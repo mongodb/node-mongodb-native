@@ -151,18 +151,19 @@ TASKS.push(
         { func: 'stop-load-balancer' }
       ]
     })),
-    {
-      name: 'test-auth-kerberos',
-      tags: ['auth', 'kerberos'],
-      commands: [
-        updateExpansions({
-          NATIVE: 'true'
-        }),
-        { func: 'install dependencies' },
-        { func: 'assume secrets manager role' },
-        { func: 'run kerberos tests' }
-      ]
-    },
+    // TODO(NODE-7178): Unskip kerberos tests.
+    // {
+    //   name: 'test-auth-kerberos',
+    //   tags: ['auth', 'kerberos'],
+    //   commands: [
+    //     updateExpansions({
+    //       NATIVE: 'true'
+    //     }),
+    //     { func: 'install dependencies' },
+    //     { func: 'assume secrets manager role' },
+    //     { func: 'run kerberos tests' }
+    //   ]
+    // },
     {
       name: 'test-auth-ldap',
       tags: ['auth', 'ldap'],

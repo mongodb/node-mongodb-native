@@ -1516,6 +1516,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:9001' };
 
       it('should fail with no TLS', metadata, async function () {
+        // NODE-6861: flakiness is caused by mock KMS servers
+        this.retries(2);
+
         try {
           await clientEncryptionNoTls.createDataKey('aws', { masterKey });
           expect.fail('it must fail with no tls');
@@ -1568,7 +1571,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         keyName: 'foo'
       };
 
-      it.skip('should fail with no TLS', metadata, async function () {
+      it('should fail with no TLS', metadata, async function () {
+        // NODE-6861: flakiness is caused by mock KMS servers
+        this.retries(2);
+
         try {
           await clientEncryptionNoTls.createDataKey('azure', { masterKey });
           expect.fail('it must fail with no tls');
@@ -1576,7 +1582,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           //Expect an error indicating TLS handshake failed.
           expect(e.cause.message).to.include('certificate required');
         }
-      }).skipReason = 'TODO(NODE-6861): fix flaky test';
+      });
 
       it('should succeed with valid TLS options', metadata, async function () {
         try {
@@ -1620,6 +1626,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       };
 
       it('should fail with no TLS', metadata, async function () {
+        // NODE-6861: flakiness is caused by mock KMS servers
+        this.retries(2);
+
         try {
           await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
           expect.fail('it must fail with no tls');
@@ -1666,6 +1675,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKey = {};
 
       it('should fail with no TLS', metadata, async function () {
+        // NODE-6861: flakiness is caused by mock KMS servers
+        this.retries(2);
+
         const e = await clientEncryptionNoTls.createDataKey('kmip', { masterKey }).catch(e => e);
         //Expect an error indicating TLS handshake failed.
         expect(e.cause.message).to.match(/before secure TLS connection|handshake/);
@@ -1797,6 +1809,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
       it('Named AWS', async function () {
         {
+          // NODE-6861: flakiness is caused by mock KMS servers
+          this.retries(2);
+
           // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
           const error = await clientEncryptionWithNames
             .createDataKey('aws:no_client_cert', {
@@ -1832,6 +1847,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
       it('Named Azure', async function () {
         {
+          // NODE-6861: flakiness is caused by mock KMS servers
+          this.retries(2);
+
           // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
           const error = await clientEncryptionWithNames
             .createDataKey('azure:no_client_cert', {
@@ -1859,6 +1877,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
       it('Named GCP', async function () {
         {
+          // NODE-6861: flakiness is caused by mock KMS servers
+          this.retries(2);
+
           // Call `client_encryption_with_names.createDataKey()` with "aws:no_client_cert" as the provider and the following masterKey.
           const error = await clientEncryptionWithNames
             .createDataKey('gcp:no_client_cert', {

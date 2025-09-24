@@ -14,8 +14,8 @@ necessary to backport a feature).
 
 `build.ts` requires the following in addition to dependencies installed with `npm i`:
 
-* Hugo static web generator `v0.30.2`
-  * You can download the right version [here](https://github.com/gohugoio/hugo/releases/tag/v0.30.2)
+* Hugo static web generator `v0.150.0`
+  * You can download the right version [here](https://github.com/gohugoio/hugo/releases/tag/v0.150.0)
 * ts-node
 
 Note: `typedoc` is also a dependency but it is downloaded by the docs generation script automatically.
@@ -31,6 +31,8 @@ Note: `typedoc` is also a dependency but it is downloaded by the docs generation
 To generate API documentation for a new major or minor version:
 
 `npm run build:docs -- --tag <version>`
+
+`<version>` should be formatted MAJOR.MINOR (ex. `--tag=6.8`)
 
 You can optionally specify the following options:
 

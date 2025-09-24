@@ -67,7 +67,6 @@ async function updateSiteTemplateForNewVersion(
 
   await writeFile(RELEASES_TOML_FILE, stringify(tomlData as any));
   await writeFile(RELEASES_JSON_FILE, JSON.stringify(jsonVersions, null, 4));
-
   // generate the site from the template
   await exec(`hugo -s template -d ../temp -b "/node-mongodb-native"`);
 }
@@ -79,6 +78,9 @@ async function main() {
     console.error(error.stdout);
     process.exit(1);
   }
+
+  const { stdout } = await exec('hugo version', { encoding: 'utf8' });
+  if (!stdout.includes('0.150.0')) throw new Error('`hugo` version must be 0.150.0.');
 
   chdir(__dirname);
 
