@@ -103,8 +103,20 @@ describe('26. Custom AWS Credential Providers', metadata, () => {
     }
   );
 
+  // Ensure a valid AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are present in the environment.
+  // Create a MongoClient named setupClient.
+  // Create a ClientEncryption object with the following options:
+  // class ClientEncryptionOpts {
+  //   keyVaultClient: <setupClient>,
+  //   keyVaultNamespace: "keyvault.datakeys",
+  //   kmsProviders: { "aws": {} },
+  //   credentialProviders: { "aws": <object/function that returns valid credentials from the secrets manager> }
+  // }
+  // Use the client encryption to create a datakey using the "aws" KMS provider. This should successfully load
+  // and use the AWS credentials that were provided by the secrets manager for the remote provider. Assert the
+  // datakey was created and that the custom credential provider was called at least once.
   context(
-    'ClientEncryption with credentialProviders and valid environment variables',
+    'Case 4: ClientEncryption with credentialProviders and valid environment variables',
     metadata,
     function () {
       let clientEncryption;
