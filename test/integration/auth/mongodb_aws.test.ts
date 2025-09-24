@@ -164,6 +164,15 @@ describe('MONGODB-AWS', function () {
     });
 
     context('when using a custom credential provider', function () {
+      // NOTE: Logic for scenarios 1-6 is handled via the evergreen variant configs.
+      // Scenarios 1-6 from the previous section with a user provided AWS_CREDENTIAL_PROVIDER auth mechanism
+      // property. This credentials MAY be obtained from the default credential provider from the AWS SDK.
+      // If the default provider does not cover all scenarios above, those not covered MAY be skipped.
+      // In these tests the driver MUST also assert that the user provided credential provider was called
+      // in each test. This may be via a custom function or object that wraps the calls to the custom provider
+      // and asserts that it was called at least once. For test scenarios where the drivers tools scripts put
+      // the credentials in the MONGODB_URI, drivers MAY extract the credentials from the URI and return the AWS
+      // credentials directly from the custom provider instead of using the AWS SDK default provider.
       context('1. Custom Credential Provider Authenticates', function () {
         let providerCount = 0;
 
@@ -201,12 +210,16 @@ describe('MONGODB-AWS', function () {
       });
 
       context('2. Custom Credential Provider Authentication Precedence', function () {
+        // Create a MongoClient configured with AWS auth and credentials in the URI.
+        // Example: mongodb://<AccessKeyId>:<SecretAccessKey>@localhost:27017/?authMechanism=MONGODB-AWS
+        // Configure a custom credential provider to pass valid AWS credentials. The provider must
+        // track if it was called.
+        // Expect authentication to succeed and the custom credential provider was not called.
         context('Case 1: Credentials in URI Take Precedence', function () {
           let providerCount = 0;
           let provider;
 
           beforeEach(function () {
-            console.log(client?.options);
             if (!client?.options.credentials.username) {
               this.skipReason = 'Test only runs when credentials are present in the URI';
               return this.skip();
@@ -219,7 +232,6 @@ describe('MONGODB-AWS', function () {
           });
 
           it('authenticates with a user provided credentials provider', async function () {
-            console.log(process.env);
             client = this.configuration.newClient(process.env.MONGODB_URI, {
               authMechanismProperties: {
                 AWS_CREDENTIAL_PROVIDER: provider
@@ -238,6 +250,11 @@ describe('MONGODB-AWS', function () {
           });
         });
 
+        // Run this test in an environment with AWS credentials configured as environment variables
+        // (e.g. AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN)
+        // Create a MongoClient configured to use AWS auth. Example: mongodb://localhost:27017/?authMechanism=MONGODB-AWS.
+        // Configure a custom credential provider to pass valid AWS credentials. The provider must track if it was called.
+        // Expect authentication to succeed and the custom credential provider was called.
         context('Case 2: Custom Provider Takes Precedence Over Environment Variables', function () {
           let providerCount = 0;
           let provider;
