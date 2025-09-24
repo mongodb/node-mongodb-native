@@ -81,12 +81,12 @@ describe('Collection', function () {
           });
         }
 
-          if (isHello(doc)) {
-            request.reply(Object.assign({}, HELLO));
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
+        if (isHello(doc)) {
+          request.reply(Object.assign({}, HELLO));
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
       await client.connect();
       const db = client.db('test');
@@ -120,12 +120,12 @@ describe('Collection', function () {
           });
         }
 
-          if (isHello(doc)) {
-            request.reply(Object.assign({}, HELLO));
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
+        if (isHello(doc)) {
+          request.reply(Object.assign({}, HELLO));
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
       await client.connect();
       const db = client.db('test');

@@ -115,10 +115,10 @@ describe('Topology (unit)', function () {
         serverSelectionTimeoutMS: 0,
         socketTimeoutMS: 250
       });
-      const server = await topology
-        .selectServer('primary', {
-          timeoutContext: ctx, operationName: 'none'
-        });
+      const server = await topology.selectServer('primary', {
+        timeoutContext: ctx,
+        operationName: 'none'
+      });
       const err = await server
         .command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx)
         .catch(e => e);

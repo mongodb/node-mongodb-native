@@ -1,10 +1,9 @@
-
 import { type Document } from 'bson';
 import { expect } from 'chai';
 
 import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
 import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
-import { ConnectionOptions, type Connection } from '../../../src/cmap/connection';
+import { type Connection, type ConnectionOptions } from '../../../src/cmap/connection';
 import {
   addContainerMetadata,
   type ClientMetadata
@@ -185,7 +184,6 @@ describe('Connect Tests', function () {
     }).catch(e => e);
     expect(error).to.be.instanceOf(MongoNetworkError);
   });
-
 
   describe('prepareHandshakeDocument', () => {
     describe('client environment (containers and FAAS)', () => {
