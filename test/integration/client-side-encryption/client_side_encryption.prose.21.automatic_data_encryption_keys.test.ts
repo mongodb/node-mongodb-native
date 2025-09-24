@@ -7,7 +7,9 @@ import {
   kmsCredentialsPresent,
   missingKeys
 } from '../../csfle-kms-providers';
-import { Collection, type Db, MongoServerError } from '../../mongodb';
+import { Collection } from '../../../src/collection';
+import { MongoServerError } from '../../../src/error';
+import { Db } from '../../../src/db';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
