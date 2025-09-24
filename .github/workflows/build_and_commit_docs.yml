@@ -17,12 +17,12 @@ jobs:
   commit-docs:
     needs: [build-docs]
     permissions:
-        contents: write
-        pull-requests: write
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
         - name: Open Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-        title: 'docs: generate docs from latest main [skip-ci]'
-        delete-branch: true
+          uses: peter-evans/create-pull-request@v6
+          with:
+            title: 'docs: generate docs from latest main [skip-ci]'
+            delete-branch: true
