@@ -104,7 +104,7 @@ Additionally, our Typescript types are compatible with the ECMAScript standard f
 
 ## Installation
 
-The recommended way to get started using the Node.js 6.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
 After you've created your own project using `npm init`, you can run:
 
