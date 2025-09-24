@@ -9,7 +9,7 @@ import * as sinon from 'sinon';
 
 import { type Db, GridFSBucket, MongoAPIError, type MongoClient, ObjectId } from '../../../src';
 
-describe.only('GridFS Stream', function () {
+describe('GridFS Stream', function () {
   let client: MongoClient;
   let db: Db;
 
@@ -25,9 +25,6 @@ describe.only('GridFS Stream', function () {
 
   /**
    * Correctly stream a file from disk into GridFS using openUploadStream
-   *
-   * @example-class GridFSBucket
-   * @example-method openUploadStream
    */
   it('should upload from file stream', {
     metadata: { requires: { topology: ['single'] } },
@@ -86,9 +83,6 @@ describe.only('GridFS Stream', function () {
 
   /**
    * Correctly stream a file from disk into GridFS using openUploadStreamWithId
-   *
-   * @example-class GridFSBucket
-   * @example-method openUploadStreamWithId
    */
   it('should upload from file stream with custom id', {
     metadata: { requires: { topology: ['single'] } },
@@ -131,9 +125,6 @@ describe.only('GridFS Stream', function () {
 
   /**
    * Correctly upload a file to GridFS and then retrieve it as a stream
-   *
-   * @example-class GridFSBucket
-   * @example-method openDownloadStream
    */
   it('should download to upload stream', {
     metadata: { requires: { topology: ['single'] } },
@@ -188,9 +179,6 @@ describe.only('GridFS Stream', function () {
 
   /**
    * Correctly download a GridFS file by name
-   *
-   * @example-class GridFSBucket
-   * @example-method openDownloadStreamByName
    */
   it('openDownloadStreamByName', {
     metadata: { requires: { topology: ['single'] } },
@@ -210,9 +198,6 @@ describe.only('GridFS Stream', function () {
 
   /**
    * Provide start and end parameters for file download to skip ahead x bytes and limit the total amount of bytes read to n
-   *
-   * @example-class GridFSBucket
-   * @example-method openDownloadStream
    */
   it('start/end options for openDownloadStream', {
     metadata: { requires: { topology: ['single'] } },
@@ -269,9 +254,6 @@ describe.only('GridFS Stream', function () {
 
   /**
    * Deleting a file from GridFS
-   *
-   * @example-class GridFSBucket
-   * @example-method delete
    */
   it('Deleting a file', {
     metadata: { requires: { topology: ['single'] } },
@@ -376,9 +358,6 @@ describe.only('GridFS Stream', function () {
 
   /*
    * Find all associates files with a bucket
-   *
-   * @example-class GridFSBucket
-   * @example-method find
    */
   it('find example', {
     metadata: { requires: { topology: ['single'] } },
@@ -398,9 +377,6 @@ describe.only('GridFS Stream', function () {
 
   /**
    * Rename a file
-   *
-   * @example-class GridFSBucket
-   * @example-method rename
    */
   it('rename example', {
     metadata: { requires: { topology: ['single'] } },
