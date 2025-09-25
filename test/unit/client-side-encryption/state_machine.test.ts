@@ -191,9 +191,7 @@ describe('StateMachine', function () {
 
               it('rejects with the validation error', async function () {
                 const err = await stateMachine.kmsRequest(request).catch(e => e);
-                expect(err.message).to.equal(
-                  `Insecure TLS options prohibited for aws: ${option}`
-                );
+                expect(err.message).to.equal(`Insecure TLS options prohibited for aws: ${option}`);
               });
             });
           }
