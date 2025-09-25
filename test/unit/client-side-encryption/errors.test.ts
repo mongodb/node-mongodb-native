@@ -7,7 +7,7 @@ import {
   MongoCryptError,
   MongoCryptInvalidArgumentError
 } from '../../../src/client-side-encryption/errors';
-import { MongoError } from '../../mongodb';
+import { MongoError } from '../../../src/error';
 
 describe('MongoCryptError', function () {
   const errors = [

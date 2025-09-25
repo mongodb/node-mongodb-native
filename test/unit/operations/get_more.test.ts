@@ -1,14 +1,12 @@
+import { Long } from 'bson';
 import { expect } from 'chai';
 
-import {
-  Aspect,
-  GetMoreOperation,
-  Long,
-  ns,
-  ReadPreference,
-  Server,
-  ServerDescription
-} from '../../mongodb';
+import { GetMoreOperation } from '../../../src/operations/get_more';
+import { Aspect } from '../../../src/operations/operation';
+import { ReadPreference } from '../../../src/read_preference';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { ns } from '../../../src/utils';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('GetMoreOperation', function () {

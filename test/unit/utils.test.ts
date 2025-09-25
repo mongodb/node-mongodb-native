@@ -1,30 +1,28 @@
 import { setTimeout } from 'node:timers';
 
+import { ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../../src/error';
+import { decorateWithExplain, Explain } from '../../src/explain';
 import {
   abortable,
   BufferPool,
   ByteUtils,
   checkParentDomainMatch,
   compareObjectId,
-  decorateWithExplain,
-  Explain,
   hasAtomicOperators,
   HostAddress,
   hostMatchesWildcards,
   isHello,
   isUint8Array,
-  LEGACY_HELLO_COMMAND,
   List,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
-  MongoInvalidArgumentError,
-  MongoRuntimeError,
-  ObjectId,
   shuffle
-} from '../mongodb';
+} from '../../src/utils';
 import { sleep } from '../tools/utils';
 
 describe('driver utils', function () {

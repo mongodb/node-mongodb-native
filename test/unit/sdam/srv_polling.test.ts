@@ -4,14 +4,11 @@ import { EventEmitter, once } from 'events';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
-import {
-  MongoDriverError,
-  SrvPoller,
-  SrvPollingEvent,
-  TopologyDescription,
-  TopologyType
-} from '../../mongodb';
-import * as sdamEvents from '../../mongodb';
+import { MongoDriverError } from '../../../src/error';
+import { TopologyType } from '../../../src/sdam/common';
+import { TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
+import { SrvPoller, SrvPollingEvent } from '../../../src/sdam/srv_polling';
+import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Mongos SRV Polling', function () {
@@ -243,7 +240,7 @@ describe('Mongos SRV Polling', function () {
       function emit(prev, current) {
         topology.emit(
           'topologyDescriptionChanged',
-          new sdamEvents.TopologyDescriptionChangedEvent(topology.s.id, prev, current)
+          new TopologyDescriptionChangedEvent(topology.s.id, prev, current)
         );
       }
 

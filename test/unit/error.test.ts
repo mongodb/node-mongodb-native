@@ -1,17 +1,24 @@
 import { expect } from 'chai';
 import { setTimeout } from 'timers';
 
+import {
+  PoolClosedError as MongoPoolClosedError,
+  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
+} from '../../src/cmap/errors';
 // Exception to the import from mongodb rule we're unit testing our public Errors API
 import * as importsFromErrorSrc from '../../src/error';
-import * as importsFromEntryPoint from '../../src/index';
 import {
-  isHello,
   isResumableError,
   isRetryableReadError,
   isSDAMUnrecoverableError,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   MONGODB_ERROR_CODES,
+  needsRetryableWriteLabel,
+  NODE_IS_RECOVERING_ERROR_MESSAGE
+} from '../../src/error';
+import * as importsFromEntryPoint from '../../src/index';
+import {
   MongoDriverError,
   MongoError,
   MongoErrorLabel,
@@ -24,17 +31,13 @@ import {
   MongoServerError,
   MongoSystemError,
   MongoWriteConcernError,
-  needsRetryableWriteLabel,
-  NODE_IS_RECOVERING_ERROR_MESSAGE,
-  ns,
-  PoolClosedError as MongoPoolClosedError,
-  RunCommandOperation,
-  setDifference,
-  TimeoutContext,
   type TopologyDescription,
-  type TopologyOptions,
-  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
-} from '../mongodb';
+  type TopologyOptions
+} from '../../src/index';
+import { RunCommandOperation } from '../../src/operations/run_command';
+import { type Topology } from '../../src/sdam/topology';
+import { TimeoutContext } from '../../src/timeout';
+import { isHello, ns, setDifference } from '../../src/utils';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../tools/utils';
@@ -359,31 +362,14 @@ describe('MongoErrors', () => {
 
     beforeEach(() => test.setup());
 
-    function makeAndConnectReplSet(cb) {
-      let invoked = false;
+    async function makeAndConnectReplSet(): Promise<Topology> {
       const replSet = topologyWithPlaceholderClient(
         [test.primaryServer.hostAddress(), test.firstSecondaryServer.hostAddress()],
         { replicaSet: 'rs' } as TopologyOptions
       );
 
-      replSet.once('error', err => {
-        if (invoked) {
-          return;
-        }
-        invoked = true;
-        cb(err);
-      });
-
-      replSet.on('connect', () => {
-        if (invoked) {
-          return;
-        }
-
-        invoked = true;
-        cb(undefined, replSet);
-      });
-
-      replSet.connect();
+      const topology = await replSet.connect();
+      return topology;
     }
 
     it('should expose a user command writeConcern error like a normal WriteConcernError', function () {
@@ -430,7 +416,7 @@ describe('MongoErrors', () => {
         });
     });
 
-    it('should propagate writeConcernError.errInfo ', function (done) {
+    it('should propagate writeConcernError.errInfo ', async function () {
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -440,16 +426,10 @@ describe('MongoErrors', () => {
         }
       });
 
-      makeAndConnectReplSet((err, topology) => {
-        // cleanup the server before calling done
-        const cleanup = err => {
-          topology.close();
-          done(err);
-        };
+      let topology: Topology;
+      try {
+        topology = await makeAndConnectReplSet();
 
-        if (err) {
-          return cleanup(err);
-        }
         const timeoutContext = TimeoutContext.create({
           serverSelectionTimeoutMS: 0,
           waitQueueTimeoutMS: 0
@@ -460,23 +440,19 @@ describe('MongoErrors', () => {
           Object.assign({}, RAW_USER_WRITE_CONCERN_CMD),
           {}
         );
-        topology.selectServer('primary', { timeoutContext }).then(server => {
-          server.command(op, timeoutContext).then(expect.fail, err => {
-            let _err;
-            try {
-              expect(err).to.be.an.instanceOf(MongoWriteConcernError);
-              expect(err.result).to.exist;
-              expect(err.result.writeConcernError).to.deep.equal(
-                RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
-              );
-            } catch (e) {
-              _err = e;
-            } finally {
-              cleanup(_err);
-            }
-          });
-        }, expect.fail);
-      });
+        const server = await topology.selectServer('primary', { timeoutContext });
+        try {
+          await server.command(op, timeoutContext);
+        } catch (err) {
+          expect(err).to.be.an.instanceOf(MongoWriteConcernError);
+          expect(err.result).to.exist;
+          expect(err.result.writeConcernError).to.deep.equal(
+            RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
+          );
+        }
+      } finally {
+        topology?.close();
+      }
     });
   });
 

@@ -1,16 +1,18 @@
 'use strict';
 
-const { ConnectionPool, MongoError } = require('../../mongodb');
-const { WaitQueueTimeoutError } = require('../../mongodb');
+const { ConnectionPool } = require('../../../src/cmap/connection_pool');
+const { MongoError } = require('../../../src/error');
+const { WaitQueueTimeoutError } = require('../../../src/cmap/errors');
 const mock = require('../../tools/mongodb-mock/index');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const { setImmediate } = require('timers/promises');
-const { ns, isHello } = require('../../mongodb');
+const { isHello } = require('../../../src/utils');
+const { ns } = require('../../../src/utils');
 const { createTimerSandbox } = require('../timer_sandbox');
 const { topologyWithPlaceholderClient } = require('../../tools/utils');
-const { MongoClientAuthProviders } = require('../../mongodb');
-const { TimeoutContext } = require('../../mongodb');
+const { MongoClientAuthProviders } = require('../../../src/mongo_client_auth_providers');
+const { TimeoutContext } = require('../../../src/timeout');
 
 describe('Connection Pool', function () {
   let timeoutContext;
