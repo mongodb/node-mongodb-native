@@ -15,6 +15,13 @@ pushd mongodb-client-encryption
 node --version
 npm --version
 
+# https://github.com/nodejs/node-gyp#configuring-python-dependency
+. $DRIVERS_TOOLS/.evergreen/find-python3.sh
+NODE_GYP_FORCE_PYTHON=$(find_python3)
+export NODE_GYP_FORCE_PYTHON
+
+echo "NODE_GYP_FORCE_PYTHON: $NODE_GYP_FORCE_PYTHON"
+
 if [ -n "${LIBMONGOCRYPT_VERSION}" ]; then
 	# nightly tests test with `latest` to test against the laster FLE build.
     npm run install:libmongocrypt -- --build --libVersion $LIBMONGOCRYPT_VERSION
