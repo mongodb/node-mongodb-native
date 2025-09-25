@@ -3,11 +3,11 @@ import { MongoClient as LegacyMongoClient } from 'mongodb-legacy';
 
 import {
   type CommandStartedEvent,
-  type CommandSucceededEvent,
-  LEGACY_HELLO_COMMAND,
-  type MongoClient,
-  MongoServerError
-} from '../../mongodb';
+  type CommandSucceededEvent
+} from '../../../src/cmap/command_monitoring_events';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { MongoServerError } from '../../../src/error';
+import { type MongoClient } from '../../../src/mongo_client';
 import type { TestConfiguration } from '../../tools/runner/config';
 import { setupDatabase } from '../shared';
 
@@ -70,19 +70,16 @@ describe('Sessions Spec', function () {
         await test.setup(this.configuration);
       });
 
-      it('should send endSessions for multiple sessions', function (done) {
+      it('should send endSessions for multiple sessions', async function () {
         const client = test.client;
         const sessions = [client.startSession(), client.startSession()].map(s => s.id);
 
-        client.close(err => {
-          expect(err).to.not.exist;
-          expect(test.commands.started).to.have.length(1);
-          expect(test.commands.started[0].commandName).to.equal('endSessions');
-          expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
-          expect(client.s.activeSessions.size).to.equal(0);
+        await client.close();
 
-          done();
-        });
+        expect(test.commands.started).to.have.length(1);
+        expect(test.commands.started[0].commandName).to.equal('endSessions');
+        expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
+        expect(client.s.activeSessions.size).to.equal(0);
       });
     });
 
