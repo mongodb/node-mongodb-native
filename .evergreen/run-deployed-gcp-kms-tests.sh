@@ -8,6 +8,7 @@ if [ -z ${GCPKMS_GCLOUD+omitted} ]; then echo "GCPKMS_GCLOUD is unset" && exit 1
 if [ -z ${GCPKMS_PROJECT+omitted} ]; then echo "GCPKMS_PROJECT is unset" && exit 1; fi
 if [ -z ${GCPKMS_ZONE+omitted} ]; then echo "GCPKMS_ZONE is unset" && exit 1; fi
 if [ -z ${GCPKMS_INSTANCENAME+omitted} ]; then echo "GCPKMS_INSTANCENAME is unset" && exit 1; fi
+if [ -z ${NODE_LTS_VERSION:+omitted}]; then echo "NODE_LTS_VERSION is unset" && exit 1; fi
 
 set -o errexit
 
@@ -28,5 +29,5 @@ export GCPKMS_CMD="tar -xzf $GCPKMS_SRC"
 "${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh"
 echo "decompressing node driver tar on gcp ... end"
 
-export GCPKMS_CMD="env EXPECTED_GCPKMS_OUTCOME=success bash src/.evergreen/run-gcp-kms-tests.sh"
+export GCPKMS_CMD="env EXPECTED_GCPKMS_OUTCOME=success NODE_LTS_VERSION=$NODE_LTS_VERSION bash src/.evergreen/run-gcp-kms-tests.sh"
 bash ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh

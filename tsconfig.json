@@ -4,15 +4,12 @@
     "checkJs": false,
     "strict": true,
     "alwaysStrict": true,
-    "target": "ES2021",
+    "target": "ES2023",
     "module": "commonJS",
     "moduleResolution": "node",
     "skipLibCheck": true,
     "lib": [
-      "es2021",
-      "ES2022.Error",
-      "ES2022.Object",
-      "esnext.disposable"
+      "es2023"
     ],
     // We don't make use of tslib helpers, all syntax used is supported by target engine
     "importHelpers": false,
@@ -36,7 +33,8 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     // TODO(NODE-3659): Enable useUnknownInCatchVariables and add type assertions or remove unnecessary catch blocks
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "useDefineForClassFields": false
   },
   "ts-node": {
     "transpileOnly": true,
