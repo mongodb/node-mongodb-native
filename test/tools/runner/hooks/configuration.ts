@@ -167,9 +167,6 @@ const testConfigBeforeHook = async function () {
     aws: MONGODB_URI.includes('authMechanism=MONGODB-AWS'),
     awsSdk: process.env.MONGODB_AWS_SDK,
     azure: MONGODB_URI.includes('ENVIRONMENT:azure'),
-    adl: this.configuration.buildInfo.dataLake
-      ? this.configuration.buildInfo.dataLake.version
-      : false,
     kerberos: process.env.PRINCIPAL != null,
     ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
     socks5: MONGODB_URI.includes('proxyHost='),

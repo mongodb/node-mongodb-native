@@ -1,9 +1,7 @@
 const MONGODB_VERSIONS = ['latest', 'rapid', '8.0', '7.0', '6.0', '5.0', '4.4', '4.2'];
 const versions = [
-  { codeName: 'gallium', versionNumber: 16, npmVersion: 9 },
-  { codeName: 'hydrogen', versionNumber: 18, npmVersion: 10 },
-  { codeName: 'iron', versionNumber: 20, npmVersion: 'latest' },
-  { codeName: 'jod', versionNumber: 22, npmVersion: 'latest' }
+  { codeName: 'iron', versionNumber: '20.19.0' },
+  { codeName: 'jod', versionNumber: 22 }
 ];
 const NODE_VERSIONS = versions.map(({ versionNumber }) => versionNumber).sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
