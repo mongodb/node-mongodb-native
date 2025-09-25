@@ -1,5 +1,6 @@
+import { once } from 'node:events';
+
 import { expect } from 'chai';
-import { once } from 'events';
 
 import {
   type CommandStartedEvent,
@@ -7,7 +8,7 @@ import {
   GridFSBucket,
   type MongoClient,
   ObjectId
-} from '../../mongodb';
+} from '../../../src';
 import { sleep } from '../../tools/utils';
 
 describe('GridFS', () => {
