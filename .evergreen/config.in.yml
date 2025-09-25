@@ -718,7 +718,7 @@ functions:
         add_expansions_to_env: true
         args:
           - -c 
-          - "npm run compile"
+          - "npm run build"
 
   "run tests - new":
     - command: subprocess.exec
@@ -728,8 +728,8 @@ functions:
         binary: bash
         add_expansions_to_env: true
         args:
-          - node
-          - js-ci/lib/run-orchestration.js
+          - -c 
+          - "node js-ci/lib/run-orchestration.js"
           
 tasks:
   - name: "test-gcpkms-task"

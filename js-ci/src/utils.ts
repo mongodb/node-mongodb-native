@@ -54,5 +54,5 @@ export async function spawn(cmdWithArgs: string, env: NodeJS.ProcessEnv, log_pre
     end: false
   });
 
-  await Promise.allSettled([once(child_process, 'close'), stdout$, stderr$]);
+  await Promise.all([once(child_process, 'exit'), stdout$, stderr$]);
 }

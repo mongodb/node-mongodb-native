@@ -7,6 +7,8 @@ import { spawn, stdout } from './utils';
 
 const DRIVERS_TOOLS = resolve(__dirname, '../../drivers-evergreen-tools');
 
+const log = (msg: string) => stdout.writeln(`[LOG] ${msg}`);
+
 async function killMongoOrchestration() {
   const output = await promisify(exec)(`lsof -i tcp:8889`, { encoding: 'utf-8' }).then(
     ({ stdout }) => stdout,
@@ -112,11 +114,22 @@ export function runTests<T extends NodeJS.ProcessEnv & { DRIVERS_TOOLS: string }
 
 async function main() {
   let env: NodeJS.ProcessEnv = { ...process.env };
-  env = await installNode(env);
-  env = await testNodeEnv(env);
-  const env2 = await runOrchestration(env);
 
+  log('Installing node...');
+  env = await installNode(env);
+  log('Installing node...complete.');
+
+  log('Test node env...');
+  env = await testNodeEnv(env);
+  log('Test node env...complete.');
+
+  log('Setup drivers-evergreen-tools...');
+  const env2 = await runOrchestration(env);
+  log('Setup drivers-evergreen-tools...complete.');
+
+  log('Run tests...');
   await runTests(env2);
+  log('Run tests...complete.');
 }
 
 main();
