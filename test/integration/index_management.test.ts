@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 
 import {
+  type Collection,
   type CommandStartedEvent,
-  type CommandSucceededEvent
-} from '../../src/cmap/command_monitoring_events';
-import { type Collection } from '../../src/collection';
-import { type Db } from '../../src/db';
-import { MongoServerError } from '../../src/error';
-import { type MongoClient } from '../../src/mongo_client';
+  type CommandSucceededEvent,
+  type Db,
+  type MongoClient,
+  MongoServerError
+} from '../mongodb';
 import { type FailCommandFailPoint } from '../tools/utils';
 import { assert as test, filterForCommands, setupDatabase } from './shared';
 

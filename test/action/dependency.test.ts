@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import { expect } from 'chai';
 
 import { dependencies, peerDependencies, peerDependenciesMeta } from '../../package.json';
-import { setDifference } from '../../src/utils';
+import { setDifference } from '../mongodb';
 import { alphabetically, itInNodeProcess, sorted } from '../tools/utils';
 
 const EXPECTED_DEPENDENCIES = sorted(

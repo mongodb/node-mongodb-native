@@ -1,24 +1,26 @@
 import * as process from 'node:process';
 
-import { type Document } from 'bson';
 import { expect } from 'chai';
 import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
 import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
-import { AWSSDKCredentialProvider } from '../../../src/cmap/auth/aws_temporary_credentials';
-import { MongoDBAWS } from '../../../src/cmap/auth/mongodb_aws';
-import { type CommandOptions, Connection } from '../../../src/cmap/connection';
-import { type MongoDBResponseConstructor } from '../../../src/cmap/wire_protocol/responses';
 import {
+  AWSSDKCredentialProvider,
+  type CommandOptions,
+  Connection,
+  type Document,
   MongoAWSError,
+  type MongoClient,
+  MongoDBAWS,
+  type MongoDBNamespace,
+  type MongoDBResponseConstructor,
   MongoMissingCredentialsError,
   MongoMissingDependencyError,
-  MongoServerError
-} from '../../../src/error';
-import { type MongoClient } from '../../../src/mongo_client';
-import { type MongoDBNamespace, setDifference } from '../../../src/utils';
+  MongoServerError,
+  setDifference
+} from '../../mongodb';
 
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 

@@ -3,18 +3,24 @@ import { on, once } from 'node:events';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { type Document, EJSON } from 'bson';
+import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
 import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
-import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
-import { MongoClient, type MongoClientOptions } from '../../src/mongo_client';
-import { type AnyClientBulkWriteModel } from '../../src/operations/client_bulk_write/common';
-import { Topology, type TopologyOptions } from '../../src/sdam/topology';
-import { type HostAddress, now } from '../../src/utils';
+import {
+  type AnyClientBulkWriteModel,
+  type Document,
+  type HostAddress,
+  MongoClient,
+  type MongoClientOptions,
+  now,
+  OP_MSG,
+  Topology,
+  type TopologyOptions
+} from '../mongodb';
 import { type TestConfiguration } from './runner/config';
 
 export function ensureCalledWith(stub: any, args: any[]) {
