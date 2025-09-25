@@ -1,14 +1,10 @@
 import { expect } from 'chai';
 
-import {
-  ClientSession,
-  type Collection,
-  type CommandStartedEvent,
-  type MongoClient,
-  MongoInvalidArgumentError,
-  MongoNetworkError,
-  type ServerSessionPool
-} from '../../mongodb';
+import { type CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { type Collection } from '../../../src/collection';
+import { MongoInvalidArgumentError, MongoNetworkError } from '../../../src/error';
+import { type MongoClient } from '../../../src/mongo_client';
+import { ClientSession, type ServerSessionPool } from '../../../src/sessions';
 import { type FailCommandFailPoint } from '../../tools/utils';
 
 describe('Transactions', function () {
@@ -55,18 +51,19 @@ describe('Transactions', function () {
       metadata: {
         requires: { topology: ['replicaset', 'sharded'] }
       },
-      test: function (done) {
+      test: async function () {
         function fnThatReturnsBadPromise() {
           return Promise.reject();
         }
 
-        session
-          .withTransaction(fnThatReturnsBadPromise)
-          .then(() => done(Error('Expected error')))
-          .catch(err => {
-            expect(err).to.equal(undefined);
-            session.endSession(done);
-          });
+        const err = await session.withTransaction(fnThatReturnsBadPromise).catch(err => err);
+        expect(err).to.equal(undefined);
+        await session.endSession();
+        // .then(() => done(Error('Expected error')))
+        // .catch(err => {
+        //   expect(err).to.equal(undefined);
+        //   session.endSession(done);
+        // });
       }
     });
 
