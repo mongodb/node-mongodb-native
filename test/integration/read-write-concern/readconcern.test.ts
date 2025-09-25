@@ -1,9 +1,10 @@
-'use strict';
-const { setupDatabase, filterForCommands } = require('../shared');
-const expect = require('chai').expect;
+import { expect } from 'chai';
 
-describe('ReadConcern', function () {
-  let client;
+import { type MongoClient } from '../../../src';
+import { filterForCommands, setupDatabase } from '../shared';
+
+describe.only('ReadConcern', function () {
+  let client: MongoClient;
 
   before(function () {
     return setupDatabase(this.configuration);
