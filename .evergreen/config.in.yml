@@ -700,6 +700,37 @@ functions:
         args:
           - .evergreen/docker/alpine.sh
 
+  "bootstrap ci tooling":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src/js-ci"
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - -c 
+          - "npm install"
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src/js-ci"
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - -c 
+          - "npm run compile"
+
+  "run tests - new":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - node
+          - js-ci/lib/run-orchestration.js
+          
 tasks:
   - name: "test-gcpkms-task"
     commands:
@@ -1217,6 +1248,7 @@ pre:
   - func: "fetch source"
   - func: "fix absolute paths"
   - func: "make files executable"
+  - func: "bootstrap ci tooling"
 
 post:
   - func: "reset aws instance profile"

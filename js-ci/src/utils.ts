@@ -8,11 +8,7 @@ export const stdout: Writable & { writeln: (s: string) => void } = Object.create
 });
 
 function logStream(prefix?: string) {
-  return async function* (generator: AsyncIterable<string>) {
-    if (!prefix) {
-      yield* generator;
-      return;
-    }
+  async function* lines(generator: AsyncIterable<string>) {
     let buffer: string = '';
     for await (const data of generator) {
       buffer += data;
@@ -22,12 +18,25 @@ function logStream(prefix?: string) {
       }
 
       for (const chunk of chunks.slice(0, chunks.length - 1)) {
-        if (chunk) yield `[${prefix}] ${chunk}\n`;
+        yield `${chunk}\n`;
       }
 
       buffer = chunks[chunks.length - 1];
     }
-    if (buffer) yield `[${prefix}] ${buffer}\n`;
+    if (buffer) yield `${buffer}\n`;
+  }
+
+  async function* addPrefix(generator: AsyncIterable<string>) {
+    for await (const chunk of generator) {
+      yield `[${prefix}] ${chunk}`;
+    }
+  }
+  return async function* (generator: AsyncIterable<string>) {
+    if (!prefix) {
+      yield* generator;
+      return;
+    }
+    yield* addPrefix(lines(generator));
   };
 }
 

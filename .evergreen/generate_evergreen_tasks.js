@@ -78,9 +78,7 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth', nodeLtsVer
     tags: [mongoVersion, topology, ...tags],
     commands: [
       expansions,
-      { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'run tests' }
+      { func: 'run tests - new' }
     ]
   };
 }

@@ -41,6 +41,6 @@
     "compiler": "typescript-cached-transpile"
   },
   "include": [
-    "src/**/*"
+    "*ts"
   ]
 }

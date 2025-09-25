@@ -1,19 +1,11 @@
 import { exec } from 'child_process';
-import { readFile, rm } from 'fs/promises';
+import { readFile, rm, stat } from 'fs/promises';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import { spawn, stdout } from './utils.ts';
+import { spawn, stdout } from './utils';
 
-const __dirname = import.meta.dirname;
-const DRIVERS_TOOLS = resolve(__dirname, '../drivers-evergreen-tools');
-
-interface OrchestrationArguments {
-  auth?: boolean;
-  ssl?: 'ssl' | 'nossl';
-  topology: 'replica_set' | 'server' | 'sharded_cluster';
-  version: string;
-}
+const DRIVERS_TOOLS = resolve(__dirname, '../../drivers-evergreen-tools');
 
 async function killMongoOrchestration() {
   const output = await promisify(exec)(`lsof -i tcp:8889`, { encoding: 'utf-8' }).then(
@@ -31,37 +23,32 @@ async function killMongoOrchestration() {
   }
 }
 
-async function installNode(
-  env: NodeJS.ProcessEnv,
-  target: `${number}` | `v${number}.${number}.${number}` | `${number}.${number}.${number}`
-): Promise<NodeJS.ProcessEnv> {
+async function installNode(env: NodeJS.ProcessEnv): Promise<NodeJS.ProcessEnv> {
   const NODE_ARTIFACTS_PATH = resolve(process.cwd(), '../node_artifacts');
-  await rm(NODE_ARTIFACTS_PATH, { recursive: true });
+  const exists = (path: string) =>
+    stat(path).then(
+      () => true,
+      () => false
+    );
+  (await exists(NODE_ARTIFACTS_PATH)) && (await rm(NODE_ARTIFACTS_PATH, { recursive: true }));
   const npm_global_prefix = resolve(NODE_ARTIFACTS_PATH, 'npm_global');
   const script = resolve(DRIVERS_TOOLS, '.evergreen/install-node.sh');
-  await spawn(
-    `bash ${script}`,
-    { ...env, NODE_LTS_VERSION: target, NODE_ARTIFACTS_PATH, npm_global_prefix },
-    'INSTALL_NODE'
-  );
+  await spawn(`bash ${script}`, { ...env, NODE_ARTIFACTS_PATH, npm_global_prefix }, 'INSTALL_NODE');
 
   const path = env.PATH ?? '';
   return {
     ...env,
-    NODE_LTS_VERSION: target,
     NODE_ARTIFACTS_PATH,
     PATH: `${NODE_ARTIFACTS_PATH}/nodejs/bin:${path}`
   };
 }
 
-export async function runOrchestration(env: NodeJS.ProcessEnv, args: OrchestrationArguments) {
+export async function runOrchestration(
+  env: NodeJS.ProcessEnv
+): Promise<NodeJS.ProcessEnv & { DRIVERS_TOOLS: string }> {
   const script = resolve(DRIVERS_TOOLS, '.evergreen/run-orchestration.sh');
-  const updatedEnv: NodeJS.ProcessEnv = {
+  const updatedEnv: NodeJS.ProcessEnv & { DRIVERS_TOOLS: string } = {
     ...env,
-    MONGODB_VERSION: args.version,
-    TOPOLOGY: args.topology,
-    AUTH: args.auth ? 'AUTH' : 'NOAUTH',
-    SSL: args.ssl ? 'ssl' : 'nossl',
     DRIVERS_TOOLS
   };
 
@@ -99,8 +86,8 @@ async function testNodeEnv(env: NodeJS.ProcessEnv) {
   return env;
 }
 
-export function runTests(env: NodeJS.ProcessEnv) {
-  const script = resolve(__dirname, '../.evergreen/run-tests.sh');
+export function runTests<T extends NodeJS.ProcessEnv & { DRIVERS_TOOLS: string }>(env: T) {
+  const script = resolve(__dirname, '../../.evergreen/run-tests.sh');
 
   const resolvedEnv: NodeJS.ProcessEnv = { ...env };
   if (!['true', 'false'].includes(resolvedEnv.CLIENT_ENCRYPTION ?? '')) {
@@ -125,15 +112,11 @@ export function runTests(env: NodeJS.ProcessEnv) {
 
 async function main() {
   let env: NodeJS.ProcessEnv = { ...process.env };
-  env = await installNode(env, '22.2.0');
+  env = await installNode(env);
   env = await testNodeEnv(env);
-  env = await runOrchestration(env, {
-    topology: 'replica_set',
-    auth: true,
-    version: 'latest'
-  });
+  const env2 = await runOrchestration(env);
 
-  await runTests(env);
+  await runTests(env2);
 }
 
 main();

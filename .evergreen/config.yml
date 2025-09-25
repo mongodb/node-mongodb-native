@@ -636,6 +636,35 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/docker/alpine.sh
+  bootstrap ci tooling:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src/js-ci
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - '-c'
+          - npm install
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src/js-ci
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - '-c'
+          - npm run compile
+  run tests - new:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - node
+          - js-ci/lib/run-orchestration.js
 tasks:
   - name: test-gcpkms-task
     commands:
@@ -891,9 +920,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-latest-replica_set
     tags:
       - latest
@@ -906,9 +933,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-latest-sharded_cluster
     tags:
       - latest
@@ -921,9 +946,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-rapid-server
     tags:
       - rapid
@@ -936,9 +959,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-rapid-replica_set
     tags:
       - rapid
@@ -951,9 +972,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-rapid-sharded_cluster
     tags:
       - rapid
@@ -966,9 +985,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-8.0-server
     tags:
       - '8.0'
@@ -981,9 +998,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-8.0-replica_set
     tags:
       - '8.0'
@@ -996,9 +1011,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-8.0-sharded_cluster
     tags:
       - '8.0'
@@ -1011,9 +1024,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-7.0-server
     tags:
       - '7.0'
@@ -1026,9 +1037,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-7.0-replica_set
     tags:
       - '7.0'
@@ -1041,9 +1050,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-7.0-sharded_cluster
     tags:
       - '7.0'
@@ -1056,9 +1063,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-6.0-server
     tags:
       - '6.0'
@@ -1071,9 +1076,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-6.0-replica_set
     tags:
       - '6.0'
@@ -1086,9 +1089,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-6.0-sharded_cluster
     tags:
       - '6.0'
@@ -1101,9 +1102,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-5.0-server
     tags:
       - '5.0'
@@ -1116,9 +1115,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-5.0-replica_set
     tags:
       - '5.0'
@@ -1131,9 +1128,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-5.0-sharded_cluster
     tags:
       - '5.0'
@@ -1146,9 +1141,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.4-server
     tags:
       - '4.4'
@@ -1161,9 +1154,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.4-replica_set
     tags:
       - '4.4'
@@ -1176,9 +1167,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.4-sharded_cluster
     tags:
       - '4.4'
@@ -1191,9 +1180,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.2-server
     tags:
       - '4.2'
@@ -1206,9 +1193,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.2-replica_set
     tags:
       - '4.2'
@@ -1221,9 +1206,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.2-sharded_cluster
     tags:
       - '4.2'
@@ -1236,9 +1219,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-latest-server-v1-api
     tags:
       - latest
@@ -2044,9 +2025,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-latest-replica_set-noauth
     tags:
       - latest
@@ -2061,9 +2040,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-latest-sharded_cluster-noauth
     tags:
       - latest
@@ -2078,9 +2055,7 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-rapid-server-noauth
     tags:
       - rapid
@@ -2095,9 +2070,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-rapid-replica_set-noauth
     tags:
       - rapid
@@ -2112,9 +2085,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-rapid-sharded_cluster-noauth
     tags:
       - rapid
@@ -2129,9 +2100,7 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-8.0-server-noauth
     tags:
       - '8.0'
@@ -2146,9 +2115,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-8.0-replica_set-noauth
     tags:
       - '8.0'
@@ -2163,9 +2130,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-8.0-sharded_cluster-noauth
     tags:
       - '8.0'
@@ -2180,9 +2145,7 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-7.0-server-noauth
     tags:
       - '7.0'
@@ -2197,9 +2160,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-7.0-replica_set-noauth
     tags:
       - '7.0'
@@ -2214,9 +2175,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-7.0-sharded_cluster-noauth
     tags:
       - '7.0'
@@ -2231,9 +2190,7 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-6.0-server-noauth
     tags:
       - '6.0'
@@ -2248,9 +2205,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-6.0-replica_set-noauth
     tags:
       - '6.0'
@@ -2265,9 +2220,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-6.0-sharded_cluster-noauth
     tags:
       - '6.0'
@@ -2282,9 +2235,7 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-5.0-server-noauth
     tags:
       - '5.0'
@@ -2299,9 +2250,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-5.0-replica_set-noauth
     tags:
       - '5.0'
@@ -2316,9 +2265,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-5.0-sharded_cluster-noauth
     tags:
       - '5.0'
@@ -2333,9 +2280,7 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.4-server-noauth
     tags:
       - '4.4'
@@ -2350,9 +2295,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.4-replica_set-noauth
     tags:
       - '4.4'
@@ -2367,9 +2310,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.4-sharded_cluster-noauth
     tags:
       - '4.4'
@@ -2384,9 +2325,7 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.2-server-noauth
     tags:
       - '4.2'
@@ -2401,9 +2340,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.2-replica_set-noauth
     tags:
       - '4.2'
@@ -2418,9 +2355,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-4.2-sharded_cluster-noauth
     tags:
       - '4.2'
@@ -2435,9 +2370,7 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run tests - new
   - name: test-lambda-example
     tags:
       - latest
@@ -2853,6 +2786,7 @@ pre:
   - func: fetch source
   - func: fix absolute paths
   - func: make files executable
+  - func: bootstrap ci tooling
 post:
   - func: reset aws instance profile
   - func: upload test results
