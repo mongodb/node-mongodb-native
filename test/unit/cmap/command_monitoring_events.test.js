@@ -1,7 +1,7 @@
 'use strict';
 
-const { OpQueryRequest, OpMsgRequest } = require('../../mongodb');
-const { CommandStartedEvent } = require('../../mongodb');
+const { OpQueryRequest, OpMsgRequest } = require('../../../src/cmap/commands');
+const { CommandStartedEvent } = require('../../../src/cmap/command_monitoring_events');
 const { expect } = require('chai');
 
 describe('Command Monitoring Events - unit/cmap', function () {

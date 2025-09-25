@@ -13,8 +13,8 @@ import {
   tokenCache
 } from '../../../../src/client-side-encryption/providers/azure';
 import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
+import { MongoNetworkTimeoutError } from '../../../../src/error';
 import * as utils from '../../../../src/utils';
-import { MongoNetworkTimeoutError } from '../../../mongodb';
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
