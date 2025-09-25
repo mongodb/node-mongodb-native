@@ -59,11 +59,6 @@ describe('Transactions', function () {
         const err = await session.withTransaction(fnThatReturnsBadPromise).catch(err => err);
         expect(err).to.equal(undefined);
         await session.endSession();
-        // .then(() => done(Error('Expected error')))
-        // .catch(err => {
-        //   expect(err).to.equal(undefined);
-        //   session.endSession(done);
-        // });
       }
     });
 
