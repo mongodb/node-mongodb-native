@@ -1,17 +1,21 @@
+import { type Document, Long, ObjectId, Timestamp } from 'bson';
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
+import { type ChangeStream } from '../../../src/change_stream';
+import {
+  type CommandFailedEvent,
+  type CommandStartedEvent,
+  type CommandSucceededEvent
+} from '../../../src/cmap/command_monitoring_events';
+import { type Collection } from '../../../src/collection';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { MongoNetworkError } from '../../../src/error';
+import { type MongoClient } from '../../../src/mongo_client';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
-import { ChangeStream } from '../../../src/change_stream';
-import { MongoNetworkError } from '../../../src/error';
-import { Collection } from '../../../src/collection';
-import { MongoClient } from '../../../src/mongo_client';
-import { Document, Long, ObjectId, Timestamp } from 'bson';
-import { CommandFailedEvent, CommandStartedEvent, CommandSucceededEvent } from '../../../src/cmap/command_monitoring_events';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 
 /**
  * Triggers a fake resumable error on a change stream

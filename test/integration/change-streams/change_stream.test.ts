@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { Document, Long, UUID } from 'bson';
+import { type Document, Long, UUID } from 'bson';
 import { expect } from 'chai';
 import { on, once } from 'events';
 import { gte, lt } from 'semver';
@@ -7,19 +7,24 @@ import * as sinon from 'sinon';
 import { PassThrough } from 'stream';
 import { setTimeout } from 'timers';
 
+import {
+  type ChangeStream,
+  type ChangeStreamDocument,
+  type ChangeStreamOptions,
+  type ResumeToken
+} from '../../../src/change_stream';
+import { type CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { type Collection } from '../../../src/collection';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { type Db } from '../../../src/db';
+import { MongoAPIError, MongoChangeStreamError, MongoServerError } from '../../../src/error';
+import { type MongoClient } from '../../../src/mongo_client';
+import { ReadPreference } from '../../../src/read_preference';
+import { isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 import { type FailCommandFailPoint, sleep } from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
-import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions, ResumeToken } from '../../../src/change_stream';
-import { MongoClient } from '../../../src/mongo_client';
-import { ReadPreference } from '../../../src/read_preference';
-import { Collection } from '../../../src/collection';
-import { Db } from '../../../src/db';
-import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
-import { isHello } from '../../../src/utils';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { MongoAPIError, MongoChangeStreamError, MongoServerError } from '../../../src/error';
 
 const initIteratorMode = async (cs: ChangeStream) => {
   const initEvent = once(cs.cursor, 'init');
@@ -469,8 +474,8 @@ describe('Change Streams', function () {
       expect(res).to.exist;
 
       const err = await changeStream.next().catch(e => e);
-        expect(err).to.exist;
-        console.log(`pavel >>> ${JSON.stringify(err)}`);
+      expect(err).to.exist;
+      console.log(`pavel >>> ${JSON.stringify(err)}`);
       await changeStream.close();
       await client.close();
     }
@@ -1306,7 +1311,7 @@ describe('Change Streams', function () {
         const collection = client.db('cs').collection('test');
         const changeStream = collection.watch();
         try {
-        await changeStream.next();
+          await changeStream.next();
         } catch (err) {
           expect(err).to.exist;
           expect(err?.message).to.equal('ChangeStream is closed');
