@@ -464,7 +464,6 @@ describe('Change Streams', function () {
 
       const err = await changeStream.next().catch(e => e);
       expect(err).to.exist;
-      console.log(`pavel >>> ${JSON.stringify(err)}`);
       await changeStream.close();
       await client.close();
     }
