@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { type Document, Long, UUID } from 'bson';
+import { Long, UUID } from 'bson';
 import { expect } from 'chai';
 import { on, once } from 'events';
 import { gte, lt } from 'semver';
@@ -323,27 +323,22 @@ describe('Change Streams', function () {
     test: async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      let changeStream: ChangeStream<Document, ChangeStreamDocument<Document>>;
 
-      try {
-        await client.connect();
-        const database = client.db('integration_tests');
-        const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
+      await client.connect();
+      const database = client.db('integration_tests');
+      const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
 
-        assert.equal(changeStream.closed, false);
-        assert.equal(changeStream.cursor.closed, false);
+      assert.equal(changeStream.closed, false);
+      assert.equal(changeStream.cursor.closed, false);
 
-        await changeStream.close();
+      await changeStream.close();
 
-        // Check the cursor is closed
-        expect(changeStream.closed).to.be.true;
-        expect(changeStream.cursor).property('closed', true);
-      } finally {
-        await client.close();
-        if (changeStream) {
-          await changeStream.close();
-        }
-      }
+      // Check the cursor is closed
+      expect(changeStream.closed).to.be.true;
+      expect(changeStream.cursor).property('closed', true);
+
+      await changeStream.close();
+      await client.close();
     }
   });
 
@@ -355,7 +350,6 @@ describe('Change Streams', function () {
       test: async function () {
         const configuration = this.configuration;
         const client = configuration.newClient();
-        let changeStream: ChangeStream<Document, ChangeStreamDocument<Document>>;
 
         await client.connect();
 
@@ -363,23 +357,18 @@ describe('Change Streams', function () {
         const forbiddenStageName = '$alksdjfhlaskdfjh';
         forbiddenStage[forbiddenStageName] = 2;
 
-        try {
-          const database = client.db('integration_tests');
-          changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
+        const database = client.db('integration_tests');
+        const changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
 
-          await changeStream.next();
-        } catch (err) {
-          assert.ok(err);
-          assert.ok(err.message);
-          assert.ok(
-            err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
-          );
-        } finally {
-          await client.close();
-          if (changeStream) {
-            await changeStream.close();
-          }
-        }
+        const err = await changeStream.next().catch(e => e);
+        assert.ok(err);
+        assert.ok(err.message);
+        assert.ok(
+          err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
+        );
+
+        await changeStream.close();
+        await client.close();
       }
     }
   );
@@ -1310,15 +1299,13 @@ describe('Change Streams', function () {
         await client.connect();
         const collection = client.db('cs').collection('test');
         const changeStream = collection.watch();
-        try {
-          await changeStream.next();
-        } catch (err) {
-          expect(err).to.exist;
-          expect(err?.message).to.equal('ChangeStream is closed');
-        } finally {
-          await changeStream.close();
-          await client.close();
-        }
+
+        const err = await changeStream.next().catch(e => e);
+        expect(err).to.exist;
+        expect(err?.message).to.equal('ChangeStream is closed');
+
+        await changeStream.close();
+        await client.close();
       });
     });
   });
