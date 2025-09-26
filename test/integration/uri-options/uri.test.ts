@@ -1,8 +1,7 @@
-'use strict';
+import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { Topology } = require('../../../src/sdam/topology');
+import { Topology } from '../../../src/sdam/topology';
 
 describe('URI', function () {
   let client;
@@ -21,8 +20,6 @@ describe('URI', function () {
     metadata: { requires: { topology: 'single' } },
 
     test: async function () {
-      var self = this;
-
       const authInformation = process.env.AUTH === 'auth' ? 'bob:pwd123@' : '';
       // Connect using the connection string
       const client = this.configuration.newClient(
@@ -30,11 +27,11 @@ describe('URI', function () {
       );
 
       await client.connect();
-      var db = client.db(self.configuration.db);
+      const db = client.db(this.configuration.db);
 
       const result = await db
         .collection('mongoclient_test')
-        .update({ a: 1 }, { $set: { b: 1 } }, { upsert: true });
+        .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true });
 
       expect(result).to.exist;
       expect(result).property('acknowledged').to.be.false;
@@ -66,7 +63,7 @@ describe('URI', function () {
     test: async function () {
       const client = this.configuration.newClient('mongodb://127.0.0.1:27017/?fsync=true');
       await client.connect();
-      var db = client.db(this.configuration.db);
+      const db = client.db(this.configuration.db);
       expect(db.writeConcern.journal).to.be.true;
       await client.close();
     }
@@ -124,7 +121,7 @@ describe('URI', function () {
         expect(options.credentials.mechanism).to.eql('MONGODB-X509');
 
         connectStub.restore();
-        return;
+        return undefined;
       }
 
       const topologyPrototype = Topology.prototype;
