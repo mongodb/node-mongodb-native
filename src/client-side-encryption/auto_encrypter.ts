@@ -258,7 +258,6 @@ export class AutoEncrypter {
     }
 
     const mongoCryptOptions: MongoCryptOptions = {
-      enableMultipleCollinfo: true,
       cryptoCallbacks
     };
     if (options.schemaMap) {
