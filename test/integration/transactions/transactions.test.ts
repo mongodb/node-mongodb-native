@@ -171,23 +171,21 @@ describe('Transactions', function () {
   describe('startTransaction', function () {
     it('should not error if transactions are supported', {
       metadata: { requires: { topology: ['sharded'] } },
-      test: function (done) {
+      test: async function () {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.url());
 
-        client.connect(err => {
-          expect(err).to.not.exist;
+        await client.connect();
 
-          const session = client.startSession();
-          const db = client.db(configuration.db);
-          const coll = db.collection('transaction_error_test');
-          coll.insertOne({ a: 1 }, err => {
-            expect(err).to.not.exist;
-            expect(() => session.startTransaction()).to.not.throw();
+        const session = client.startSession();
+        const db = client.db(configuration.db);
+        const coll = db.collection('transaction_error_test');
+        await coll.insertOne({ a: 1 });
+        session.startTransaction();
 
-            session.abortTransaction(() => session.endSession(() => client.close(done)));
-          });
-        });
+        await session.abortTransaction();
+        await session.endSession();
+        await client.close();
       }
     });
   });
