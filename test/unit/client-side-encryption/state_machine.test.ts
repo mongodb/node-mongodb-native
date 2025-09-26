@@ -1,27 +1,21 @@
+import { BSON, Int32, Long, serialize } from 'bson';
 import { expect } from 'chai';
 import { EventEmitter, once } from 'events';
 import * as fs from 'fs/promises';
 import { type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import * as tls from 'tls';
 
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
+import { Collection } from '../../../src/collection';
+import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
 import { Db } from '../../../src/db';
-import {
-  BSON,
-  Collection,
-  CSOTTimeoutContext,
-  CursorTimeoutContext,
-  type FindOptions,
-  Int32,
-  Long,
-  MongoClient,
-  serialize,
-  squashError
-} from '../../mongodb';
+import { MongoClient } from '../../../src/mongo_client';
+import { type FindOptions } from '../../../src/operations/find';
+import { CSOTTimeoutContext } from '../../../src/timeout';
+import { squashError } from '../../../src/utils';
 import { sleep } from '../../tools/utils';
 
 describe('StateMachine', function () {
@@ -129,7 +123,7 @@ describe('StateMachine', function () {
         });
       });
 
-      it('should only resolve once bytesNeeded drops to zero', function (done) {
+      it('should only resolve once bytesNeeded drops to zero', async function () {
         const stateMachine = new StateMachine({} as any);
         const request = new MockRequest(Buffer.from('foobar'), 500);
         let status = 'pending';
@@ -143,22 +137,21 @@ describe('StateMachine', function () {
           .catch(() => {});
 
         this.fakeSocket.emit('connect');
-        setTimeout(() => {
-          expect(status).to.equal('pending');
-          expect(request.bytesNeeded).to.equal(500);
-          expect(request.kmsProvider).to.equal('aws');
-          this.fakeSocket.emit('data', Buffer.alloc(300));
-          setTimeout(() => {
-            expect(status).to.equal('pending');
-            expect(request.bytesNeeded).to.equal(200);
-            this.fakeSocket.emit('data', Buffer.alloc(200));
-            setTimeout(() => {
-              expect(status).to.equal('resolved');
-              expect(request.bytesNeeded).to.equal(0);
-              done();
-            });
-          });
-        });
+        await sleep();
+
+        expect(status).to.equal('pending');
+        expect(request.bytesNeeded).to.equal(500);
+        expect(request.kmsProvider).to.equal('aws');
+        this.fakeSocket.emit('data', Buffer.alloc(300));
+        await sleep();
+
+        expect(status).to.equal('pending');
+        expect(request.bytesNeeded).to.equal(200);
+        this.fakeSocket.emit('data', Buffer.alloc(200));
+        await sleep();
+
+        expect(status).to.equal('resolved');
+        expect(request.bytesNeeded).to.equal(0);
       });
     });
 
@@ -196,13 +189,9 @@ describe('StateMachine', function () {
               } as any);
               const request = new MockRequest(Buffer.from('foobar'), 500);
 
-              it('rejects with the validation error', function (done) {
-                stateMachine.kmsRequest(request).catch(err => {
-                  expect(err.message).to.equal(
-                    `Insecure TLS options prohibited for aws: ${option}`
-                  );
-                  done();
-                });
+              it('rejects with the validation error', async function () {
+                const err = await stateMachine.kmsRequest(request).catch(e => e);
+                expect(err.message).to.equal(`Insecure TLS options prohibited for aws: ${option}`);
               });
             });
           }

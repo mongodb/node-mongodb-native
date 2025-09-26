@@ -5,7 +5,7 @@ import {
   MAX_SUPPORTED_WIRE_VERSION,
   MIN_SUPPORTED_SERVER_VERSION,
   MIN_SUPPORTED_WIRE_VERSION
-} from '../../../mongodb';
+} from '../../../../src/cmap/wire_protocol/constants';
 
 describe('Wire Protocol Constants', function () {
   describe('MIN_SUPPORTED_SERVER_VERSION', function () {

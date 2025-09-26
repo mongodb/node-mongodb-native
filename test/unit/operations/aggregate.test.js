@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { AggregateOperation } = require('../../mongodb');
+const { AggregateOperation } = require('../../../src/operations/aggregate');
 
 describe('AggregateOperation', function () {
   const db = 'test';

@@ -1,18 +1,11 @@
+import { BSON, Long } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  applySession,
-  BSON,
-  ClientSession,
-  isHello,
-  Long,
-  MongoClient,
-  MongoRuntimeError,
-  now,
-  ServerSession,
-  ServerSessionPool
-} from '../mongodb';
+import { MongoRuntimeError } from '../../src/error';
+import { MongoClient } from '../../src/mongo_client';
+import { applySession, ClientSession, ServerSession, ServerSessionPool } from '../../src/sessions';
+import { isHello, now } from '../../src/utils';
 import { genClusterTime } from '../tools/common';
 import * as mock from '../tools/mongodb-mock/index';
 
@@ -497,7 +490,7 @@ describe('Sessions - unit', function () {
       expect(() => new ServerSessionPool()).to.throw(MongoRuntimeError);
     });
 
-    it('should create a new session if the pool is empty', function (done) {
+    it('should create a new session if the pool is empty', function () {
       const pool = new ServerSessionPool(client);
       expect(pool.sessions).to.have.length(0);
 
@@ -505,11 +498,9 @@ describe('Sessions - unit', function () {
       expect(session).to.exist;
       expect(pool.sessions).to.have.length(0);
       pool.release(session);
-
-      done();
     });
 
-    it('should reuse sessions which have not timed out yet on acquire', function (done) {
+    it('should reuse sessions which have not timed out yet on acquire', function () {
       const oldSession = new ServerSession();
       const pool = new ServerSessionPool(client);
       pool.sessions.push(oldSession);
@@ -518,11 +509,9 @@ describe('Sessions - unit', function () {
       expect(session).to.exist;
       expect(session).to.eql(oldSession);
       pool.release(session);
-
-      done();
     });
 
-    it('should remove sessions which have timed out on acquire, and return a fresh session', function (done) {
+    it('should remove sessions which have timed out on acquire, and return a fresh session', function () {
       const oldSession = new ServerSession();
       oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
 
@@ -533,8 +522,6 @@ describe('Sessions - unit', function () {
       expect(session).to.exist;
       expect(session).to.not.eql(oldSession);
       pool.release(session);
-
-      done();
     });
 
     describe('release()', () => {
@@ -614,7 +601,7 @@ describe('Sessions - unit', function () {
       });
     });
 
-    it('should not reintroduce a soon-to-expire session to the pool on release', function (done) {
+    it('should not reintroduce a soon-to-expire session to the pool on release', function () {
       const session = new ServerSession();
       session.lastUse = now() - 9.5 * 60 * 1000; // add 9.5min
 
@@ -622,10 +609,9 @@ describe('Sessions - unit', function () {
 
       pool.release(session);
       expect(pool.sessions).to.have.length(0);
-      done();
     });
 
-    it('should maintain a LIFO queue of sessions', function (done) {
+    it('should maintain a LIFO queue of sessions', function () {
       const pool = new ServerSessionPool(client);
 
       const sessionA = new ServerSession();
@@ -642,7 +628,6 @@ describe('Sessions - unit', function () {
 
       pool.release(sessionC);
       pool.release(sessionD);
-      done();
     });
   });
 });
