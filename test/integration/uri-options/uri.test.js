@@ -2,7 +2,7 @@
 
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { Topology } = require('../../mongodb');
+const { Topology } = require('../../../src/sdam/topology');
 
 describe('URI', function () {
   let client;
@@ -20,7 +20,7 @@ describe('URI', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function (done) {
+    test: async function () {
       var self = this;
 
       const authInformation = process.env.AUTH === 'auth' ? 'bob:pwd123@' : '';
@@ -29,22 +29,16 @@ describe('URI', function () {
         `mongodb://${authInformation}localhost:27017/?w=0`
       );
 
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        var db = client.db(self.configuration.db);
+      await client.connect();
+      var db = client.db(self.configuration.db);
 
-        db.collection('mongoclient_test').update(
-          { a: 1 },
-          { $set: { b: 1 } },
-          { upsert: true },
-          function (err, result) {
-            expect(err).to.not.exist;
-            expect(result).to.exist;
-            expect(result).property('acknowledged').to.be.false;
-            client.close(done);
-          }
-        );
-      });
+      const result = await db
+        .collection('mongoclient_test')
+        .update({ a: 1 }, { $set: { b: 1 } }, { upsert: true });
+
+      expect(result).to.exist;
+      expect(result).property('acknowledged').to.be.false;
+      await client.close();
     }
   });
 
@@ -53,17 +47,14 @@ describe('URI', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function (done) {
+    test: async function () {
       if (process.platform === 'win32') {
-        return done();
+        return;
       }
 
       const client = this.configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock');
-
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        client.close(done);
-      });
+      await client.connect();
+      await client.close();
     }
   });
 
@@ -72,13 +63,12 @@ describe('URI', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: 'single' } },
 
-    test: function (done) {
+    test: async function () {
       const client = this.configuration.newClient('mongodb://127.0.0.1:27017/?fsync=true');
-      client.connect((err, client) => {
-        var db = client.db(this.configuration.db);
-        expect(db.writeConcern.journal).to.be.true;
-        client.close(done);
-      });
+      await client.connect();
+      var db = client.db(this.configuration.db);
+      expect(db.writeConcern.journal).to.be.true;
+      await client.close();
     }
   });
 
@@ -114,17 +104,15 @@ describe('URI', function () {
 
   it('should correctly translate uri options', {
     metadata: { requires: { topology: 'replicaset' } },
-    test: function (done) {
+    test: async function () {
       const config = this.configuration;
       const uri = `mongodb://${config.host}:${config.port}/${config.db}?replicaSet=${config.replicasetName}`;
 
       const client = this.configuration.newClient(uri);
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        expect(client).to.exist;
-        expect(client.options.replicaSet).to.exist.and.equal(config.replicasetName);
-        client.close(done);
-      });
+      await client.connect();
+      expect(client).to.exist;
+      expect(client.options.replicaSet).to.exist.and.equal(config.replicasetName);
+      await client.close();
     }
   });
 
