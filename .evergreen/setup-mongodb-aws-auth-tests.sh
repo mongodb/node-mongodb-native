@@ -18,7 +18,7 @@ cd $DRIVERS_TOOLS/.evergreen/auth_aws
 # Create a python virtual environment.
 . ./activate-authawsvenv.sh
 # Source the environment variables. Configure the environment and the server.
-. aws_setup.sh $AWS_CREDENTIAL_TYPE
+. aws_setup.sh $AWS_CREDENTIAL_TYPE --nouri
 
 cd $BEFORE
 

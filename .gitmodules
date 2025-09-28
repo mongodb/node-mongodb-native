@@ -1,3 +1,4 @@
 [submodule "drivers-evergreen-tools"]
 	path = drivers-evergreen-tools
 	url = https://github.com/mongodb-labs/drivers-evergreen-tools.git
+	branch = DRIVERS-3131
