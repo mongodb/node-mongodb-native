@@ -1,0 +1,18 @@
+name: 'Build Documentation'
+description: 'Build documentation files'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Hugo
+      shell: bash
+      run: |
+        mkdir hugo 
+        curl -L https://github.com/gohugoio/hugo/releases/download/v0.150.0/hugo_0.150.0_linux-amd64.tar.gz | tar -xzf - -C hugo
+        echo "$(pwd)/hugo" >> $GITHUB_PATH
+
+    - name: Install Node and dependencies
+      uses: mongodb-labs/drivers-github-tools/node/setup@v2
+
+    - name: Build Docs
+      run: npm run build:docs -- --yes
+      shell: bash
