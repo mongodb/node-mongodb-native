@@ -6,7 +6,13 @@ import { type MongoCryptOptions } from 'mongodb-client-encryption';
 import * as sinon from 'sinon';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { AutoEncrypter, BSON, type Document, type MongoClient } from '../../mongodb';
+import {
+  AutoEncrypter,
+  BSON,
+  type Document,
+  type MongoClient,
+  MongoCryptError
+} from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
@@ -421,7 +427,7 @@ describe('$lookup support', defaultMetadata, function () {
             .toArray()
             .catch(error => error);
 
-          expect(actual).to.be.instanceOf(TypeError);
+          expect(actual).to.be.instanceOf(MongoCryptError);
           expect(actual.message).to.match(
             /libmongocrypt is not configured to support encrypting a command with multiple collections/i
           );
