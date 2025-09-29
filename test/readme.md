@@ -79,6 +79,9 @@ The actual implementations of the spec tests can be unit tests or integration te
 
 ## Running the Tests Locally
 
+> [!NOTE]
+> All scripts mentioned in the readme and in drivers-evergreen-tools expect to be run in bash.  These scripts will work fine in other shells so long as they're launched with the `bash` command.  The outputs of these scripts also expect the user to be running in a bash syntax-like shell; users using `fish` or shells with syntax for declaring environment variables that does not look like `export <name>=<value>` may find that they need to adapt the output of the tooling to work in their shell.
+
 The easiest way to get started running the tests locally is to start a replica set and run all of the integration tests.
 
 Ensure the drivers tools submodule is cloned:
@@ -112,7 +115,8 @@ Then run the tests:
 npm run check:test
 ```
 
-> **Note:** the command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
+> [!NOTE]
+> The command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
 The output will show how many tests passed, failed, and are pending. Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test results. See [Mocha's documentation][mocha-skip] for more information.
 
