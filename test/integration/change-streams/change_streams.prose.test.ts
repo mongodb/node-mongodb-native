@@ -1,19 +1,22 @@
-import { type Document, Long, ObjectId, Timestamp } from 'bson';
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
-import { type ChangeStream } from '../../../src/change_stream';
 import {
+  type ChangeStream,
+  type Collection,
   type CommandFailedEvent,
   type CommandStartedEvent,
-  type CommandSucceededEvent
-} from '../../../src/cmap/command_monitoring_events';
-import { type Collection } from '../../../src/collection';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { MongoNetworkError } from '../../../src/error';
-import { type MongoClient } from '../../../src/mongo_client';
+  type CommandSucceededEvent,
+  type Document,
+  LEGACY_HELLO_COMMAND,
+  Long,
+  type MongoClient,
+  MongoNetworkError,
+  ObjectId,
+  Timestamp
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 
@@ -636,9 +639,6 @@ describe('Change Stream prose tests', function () {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
-        changeStream.on('error', async () => {
-          await changeStream.close();
-        });
 
         changeStream.on('change', change => {
           events.push({ change: { insert: { x: change.fullDocument.x } } });
@@ -648,18 +648,20 @@ describe('Change Stream prose tests', function () {
               events = [];
               triggerResumableError(changeStream, () => events.push('error'));
               break;
-            case 3:
-              expect(events).to.be.an('array').with.lengthOf(3);
-              expect(events[0]).to.equal('error');
-              expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
-              expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
-              break;
           }
         });
 
         await once(changeStream.cursor, 'init');
         await coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } });
         await coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } });
+        await once(changeStream, 'change');
+
+        expect(events).to.be.an('array').with.lengthOf(3);
+        expect(events[0]).to.equal('error');
+        expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
+        expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
+
+        await changeStream.close();
       }
     });
   });
