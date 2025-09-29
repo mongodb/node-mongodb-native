@@ -7,10 +7,10 @@ import {
   type CommandStartedEvent,
   type CommandSucceededEvent,
   type Db,
-  LEGACY_HELLO_COMMAND,
-  MongoClient,
-  OpMsgRequest
-} from '../../mongodb';
+  MongoClient
+} from '../../../src';
+import { OpMsgRequest } from '../../../src/cmap/commands';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import * as mock from '../../tools/mongodb-mock/index';
 import { filterForCommands } from '../shared';
 
@@ -144,7 +144,7 @@ describe('Write Concern', function () {
           async test() {
             const changeStream = col.watch(undefined, { batchSize: 2 });
             const changes = on(changeStream, 'change');
-            await once(changeStream.cursor, 'init');
+            await once(changeStream['cursor'], 'init');
 
             await col.insertMany(
               [
