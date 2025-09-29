@@ -51,7 +51,8 @@ describe('URI', function () {
 
       const client = this.configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock');
       await client.connect();
-      await client.close();
+      const err = await client.close().catch(e => e);
+      expect(err).to.not.exist;
     }
   });
 
