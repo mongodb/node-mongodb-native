@@ -5,24 +5,27 @@ on:
 
 name: Build and commit documentation
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build-docs:
     # prevent subsequent commits from triggering the job multiple times
     concurrency:
       group: ci-${{ github.ref }}
       cancel-in-progress: true
-    name: "Build documentation."
-    uses: ./.github/workflows/build.yml
 
-  commit-docs:
-    needs: [build-docs]
-    permissions:
-      contents: write
-      pull-requests: write
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-latest'
+    
     steps:
-        - name: Open Pull Request
-          uses: peter-evans/create-pull-request@v6
-          with:
-            title: 'docs: generate docs from latest main [skip-ci]'
-            delete-branch: true
+      - uses: actions/checkout@v5
+
+      - name: "Build documentation"
+        uses: ./.github/actions/build_documentation
+
+      - name: Open Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: 'docs: generate docs from latest main [skip-ci]'
+          delete-branch: true
