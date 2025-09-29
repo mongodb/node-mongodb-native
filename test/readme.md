@@ -462,7 +462,7 @@ The following steps will walk you through how to start and test a load balancer.
    ```
 1. Start the load balancer by using the [run-load-balancer script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/run-load-balancer.sh) provided in `drivers-evergreen-tools`.
    ```sh
-   $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh start
+   bash $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh start
    ```
    A new file name `lb-expansion.yml` will be automatically created. The contents of the file will be similar in structure to the code below.
    ```yaml
@@ -494,7 +494,7 @@ The following steps will walk you through how to start and test a load balancer.
    Verify that the output from Mocha includes `[ topology type: load-balanced ]`. This indicates the tests successfully accessed the specialized environment variables for load balancer testing.
 1. When you are done testing, shutdown the HAProxy load balancer:
    ```sh
-   $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
+   bash $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
    ```
 
 ### Client-Side Field-Level Encryption (CSFLE)
@@ -612,7 +612,7 @@ TODO(NODE-6698): Update deployed lambda test section.
 
 You must be in an office or connected to the VPN to run these tests.
 
-Run `.evergreen/run-kerberos-tests.sh`.
+Run `bash .evergreen/run-kerberos-tests.sh`.
 
 ### AWS Authentication tests
 
