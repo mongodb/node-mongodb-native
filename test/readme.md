@@ -123,7 +123,7 @@ In the following subsections, we'll dig into the details of running the tests.
 By default, the integration tests run with auth-enabled and the mongo orchestration script will run with auth enabled when the `AUTH` variable is set to `auth`. Tests can be run locally without auth by setting the environment variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
 
 ```shell
-AUTH='noauth' TOPOLOGY='server' ./.evergreen/run-orchestration.sh
+AUTH='noauth' TOPOLOGY='server' bash .evergreen/run-orchestration.sh
 AUTH='noauth' npm run check:test
 ```
 ### Testing Different MongoDB Topologies
@@ -133,16 +133,16 @@ As we mentioned earlier, the tests check the topology of the MongoDB server bein
 In the steps above, we started a standalone server:
 
 ```sh
-TOPOLOGY='server' ./.evergreen/run-orchestration.sh
+TOPOLOGY='server' bash .evergreen/run-orchestration.sh
 ```
 
 You can use the same [run-orchestration.sh](.evergreen/run-orchestration.sh) script to start a replica set or sharded cluster by passing the appropriate option:
 ```sh
-TOPOLOGY='replica_set' ./.evergreen/run-orchestration.sh
+TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
 ```
 or
 ```sh
-TOPOLOGY='sharded_cluster' ./.evergreen/run-orchestration.sh
+TOPOLOGY='sharded_cluster' bash .evergreen/run-orchestration.sh
 ```
 If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated `maxproc` steps.)
 
