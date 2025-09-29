@@ -15,7 +15,7 @@ describe('stats', function () {
       }
     },
 
-    test: function (done) {
+    test: async function () {
       var configuration = this.configuration;
       var url = configuration.url();
       url =
@@ -24,16 +24,10 @@ describe('stats', function () {
           : f('%s?%s', url, 'maxPoolSize=5');
 
       const client = configuration.newClient(url);
-      client.connect().then(function (client) {
-        client
-          .db(configuration.db)
-          .stats()
-          .then(function (stats) {
-            test.ok(stats != null);
-
-            client.close(done);
-          });
-      });
+      await client.connect();
+      const stats = await client.db(configuration.db).stats();
+      test.notEqual(null, stats);
+      await client.close();
     }
   });
 });
