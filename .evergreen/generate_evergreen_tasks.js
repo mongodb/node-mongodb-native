@@ -344,6 +344,7 @@ const AWS_AUTH_TASKS = [];
 for (const VERSION of AWS_AUTH_VERSIONS) {
   const name = ex => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
   const awsFuncs = [
+    { func: 'run aws auth test with regular aws credentials' },
     { func: 'run aws auth test with assume role credentials' },
     { func: 'run aws auth test with aws EC2 credentials', onlySdk: true },
     { func: 'run aws auth test with aws credentials as environment variables' },
