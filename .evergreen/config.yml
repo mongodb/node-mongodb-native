@@ -1609,21 +1609,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
-  - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: assume secrets manager role
-      - func: run aws auth test with regular aws credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - command: expansions.update
@@ -3178,7 +3163,6 @@ buildvariants:
     expansions:
       NODE_LTS_VERSION: 22
     tasks:
-      - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
