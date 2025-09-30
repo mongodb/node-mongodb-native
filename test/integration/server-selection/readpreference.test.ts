@@ -232,7 +232,6 @@ describe('ReadPreference', function () {
     );
   });
 
-  // TODO(NODE-7219): Hedge reads are deprecated in MongoDB Server version 8.0.
   context('hedge', function () {
     it('should set hedge using [find option & empty hedge]', {
       metadata: { requires: { topology: 'replicaset' } },
