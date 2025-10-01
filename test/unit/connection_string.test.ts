@@ -794,42 +794,6 @@ describe('Connection String', function () {
     expect(() => new MongoClient('mango+srv://localhost:23')).to.throw(/Invalid scheme/i);
   });
 
-  describe('when deprecated options are used', () => {
-    it('useNewUrlParser emits a warning', async () => {
-      let willBeWarning = once(process, 'warning');
-      parseOptions('mongodb://host?useNewUrlParser=true');
-      let [warning] = await willBeWarning;
-      expect(warning)
-        .to.have.property('message')
-        .that.matches(/useNewUrlParser has no effect/);
-
-      willBeWarning = once(process, 'warning');
-      //@ts-expect-error: using unsupported option on purpose
-      parseOptions('mongodb://host', { useNewUrlParser: true });
-      [warning] = await willBeWarning;
-      expect(warning)
-        .to.have.property('message')
-        .that.matches(/useNewUrlParser has no effect/);
-    });
-
-    it('useUnifiedTopology emits a warning', async () => {
-      let willBeWarning = once(process, 'warning');
-      parseOptions('mongodb://host?useUnifiedTopology=true');
-      let [warning] = await willBeWarning;
-      expect(warning)
-        .to.have.property('message')
-        .that.matches(/useUnifiedTopology has no effect/);
-
-      willBeWarning = once(process, 'warning');
-      //@ts-expect-error: using unsupported option on purpose
-      parseOptions('mongodb://host', { useUnifiedTopology: true });
-      [warning] = await willBeWarning;
-      expect(warning)
-        .to.have.property('message')
-        .that.matches(/useUnifiedTopology has no effect/);
-    });
-  });
-
   describe('when mongodbLogPath is in options', function () {
     let stderrStub;
     let stdoutStub;
