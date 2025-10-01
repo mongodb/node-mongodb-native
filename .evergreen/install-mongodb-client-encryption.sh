@@ -9,7 +9,7 @@ if [ -z ${PROJECT_DIRECTORY+omitted} ]; then echo "PROJECT_DIRECTORY is unset" &
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 rm -rf mongodb-client-encryption
-git clone https://github.com/mongodb-js/mongodb-client-encryption.git -b NODE-6297
+git clone https://github.com/mongodb-js/mongodb-client-encryption.git
 pushd mongodb-client-encryption
 
 node --version
