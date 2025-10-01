@@ -40,6 +40,9 @@ about the types of tests and how to run them.
     - [Kerberos Tests](#kerberos-tests)
     - [AWS Authentication tests](#aws-authentication-tests)
     - [Container Tests](#container-tests)
+  - [GCP](#gcp)
+  - [Azure](#azure)
+  - [AWS](#aws)
     - [TODO Special Env Sections](#todo-special-env-sections)
   - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
     - [Point mongosh to the driver](#point-mongosh-to-the-driver)
@@ -60,7 +63,7 @@ Below is a summary of the types of test automation in this repo.
 | Unit                         | `/test/unit`                               | The unit tests test individual pieces of code, typically functions. These tests do **not** interact with a real database, so mocks are used instead. <br><br>The unit test directory mirrors the `/src` directory structure with test file names matching the source file names of the code they test.                                                                                                                                                                                          | `npm run check:unit`                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Integration                  | `/test/integration`                        | The integration tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. <br><br> The integration test directory follows the `test/spec` directory structure representing the different functional areas of the driver. <br><br> **Note:** The `.gitkeep` files are intentionally left to ensure that this directory structure is preserved even as the actual test files are moved around. | `npm run check:test`                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Benchmark                    | `/test/benchmarks`                         | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance.                                                                                                                                                                                                                                                                                                                                                                                | `npm run check:bench`                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Specialized Environment      | `/test/manual`                             | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br><br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests have a special Evergreen configuration and run in isolation from the other tests.                                                                                                                                                  | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization |
+| Specialized Environment      | `/test/manual`                             | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br><br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests have a special Evergreen configuration and run in isolation from the other tests.                                                                                                                                                  | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization |
 | TypeScript Definition        | `/test/types`                              | The TypeScript definition tests verify the type definitions are correct.                                                                                                                                                                                                                                                                                                                                                                                                                        | `npm run check:tsd`                                                                                                                                                                                                                                                                                                                                                                                                       |
 | GitHub Actions               | `/test/action`                             | Tests that run as GitHub Actions such as dependency checking.                                                                                                                                                                                                                                                                                                                                                                                                                                   | Currently, only `npm run check:dependencies` but could be expanded to more in the future.                                                                                                                                                                                                                                                                                                                                 |
 | Code Examples                | `/test/integration/node-specific/examples` | Code examples that are also paired with tests that show they are working examples.                                                                                                                                                                                                                                                                                                                                                                                                              | Currently, `npm run check:lambda` to test the AWS Lambda example with default auth and `npm run check:lambda:aws` to test the AWS Lambda example with AWS auth.                                                                                                                                                                                                                                                           |
@@ -76,7 +79,10 @@ The actual implementations of the spec tests can be unit tests or integration te
 
 ## Running the Tests Locally
 
-The easiest way to get started running the tests locally is to start a standalone server and run all of the tests.
+> [!NOTE]
+> All scripts mentioned in the readme and in drivers-evergreen-tools expect to be run in bash.  These scripts will work fine in other shells so long as they're launched with the `bash` command.  The outputs of these scripts also expect the user to be running in a bash syntax-like shell; users using `fish` or shells with syntax for declaring environment variables that does not look like `export <name>=<value>` may find that they need to adapt the output of the tooling to work in their shell.
+
+The easiest way to get started running the tests locally is to start a replica set and run all of the integration tests.
 
 Ensure the drivers tools submodule is cloned:
 
@@ -85,19 +91,32 @@ git submodule init
 git submodule update
 ```
 
-Start a `mongod` standalone with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
+Set the `DRIVERS_TOOLS` environment variable:
 
 ```sh
-VERSION='latest' TOPOLOGY='server' AUTH='noauth' ./.evergreen/run-orchestration.sh
+export DRIVERS_TOOLS=<path to driver>/drivers-evergreen-tools
+```
+
+Start a replica set with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
+
+```sh
+VERSION='latest' TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
+```
+
+Load the new cluster's URI into the environment:
+
+```sh
+source mo-expansion.sh
 ```
 
 Then run the tests:
 
 ```sh
-npm test
+npm run check:test
 ```
 
-> **Note:** the command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
+> [!NOTE]
+> The command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
 The output will show how many tests passed, failed, and are pending. Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test results. See [Mocha's documentation][mocha-skip] for more information.
 
@@ -108,7 +127,7 @@ In the following subsections, we'll dig into the details of running the tests.
 By default, the integration tests run with auth-enabled and the mongo orchestration script will run with auth enabled when the `AUTH` variable is set to `auth`. Tests can be run locally without auth by setting the environment variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
 
 ```shell
-AUTH='noauth' TOPOLOGY='server' ./.evergreen/run-orchestration.sh
+AUTH='noauth' TOPOLOGY='server' bash .evergreen/run-orchestration.sh
 AUTH='noauth' npm run check:test
 ```
 ### Testing Different MongoDB Topologies
@@ -118,16 +137,16 @@ As we mentioned earlier, the tests check the topology of the MongoDB server bein
 In the steps above, we started a standalone server:
 
 ```sh
-TOPOLOGY='server' ./.evergreen/run-orchestration.sh
+TOPOLOGY='server' bash .evergreen/run-orchestration.sh
 ```
 
 You can use the same [run-orchestration.sh](.evergreen/run-orchestration.sh) script to start a replica set or sharded cluster by passing the appropriate option:
 ```sh
-TOPOLOGY='replica_set' ./.evergreen/run-orchestration.sh
+TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
 ```
 or
 ```sh
-TOPOLOGY='sharded_cluster' ./.evergreen/run-orchestration.sh
+TOPOLOGY='sharded_cluster' bash .evergreen/run-orchestration.sh
 ```
 If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated `maxproc` steps.)
 
@@ -447,7 +466,7 @@ The following steps will walk you through how to start and test a load balancer.
    ```
 1. Start the load balancer by using the [run-load-balancer script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/run-load-balancer.sh) provided in `drivers-evergreen-tools`.
    ```sh
-   $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh start
+   bash $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh start
    ```
    A new file name `lb-expansion.yml` will be automatically created. The contents of the file will be similar in structure to the code below.
    ```yaml
@@ -479,7 +498,7 @@ The following steps will walk you through how to start and test a load balancer.
    Verify that the output from Mocha includes `[ topology type: load-balanced ]`. This indicates the tests successfully accessed the specialized environment variables for load balancer testing.
 1. When you are done testing, shutdown the HAProxy load balancer:
    ```sh
-   $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
+   bash $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
    ```
 
 ### Client-Side Field-Level Encryption (CSFLE)
@@ -597,7 +616,7 @@ TODO(NODE-6698): Update deployed lambda test section.
 
 You must be in an office or connected to the VPN to run these tests.
 
-Run `.evergreen/run-kerberos-tests.sh`.
+Run `bash .evergreen/run-kerberos-tests.sh`.
 
 ### AWS Authentication tests
 
@@ -661,7 +680,6 @@ needs to be tested.
 ### TODO Special Env Sections
 
 - TLS
-- Atlas Data Lake
 - LDAP
 - Snappy (maybe in general, how to test optional dependencies)
 - Atlas connectivity

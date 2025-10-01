@@ -4,9 +4,7 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 
 import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptError } from '../../../src/client-side-encryption/errors';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 

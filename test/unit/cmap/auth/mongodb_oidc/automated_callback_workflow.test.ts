@@ -1,16 +1,12 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { MongoCredentials } from '../../../../../src/cmap/auth/mongo_credentials';
+import { AutomatedCallbackWorkflow } from '../../../../../src/cmap/auth/mongodb_oidc/automated_callback_workflow';
+import { CallbackWorkflow } from '../../../../../src/cmap/auth/mongodb_oidc/callback_workflow';
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
-import {
-  AutomatedCallbackWorkflow,
-  CallbackWorkflow,
-  Connection,
-  MongoCredentials
-} from '../../../../mongodb';
+import { Connection } from '../../../../../src/cmap/connection';
 
 describe('AutomatedCallbackWorkflow', function () {
   describe('#execute', function () {

@@ -1,9 +1,7 @@
 import { expect } from 'chai';
 import { env } from 'process';
 
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
 import { Binary } from '../../mongodb';
 

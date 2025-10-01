@@ -1,6 +1,5 @@
+import { BSON } from 'bson';
 import { expect } from 'chai';
-
-import { BSON } from '../mongodb';
 
 describe('When importing BSON', function () {
   const types = [

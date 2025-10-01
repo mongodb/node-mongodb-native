@@ -1,26 +1,28 @@
+import { type EventEmitter, once } from 'node:events';
+import { setTimeout } from 'node:timers';
+
 import { expect } from 'chai';
-import { type EventEmitter, once } from 'events';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers';
 
 import {
-  addContainerMetadata,
   Binary,
-  connect,
-  Connection,
   type ConnectionOptions,
-  HostAddress,
-  LEGACY_HELLO_COMMAND,
-  makeClientMetadata,
   MongoClient,
   MongoClientAuthProviders,
   type MongoClientOptions,
-  MongoDBResponse,
   MongoServerError,
-  ns,
-  ServerHeartbeatStartedEvent,
-  Topology
-} from '../../mongodb';
+  ServerHeartbeatStartedEvent
+} from '../../../src';
+import { connect } from '../../../src/cmap/connect';
+import { Connection } from '../../../src/cmap/connection';
+import {
+  addContainerMetadata,
+  makeClientMetadata
+} from '../../../src/cmap/handshake/client_metadata';
+import { MongoDBResponse } from '../../../src/cmap/wire_protocol/responses';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { Topology } from '../../../src/sdam/topology';
+import { HostAddress, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { processTick, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
@@ -49,10 +51,8 @@ describe('Connection', function () {
           ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
-          extendedMetadata: addContainerMetadata(
-            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
-          )
+          metadata: makeClientMetadata([], {}),
+          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
         };
 
         let conn;
@@ -74,10 +74,8 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
-          extendedMetadata: addContainerMetadata(
-            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
-          )
+          metadata: makeClientMetadata([], {}),
+          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
         };
 
         let conn;
@@ -108,10 +106,8 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] }),
-          extendedMetadata: addContainerMetadata(
-            makeClientMetadata({ driverInfo: {}, additionalDriverInfo: [] })
-          )
+          metadata: makeClientMetadata([], {}),
+          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
         };
 
         let conn;
@@ -179,7 +175,7 @@ describe('Connection', function () {
       metadata: {
         requires: { topology: 'single', os: '!win32' }
       },
-      test: function (done) {
+      test: async function () {
         const configuration = this.configuration;
         const uri = `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`;
         const options: MongoClientOptions = {
@@ -192,22 +188,12 @@ describe('Connection', function () {
 
         const db = client.db(configuration.db);
 
-        db.collection('domainSocketCollection0').insert(
-          { a: 1 },
-          { writeConcern: { w: 1 } },
-          function (err) {
-            expect(err).to.not.exist;
+        await db
+          .collection('domainSocketCollection0')
+          .insertOne({ a: 1 }, { writeConcern: { w: 1 } });
 
-            db.collection('domainSocketCollection0')
-              .find({ a: 1 })
-              .toArray(function (err, items) {
-                expect(err).to.not.exist;
-                test.equal(1, items.length);
-
-                done();
-              });
-          }
-        );
+        const items = await db.collection('domainSocketCollection0').find({ a: 1 }).toArray();
+        test.equal(1, items.length);
       }
     });
 
@@ -378,7 +364,11 @@ describe('Connection', function () {
 
           // Ensure that we used the drain event for this write
           expect(addedListeners).to.deep.equal(['drain', 'error']);
-          expect(removedListeners).to.deep.equal(['drain', 'error']);
+
+          // https://github.com/nodejs/node/issues/59977: Node 20.11.0
+          // does not emit a `removeListeners` event for `drain`.
+          expect(removedListeners).to.deep.equal(['error']);
+          expect(socket.listenerCount('drain')).to.equal(0);
         });
       }
     );

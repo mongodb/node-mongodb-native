@@ -1,7 +1,10 @@
 import { expect } from 'chai';
 import { it } from 'mocha';
 
-import { Explain, ExplainVerbosity, FindCursor, MongoClient, MongoDBNamespace } from '../mongodb';
+import { FindCursor } from '../../src/cursor/find_cursor';
+import { Explain, ExplainVerbosity } from '../../src/explain';
+import { MongoClient } from '../../src/mongo_client';
+import { MongoDBNamespace } from '../../src/utils';
 
 describe('class Explain {}', function () {
   describe('static .fromOptions()', function () {

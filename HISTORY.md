@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.20.0](https://github.com/mongodb/node-mongodb-native/compare/v6.19.0...v6.20.0) (2025-09-17)
+
+
+### Features
+
+* **NODE-6883:** allow rawData option on time series collections ([#4642](https://github.com/mongodb/node-mongodb-native/issues/4642)) ([0fa3cd4](https://github.com/mongodb/node-mongodb-native/commit/0fa3cd4e82b2b0d28a10bebca1dded2aa9324708))
+* **NODE-7125:** add db and client properties to collection and database objects ([#4640](https://github.com/mongodb/node-mongodb-native/issues/4640)) ([3469f86](https://github.com/mongodb/node-mongodb-native/commit/3469f86816e4b583a12de29d76b19823a3ad25ef))
+* **NODE-7134:** allow hint with unacknowledged writes for delete, update and findAndModify commands ([#4647](https://github.com/mongodb/node-mongodb-native/issues/4647)) ([82d6ce6](https://github.com/mongodb/node-mongodb-native/commit/82d6ce6a6dbbf6d823f02c8d183fc1d45f0d1560))
+* **NODE-7139:** remove pre-4.2 logic and deprecate dead code ([#4657](https://github.com/mongodb/node-mongodb-native/issues/4657)) ([14303bc](https://github.com/mongodb/node-mongodb-native/commit/14303bc810c1aa069d440ac3cd45bff354dc51aa))
+* **NODE-7140:** deprecate driver info options ([#4654](https://github.com/mongodb/node-mongodb-native/issues/4654)) ([b813c85](https://github.com/mongodb/node-mongodb-native/commit/b813c85813c7c86b84aed1cdde69fc3e06856892))
+* **NODE-7157:** deprecate `retryWrites` in `CommandOperationOptions` ([#4661](https://github.com/mongodb/node-mongodb-native/issues/4661)) ([620972d](https://github.com/mongodb/node-mongodb-native/commit/620972df28f57aae1eb67dd2d3a49f8cf48f7262))
+
+
+### Bug Fixes
+
+* **NODE-4763:** cache `resumeToken` in `ChangeStream.tryNext()` ([#4636](https://github.com/mongodb/node-mongodb-native/issues/4636)) ([8331a93](https://github.com/mongodb/node-mongodb-native/commit/8331a939c2f3d6833486ca3ec45cd77603cf3fa9))
+* **NODE-6858:** treat MongoServerSelectionError as a resumable error for Change Streams ([#4653](https://github.com/mongodb/node-mongodb-native/issues/4653)) ([c6d64e7](https://github.com/mongodb/node-mongodb-native/commit/c6d64e71b010dbf2bc0dc634df12d7a03bd12da6))
+* **NODE-7138:** prevent duplicate metadata from being appended to handshake metadata ([#4651](https://github.com/mongodb/node-mongodb-native/issues/4651)) ([05c230c](https://github.com/mongodb/node-mongodb-native/commit/05c230cb1b0cc5831983ad2fc8f84200a35da63d))
+
 ## [6.19.0](https://github.com/mongodb/node-mongodb-native/compare/v6.18.0...v6.19.0) (2025-08-26)
 
 

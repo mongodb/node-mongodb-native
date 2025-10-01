@@ -1,9 +1,8 @@
 import { expect } from 'chai';
 
 // Exception to the import from mongodb rule we're unit testing our public API
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as mongodb from '../../src/index';
-import { setDifference } from '../mongodb';
+import { setDifference } from '../../src/utils';
 
 const EXPECTED_EXPORTS = [
   'AbstractCursor',

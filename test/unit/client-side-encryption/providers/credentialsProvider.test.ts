@@ -2,24 +2,19 @@ import { expect } from 'chai';
 import * as http from 'http';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoCryptAzureKMSRequestError } from '../../../../src/client-side-encryption/errors';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   isEmptyCredentials,
   type KMSProviders,
   refreshKMSCredentials
 } from '../../../../src/client-side-encryption/providers';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   fetchAzureKMSToken,
   tokenCache
 } from '../../../../src/client-side-encryption/providers/azure';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { MongoNetworkTimeoutError } from '../../../../src/error';
 import * as utils from '../../../../src/utils';
-import { MongoNetworkTimeoutError } from '../../../mongodb';
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;

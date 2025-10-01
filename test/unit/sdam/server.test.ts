@@ -1,20 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { ObjectId } from 'bson';
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
 
+import { type Connection } from '../../../src/cmap/connection';
 import {
-  type Connection,
   MongoError,
   MongoErrorLabel,
   MongoNetworkError,
-  MongoNetworkTimeoutError,
-  ObjectId,
-  Server,
-  ServerDescription,
-  ServerType,
-  TopologyType
-} from '../../mongodb';
+  MongoNetworkTimeoutError
+} from '../../../src/error';
+import { ServerType, TopologyType } from '../../../src/sdam/common';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription } from '../../../src/sdam/server_description';
 import { sleep, topologyWithPlaceholderClient } from '../../tools/utils';
 
 const handledErrors = [

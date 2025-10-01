@@ -3,14 +3,10 @@ import { expect } from 'chai';
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
-import {
-  ReadPreference,
-  type Server,
-  type ServerType,
-  STATE_CONNECTED,
-  type Topology,
-  type TopologyType
-} from '../../mongodb';
+import { ReadPreference } from '../../../src/read_preference';
+import { type ServerType, STATE_CONNECTED, type TopologyType } from '../../../src/sdam/common';
+import { type Server } from '../../../src/sdam/server';
+import { type Topology } from '../../../src/sdam/topology';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';
 

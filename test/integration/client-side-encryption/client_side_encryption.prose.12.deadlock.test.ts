@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { type CommandStartedEvent, type MongoClient, type MongoClientOptions } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';

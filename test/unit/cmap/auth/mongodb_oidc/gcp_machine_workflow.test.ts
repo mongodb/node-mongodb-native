@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { OIDC_VERSION, type OIDCCallbackParams } from '../../../../../src/cmap/auth/mongodb_oidc';
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
-import { OIDC_VERSION, type OIDCCallbackParams } from '../../../../mongodb';
 
 describe('GCP machine workflow', function () {
   describe('#callback', function () {

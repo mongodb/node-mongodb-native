@@ -4,17 +4,11 @@ import { once } from 'events';
 import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 
-import {
-  HostAddress,
-  isHello,
-  MongoClient,
-  SrvPoller,
-  type SrvPollerOptions,
-  SrvPollingEvent,
-  type Topology,
-  type TopologyOptions,
-  TopologyType
-} from '../../mongodb';
+import { MongoClient } from '../../../src/mongo_client';
+import { TopologyType } from '../../../src/sdam/common';
+import { SrvPoller, type SrvPollerOptions, SrvPollingEvent } from '../../../src/sdam/srv_polling';
+import type { Topology, TopologyOptions } from '../../../src/sdam/topology';
+import { HostAddress, isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import type { MockServer } from '../../tools/mongodb-mock/src/server';
 import { processTick, topologyWithPlaceholderClient } from '../../tools/utils';
@@ -75,10 +69,10 @@ describe('Polling Srv Records for Mongos Discovery', () => {
     }
 
     class FakeSrvPoller extends SrvPoller {
-      start() {
+      override start() {
         return;
       }
-      stop() {
+      override stop() {
         return;
       }
       trigger(srvRecords) {
@@ -104,12 +98,9 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       return mock.cleanup();
     });
 
-    afterEach(function (done) {
+    afterEach(function () {
       if (context.topology) {
         context.topology.close();
-        done();
-      } else {
-        done();
       }
     });
 

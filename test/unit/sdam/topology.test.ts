@@ -6,25 +6,25 @@ import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
+import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
 import {
-  isHello,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
-  makeClientMetadata,
-  MongoClient,
-  MongoServerSelectionError,
-  ns,
-  ReadPreference,
+  MongoServerSelectionError
+} from '../../../src/error';
+import { MongoClient } from '../../../src/mongo_client';
+import {
   RunCommandOperation,
-  RunCursorCommandOperation,
-  Server,
-  SrvPoller,
-  SrvPollingEvent,
-  TimeoutContext,
-  Topology,
-  TopologyDescription,
-  TopologyDescriptionChangedEvent,
-  TopologyType
-} from '../../mongodb';
+  RunCursorCommandOperation
+} from '../../../src/operations/run_command';
+import { ReadPreference } from '../../../src/read_preference';
+import { TopologyType } from '../../../src/sdam/common';
+import { TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
+import { Server } from '../../../src/sdam/server';
+import { SrvPoller, SrvPollingEvent } from '../../../src/sdam/srv_polling';
+import { Topology } from '../../../src/sdam/topology';
+import { TopologyDescription } from '../../../src/sdam/topology_description';
+import { TimeoutContext } from '../../../src/timeout';
+import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
@@ -53,10 +53,8 @@ describe('Topology (unit)', function () {
 
     it('should correctly pass appname', function () {
       const server: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
-        metadata: makeClientMetadata({
-          appName: 'My application name',
-          driverInfo: {},
-          additionalDriverInfo: []
+        metadata: makeClientMetadata([], {
+          appName: 'My application name'
         })
       });
 
@@ -97,7 +95,7 @@ describe('Topology (unit)', function () {
 
     afterEach(() => mock.cleanup());
 
-    it('should time out operations against servers that have been blackholed', function (done) {
+    it('should time out operations against servers that have been blackholed', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
 
@@ -111,30 +109,22 @@ describe('Topology (unit)', function () {
       });
 
       const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
-      topology.connect().then(() => {
-        const ctx = TimeoutContext.create({
-          waitQueueTimeoutMS: 0,
-          serverSelectionTimeoutMS: 0,
-          socketTimeoutMS: 250
-        });
-        topology
-          .selectServer('primary', {
-            timeoutContext: ctx
-          })
-          .then(server => {
-            server
-              .command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx)
-              .then(
-                () => expect.fail('expected command to fail'),
-                err => {
-                  expect(err).to.exist;
-                  expect(err).to.match(/timed out/);
-                  topology.close();
-                  done();
-                }
-              );
-          }, expect.fail);
-      }, expect.fail);
+      await topology.connect();
+      const ctx = TimeoutContext.create({
+        waitQueueTimeoutMS: 0,
+        serverSelectionTimeoutMS: 0,
+        socketTimeoutMS: 250
+      });
+      const server = await topology.selectServer('primary', {
+        timeoutContext: ctx,
+        operationName: 'none'
+      });
+      const err = await server
+        .command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx)
+        .catch(e => e);
+      expect(err).to.exist;
+      expect(err).to.match(/timed out/);
+      topology.close();
     });
   });
 

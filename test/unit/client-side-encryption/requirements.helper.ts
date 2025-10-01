@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { getAwsCredentialProvider, getGcpMetadata } from '../../../src/deps';
 
 // Data Key Stuff

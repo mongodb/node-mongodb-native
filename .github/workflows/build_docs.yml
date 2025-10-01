@@ -1,31 +1,18 @@
-name: Build and commit docs
+name: Build documentation
 
 on:
   push:
     branches: ['main']
+  workflow_dispatch: {}
+  workflow_call: {}
 
-permissions:
-  contents: write
-  pull-requests: write
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
-    # prevent subsequent commits from triggering the job multiple times
-    concurrency:
-      group: ci-${{ github.ref }}
-      cancel-in-progress: true
-
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
-      - name: Install Node and dependencies
-        uses: mongodb-labs/drivers-github-tools/node/setup@v2
-      - run: sudo apt update && sudo apt-get install hugo
-      - name: Build Docs
-        run: npm run build:docs -- --yes
-      - name: Open Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          title: 'docs: generate docs from latest main [skip-ci]'
-          delete-branch: true
+      - uses: ./.github/actions/build_documentation

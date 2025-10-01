@@ -1,17 +1,14 @@
+import { ObjectId } from 'bson';
 import { expect } from 'chai';
 import { type ChildProcess, spawn } from 'child_process';
 import { once } from 'events';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  type Collection,
-  type CommandStartedEvent,
-  MongoClient,
-  MongoDriverError,
-  MongoInvalidArgumentError,
-  ObjectId
-} from '../../mongodb';
+import { type CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { type Collection } from '../../../src/collection';
+import { MongoDriverError, MongoInvalidArgumentError } from '../../../src/error';
+import { MongoClient } from '../../../src/mongo_client';
 import { sleep } from '../../tools/utils';
 
 describe('Sessions Prose Tests', () => {

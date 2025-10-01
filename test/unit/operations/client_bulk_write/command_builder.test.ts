@@ -1,5 +1,7 @@
+import { ObjectId } from 'bson';
 import { expect } from 'chai';
 
+import { DocumentSequence } from '../../../../src/cmap/commands';
 import {
   buildDeleteManyOperation,
   buildDeleteOneOperation,
@@ -7,17 +9,17 @@ import {
   buildReplaceOneOperation,
   buildUpdateManyOperation,
   buildUpdateOneOperation,
-  ClientBulkWriteCommandBuilder,
+  ClientBulkWriteCommandBuilder
+} from '../../../../src/operations/client_bulk_write/command_builder';
+import {
   type ClientDeleteManyModel,
   type ClientDeleteOneModel,
   type ClientInsertOneModel,
   type ClientReplaceOneModel,
   type ClientUpdateManyModel,
-  type ClientUpdateOneModel,
-  DEFAULT_PK_FACTORY,
-  DocumentSequence,
-  ObjectId
-} from '../../../mongodb';
+  type ClientUpdateOneModel
+} from '../../../../src/operations/client_bulk_write/common';
+import { DEFAULT_PK_FACTORY } from '../../../../src/utils';
 
 describe('ClientBulkWriteCommandBuilder', function () {
   describe('#buildBatch', function () {

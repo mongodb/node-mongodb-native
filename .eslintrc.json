@@ -2,7 +2,7 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2020
+    "ecmaVersion": 2023
   },
   "plugins": [
     "simple-import-sort",
@@ -178,7 +178,6 @@
           {
             "patterns": [
               "**/../lib/**",
-              "**/../src/**",
               "mongodb-mock-server"
             ]
           }
@@ -217,7 +216,6 @@
           {
             "patterns": [
               "**/../lib/**",
-              "**/../src/**",
               "mongodb-mock-server"
             ]
           }

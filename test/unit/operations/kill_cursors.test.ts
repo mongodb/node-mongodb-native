@@ -1,13 +1,10 @@
+import { Long } from 'bson';
 import { expect } from 'chai';
 
-import {
-  KillCursorsOperation,
-  Long,
-  MongoDBNamespace,
-  ns,
-  Server,
-  ServerDescription
-} from '../../mongodb';
+import { KillCursorsOperation } from '../../../src/operations/kill_cursors';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { MongoDBNamespace, ns } from '../../../src/utils';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('class KillCursorsOperation', () => {

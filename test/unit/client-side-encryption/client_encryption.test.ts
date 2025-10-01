@@ -1,20 +1,17 @@
+import { Binary, BSON, deserialize } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import { resolve } from 'path';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as cryptoCallbacks from '../../../src/client-side-encryption/crypto_callbacks';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError
 } from '../../../src/client-side-encryption/errors';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { Binary, BSON, deserialize, MongoClient } from '../../mongodb';
+import { MongoClient } from '../../../src/mongo_client';
 
 const { EJSON } = BSON;
 
