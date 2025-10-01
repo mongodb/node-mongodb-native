@@ -1,7 +1,5 @@
-import { Binary, BSON, deserialize } from 'bson';
+import { Binary } from 'bson';
 import { expect } from 'chai';
-import * as fs from 'fs';
-import { resolve } from 'path';
 import * as sinon from 'sinon';
 
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
@@ -9,10 +7,7 @@ import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError
 } from '../../../src/client-side-encryption/errors';
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { MongoClient } from '../../../src/mongo_client';
-
-const { EJSON } = BSON;
 
 class MockClient {
   options: any;

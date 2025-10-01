@@ -2,17 +2,9 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { expect } from 'chai';
-import { type MongoCryptOptions } from 'mongodb-client-encryption';
-import * as sinon from 'sinon';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import {
-  AutoEncrypter,
-  BSON,
-  type Document,
-  type MongoClient,
-  MongoCryptError
-} from '../../mongodb';
+import { BSON, type Document, type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
