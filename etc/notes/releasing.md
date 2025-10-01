@@ -125,9 +125,9 @@ To configure a repo for a prerelease:
 ```
 
 2. Update the release please configuration file with the following parameters:
-   1. specify `prerelease-type: alpha`.  this tells release-please that we want to use alpha as the pre-release tag.
-   2. specify `prerelease: true`.  this tells release-please to create the Github release as a pre-release.
-   3. specify `versioning: prerelease`.  this tells release-please that we wish to release a pre-release.
+   1. Specify `prerelease-type: alpha`.  This tells release-please that we want to use alpha as the pre-release tag.
+   2. Specify `prerelease: true`.  This tells release-please to create the Github release as a pre-release.
+   3. Specify `versioning: prerelease`.  This tells release-please that we wish to release a pre-release.
 
 ```json
 {
