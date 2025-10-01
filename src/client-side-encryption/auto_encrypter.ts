@@ -10,7 +10,6 @@ import { MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Abortable } from '../mongo_types';
 import { MongoDBCollectionNamespace } from '../utils';
 import { autoSelectSocketOptions } from './client_encryption';
-import * as cryptoCallbacks from './crypto_callbacks';
 import { defaultErrorWrapper, MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
 import {
@@ -254,7 +253,6 @@ export class AutoEncrypter {
     }
 
     const mongoCryptOptions: MongoCryptOptions = {
-      cryptoCallbacks,
       errorWrapper: defaultErrorWrapper
     };
     if (options.schemaMap) {
