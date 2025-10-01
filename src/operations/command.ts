@@ -53,13 +53,6 @@ export interface CommandOperationOptions
    * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
   comment?: unknown;
-  /**
-   * @deprecated
-   * This option is deprecated and will be removed in a future release as it is not used
-   * in the driver. Use MongoClientOptions or connection string parameters instead.
-   * */
-  retryWrites?: boolean;
-
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
