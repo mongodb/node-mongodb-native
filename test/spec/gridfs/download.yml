@@ -29,55 +29,37 @@ initialData:
         length: 0
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "d41d8cd98f00b204e9800998ecf8427e"
         filename: "length-0"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
       - _id: { "$oid": "000000000000000000000002" }
         length: 0
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "d41d8cd98f00b204e9800998ecf8427e"
         filename: "length-0-with-empty-chunk"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
       - _id: { "$oid": "000000000000000000000003" }
         length: 2
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "c700ed4fdb1d27055aa3faa2c2432283"
         filename: "length-2"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
       - _id: { "$oid": "000000000000000000000004" }
         length: 8
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "dd254cdc958e53abaa67da9f797125f5"
         filename: "length-8"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
       - _id: { "$oid": "000000000000000000000005" }
         length: 10
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "57d83cd477bfb1ccd975ab33d827a92b"
         filename: "length-10"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
       - _id: { "$oid": "000000000000000000000006" }
         length: 2
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "c700ed4fdb1d27055aa3faa2c2432283"
         # filename is intentionally omitted
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
   - collectionName: *bucket0_chunks_collectionName
     databaseName: *database0Name
@@ -157,7 +139,7 @@ tests:
         object: *bucket0
         arguments:
           id: { $oid: "000000000000000000000000" }
-        expectError: { isError: true } # FileNotFound
+        expectError: { isClientError: true } # FileNotFound
   - description: "download when an intermediate chunk is missing"
     operations:
       - name: deleteOne
@@ -172,7 +154,7 @@ tests:
         object: *bucket0
         arguments:
           id: { $oid: "000000000000000000000005" }
-        expectError: { isError: true } # ChunkIsMissing
+        expectError: { isClientError: true } # ChunkIsMissing
   - description: "download when final chunk is missing"
     operations:
       - name: deleteOne
@@ -187,7 +169,7 @@ tests:
         object: *bucket0
         arguments:
           id: { $oid: "000000000000000000000005" }
-        expectError: { isError: true } # ChunkIsMissing
+        expectError: { isClientError: true } # ChunkIsMissing
   - description: "download when an intermediate chunk is the wrong size"
     operations:
       - name: bulkWrite
@@ -213,7 +195,7 @@ tests:
         object: *bucket0
         arguments:
           id: { $oid: "000000000000000000000005" }
-        expectError: { isError: true } # ChunkIsWrongSize
+        expectError: { isClientError: true } # ChunkIsWrongSize
   - description: "download when final chunk is the wrong size"
     operations:
       - name: updateOne
@@ -231,7 +213,7 @@ tests:
         object: *bucket0
         arguments:
           id: { $oid: "000000000000000000000005" }
-        expectError: { isError: true } # ChunkIsWrongSize
+        expectError: { isClientError: true } # ChunkIsWrongSize
   - description: "download legacy file with no name"
     operations:
       - name: download

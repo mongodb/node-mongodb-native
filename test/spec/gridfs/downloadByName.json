@@ -49,10 +49,7 @@
           "uploadDate": {
             "$date": "1970-01-01T00:00:00.000Z"
           },
-          "md5": "47ed733b8d10be225eceba344d533586",
           "filename": "abc",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         },
         {
@@ -64,10 +61,7 @@
           "uploadDate": {
             "$date": "1970-01-02T00:00:00.000Z"
           },
-          "md5": "b15835f133ff2e27c7cb28117bfae8f4",
           "filename": "abc",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         },
         {
@@ -79,10 +73,7 @@
           "uploadDate": {
             "$date": "1970-01-03T00:00:00.000Z"
           },
-          "md5": "eccbc87e4b5ce2fe28308fd9f2a7baf3",
           "filename": "abc",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         },
         {
@@ -94,10 +85,7 @@
           "uploadDate": {
             "$date": "1970-01-04T00:00:00.000Z"
           },
-          "md5": "f623e75af30e62bbd73d6df5b50bb7b5",
           "filename": "abc",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         },
         {
@@ -109,10 +97,7 @@
           "uploadDate": {
             "$date": "1970-01-05T00:00:00.000Z"
           },
-          "md5": "4c614360da93c0a041b22e537de151eb",
           "filename": "abc",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         }
       ]
@@ -305,7 +290,7 @@
             "filename": "xyz"
           },
           "expectError": {
-            "isError": true
+            "isClientError": true
           }
         }
       ]
@@ -321,7 +306,7 @@
             "revision": 999
           },
           "expectError": {
-            "isError": true
+            "isClientError": true
           }
         }
       ]
