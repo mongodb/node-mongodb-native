@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { once } from 'events';
+import { on, once } from 'events';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
@@ -652,9 +652,11 @@ describe('Change Stream prose tests', function () {
         });
 
         await once(changeStream.cursor, 'init');
+        const changes = on(changeStream, 'change');
         await coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } });
+        await changes.next();
         await coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } });
-        await once(changeStream, 'change');
+        await changes.next();
 
         expect(events).to.be.an('array').with.lengthOf(3);
         expect(events[0]).to.equal('error');
