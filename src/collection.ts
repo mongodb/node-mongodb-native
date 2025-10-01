@@ -546,7 +546,7 @@ export class Collection<TSchema extends Document = Document> {
     // Explicitly set the limit to 1 and singleBatch to true for all commands, per the spec.
     // noCursorTimeout must be unset as well as batchSize.
     // See: https://github.com/mongodb/specifications/blob/master/source/crud/crud.md#findone-api-details
-    const { batchSize: _batchSize, noCursorTimeout: _noCursorTimeout, ...opts } = options;
+    const { ...opts } = options;
     opts.singleBatch = true;
     const cursor = this.find(filter, opts).limit(1);
     const result = await cursor.next();

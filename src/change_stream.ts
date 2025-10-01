@@ -17,8 +17,7 @@ import {
 import { MongoClient } from './mongo_client';
 import { type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
-import type { CollationOptions, OperationParent } from './operations/command';
-import type { ReadPreference } from './read_preference';
+import type { OperationParent } from './operations/command';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerSessionId } from './sessions';
 import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
@@ -44,21 +43,6 @@ const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE] as const;
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
-
-/**
- * @public
- * @deprecated Please use the ChangeStreamCursorOptions type instead.
- */
-export interface ResumeOptions {
-  startAtOperationTime?: Timestamp;
-  batchSize?: number;
-  maxAwaitTimeMS?: number;
-  collation?: CollationOptions;
-  readPreference?: ReadPreference;
-  resumeAfter?: ResumeToken;
-  startAfter?: ResumeToken;
-  fullDocument?: string;
-}
 
 /**
  * Represents the logical starting point for a new ChangeStream or resuming a ChangeStream on the server.

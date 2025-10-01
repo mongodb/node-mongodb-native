@@ -20,7 +20,6 @@ import type { Topology } from '../sdam/topology';
 import { type Sort } from '../sort';
 import { TimeoutContext } from '../timeout';
 import {
-  applyRetryableWrites,
   getTopology,
   hasAtomicOperators,
   maybeAddIdToDocuments,
@@ -527,15 +526,15 @@ async function executeCommands(
       finalOptions.checkKeys = false;
     }
 
-    if (finalOptions.retryWrites) {
+    if (bulkOperation.retryWrites) {
       if (isUpdateBatch(batch)) {
-        finalOptions.retryWrites =
-          finalOptions.retryWrites && !batch.operations.some(op => op.multi);
+        bulkOperation.retryWrites =
+          bulkOperation.retryWrites && !batch.operations.some(op => op.multi);
       }
 
       if (isDeleteBatch(batch)) {
-        finalOptions.retryWrites =
-          finalOptions.retryWrites && !batch.operations.some(op => op.limit === 0);
+        bulkOperation.retryWrites =
+          bulkOperation.retryWrites && !batch.operations.some(op => op.limit === 0);
       }
     }
 
@@ -859,6 +858,7 @@ export abstract class BulkOperationBase {
   s: BulkOperationPrivate;
   operationId?: number;
   private collection: Collection;
+  retryWrites?: boolean;
 
   /**
    * Create a new OrderedBulkOperation or UnorderedBulkOperation instance
@@ -866,6 +866,7 @@ export abstract class BulkOperationBase {
    */
   constructor(collection: Collection, options: BulkWriteOptions, isOrdered: boolean) {
     this.collection = collection;
+    this.retryWrites = collection.db.options?.retryWrites;
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
@@ -897,10 +898,6 @@ export abstract class BulkOperationBase {
     //     # of bytes = length of (string representation of (maxWriteBatchSize - 1))
     //   + 1 bytes for null terminator
     const maxKeySize = (maxWriteBatchSize - 1).toString(10).length + 2;
-
-    // Final options for retryable writes
-    let finalOptions = Object.assign({}, options);
-    finalOptions = applyRetryableWrites(finalOptions, collection.db);
 
     // Final results
     const bulkResult: BulkResult = {
@@ -943,7 +940,7 @@ export abstract class BulkOperationBase {
       // Topology
       topology,
       // Options
-      options: finalOptions,
+      options: options,
       // BSON options
       bsonOptions: resolveBSONOptions(options),
       // Current operation
