@@ -29,7 +29,7 @@ describe('Non Server Retryable Writes', function () {
   });
 
   it(
-    'returns the original error with a PoolRequstedRetry label after encountering a WriteConcernError',
+    'returns the original error with a PoolRequestedRetry label after encountering a WriteConcernError',
     { requires: { topology: 'replicaset' } },
     async () => {
       const serverCommandStub = sinon.stub(Server.prototype, 'command');
@@ -46,7 +46,7 @@ describe('Non Server Retryable Writes', function () {
       const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
       sinon.restore();
 
-      expect(insertResult.errorLabels).to.be.deep.equal(['PoolRequstedRetry']);
+      expect(insertResult.errorLabels).to.be.deep.equal(['PoolRequestedRetry']);
     }
   );
 });

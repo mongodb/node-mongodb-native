@@ -97,7 +97,7 @@ export const MongoErrorLabel = Object.freeze({
   ResumableChangeStreamError: 'ResumableChangeStreamError',
   HandshakeError: 'HandshakeError',
   ResetPool: 'ResetPool',
-  PoolRequstedRetry: 'PoolRequstedRetry',
+  PoolRequestedRetry: 'PoolRequestedRetry',
   InterruptInUseConnections: 'InterruptInUseConnections',
   NoWritesPerformed: 'NoWritesPerformed'
 } as const);
@@ -1444,7 +1444,7 @@ export function needsRetryableWriteLabel(
 export function isRetryableWriteError(error: MongoError): boolean {
   return (
     error.hasErrorLabel(MongoErrorLabel.RetryableWriteError) ||
-    error.hasErrorLabel(MongoErrorLabel.PoolRequstedRetry)
+    error.hasErrorLabel(MongoErrorLabel.PoolRequestedRetry)
   );
 }
 

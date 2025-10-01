@@ -1,7 +1,19 @@
 # Releasing MongoDB Node.js Packages
 
+- [Releasing MongoDB Node.js Packages](#releasing-mongodb-nodejs-packages)
+  - [Pre-requisites](#pre-requisites)
+  - [Branching and backport strategy](#branching-and-backport-strategy)
+    - [Backports](#backports)
+  - [`release-please`](#release-please)
+  - [Release Notes](#release-notes)
+  - [Release Instructions](#release-instructions)
+    - [Authentication](#authentication)
+    - [Prebuilds](#prebuilds)
+  - [Alphas / Prereleases](#alphas--prereleases)
+  - [Packages](#packages)
+
 > [!NOTE]
-> _Last updated: Thu Jun 6_
+> _Last updated: Oct 1, 2025_
 
 ## Pre-requisites
 
@@ -94,6 +106,52 @@ prebuild uploads archives of the native dependency to the github release.
 `prebuild-install` will handle downloading the correct binary when the package is installed by downstream projects.
 Uploading binaries should happen automatically after the git tag/github release has been made.
 It may take some time for the building and uploading to finish, but no more than a few hours at most.
+
+## Alphas / Prereleases
+
+> [!NOTE]
+> This documentation uses `alpha` as the prerelease tag, but if you wish to use a different tag, just 
+> replace `alpha` with the desired tag.
+
+To configure a repo for a prerelease:
+
+1. Update the release Github action's `npm publish` step to publish an alpha by specifying `--tag alpha`:
+
+```yaml
+      - run: npm publish --provenance --tag alpha
+        if: ${{ needs.release_please.outputs.release_created }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+2. Update the release please configuration file with the following parameters:
+   1. Specify `prerelease-type: alpha`.  This tells release-please that we want to use alpha as the pre-release tag.
+   2. Specify `prerelease: true`.  This tells release-please to create the Github release as a pre-release.
+   3. Specify `versioning: prerelease`.  This tells release-please that we wish to release a pre-release.
+
+```json
+{
+  "pull-request-header": "Please run the release_notes action before releasing to generate release highlights",
+  "packages": {
+    ".": {
+      "include-component-in-tag": false,
+      "changelog-path": "HISTORY.md",
+      "release-type": "node",
+      "bump-minor-pre-major": false,
+      "bump-patch-for-minor-pre-major": false,
+      "draft": false,
+      "prerelease-type": "alpha",
+      "prerelease": true,
+      "versioning": "prerelease"
+    }
+  }
+}
+```
+
+After merging the a PR with the above changes, release-please should re-create the release PR as a PR to release 
+an alpha.
+
+Example PR: https://github.com/mongodb-js/mongodb-client-encryption/pull/104
 
 ## Packages
 
