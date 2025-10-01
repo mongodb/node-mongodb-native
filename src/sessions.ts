@@ -118,7 +118,7 @@ export class ClientSession
   /** @internal */
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
-  /** @internal - Will be made internal in the next major release */
+  /** @internal
   transaction: Transaction;
   /**
    * @internal
