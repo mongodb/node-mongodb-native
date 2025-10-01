@@ -155,6 +155,7 @@ By default, the integration tests run with auth-enabled and the mongo orchestrat
 AUTH='noauth' TOPOLOGY='server' ./.evergreen/run-orchestration.sh
 AUTH='noauth' npm run check:test
 ```
+
 ### Testing Different MongoDB Topologies
 
 As we mentioned earlier, the tests check the topology of the MongoDB server being used and run the tests associated with that topology. Tests that don't have a matching topology will be skipped.
