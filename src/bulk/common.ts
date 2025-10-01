@@ -858,6 +858,7 @@ export abstract class BulkOperationBase {
   s: BulkOperationPrivate;
   operationId?: number;
   private collection: Collection;
+  /** @internal */
   retryWrites?: boolean;
 
   /**
