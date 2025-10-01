@@ -58,6 +58,7 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
+  /** @internal */
   AWS_SESSION_TOKEN?: string;
   /** A user provided OIDC machine callback function. */
   OIDC_CALLBACK?: OIDCCallbackFunction;

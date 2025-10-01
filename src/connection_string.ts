@@ -423,6 +423,18 @@ export function parseOptions(
       );
     }
 
+    if (isAws) {
+      const { username, password } = mongoOptions.credentials;
+      if (username || password) {
+        throw new MongoParseError(
+          'username and password cannot be provided when using MONGODB-AWS'
+        );
+      }
+      if (mongoOptions.credentials.mechanismProperties.AWS_SESSION_TOKEN) {
+        throw new MongoParseError('AWS_SESSION_TOKEN cannot be provided when using MONGODB-AWS');
+      }
+    }
+
     mongoOptions.credentials.validate();
 
     // Check if the only auth related option provided was authSource, if so we can remove credentials
