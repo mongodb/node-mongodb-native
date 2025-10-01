@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { once } from 'events';
+import { on, once } from 'events';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
@@ -57,9 +57,7 @@ function triggerResumableError(
       nextStub.restore();
     });
 
-    changeStream.next(() => {
-      // ignore
-    });
+    changeStream.next();
   }
 
   if (typeof delay === 'number') {
@@ -77,12 +75,6 @@ const initIteratorMode = async (cs: ChangeStream) => {
   await initEvent;
   return;
 };
-
-/** Waits for a change stream to start */
-async function waitForStarted(changeStream, callback) {
-  await once(changeStream.cursor, 'init');
-  await callback();
-}
 
 describe('Change Stream prose tests', function () {
   before(async function () {
@@ -643,12 +635,10 @@ describe('Change Stream prose tests', function () {
     // when resuming a change stream.
     it('$changeStream with results must include resumeAfter and not startAfter', {
       metadata: { requires: { topology: 'replicaset' } },
-      test: function (done) {
+      test: async function () {
         let events = [];
         client.on('commandStarted', e => recordEvent(events, e));
         const changeStream = coll.watch([], { startAfter });
-        changeStream.on('error', done);
-        this.defer(() => changeStream.close());
 
         changeStream.on('change', change => {
           events.push({ change: { insert: { x: change.fullDocument.x } } });
@@ -658,21 +648,22 @@ describe('Change Stream prose tests', function () {
               events = [];
               triggerResumableError(changeStream, () => events.push('error'));
               break;
-            case 3:
-              expect(events).to.be.an('array').with.lengthOf(3);
-              expect(events[0]).to.equal('error');
-              expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
-              expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
-              done();
-              break;
           }
         });
 
-        waitForStarted(changeStream, () =>
-          coll
-            .insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } })
-            .then(() => coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } }))
-        );
+        await once(changeStream.cursor, 'init');
+        const changes = on(changeStream, 'change');
+        await coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } });
+        await changes.next();
+        await coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } });
+        await changes.next();
+
+        expect(events).to.be.an('array').with.lengthOf(3);
+        expect(events[0]).to.equal('error');
+        expect(events[1]).nested.property('$changeStream.resumeAfter').to.exist;
+        expect(events[2]).to.eql({ change: { insert: { x: 3 } } });
+
+        await changeStream.close();
       }
     });
   });
