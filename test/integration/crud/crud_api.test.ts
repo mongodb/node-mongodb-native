@@ -387,17 +387,15 @@ describe.only('CRUD API', function () {
   });
 
   describe('should correctly execute insert methods using crud api', function () {
-    let db: Db;
-
-    before(function () {
-      db = client.db();
-    });
-
     it('#insertMany()', async function () {
+      const db = client.db();
       const r = await db.collection('t2_1').insertMany([{ a: 1 }, { a: 2 }]);
       expect(r).property('insertedCount').to.equal(2);
     });
+
     it('bulk inserts', async function () {
+      await client.connect();
+      const db = client.db();
       const bulk = db.collection('t2_2').initializeOrderedBulkOp();
       bulk.insert({ a: 1 });
       bulk.insert({ a: 1 });
@@ -405,16 +403,18 @@ describe.only('CRUD API', function () {
     });
 
     it('#insertOne()', async function () {
+      const db = client.db();
       const r = await db.collection('t2_3').insertOne({ a: 1 }, { writeConcern: { w: 1 } });
       expect(r).property('insertedId').to.exist;
     });
 
     it('bulk write unordered', async function () {
+      const db = client.db();
       const i = await db.collection('t2_5').insertMany([{ c: 1 }], { writeConcern: { w: 1 } });
       expect(i).property('insertedCount').to.equal(1);
 
       const r = await db
-        .collection('t2_4')
+        .collection('t2_5')
         .bulkWrite(
           [
             { insertOne: { document: { a: 1 } } },
@@ -442,11 +442,12 @@ describe.only('CRUD API', function () {
     });
 
     it('bulk write ordered', async function () {
-      const i = await db.collection('t2_7').insertMany([{ c: 1 }], { writeConcern: { w: 1 } });
+      const db = client.db();
+      const i = await db.collection('t2_6').insertMany([{ c: 1 }], { writeConcern: { w: 1 } });
       expect(i).property('insertedCount').to.equal(1);
 
       const r = await db
-        .collection('t2_5')
+        .collection('t2_6')
         .bulkWrite(
           [
             { insertOne: { document: { a: 1 } } },
@@ -480,13 +481,8 @@ describe.only('CRUD API', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
     function () {
-      let db: Db;
-
-      before(function () {
-        db = client.db();
-      });
-
       it('legacy update', async function () {
+        const db = client.db();
         const r = await db
           .collection('t3_1')
           // @ts-expect-error Not allowed in TS, but allowed for legacy compat
@@ -495,6 +491,7 @@ describe.only('CRUD API', function () {
       });
 
       it('#updateOne()', async function () {
+        const db = client.db();
         const i = await db.collection('t3_2').insertMany([{ c: 1 }], { writeConcern: { w: 1 } });
         expect(i).property('insertedCount').to.equal(1);
 
@@ -512,6 +509,7 @@ describe.only('CRUD API', function () {
       });
 
       it('#replaceOne()', async function () {
+        const db = client.db();
         const r1 = await db.collection('t3_3').replaceOne({ a: 1 }, { a: 2 }, { upsert: true });
         expect(r1).property('upsertedCount').to.equal(1);
         test.equal(0, r1.matchedCount);
@@ -524,6 +522,7 @@ describe.only('CRUD API', function () {
       });
 
       it('#updateMany()', async function () {
+        const db = client.db();
         const i = await db
           .collection('t3_4')
           .insertMany([{ a: 1 }, { a: 1 }], { writeConcern: { w: 1 } });
@@ -889,7 +888,11 @@ describe.only('CRUD API', function () {
       ops.push({ insertOne: { _id: 0, a: i } });
 
       const db = client.db();
-      await db.collection('t20_1').bulkWrite(ops, { ordered: true, writeConcern: { w: 1 } });
+      const err = await db
+        .collection('t20_1')
+        .bulkWrite(ops, { ordered: true, writeConcern: { w: 1 } })
+        .catch(err => err);
+      test.ok(err != null);
     }
   });
 
