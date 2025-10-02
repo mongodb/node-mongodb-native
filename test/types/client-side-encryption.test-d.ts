@@ -1,8 +1,8 @@
 import { expectAssignable, expectError, expectNotAssignable, expectType } from 'tsd';
 
 import type {
-  AWSEncryptionKeyOptions,
   AutoEncryptionOptions,
+  AWSEncryptionKeyOptions,
   AzureEncryptionKeyOptions,
   ClientEncryption,
   ClientEncryptionEncryptOptions,
