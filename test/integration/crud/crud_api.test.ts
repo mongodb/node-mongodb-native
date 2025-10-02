@@ -1,4 +1,3 @@
-import { once } from 'node:events';
 import { finished } from 'node:stream/promises';
 
 import { expect } from 'chai';
@@ -372,10 +371,11 @@ describe.only('CRUD API', function () {
       let count = 0;
       cursor.match({ a: 1 });
       const stream = cursor.stream();
+      const willFinish = finished(stream, { cleanup: true });
       stream.on('data', function () {
         count = count + 1;
       });
-      await once(cursor, 'end');
+      await willFinish;
       test.equal(3, count);
     });
 
@@ -387,13 +387,16 @@ describe.only('CRUD API', function () {
   });
 
   describe('should correctly execute insert methods using crud api', function () {
-    const db = client.db();
+    let db: Db;
+
+    before(function () {
+      db = client.db();
+    });
 
     it('#insertMany()', async function () {
       const r = await db.collection('t2_1').insertMany([{ a: 1 }, { a: 2 }]);
       expect(r).property('insertedCount').to.equal(2);
     });
-
     it('bulk inserts', async function () {
       const bulk = db.collection('t2_2').initializeOrderedBulkOp();
       bulk.insert({ a: 1 });
@@ -477,7 +480,11 @@ describe.only('CRUD API', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
     function () {
-      const db = client.db();
+      let db: Db;
+
+      before(function () {
+        db = client.db();
+      });
 
       it('legacy update', async function () {
         const r = await db
