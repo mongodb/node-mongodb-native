@@ -20,7 +20,7 @@ import { assert as test } from '../shared';
 
 const DB_NAME = 'crud_api_tests';
 
-describe.only('CRUD API', function () {
+describe('CRUD API', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
