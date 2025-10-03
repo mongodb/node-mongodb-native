@@ -1,8 +1,4 @@
-import {
-  type MongoCrypt,
-  type MongoCryptConstructor,
-  type MongoCryptOptions
-} from 'mongodb-client-encryption';
+import { type MongoCrypt, type MongoCryptOptions } from 'mongodb-client-encryption';
 import * as net from 'net';
 
 import { deserialize, type Document, serialize } from '../bson';
@@ -14,8 +10,7 @@ import { MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Abortable } from '../mongo_types';
 import { MongoDBCollectionNamespace } from '../utils';
 import { autoSelectSocketOptions } from './client_encryption';
-import * as cryptoCallbacks from './crypto_callbacks';
-import { MongoCryptInvalidArgumentError } from './errors';
+import { defaultErrorWrapper, MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
 import {
   type CredentialProviders,
@@ -183,7 +178,7 @@ export class AutoEncrypter {
   [kDecorateResult] = false;
 
   /** @internal */
-  static getMongoCrypt(): MongoCryptConstructor {
+  static getMongoCrypt(): typeof MongoCrypt {
     const encryption = getMongoDBClientEncryption();
     if ('kModuleError' in encryption) {
       throw encryption.kModuleError;
@@ -258,8 +253,7 @@ export class AutoEncrypter {
     }
 
     const mongoCryptOptions: MongoCryptOptions = {
-      enableMultipleCollinfo: true,
-      cryptoCallbacks
+      errorWrapper: defaultErrorWrapper
     };
     if (options.schemaMap) {
       mongoCryptOptions.schemaMap = Buffer.isBuffer(options.schemaMap)

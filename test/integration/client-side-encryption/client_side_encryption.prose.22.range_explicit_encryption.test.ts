@@ -537,7 +537,7 @@ describe('Range Explicit Encryption', function () {
             })
             .catch(e => e);
 
-          expect(resultOrError).to.be.instanceOf(TypeError);
+          expect(resultOrError).to.be.instanceOf(MongoCryptError);
         }
       );
     });

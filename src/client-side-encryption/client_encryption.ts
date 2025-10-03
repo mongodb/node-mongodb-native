@@ -1,7 +1,6 @@
 import type {
   ExplicitEncryptionContextOptions,
   MongoCrypt,
-  MongoCryptConstructor,
   MongoCryptOptions
 } from 'mongodb-client-encryption';
 
@@ -26,8 +25,8 @@ import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
 import { type CSOTTimeoutContext, TimeoutContext } from '../timeout';
 import { MongoDBCollectionNamespace, resolveTimeoutOptions } from '../utils';
-import * as cryptoCallbacks from './crypto_callbacks';
 import {
+  defaultErrorWrapper,
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError,
   MongoCryptInvalidArgumentError
@@ -87,7 +86,7 @@ export class ClientEncryption {
   _credentialProviders?: CredentialProviders;
 
   /** @internal */
-  static getMongoCrypt(): MongoCryptConstructor {
+  static getMongoCrypt(): typeof MongoCrypt {
     const encryption = getMongoDBClientEncryption();
     if ('kModuleError' in encryption) {
       throw encryption.kModuleError;
@@ -144,10 +143,10 @@ export class ClientEncryption {
 
     const mongoCryptOptions: MongoCryptOptions = {
       ...options,
-      cryptoCallbacks,
       kmsProviders: !Buffer.isBuffer(this._kmsProviders)
         ? (serialize(this._kmsProviders) as Buffer)
-        : this._kmsProviders
+        : this._kmsProviders,
+      errorWrapper: defaultErrorWrapper
     };
 
     this._keyVaultNamespace = options.keyVaultNamespace;

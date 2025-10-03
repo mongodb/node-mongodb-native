@@ -771,20 +771,7 @@ export function compareLogs(
 }
 
 function isMongoCryptError(err): boolean {
-  if (err.constructor.name === 'MongoCryptError') {
-    return true;
-  }
-
-  // TODO(NODE-7043): remove special handling for FLE errors in the UTR
-  if (
-    err instanceof TypeError &&
-    err.message.includes(
-      `csfle "analyze_query" failed: JSON schema keyword 'required' is only allowed with a remote schema`
-    )
-  ) {
-    return true;
-  }
-  return err.stack.includes('at ClientEncryption');
+  return err.constructor.name === 'MongoCryptError';
 }
 
 export function expectErrorCheck(

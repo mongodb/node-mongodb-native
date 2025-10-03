@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as sinon from 'sinon';
 
+import { MongoCryptError } from '../../../src';
 import {
   ClientEncryption,
   type DataKey
@@ -391,7 +392,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(TypeError);
+      expect(errorOrResult).to.be.instanceof(MongoCryptError);
     });
 
     it('throws if algorithm is not provided', metadata, async function () {
@@ -400,7 +401,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(TypeError);
+      expect(errorOrResult).to.be.instanceof(MongoCryptError);
     });
 
     it(`throws if algorithm does not equal 'range'`, metadata, async function () {
@@ -409,7 +410,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(TypeError);
+      expect(errorOrResult).to.be.instanceof(MongoCryptError);
     });
 
     it(`works with any casing of 'range'`, metadata, async function () {
