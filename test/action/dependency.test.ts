@@ -57,10 +57,14 @@ describe('package.json', function () {
       .split('\n')
       .join('');
 
-    for (const [depName, depVersion] of Object.entries(peerDependencies as Record<string, string>)) {
-      // If a dependency specifies `alpha|beta`, the major version will fail to install because 
+    for (const [depName, depVersion] of Object.entries(
+      peerDependencies as Record<string, string>
+    )) {
+      // If a dependency specifies `alpha|beta`, the major version will fail to install because
       // an alpha < the major of that version (ex: mongodb-client-encryption@7.0.0-alpha < mongodb-client-encryption@7.0.0)
-      const depInstallSpecifier = /alpha|beta/.test(depVersion) ? depVersion : depVersion.split('.')[0];
+      const depInstallSpecifier = /alpha|beta/.test(depVersion)
+        ? depVersion
+        : depVersion.split('.')[0];
 
       context(`when ${depName} is NOT installed`, () => {
         beforeEach(async () => {
