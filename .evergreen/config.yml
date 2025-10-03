@@ -556,6 +556,9 @@ functions:
           export AWS_ACCESS_KEY_ID=${aws_key}
           export AWS_SECRET_ACCESS_KEY=${aws_secret}
 
+          # use Node20
+          export PATH=/opt/devtools/node20/bin:/opt/dev/tools/bin:$PATH
+
           # Download all the task coverage files.
           # NOTE: All coverage files are too large for V8 to handle the resulting call to
           #       JSON.stringify from within nyc, so with stick to Fermiun to include the
