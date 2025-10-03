@@ -9,7 +9,14 @@ import { connect } from '../../../src/cmap/connect';
 import { Connection, CryptoConnection, SizedMessageTransform } from '../../../src/cmap/connection';
 import { MongoNetworkTimeoutError, MongoRuntimeError } from '../../../src/error';
 import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
-import { isHello, MongoDBCollectionNamespace, ns, promiseWithResolvers } from '../../../src/utils';
+import {
+  HostAddress,
+  isHello,
+  MongoDBCollectionNamespace,
+  MongoDBNamespace,
+  ns,
+  promiseWithResolvers
+} from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 
 const connectionOptionsDefaults = {
@@ -401,15 +408,20 @@ describe('new Connection()', function () {
       expect(error).to.be.instanceOf(MongoRuntimeError);
     });
   });
+});
 
+describe('class CryptoConnection {}', function () {
   it('CryptoConnection.command() throws if no autoEncrypter is configured', async function () {
-    const error = await connect({
+    const connection = new CryptoConnection(new Socket(), {
       ...connectionOptionsDefaults,
-      hostAddress: server.hostAddress(),
+      hostAddress: HostAddress.fromString('localhost:27017'),
       authProviders: new MongoClientAuthProviders(),
-      connectionType: CryptoConnection,
       extendedMetadata: Promise.resolve({})
-    }).catch(e => e);
+    });
+
+    const error = await connection
+      .command(MongoDBNamespace.fromString('foo.bar'), {}, {})
+      .catch(e => e);
 
     expect(error)
       .to.be.instanceOf(MongoRuntimeError)
