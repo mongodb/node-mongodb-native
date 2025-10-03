@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v7.0.0) (2025-10-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-6065:** throw MongoRuntimeError instead of MissingDependencyError in crypto connection ([#4711](https://github.com/mongodb/node-mongodb-native/issues/4711))
+* **NODE-6584:** improve typing for filepaths in AutoEncryptionOptions ([#4341](https://github.com/mongodb/node-mongodb-native/issues/4341))
+* **NODE-6334:** rename PoolRequstedRetry to PoolRequestedRetry ([#4696](https://github.com/mongodb/node-mongodb-native/issues/4696))
+* **NODE-7174:** drop support for Node16 and Node18 ([#4668](https://github.com/mongodb/node-mongodb-native/issues/4668))
+* **NODE-7047:** use custom credential provider first after URI ([#4656](https://github.com/mongodb/node-mongodb-native/issues/4656))
+* **NODE-6988:** require aws sdk for aws auth ([#4659](https://github.com/mongodb/node-mongodb-native/issues/4659))
+
+### Features
+
+* **NODE-6065:** throw MongoRuntimeError instead of MissingDependencyError in crypto connection ([#4711](https://github.com/mongodb/node-mongodb-native/issues/4711)) ([ff229fa](https://github.com/mongodb/node-mongodb-native/commit/ff229fa8e4c906f5980ee4311c0eb0d883909934))
+* **NODE-6334:** rename PoolRequstedRetry to PoolRequestedRetry ([#4696](https://github.com/mongodb/node-mongodb-native/issues/4696)) ([84db848](https://github.com/mongodb/node-mongodb-native/commit/84db84829fb41135d19bc5216137ef84a16a1960))
+* **NODE-6584:** improve typing for filepaths in AutoEncryptionOptions ([#4341](https://github.com/mongodb/node-mongodb-native/issues/4341)) ([dab4c7c](https://github.com/mongodb/node-mongodb-native/commit/dab4c7c8279ac1112d99d7ceca505632a45d0787))
+* **NODE-6988:** require aws sdk for aws auth ([#4659](https://github.com/mongodb/node-mongodb-native/issues/4659)) ([b7c6750](https://github.com/mongodb/node-mongodb-native/commit/b7c6750771e0a578e7f2ce6a8b9192ee7e76e8d3))
+* **NODE-7047:** use custom credential provider first after URI ([#4656](https://github.com/mongodb/node-mongodb-native/issues/4656)) ([2a47bbb](https://github.com/mongodb/node-mongodb-native/commit/2a47bbbf03ec54509d93f925d0747378e3de80ed))
+* **NODE-7174:** drop support for Node16 and Node18 ([#4668](https://github.com/mongodb/node-mongodb-native/issues/4668)) ([a576b7d](https://github.com/mongodb/node-mongodb-native/commit/a576b7d3a8210f0544c3814b130ea21585ea1f9f))
+
 ## [6.20.0](https://github.com/mongodb/node-mongodb-native/compare/v6.19.0...v6.20.0) (2025-09-17)
 
 
