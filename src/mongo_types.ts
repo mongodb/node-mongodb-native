@@ -473,7 +473,7 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
 }
 
 /**
- * @internal 
+ * @internal
  */
 export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {
   constructor(...args: any[]) {
