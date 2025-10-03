@@ -1994,24 +1994,6 @@ tasks:
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
-  - name: test-latest-driver-mongodb-client-encryption-6.0.0
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: VERSION, value: '7.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CLIENT_ENCRYPTION, value: 'true'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: install package
-        vars:
-          PACKAGE: mongodb-client-encryption@6.0.0
-      - func: run tests
   - name: test-alpine-fle
     tags:
       - alpine-fle
@@ -3205,7 +3187,6 @@ buildvariants:
       - run-custom-csfle-tests-5.0
       - run-custom-csfle-tests-rapid
       - run-custom-csfle-tests-latest
-      - test-latest-driver-mongodb-client-encryption-6.0.0
   - name: rhel8-test-gcp-kms
     display_name: GCP KMS Test
     run_on: debian11-small
