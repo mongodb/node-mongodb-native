@@ -57,8 +57,10 @@ describe('package.json', function () {
       .split('\n')
       .join('');
 
-    for (const [depName, depVersion] of Object.entries(peerDependencies)) {
-      const depMajor = depVersion.split('.')[0];
+    for (const [depName, depVersion] of Object.entries(peerDependencies as Record<string, string>)) {
+      // If a dependency specifies `alpha|beta`, the major version will fail to install because 
+      // an alpha < the major of that version (ex: mongodb-client-encryption@7.0.0-alpha < mongodb-client-encryption@7.0.0)
+      const depInstallSpecifier = /alpha|beta/.test(depVersion) ? depVersion : depVersion.split('.')[0];
 
       context(`when ${depName} is NOT installed`, () => {
         beforeEach(async () => {
@@ -91,7 +93,7 @@ describe('package.json', function () {
 
       context(`when ${depName} is installed`, () => {
         beforeEach(async function () {
-          execSync(`npm install --no-save -D "${depName}"@"${depMajor}"`);
+          execSync(`npm install --no-save -D "${depName}"@"${depInstallSpecifier}"`);
         });
 
         it(`driver is importable`, () => {
