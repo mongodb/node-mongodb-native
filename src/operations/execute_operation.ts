@@ -1,3 +1,4 @@
+import { MIN_SUPPORTED_SNAPSHOT_READS_WIRE_VERSION } from '../cmap/wire_protocol/constants';
 import {
   isRetryableReadError,
   isRetryableWriteError,
@@ -25,7 +26,7 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { abortable, supportsRetryableWrites } from '../utils';
+import { abortable, maxWireVersion, supportsRetryableWrites } from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
 
@@ -81,7 +82,10 @@ export async function executeOperation<
     session = client.startSession({ owner, explicit: false });
   } else if (session.hasEnded) {
     throw new MongoExpiredSessionError('Use of expired sessions is not permitted');
-  } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
+  } else if (
+    session.snapshotEnabled &&
+    maxWireVersion(topology) < MIN_SUPPORTED_SNAPSHOT_READS_WIRE_VERSION
+  ) {
     throw new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later');
   } else if (session.client !== client) {
     throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');

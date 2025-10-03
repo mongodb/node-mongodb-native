@@ -153,24 +153,6 @@ export function filterOptions(options: AnyOptions, names: ReadonlyArray<string>)
   return filterOptions;
 }
 
-interface HasRetryableWrites {
-  retryWrites?: boolean;
-}
-/**
- * Applies retryWrites: true to a command if retryWrites is set on the command's database.
- * @internal
- *
- * @param target - The target command to which we will apply retryWrites.
- * @param db - The database from which we can inherit a retryWrites value.
- */
-export function applyRetryableWrites<T extends HasRetryableWrites>(target: T, db?: Db): T {
-  if (db && db.s.options?.retryWrites) {
-    target.retryWrites = true;
-  }
-
-  return target;
-}
-
 /**
  * Applies a write concern to a command based on well defined inheritance rules, optionally
  * detecting support for the write concern in the first place.

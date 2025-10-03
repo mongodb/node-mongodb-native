@@ -393,10 +393,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return this.s.options.serverApi;
   }
 
-  get capabilities(): ServerCapabilities {
-    return new ServerCapabilities(this.lastHello());
-  }
-
   /** Initiate server connect */
   async connect(options?: ConnectOptions): Promise<Topology> {
     this.connectionLock ??= this._connect(options);
@@ -1102,53 +1098,4 @@ function isStaleServerDescription(
   return (
     compareTopologyVersion(currentTopologyVersion, incomingServerDescription.topologyVersion) > 0
   );
-}
-
-/**
- * @public
- * @deprecated This class will be removed as dead code in the next major version.
- */
-export class ServerCapabilities {
-  maxWireVersion: number;
-  minWireVersion: number;
-
-  constructor(hello: Document) {
-    this.minWireVersion = hello.minWireVersion || 0;
-    this.maxWireVersion = hello.maxWireVersion || 0;
-  }
-
-  get hasAggregationCursor(): boolean {
-    return true;
-  }
-
-  get hasWriteCommands(): boolean {
-    return true;
-  }
-  get hasTextSearch(): boolean {
-    return true;
-  }
-
-  get hasAuthCommands(): boolean {
-    return true;
-  }
-
-  get hasListCollectionsCommand(): boolean {
-    return true;
-  }
-
-  get hasListIndexesCommand(): boolean {
-    return true;
-  }
-
-  get supportsSnapshotReads(): boolean {
-    return this.maxWireVersion >= 13;
-  }
-
-  get commandsTakeWriteConcern(): boolean {
-    return true;
-  }
-
-  get commandsTakeCollation(): boolean {
-    return true;
-  }
 }

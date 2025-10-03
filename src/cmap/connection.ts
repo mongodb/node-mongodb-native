@@ -138,6 +138,7 @@ export interface ConnectionOptions
   tls: boolean;
   noDelay?: boolean;
   socketTimeoutMS?: number;
+  /** @internal */
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
   /** @internal */

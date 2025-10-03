@@ -33,16 +33,6 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   /** Object to store in the file document's `metadata` field */
   metadata?: Document;
   /**
-   * String to store in the file document's `contentType` field.
-   * @deprecated Will be removed in the next major version. Add a contentType field to the metadata document instead.
-   */
-  contentType?: string;
-  /**
-   * Array of strings to store in the file document's `aliases` field.
-   * @deprecated Will be removed in the next major version. Add an aliases field to the metadata document instead.
-   */
-  aliases?: string[];
-  /**
    * @experimental
    * Specifies the time an operation will run until it throws a timeout error
    */
@@ -305,8 +295,6 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
       stream.length,
       stream.chunkSizeBytes,
       stream.filename,
-      stream.options.contentType,
-      stream.options.aliases,
       stream.options.metadata
     );
 
@@ -402,8 +390,6 @@ function createFilesDoc(
   length: number,
   chunkSize: number,
   filename: string,
-  contentType?: string,
-  aliases?: string[],
   metadata?: Document
 ): GridFSFile {
   const ret: GridFSFile = {
@@ -413,14 +399,6 @@ function createFilesDoc(
     uploadDate: new Date(),
     filename
   };
-
-  if (contentType) {
-    ret.contentType = contentType;
-  }
-
-  if (aliases) {
-    ret.aliases = aliases;
-  }
 
   if (metadata) {
     ret.metadata = metadata;

@@ -49,10 +49,7 @@
           "uploadDate": {
             "$date": "1970-01-01T00:00:00.000Z"
           },
-          "md5": "d41d8cd98f00b204e9800998ecf8427e",
           "filename": "length-0",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         },
         {
@@ -64,10 +61,7 @@
           "uploadDate": {
             "$date": "1970-01-01T00:00:00.000Z"
           },
-          "md5": "d41d8cd98f00b204e9800998ecf8427e",
           "filename": "length-0-with-empty-chunk",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         },
         {
@@ -79,10 +73,7 @@
           "uploadDate": {
             "$date": "1970-01-01T00:00:00.000Z"
           },
-          "md5": "c700ed4fdb1d27055aa3faa2c2432283",
           "filename": "length-2",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         },
         {
@@ -94,10 +85,7 @@
           "uploadDate": {
             "$date": "1970-01-01T00:00:00.000Z"
           },
-          "md5": "dd254cdc958e53abaa67da9f797125f5",
           "filename": "length-8",
-          "contentType": "application/octet-stream",
-          "aliases": [],
           "metadata": {}
         }
       ]
@@ -197,10 +185,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "d41d8cd98f00b204e9800998ecf8427e",
               "filename": "length-0-with-empty-chunk",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -212,10 +197,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "c700ed4fdb1d27055aa3faa2c2432283",
               "filename": "length-2",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -227,10 +209,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "dd254cdc958e53abaa67da9f797125f5",
               "filename": "length-8",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             }
           ]
@@ -330,10 +309,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "d41d8cd98f00b204e9800998ecf8427e",
               "filename": "length-0",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -345,10 +321,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "c700ed4fdb1d27055aa3faa2c2432283",
               "filename": "length-2",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -360,10 +333,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "dd254cdc958e53abaa67da9f797125f5",
               "filename": "length-8",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             }
           ]
@@ -448,10 +418,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "d41d8cd98f00b204e9800998ecf8427e",
               "filename": "length-0",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -463,10 +430,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "d41d8cd98f00b204e9800998ecf8427e",
               "filename": "length-0-with-empty-chunk",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -478,10 +442,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "c700ed4fdb1d27055aa3faa2c2432283",
               "filename": "length-2",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             }
           ]
@@ -536,7 +497,7 @@
             }
           },
           "expectError": {
-            "isError": true
+            "isClientError": true
           }
         }
       ],
@@ -554,10 +515,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "d41d8cd98f00b204e9800998ecf8427e",
               "filename": "length-0",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -569,10 +527,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "d41d8cd98f00b204e9800998ecf8427e",
               "filename": "length-0-with-empty-chunk",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -584,10 +539,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "c700ed4fdb1d27055aa3faa2c2432283",
               "filename": "length-2",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -599,10 +551,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "dd254cdc958e53abaa67da9f797125f5",
               "filename": "length-8",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             }
           ]
@@ -701,7 +650,7 @@
             }
           },
           "expectError": {
-            "isError": true
+            "isClientError": true
           }
         }
       ],
@@ -719,10 +668,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "d41d8cd98f00b204e9800998ecf8427e",
               "filename": "length-0",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -734,10 +680,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "d41d8cd98f00b204e9800998ecf8427e",
               "filename": "length-0-with-empty-chunk",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             },
             {
@@ -749,10 +692,7 @@
               "uploadDate": {
                 "$date": "1970-01-01T00:00:00.000Z"
               },
-              "md5": "c700ed4fdb1d27055aa3faa2c2432283",
               "filename": "length-2",
-              "contentType": "application/octet-stream",
-              "aliases": [],
               "metadata": {}
             }
           ]

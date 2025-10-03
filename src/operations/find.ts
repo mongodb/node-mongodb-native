@@ -12,10 +12,8 @@ import { Aspect, defineAspects, type Hint } from './operation';
 
 /**
  * @public
- * @typeParam TSchema - Unused schema definition, deprecated usage, only specify `FindOptions` with no generic
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface FindOptions<TSchema extends Document = Document>
+export interface FindOptions
   extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'>,
     AbstractCursorOptions {
   /** Sets the limit of documents returned in the query. */
@@ -76,14 +74,7 @@ export interface FindOptions<TSchema extends Document = Document>
 }
 
 /** @public */
-export interface FindOneOptions extends FindOptions {
-  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
-  batchSize?: number;
-  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
-  limit?: number;
-  /** @deprecated Will be removed in the next major version. User provided value will be ignored. */
-  noCursorTimeout?: boolean;
-}
+export type FindOneOptions = Omit<FindOptions, 'batchSize' | 'limit' | 'noCursorTimeout'>;
 
 /** @internal */
 export class FindOperation extends CommandOperation<CursorResponse> {

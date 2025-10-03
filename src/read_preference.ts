@@ -63,10 +63,6 @@ export class ReadPreference {
   tags?: TagSet[];
   hedge?: HedgeOptions;
   maxStalenessSeconds?: number;
-  /**
-   * @deprecated This will be removed as dead code in the next major version.
-   */
-  minWireVersion?: number;
 
   public static PRIMARY = ReadPreferenceMode.primary;
   public static PRIMARY_PREFERRED = ReadPreferenceMode.primaryPreferred;
@@ -100,7 +96,6 @@ export class ReadPreference {
     this.tags = tags;
     this.hedge = options?.hedge;
     this.maxStalenessSeconds = undefined;
-    this.minWireVersion = undefined;
 
     options = options ?? {};
     if (options.maxStalenessSeconds != null) {
@@ -109,10 +104,6 @@ export class ReadPreference {
       }
 
       this.maxStalenessSeconds = options.maxStalenessSeconds;
-
-      // NOTE: The minimum required wire version is 5 for this read preference. If the existing
-      //       topology has a lower value then a MongoError will be thrown during server selection.
-      this.minWireVersion = 5;
     }
 
     if (this.mode === ReadPreference.PRIMARY) {

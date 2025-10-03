@@ -23,7 +23,6 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'timeoutMS',
   'j',
   'fsync',
-  'autoIndexId',
   'pkFactory',
   'raw',
   'readPreference',
@@ -68,8 +67,6 @@ export interface ClusteredCollectionOptions extends Document {
 export interface CreateCollectionOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** Create a capped collection */
   capped?: boolean;
-  /** @deprecated Create an index on the _id field of the document. This option is deprecated in MongoDB 3.2+ and will be removed once no longer supported by the server. */
-  autoIndexId?: boolean;
   /** The size of the capped collection in bytes */
   size?: number;
   /** The maximum number of documents in the capped collection */

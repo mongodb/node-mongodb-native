@@ -224,7 +224,6 @@ export type {
   ChangeStreamSplitEvent,
   ChangeStreamUpdateDocument,
   OperationTime,
-  ResumeOptions,
   ResumeToken,
   UpdateDescription
 } from './change_stream';
@@ -307,7 +306,6 @@ export type {
   ProxyOptions
 } from './cmap/connection';
 export type {
-  CloseOptions,
   ConnectionPool,
   ConnectionPoolEvents,
   ConnectionPoolOptions,
@@ -315,7 +313,7 @@ export type {
   WaitQueueMember,
   WithConnectionCallback
 } from './cmap/connection_pool';
-export type { ClientMetadata, ClientMetadataOptions } from './cmap/handshake/client_metadata';
+export type { ClientMetadata } from './cmap/handshake/client_metadata';
 export type { ConnectionPoolMetrics } from './cmap/metrics';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
 export type { CompressorName } from './cmap/wire_protocol/compression';
@@ -598,7 +596,6 @@ export type { SrvPoller, SrvPollerEvents, SrvPollerOptions } from './sdam/srv_po
 export type {
   ConnectOptions,
   SelectServerOptions,
-  ServerCapabilities,
   ServerSelectionCallback,
   ServerSelectionRequest,
   Topology,

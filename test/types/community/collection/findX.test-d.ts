@@ -209,7 +209,7 @@ colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
 colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
 
 // This is a regression test that we don't remove the unused generic in FindOptions
-const findOptions: FindOptions<{ a: number }> = {};
+const findOptions: FindOptions = {};
 expectType<FindOptions>(findOptions);
 
 // Ensure users can create a custom Db type that only contains specific
