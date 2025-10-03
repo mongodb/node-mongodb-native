@@ -6,7 +6,7 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
 
 import { connect } from '../../../src/cmap/connect';
-import { Connection, SizedMessageTransform } from '../../../src/cmap/connection';
+import { Connection, CryptoConnection, SizedMessageTransform } from '../../../src/cmap/connection';
 import { MongoNetworkTimeoutError, MongoRuntimeError } from '../../../src/error';
 import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
 import { isHello, MongoDBCollectionNamespace, ns, promiseWithResolvers } from '../../../src/utils';
@@ -400,5 +400,19 @@ describe('new Connection()', function () {
       const error = await promise.catch(error => error);
       expect(error).to.be.instanceOf(MongoRuntimeError);
     });
+  });
+
+  it('CryptoConnection.command() throws if no autoEncrypter is configured', async function () {
+    const error = await connect({
+      ...connectionOptionsDefaults,
+      hostAddress: server.hostAddress(),
+      authProviders: new MongoClientAuthProviders(),
+      connectionType: CryptoConnection,
+      extendedMetadata: Promise.resolve({})
+    }).catch(e => e);
+
+    expect(error)
+      .to.be.instanceOf(MongoRuntimeError)
+      .to.match(/No AutoEncrypter available for encryption/);
   });
 });
