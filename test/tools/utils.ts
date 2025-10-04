@@ -281,10 +281,11 @@ export const sorted = <T>(iterable: Iterable<T>, how: (a: T, b: T) => 0 | 1 | -1
  * changes*/
 export function topologyWithPlaceholderClient(
   seeds: string | string[] | HostAddress | HostAddress[],
-  options: Partial<TopologyOptions>
+  options: Partial<TopologyOptions>,
+  clientOptions?: MongoClientOptions
 ): Topology {
   return new Topology(
-    new MongoClient('mongodb://iLoveJavaScript'),
+    new MongoClient('mongodb://iLoveJavaScript', clientOptions),
     seeds,
     options as TopologyOptions
   );
