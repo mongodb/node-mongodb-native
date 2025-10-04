@@ -9,6 +9,7 @@ import {
   type Collection,
   MongoClient,
   MongoNotConnectedError,
+  MongoOperationTimeoutError,
   ProfilingLevel,
   Topology,
   TopologyType
@@ -862,12 +863,17 @@ describe('When executing an operation for the first time', () => {
           sinon.restore();
         });
 
-        it('client.connect() takes as long as selectServer is delayed for and does not throw a timeout error', async function () {
+        it('client.connect() takes as long as selectServer is delayed for and throws a timeout error', async function () {
           const start = performance.now();
           expect(client.topology).to.not.exist; // make sure not connected.
-          const res = await client.db().collection('test').insertOne({ a: 1 }, { timeoutMS: 500 }); // auto-connect
+          const error = await client
+            .db()
+            .collection('test')
+            .insertOne({ a: 1 }, { timeoutMS: 500 })
+            .catch(error => error);
           const end = performance.now();
-          expect(res).to.have.property('acknowledged', true);
+          expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(error).to.match(/Timed out during server selection/);
           expect(end - start).to.be.within(1000, 1500); // timeoutMS is 1000, did not apply.
         });
       }
