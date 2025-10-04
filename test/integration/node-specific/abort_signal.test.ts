@@ -689,7 +689,11 @@ describe('AbortSignal support', () => {
         await connectStarted;
         const findError = await toArray;
         expect(findError).to.be.instanceOf(MongoServerSelectionError);
-        expect(findError).to.match(/ENOTFOUND/);
+        if (process.platform !== 'win32') {
+          // linux / mac, unix in general will have this errno set,
+          // which is generally helpful if this is kept elevated in the error message
+          expect(findError).to.match(/ENOTFOUND/);
+        }
         await sleep(500);
         expect(client.topology).to.exist;
         expect(client.topology.description).to.have.property('type', 'Unknown');
