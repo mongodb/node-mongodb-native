@@ -9,7 +9,9 @@ describe('Server Selection Unified Tests (Spec)', function () {
     if (
       [
         'Failed bulkWrite operation: log messages have operationIds',
-        'Successful bulkWrite operation: log messages have operationIds'
+        'Failed client bulkWrite operation: log messages have operationIds',
+        'Successful bulkWrite operation: log messages have operationIds',
+        'Successful client bulkWrite operation: log messages have operationIds'
       ].includes(test.description)
     ) {
       return 'not applicable: operationId not supported';
