@@ -721,6 +721,7 @@ describe('class MongoClient', function () {
         expect(result).to.be.instanceOf(MongoServerSelectionError);
         expect(client).to.be.instanceOf(MongoClient);
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+        await client.close();
       }
     );
   });
