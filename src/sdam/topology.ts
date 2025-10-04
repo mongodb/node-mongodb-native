@@ -464,20 +464,14 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     };
 
     try {
-      const server = await this.selectServer(
-        readPreferenceServerSelector(readPreference),
-        selectServerOptions
-      );
-
       const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
-      if (!skipPingOnConnect && this.s.credentials) {
+      if (!skipPingOnConnect) {
+        const server = await this.selectServer(
+          readPreferenceServerSelector(readPreference),
+          selectServerOptions
+        );
         const connection = await server.pool.checkOut({ timeoutContext: timeoutContext });
         server.pool.checkIn(connection);
-        stateTransition(this, STATE_CONNECTED);
-        this.emit(Topology.OPEN, this);
-        this.emit(Topology.CONNECT, this);
-
-        return this;
       }
 
       stateTransition(this, STATE_CONNECTED);

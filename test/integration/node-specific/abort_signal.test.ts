@@ -18,10 +18,12 @@ import {
   type Log,
   type MongoClient,
   MongoServerError,
+  MongoServerSelectionError,
   promiseWithResolvers,
   ReadPreference,
   setDifference,
-  StateMachine
+  StateMachine,
+  Topology
 } from '../../mongodb';
 import {
   clearFailPoint,
@@ -612,7 +614,6 @@ describe('AbortSignal support', () => {
     let client: MongoClient;
     let db: Db;
     let collection: Collection<{ a: number; ssn: string }>;
-    const logs: Log[] = [];
     let connectStarted;
     let controller: AbortController;
     let signal: AbortSignal;
@@ -620,27 +621,15 @@ describe('AbortSignal support', () => {
 
     describe('when connect succeeds', () => {
       beforeEach(async function () {
-        logs.length = 0;
-
         const promise = promiseWithResolvers<void>();
         connectStarted = promise.promise;
 
-        client = this.configuration.newClient(
-          {},
-          {
-            mongodbLogComponentSeverities: { serverSelection: 'debug' },
-            mongodbLogPath: {
-              write: log => {
-                if (log.c === 'serverSelection' && log.operation === 'handshake') {
-                  controller.abort();
-                  promise.resolve();
-                }
-                logs.push(log);
-              }
-            },
-            serverSelectionTimeoutMS: 1000
-          }
-        );
+        client = this.configuration.newClient({}, { serverSelectionTimeoutMS: 1000 });
+
+        client.once('open', () => {
+          controller.abort();
+          promise.resolve();
+        });
         db = client.db('abortSignal');
         collection = db.collection('support');
 
@@ -651,7 +640,6 @@ describe('AbortSignal support', () => {
       });
 
       afterEach(async function () {
-        logs.length = 0;
         await client?.close();
       });
 
@@ -667,22 +655,18 @@ describe('AbortSignal support', () => {
 
     describe('when connect fails', () => {
       beforeEach(async function () {
-        logs.length = 0;
-
         const promise = promiseWithResolvers<void>();
         connectStarted = promise.promise;
 
+        const selectServerStub = sinon
+          .stub(Topology.prototype, 'selectServer')
+          .callsFake(async function (...args) {
+            controller.abort();
+            promise.resolve();
+            return selectServerStub.wrappedMethod.call(this, ...args);
+          });
+
         client = this.configuration.newClient('mongodb://iLoveJavaScript', {
-          mongodbLogComponentSeverities: { serverSelection: 'debug' },
-          mongodbLogPath: {
-            write: log => {
-              if (log.c === 'serverSelection' && log.operation === 'handshake') {
-                controller.abort();
-                promise.resolve();
-              }
-              logs.push(log);
-            }
-          },
           serverSelectionTimeoutMS: 200,
           maxPoolSize: 1
         });
@@ -696,18 +680,19 @@ describe('AbortSignal support', () => {
       });
 
       afterEach(async function () {
-        logs.length = 0;
+        sinon.restore();
         await client?.close();
       });
 
-      it('escapes auto connect without interrupting it', async () => {
+      it('server selection error is thrown before reaching signal abort state check', async () => {
         const toArray = cursor.toArray().catch(error => error);
         await connectStarted;
-        expect(await toArray).to.be.instanceOf(DOMException);
+        const findError = await toArray;
+        expect(findError).to.be.instanceOf(MongoServerSelectionError);
+        expect(findError).to.match(/ENOTFOUND/);
         await sleep(500);
         expect(client.topology).to.exist;
         expect(client.topology.description).to.have.property('type', 'Unknown');
-        expect(findLast(logs, l => l.message.includes('Server selection failed'))).to.exist;
       });
     });
   });
