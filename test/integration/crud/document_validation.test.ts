@@ -1,6 +1,6 @@
-'use strict';
-const { assert: test, setupDatabase } = require('../shared');
-const { expect } = require('chai');
+import { expect } from 'chai';
+
+import { assert as test, setupDatabase } from '../shared';
 
 describe('Document Validation', function () {
   before(function () {
@@ -18,14 +18,14 @@ describe('Document Validation', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
 
         // Get collection
-        var col = db.collection('createValidationCollection');
+        const col = db.collection('createValidationCollection');
 
         // Drop the collection
         col.drop(function () {
@@ -75,14 +75,14 @@ describe('Document Validation', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
 
         // Get collection
-        var col = db.collection('createValidationCollection');
+        const col = db.collection('createValidationCollection');
 
         // Drop the collection
         col.drop(function () {
@@ -157,14 +157,14 @@ describe('Document Validation', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
 
         // Get collection
-        var col = db.collection('createValidationCollection');
+        const col = db.collection('createValidationCollection');
 
         // Drop the collection
         col.drop(function () {
@@ -207,14 +207,14 @@ describe('Document Validation', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
 
         // Get collection
-        var col = db.collection('createValidationCollection');
+        const col = db.collection('createValidationCollection');
 
         // Drop the collection
         col.drop(function () {
@@ -269,12 +269,12 @@ describe('Document Validation', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         // Some docs for insertion
-        var docs = [
+        const docs = [
           {
             title: 'this is my title',
             author: 'bob',
@@ -290,7 +290,7 @@ describe('Document Validation', function () {
         ];
 
         // Get collection
-        var col = db.collection('createValidationCollectionOut');
+        const col = db.collection('createValidationCollectionOut');
 
         // Drop the collection
         col.drop(function () {
