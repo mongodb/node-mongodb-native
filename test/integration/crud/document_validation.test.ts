@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../../src';
 import { assert as test, ignoreNsNotFound, setupDatabase } from '../shared';
 
-describe.only('Document Validation', function () {
+describe('Document Validation', function () {
   let client: MongoClient;
 
   before(function () {
