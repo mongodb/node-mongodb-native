@@ -321,15 +321,12 @@ tests:
     mechanism_properties:
       AWS_SESSION_TOKEN: token!@#$%^&*()_+
 - description: should throw an exception if username provided (MONGODB-AWS)
-    implies default mechanism)
-  uri: mongodb://user:localhost.com/
+  uri: mongodb://user@localhost.com/
   valid: false
 - description: should throw an exception if username and password provided (MONGODB-AWS)
-    implies default mechanism)
-  uri: mongodb://user@pass:localhost.com/
+  uri: mongodb://user:pass@localhost.com/
   valid: false
 - description: should throw an exception if AWS_SESSION_TOKEN provided (MONGODB-AWS)
-    implies default mechanism)
   uri: mongodb://localhost/?authMechanism=MONGODB-AWS&authMechanismProperties=AWS_SESSION_TOKEN:token
   valid: false
 - description: should recognise the mechanism with test environment (MONGODB-OIDC)

@@ -441,17 +441,17 @@
       }
     },
     {
-      "description": "should throw an exception if username provided (MONGODB-AWS) implies default mechanism)",
-      "uri": "mongodb://user:localhost.com/",
+      "description": "should throw an exception if username provided (MONGODB-AWS)",
+      "uri": "mongodb://user@localhost.com/",
       "valid": false
     },
     {
-      "description": "should throw an exception if username and password provided (MONGODB-AWS) implies default mechanism)",
-      "uri": "mongodb://user@pass:localhost.com/",
+      "description": "should throw an exception if username and password provided (MONGODB-AWS)",
+      "uri": "mongodb://user:pass@localhost.com/",
       "valid": false
     },
     {
-      "description": "should throw an exception if AWS_SESSION_TOKEN provided (MONGODB-AWS) implies default mechanism)",
+      "description": "should throw an exception if AWS_SESSION_TOKEN provided (MONGODB-AWS)",
       "uri": "mongodb://localhost/?authMechanism=MONGODB-AWS&authMechanismProperties=AWS_SESSION_TOKEN:token",
       "valid": false
     },
