@@ -138,7 +138,7 @@ export interface ConnectionOptions
   tls: boolean;
   noDelay?: boolean;
   socketTimeoutMS?: number;
-  /** @internal */
+  /** @deprecated - Will be removed in a future major release. Users should use AbortSignal instead. */
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
   /** @internal */
