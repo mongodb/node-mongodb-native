@@ -416,7 +416,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       | 'key'
       | 'cert'
       | 'driverInfo'
-      | 'additionalDriverInfo'
       | 'metadata'
       | 'extendedMetadata'
     >
@@ -429,7 +428,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       | 'key'
       | 'cert'
       | 'driverInfo'
-      | 'additionalDriverInfo'
       | 'metadata'
       | 'extendedMetadata'
     >;
@@ -1109,8 +1107,6 @@ export interface MongoOptions
   metadata: ClientMetadata;
   /** @deprecated - Will be made internal in a future major release. */
   extendedMetadata: Promise<Document>;
-  /** @deprecated - Will be made internal in a future major release. */
-  additionalDriverInfo: DriverInfo[];
   /** @internal */
   autoEncrypter?: AutoEncrypter;
   /** @internal */
