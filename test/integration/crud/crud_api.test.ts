@@ -340,7 +340,7 @@ describe('CRUD API', function () {
       // Execute the command with all steps defined
       // will fail
       const err = await cursor.toArray().catch(err => err);
-      test.ok(err instanceof Error);
+      expect(err).to.be.instanceof(MongoServerError);
     });
 
     it('#toArray()', async function () {
@@ -892,7 +892,7 @@ describe('CRUD API', function () {
         .collection('t20_1')
         .bulkWrite(ops, { ordered: true, writeConcern: { w: 1 } })
         .catch(err => err);
-      test.ok(err instanceof Error);
+      expect(err).to.be.instanceOf(MongoBulkWriteError);
     }
   });
 
