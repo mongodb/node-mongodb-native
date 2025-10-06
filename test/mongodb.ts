@@ -104,7 +104,6 @@ export * from '../src/bulk/unordered';
 export * from '../src/change_stream';
 export * from '../src/client-side-encryption/auto_encrypter';
 export * from '../src/client-side-encryption/client_encryption';
-export * from '../src/client-side-encryption/crypto_callbacks';
 export * from '../src/client-side-encryption/errors';
 export * from '../src/client-side-encryption/mongocryptd_manager';
 export * from '../src/client-side-encryption/providers/aws';
