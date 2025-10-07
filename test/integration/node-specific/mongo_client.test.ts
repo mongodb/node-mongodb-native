@@ -339,6 +339,29 @@ describe('class MongoClient', function () {
     });
   });
 
+    it('throws ENOTFOUND error when connecting to non-existent host with no auth and loadBalanced=true', async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(
+        'mongodb://iLoveJavaScript:27017/test?loadBalanced=true',
+        { serverSelectionTimeoutMS: 100 }
+      );
+
+      const error = await client.connect().catch(error => error);
+      expect(error).to.be.instanceOf(MongoNetworkError); // not server selection like other topologies
+      expect(error.message).to.match(/ENOTFOUND/);
+    });
+
+    it('throws an error when srv is not a real record', async function () {
+      const client = this.configuration.newClient('mongodb+srv://iLoveJavaScript/test', {
+        serverSelectionTimeoutMS: 100
+      });
+
+      const error = await client.connect().catch(error => error);
+      expect(error).to.be.instanceOf(Error);
+      expect(error.message).to.match(/ENOTFOUND/);
+    });
+  });
+
   it('Should correctly pass through appname', async function () {
     const configuration = this.configuration;
     const options = {
