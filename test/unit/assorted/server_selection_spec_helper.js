@@ -106,7 +106,14 @@ export async function executeServerSelectionTest(testDefinition) {
     .callsFake(async function () {
       topologySelectServers.restore();
 
-      const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
+      const fakeServer = {
+        s: { state: 'connected' },
+        removeListener: () => true,
+        pool: {
+          checkOut: async () => ({}),
+          checkIn: () => undefined
+        }
+      };
       return fakeServer;
     });
 
