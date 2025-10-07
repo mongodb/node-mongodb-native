@@ -47,11 +47,14 @@ export interface ClientMetadata {
   };
   /** FaaS environment information */
   env?: {
-    name: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
+    name?: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
     timeout_sec?: Int32;
     memory_mb?: Int32;
     region?: string;
-    url?: string;
+    container?: {
+      runtime?: string;
+      orchestrator?: string;
+    };
   };
 }
 
@@ -181,14 +184,16 @@ export async function makeClientMetadata(
 }
 
 let dockerPromise: Promise<boolean>;
+type ContainerMetadata = NonNullable<NonNullable<ClientMetadata['env']>['container']>;
 /** @internal */
-async function getContainerMetadata() {
-  const containerMetadata: Record<string, any> = {};
+async function getContainerMetadata(): Promise<ContainerMetadata> {
   dockerPromise ??= fileIsAccessible('/.dockerenv');
   const isDocker = await dockerPromise;
 
   const { KUBERNETES_SERVICE_HOST = '' } = process.env;
   const isKubernetes = KUBERNETES_SERVICE_HOST.length > 0 ? true : false;
+
+  const containerMetadata: ContainerMetadata = {};
 
   if (isDocker) containerMetadata.runtime = 'docker';
   if (isKubernetes) containerMetadata.orchestrator = 'kubernetes';
@@ -207,7 +212,10 @@ async function addContainerMetadata(originalMetadata: ClientMetadata): Promise<C
 
   const extendedMetadata = new LimitedSizeDocument(512);
 
-  const extendedEnvMetadata = { ...originalMetadata?.env, container: containerMetadata };
+  const extendedEnvMetadata: NonNullable<ClientMetadata['env']> = {
+    ...originalMetadata?.env,
+    container: containerMetadata
+  };
 
   for (const [key, val] of Object.entries(originalMetadata)) {
     if (key !== 'env') {

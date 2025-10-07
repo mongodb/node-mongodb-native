@@ -407,15 +407,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * The consolidate, parsed, transformed and merged options.
    */
   public readonly options: Readonly<
-    Omit<
-      MongoOptions,
-      'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo' | 'metadata'
-    >
+    Omit<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo'>
   > &
-    Pick<
-      MongoOptions,
-      'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo' | 'metadata'
-    >;
+    Pick<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo'> & {
+      /** @internal */
+      metadata: Promise<ClientMetadata>;
+    };
 
   private driverInfoList: DriverInfo[] = [];
 
@@ -1087,7 +1084,7 @@ export interface MongoOptions
   compressors: CompressorName[];
   writeConcern: WriteConcern;
   dbName: string;
-  /** @internal - Will be made internal in a future major release. */
+  /** @internal */
   metadata: Promise<ClientMetadata>;
   /** @internal */
   autoEncrypter?: AutoEncrypter;
