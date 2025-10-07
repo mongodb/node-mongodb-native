@@ -12,6 +12,7 @@ import {
   Db,
   getTopology,
   MongoClient,
+  MongoNetworkError,
   MongoNotConnectedError,
   MongoServerSelectionError,
   ReadPreference,
@@ -333,6 +334,28 @@ describe('class MongoClient', function () {
         }
       });
     });
+
+    it('throws ENOTFOUND error when connecting to non-existent host with no auth and loadBalanced=true', async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(
+        'mongodb://iLoveJavaScript:27017/test?loadBalanced=true',
+        { serverSelectionTimeoutMS: 100 }
+      );
+
+      const error = await client.connect().catch(error => error);
+      expect(error).to.be.instanceOf(MongoNetworkError); // not server selection like other topologies
+      expect(error.message).to.match(/ENOTFOUND/);
+    });
+
+    it('throws an error when srv is not a real record', async function () {
+      const client = this.configuration.newClient('mongodb+srv://iLoveJavaScript/test', {
+        serverSelectionTimeoutMS: 100
+      });
+
+      const error = await client.connect().catch(error => error);
+      expect(error).to.be.instanceOf(Error);
+      expect(error.message).to.match(/ENOTFOUND/);
+    });
   });
 
   it('Should correctly pass through appname', {
@@ -600,15 +623,17 @@ describe('class MongoClient', function () {
     );
 
     it(
-      'does not checkout connection when authentication is disabled',
+      'checks out connection to confirm connectivity even when authentication is disabled',
       { requires: { auth: 'disabled' } },
       async function () {
         const checkoutStartedEvents = [];
         client.on('connectionCheckOutStarted', event => {
           checkoutStartedEvents.push(event);
         });
+        const checkoutStarted = once(client, 'connectionCheckOutStarted');
         await client.connect();
-        expect(checkoutStartedEvents).to.be.empty;
+        const checkout = await checkoutStarted;
+        expect(checkout).to.exist;
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       }
     );

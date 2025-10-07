@@ -470,7 +470,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       );
 
       const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
-      if (!skipPingOnConnect && this.s.credentials) {
+      if (!skipPingOnConnect) {
         const connection = await server.pool.checkOut({ timeoutContext: timeoutContext });
         server.pool.checkIn(connection);
         stateTransition(this, STATE_CONNECTED);
