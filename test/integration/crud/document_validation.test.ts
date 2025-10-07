@@ -36,7 +36,7 @@ describe('Document Validation', function () {
 
       // Ensure validation was correctly applied
       const err = await col.insertOne({ b: 1 }).catch(err => err);
-      test.ok(err instanceof MongoServerError);
+      expect(err).to.be.instanceOf(MongoServerError);
 
       // Bypass valiation on insertOne
       await col.insertOne({ b: 1 }, { bypassDocumentValidation: true });
