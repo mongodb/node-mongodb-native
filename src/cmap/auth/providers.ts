@@ -1,7 +1,6 @@
 /** @public */
 export const AuthMechanism = Object.freeze({
   MONGODB_AWS: 'MONGODB-AWS',
-  MONGODB_CR: 'MONGODB-CR',
   MONGODB_DEFAULT: 'DEFAULT',
   MONGODB_GSSAPI: 'GSSAPI',
   MONGODB_PLAIN: 'PLAIN',
