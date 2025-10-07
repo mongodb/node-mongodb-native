@@ -105,7 +105,16 @@ export async function executeServerSelectionTest(testDefinition) {
     .stub(Topology.prototype, 'selectServer')
     .callsFake(async function () {
       topologySelectServers.restore();
-      return fakeServer();
+
+      const fakeServer = {
+        s: { state: 'connected' },
+        removeListener: () => true,
+        pool: {
+          checkOut: async () => ({}),
+          checkIn: () => undefined
+        }
+      };
+      return fakeServer;
     });
 
   await topology.connect();

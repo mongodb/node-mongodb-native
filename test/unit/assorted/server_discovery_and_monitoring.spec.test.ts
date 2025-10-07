@@ -214,7 +214,16 @@ describe('Server Discovery and Monitoring (spec)', function () {
           .stub(Topology.prototype, 'selectServer')
           .callsFake(async function (_selector, _options) {
             topologySelectServers.restore();
-            return fakeServer();
+
+            const fakeServer = {
+              s: { state: 'connected' },
+              removeListener: () => true,
+              pool: {
+                checkOut: async () => ({}),
+                checkIn: () => undefined
+              }
+            };
+            return fakeServer;
           });
       });
 
