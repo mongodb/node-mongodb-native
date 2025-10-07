@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../../src';
-import { assert as test, ignoreNsNotFound, setupDatabase } from '../shared';
+import { ignoreNsNotFound, setupDatabase } from '../shared';
 
 describe('Document Validation', function () {
   let client: MongoClient;
