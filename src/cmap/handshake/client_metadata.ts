@@ -56,19 +56,6 @@ export interface ClientMetadata {
   };
 }
 
-/**
- * @public
- * @deprecated This interface will be made internal in the next major release.
- */
-export interface ClientMetadataOptions {
-  driverInfo?: {
-    name?: string;
-    version?: string;
-    platform?: string;
-  };
-  appName?: string;
-}
-
 /** @internal */
 export class LimitedSizeDocument {
   private document = new Map();

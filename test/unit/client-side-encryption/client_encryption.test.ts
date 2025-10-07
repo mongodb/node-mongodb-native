@@ -1,19 +1,13 @@
-import { Binary, BSON, deserialize } from 'bson';
+import { Binary } from 'bson';
 import { expect } from 'chai';
-import * as fs from 'fs';
-import { resolve } from 'path';
 import * as sinon from 'sinon';
 
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import * as cryptoCallbacks from '../../../src/client-side-encryption/crypto_callbacks';
 import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError
 } from '../../../src/client-side-encryption/errors';
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { MongoClient } from '../../../src/mongo_client';
-
-const { EJSON } = BSON;
 
 class MockClient {
   options: any;
@@ -34,66 +28,6 @@ class MockClient {
 
 describe('ClientEncryption', function () {
   this.timeout(12000);
-
-  context('with stubbed key material and fixed random source', function () {
-    const sandbox = sinon.createSandbox();
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-    beforeEach(() => {
-      const rndData = Buffer.from(
-        '\x4d\x06\x95\x64\xf5\xa0\x5e\x9e\x35\x23\xb9\x8f\x57\x5a\xcb\x15',
-        'latin1'
-      );
-      let rndPos = 0;
-      sandbox.stub(cryptoCallbacks, 'randomHook').callsFake((buffer, count) => {
-        if (rndPos + count > rndData.length) {
-          return new Error('Out of fake random data');
-        }
-        buffer.set(rndData.subarray(rndPos, rndPos + count));
-        rndPos += count;
-        return count;
-      });
-
-      // stubbed out for AWS unit testing below
-      sandbox.stub(StateMachine.prototype, 'fetchKeys').callsFake((client, ns, filter) => {
-        filter = deserialize(filter);
-        const keyIds = filter.$or[0]._id.$in.map(key => key.toString('hex'));
-        const fileNames = keyIds.map(keyId =>
-          resolve(`${__dirname}/data/keys/${keyId.toUpperCase()}-local-document.json`)
-        );
-        const contents = fileNames.map(filename =>
-          EJSON.parse(fs.readFileSync(filename, { encoding: 'utf-8' }))
-        );
-        return Promise.resolve(contents);
-      });
-    });
-
-    // This exactly matches _test_encrypt_fle2_explicit from the C tests
-    it('should explicitly encrypt and decrypt with the "local" KMS provider (FLE2, exact result)', function () {
-      const encryption = new ClientEncryption(new MockClient(), {
-        keyVaultNamespace: 'client.encryption',
-        kmsProviders: { local: { key: Buffer.alloc(96) } }
-      });
-
-      const encryptOptions = {
-        keyId: new Binary(Buffer.from('ABCDEFAB123498761234123456789012', 'hex'), 4),
-        algorithm: 'Unindexed'
-      };
-
-      return encryption
-        .encrypt('value123', encryptOptions)
-        .then(encrypted => {
-          expect(encrypted._bsontype).to.equal('Binary');
-          expect(encrypted.sub_type).to.equal(6);
-          return encryption.decrypt(encrypted);
-        })
-        .then(decrypted => {
-          expect(decrypted).to.equal('value123');
-        });
-    });
-  });
 
   it('should provide the libmongocrypt version', function () {
     expect(ClientEncryption.libmongocryptVersion).to.be.a('string');

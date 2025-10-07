@@ -12,8 +12,7 @@ rm -rf mongodb-client-encryption
 git clone https://github.com/mongodb-js/mongodb-client-encryption.git
 pushd mongodb-client-encryption
 
-# TODO(NODE-7218): test against latest mongodb-client-encryption
-git checkout aa61a35f5e174cd1c1e247e036093e18c88268c6
+git checkout main
 
 node --version
 npm --version
