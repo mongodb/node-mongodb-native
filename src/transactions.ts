@@ -73,21 +73,15 @@ export interface TransactionOptions extends Omit<CommandOperationOptions, 'timeo
 }
 
 /**
- * @public
- * @deprecated - Will be made internal in a future major release.
- * A class maintaining state related to a server transaction. Internal Only
+ * @internal
  */
 export class Transaction {
-  /** @internal */
   state: TxnState;
-  /** @deprecated - Will be made internal in a future major release. */
   options: TransactionOptions;
-  /** @internal */
   _pinnedServer?: Server;
-  /** @internal */
   _recoveryToken?: Document;
 
-  /** Create a transaction @internal */
+  /** Create a transaction */
   constructor(options?: TransactionOptions) {
     options = options ?? {};
     this.state = TxnState.NO_TRANSACTION;
@@ -119,23 +113,19 @@ export class Transaction {
     this._recoveryToken = undefined;
   }
 
-  /** @internal */
   get server(): Server | undefined {
     return this._pinnedServer;
   }
 
-  /** @deprecated - Will be made internal in a future major release. */
   get recoveryToken(): Document | undefined {
     return this._recoveryToken;
   }
 
-  /** @deprecated - Will be made internal in a future major release. */
   get isPinned(): boolean {
     return !!this.server;
   }
 
   /**
-   * @deprecated - Will be made internal in a future major release.
    * @returns Whether the transaction has started
    */
   get isStarting(): boolean {
@@ -143,20 +133,17 @@ export class Transaction {
   }
 
   /**
-   * @deprecated - Will be made internal in a future major release.
    * @returns Whether this session is presently in a transaction
    */
   get isActive(): boolean {
     return ACTIVE_STATES.has(this.state);
   }
 
-  /** @deprecated - Will be made internal in a future major release. */
   get isCommitted(): boolean {
     return COMMITTED_STATES.has(this.state);
   }
   /**
    * Transition the transaction in the state machine
-   * @internal
    * @param nextState - The new state to transition to
    */
   transition(nextState: TxnState): void {
@@ -178,14 +165,12 @@ export class Transaction {
     );
   }
 
-  /** @internal */
   pinServer(server: Server): void {
     if (this.isActive) {
       this._pinnedServer = server;
     }
   }
 
-  /** @internal */
   unpinServer(): void {
     this._pinnedServer = undefined;
   }

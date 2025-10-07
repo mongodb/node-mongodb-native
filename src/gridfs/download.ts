@@ -53,10 +53,6 @@ export interface GridFSFile {
   filename: string;
   metadata?: Document;
   uploadDate: Date;
-  /** @deprecated Will be removed in the next major version. */
-  contentType?: string;
-  /** @deprecated Will be removed in the next major version. */
-  aliases?: string[];
 }
 
 /** @internal */
