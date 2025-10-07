@@ -27,8 +27,7 @@ export function isDriverInfoEqual(info1: DriverInfo, info2: DriverInfo): boolean
 }
 
 /**
- * @public
- * @deprecated This interface will be made internal in the next major release.
+ * @internal
  * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#hello-command
  */
 export interface ClientMetadata {
@@ -103,10 +102,10 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName'>;
  * 3. Omit the `env` document entirely.
  * 4. Truncate `platform`. -- special we do not truncate this field
  */
-export function makeClientMetadata(
+export async function makeClientMetadata(
   driverInfoList: DriverInfo[],
   { appName = '' }: MakeClientMetadataOptions
-): ClientMetadata {
+): Promise<ClientMetadata> {
   const metadataDocument = new LimitedSizeDocument(512);
 
   // Add app name first, it must be sent
@@ -178,7 +177,7 @@ export function makeClientMetadata(
       }
     }
   }
-  return metadataDocument.toObject() as ClientMetadata;
+  return await addContainerMetadata(metadataDocument.toObject() as ClientMetadata);
 }
 
 let dockerPromise: Promise<boolean>;
@@ -202,9 +201,7 @@ async function getContainerMetadata() {
  * Re-add each metadata value.
  * Attempt to add new env container metadata, but keep old data if it does not fit.
  */
-export async function addContainerMetadata(
-  originalMetadata: ClientMetadata
-): Promise<ClientMetadata> {
+async function addContainerMetadata(originalMetadata: ClientMetadata): Promise<ClientMetadata> {
   const containerMetadata = await getContainerMetadata();
   if (Object.keys(containerMetadata).length === 0) return originalMetadata;
 

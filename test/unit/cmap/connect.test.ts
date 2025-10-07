@@ -4,10 +4,7 @@ import { expect } from 'chai';
 import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
 import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
 import { type Connection, type ConnectionOptions } from '../../../src/cmap/connection';
-import {
-  addContainerMetadata,
-  type ClientMetadata
-} from '../../../src/cmap/handshake/client_metadata';
+import { type ClientMetadata } from '../../../src/cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { MongoNetworkError } from '../../../src/error';
 import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
@@ -21,8 +18,7 @@ const CONNECT_DEFAULTS = {
   tls: false,
   generation: 1,
   monitorCommands: false,
-  metadata: {} as ClientMetadata,
-  extendedMetadata: addContainerMetadata({} as ClientMetadata),
+  metadata: Promise.resolve({} as ClientMetadata),
   loadBalanced: false
 };
 

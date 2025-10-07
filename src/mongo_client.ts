@@ -16,7 +16,6 @@ import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
 import {
-  addContainerMetadata,
   type ClientMetadata,
   isDriverInfoEqual,
   makeClientMetadata
@@ -410,26 +409,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   public readonly options: Readonly<
     Omit<
       MongoOptions,
-      | 'monitorCommands'
-      | 'ca'
-      | 'crl'
-      | 'key'
-      | 'cert'
-      | 'driverInfo'
-      | 'metadata'
-      | 'extendedMetadata'
+      'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo' | 'metadata'
     >
   > &
     Pick<
       MongoOptions,
-      | 'monitorCommands'
-      | 'ca'
-      | 'crl'
-      | 'key'
-      | 'cert'
-      | 'driverInfo'
-      | 'metadata'
-      | 'extendedMetadata'
+      'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo' | 'metadata'
     >;
 
   private driverInfoList: DriverInfo[] = [];
@@ -504,10 +489,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     if (isDuplicateDriverInfo) return;
 
     this.driverInfoList.push(driverInfo);
-    this.options.metadata = makeClientMetadata(this.driverInfoList, this.options);
-    this.options.extendedMetadata = addContainerMetadata(this.options.metadata)
+    this.options.metadata = makeClientMetadata(this.driverInfoList, this.options)
       .then(undefined, squashError)
-      .then(result => result ?? {}); // ensure Promise<Document>
+      .then(result => result ?? ({} as ClientMetadata)); // ensure Promise<Document>
   }
 
   /** @internal */
@@ -1103,10 +1087,8 @@ export interface MongoOptions
   compressors: CompressorName[];
   writeConcern: WriteConcern;
   dbName: string;
-  /** @deprecated - Will be made internal in a future major release. */
-  metadata: ClientMetadata;
-  /** @deprecated - Will be made internal in a future major release. */
-  extendedMetadata: Promise<Document>;
+  /** @internal - Will be made internal in a future major release. */
+  metadata: Promise<ClientMetadata>;
   /** @internal */
   autoEncrypter?: AutoEncrypter;
   /** @internal */
