@@ -1,0 +1,313 @@
+{
+  "description": "gridfs-renameByName",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "gridfs-tests"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket0",
+        "database": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_files_collection",
+        "database": "database0",
+        "collectionName": "fs.files"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_chunks_collection",
+        "database": "database0",
+        "collectionName": "fs.chunks"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "gridfs-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "length": 0,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "filename": "filename",
+          "metadata": {}
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000002"
+          },
+          "length": 0,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "filename": "filename",
+          "metadata": {}
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000003"
+          },
+          "length": 2,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "filename": "filename",
+          "metadata": {}
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000004"
+          },
+          "length": 8,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "filename": "otherfilename",
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "gridfs-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000002"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000002"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000003"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000003"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000004"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000004"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000004"
+          },
+          "n": 1,
+          "data": {
+            "$binary": {
+              "base64": "",
+              "subType": "00"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "rename when multiple revisions of the file exist",
+      "operations": [
+        {
+          "name": "renameByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "filename",
+            "newFilename": "newfilename"
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "fs.files",
+          "databaseName": "gridfs-tests",
+          "documents": [
+            {
+              "_id": {
+                "$oid": "000000000000000000000001"
+              },
+              "length": 0,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "newfilename",
+              "metadata": {}
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000002"
+              },
+              "length": 0,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "newfilename",
+              "metadata": {}
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000003"
+              },
+              "length": 2,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "newfilename",
+              "metadata": {}
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000004"
+              },
+              "length": 8,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "otherfilename",
+              "metadata": {}
+            }
+          ]
+        },
+        {
+          "collectionName": "fs.chunks",
+          "databaseName": "gridfs-tests",
+          "documents": [
+            {
+              "_id": {
+                "$oid": "000000000000000000000001"
+              },
+              "files_id": {
+                "$oid": "000000000000000000000002"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "",
+                  "subType": "00"
+                }
+              }
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000002"
+              },
+              "files_id": {
+                "$oid": "000000000000000000000003"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "",
+                  "subType": "00"
+                }
+              }
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000003"
+              },
+              "files_id": {
+                "$oid": "000000000000000000000004"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "",
+                  "subType": "00"
+                }
+              }
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000004"
+              },
+              "files_id": {
+                "$oid": "000000000000000000000004"
+              },
+              "n": 1,
+              "data": {
+                "$binary": {
+                  "base64": "",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rename when file name does not exist",
+      "operations": [
+        {
+          "name": "renameByName",
+          "object": "bucket0",
+          "arguments": {
+            "filename": "missing-file",
+            "newFilename": "newfilename"
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    }
+  ]
+}

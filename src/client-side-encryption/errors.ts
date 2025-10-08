@@ -26,6 +26,9 @@ export class MongoCryptError extends MongoError {
   }
 }
 
+export const defaultErrorWrapper = (error: Error) =>
+  new MongoCryptError(error.message, { cause: error });
+
 /**
  * @public
  *

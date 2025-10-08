@@ -1,6 +1,7 @@
 import { expectAssignable, expectError, expectNotAssignable, expectType } from 'tsd';
 
 import type {
+  AutoEncryptionOptions,
   AWSEncryptionKeyOptions,
   AzureEncryptionKeyOptions,
   ClientEncryption,
@@ -106,4 +107,53 @@ expectAssignable<RequiredCreateEncryptedCollectionSettings>({
   expectAssignable<ClientEncryptionDataKeyProvider>('kmip:named');
 
   expectNotAssignable<ClientEncryptionDataKeyProvider>('arbitrary string');
+}
+
+{
+  expectAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      mongocryptdSpawnPath: 'mongocryptd'
+    }
+  });
+  expectAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      mongocryptdSpawnPath: 'mongocryptd.exe'
+    }
+  });
+  expectAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      mongocryptdSpawnPath: '/usr/bin/mongocryptd'
+    }
+  });
+  expectNotAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      mongocryptdSpawnPath: 'mongo_crypt_v1.so'
+    }
+  });
+
+  expectAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      cryptSharedLibPath: 'mongo_crypt_v1.so'
+    }
+  });
+  expectAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      cryptSharedLibPath: 'mongo_crypt_v1.dll'
+    }
+  });
+  expectAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      cryptSharedLibPath: 'mongo_crypt_v1.dylib'
+    }
+  });
+  expectAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      cryptSharedLibPath: '/usr/lib/mongo_crypt_v1.dylib'
+    }
+  });
+  expectNotAssignable<AutoEncryptionOptions>({
+    extraOptions: {
+      cryptSharedLibPath: 'libmongocrypt.so'
+    }
+  });
 }

@@ -1297,16 +1297,6 @@ export const OPTIONS = {
   secureProtocol: { type: 'any' },
   index: { type: 'any' },
   // Legacy options from v3 era
-  useNewUrlParser: {
-    type: 'boolean',
-    deprecated:
-      'useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
-  } as OptionDescriptor,
-  useUnifiedTopology: {
-    type: 'boolean',
-    deprecated:
-      'useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
-  } as OptionDescriptor,
   __skipPingOnConnect: { type: 'boolean' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
