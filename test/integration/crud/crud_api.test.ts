@@ -315,33 +315,34 @@ describe('CRUD API', function () {
       await db.collection('t1').drop();
     });
 
-    it('allMethods', async function () {
-      const cursor = db.collection('t1').aggregate([{ $match: {} }], {
-        allowDiskUse: true,
-        batchSize: 2,
-        maxTimeMS: 50
-      });
-
-      // Exercise all the options
-      cursor
-        .geoNear({ geo: 1 })
-        .group({ group: 1 })
-        .limit(10)
-        .match({ match: 1 })
-        .maxTimeMS(10)
-        .out('collection')
-        .project({ project: 1 })
-        .redact({ redact: 1 })
-        .skip(1)
-        .sort({ sort: 1 })
-        .batchSize(10)
-        .unwind('name');
-
-      // Execute the command with all steps defined
-      // will fail
-      const err = await cursor.toArray().catch(err => err);
-      expect(err).to.be.instanceof(MongoServerError);
-    });
+    // TODO(NODE-7219): Remove test as it doesn't test correct aggregation execution
+    // it('allMethods', async function () {
+    //   const cursor = db.collection('t1').aggregate([{ $match: {} }], {
+    //     allowDiskUse: true,
+    //     batchSize: 2,
+    //     maxTimeMS: 50
+    //   });
+    //
+    //   // Exercise all the options
+    //   cursor
+    //     .geoNear({ geo: 1 })
+    //     .group({ group: 1 })
+    //     .limit(10)
+    //     .match({ match: 1 })
+    //     .maxTimeMS(10)
+    //     .out('collection')
+    //     .project({ project: 1 })
+    //     .redact({ redact: 1 })
+    //     .skip(1)
+    //     .sort({ sort: 1 })
+    //     .batchSize(10)
+    //     .unwind('name');
+    //
+    //   // Execute the command with all steps defined
+    //   // will fail
+    //   const err = await cursor.toArray().catch(err => err);
+    //   expect(err).to.be.instanceof(MongoServerError);
+    // });
 
     it('#toArray()', async function () {
       const cursor = db.collection('t1').aggregate();
@@ -475,74 +476,68 @@ describe('CRUD API', function () {
     });
   });
 
-  describe(
-    'should correctly execute update methods using crud api',
-    {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-    function () {
-      it('legacy update', async function () {
-        const db = client.db();
-        const r = await db
-          .collection('t3_1')
-          // @ts-expect-error Not allowed in TS, but allowed for legacy compat
-          .update({ a: 1 }, { $set: { a: 2 } }, { upsert: true });
-        expect(r).property('upsertedCount').to.equal(1);
-      });
+  describe('should correctly execute update methods using crud api', function () {
+    // TODO(NODE-7219): Remove test. There is no `update` method anymore
+    // it('legacy update', async function () {
+    //   const db = client.db();
+    //   const r = await db
+    //     .collection('t3_1')
+    //     .update({ a: 1 }, { $set: { a: 2 } }, { upsert: true });
+    //   expect(r).property('upsertedCount').to.equal(1);
+    // });
 
-      it('#updateOne()', async function () {
-        const db = client.db();
-        const i = await db.collection('t3_2').insertMany([{ c: 1 }], { writeConcern: { w: 1 } });
-        expect(i).property('insertedCount').to.equal(1);
+    it('#updateOne()', async function () {
+      const db = client.db();
+      const i = await db.collection('t3_2').insertMany([{ c: 1 }], { writeConcern: { w: 1 } });
+      expect(i).property('insertedCount').to.equal(1);
 
-        const u1 = await db
-          .collection('t3_2')
-          .updateOne({ a: 1 }, { $set: { a: 1 } }, { upsert: true });
-        expect(u1).property('upsertedCount').to.equal(1);
-        test.equal(0, u1.matchedCount);
-        test.ok(u1.upsertedId != null);
+      const u1 = await db
+        .collection('t3_2')
+        .updateOne({ a: 1 }, { $set: { a: 1 } }, { upsert: true });
+      expect(u1).property('upsertedCount').to.equal(1);
+      test.equal(0, u1.matchedCount);
+      test.ok(u1.upsertedId != null);
 
-        const u2 = await db.collection('t3_2').updateOne({ c: 1 }, { $set: { a: 1 } });
-        expect(u2).property('modifiedCount').to.equal(1);
-        test.equal(1, u2.matchedCount);
-        test.ok(u2.upsertedId == null);
-      });
+      const u2 = await db.collection('t3_2').updateOne({ c: 1 }, { $set: { a: 1 } });
+      expect(u2).property('modifiedCount').to.equal(1);
+      test.equal(1, u2.matchedCount);
+      test.ok(u2.upsertedId == null);
+    });
 
-      it('#replaceOne()', async function () {
-        const db = client.db();
-        const r1 = await db.collection('t3_3').replaceOne({ a: 1 }, { a: 2 }, { upsert: true });
-        expect(r1).property('upsertedCount').to.equal(1);
-        test.equal(0, r1.matchedCount);
-        test.ok(r1.upsertedId != null);
+    it('#replaceOne()', async function () {
+      const db = client.db();
+      const r1 = await db.collection('t3_3').replaceOne({ a: 1 }, { a: 2 }, { upsert: true });
+      expect(r1).property('upsertedCount').to.equal(1);
+      test.equal(0, r1.matchedCount);
+      test.ok(r1.upsertedId != null);
 
-        const r2 = await db.collection('t3_3').replaceOne({ a: 2 }, { a: 3 }, { upsert: true });
-        expect(r2).property('modifiedCount').to.equal(1);
-        expect(r2).property('upsertedCount').to.equal(0);
-        expect(r2).property('matchedCount').to.equal(1);
-      });
+      const r2 = await db.collection('t3_3').replaceOne({ a: 2 }, { a: 3 }, { upsert: true });
+      expect(r2).property('modifiedCount').to.equal(1);
+      expect(r2).property('upsertedCount').to.equal(0);
+      expect(r2).property('matchedCount').to.equal(1);
+    });
 
-      it('#updateMany()', async function () {
-        const db = client.db();
-        const i = await db
-          .collection('t3_4')
-          .insertMany([{ a: 1 }, { a: 1 }], { writeConcern: { w: 1 } });
-        expect(i).property('insertedCount').to.equal(2);
+    it('#updateMany()', async function () {
+      const db = client.db();
+      const i = await db
+        .collection('t3_4')
+        .insertMany([{ a: 1 }, { a: 1 }], { writeConcern: { w: 1 } });
+      expect(i).property('insertedCount').to.equal(2);
 
-        const u1 = await db
-          .collection('t3_4')
-          .updateMany({ a: 1 }, { $set: { a: 2 } }, { upsert: true, writeConcern: { w: 1 } });
-        expect(u1).property('modifiedCount').to.equal(2);
-        test.equal(2, u1.matchedCount);
-        test.ok(u1.upsertedId == null);
+      const u1 = await db
+        .collection('t3_4')
+        .updateMany({ a: 1 }, { $set: { a: 2 } }, { upsert: true, writeConcern: { w: 1 } });
+      expect(u1).property('modifiedCount').to.equal(2);
+      test.equal(2, u1.matchedCount);
+      test.ok(u1.upsertedId == null);
 
-        const u2 = await db
-          .collection('t3_4')
-          .updateMany({ c: 1 }, { $set: { d: 2 } }, { upsert: true, writeConcern: { w: 1 } });
-        test.equal(0, u2.matchedCount);
-        test.ok(u2.upsertedId != null);
-      });
-    }
-  );
+      const u2 = await db
+        .collection('t3_4')
+        .updateMany({ c: 1 }, { $set: { d: 2 } }, { upsert: true, writeConcern: { w: 1 } });
+      test.equal(0, u2.matchedCount);
+      test.ok(u2.upsertedId != null);
+    });
+  });
 
   describe('#findOneAndDelete', function () {
     let collection: Collection;
@@ -771,80 +766,63 @@ describe('CRUD API', function () {
     });
   });
 
-  it('should correctly execute removeMany with no selector', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const db = client.db();
-      // Delete all items with no selector
-      await db.collection('t6_1').deleteMany();
-    }
+  it('should correctly execute removeMany with no selector', async function () {
+    const db = client.db();
+    // Delete all items with no selector
+    await db.collection('t6_1').deleteMany();
   });
 
-  it('should correctly execute crud operations with w:0', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should correctly execute crud operations with w:0', async function () {
+    const db = client.db();
 
-    test: async function () {
-      const db = client.db();
+    const col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
+    const i1 = await col.insertOne({ a: 1 }, { writeConcern: { w: 0 } });
+    expect(i1).property('acknowledged').to.be.false;
+    expect(i1).property('insertedId').to.exist;
 
-      const col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
-      const i1 = await col.insertOne({ a: 1 }, { writeConcern: { w: 0 } });
-      expect(i1).property('acknowledged').to.be.false;
-      expect(i1).property('insertedId').to.exist;
+    const i2 = await col.insertMany([{ a: 1 }], { writeConcern: { w: 0 } });
+    expect(i2).to.exist;
 
-      const i2 = await col.insertMany([{ a: 1 }], { writeConcern: { w: 0 } });
-      expect(i2).to.exist;
+    const u1 = await col.updateOne({ a: 1 }, { $set: { b: 1 } }, { writeConcern: { w: 0 } });
+    expect(u1).to.exist;
 
-      const u1 = await col.updateOne({ a: 1 }, { $set: { b: 1 } }, { writeConcern: { w: 0 } });
-      expect(u1).to.exist;
+    const u2 = await col.updateMany({ a: 1 }, { $set: { b: 1 } }, { writeConcern: { w: 0 } });
+    expect(u2).to.exist;
 
-      const u2 = await col.updateMany({ a: 1 }, { $set: { b: 1 } }, { writeConcern: { w: 0 } });
-      expect(u2).to.exist;
+    const d1 = await col.deleteOne({ a: 1 }, { writeConcern: { w: 0 } });
+    expect(d1).to.exist;
 
-      const d1 = await col.deleteOne({ a: 1 }, { writeConcern: { w: 0 } });
-      expect(d1).to.exist;
-
-      const d2 = await col.deleteMany({ a: 1 }, { writeConcern: { w: 0 } });
-      expect(d2).to.exist;
-    }
+    const d2 = await col.deleteMany({ a: 1 }, { writeConcern: { w: 0 } });
+    expect(d2).to.exist;
   });
 
-  it('should correctly execute updateOne operations with w:0 and upsert', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should correctly execute updateOne operations with w:0 and upsert', async function () {
+    const db = client.db();
 
-    test: async function () {
-      const db = client.db();
-
-      const r = await db
-        .collection<{ _id: number }>('try')
-        .updateOne({ _id: 1 }, { $set: { x: 1 } }, { upsert: true, writeConcern: { w: 0 } });
-      test.ok(r != null);
-    }
+    const r = await db
+      .collection<{ _id: number }>('try')
+      .updateOne({ _id: 1 }, { $set: { x: 1 } }, { upsert: true, writeConcern: { w: 0 } });
+    test.ok(r != null);
   });
 
-  it('should correctly execute crud operations using w:0', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const db = client.db();
-
-      const collection = db.collection<{ _id: number }>('w0crudoperations');
-      const r = await collection.updateOne(
-        { _id: 1 },
-        { $set: { x: 1 } },
-        { upsert: true, writeConcern: { w: 0 } }
-      );
-      test.ok(r != null);
-    }
-  });
+  // TODO(NODE-7219): Remove test as it duplicates the one from the above
+  // it('should correctly execute crud operations using w:0', {
+  //   metadata: {
+  //     requires: { topology: ['single', 'replicaset', 'sharded'] }
+  //   },
+  //
+  //   test: async function () {
+  //     const db = client.db();
+  //
+  //     const collection = db.collection<{ _id: number }>('w0crudoperations');
+  //     const r = await collection.updateOne(
+  //       { _id: 1 },
+  //       { $set: { x: 1 } },
+  //       { upsert: true, writeConcern: { w: 0 } }
+  //     );
+  //     test.ok(r != null);
+  //   }
+  // });
 
   describe('when performing a multi-batch unordered bulk write that has a duplicate key', function () {
     it('throws a MongoBulkWriteError indicating the duplicate key document failed', async function () {
@@ -872,28 +850,22 @@ describe('CRUD API', function () {
     });
   });
 
-  it('should correctly throw error on illegal callback when ordered bulkWrite encounters error', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const ops = [];
-      // Create a set of operations that go over the 1000 limit causing two messages
-      let i = 0;
-      for (; i < 1005; i++) {
-        ops.push({ insertOne: { _id: i, a: i } });
-      }
-
-      ops.push({ insertOne: { _id: 0, a: i } });
-
-      const db = client.db();
-      const err = await db
-        .collection('t20_1')
-        .bulkWrite(ops, { ordered: true, writeConcern: { w: 1 } })
-        .catch(err => err);
-      expect(err).to.be.instanceOf(MongoBulkWriteError);
+  it('should throw an error when ordered bulkWrite encounters error', async function () {
+    const ops = [];
+    // Create a set of operations that go over the 1000 limit causing two messages
+    let i = 0;
+    for (; i < 1005; i++) {
+      ops.push({ insertOne: { _id: i, a: i } });
     }
+
+    ops.push({ insertOne: { _id: 0, a: i } });
+
+    const db = client.db();
+    const err = await db
+      .collection('t20_1')
+      .bulkWrite(ops, { ordered: true, writeConcern: { w: 1 } })
+      .catch(err => err);
+    expect(err).to.be.instanceOf(MongoBulkWriteError);
   });
 
   describe('sort support', function () {
