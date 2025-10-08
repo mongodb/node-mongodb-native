@@ -610,33 +610,13 @@ describe('class MongoClient', function () {
       await client.close();
     });
 
-    it(
-      'creates topology and checks out connection when auth is enabled',
-      { requires: { auth: 'enabled' } },
-      async function () {
-        const checkoutStarted = once(client, 'connectionCheckOutStarted');
-        await client.connect();
-        const checkout = await checkoutStarted;
-        expect(checkout).to.exist;
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      }
-    );
-
-    it(
-      'checks out connection to confirm connectivity even when authentication is disabled',
-      { requires: { auth: 'disabled' } },
-      async function () {
-        const checkoutStartedEvents = [];
-        client.on('connectionCheckOutStarted', event => {
-          checkoutStartedEvents.push(event);
-        });
-        const checkoutStarted = once(client, 'connectionCheckOutStarted');
-        await client.connect();
-        const checkout = await checkoutStarted;
-        expect(checkout).to.exist;
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      }
-    );
+    it('creates topology and checks out connection', async function () {
+      const checkoutStarted = once(client, 'connectionCheckOutStarted');
+      await client.connect();
+      const checkout = await checkoutStarted;
+      expect(checkout).to.exist;
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+    });
 
     it(
       'permits operations to be run after connect is called',
