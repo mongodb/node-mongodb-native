@@ -594,7 +594,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * An optional method to verify a typical set of preconditions before using a MongoClient.
+   * An optional method to verify a handful of assumptions that are generally useful at application boot-time before using a MongoClient.
    * For detailed information about the connect process see the MongoClient.connect static method documentation.
    *
    * @param url - The MongoDB connection string (supports `mongodb://` and `mongodb+srv://` schemes)
