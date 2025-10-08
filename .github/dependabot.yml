@@ -32,12 +32,18 @@ updates:
         versions: [">=10.0.0"]
       # we ignore TS as a part of quarterly dependency updates.
       - dependency-name: "typescript"
-      # stay on the supported major version of gcp-metadata
-      - dependency-name: "gcp-metadata"
-        versions: [">=6.0.0"]
       # NODE-3773: sinon 19+ breaks the srv polling unit tests
       - dependency-name: "sinon"
         versions: ["18.x"]
+
+      # ignore all peer dependencies
+      - dependency-name: "gcp-metadata"
+      - dependency-name: "@aws-sdk/credential-providers"
+      - dependency-name: "kerberos"
+      - dependency-name: "mongodb-client-encryption"
+      - dependency-name: "snappy"
+      - dependency-name: "gcp-metadata"
+      - dependency-name: "@mongodb-js/zstd"
 
     versioning-strategy: increase
 
