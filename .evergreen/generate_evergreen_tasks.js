@@ -243,7 +243,7 @@ TASKS.push({
 });
 
 TASKS.push({
-  name: `test-zstd-1.x-compression`,
+  name: `test-zstd-compression`,
   tags: ['latest', 'zstd'],
   commands: [
     updateExpansions({
@@ -256,31 +256,6 @@ TASKS.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    {
-      func: 'install package',
-      vars: {
-        PACKAGE: '@mongodb-js/zstd@1.x'
-      }
-    },
-    { func: 'run-compression-tests' }
-  ]
-});
-
-TASKS.push({
-  name: `test-zstd-2.x-compression`,
-  tags: ['latest', 'zstd'],
-  commands: [
-    updateExpansions({
-      VERSION: 'latest',
-      TOPOLOGY: 'replica_set',
-      AUTH: 'auth',
-      COMPRESSOR: 'zstd',
-      CLIENT_ENCRYPTION: 'false',
-      TEST_CSFLE: 'false'
-    }),
-    { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
-    // no need to manually install zstd - we specify 2.x as a dev dependency in package.json
     { func: 'run-compression-tests' }
   ]
 });
