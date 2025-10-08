@@ -8,16 +8,15 @@ import {
   type CommandFailedEvent,
   type CommandStartedEvent,
   type CommandSucceededEvent,
-  Connection,
   Db,
-  getTopology,
   MongoClient,
   MongoNotConnectedError,
   MongoServerSelectionError,
-  ReadPreference,
-  ServerDescription,
-  Topology
-} from '../../mongodb';
+  ReadPreference
+} from '../../../src';
+import { Connection } from '../../../src/cmap/connection';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { Topology } from '../../../src/sdam/topology';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
@@ -34,16 +33,17 @@ describe('class MongoClient', function () {
     client = undefined;
   });
 
-  it('should correctly pass through extra db options', {
-    metadata: { requires: { topology: ['single'] } },
-    test: function (done) {
+  it(
+    'should correctly pass through extra db options',
+    { requires: { topology: 'single' } },
+    async function () {
       const configuration = this.configuration;
       const client = configuration.newClient(
         {},
         {
           writeConcern: { w: 1, wtimeoutMS: 1000, fsync: true, j: true },
           readPreference: 'nearest',
-          readPreferenceTags: { loc: 'ny' },
+          readPreferenceTags: [{ loc: 'ny' }],
           forceServerObjectId: true,
           pkFactory: {
             createPk() {
@@ -54,74 +54,55 @@ describe('class MongoClient', function () {
         }
       );
 
-      client.connect(function (err, client) {
-        expect(err).to.be.undefined;
+      await client.connect();
 
-        const db = client.db(configuration.db);
+      const db = client.db(configuration.db);
 
-        expect(db).to.have.property('writeConcern');
-        expect(db.writeConcern).to.have.property('w', 1);
-        expect(db.writeConcern).to.have.property('wtimeoutMS', 1000);
-        expect(db.writeConcern).to.have.property('journal', true);
+      expect(db).to.have.property('writeConcern');
+      expect(db.writeConcern).to.have.property('w', 1);
+      expect(db.writeConcern).to.have.property('wtimeoutMS', 1000);
+      expect(db.writeConcern).to.have.property('journal', true);
 
-        expect(db).to.have.property('s');
-        expect(db.s).to.have.property('readPreference');
-        expect(db.s.readPreference).to.have.property('mode', 'nearest');
-        expect(db.s.readPreference)
-          .to.have.property('tags')
-          .that.deep.equals([{ loc: 'ny' }]);
+      expect(db).to.have.property('s');
+      expect(db.s).to.have.property('readPreference');
+      expect(db.s.readPreference).to.have.property('mode', 'nearest');
+      expect(db.s.readPreference)
+        .to.have.property('tags')
+        .that.deep.equals([{ loc: 'ny' }]);
 
-        expect(db.s).to.have.nested.property('options.forceServerObjectId');
-        expect(db.s.options).to.have.property('forceServerObjectId', true);
-        expect(db.s).to.have.nested.property('pkFactory.createPk').that.is.a('function');
-        expect(db.s.pkFactory.createPk()).to.equal(1);
-        expect(db).to.have.nested.property('bsonOptions.serializeFunctions');
+      expect(db.s).to.have.nested.property('options.forceServerObjectId');
+      expect(db.s.options).to.have.property('forceServerObjectId', true);
+      expect(db.s).to.have.nested.property('pkFactory.createPk').that.is.a('function');
+      expect(db.s.pkFactory.createPk()).to.equal(1);
+      expect(db).to.have.nested.property('bsonOptions.serializeFunctions');
 
-        client.close(done);
-      });
+      await client.close();
     }
+  );
+
+  it('Should fail due to wrong uri user:password@localhost', function () {
+    expect(() => this.configuration.newClient('user:password@localhost:27017/test')).to.throw(
+      'Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"'
+    );
   });
 
-  it('Should fail due to wrong uri user:password@localhost', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-    test() {
-      expect(() => this.configuration.newClient('user:password@localhost:27017/test')).to.throw(
-        'Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"'
-      );
-    }
-  });
+  it('correctly error out when no socket available on MongoClient `connect`', async function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient('mongodb://localhost:27088/test', {
+      serverSelectionTimeoutMS: 10
+    });
 
-  it('correctly error out when no socket available on MongoClient `connect`', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient('mongodb://localhost:27088/test', {
-        serverSelectionTimeoutMS: 10
-      });
-
-      client.connect(function (err) {
-        expect(err).to.exist;
-
-        done();
-      });
-    }
+    const error = await client.connect().catch(e => e);
+    expect(error).to.be.instanceOf(MongoServerSelectionError);
   });
 
   it('should correctly connect to mongodb using domain socket', {
     metadata: { requires: { topology: ['single'], os: '!win32' } },
-
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
       const client = configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock/test');
-      client.connect(function (err) {
-        expect(err).to.not.exist;
-        client.close(done);
-      });
+      await client.connect();
+      await client.close();
     }
   });
 
@@ -236,6 +217,7 @@ describe('class MongoClient', function () {
         beforeEach(async function () {
           spy = sinon.spy(net, 'createConnection');
           const uri = this.configuration.url();
+          // @ts-expect-error Intentional test of invalid options
           client = new MongoClient(uri, options);
         });
 
@@ -359,92 +341,85 @@ describe('class MongoClient', function () {
     expect(name).to.equal('hello world');
   });
 
-  it('Should correctly pass through socketTimeoutMS and connectTimeoutMS', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded']
-      }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(
-        {},
-        {
-          socketTimeoutMS: 0,
-          connectTimeoutMS: 0
-        }
-      );
-
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        const topology = getTopology(client.db(configuration.db));
-        expect(topology).nested.property('s.options.connectTimeoutMS').to.equal(0);
-        expect(topology).nested.property('s.options.socketTimeoutMS').to.equal(0);
-
-        client.close(done);
-      });
-    }
-  });
-
-  it('should open a new MongoClient connection', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-      client.connect(function (err, mongoclient) {
-        expect(err).to.not.exist;
-
-        mongoclient
-          .db('integration_tests')
-          .collection('new_mongo_client_collection')
-          .insertOne({ a: 1 }, function (err, r) {
-            expect(err).to.not.exist;
-            expect(r).to.be.an('object');
-
-            mongoclient.close(done);
-          });
-      });
-    }
-  });
-
-  it('should correctly connect with MongoClient `connect` using Promise', function () {
+  it('Should correctly pass through socketTimeoutMS and connectTimeoutMS', async function () {
     const configuration = this.configuration;
-    let url = configuration.url();
-    url = url.indexOf('?') !== -1 ? `${url}&maxPoolSize=100` : `${url}?maxPoolSize=100`;
-
-    const client = configuration.newClient(url);
-    return client.connect().then(() => client.close());
-  });
-
-  it('should open a new MongoClient connection using promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
+    const client = configuration.newClient(
+      {},
+      {
+        socketTimeoutMS: 0,
+        connectTimeoutMS: 0
       }
-    },
+    );
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient();
-      client.connect().then(function (mongoclient) {
-        mongoclient
-          .db('integration_tests')
-          .collection('new_mongo_client_collection')
-          .insertOne({ a: 1 })
-          .then(function (r) {
-            expect(r).to.exist;
+    await client.connect();
+    const topology = client.topology;
+    expect(topology).nested.property('s.options.connectTimeoutMS').to.equal(0);
+    expect(topology).nested.property('s.options.socketTimeoutMS').to.equal(0);
 
-            mongoclient.close(done);
-          });
-      });
-    }
+    await client.close();
   });
+
+  // TODO(NODE-7219): remove unnecessary test
+  // it('should open a new MongoClient connection', {
+  //   metadata: {
+  //     requires: {
+  //       topology: ['single']
+  //     }
+  //   },
+
+  //   test: function (done) {
+  //     const configuration = this.configuration;
+  //     const client = configuration.newClient();
+  //     client.connect(function (err, mongoclient) {
+  //       expect(err).to.not.exist;
+
+  //       mongoclient
+  //         .db('integration_tests')
+  //         .collection('new_mongo_client_collection')
+  //         .insertOne({ a: 1 }, function (err, r) {
+  //           expect(err).to.not.exist;
+  //           expect(r).to.be.an('object');
+
+  //           mongoclient.close(done);
+  //         });
+  //     });
+  //   }
+  // });
+
+  // TODO(NODE-7219): remove unnecessary test
+  // it('should correctly connect with MongoClient `connect` using Promise', function () {
+  //   const configuration = this.configuration;
+  //   let url = configuration.url();
+  //   url = url.indexOf('?') !== -1 ? `${url}&maxPoolSize=100` : `${url}?maxPoolSize=100`;
+
+  //   const client = configuration.newClient(url);
+  //   return client.connect().then(() => client.close());
+  // });
+
+  // TODO(NODE-7219): remove unnecessary test
+  // it('should open a new MongoClient connection using promise', {
+  //   metadata: {
+  //     requires: {
+  //       topology: ['single']
+  //     }
+  //   },
+
+  //   test: function (done) {
+  //     const configuration = this.configuration;
+  //     const client = configuration.newClient();
+  //     client.connect().then(function (mongoclient) {
+  //       mongoclient
+  //         .db('integration_tests')
+  //         .collection('new_mongo_client_collection')
+  //         .insertOne({ a: 1 })
+  //         .then(function (r) {
+  //           expect(r).to.exist;
+
+  //           mongoclient.close(done);
+  //         });
+  //     });
+  //   }
+  // });
 
   it('should be able to access a database named "constructor"', function () {
     const client = this.configuration.newClient();
@@ -474,28 +449,18 @@ describe('class MongoClient', function () {
     expect(client.readPreference).to.have.property('mode', ReadPreference.SECONDARY);
   });
 
-  it('should error on unexpected options', {
-    metadata: { requires: { topology: 'single' } },
+  it('should error on unexpected options', async function () {
+    const configuration = this.configuration;
+    const error = await MongoClient.connect(configuration.url(), {
+      maxPoolSize: 4,
+      // @ts-expect-error: unexpected option test
+      notlegal: {},
+      validateOptions: true
+    }).catch(e => e);
 
-    test: function (done) {
-      const configuration = this.configuration;
-      MongoClient.connect(
-        configuration.url(),
-        {
-          maxPoolSize: 4,
-          // @ts-expect-error: unexpected option test
-          notlegal: {},
-          validateOptions: true
-        },
-        function (err, client) {
-          expect(err)
-            .property('message')
-            .to.match(/options notlegal, validateoptions are not supported/);
-          expect(client).to.not.exist;
-          done();
-        }
-      );
-    }
+    expect(error)
+      .property('message')
+      .to.match(/options notlegal, validateoptions are not supported/);
   });
 
   it('should error on unexpected options (promise)', {
