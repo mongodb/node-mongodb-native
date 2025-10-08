@@ -335,52 +335,28 @@ describe('class MongoClient', function () {
     });
   });
 
-  it('Should correctly pass through appname', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded']
-      }
-    },
+  it('Should correctly pass through appname', async function () {
+    const configuration = this.configuration;
+    const options = {
+      appName: 'hello world'
+    };
+    const client = configuration.newClient(options);
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const options = {
-        appName: 'hello world'
-      };
-      const client = configuration.newClient(options);
-
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        expect(client)
-          .to.have.nested.property('topology.clientMetadata.application.name')
-          .to.equal('hello world');
-
-        client.close(done);
-      });
-    }
+    const {
+      application: { name }
+    } = await client.options.metadata;
+    expect(name).to.equal('hello world');
   });
 
-  it('Should correctly pass through appname in options', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded']
-      }
-    },
+  it('Should correctly pass through appname in options', async function () {
+    const configuration = this.configuration;
+    const url = this.configuration.url();
+    const client = configuration.newClient(url, { appName: 'hello world' });
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const url = configuration.url();
-
-      const client = configuration.newClient(url, { appname: 'hello world' });
-      client.connect(err => {
-        expect(err).to.not.exist;
-        expect(client)
-          .to.have.nested.property('topology.clientMetadata.application.name')
-          .to.equal('hello world');
-
-        client.close(done);
-      });
-    }
+    const {
+      application: { name }
+    } = await client.options.metadata;
+    expect(name).to.equal('hello world');
   });
 
   it('Should correctly pass through socketTimeoutMS and connectTimeoutMS', {
