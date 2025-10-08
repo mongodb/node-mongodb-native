@@ -1860,17 +1860,6 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: run lint checks
-  - name: run-resource-management-async-dispose
-    tags:
-      - resource-management
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '22'}
-      - func: install dependencies
-      - func: check resource management
   - name: test-explicit-resource-management-feature-integration
     tags:
       - resource-management
