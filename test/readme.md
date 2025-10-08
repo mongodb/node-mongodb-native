@@ -10,6 +10,8 @@ about the types of tests and how to run them.
   - [About the Tests](#about-the-tests)
     - [Spec Tests](#spec-tests)
   - [Running the Tests Locally](#running-the-tests-locally)
+    - [Testing Against Different Versions](#testing-against-different-versions)
+      - ["Bad CPU type in executable" error](#bad-cpu-type-in-executable-error)
     - [Testing With Authorization-Enabled](#testing-with-authorization-enabled)
     - [Testing Different MongoDB Topologies](#testing-different-mongodb-topologies)
     - [Running Individual Tests](#running-individual-tests)
@@ -122,6 +124,33 @@ The output will show how many tests passed, failed, and are pending. Tests that 
 
 In the following subsections, we'll dig into the details of running the tests.
 
+### Testing Against Different Versions
+
+Sometimes you'll need to run tests against a specific version, such as "7.0", and to do that you can use the `VERSION` env var.
+
+```sh
+VERSION=7.0 TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
+```
+
+Older versions of MongoDB may not have Mac binaries, so you may also need to specify a different architecture:
+
+```sh
+VERSION=4.2 ARCH=x86_64 TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
+```
+
+#### "Bad CPU type in executable" error
+
+You may encounter this error if Rosetta isn't properly configured on your system.
+```txt
+OSError: [Errno 86] Bad CPU type in executable: '.../node-mongodb-native/drivers-evergreen-tools/mongodb/bin/mongod'
+```
+
+To fix it, simply run:
+
+```sh
+softwareupdate --install-rosetta
+```
+
 ### Testing With Authorization-Enabled
 
 By default, the integration tests run with auth-enabled and the mongo orchestration script will run with auth enabled when the `AUTH` variable is set to `auth`. Tests can be run locally without auth by setting the environment variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
@@ -130,6 +159,7 @@ By default, the integration tests run with auth-enabled and the mongo orchestrat
 AUTH='noauth' TOPOLOGY='server' bash .evergreen/run-orchestration.sh
 AUTH='noauth' npm run check:test
 ```
+
 ### Testing Different MongoDB Topologies
 
 As we mentioned earlier, the tests check the topology of the MongoDB server being used and run the tests associated with that topology. Tests that don't have a matching topology will be skipped.
@@ -509,7 +539,7 @@ The following steps will walk you through how to run the tests for CSFLE.
 ```bash
 npm install mongodb-client-encryption
 ```
-> [!NOTE] 
+> [!NOTE]
 > If developing changes in `mongodb-client-encryption`, you can link it locally using `etc/tooling/fle.sh`.
 
 2. Load FLE credentials and download crypt_shared
@@ -521,8 +551,8 @@ source .evergreen/setup-fle.sh
 ```
 
 > [!NOTE]
-> By default, `setup-fle.sh` installs crypt_shared.  If you want to test with mongocryptd instead, set the RUN_WITH_MONGOCRYPTD environment variable before 
-> sourcing `setup-fle.sh`. 
+> By default, `setup-fle.sh` installs crypt_shared.  If you want to test with mongocryptd instead, set the RUN_WITH_MONGOCRYPTD environment variable before
+> sourcing `setup-fle.sh`.
 
 3. Run the functional tests:
 ```bash
@@ -550,7 +580,7 @@ All of this is handled in the csfle/azurekms and csfle/gcpkms folders in drivers
 
 #### Azure KMS
 
-1. Provision an Azure server.  You must set the `AZUREKMS_VMNAME_PREFIX` variable: 
+1. Provision an Azure server.  You must set the `AZUREKMS_VMNAME_PREFIX` variable:
 
 ```bash
 export AZUREKMS_VMNAME_PREFIX: "NODE_DRIVER"
