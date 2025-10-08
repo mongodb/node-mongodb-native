@@ -87,7 +87,6 @@ export {
   MongoWriteConcernError,
   WriteConcernErrorResult
 } from './error';
-export { configureExplicitResourceManagement } from './resource_management';
 export {
   AbstractCursor,
   // Actual driver classes exported
@@ -564,7 +563,6 @@ export type {
   ReadPreferenceLikeOptions,
   ReadPreferenceOptions
 } from './read_preference';
-export type { AsyncDisposable } from './resource_management';
 export type { ClusterTime } from './sdam/common';
 export type {
   Monitor,

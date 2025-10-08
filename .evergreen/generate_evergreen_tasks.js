@@ -511,17 +511,6 @@ SINGLETON_TASKS.push(
       ]
     },
     {
-      name: 'run-resource-management-async-dispose',
-      tags: ['resource-management'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: LATEST_LTS
-        }),
-        { func: 'install dependencies' },
-        { func: 'check resource management' }
-      ]
-    },
-    {
       name: 'test-explicit-resource-management-feature-integration',
       tags: ['resource-management'],
       commands: [
