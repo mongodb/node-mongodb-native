@@ -1,35 +1,20 @@
-import { type ChildProcess, spawn } from 'node:child_process';
-
 import { expect } from 'chai';
-import * as os from 'os';
-import * as path from 'path';
 
-import { MongoClient, ObjectId } from '../../mongodb';
+import { MongoClient } from '../../mongodb';
+import { configureMongocryptdSpawnHooks } from '../../tools/utils';
 
 describe('class ServerDescription', function () {
   describe('when connecting to mongocryptd', { requires: { mongodb: '>=4.4' } }, function () {
     let client: MongoClient;
-    const mongocryptdTestPort = '27022';
-    let childProcess: ChildProcess;
+
+    const { port: mongocryptdTestPort } = configureMongocryptdSpawnHooks();
 
     beforeEach(async function () {
-      const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
-      childProcess = spawn(
-        'mongocryptd',
-        ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
-        {
-          stdio: 'ignore',
-          detached: true
-        }
-      );
-
-      childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
       client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`);
     });
 
     afterEach(async function () {
       await client?.close();
-      childProcess.kill('SIGKILL');
     });
 
     it('iscryptd is set to true ', async function () {
