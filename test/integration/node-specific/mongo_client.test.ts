@@ -10,6 +10,7 @@ import {
   type CommandSucceededEvent,
   Db,
   MongoClient,
+  MongoNetworkError,
   MongoNotConnectedError,
   MongoServerSelectionError,
   ReadPreference
@@ -315,6 +316,28 @@ describe('class MongoClient', function () {
         }
       });
     });
+
+    it('throws ENOTFOUND error when connecting to non-existent host with no auth and loadBalanced=true', async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(
+        'mongodb://iLoveJavaScript:27017/test?loadBalanced=true',
+        { serverSelectionTimeoutMS: 100 }
+      );
+
+      const error = await client.connect().catch(error => error);
+      expect(error).to.be.instanceOf(MongoNetworkError); // not server selection like other topologies
+      expect(error.message).to.match(/ENOTFOUND/);
+    });
+
+    it('throws an error when srv is not a real record', async function () {
+      const client = this.configuration.newClient('mongodb+srv://iLoveJavaScript/test', {
+        serverSelectionTimeoutMS: 100
+      });
+
+      const error = await client.connect().catch(error => error);
+      expect(error).to.be.instanceOf(Error);
+      expect(error.message).to.match(/ENOTFOUND/);
+    });
   });
 
   it('Should correctly pass through appname', async function () {
@@ -528,31 +551,13 @@ describe('class MongoClient', function () {
       await client.close();
     });
 
-    it(
-      'creates topology and checks out connection when auth is enabled',
-      { requires: { auth: 'enabled' } },
-      async function () {
-        const checkoutStarted = once(client, 'connectionCheckOutStarted');
-        await client.connect();
-        const checkout = await checkoutStarted;
-        expect(checkout).to.exist;
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      }
-    );
-
-    it(
-      'does not checkout connection when authentication is disabled',
-      { requires: { auth: 'disabled' } },
-      async function () {
-        const checkoutStartedEvents = [];
-        client.on('connectionCheckOutStarted', event => {
-          checkoutStartedEvents.push(event);
-        });
-        await client.connect();
-        expect(checkoutStartedEvents).to.be.empty;
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      }
-    );
+    it('creates topology and checks out connection', async function () {
+      const checkoutStarted = once(client, 'connectionCheckOutStarted');
+      await client.connect();
+      const checkout = await checkoutStarted;
+      expect(checkout).to.exist;
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+    });
 
     it(
       'permits operations to be run after connect is called',
