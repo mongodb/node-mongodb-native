@@ -1,14 +1,14 @@
-'use strict';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
-const { AggregateOperation } = require('../../../src/operations/aggregate');
+import { AggregateOperation } from '../../../src/operations/aggregate';
+import { MongoDBNamespace, WriteConcern } from '../../mongodb';
 
 describe('AggregateOperation', function () {
-  const db = 'test';
+  const ns = new MongoDBNamespace('test', 'coll');
 
   describe('#constructor', function () {
     context('when out is in the options', function () {
-      const operation = new AggregateOperation(db, [], { out: 'test', dbName: db });
+      const operation = new AggregateOperation(ns, [], { out: 'test', dbName: ns.db });
 
       it('sets hasWriteStage to true', function () {
         expect(operation.hasWriteStage).to.be.true;
@@ -16,7 +16,7 @@ describe('AggregateOperation', function () {
     });
 
     context('when $out is the last stage', function () {
-      const operation = new AggregateOperation(db, [{ $out: 'test' }], { dbName: db });
+      const operation = new AggregateOperation(ns, [{ $out: 'test' }], { dbName: ns.db });
 
       it('sets hasWriteStage to true', function () {
         expect(operation.hasWriteStage).to.be.true;
@@ -24,8 +24,8 @@ describe('AggregateOperation', function () {
     });
 
     context('when $out is not the last stage', function () {
-      const operation = new AggregateOperation(db, [{ $out: 'test' }, { $project: { name: 1 } }], {
-        dbName: db
+      const operation = new AggregateOperation(ns, [{ $out: 'test' }, { $project: { name: 1 } }], {
+        dbName: ns.db
       });
 
       it('sets hasWriteStage to false', function () {
@@ -34,7 +34,9 @@ describe('AggregateOperation', function () {
     });
 
     context('when $merge is the last stage', function () {
-      const operation = new AggregateOperation(db, [{ $merge: { into: 'test' } }], { dbName: db });
+      const operation = new AggregateOperation(ns, [{ $merge: { into: 'test' } }], {
+        dbName: ns.db
+      });
 
       it('sets hasWriteStage to true', function () {
         expect(operation.hasWriteStage).to.be.true;
@@ -43,9 +45,9 @@ describe('AggregateOperation', function () {
 
     context('when $merge is not the last stage', function () {
       const operation = new AggregateOperation(
-        db,
+        ns,
         [{ $merge: { into: 'test' } }, { $project: { name: 1 } }],
-        { dbName: db }
+        { dbName: ns.db }
       );
 
       it('sets hasWriteStage to false', function () {
@@ -54,7 +56,7 @@ describe('AggregateOperation', function () {
     });
 
     context('when no writable stages in empty pipeline', function () {
-      const operation = new AggregateOperation(db, [], { dbName: db });
+      const operation = new AggregateOperation(ns, [], { dbName: ns.db });
 
       it('sets hasWriteStage to false', function () {
         expect(operation.hasWriteStage).to.be.false;
@@ -62,10 +64,24 @@ describe('AggregateOperation', function () {
     });
 
     context('when no writable stages', function () {
-      const operation = new AggregateOperation(db, [{ $project: { name: 1 } }], { dbName: db });
+      const operation = new AggregateOperation(ns, [{ $project: { name: 1 } }], { dbName: ns });
 
       it('sets hasWriteStage to false', function () {
         expect(operation.hasWriteStage).to.be.false;
+      });
+    });
+
+    context('when explain is set', function () {
+      context('when writeConcern is set', function () {
+        const operation = new AggregateOperation(ns, [], {
+          dbName: ns.db,
+          explain: true,
+          writeConcern: WriteConcern.fromOptions({ wtimeoutMS: 1000 })
+        });
+
+        it('does not raise an error', function () {
+          expect(operation.explain).to.exist;
+        });
       });
     });
   });

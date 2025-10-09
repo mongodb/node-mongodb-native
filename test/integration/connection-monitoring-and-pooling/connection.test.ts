@@ -15,10 +15,7 @@ import {
 } from '../../../src';
 import { connect } from '../../../src/cmap/connect';
 import { Connection } from '../../../src/cmap/connection';
-import {
-  addContainerMetadata,
-  makeClientMetadata
-} from '../../../src/cmap/handshake/client_metadata';
+import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
 import { MongoDBResponse } from '../../../src/cmap/wire_protocol/responses';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { Topology } from '../../../src/sdam/topology';
@@ -51,8 +48,7 @@ describe('Connection', function () {
           ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata([], {}),
-          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
+          metadata: makeClientMetadata([], {})
         };
 
         let conn;
@@ -74,8 +70,7 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata([], {}),
-          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
+          metadata: makeClientMetadata([], {})
         };
 
         let conn;
@@ -106,8 +101,7 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata([], {}),
-          extendedMetadata: addContainerMetadata(makeClientMetadata([], {}))
+          metadata: makeClientMetadata([], {})
         };
 
         let conn;

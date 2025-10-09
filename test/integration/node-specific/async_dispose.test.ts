@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { AbstractCursor, ChangeStream, ClientSession, MongoClient } from '../mongodb';
+import { type MongoClient } from '../../../src';
 
 describe('Symbol.asyncDispose implementation tests', function () {
   let client: MongoClient;
@@ -11,16 +11,9 @@ describe('Symbol.asyncDispose implementation tests', function () {
   });
 
   describe('Symbol.asyncDispose defined', function () {
-    beforeEach(function () {
-      if (!('asyncDispose' in Symbol)) {
-        this.currentTest.skipReason = 'Test must run with asyncDispose available.';
-        this.skip();
-      }
-    });
-
     describe('MongoClient', function () {
       it('the Symbol.asyncDispose method calls close()', async function () {
-        client = new MongoClient('mongodb://localhost:27017');
+        client = this.configuration.newClient();
 
         const spy = sinon.spy(client, 'close');
         await client[Symbol.asyncDispose]();
@@ -30,7 +23,7 @@ describe('Symbol.asyncDispose implementation tests', function () {
 
     describe('ClientSession', function () {
       it('the Symbol.asyncDispose method calls endSession()', async function () {
-        client = new MongoClient('mongodb://localhost:27017');
+        client = this.configuration.newClient();
         const session = client.startSession();
 
         const spy = sinon.spy(session, 'endSession');
@@ -41,7 +34,7 @@ describe('Symbol.asyncDispose implementation tests', function () {
 
     describe('ChangeStreams', function () {
       it('the Symbol.asyncDispose method calls close()', async function () {
-        client = new MongoClient('mongodb://localhost:27017');
+        client = this.configuration.newClient();
         const changeStream = client.watch();
 
         const spy = sinon.spy(changeStream, 'close');
@@ -52,38 +45,13 @@ describe('Symbol.asyncDispose implementation tests', function () {
 
     describe('cursors', function () {
       it('the Symbol.asyncDispose method calls close()', async function () {
-        client = new MongoClient('mongodb://localhost:27017');
+        client = this.configuration.newClient();
         const cursor = client.db('foo').collection('bar').find();
 
         const spy = sinon.spy(cursor, 'close');
         await cursor[Symbol.asyncDispose]();
         expect(spy.called).to.be.true;
       });
-    });
-  });
-
-  describe('Symbol.asyncDispose not defined', function () {
-    beforeEach(function () {
-      if ('asyncDispose' in Symbol) {
-        this.currentTest.skipReason = 'Test must run without asyncDispose available.';
-        this.skip();
-      }
-    });
-
-    it('does not define symbol.asyncDispose on MongoClient', function () {
-      expect(MongoClient[Symbol.asyncDispose]).not.to.exist;
-    });
-
-    it('does not define symbol.asyncDispose on ClientSession', function () {
-      expect(ClientSession[Symbol.asyncDispose]).not.to.exist;
-    });
-
-    it('does not define symbol.asyncDispose on ChangeStream', function () {
-      expect(ChangeStream[Symbol.asyncDispose]).not.to.exist;
-    });
-
-    it('does not define symbol.asyncDispose on cursors', function () {
-      expect(AbstractCursor[Symbol.asyncDispose]).not.to.exist;
     });
   });
 });

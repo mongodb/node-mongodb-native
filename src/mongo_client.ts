@@ -16,7 +16,6 @@ import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
 import {
-  addContainerMetadata,
   type ClientMetadata,
   isDriverInfoEqual,
   makeClientMetadata
@@ -48,7 +47,6 @@ import { executeOperation } from './operations/execute_operation';
 import { AbstractOperation } from './operations/operation';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
-import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import { readPreferenceServerSelector } from './sdam/server_selection';
@@ -408,31 +406,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * The consolidate, parsed, transformed and merged options.
    */
   public readonly options: Readonly<
-    Omit<
-      MongoOptions,
-      | 'monitorCommands'
-      | 'ca'
-      | 'crl'
-      | 'key'
-      | 'cert'
-      | 'driverInfo'
-      | 'additionalDriverInfo'
-      | 'metadata'
-      | 'extendedMetadata'
-    >
+    Omit<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo'>
   > &
-    Pick<
-      MongoOptions,
-      | 'monitorCommands'
-      | 'ca'
-      | 'crl'
-      | 'key'
-      | 'cert'
-      | 'driverInfo'
-      | 'additionalDriverInfo'
-      | 'metadata'
-      | 'extendedMetadata'
-    >;
+    Pick<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo'> & {
+      /** @internal */
+      metadata: Promise<ClientMetadata>;
+    };
 
   private driverInfoList: DriverInfo[] = [];
 
@@ -485,13 +464,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * @beta
    * @experimental
    * An alias for {@link MongoClient.close|MongoClient.close()}.
    */
-  declare [Symbol.asyncDispose]: () => Promise<void>;
-  /** @internal */
-  async asyncDispose() {
+  async [Symbol.asyncDispose]() {
     await this.close();
   }
 
@@ -506,10 +482,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     if (isDuplicateDriverInfo) return;
 
     this.driverInfoList.push(driverInfo);
-    this.options.metadata = makeClientMetadata(this.driverInfoList, this.options);
-    this.options.extendedMetadata = addContainerMetadata(this.options.metadata)
+    this.options.metadata = makeClientMetadata(this.driverInfoList, this.options)
       .then(undefined, squashError)
-      .then(result => result ?? {}); // ensure Promise<Document>
+      .then(result => result ?? ({} as ClientMetadata)); // ensure Promise<Document>
   }
 
   /** @internal */
@@ -1037,8 +1012,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 }
 
-configureResourceManagement(MongoClient.prototype);
-
 /**
  * Parsed Mongo Client Options.
  *
@@ -1105,12 +1078,8 @@ export interface MongoOptions
   compressors: CompressorName[];
   writeConcern: WriteConcern;
   dbName: string;
-  /** @deprecated - Will be made internal in a future major release. */
-  metadata: ClientMetadata;
-  /** @deprecated - Will be made internal in a future major release. */
-  extendedMetadata: Promise<Document>;
-  /** @deprecated - Will be made internal in a future major release. */
-  additionalDriverInfo: DriverInfo[];
+  /** @internal */
+  metadata: Promise<ClientMetadata>;
   /** @internal */
   autoEncrypter?: AutoEncrypter;
   /** @internal */

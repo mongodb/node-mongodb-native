@@ -18,7 +18,6 @@ import { MongoClient } from './mongo_client';
 import { type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { OperationParent } from './operations/command';
-import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerSessionId } from './sessions';
 import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
 import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
@@ -574,13 +573,10 @@ export class ChangeStream<
   implements AsyncDisposable
 {
   /**
-   * @beta
    * @experimental
    * An alias for {@link ChangeStream.close|ChangeStream.close()}.
    */
-  declare [Symbol.asyncDispose]: () => Promise<void>;
-  /** @internal */
-  async asyncDispose() {
+  async [Symbol.asyncDispose]() {
     await this.close();
   }
 
@@ -1090,5 +1086,3 @@ export class ChangeStream<
     }
   }
 }
-
-configureResourceManagement(ChangeStream.prototype);

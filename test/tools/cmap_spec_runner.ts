@@ -323,7 +323,7 @@ export class ThreadContext {
       serverApi: process.env.MONGODB_API_VERSION
         ? { version: process.env.MONGODB_API_VERSION }
         : undefined,
-      extendedMetadata: this.#server.topology.client.options.extendedMetadata
+      metadata: this.#server.topology.client.options.metadata
     });
     this.#originalServerPool = this.#server.pool;
     this.#server.pool = this.pool;

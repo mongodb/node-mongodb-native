@@ -1,12 +1,6 @@
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
-import {
-  AbstractCursor,
-  ChangeStream,
-  ClientSession,
-  GridFSBucket,
-  MongoClient
-} from 'mongodb/lib/beta';
+import { AbstractCursor, ChangeStream, ClientSession, GridFSBucket, MongoClient } from 'mongodb';
 import * as sinon from 'sinon';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';

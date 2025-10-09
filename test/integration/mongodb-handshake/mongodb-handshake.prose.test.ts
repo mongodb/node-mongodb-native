@@ -149,8 +149,8 @@ describe('Handshake Prose Tests', function () {
     it('includes both container and FAAS provider information in the client metadata', async function () {
       client = this.configuration.newClient();
       await client.connect();
-      expect(client.topology?.s.options.extendedMetadata).to.exist;
-      const { env } = await client.topology.s.options.extendedMetadata;
+      expect(client.topology?.s.options.metadata).to.exist;
+      const { env } = await client.topology.s.options.metadata;
 
       expect(env).to.deep.equal({
         region: 'us-east-2',

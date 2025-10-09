@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoInvalidArgumentError } from '../../../src/error';
+import { MongoInvalidArgumentError, MongoServerError } from '../../../src/error';
 import { type MongoClient } from '../../../src/mongo_client';
 import { filterForCommands } from '../shared';
 
@@ -601,7 +601,7 @@ describe('Aggregation', function () {
       .toArray()
       .catch(error => error);
 
-    expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+    expect(error).to.be.instanceOf(MongoServerError);
   });
 
   it('should fail if you try to use explain flag with { writeConcern: { j: true } }', async function () {
@@ -615,7 +615,7 @@ describe('Aggregation', function () {
       .toArray()
       .catch(error => error);
 
-    expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+    expect(error).to.be.instanceOf(MongoServerError);
   });
 
   it('should ensure MaxTimeMS is correctly passed down into command execution when using a cursor', async function () {

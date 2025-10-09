@@ -18,7 +18,6 @@ import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
-import { type AsyncDisposable, configureResourceManagement } from '../resource_management';
 import type { Server } from '../sdam/server';
 import { type ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type CSOTTimeoutContext, type Timeout, TimeoutContext } from '../timeout';
@@ -437,13 +436,10 @@ export abstract class AbstractCursor<
   }
 
   /**
-   * @beta
    * @experimental
    * An alias for {@link AbstractCursor.close|AbstractCursor.close()}.
    */
-  declare [Symbol.asyncDispose]: () => Promise<void>;
-  /** @internal */
-  async asyncDispose() {
+  async [Symbol.asyncDispose]() {
     await this.close();
   }
 
@@ -1222,8 +1218,6 @@ class ReadableCursorStream extends Readable {
       });
   }
 }
-
-configureResourceManagement(AbstractCursor.prototype);
 
 /**
  * @internal
