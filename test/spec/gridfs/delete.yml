@@ -30,40 +30,28 @@ initialData:
         length: 0
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "d41d8cd98f00b204e9800998ecf8427e"
         filename: "length-0"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
       - &file2
         _id: { "$oid": "000000000000000000000002" }
         length: 0
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "d41d8cd98f00b204e9800998ecf8427e"
         filename: "length-0-with-empty-chunk"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
       - &file3
         _id: { "$oid": "000000000000000000000003" }
         length: 2
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "c700ed4fdb1d27055aa3faa2c2432283"
         filename: "length-2"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
       - &file4
         _id: { "$oid": "000000000000000000000004" }
         length: 8
         chunkSize: 4
         uploadDate: { "$date": "1970-01-01T00:00:00.000Z" }
-        md5: "dd254cdc958e53abaa67da9f797125f5"
         filename: "length-8"
-        contentType: "application/octet-stream"
-        aliases: []
         metadata: {}
   - collectionName: *bucket0_chunks_collectionName
     databaseName: *database0Name
@@ -153,7 +141,7 @@ tests:
         object: *bucket0
         arguments:
           id: { $oid: "000000000000000000000000" }
-        expectError: { isError: true } # FileNotFound
+        expectError: { isClientError: true } # FileNotFound
     outcome:
       - collectionName: *bucket0_files_collectionName
         databaseName: *database0Name
@@ -182,7 +170,7 @@ tests:
         object: *bucket0
         arguments:
           id: { $oid: "000000000000000000000004" }
-        expectError: { isError: true } # FileNotFound
+        expectError: { isClientError: true } # FileNotFound
     outcome:
       - collectionName: *bucket0_files_collectionName
         databaseName: *database0Name

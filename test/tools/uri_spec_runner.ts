@@ -329,7 +329,7 @@ export function executeUriValidationTest(
 
       //** MISC SPECIAL PARSE RULE OPTIONS **/
       case 'appname':
-        expectedProp = 'metadata.application.name';
+        expectedProp = 'appName';
         expect(options, `${errorMessage} ${optionKey} -> ${expectedProp}`)
           .to.have.nested.property(expectedProp)
           .equal(optionValue);

@@ -138,10 +138,10 @@ export interface ConnectionOptions
   tls: boolean;
   noDelay?: boolean;
   socketTimeoutMS?: number;
-  cancellationToken?: CancellationToken;
-  metadata: ClientMetadata;
   /** @internal */
-  extendedMetadata: Promise<Document>;
+  cancellationToken?: CancellationToken;
+  /** @internal */
+  metadata: Promise<ClientMetadata>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
 }

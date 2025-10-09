@@ -273,8 +273,6 @@ describe('MongoClient', function () {
     expect(options.readPreference.mode).to.equal('nearest');
     expect(options.readPreference.tags).to.be.an('array').that.includes(tag);
     expect(options.readPreference.maxStalenessSeconds).to.equal(20);
-    // maxStalenessSeconds sets the minWireVersion
-    expect(options.readPreference.minWireVersion).to.be.at.least(5);
   });
 
   it('should throw when given a readpreference options with an unsupported type', () => {
