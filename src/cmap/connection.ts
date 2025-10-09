@@ -140,9 +140,8 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   /** @internal */
   cancellationToken?: CancellationToken;
-  metadata: ClientMetadata;
   /** @internal */
-  extendedMetadata: Promise<Document>;
+  metadata: Promise<ClientMetadata>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
 }

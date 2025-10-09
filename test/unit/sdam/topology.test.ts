@@ -51,14 +51,15 @@ describe('Topology (unit)', function () {
 
     after(() => mock.cleanup());
 
-    it('should correctly pass appname', function () {
-      const server: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
+    it('should correctly pass appname', async function () {
+      const topology: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
         metadata: makeClientMetadata([], {
           appName: 'My application name'
         })
       });
 
-      expect(server.clientMetadata?.application.name).to.equal('My application name');
+      const metadata = await topology.s.options.metadata;
+      expect(metadata.application.name).to.equal('My application name');
     });
 
     it('should report the correct platform in client metadata', async function () {

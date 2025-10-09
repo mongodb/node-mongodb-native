@@ -140,8 +140,8 @@ describe('client metadata module', () => {
 
   describe('makeClientMetadata()', () => {
     context('when no FAAS environment is detected', () => {
-      it('does not append FAAS metadata', () => {
-        const metadata = makeClientMetadata([], {});
+      it('does not append FAAS metadata', async () => {
+        const metadata = await makeClientMetadata([], {});
         expect(metadata).not.to.have.property(
           'env',
           'faas metadata applied in a non-faas environment'
@@ -163,15 +163,15 @@ describe('client metadata module', () => {
     });
 
     context('when driverInfo.platform is provided', () => {
-      it('throws an error if driverInfo.platform is too large', () => {
-        expect(() => makeClientMetadata([{ platform: 'a'.repeat(512) }], {})).to.throw(
-          MongoInvalidArgumentError,
-          /platform/
-        );
+      it('throws an error if driverInfo.platform is too large', async () => {
+        const error = await makeClientMetadata([{ platform: 'a'.repeat(512) }], {}).catch(e => e);
+        expect(error)
+          .to.be.instanceOf(MongoInvalidArgumentError)
+          .to.match(/platform/);
       });
 
-      it('appends driverInfo.platform to the platform field', () => {
-        const metadata = makeClientMetadata([{ platform: 'myPlatform' }], {});
+      it('appends driverInfo.platform to the platform field', async () => {
+        const metadata = await makeClientMetadata([{ platform: 'myPlatform' }], {});
         expect(metadata).to.deep.equal({
           driver: {
             name: 'nodejs',
@@ -189,15 +189,13 @@ describe('client metadata module', () => {
     });
 
     context('when driverInfo.name is provided', () => {
-      it('throws an error if driverInfo.name is too large', () => {
-        expect(() => makeClientMetadata([{ name: 'a'.repeat(512) }], {})).to.throw(
-          MongoInvalidArgumentError,
-          /name/
-        );
+      it('throws an error if driverInfo.name is too large', async () => {
+        const error = await makeClientMetadata([{ name: 'a'.repeat(512) }], {}).catch(e => e);
+        expect(error).to.be.instanceOf(MongoInvalidArgumentError).to.match(/name/);
       });
 
-      it('appends driverInfo.name to the driver.name field', () => {
-        const metadata = makeClientMetadata([{ name: 'myName' }], {});
+      it('appends driverInfo.name to the driver.name field', async () => {
+        const metadata = await makeClientMetadata([{ name: 'myName' }], {});
         expect(metadata).to.deep.equal({
           driver: {
             name: 'nodejs|myName',
@@ -215,15 +213,15 @@ describe('client metadata module', () => {
     });
 
     context('when driverInfo.version is provided', () => {
-      it('throws an error if driverInfo.version is too large', () => {
-        expect(() => makeClientMetadata([{ version: 'a'.repeat(512) }], {})).to.throw(
-          MongoInvalidArgumentError,
-          /version/
-        );
+      it('throws an error if driverInfo.version is too large', async () => {
+        const error = await makeClientMetadata([{ version: 'a'.repeat(512) }], {}).catch(e => e);
+        expect(error)
+          .to.be.instanceOf(MongoInvalidArgumentError)
+          .to.match(/version/);
       });
 
-      it('appends driverInfo.version to the version field', () => {
-        const metadata = makeClientMetadata([{ version: 'myVersion' }], {});
+      it('appends driverInfo.version to the version field', async () => {
+        const metadata = await makeClientMetadata([{ version: 'myVersion' }], {});
         expect(metadata).to.deep.equal({
           driver: {
             name: 'nodejs',
@@ -241,9 +239,8 @@ describe('client metadata module', () => {
     });
 
     context('when no custom driverInto is provided', () => {
-      const metadata = makeClientMetadata([], {});
-
-      it('does not append the driver info to the metadata', () => {
+      it('does not append the driver info to the metadata', async () => {
+        const metadata = await makeClientMetadata([], {});
         expect(metadata).to.deep.equal({
           driver: {
             name: 'nodejs',
@@ -259,19 +256,19 @@ describe('client metadata module', () => {
         });
       });
 
-      it('does not set the application field', () => {
+      it('does not set the application field', async () => {
+        const metadata = await makeClientMetadata([], {});
         expect(metadata).not.to.have.property('application');
       });
     });
 
     context('when app name is provided', () => {
       context('when the app name is over 128 bytes', () => {
-        const longString = 'a'.repeat(300);
-        const metadata = makeClientMetadata([], {
-          appName: longString
-        });
-
-        it('truncates the application name to <=128 bytes', () => {
+        it('truncates the application name to <=128 bytes', async () => {
+          const longString = 'a'.repeat(300);
+          const metadata = await makeClientMetadata([], {
+            appName: longString
+          });
           expect(metadata.application?.name).to.be.a('string');
           // the above assertion fails if `metadata.application?.name` is undefined, so
           // we can safely assert that it exists
@@ -283,12 +280,12 @@ describe('client metadata module', () => {
       context(
         'TODO(NODE-5150): fix appName truncation when multi-byte unicode charaters straddle byte 128',
         () => {
-          const longString = '€'.repeat(300);
-          const metadata = makeClientMetadata([], {
-            appName: longString
-          });
+          it('truncates the application name to 129 bytes', async () => {
+            const longString = '€'.repeat(300);
+            const metadata = await makeClientMetadata([], {
+              appName: longString
+            });
 
-          it('truncates the application name to 129 bytes', () => {
             expect(metadata.application?.name).to.be.a('string');
             // the above assertion fails if `metadata.application?.name` is undefined, so
             // we can safely assert that it exists
@@ -299,11 +296,10 @@ describe('client metadata module', () => {
       );
 
       context('when the app name is under 128 bytes', () => {
-        const metadata = makeClientMetadata([], {
-          appName: 'myApplication'
-        });
-
-        it('sets the application name to the value', () => {
+        it('sets the application name to the value', async () => {
+          const metadata = await makeClientMetadata([], {
+            appName: 'myApplication'
+          });
           expect(metadata.application?.name).to.equal('myApplication');
         });
       });
@@ -315,39 +311,39 @@ describe('client metadata module', () => {
           expect(delete globalThis.Deno, 'failed to delete Deno global').to.be.true;
         });
 
-        it('sets platform to Deno', () => {
+        it('sets platform to Deno', async () => {
           globalThis.Deno = { version: { deno: '1.2.3' } };
-          const metadata = makeClientMetadata([], {});
+          const metadata = await makeClientMetadata([], {});
           expect(metadata.platform).to.equal('Deno v1.2.3, LE');
         });
 
-        it('sets platform to Deno with driverInfo.platform', () => {
+        it('sets platform to Deno with driverInfo.platform', async () => {
           globalThis.Deno = { version: { deno: '1.2.3' } };
-          const metadata = makeClientMetadata([{ platform: 'myPlatform' }], {});
+          const metadata = await makeClientMetadata([{ platform: 'myPlatform' }], {});
           expect(metadata.platform).to.equal('Deno v1.2.3, LE|myPlatform');
         });
 
-        it('ignores version if Deno.version.deno is not a string', () => {
+        it('ignores version if Deno.version.deno is not a string', async () => {
           globalThis.Deno = { version: { deno: 1 } };
-          const metadata = makeClientMetadata([], {});
+          const metadata = await makeClientMetadata([], {});
           expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
-        it('ignores version if Deno.version does not have a deno property', () => {
+        it('ignores version if Deno.version does not have a deno property', async () => {
           globalThis.Deno = { version: { somethingElse: '1.2.3' } };
-          const metadata = makeClientMetadata([], {});
+          const metadata = await makeClientMetadata([], {});
           expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
-        it('ignores version if Deno.version is null', () => {
+        it('ignores version if Deno.version is null', async () => {
           globalThis.Deno = { version: null };
-          const metadata = makeClientMetadata([], {});
+          const metadata = await makeClientMetadata([], {});
           expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
-        it('ignores version if Deno is nullish', () => {
+        it('ignores version if Deno is nullish', async () => {
           globalThis.Deno = null;
-          const metadata = makeClientMetadata([], {});
+          const metadata = await makeClientMetadata([], {});
           expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
       });
@@ -357,41 +353,41 @@ describe('client metadata module', () => {
           expect(delete globalThis.Bun, 'failed to delete Bun global').to.be.true;
         });
 
-        it('sets platform to Bun', () => {
+        it('sets platform to Bun', async () => {
           globalThis.Bun = class {
             static version = '1.2.3';
           };
-          const metadata = makeClientMetadata([], {});
+          const metadata = await makeClientMetadata([], {});
           expect(metadata.platform).to.equal('Bun v1.2.3, LE');
         });
 
-        it('sets platform to Bun with driverInfo.platform', () => {
+        it('sets platform to Bun with driverInfo.platform', async () => {
           globalThis.Bun = class {
             static version = '1.2.3';
           };
-          const metadata = makeClientMetadata([{ platform: 'myPlatform' }], {});
+          const metadata = await makeClientMetadata([{ platform: 'myPlatform' }], {});
           expect(metadata.platform).to.equal('Bun v1.2.3, LE|myPlatform');
         });
 
-        it('ignores version if Bun.version is not a string', () => {
+        it('ignores version if Bun.version is not a string', async () => {
           globalThis.Bun = class {
             static version = 1;
           };
-          const metadata = makeClientMetadata([], {});
+          const metadata = await makeClientMetadata([], {});
           expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE');
         });
 
-        it('ignores version if Bun.version is not a string and sets driverInfo.platform', () => {
+        it('ignores version if Bun.version is not a string and sets driverInfo.platform', async () => {
           globalThis.Bun = class {
             static version = 1;
           };
-          const metadata = makeClientMetadata([{ platform: 'myPlatform' }], {});
+          const metadata = await makeClientMetadata([{ platform: 'myPlatform' }], {});
           expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE|myPlatform');
         });
 
-        it('ignores version if Bun is nullish', () => {
+        it('ignores version if Bun is nullish', async () => {
           globalThis.Bun = null;
-          const metadata = makeClientMetadata([{ platform: 'myPlatform' }], {});
+          const metadata = await makeClientMetadata([{ platform: 'myPlatform' }], {});
           expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE|myPlatform');
         });
       });
@@ -511,8 +507,8 @@ describe('client metadata module', () => {
             sinon.stub(process, 'env').get(() => Object.fromEntries(faasVariables));
           });
 
-          it(`returns ${inspect(outcome)} under env property`, () => {
-            const { env } = makeClientMetadata([], {});
+          it(`returns ${inspect(outcome)} under env property`, async () => {
+            const { env } = await makeClientMetadata([], {});
             expect(env).to.deep.equal(outcome);
           });
 
@@ -535,8 +531,8 @@ describe('client metadata module', () => {
         delete process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE;
       });
 
-      it('does not attach it to the metadata', () => {
-        expect(makeClientMetadata([], {})).not.to.have.nested.property('aws.memory_mb');
+      it('does not attach it to the metadata', async () => {
+        expect(await makeClientMetadata([], {})).not.to.have.nested.property('aws.memory_mb');
       });
     });
   });
@@ -550,8 +546,8 @@ describe('client metadata module', () => {
         }));
       });
 
-      it('only includes env.name', () => {
-        const metadata = makeClientMetadata([], {});
+      it('only includes env.name', async () => {
+        const metadata = await makeClientMetadata([], {});
         expect(metadata).to.not.have.nested.property('env.region');
         expect(metadata).to.have.nested.property('env.name', 'aws.lambda');
         expect(metadata.env).to.have.all.keys('name');
@@ -568,8 +564,8 @@ describe('client metadata module', () => {
           sinon.stub(os, 'release').returns('a'.repeat(512));
         });
 
-        it('only includes env.name', () => {
-          const metadata = makeClientMetadata([], {});
+        it('only includes env.name', async () => {
+          const metadata = await makeClientMetadata([], {});
           expect(metadata).to.have.property('env');
           expect(metadata).to.have.nested.property('env.region', 'abc');
           expect(metadata.os).to.have.all.keys('type');
@@ -585,8 +581,8 @@ describe('client metadata module', () => {
           sinon.stub(os, 'type').returns('a'.repeat(512));
         });
 
-        it('omits os information', () => {
-          const metadata = makeClientMetadata([], {});
+        it('omits os information', async () => {
+          const metadata = await makeClientMetadata([], {});
           expect(metadata).to.not.have.property('os');
         });
       });
@@ -601,8 +597,8 @@ describe('client metadata module', () => {
         sinon.stub(os, 'type').returns('a'.repeat(50));
       });
 
-      it('omits the faas env', () => {
-        const metadata = makeClientMetadata([{ name: 'a'.repeat(350) }], {});
+      it('omits the faas env', async () => {
+        const metadata = await makeClientMetadata([{ name: 'a'.repeat(350) }], {});
         expect(metadata).to.not.have.property('env');
       });
     });
