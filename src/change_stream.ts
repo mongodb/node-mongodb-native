@@ -20,16 +20,7 @@ import type { AggregateOptions } from './operations/aggregate';
 import type { OperationParent } from './operations/command';
 import type { ServerSessionId } from './sessions';
 import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
-import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
-
-const CHANGE_STREAM_OPTIONS = [
-  'resumeAfter',
-  'startAfter',
-  'startAtOperationTime',
-  'fullDocument',
-  'fullDocumentBeforeChange',
-  'showExpandedEvents'
-] as const;
+import { getTopology, type MongoDBNamespace, squashError } from './utils';
 
 const CHANGE_DOMAIN_TYPES = {
   COLLECTION: Symbol('Collection'),
@@ -900,7 +891,7 @@ export class ChangeStream<
   private _createChangeStreamCursor(
     options: ChangeStreamOptions | ChangeStreamCursorOptions
   ): ChangeStreamCursor<TSchema, TChange> {
-    const changeStreamStageOptions = filterOptions(options, CHANGE_STREAM_OPTIONS);
+    const changeStreamStageOptions: Document = { ...options };
     if (this.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
       changeStreamStageOptions.allChangesForCluster = true;
     }
