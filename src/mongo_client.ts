@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 
-import { type ServerCommandOptions, type TimeoutContext, TopologyType } from '.';
+import { TopologyType } from '.';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
@@ -22,7 +22,6 @@ import {
   makeClientMetadata
 } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import { MongoDBResponse } from './cmap/wire_protocol/responses';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { type AbstractCursor } from './cursor/abstract_cursor';
@@ -44,8 +43,8 @@ import {
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
 import { ClientBulkWriteExecutor } from './operations/client_bulk_write/executor';
+import { EndSessionsOperation } from './operations/end_sessions';
 import { executeOperation } from './operations/execute_operation';
-import { AbstractOperation } from './operations/operation';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
@@ -63,7 +62,7 @@ import {
   type HostAddress,
   hostMatchesWildcards,
   isHostMatch,
-  MongoDBNamespace,
+  type MongoDBNamespace,
   noop,
   ns,
   resolveOptions,
@@ -827,26 +826,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
         const endSessions = Array.from(client.s.sessionPool.sessions, ({ id }) => id);
         if (endSessions.length !== 0) {
           try {
-            class EndSessionsOperation extends AbstractOperation<void> {
-              override ns = MongoDBNamespace.fromString('admin.$cmd');
-              override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
-              override buildCommand(_connection: Connection, _session?: ClientSession): Document {
-                return {
-                  endSessions
-                };
-              }
-              override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
-                return {
-                  timeoutContext,
-                  readPreference: ReadPreference.primaryPreferred,
-                  noResponse: true
-                };
-              }
-              override get commandName(): string {
-                return 'endSessions';
-              }
-            }
-            await executeOperation(client, new EndSessionsOperation());
+            await executeOperation(client, new EndSessionsOperation(endSessions));
           } catch (error) {
             squashError(error);
           }
