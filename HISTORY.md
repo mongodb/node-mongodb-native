@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v7.0.0) (2025-10-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-6473:** remove MONGODB-CR auth ([#4717](https://github.com/mongodb/node-mongodb-native/issues/4717))
+* **NODE-5994:** Remove metadata-related properties from public driver API ([#4716](https://github.com/mongodb/node-mongodb-native/issues/4716))
+* **NODE-7016:** remove `beta` namespace and move resource management into driver ([#4719](https://github.com/mongodb/node-mongodb-native/issues/4719))
+* **NODE-4184:** don't throw on aggregate with write concern and explain ([#4718](https://github.com/mongodb/node-mongodb-native/issues/4718))
+* **NODE-7043, NODE-7217:** adopt mongodb-client-encryption v7 ([#4705](https://github.com/mongodb/node-mongodb-native/issues/4705))
+* **NODE-6065:** throw MongoRuntimeError instead of MissingDependencyError in crypto connection ([#4711](https://github.com/mongodb/node-mongodb-native/issues/4711))
+* **NODE-6584:** improve typing for filepaths in AutoEncryptionOptions ([#4341](https://github.com/mongodb/node-mongodb-native/issues/4341))
+* **NODE-6334:** rename PoolRequstedRetry to PoolRequestedRetry ([#4696](https://github.com/mongodb/node-mongodb-native/issues/4696))
+* **NODE-7174:** drop support for Node16 and Node18 ([#4668](https://github.com/mongodb/node-mongodb-native/issues/4668))
+* **NODE-7047:** use custom credential provider first after URI ([#4656](https://github.com/mongodb/node-mongodb-native/issues/4656))
+* **NODE-6988:** require aws sdk for aws auth ([#4659](https://github.com/mongodb/node-mongodb-native/issues/4659))
+
+### Features
+
+* **NODE-4184:** don't throw on aggregate with write concern and explain ([#4718](https://github.com/mongodb/node-mongodb-native/issues/4718)) ([88e02a4](https://github.com/mongodb/node-mongodb-native/commit/88e02a41eaf69da100b2beeabc67a26406d4f2b7))
+* **NODE-5545:** remove deprecated objects ([#4704](https://github.com/mongodb/node-mongodb-native/issues/4704)) ([cfbada6](https://github.com/mongodb/node-mongodb-native/commit/cfbada66ceb017bdb8fa1ff39257e1ab49ee9e25))
+* **NODE-5994:** Remove metadata-related properties from public driver API ([#4716](https://github.com/mongodb/node-mongodb-native/issues/4716)) ([b59c5ce](https://github.com/mongodb/node-mongodb-native/commit/b59c5ce387714e3d3fc4eed20e882f4b56597dd0))
+* **NODE-6065:** throw MongoRuntimeError instead of MissingDependencyError in crypto connection ([#4711](https://github.com/mongodb/node-mongodb-native/issues/4711)) ([ff229fa](https://github.com/mongodb/node-mongodb-native/commit/ff229fa8e4c906f5980ee4311c0eb0d883909934))
+* **NODE-6334:** rename PoolRequstedRetry to PoolRequestedRetry ([#4696](https://github.com/mongodb/node-mongodb-native/issues/4696)) ([84db848](https://github.com/mongodb/node-mongodb-native/commit/84db84829fb41135d19bc5216137ef84a16a1960))
+* **NODE-6473:** remove MONGODB-CR auth ([#4717](https://github.com/mongodb/node-mongodb-native/issues/4717)) ([9a1bc65](https://github.com/mongodb/node-mongodb-native/commit/9a1bc65893640f56b25049243ac94fc3dab35c8a))
+* **NODE-6584:** improve typing for filepaths in AutoEncryptionOptions ([#4341](https://github.com/mongodb/node-mongodb-native/issues/4341)) ([dab4c7c](https://github.com/mongodb/node-mongodb-native/commit/dab4c7c8279ac1112d99d7ceca505632a45d0787))
+* **NODE-6988:** require aws sdk for aws auth ([#4659](https://github.com/mongodb/node-mongodb-native/issues/4659)) ([b7c6750](https://github.com/mongodb/node-mongodb-native/commit/b7c6750771e0a578e7f2ce6a8b9192ee7e76e8d3))
+* **NODE-7016:** remove `beta` namespace and move resource management into driver ([#4719](https://github.com/mongodb/node-mongodb-native/issues/4719)) ([fb2824f](https://github.com/mongodb/node-mongodb-native/commit/fb2824ffd503d0b8d580df3ee51bf40cc51f53e0))
+* **NODE-7043, NODE-7217:** adopt mongodb-client-encryption v7 ([#4705](https://github.com/mongodb/node-mongodb-native/issues/4705)) ([3f7196e](https://github.com/mongodb/node-mongodb-native/commit/3f7196eb346925f2f6c016abfd18f030de25c911))
+* **NODE-7047:** use custom credential provider first after URI ([#4656](https://github.com/mongodb/node-mongodb-native/issues/4656)) ([2a47bbb](https://github.com/mongodb/node-mongodb-native/commit/2a47bbbf03ec54509d93f925d0747378e3de80ed))
+* **NODE-7174:** drop support for Node16 and Node18 ([#4668](https://github.com/mongodb/node-mongodb-native/issues/4668)) ([a576b7d](https://github.com/mongodb/node-mongodb-native/commit/a576b7d3a8210f0544c3814b130ea21585ea1f9f))
+* **NODE-7223:** run checkout on connect regardless of credentials ([#4715](https://github.com/mongodb/node-mongodb-native/issues/4715)) ([c5f74ab](https://github.com/mongodb/node-mongodb-native/commit/c5f74abe27acd8661f17046b1740ac74de1be082))
+
+
+### Bug Fixes
+
+* **NODE-7232:** only send endSessions during client close if the topology supports sessions ([#4722](https://github.com/mongodb/node-mongodb-native/issues/4722)) ([cc85ebf](https://github.com/mongodb/node-mongodb-native/commit/cc85ebf246b20e0bae59e1bdcdf0f9c74ea01979))
+
 ## [6.20.0](https://github.com/mongodb/node-mongodb-native/compare/v6.19.0...v6.20.0) (2025-09-17)
 
 
