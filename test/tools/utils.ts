@@ -1,6 +1,7 @@
 import * as child_process from 'node:child_process';
 import { on, once } from 'node:events';
 import * as fs from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 
 import { EJSON } from 'bson';
@@ -539,3 +540,33 @@ export const DOMException: {
   ac.abort();
   return ac.signal.reason.constructor;
 })();
+
+export function configureMongocryptdSpawnHooks(
+  options: { port?: string; pidfilepath?: string } = {}
+): { port: string } {
+  const port = options.port ?? '27022';
+  const pidfilepath = options.pidfilepath ?? path.join(tmpdir(), new BSON.ObjectId().toHexString());
+
+  let childProcess: child_process.ChildProcess;
+
+  beforeEach(async function () {
+    childProcess = child_process.spawn(
+      'mongocryptd',
+      ['--port', port, '--ipv6', '--pidfilepath', pidfilepath],
+      {
+        stdio: 'ignore',
+        detached: false
+      }
+    );
+
+    childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
+  });
+
+  afterEach(function () {
+    childProcess.kill('SIGKILL');
+  });
+
+  return {
+    port
+  };
+}

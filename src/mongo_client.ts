@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 
-import { type ServerCommandOptions, type TimeoutContext } from '.';
+import { TopologyType } from '.';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
@@ -21,7 +21,6 @@ import {
   makeClientMetadata
 } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import { MongoDBResponse } from './cmap/wire_protocol/responses';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { type AbstractCursor } from './cursor/abstract_cursor';
@@ -43,8 +42,8 @@ import {
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
 import { ClientBulkWriteExecutor } from './operations/client_bulk_write/executor';
+import { EndSessionsOperation } from './operations/end_sessions';
 import { executeOperation } from './operations/execute_operation';
-import { AbstractOperation } from './operations/operation';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import type { ServerMonitoringMode } from './sdam/monitor';
@@ -61,7 +60,7 @@ import {
   type HostAddress,
   hostMatchesWildcards,
   isHostMatch,
-  MongoDBNamespace,
+  type MongoDBNamespace,
   noop,
   ns,
   resolveOptions,
@@ -763,40 +762,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       return;
     }
 
-    // If we would attempt to select a server and get nothing back we short circuit
-    // to avoid the server selection timeout.
-    const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
-    const topologyDescription = this.topology.description;
-    const serverDescriptions = Array.from(topologyDescription.servers.values());
-    const servers = selector(topologyDescription, serverDescriptions);
-    if (servers.length !== 0) {
-      const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
-      if (endSessions.length !== 0) {
-        try {
-          class EndSessionsOperation extends AbstractOperation<void> {
-            override ns = MongoDBNamespace.fromString('admin.$cmd');
-            override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
-            override buildCommand(_connection: Connection, _session?: ClientSession): Document {
-              return {
-                endSessions
-              };
-            }
-            override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
-              return {
-                timeoutContext,
-                readPreference: ReadPreference.primaryPreferred,
-                noResponse: true
-              };
-            }
-            override get commandName(): string {
-              return 'endSessions';
-            }
-          }
-          await executeOperation(this, new EndSessionsOperation());
-        } catch (error) {
-          squashError(error);
-        }
-      }
+    const supportsSessions =
+      this.topology.description.type === TopologyType.LoadBalanced ||
+      this.topology.description.logicalSessionTimeoutMinutes != null;
+
+    if (supportsSessions) {
+      await endSessions(this, this.topology);
     }
 
     // clear out references to old topology
@@ -808,6 +779,27 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     const { encrypter } = this.options;
     if (encrypter) {
       await encrypter.close(this);
+    }
+
+    async function endSessions(
+      client: MongoClient,
+      { description: topologyDescription }: Topology
+    ) {
+      // If we would attempt to select a server and get nothing back we short circuit
+      // to avoid the server selection timeout.
+      const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
+      const serverDescriptions = Array.from(topologyDescription.servers.values());
+      const servers = selector(topologyDescription, serverDescriptions);
+      if (servers.length !== 0) {
+        const endSessions = Array.from(client.s.sessionPool.sessions, ({ id }) => id);
+        if (endSessions.length !== 0) {
+          try {
+            await executeOperation(client, new EndSessionsOperation(endSessions));
+          } catch (error) {
+            squashError(error);
+          }
+        }
+      }
     }
   }
 
