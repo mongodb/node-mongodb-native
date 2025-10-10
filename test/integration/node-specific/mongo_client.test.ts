@@ -862,23 +862,33 @@ describe('class MongoClient', function () {
       expect(result2).to.have.property('ok', 1);
     });
 
-    it('sends endSessions with noResponse set', async () => {
+    it('sends endSessions with w: 0 set', async () => {
       const session = client.startSession(); // make a session to be ended
       await client.db('test').command({ ping: 1 }, { session });
       await session.endSession();
 
       const startedEvents: CommandStartedEvent[] = [];
-      const endEvents: Array<CommandFailedEvent | CommandSucceededEvent> = [];
+      const endEvents: Array<CommandSucceededEvent> = [];
       client.on('commandStarted', event => startedEvents.push(event));
       client.on('commandSucceeded', event => endEvents.push(event));
-      client.on('commandFailed', event => endEvents.push(event));
 
       await client.close();
 
       expect(startedEvents).to.have.lengthOf(1);
-      expect(startedEvents[0]).to.have.property('commandName', 'endSessions');
+      const [
+        {
+          command: { endSessions, writeConcern }
+        }
+      ] = startedEvents;
+      expect(endSessions).to.exist;
+      expect(writeConcern).to.deep.equal({ w: 0 });
       expect(endEvents).to.have.lengthOf(1);
-      expect(endEvents[0]).to.have.property('reply', undefined); // noReponse: true
+
+      const [{ reply }] = endEvents;
+
+      // when unacknowledged writes are used, the driver uses `{ ok: 1 }` as a placeholder
+      // `reply` in CommandSucceededEvents
+      expect(reply).to.deep.equal({ ok: 1 });
     });
 
     describe('when server selection would return no servers', () => {
