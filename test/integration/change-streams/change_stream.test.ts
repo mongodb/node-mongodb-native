@@ -160,10 +160,10 @@ describe('Change Streams', function () {
       });
     });
 
-    it('ignores any invalid option values', function () {
+    it('allows invalid option values', function () {
       const changeStream = collection.watch([], { invalidOption: true });
 
-      expect(changeStream).not.to.have.nested.property(
+      expect(changeStream).to.have.nested.property(
         'cursor.pipeline[0].$changeStream.invalidOption'
       );
     });
