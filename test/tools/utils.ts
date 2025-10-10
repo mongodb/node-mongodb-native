@@ -463,6 +463,17 @@ export async function makeMultiResponseBatchModelArray(
   return models;
 }
 
+export function fakeServer() {
+  return {
+    s: { state: 'connected' },
+    removeListener: () => true,
+    pool: {
+      checkOut: async () => ({}),
+      checkIn: () => undefined
+    }
+  };
+}
+
 /**
  * A utility to measure the duration of an async function.  This is intended to be used for CSOT
  * testing, where we expect to timeout within a certain threshold and want to measure the duration

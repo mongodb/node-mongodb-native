@@ -8,6 +8,7 @@ import { Server } from '../../../src/sdam/server';
 import { ServerDescription } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
 import { type TopologyDescription } from '../../../src/sdam/topology_description';
+import { fakeServer } from '../../tools/utils';
 
 describe('Server Discovery and Monitoring', function () {
   let serverConnect: sinon.SinonStub;
@@ -30,9 +31,7 @@ describe('Server Discovery and Monitoring', function () {
       .stub(Topology.prototype, 'selectServer')
       .callsFake(async function (_selector, _options) {
         topologySelectServer.restore();
-
-        const fakeServer = { s: { state: 'connected' }, removeListener: () => true };
-        return fakeServer;
+        return fakeServer();
       });
 
     events = [];

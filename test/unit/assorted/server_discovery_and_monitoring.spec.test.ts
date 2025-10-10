@@ -38,7 +38,7 @@ import { Server } from '../../../src/sdam/server';
 import { ServerDescription, type TopologyVersion } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
 import { isRecord, ns, squashError } from '../../../src/utils';
-import { ejson } from '../../tools/utils';
+import { ejson, fakeServer } from '../../tools/utils';
 
 const SDAM_EVENT_CLASSES = {
   ServerDescriptionChangedEvent,
@@ -214,9 +214,7 @@ describe('Server Discovery and Monitoring (spec)', function () {
           .stub(Topology.prototype, 'selectServer')
           .callsFake(async function (_selector, _options) {
             topologySelectServers.restore();
-
-            const fakeServer = { s: { state: 'connected' }, removeListener: () => true };
-            return fakeServer;
+            return fakeServer();
           });
       });
 

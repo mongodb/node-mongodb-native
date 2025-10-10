@@ -21,14 +21,6 @@ const AUTH_PROVIDERS = new Map<
     AuthMechanism.MONGODB_AWS,
     ({ AWS_CREDENTIAL_PROVIDER }) => new MongoDBAWS(AWS_CREDENTIAL_PROVIDER)
   ],
-  [
-    AuthMechanism.MONGODB_CR,
-    () => {
-      throw new MongoInvalidArgumentError(
-        'MONGODB-CR is no longer a supported auth mechanism in MongoDB 4.0+'
-      );
-    }
-  ],
   [AuthMechanism.MONGODB_GSSAPI, () => new GSSAPI()],
   [AuthMechanism.MONGODB_OIDC, properties => new MongoDBOIDC(getWorkflow(properties))],
   [AuthMechanism.MONGODB_PLAIN, () => new Plain()],
