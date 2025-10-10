@@ -56,12 +56,10 @@ export class MongoDBAWS extends AuthProvider {
       );
     }
 
-    if (!authContext.credentials.username) {
-      authContext.credentials = await makeTempCredentials(
-        authContext.credentials,
-        this.credentialFetcher
-      );
-    }
+    authContext.credentials = await makeTempCredentials(
+      authContext.credentials,
+      this.credentialFetcher
+    );
 
     const { credentials } = authContext;
 

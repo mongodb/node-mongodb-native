@@ -6,10 +6,6 @@ const { MongoClient } = require('mongodb');
 // options. Note that MongoClient now auto-connects so no need to store the connect()
 // promise anywhere and reference it.
 const client = new MongoClient(process.env.MONGODB_URI, {
-  auth: {
-    username: process.env.AWS_ACCESS_KEY_ID,
-    password: process.env.AWS_SECRET_ACCESS_KEY
-  },
   authSource: '$external',
   authMechanism: 'MONGODB-AWS'
 });
