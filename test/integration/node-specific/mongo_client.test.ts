@@ -5,7 +5,6 @@ import * as sinon from 'sinon';
 
 import {
   type Collection,
-  type CommandFailedEvent,
   type CommandStartedEvent,
   type CommandSucceededEvent,
   Db,
