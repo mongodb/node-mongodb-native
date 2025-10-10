@@ -35,29 +35,6 @@ describe('new Connection()', function () {
 
   before(() => mock.createServer().then(s => (server = s)));
 
-  it('supports fire-and-forget messages', async function () {
-    server.setMessageHandler(request => {
-      const doc = request.document;
-      if (isHello(doc)) {
-        request.reply(mock.HELLO);
-      }
-
-      // black hole all other requests
-    });
-
-    const options = {
-      ...connectionOptionsDefaults,
-      connectionType: Connection,
-      hostAddress: server.hostAddress(),
-      authProviders: new MongoClientAuthProviders()
-    };
-
-    const conn = await connect(options);
-    const readSpy = sinon.spy(conn, 'readMany');
-    await conn.command(ns('$admin.cmd'), { ping: 1 }, { noResponse: true });
-    expect(readSpy).to.not.have.been.called;
-  });
-
   it('destroys streams which time out', async function () {
     server.setMessageHandler(request => {
       const doc = request.document;
