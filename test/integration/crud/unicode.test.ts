@@ -19,7 +19,7 @@ describe('Unicode', function () {
     await client?.close();
   });
 
-  it('shouldCorrectlyInsertUnicodeContainingDocument', async function () {
+  it('should correctly insert unicode containing document', async function () {
     if (satisfies(process.versions.node, '22.7.0')) {
       this.skipReason = 'Node.js 22.7.0 has a UTF-8 encoding bug';
       this.skip();
@@ -79,7 +79,7 @@ describe('Unicode', function () {
     test.equal('felixge', document._id);
   });
 
-  it('should Correctly Insert Unicode Characters', async function () {
+  it('should correctly insert unicode characters', async function () {
     const db = client.db(this.configuration.db);
     const collection = await db.createCollection('unicode_test_collection');
     const test_strings = ['ouooueauiOUOOUEAUI', 'öüóőúéáűíÖÜÓŐÚÉÁŰÍ', '本荘由利地域に洪水警報'];
@@ -91,7 +91,7 @@ describe('Unicode', function () {
     expect(documents[1]).property('text').to.equal(test_strings[documents[1].id]);
   });
 
-  it('shouldCreateObjectWithChineseObjectName', async function () {
+  it('should create object with Chinese object name', async function () {
     const object = { 客家话: 'Hello' };
 
     const configuration = this.configuration;
@@ -106,7 +106,7 @@ describe('Unicode', function () {
     test.equal(object['客家话'], items[0]['客家话']);
   });
 
-  it('shouldCorrectlyHandleUT8KeyNames', async function () {
+  it('should correctly handle UTF8 key names', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
     const collection = await db.createCollection('test_utf8_key_name');
