@@ -889,7 +889,7 @@ export abstract class AbstractCursor<
   ): Promise<InitialCursorResponse>;
 
   /** @internal */
-  async getMore(batchSize: number): Promise<CursorResponse> {
+  async getMore(): Promise<CursorResponse> {
     if (this.cursorId == null) {
       throw new MongoRuntimeError(
         'Unexpected null cursor id. A cursor creating command should have set this'
@@ -906,11 +906,10 @@ export abstract class AbstractCursor<
         'Unexpected null session. A cursor creating command should have set this'
       );
     }
-
     const getMoreOptions = {
       ...this.cursorOptions,
       session: this.cursorSession,
-      batchSize
+      batchSize: this.cursorOptions.batchSize
     };
 
     const getMoreOperation = new GetMoreOperation(
@@ -983,14 +982,11 @@ export abstract class AbstractCursor<
       await this.cursorInit();
       // If the cursor died or returned documents, return
       if ((this.documents?.length ?? 0) !== 0 || this.isDead) return;
-      // Otherwise, run a getMore
     }
 
-    // otherwise need to call getMore
-    const batchSize = this.cursorOptions.batchSize || 1000;
-
+    // Otherwise, run a getMore
     try {
-      const response = await this.getMore(batchSize);
+      const response = await this.getMore();
       this.cursorId = response.id;
       this.documents = response;
     } catch (error) {

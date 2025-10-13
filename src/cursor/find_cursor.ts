@@ -98,34 +98,29 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   }
 
   /** @internal */
-  override async getMore(batchSize: number): Promise<CursorResponse> {
+  override async getMore(): Promise<CursorResponse> {
     const numReturned = this.numReturned;
-    if (numReturned) {
-      // TODO(DRIVERS-1448): Remove logic to enforce `limit` in the driver
-      const limit = this.findOptions.limit;
-      batchSize =
-        limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
+    const limit = this.findOptions.limit;
 
-      if (batchSize <= 0) {
-        try {
-          await this.close();
-        } catch (error) {
-          squashError(error);
-          // this is an optimization for the special case of a limit for a find command to avoid an
-          // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
-          // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
-          // produces results for the find command.  Once a batch is filled up, it is returned and only
-          // on the subsequent getMore will the query framework consider the limit, determine the cursor
-          // is exhausted and return a cursorId of zero.
-          // instead, if we determine there are no more documents to request from the server, we preemptively
-          // close the cursor
-        }
-        return CursorResponse.emptyGetMore;
+    if (numReturned && limit && numReturned >= limit) {
+      try {
+        await this.close();
+      } catch (error) {
+        squashError(error);
+        // this is an optimization for the special case of a limit for a find command to avoid an
+        // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
+        // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
+        // produces results for the find command.  Once a batch is filled up, it is returned and only
+        // on the subsequent getMore will the query framework consider the limit, determine the cursor
+        // is exhausted and return a cursorId of zero.
+        // instead, if we determine there are no more documents to request from the server, we preemptively
+        // close the cursor
       }
+      return CursorResponse.emptyGetMore;
     }
 
-    const response = await super.getMore(batchSize);
-    // TODO: wrap this in some logic to prevent it from happening if we don't need this support
+    const response = await super.getMore();
+
     this.numReturned = this.numReturned + response.batchSize;
 
     return response;
