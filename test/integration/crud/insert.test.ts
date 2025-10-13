@@ -1,26 +1,25 @@
-'use strict';
-const semver = require('semver');
-const { assert: test, ignoreNsNotFound, setupDatabase } = require('../shared');
-const { format: f } = require('util');
-const { expect } = require('chai');
+import { format as f } from 'node:util';
+import * as Script from 'node:vm';
 
-const Script = require('vm');
+import { expect } from 'chai';
+import { satisfies } from 'semver';
 
-const {
-  Long,
-  Timestamp,
-  ObjectId,
-  DBRef,
-  BSONSymbol,
-  Double,
+import {
   Binary,
-  MinKey,
-  MaxKey,
+  BSONSymbol,
   Code,
+  DBRef,
+  Double,
+  Long,
+  MaxKey,
+  MinKey,
   MongoBulkWriteError,
+  MongoInvalidArgumentError,
+  ObjectId,
   ReturnDocument,
-  MongoInvalidArgumentError
-} = require('../../mongodb');
+  Timestamp
+} from '../../mongodb';
+import { assert as test, ignoreNsNotFound, setupDatabase } from '../shared';
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -62,7 +61,7 @@ const ISODate = function (string) {
   } else throw new Error('Invalid ISO 8601 date given.', __filename);
 };
 
-describe('crud - insert', function () {
+describe.only('crud - insert', function () {
   let client;
 
   beforeEach(async function () {
@@ -142,11 +141,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyPerformSingleInsert');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyPerformSingleInsert');
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
             expect(err).to.not.exist;
 
@@ -184,13 +183,13 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_should_deserialize_large_integrated_array');
+          const db = client.db(configuration.db);
+          const collection = db.collection('test_should_deserialize_large_integrated_array');
 
-          var doc = {
+          const doc = {
             a: 0,
             b: [
               'tmp1',
@@ -233,21 +232,21 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_all_serialization_types');
+          const db = client.db(configuration.db);
+          const collection = db.collection('test_all_serialization_types');
 
-          var date = new Date();
-          var oid = new ObjectId();
-          var string = 'binstring';
-          var bin = new Binary();
-          for (var index = 0; index < string.length; index++) {
+          const date = new Date();
+          const oid = new ObjectId();
+          const string = 'binstring';
+          const bin = new Binary();
+          for (let index = 0; index < string.length; index++) {
             bin.put(string.charAt(index));
           }
 
-          var motherOfAllDocuments = {
+          const motherOfAllDocuments = {
             string: 'hello',
             array: [1, 2, 3],
             hash: { a: 1, b: 2 },
@@ -306,10 +305,10 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
 
           //convience curried handler for functions of type 'a -> (err, result)
           function getResult(callback) {
@@ -326,18 +325,18 @@ describe('crud - insert', function () {
                 expect(err).to.not.exist;
 
                 //first, create a user object
-                var newUser = { name: 'Test Account', settings: {} };
+                const newUser = { name: 'Test Account', settings: {} };
                 user_collection.insert(
                   [newUser],
                   configuration.writeConcernMax(),
                   getResult(function () {
-                    var scriptCode = "settings.block = []; settings.block.push('test');";
-                    var context = { settings: { thisOneWorks: 'somestring' } };
+                    const scriptCode = "settings.block = []; settings.block.push('test');";
+                    const context = { settings: { thisOneWorks: 'somestring' } };
 
                     Script.runInNewContext(scriptCode, context, 'testScript');
 
                     //now create update command and issue it
-                    var updateCommand = { $set: context };
+                    const updateCommand = { $set: context };
 
                     user_collection.update(
                       { _id: newUser._id },
@@ -371,14 +370,14 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_all_serialization_types_new_context');
+          const db = client.db(configuration.db);
+          const collection = db.collection('test_all_serialization_types_new_context');
 
-          var date = new Date();
-          var scriptCode =
+          const date = new Date();
+          const scriptCode =
             "var string = 'binstring'\n" +
             'var bin = new mongo.Binary()\n' +
             'for(var index = 0; index < string.length; index++) {\n' +
@@ -398,7 +397,7 @@ describe('crud - insert', function () {
             "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
             "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
 
-          var context = {
+          const context = {
             motherOfAllDocuments: {},
             mongo: {
               ObjectId: ObjectId,
@@ -412,7 +411,7 @@ describe('crud - insert', function () {
           // Execute function in context
           Script.runInNewContext(scriptCode, context, 'testScript');
           // sys.puts(sys.inspect(context.motherOfAllDocuments))
-          var motherOfAllDocuments = context.motherOfAllDocuments;
+          const motherOfAllDocuments = context.motherOfAllDocuments;
 
           collection.insert(
             context.motherOfAllDocuments,
@@ -513,11 +512,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_insert_and_query_undefined');
+          const db = client.db(configuration.db);
+          const collection = db.collection('test_insert_and_query_undefined');
 
           // Insert the update
           collection.insert({ i: undefined }, configuration.writeConcernMax(), function (err, r) {
@@ -543,7 +542,7 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var dbref = new DBRef(
+        const dbref = new DBRef(
           'foo',
           ObjectId.createFromHexString('fc24a04d4560531f00000000'),
           null
@@ -561,11 +560,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('insert_doc_with_uuid');
+          const db = client.db(configuration.db);
+          const collection = db.collection('insert_doc_with_uuid');
 
           collection.insert(
             { _id: '12345678123456781234567812345678', field: '1' },
@@ -582,7 +581,7 @@ describe('crud - insert', function () {
                   test.equal(items[0].field, '1');
 
                   // Generate a binary id
-                  var binaryUUID = new Binary(
+                  const binaryUUID = new Binary(
                     Buffer.from('00000078123456781234567812345678', 'hex'),
                     Binary.SUBTYPE_UUID
                   );
@@ -619,11 +618,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_insert_and_update_no_callback_strict');
+          const db = client.db(configuration.db);
+          const collection = db.collection('test_insert_and_update_no_callback_strict');
 
           collection.insert(
             { _id: '12345678123456781234567812345678', field: '1' },
@@ -656,15 +655,15 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
-          var doc = { _id: new ObjectId() };
-          var doc2 = { _id: new ObjectId() };
-          var doc3 = { _id: new ObjectId() };
+          const doc = { _id: new ObjectId() };
+          const doc2 = { _id: new ObjectId() };
+          const doc3 = { _id: new ObjectId() };
 
           collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
             expect(err).to.not.exist;
@@ -712,11 +711,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions');
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
             expect(err).to.not.exist;
@@ -759,12 +758,12 @@ describe('crud - insert', function () {
 
       test: function (done) {
         // Search parameter
-        var to = 'ralph';
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const to = 'ralph';
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyExecuteMultipleFetches');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyExecuteMultipleFetches');
           // Execute query
           collection.insert(
             { addresses: { localPart: 'ralph' } },
@@ -793,11 +792,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyFailWhenNoObjectToUpdate');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyFailWhenNoObjectToUpdate');
 
           collection.update(
             { _id: new ObjectId() },
@@ -821,8 +820,8 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var doc = {
+        const configuration = this.configuration;
+        const doc = {
           _id: new ObjectId('4e886e687ff7ef5e00000162'),
           str: 'foreign',
           type: 2,
@@ -832,10 +831,10 @@ describe('crud - insert', function () {
           ]
         };
 
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection(
+          const db = client.db(configuration.db);
+          const collection = db.collection(
             'Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate'
           );
 
@@ -883,17 +882,17 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
+        const configuration = this.configuration;
 
-        var doc = {
+        const doc = {
           str: 'String',
           func: function () {}
         };
 
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection(
+          const db = client.db(configuration.db);
+          const collection = db.collection(
             'Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level'
           );
           collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
@@ -942,17 +941,17 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
+        const configuration = this.configuration;
 
-        var doc = {
+        const doc = {
           str: 'String',
           func: function () {}
         };
 
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection(
+          const db = client.db(configuration.db);
+          const collection = db.collection(
             'Should_Correctly_allow_for_control_of_serialization_of_functions_on_collection_level',
             { serializeFunctions: true }
           );
@@ -977,16 +976,16 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var doc = {
+        const doc = {
           _id: new Date(),
           str: 'hello'
         };
 
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('Should_Correctly_allow_for_using_a_Date_object_as__id');
+          const db = client.db(configuration.db);
+          const collection = db.collection('Should_Correctly_allow_for_using_a_Date_object_as__id');
           collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
             expect(err).to.not.exist;
             test.ok(result);
@@ -1008,11 +1007,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
+          const db = client.db(configuration.db);
+          const collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
           collection.updateMany(
             { a: 1 },
             { $set: { a: 1 } },
@@ -1034,8 +1033,8 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var doc = {
+        const configuration = this.configuration;
+        const doc = {
           _id: new ObjectId(),
           Prop1: 'p1',
           Prop2: 'p2',
@@ -1046,10 +1045,10 @@ describe('crud - insert', function () {
           }
         };
 
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection(
+          const db = client.db(configuration.db);
+          const collection = db.collection(
             'Should_Correctly_update_two_fields_including_a_sub_field'
           );
           collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
@@ -1086,11 +1085,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection(
+          const db = client.db(configuration.db);
+          const collection = db.collection(
             'Should_Correctly_update_two_fields_including_a_sub_field_2'
           );
 
@@ -1117,11 +1116,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyInsertDocWithCustomId');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyInsertDocWithCustomId');
           // Insert the update
           collection.insert(
             { _id: 0, test: 'hello' },
@@ -1149,11 +1148,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection(
+          const db = client.db(configuration.db);
+          const collection = db.collection(
             'shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne'
           );
 
@@ -1191,16 +1190,16 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyPerformLargeTextInsert');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyPerformLargeTextInsert');
 
           // Create large string, insert and then retrive
-          var string = '';
+          let string = '';
           // Create large text field
-          for (var i = 0; i < 50000; i++) {
+          for (let i = 0; i < 50000; i++) {
             string = string + 'a';
           }
 
@@ -1230,14 +1229,14 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON');
 
           // Create document with toBSON method
-          var doc = { a: 1, b: 1 };
+          const doc = { a: 1, b: 1 };
           doc.toBSON = function () {
             return { c: this.a };
           };
@@ -1264,13 +1263,13 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           db.createCollection('shouldAttempToForceBsonSize', function (err, collection) {
             // var doc = {a:1, b:new Binary(Buffer.alloc(16777216)/5)}
-            var doc = [
+            const doc = [
               { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
               { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
               { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) }
@@ -1300,11 +1299,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
 
           collection.insert(
             { a: { b: { c: 1 } } },
@@ -1314,7 +1313,7 @@ describe('crud - insert', function () {
               test.ok(result);
 
               // Dynamically build query
-              var query = {};
+              const query = {};
               query['a'] = {};
               query.a['b'] = {};
               query.a.b['c'] = 1;
@@ -1344,11 +1343,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
           collection.insert({ a: { b: { c: 1 } } }).then(
             () => {
               client.close(done);
@@ -1374,11 +1373,11 @@ describe('crud - insert', function () {
           client.close(done);
         }
 
-        var configuration = this.configuration;
+        const configuration = this.configuration;
         var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('gh-completely2');
+          const db = client.db(configuration.db);
+          const collection = db.collection('gh-completely2');
           collection.insert({ a: 1 }, { writeConcern: { w: 0 } }, cb);
         });
       }
@@ -1397,11 +1396,11 @@ describe('crud - insert', function () {
           client.close(done);
         }
 
-        var configuration = this.configuration;
+        const configuration = this.configuration;
         var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('gh-completely3');
+          const db = client.db(configuration.db);
+          const collection = db.collection('gh-completely3');
           collection.update(
             { a: 1 },
             { $set: { a: 2 } },
@@ -1425,11 +1424,11 @@ describe('crud - insert', function () {
           client.close(done);
         }
 
-        var configuration = this.configuration;
+        const configuration = this.configuration;
         var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('gh-completely1');
+          const db = client.db(configuration.db);
+          const collection = db.collection('gh-completely1');
           collection.deleteMany({ a: 1 }, { writeConcern: { w: 0 } }, cb);
         });
       }
@@ -1446,13 +1445,13 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('bson_types_insert');
+          const db = client.db(configuration.db);
+          const collection = db.collection('bson_types_insert');
 
-          var document = {
+          const document = {
             symbol: new BSONSymbol('abcdefghijkl'),
             objid: new ObjectId('abcdefghijkl'),
             double: new Double(1),
@@ -1522,10 +1521,10 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
-        var document = {
+        const document = {
           string: 'abcdefghijkl',
           objid: new ObjectId(Buffer.alloc(12, 1)),
           double: new Double(1),
@@ -1536,8 +1535,8 @@ describe('crud - insert', function () {
         };
 
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('bson_types_insert_1');
+          const db = client.db(configuration.db);
+          const collection = db.collection('bson_types_insert_1');
 
           collection.insert(document, configuration.writeConcernMax(), function (err, result) {
             expect(err).to.not.exist;
@@ -1614,13 +1613,13 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('negative_pos');
+          const db = client.db(configuration.db);
+          const collection = db.collection('negative_pos');
 
-          var document = {
+          const document = {
             pos: Number.POSITIVE_INFINITY,
             neg: Number.NEGATIVE_INFINITY
           };
@@ -1648,12 +1647,12 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var regexp = /foobar/i;
+        const regexp = /foobar/i;
 
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           db.createCollection('test_regex', function (err, collection) {
             collection.insert({ b: regexp }, configuration.writeConcernMax(), function (err, ids) {
               expect(err).to.not.exist;
@@ -1681,18 +1680,18 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        if (semver.satisfies(process.versions.node, '22.7.0')) {
+        if (satisfies(process.versions.node, '22.7.0')) {
           this.skipReason = 'Node.js 22.7.0 has a UTF-8 encoding bug';
           this.skip();
         }
 
-        var regexp = /foobaré/;
+        const regexp = /foobaré/;
 
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
 
           collection.insert({ b: regexp }, configuration.writeConcernMax(), function (err, ids) {
             expect(err).to.not.exist;
@@ -1720,12 +1719,12 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var k = Buffer.alloc(15);
-          for (var i = 0; i < 15; i++) k[i] = 0;
+          const db = client.db(configuration.db);
+          const k = Buffer.alloc(15);
+          for (let i = 0; i < 15; i++) k[i] = 0;
 
           k.write('hello');
           k[6] = 0x06;
@@ -1884,10 +1883,10 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert(
             {
               doc: Long.fromNumber(10),
@@ -1947,10 +1946,10 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert(
             {
               doc: Long.fromNumber(10),
@@ -1983,11 +1982,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
+        const configuration = this.configuration;
 
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update(
             {
               'ps.op.t': 1
@@ -2013,11 +2012,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var col = db.collection('shouldCorrectlyApplyBitOperator');
+          const db = client.db(configuration.db);
+          const col = db.collection('shouldCorrectlyApplyBitOperator');
 
           col.insert({ a: 1, b: 1 }, function (err, result) {
             expect(err).to.not.exist;
@@ -2052,11 +2051,11 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var col = db.collection(
+          const db = client.db(configuration.db);
+          const col = db.collection(
             'shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization',
             {
               serializeFunctions: true
@@ -2108,16 +2107,16 @@ describe('crud - insert', function () {
       },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var col = db.collection('shouldCorrectlyAllowforMoreThanAThousandDocsInsert', {
+          const db = client.db(configuration.db);
+          const col = db.collection('shouldCorrectlyAllowforMoreThanAThousandDocsInsert', {
             serializeFunctions: true
           });
-          var docs = [];
+          let docs = [];
 
-          for (var i = 0; i < 2000; i++) {
+          for (let i = 0; i < 2000; i++) {
             docs.push({ a: i });
           }
 
@@ -2126,7 +2125,7 @@ describe('crud - insert', function () {
             expect(result).property('insertedCount').to.equal(2000);
 
             docs = [];
-            for (var i = 0; i < 2000; i++) {
+            for (let i = 0; i < 2000; i++) {
               docs.push({ a: i });
             }
 
@@ -2180,11 +2179,11 @@ describe('crud - insert', function () {
       metadata: { requires: { topology: ['single'] } },
 
       test: function (done) {
-        var started = [];
-        var succeeded = [];
+        const started = [];
+        const succeeded = [];
 
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), {
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), {
           maxPoolSize: 1,
           monitorCommands: true
         });
@@ -2197,7 +2196,7 @@ describe('crud - insert', function () {
         });
 
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           expect(err).to.not.exist;
 
           db.collection('apm_test')
@@ -2215,11 +2214,11 @@ describe('crud - insert', function () {
       metadata: { requires: { topology: ['single'] } },
 
       test: function (done) {
-        var started = [];
-        var succeeded = [];
+        const started = [];
+        const succeeded = [];
 
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), {
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), {
           maxPoolSize: 1,
           monitorCommands: true
         });
@@ -2232,7 +2231,7 @@ describe('crud - insert', function () {
         });
 
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           expect(err).to.not.exist;
 
           db.collection('apm_test')
@@ -2249,10 +2248,10 @@ describe('crud - insert', function () {
     it('should return correct number of ids for insertMany { ordered: true }', {
       metadata: { requires: { topology: ['single'] } },
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           expect(err).to.not.exist;
           db.collection('inserted_ids_test')
             .insertMany([{}, {}, {}], { ordered: true })
@@ -2267,10 +2266,10 @@ describe('crud - insert', function () {
     it('should return correct number of ids for insertMany { ordered: false }', {
       metadata: { requires: { topology: ['single'] } },
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           expect(err).to.not.exist;
           db.collection('inserted_ids_test')
             .insertMany([{}, {}, {}], { ordered: false })
@@ -2287,25 +2286,25 @@ describe('crud - insert', function () {
       metadata: { requires: { topology: ['single'] } },
 
       test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
+          const db = client.db(configuration.db);
           expect(err).to.not.exist;
 
-          var shipment = {
+          const shipment = {
             shipment1: 'a'
           };
 
-          var supplier = {
+          const supplier = {
             shipments: [shipment]
           };
 
-          var product = {
+          const product = {
             suppliers: [supplier]
           };
 
-          var doc = {
+          const doc = {
             a: 1,
             products: [product]
           };
