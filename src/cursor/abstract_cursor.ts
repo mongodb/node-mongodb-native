@@ -60,12 +60,6 @@ export const CURSOR_FLAGS = [
 ] as const;
 
 /** @public */
-export interface CursorStreamOptions {
-  /** A transformation method applied to each document emitted by the stream */
-  transform?(this: void, doc: Document): Document;
-}
-
-/** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
 function removeActiveCursor(this: AbstractCursor) {
@@ -523,7 +517,7 @@ export abstract class AbstractCursor<
     }
   }
 
-  stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
+  stream(): Readable & AsyncIterable<TSchema> {
     const readable = new ReadableCursorStream(this);
     const abortListener = addAbortListener(this.signal, function () {
       readable.destroy(this.reason);
@@ -531,31 +525,6 @@ export abstract class AbstractCursor<
     readable.once('end', () => {
       abortListener?.[kDispose]();
     });
-
-    if (options?.transform) {
-      const transform = options.transform;
-
-      const transformedStream = readable.pipe(
-        new Transform({
-          objectMode: true,
-          highWaterMark: 1,
-          transform(chunk, _, callback) {
-            try {
-              const transformed = transform(chunk);
-              callback(undefined, transformed);
-            } catch (err) {
-              callback(err);
-            }
-          }
-        })
-      );
-
-      // Bubble errors to transformed stream, because otherwise no way
-      // to handle this error.
-      readable.on('error', err => transformedStream.emit('error', err));
-
-      return transformedStream;
-    }
 
     return readable;
   }

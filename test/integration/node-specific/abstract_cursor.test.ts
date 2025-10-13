@@ -317,42 +317,6 @@ describe('class AbstractCursor', function () {
     });
   });
 
-  describe('transform stream error handling', function () {
-    let client: MongoClient;
-    let collection: Collection;
-    const docs = [{ count: 0 }];
-
-    beforeEach(async function () {
-      client = this.configuration.newClient();
-
-      collection = client.db('abstract_cursor_integration').collection('test');
-
-      await collection.insertMany(docs);
-    });
-
-    afterEach(async function () {
-      await collection.deleteMany({});
-      await client.close();
-    });
-
-    it('propagates errors to transform stream', async function () {
-      const transform = new Transform({
-        transform(data, encoding, callback) {
-          callback(null, data);
-        }
-      });
-
-      // MongoServerError: unknown operator: $bar
-      const stream = collection.find({ foo: { $bar: 25 } }).stream({ transform });
-
-      const error: Error | null = await new Promise(resolve => {
-        stream.on('error', error => resolve(error));
-        stream.on('end', () => resolve(null));
-      });
-      expect(error).to.be.instanceof(MongoServerError);
-    });
-  });
-
   describe('cursor end state', function () {
     let client: MongoClient;
     let cursor: FindCursor;

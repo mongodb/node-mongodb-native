@@ -1823,9 +1823,7 @@ describe('Cursor', function () {
 
             const filename = path.join(os.tmpdir(), '_nodemongodbnative_stream_out.txt');
             const out = fs.createWriteStream(filename);
-            const stream = collection.find().stream({
-              transform: doc => JSON.stringify(doc)
-            });
+            const stream = collection.find().stream().map(JSON.stringify);
 
             stream.pipe(out);
             // Wait for output stream to close
@@ -3746,14 +3744,13 @@ describe('Cursor', function () {
         { _id: 2, a: { b: 1, c: 0 } }
       ];
       const resultSet = new Set();
-      const transformParam = transformFunc != null ? { transform: transformFunc } : null;
       Promise.resolve()
         .then(() => db.createCollection(collectionName))
         .then(() => (collection = db.collection(collectionName)))
         .then(() => collection.insertMany(docs))
         .then(() => {
           cursor = collection.find();
-          return cursor.stream(transformParam);
+          return cursor.stream().map(transformFunc ?? (doc => doc));
         })
         .then(stream => {
           stream.on('data', function (doc) {
