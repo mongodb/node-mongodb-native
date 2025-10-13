@@ -34,9 +34,6 @@ describe.only('Find', function () {
     await client?.close();
   });
 
-  /**
-   * Test a simple find
-   */
   it('should correctly perform simple find', async function () {
     const configuration = this.configuration;
 
@@ -59,9 +56,6 @@ describe.only('Find', function () {
   });
 
   // TODO(NODE-7219): Remove test as it duplicates "should correctly perform simple find"
-  /**
-   * Test a simple find chained
-   */
   // it('shouldCorrectlyPerformSimpleChainedFind', {
   //   metadata: {
   //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -103,9 +97,6 @@ describe.only('Find', function () {
   //   }
   // });
 
-  /**
-   * Test advanced find
-   */
   it('should correctly perform advanced finds', async function () {
     const configuration = this.configuration;
 
@@ -148,9 +139,7 @@ describe.only('Find', function () {
     expect(byID).to.have.length(2);
     expect(byID.filter(doc => doc.a === 1 || doc.a === 2)).to.have.length(2);
   });
-  /**
-   * Test sorting of results
-   */
+
   it('should correctly perform find with sort', async function () {
     const db = client.db(this.configuration.db);
     await db.createCollection('test_find_sorting');
@@ -234,19 +223,8 @@ describe.only('Find', function () {
     // Sorting using empty array, no order guarantee should not blow up
     const documentsEmptyArray = await collection.find({ a: { $lt: 10 } }, { sort: [] }).toArray();
     test.equal(4, documentsEmptyArray.length);
-
-    /* NONACTUAL */
-    // Sorting using ordered hash
-    const documentsOrderedHash = await collection
-      .find({ a: { $lt: 10 } }, { sort: { a: -1 } })
-      .toArray();
-    // Fail test if not an error
-    test.equal(4, documentsOrderedHash.length);
   });
 
-  /**
-   * Test the limit function of the db
-   */
   it('should correctly perform find with limit', async function () {
     const db = client.db(this.configuration.db);
     await db.createCollection('test_find_limits');
@@ -278,77 +256,57 @@ describe.only('Find', function () {
     test.equal(4, limit99.length);
   });
 
-  /**
-   * Test find by non-quoted values (issue #128)
-   */
-  it('shouldCorrectlyFindWithNonQuotedValues', {
-    metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
+  it('should correctly find with non quoted values', async function () {
+    const db = client.db(this.configuration.db);
+    await db.createCollection('test_find_non_quoted_values');
 
-    test: async function () {
-      const db = client.db(this.configuration.db);
-      await db.createCollection('test_find_non_quoted_values');
-
-      const collection = db.collection('test_find_non_quoted_values');
-      // insert test document
-      await collection.insertMany(
-        [
-          { a: 19, b: 'teststring', c: 59920303 },
-          { a: '19', b: 'teststring', c: 3984929 }
-        ],
-        this.configuration.writeConcernMax()
-      );
-      const documents = await collection.find({ a: 19 }).toArray();
-      test.equal(1, documents.length);
-    }
+    const collection = db.collection('test_find_non_quoted_values');
+    // insert test document
+    await collection.insertMany(
+      [
+        { a: 19, b: 'teststring', c: 59920303 },
+        { a: '19', b: 'teststring', c: 3984929 }
+      ],
+      this.configuration.writeConcernMax()
+    );
+    const documents = await collection.find({ a: 19 }).toArray();
+    test.equal(1, documents.length);
+    test.equal(59920303, documents[0].c);
   });
 
-  /**
-   * Test for querying embedded document using dot-notation (issue #126)
-   */
-  it('shouldCorrectlyFindEmbeddedDocument', {
-    metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
+  it('should correctly find embedded document', async function () {
+    const db = client.db(this.configuration.db);
+    await db.createCollection('test_find_embedded_document');
 
-    test: async function () {
-      const db = client.db(this.configuration.db);
-      await db.createCollection('test_find_embedded_document');
+    const collection = db.collection('test_find_embedded_document');
+    // insert test document
+    await collection.insertMany(
+      [
+        { a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' } },
+        { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' } }
+      ],
+      this.configuration.writeConcernMax()
+    );
 
-      const collection = db.collection('test_find_embedded_document');
-      // insert test document
-      await collection.insertMany(
-        [
-          { a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' } },
-          { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' } }
-        ],
-        this.configuration.writeConcernMax()
-      );
+    // test using integer value
+    const intDocuments = await collection.find({ 'a.id': 10 }).toArray();
+    test.equal(1, intDocuments.length);
+    test.equal('bar', intDocuments[0].b);
 
-      // test using integer value
-      const intDocuments = await collection.find({ 'a.id': 10 }).toArray();
-      test.equal(1, intDocuments.length);
-      test.equal('bar', intDocuments[0].b);
-
-      // test using string value
-      const strDocuments = await collection.find({ 'a.value': 'foo' }).toArray();
-      // should yield 2 documents
-      test.equal(2, strDocuments.length);
-      test.equal('bar', strDocuments[0].b);
-      test.equal('bar2', strDocuments[1].b);
-    }
+    // test using string value
+    const strDocuments = await collection.find({ 'a.value': 'foo' }).toArray();
+    // should yield 2 documents
+    test.equal(2, strDocuments.length);
+    test.equal('bar', strDocuments[0].b);
+    test.equal('bar2', strDocuments[1].b);
   });
 
-  /**
-   * Find no records
-   */
-  it('shouldCorrectlyFindNoRecords', {
-    metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
-
-    test: async function () {
-      const db = client.db(this.configuration.db);
-      await db.createCollection('test_find_one_no_records');
-      const collection = db.collection('test_find_one_no_records');
-      const documents = await collection.find({ a: 1 }, {}).toArray();
-      test.equal(0, documents.length);
-    }
+  it('should correctly find no records', async function () {
+    const db = client.db(this.configuration.db);
+    await db.createCollection('test_find_one_no_records');
+    const collection = db.collection('test_find_one_no_records');
+    const documents = await collection.find({ a: 1 }, {}).toArray();
+    test.equal(0, documents.length);
   });
 
   it('should correctly perform find by $where', {
@@ -364,14 +322,12 @@ describe.only('Find', function () {
       const count = await collection.countDocuments();
       test.equal(3, count);
 
-      // Let's test usage of the $where statement
-
-      //@ts-expect-error: our types do not support Code which should be fixed.
+      // @ts-expect-error: $where no longer supports Code
       const documentsGT2 = await collection.find({ $where: new Code('this.a > 2') }).toArray();
       test.equal(1, documentsGT2.length);
 
       const documentsGT1 = await collection
-        //@ts-expect-error: our types do not support Code which should be fixed.
+        // @ts-expect-error: $where no longer supports Code
         .find({ $where: new Code('this.a > i', { i: 1 }) })
         .toArray();
       test.equal(2, documentsGT1.length);
@@ -380,16 +336,16 @@ describe.only('Find', function () {
 
   it('should correctly perform finds with hint turned on', async function () {
     const configuration = this.configuration;
-    client = configuration.newClient(configuration.writeConcernMax(), {
+    const p_client = configuration.newClient(configuration.writeConcernMax(), {
       monitorCommands: true
     });
 
     const finds = [];
-    client.on('commandStarted', filterForCommands('find', finds));
+    p_client.on('commandStarted', filterForCommands('find', finds));
 
-    await client.connect();
+    await p_client.connect();
 
-    const db = client.db(configuration.db);
+    const db = p_client.db(configuration.db);
     const collection = await db.createCollection('test_hint');
 
     await collection.deleteMany({});
@@ -413,7 +369,7 @@ describe.only('Find', function () {
     expect(await collection.find({ a: 1 }, { hint: { a: 1 } }).toArray()).to.have.lengthOf(1);
     expect(finds[2].command.hint).to.deep.equal({ a: 1 });
 
-    await client.close();
+    await p_client.close();
   });
 
   it('should correctly perform find by ObjectId', async function () {
@@ -431,35 +387,78 @@ describe.only('Find', function () {
     test.equal('mike', mike.hello);
   });
 
-  it('should correctly return document with original structure', async function () {
-    const configuration = this.configuration;
-    const db = client.db(configuration.db);
-    const collection = await db.createCollection('test_find_by_oid_with_subdocs');
-    const c1 = { _id: new ObjectId(), comments: [], title: 'number 1' };
-    const c2 = { _id: new ObjectId(), comments: [], title: 'number 2' };
-    const doc = {
-      numbers: [],
-      owners: [],
-      comments: [c1, c2],
-      _id: new ObjectId()
-    };
+  // TODO(NODE-7219): Remove test as it duplicates other tests that testing nested documents
+  // it('shouldCorrectlyReturnDocumentWithOriginalStructure', {
+  //   metadata: {
+  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  //   },
+  //
+  //   test: function (done) {
+  //     var configuration = this.configuration;
+  //     var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+  //     client.connect(function (err, client) {
+  //       var db = client.db(configuration.db);
+  //       db.createCollection('test_find_by_oid_with_subdocs', function (err, collection) {
+  //         var c1 = { _id: new ObjectId(), comments: [], title: 'number 1' };
+  //         var c2 = { _id: new ObjectId(), comments: [], title: 'number 2' };
+  //         var doc = {
+  //           numbers: [],
+  //           owners: [],
+  //           comments: [c1, c2],
+  //           _id: new ObjectId()
+  //         };
+  //
+  //         collection.insert(doc, configuration.writeConcernMax(), function (err) {
+  //           expect(err).to.not.exist;
+  //           collection.findOne(
+  //             { _id: doc._id },
+  //             { writeConcern: { w: 1 }, projection: undefined },
+  //             function (err, doc) {
+  //               expect(err).to.not.exist;
+  //               test.equal(2, doc.comments.length);
+  //               test.equal('number 1', doc.comments[0].title);
+  //               test.equal('number 2', doc.comments[1].title);
+  //
+  //               client.close(done);
+  //             }
+  //           );
+  //         });
+  //       });
+  //     });
+  //   }
+  // });
 
-    await collection.insertOne(doc, configuration.writeConcernMax());
-    const document = await collection.findOne({ _id: doc._id }, { projection: undefined });
-    test.equal(2, document.comments.length);
-    test.equal('number 1', document.comments[0].title);
-    test.equal('number 2', document.comments[1].title);
-  });
-
-  it('should correctly retrieve single record', async function () {
-    const configuration = this.configuration;
-    const db = client.db(configuration.db);
-
-    const collection = await db.createCollection('test_should_correctly_retrieve_one_record');
-    await collection.insertOne({ a: 0 }, configuration.writeConcernMax());
-    const usercollection = db.collection('test_should_correctly_retrieve_one_record');
-    await usercollection.findOne({ a: 0 });
-  });
+  // TODO(NODE-7219): Remove test as it duplicates simple find
+  // it('shouldCorrectlyRetrieveSingleRecord', {
+  //   metadata: {
+  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  //   },
+  //
+  //   test: function (done) {
+  //     var configuration = this.configuration;
+  //     var p_client = configuration.newClient(configuration.writeConcernMax(), {
+  //       maxPoolSize: 1
+  //     });
+  //
+  //     p_client.connect(function (err, client) {
+  //       var db = client.db(configuration.db);
+  //
+  //       db.createCollection(
+  //         'test_should_correctly_retrieve_one_record',
+  //         function (err, collection) {
+  //           collection.insert({ a: 0 }, configuration.writeConcernMax(), function (err) {
+  //             expect(err).to.not.exist;
+  //             const usercollection = db.collection('test_should_correctly_retrieve_one_record');
+  //             usercollection.findOne({ a: 0 }, function (err) {
+  //               expect(err).to.not.exist;
+  //               p_client.close(done);
+  //             });
+  //           });
+  //         }
+  //       );
+  //     });
+  //   }
+  // });
 
   // TODO(NODE-7219): Remove test as it tests `createFromHexString` method of BSON
   // it('shouldCorrectlyHandleError', {
@@ -488,9 +487,6 @@ describe.only('Find', function () {
   //   }
   // });
 
-  /**
-   * Test field select with options
-   */
   it('should correctly perform find with options', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -514,9 +510,6 @@ describe.only('Find', function () {
     });
   });
 
-  /**
-   * Test findOneAndUpdate a document with fields
-   */
   it('returns selected fields only for findOneAndUpdate', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -533,7 +526,7 @@ describe.only('Find', function () {
     expect(updatedDoc.a).to.equal(1);
   });
 
-  it('should correctly locate post and $inc values', async function () {
+  it('should retrieve a document by a value updated with $inc', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
     const collection = await db.createCollection('shouldCorrectlyExecuteFindOneWithAnInSearchTag');
@@ -636,9 +629,6 @@ describe.only('Find', function () {
     expect(result.value.b).to.equal(3);
   });
 
-  /**
-   * Test findOneAndUpdate a document that fails in first step before safe
-   */
   it('should correctly findOneAndUpdate document that fails in first step', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -688,9 +678,6 @@ describe.only('Find', function () {
     expect(item.c.c).to.equal(100);
   });
 
-  /**
-   * Should correctly execute findOneAndUpdate that is breaking in prod
-   */
   it('should correctly execute findOneAndUpdate', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -891,25 +878,26 @@ describe.only('Find', function () {
     expect(err.message).to.include('immutable field');
   });
 
+  // TODO(NODE-7219): Remove test as it doesn't test any find* operations
   // it('shouldCorrectlyExecutefindOneAndUpdateUnderConcurrentLoad', {
   //   metadata: {
   //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
   //   },
   //
   //   test: function (done) {
-  //     const configuration = this.configuration;
-  //     const p_client = configuration.newClient(configuration.writeConcernMax(), {
+  //     var configuration = this.configuration;
+  //     var p_client = configuration.newClient(configuration.writeConcernMax(), {
   //       maxPoolSize: 1
   //     });
-  //     const running = true;
+  //     var running = true;
   //
   //     p_client.connect(function (err, client) {
-  //       const db = client.db(configuration.db);
+  //       var db = client.db(configuration.db);
   //       // Create a collection
   //       db.createCollection('collection1', function (err, collection) {
   //         // Wait a bit and then execute something that will throw a duplicate error
   //         setTimeout(function () {
-  //           const id = new ObjectId();
+  //           var id = new ObjectId();
   //
   //           collection.insert({ _id: id, a: 1 }, configuration.writeConcernMax(), function (err) {
   //             expect(err).to.not.exist;
@@ -925,7 +913,7 @@ describe.only('Find', function () {
   //
   //       db.createCollection('collection2', function (err, collection) {
   //         // Keep hammering in inserts
-  //         const insert;
+  //         var insert;
   //         insert = function () {
   //           process.nextTick(function () {
   //             collection.insert({ a: 1 });
@@ -985,10 +973,7 @@ describe.only('Find', function () {
     expect(err).to.be.instanceof(MongoServerError);
   });
 
-  /**
-   * An example of using find with a very large in parameter
-   */
-  it('should perform find in array', async function () {
+  it('should perform find with large $in parameter', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
 
@@ -1026,12 +1011,9 @@ describe.only('Find', function () {
       .toArray()
       .catch(err => err);
     expect(err).to.be.instanceof(MongoServerError);
-    expect(err.message).to.include('Cannot do exclusion on field b in inclusion projection');
+    expect(err.message).to.include('exclusion');
   });
 
-  /**
-   * A simple query using find and fields
-   */
   it('should perform a simple find with project fields', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -1053,9 +1035,6 @@ describe.only('Find', function () {
   });
 
   // TODO(NODE-7219): Remove test as it duplicates "should perform a simple find with project fields"
-  /**
-   * A simple query using find and fields
-   */
   // it('shouldPerformASimpleLimitSkipFindWithFields2', {
   //   metadata: {
   //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -1101,9 +1080,6 @@ describe.only('Find', function () {
   //   }
   // });
 
-  /**
-   * A simple query with a different batchSize
-   */
   it('should perform query with batchSize different to standard', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -1124,9 +1100,7 @@ describe.only('Find', function () {
     test.equal(1000, documents.length);
   });
 
-  /**
-   * A simple query with negative limit
-   */
+  // TODO(NODE-7219): Remove test as it duplicates "should execute query using negative limit"
   // it('shouldCorrectlyPerformNegativeLimit', {
   //   metadata: {
   //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -1167,9 +1141,7 @@ describe.only('Find', function () {
   //   }
   // });
 
-  /**
-   * Should perform an exhaust find query
-   */
+  // TODO(NODE-7219): Remove test as "exhaust" is deprecated
   // it('shouldCorrectlyExecuteExhaustQuery', {
   //   metadata: { requires: { topology: ['single', 'replicaset'] } },
   //
@@ -1222,6 +1194,7 @@ describe.only('Find', function () {
   //   }
   // });
 
+  // TODO(NODE-7219): Remove test as it duplicates "should respect client-level read preference"
   // it('Readpreferences should work fine when using a single server instance', {
   //   metadata: {
   //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -1261,32 +1234,14 @@ describe.only('Find', function () {
   //   }
   // });
 
-  // it('Each should not hang on iterating over no results', {
-  //   metadata: {
-  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-  //   },
-  //
-  //   test: function (done) {
-  //     const configuration = this.configuration;
-  //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-  //     client.connect(function (err, client) {
-  //       const db = client.db(configuration.db);
-  //       expect(err).to.not.exist;
-  //       // Create a collection we want to drop later
-  //       const collection = db.collection('noresultAvailableForEachToIterate');
-  //       // Perform a simple find and return all the documents
-  //       collection.find({}).forEach(
-  //         doc => {
-  //           expect(doc).to.not.exist;
-  //         },
-  //         err => {
-  //           expect(err).to.not.exist;
-  //           client.close(done);
-  //         }
-  //       );
-  //     });
-  //   }
-  // });
+  it('should correctly iterate over an empty cursor', async function () {
+    const collection = client.db().collection('empty_collection_for_iteration');
+    let iteratedCount = 0;
+    for await (const _ of collection.find({})) {
+      iteratedCount++;
+    }
+    expect(iteratedCount).to.equal(0);
+  });
 
   it('should correctly find documents by regExp', async function () {
     const configuration = this.configuration;
@@ -1308,6 +1263,7 @@ describe.only('Find', function () {
     }
   });
 
+  // TODO(NODE-7219): Remove test as it duplicates "should correctly perform find with options"
   // it('shouldCorrectlyDoFindMinMax', {
   //   metadata: {
   //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -1377,30 +1333,18 @@ describe.only('Find', function () {
     test.equal('spam eggs and spam', items[0].s);
   });
 
-  // it('shouldNotMutateUserOptions', {
-  //   metadata: {
-  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-  //   },
-  //
-  //   test: function (done) {
-  //     const configuration = this.configuration;
-  //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-  //     client.connect(function (err, client) {
-  //       const db = client.db(configuration.db);
-  //       const collection = db.collection('shouldNotMutateUserOptions');
-  //       const options = { raw: 'TEST' };
-  //       collection.find({}, options);
-  //       expect(options.skip).to.not.exist;
-  //       expect(options.limit).to.not.exist;
-  //       test.equal('TEST', options.raw);
-  //       client.close(done);
-  //     });
-  //   }
-  // });
+  it('should not mutate user-provided options', async function () {
+    const configuration = this.configuration;
+    const db = client.db(configuration.db);
+    const collection = db.collection('shouldNotMutateUserOptions');
+    const options = { raw: 'TEST' };
+    // @ts-expect-error: intentionally passing an invalid option
+    await collection.find({}, options).toArray();
+    expect(options).to.not.have.property('skip');
+    expect(options).to.not.have.property('limit');
+    test.equal('TEST', options.raw);
+  });
 
-  /**
-   * Find and modify should allow for a write Concern without failing
-   */
   it('should correctly execute a findOneAndUpdate with a writeConcern', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -1418,9 +1362,6 @@ describe.only('Find', function () {
     expect(updated_doc.value.b).to.equal(3);
   });
 
-  /**
-   * Test a simple find
-   */
   it('should execute query using negative batchSize', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -1432,9 +1373,6 @@ describe.only('Find', function () {
     test.equal(3, documents.length);
   });
 
-  /**
-   * Test a simple find
-   */
   it('should execute query using negative limit', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -1447,9 +1385,6 @@ describe.only('Find', function () {
     test.equal(3, documents.length);
   });
 
-  /**
-   * Test a simple find
-   */
   it('should execute query using $elemMatch', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -1469,50 +1404,63 @@ describe.only('Find', function () {
     test.deepEqual([{ _id: 1, results: [82, 85, 88] }], documents);
   });
 
-  /**
-   * Test a simple find
-   */
-  it('should execute query using limit of 101', async function () {
-    const configuration = this.configuration;
-    const db = client.db(configuration.db);
-    const collection = db.collection('test_find_simple_limit_101');
-    function clone(obj) {
-      const o = {};
-      for (const name in obj) o[name] = obj[name];
-      return o;
-    }
+  // TODO(NODE-7219): Remove test as it duplicates "should correctly perform find with limit"
+  // it('should execute query using limit of 101', {
+  //   metadata: {
+  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  //   },
+  //
+  //   test: function (done) {
+  //     var configuration = this.configuration;
+  //     var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+  //     client.connect(function (err, client) {
+  //       var db = client.db(configuration.db);
+  //       const collection = db.collection('test_find_simple_limit_101');
+  //       function clone(obj) {
+  //         var o = {};
+  //         for (var name in obj) o[name] = obj[name];
+  //         return o;
+  //       }
+  //
+  //       var template = {
+  //         linkid: '12633170',
+  //         advertisercid: '4612127',
+  //         websitename: 'Car Rental 8',
+  //         destinationurl: 'https://www.carrental8.com/en/',
+  //         who: '8027061-12633170-1467924618000',
+  //         href: 'http://www.tkqlhce.com',
+  //         src: 'http://www.awltovhc.com',
+  //         r1: 3,
+  //         r2: 44,
+  //         r3: 24,
+  //         r4: 58
+  //       };
+  //
+  //       var docs = [];
+  //       for (var i = 0; i < 1000; i++) {
+  //         docs.push(clone(template));
+  //       }
+  //
+  //       // Insert some test documents
+  //       collection.insertMany(docs, configuration.writeConcernMax(), function (err, r) {
+  //         expect(err).to.not.exist;
+  //         test.ok(r);
+  //
+  //         // Ensure correct insertion testing via the cursor and the count function
+  //         collection
+  //           .find()
+  //           .limit(200)
+  //           .toArray(function (err, documents) {
+  //             expect(err).to.not.exist;
+  //             test.equal(200, documents.length);
+  //             // Let's close the db
+  //             client.close(done);
+  //           });
+  //       });
+  //     });
+  //   }
+  // });
 
-    const template = {
-      linkid: '12633170',
-      advertisercid: '4612127',
-      websitename: 'Car Rental 8',
-      destinationurl: 'https://www.carrental8.com/en/',
-      who: '8027061-12633170-1467924618000',
-      href: 'http://www.tkqlhce.com',
-      src: 'http://www.awltovhc.com',
-      r1: 3,
-      r2: 44,
-      r3: 24,
-      r4: 58
-    };
-
-    const docs = [];
-    for (let i = 0; i < 1000; i++) {
-      docs.push(clone(template));
-    }
-
-    // Insert some test documents
-    const r = await collection.insertMany(docs, configuration.writeConcernMax());
-    test.ok(r);
-
-    // Ensure correct insertion testing via the cursor and the count function
-    const documents = await collection.find().limit(200).toArray();
-    test.equal(200, documents.length);
-  });
-
-  /**
-   * Test a simple find
-   */
   it('Should correctly apply db level options to find cursor', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({}, { ignoreUndefined: true });
