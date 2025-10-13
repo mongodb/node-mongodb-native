@@ -12,7 +12,7 @@ import {
 import { CursorResponse } from '../../../src/cmap/wire_protocol/responses';
 import { assert as test, filterForCommands } from '../shared';
 
-describe.only('Find', function () {
+describe('Find', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
