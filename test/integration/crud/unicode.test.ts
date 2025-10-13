@@ -1,9 +1,9 @@
-'use strict';
-const semver = require('semver');
-const { assert: test, setupDatabase } = require('../shared');
-const { expect } = require('chai');
+import { expect } from 'chai';
+import * as semver from 'semver';
 
-describe('Unicode', function () {
+import { assert as test, setupDatabase } from '../shared';
+
+describe.only('Unicode', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
@@ -19,11 +19,11 @@ describe('Unicode', function () {
         this.skip();
       }
 
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var doc = {
+        const db = client.db(configuration.db);
+        const doc = {
           statuses_count: 1687,
           created_at: 'Mon Oct 22 14:55:08 +0000 2007',
           description: 'NodeJS hacker, Cofounder of Debuggable, CakePHP core alumnus',
@@ -120,12 +120,12 @@ describe('Unicode', function () {
     },
 
     test: function (done) {
-      var object = { 客家话: 'Hello' };
+      const object = { 客家话: 'Hello' };
 
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         db.createCollection('create_object_with_chinese_object_name', function (err) {
           expect(err).to.not.exist;
           const collection = db.collection('create_object_with_chinese_object_name');
@@ -151,10 +151,10 @@ describe('Unicode', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         db.createCollection('test_utf8_key_name', function (err, collection) {
           collection.insert({ šđžčćŠĐŽČĆ: 1 }, { writeConcern: { w: 1 } }, function (err) {
             expect(err).to.not.exist;
