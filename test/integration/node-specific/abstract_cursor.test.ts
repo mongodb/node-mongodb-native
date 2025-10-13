@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
-import { Transform } from 'stream';
 import { inspect } from 'util';
 
 import {
@@ -16,7 +15,6 @@ import {
   type MongoClient,
   MongoCursorExhaustedError,
   MongoOperationTimeoutError,
-  MongoServerError,
   TimeoutContext
 } from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';

@@ -1,4 +1,4 @@
-import { Readable, Transform } from 'stream';
+import { Readable } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
 import { type OnDemandDocumentDeserializeOptions } from '../cmap/wire_protocol/on_demand/document';
