@@ -1,13 +1,13 @@
-'use strict';
-const { expect } = require('chai');
-const { filterForCommands } = require('../shared');
-const {
-  promiseWithResolvers,
-  MongoCursorExhaustedError,
+import { expect } from 'chai';
+
+import {
   CursorTimeoutContext,
-  TimeoutContext,
-  MongoAPIError
-} = require('../../mongodb');
+  MongoAPIError,
+  MongoCursorExhaustedError,
+  promiseWithResolvers,
+  TimeoutContext
+} from '../../mongodb';
+import { filterForCommands } from '../shared';
 
 describe('Find Cursor', function () {
   let client;
@@ -437,7 +437,7 @@ describe('Find Cursor', function () {
         });
 
         await cursor.next();
-        // eslint-disable-next-line no-unused-vars
+
         for await (const _ of cursor) {
           /* empty */
         }
@@ -543,7 +543,7 @@ describe('Find Cursor', function () {
             await promise;
 
             let count = 0;
-            // eslint-disable-next-line no-unused-vars
+
             for await (const _ of cursor) {
               count++;
             }
@@ -587,7 +587,7 @@ describe('Find Cursor', function () {
           cursor = collection.find({});
 
           await cursor.toArray();
-          // eslint-disable-next-line no-unused-vars
+
           for await (const _ of cursor) {
             expect.fail('should not iterate');
           }
@@ -633,7 +633,7 @@ describe('Find Cursor', function () {
         });
 
         await cursor.next();
-        // eslint-disable-next-line no-unused-vars
+
         for await (const _ of cursor) {
           /* empty */
         }
@@ -647,7 +647,6 @@ describe('Find Cursor', function () {
           it('throws a MongoCursorExhaustedError', async function () {
             cursor = collection.find({}, { batchSize: 1 });
 
-            // eslint-disable-next-line no-unused-vars
             for await (const _ of cursor) {
               /* empty */
               break;
@@ -715,7 +714,7 @@ describe('Find Cursor', function () {
           cursor = collection.find({}, { batchSize: 1 });
 
           await cursor.toArray();
-          // eslint-disable-next-line no-unused-vars
+
           for await (const _ of cursor) {
             expect.fail('should not iterate');
           }
