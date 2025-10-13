@@ -16,7 +16,7 @@ import { FindOperation, type FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
-import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
+import { emitWarningOnce, mergeOptions, type MongoDBNamespace, noop, squashError } from '../utils';
 import { type InitialCursorResponse } from './abstract_cursor';
 import { ExplainableCursor } from './explainable_cursor';
 
@@ -100,9 +100,10 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   /** @internal */
   override async getMore(): Promise<CursorResponse> {
     const numReturned = this.numReturned;
-    const limit = this.findOptions.limit;
+    const limit = this.findOptions.limit ?? Infinity;
+    const remaining = limit - numReturned;
 
-    if (numReturned && limit && numReturned >= limit) {
+    if (numReturned >= limit) {
       try {
         await this.close();
       } catch (error) {
@@ -119,11 +120,28 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
       return CursorResponse.emptyGetMore;
     }
 
-    const response = await super.getMore();
+    // TODO(DRIVERS-1448): Remove logic to enforce `limit` in the driver
+    let cleanup: () => void = noop;
+    const { batchSize } = this.cursorOptions;
+    if (batchSize != null && batchSize > remaining) {
+      this.cursorOptions.batchSize = remaining;
 
-    this.numReturned = this.numReturned + response.batchSize;
+      // After executing the final getMore, re-assign the batchSize back to its original value so that
+      // if the cursor is rewound and executed, the batchSize is still correct.
+      cleanup = () => {
+        this.cursorOptions.batchSize = batchSize;
+      };
+    }
 
-    return response;
+    try {
+      const response = await super.getMore();
+
+      this.numReturned = this.numReturned + response.batchSize;
+
+      return response;
+    } finally {
+      cleanup?.();
+    }
   }
 
   /**
