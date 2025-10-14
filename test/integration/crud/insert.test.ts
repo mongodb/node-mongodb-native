@@ -8,30 +8,31 @@ import {
   Binary,
   BSONSymbol,
   Code,
+  type Collection,
   DBRef,
   Double,
   Long,
   MaxKey,
   MinKey,
   MongoBulkWriteError,
+  type MongoClient,
   MongoInvalidArgumentError,
+  MongoServerError,
   ObjectId,
   ReturnDocument,
   Timestamp
-} from '../../mongodb';
+} from '../../../src';
 import { assert as test, ignoreNsNotFound, setupDatabase } from '../shared';
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
- *
- * @param {any} string
  */
-const ISODate = function (string) {
-  let match;
+const ISODate = function (str: string | Date): Date {
+  let match: RegExpMatchArray | null;
 
-  if (typeof string.getTime === 'function') return string;
+  if (str instanceof Date) return str;
   else if (
-    (match = string.match(
+    (match = str.match(
       /^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/
     ))
   ) {
@@ -58,11 +59,15 @@ const ISODate = function (string) {
     }
 
     return date;
-  } else throw new Error('Invalid ISO 8601 date given.', __filename);
+  } else throw new Error('Invalid ISO 8601 date given.', { cause: __filename });
 };
 
 describe.only('crud - insert', function () {
-  let client;
+  let client: MongoClient;
+
+  before(async function () {
+    return setupDatabase(this.configuration);
+  });
 
   beforeEach(async function () {
     client = this.configuration.newClient();
@@ -73,14 +78,14 @@ describe.only('crud - insert', function () {
   });
 
   describe('when a pkFactory is set on the client', function () {
-    let client;
+    let client: MongoClient;
     const pkFactory = {
       count: 0,
       createPk: function () {
         return new Double(this.count++);
       }
     };
-    let collection;
+    let collection: Collection;
 
     beforeEach(async function () {
       client = this.configuration.newClient({}, { pkFactory, promoteValues: false });
@@ -97,7 +102,7 @@ describe.only('crud - insert', function () {
     });
   });
 
-  it('Should correctly execute Collection.prototype.insertOne', function (done) {
+  it('should correctly execute Collection.prototype.insertOne', async function () {
     const configuration = this.configuration;
     let url = configuration.url();
     url =
@@ -106,56 +111,34 @@ describe.only('crud - insert', function () {
         : f('%s?%s', url, 'maxPoolSize=100');
 
     const client = configuration.newClient(url);
-    client.connect().then(function (client) {
-      const db = client.db(configuration.db);
+    await client.connect();
+    const db = client.db(configuration.db);
 
-      db.collection('insertOne')
-        .insertOne({ a: 1 })
-        .then(function (r) {
-          expect(r).property('insertedId').to.exist;
-          client.close(done);
-        });
-    });
+    const r = await db.collection('insertOne').insertOne({ a: 1 });
+    expect(r).property('insertedId').to.exist;
+    await client.close();
   });
 
   it('rejects when insertMany is passed a non array object', async function () {
     const db = client.db();
     const error = await db
       .collection('insertMany_Promise_error')
+      // @ts-expect-error Not allowed in TS, but can be used in JS
       .insertMany({ a: 1 })
       .catch(error => error);
     expect(error).to.be.instanceOf(MongoInvalidArgumentError);
     expect(error.message).to.match(/must be an array/);
   });
 
-  describe('collection.insert()', function () {
-    before(function () {
-      return setupDatabase(this.configuration);
-    });
+  describe('collection.insertOne/insertMany()', function () {
+    it('should correctly perform single insert', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('shouldCorrectlyPerformSingleInsert');
+      await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
 
-    it('shouldCorrectlyPerformSingleInsert', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyPerformSingleInsert');
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-
-            collection.findOne(function (err, item) {
-              test.equal(1, item.a);
-              client.close(done);
-            });
-          });
-        });
-      }
+      const item = await collection.findOne();
+      test.equal(1, item.a);
     });
 
     it('insertMany returns the insertedIds and we can look up the documents', async function () {
@@ -175,681 +158,475 @@ describe.only('crud - insert', function () {
       expect(foundDocs).to.have.nested.property('[1].a', 2);
     });
 
-    it('shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly insert and retrieve large integrated array document', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('test_should_deserialize_large_integrated_array');
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('test_should_deserialize_large_integrated_array');
-
-          const doc = {
-            a: 0,
-            b: [
-              'tmp1',
-              'tmp2',
-              'tmp3',
-              'tmp4',
-              'tmp5',
-              'tmp6',
-              'tmp7',
-              'tmp8',
-              'tmp9',
-              'tmp10',
-              'tmp11',
-              'tmp12',
-              'tmp13',
-              'tmp14',
-              'tmp15',
-              'tmp16'
-            ]
-          };
-          // Insert the collection
-          collection.insert(doc, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-            // Fetch and check the collection
-            collection.findOne({ a: 0 }, function (err, result) {
-              test.deepEqual(doc.a, result.a);
-              test.deepEqual(doc.b, result.b);
-              client.close(done);
-            });
-          });
-        });
-      }
+      const doc = {
+        a: 0,
+        b: [
+          'tmp1',
+          'tmp2',
+          'tmp3',
+          'tmp4',
+          'tmp5',
+          'tmp6',
+          'tmp7',
+          'tmp8',
+          'tmp9',
+          'tmp10',
+          'tmp11',
+          'tmp12',
+          'tmp13',
+          'tmp14',
+          'tmp15',
+          'tmp16'
+        ]
+      };
+      // Insert in the collection
+      await collection.insertOne(doc, configuration.writeConcernMax());
+      // Fetch and check the document
+      const result = await collection.findOne({ a: 0 });
+      test.deepEqual(doc.a, result.a);
+      test.deepEqual(doc.b, result.b);
     });
 
-    it('shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly insert and retrieve document with all types', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('test_all_serialization_types');
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('test_all_serialization_types');
-
-          const date = new Date();
-          const oid = new ObjectId();
-          const string = 'binstring';
-          const bin = new Binary();
-          for (let index = 0; index < string.length; index++) {
-            bin.put(string.charAt(index));
-          }
-
-          const motherOfAllDocuments = {
-            string: 'hello',
-            array: [1, 2, 3],
-            hash: { a: 1, b: 2 },
-            date: date,
-            oid: oid,
-            binary: bin,
-            int: 42,
-            float: 33.3333,
-            regexp: /regexp/,
-            boolean: true,
-            long: date.getTime(),
-            where: new Code('this.a > i', { i: 1 }),
-            dbref: new DBRef('namespace', oid, 'integration_tests_')
-          };
-
-          collection.insert(motherOfAllDocuments, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-            collection.findOne(function (err, doc) {
-              // Assert correct deserialization of the values
-              test.equal(motherOfAllDocuments.string, doc.string);
-              test.deepEqual(motherOfAllDocuments.array, doc.array);
-              test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
-              test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
-              test.equal(date.getTime(), doc.long);
-              test.equal(date.toString(), doc.date.toString());
-              test.equal(date.getTime(), doc.date.getTime());
-              test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-              test.equal(
-                motherOfAllDocuments.binary.value().toString('hex'),
-                doc.binary.value().toString('hex')
-              );
-
-              test.equal(motherOfAllDocuments.int, doc.int);
-              test.equal(motherOfAllDocuments.long, doc.long);
-              test.equal(motherOfAllDocuments.float, doc.float);
-              test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
-              test.equal(motherOfAllDocuments.boolean, doc.boolean);
-              test.equal(motherOfAllDocuments.where.code, doc.where.code);
-              test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-
-              test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-              test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-              test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-              client.close(done);
-            });
-          });
-        });
+      const date = new Date();
+      const oid = new ObjectId();
+      const string = 'binstring';
+      const bin = new Binary();
+      for (let index = 0; index < string.length; index++) {
+        bin.put(string.charAt(index));
       }
+
+      const motherOfAllDocuments = {
+        string: 'hello',
+        array: [1, 2, 3],
+        hash: { a: 1, b: 2 },
+        date: date,
+        oid: oid,
+        binary: bin,
+        int: 42,
+        float: 33.3333,
+        regexp: /regexp/,
+        boolean: true,
+        long: date.getTime(),
+        where: new Code('this.a > i', { i: 1 }),
+        dbref: new DBRef('namespace', oid, 'integration_tests_')
+      };
+
+      await collection.insertOne(motherOfAllDocuments, configuration.writeConcernMax());
+      const doc = await collection.findOne();
+      // Assert correct deserialization of the values
+      test.equal(motherOfAllDocuments.string, doc.string);
+      test.deepEqual(motherOfAllDocuments.array, doc.array);
+      test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+      test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+      test.equal(date.getTime(), doc.long);
+      test.equal(date.toString(), doc.date.toString());
+      test.equal(date.getTime(), doc.date.getTime());
+      test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+      test.equal(
+        motherOfAllDocuments.binary.value().toString('hex'),
+        doc.binary.value().toString('hex')
+      );
+
+      test.equal(motherOfAllDocuments.int, doc.int);
+      test.equal(motherOfAllDocuments.long, doc.long);
+      test.equal(motherOfAllDocuments.float, doc.float);
+      test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+      test.equal(motherOfAllDocuments.boolean, doc.boolean);
+      test.equal(motherOfAllDocuments.where.code, doc.where.code);
+      test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
+
+      test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+      test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+      test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
     });
 
-    it('shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly insert and update document with new script context', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
+      const user_collection = await db.createCollection('users');
+      await user_collection.deleteMany({}, configuration.writeConcernMax());
 
-          //convience curried handler for functions of type 'a -> (err, result)
-          function getResult(callback) {
-            return function (error, result) {
-              test.ok(error == null);
-              return callback(result);
-            };
-          }
+      //first, create a user object
+      const user = await user_collection.insertOne(
+        { name: 'Test Account', settings: {} },
+        configuration.writeConcernMax()
+      );
+      const scriptCode = "settings.block = []; settings.block.push('test');";
+      const context = { settings: { thisOneWorks: 'somestring' } };
 
-          db.createCollection(
-            'users',
-            getResult(function (user_collection) {
-              user_collection.deleteMany({}, configuration.writeConcernMax(), function (err) {
-                expect(err).to.not.exist;
+      Script.runInNewContext(scriptCode, context, 'testScript');
 
-                //first, create a user object
-                const newUser = { name: 'Test Account', settings: {} };
-                user_collection.insert(
-                  [newUser],
-                  configuration.writeConcernMax(),
-                  getResult(function () {
-                    const scriptCode = "settings.block = []; settings.block.push('test');";
-                    const context = { settings: { thisOneWorks: 'somestring' } };
+      //now create update command and issue it
+      const updateCommand = { $set: context };
 
-                    Script.runInNewContext(scriptCode, context, 'testScript');
-
-                    //now create update command and issue it
-                    const updateCommand = { $set: context };
-
-                    user_collection.update(
-                      { _id: newUser._id },
-                      updateCommand,
-                      configuration.writeConcernMax(),
-                      getResult(function () {
-                        // Fetch the object and check that the changes are persisted
-                        user_collection.findOne({ _id: newUser._id }, function (err, doc) {
-                          test.ok(err == null);
-                          test.equal('Test Account', doc.name);
-                          test.equal('somestring', doc.settings.thisOneWorks);
-                          test.equal('test', doc.settings.block[0]);
-                          client.close(done);
-                        });
-                      })
-                    );
-                  })
-                );
-              });
-            })
-          );
-        });
-      }
+      await user_collection.updateOne(
+        { _id: user.insertedId },
+        updateCommand,
+        configuration.writeConcernMax()
+      );
+      // Fetch the object and check that the changes are persisted
+      const doc = await user_collection.findOne({ _id: user.insertedId });
+      test.equal('Test Account', doc.name);
+      test.equal('somestring', doc.settings.thisOneWorks);
+      test.equal('test', doc.settings.block[0]);
     });
 
-    it('shouldCorrectlySerializeDocumentWithAllTypesInNewContext', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly serialize document with all types in new context', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('test_all_serialization_types_new_context');
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('test_all_serialization_types_new_context');
+      const date = new Date();
+      const scriptCode =
+        "var string = 'binstring'\n" +
+        'var bin = new mongo.Binary()\n' +
+        'for(var index = 0; index < string.length; index++) {\n' +
+        '  bin.put(string.charAt(index))\n' +
+        '}\n' +
+        "motherOfAllDocuments['string'] = 'hello';" +
+        "motherOfAllDocuments['array'] = [1,2,3];" +
+        "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
+        "motherOfAllDocuments['date'] = date;" +
+        "motherOfAllDocuments['oid'] = new mongo.ObjectId();" +
+        "motherOfAllDocuments['binary'] = bin;" +
+        "motherOfAllDocuments['int'] = 42;" +
+        "motherOfAllDocuments['float'] = 33.3333;" +
+        "motherOfAllDocuments['regexp'] = /regexp/;" +
+        "motherOfAllDocuments['boolean'] = true;" +
+        "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
+        "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
+        "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
 
-          const date = new Date();
-          const scriptCode =
-            "var string = 'binstring'\n" +
-            'var bin = new mongo.Binary()\n' +
-            'for(var index = 0; index < string.length; index++) {\n' +
-            '  bin.put(string.charAt(index))\n' +
-            '}\n' +
-            "motherOfAllDocuments['string'] = 'hello';" +
-            "motherOfAllDocuments['array'] = [1,2,3];" +
-            "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
-            "motherOfAllDocuments['date'] = date;" +
-            "motherOfAllDocuments['oid'] = new mongo.ObjectId();" +
-            "motherOfAllDocuments['binary'] = bin;" +
-            "motherOfAllDocuments['int'] = 42;" +
-            "motherOfAllDocuments['float'] = 33.3333;" +
-            "motherOfAllDocuments['regexp'] = /regexp/;" +
-            "motherOfAllDocuments['boolean'] = true;" +
-            "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
-            "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
-            "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
+      const context = {
+        motherOfAllDocuments: {} as any,
+        mongo: {
+          ObjectId: ObjectId,
+          Binary: Binary,
+          Code: Code,
+          DBRef: DBRef
+        },
+        date: date
+      };
 
-          const context = {
-            motherOfAllDocuments: {},
-            mongo: {
-              ObjectId: ObjectId,
-              Binary: Binary,
-              Code: Code,
-              DBRef: DBRef
-            },
-            date: date
-          };
+      // Execute function in context
+      Script.runInNewContext(scriptCode, context, 'testScript');
+      // sys.puts(sys.inspect(context.motherOfAllDocuments))
+      const motherOfAllDocuments = context.motherOfAllDocuments;
 
-          // Execute function in context
-          Script.runInNewContext(scriptCode, context, 'testScript');
-          // sys.puts(sys.inspect(context.motherOfAllDocuments))
-          const motherOfAllDocuments = context.motherOfAllDocuments;
+      await collection.insertOne(context.motherOfAllDocuments, configuration.writeConcernMax());
+      const doc = await collection.findOne();
+      // Assert correct deserialization of the values
+      test.equal(motherOfAllDocuments.string, doc.string);
+      test.deepEqual(motherOfAllDocuments.array, doc.array);
+      test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+      test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+      test.equal(date.getTime(), doc.long);
+      test.equal(date.toString(), doc.date.toString());
+      test.equal(date.getTime(), doc.date.getTime());
+      test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+      test.equal(
+        motherOfAllDocuments.binary.value().toString('hex'),
+        doc.binary.value().toString('hex')
+      );
 
-          collection.insert(
-            context.motherOfAllDocuments,
-            configuration.writeConcernMax(),
-            function (err, docs) {
-              test.ok(docs);
-              collection.findOne(function (err, doc) {
-                // Assert correct deserialization of the values
-                test.equal(motherOfAllDocuments.string, doc.string);
-                test.deepEqual(motherOfAllDocuments.array, doc.array);
-                test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
-                test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
-                test.equal(date.getTime(), doc.long);
-                test.equal(date.toString(), doc.date.toString());
-                test.equal(date.getTime(), doc.date.getTime());
-                test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-                test.equal(
-                  motherOfAllDocuments.binary.value().toString('hex'),
-                  doc.binary.value().toString('hex')
-                );
-
-                test.equal(motherOfAllDocuments.int, doc.int);
-                test.equal(motherOfAllDocuments.long, doc.long);
-                test.equal(motherOfAllDocuments.float, doc.float);
-                test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
-                test.equal(motherOfAllDocuments.boolean, doc.boolean);
-                test.equal(motherOfAllDocuments.where.code, doc.where.code);
-                test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-                test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-                test.equal(
-                  motherOfAllDocuments.dbref.oid.toHexString(),
-                  doc.dbref.oid.toHexString()
-                );
-                test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-                client.close(done);
-              });
-            }
-          );
-        });
-      }
+      test.equal(motherOfAllDocuments.int, doc.int);
+      test.equal(motherOfAllDocuments.long, doc.long);
+      test.equal(motherOfAllDocuments.float, doc.float);
+      test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+      test.equal(motherOfAllDocuments.boolean, doc.boolean);
+      test.equal(motherOfAllDocuments.where.code, doc.where.code);
+      test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
+      test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+      test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+      test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
     });
 
-    it('shouldCorrectlyDoToJsonForLongValue', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: async function () {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        await client.connect();
-        const db = client.db(configuration.db);
-        const collection = db.collection('test_to_json_for_long');
-        await collection.insert(
-          [{ value: Long.fromNumber(32222432) }],
-          configuration.writeConcernMax()
-        );
-        const findResult = await collection.findOne({});
-        expect(findResult.value).to.deep.equal(32222432);
-
-        await client.close();
-      }
+    it('should correctly do .toJson() for Long value', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('test_to_json_for_long');
+      await collection.insertMany(
+        [{ value: Long.fromNumber(32222432) }],
+        configuration.writeConcernMax()
+      );
+      const findResult = await collection.findOne({});
+      expect(findResult.value).to.deep.equal(32222432);
     });
 
-    it('shouldInsertAndQueryTimestamp', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: async function () {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        await client.connect();
-        const db = client.db(configuration.db);
-        const collection = db.collection('test_insert_and_query_timestamp');
-        await collection.insertOne(
-          { i: Timestamp.fromNumber(100), j: Long.fromNumber(200) },
-          configuration.writeConcernMax()
-        );
-        const findResult = await collection.findOne({});
-        expect(findResult.i._bsontype).equals('Timestamp');
-        expect(findResult.i.toInt(), 100);
-        expect(findResult.j, 200);
-
-        await client.close();
-      }
+    it('should insert and query timestamp', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('test_insert_and_query_timestamp');
+      await collection.insertOne(
+        { i: Timestamp.fromNumber(100), j: Long.fromNumber(200) },
+        configuration.writeConcernMax()
+      );
+      const findResult = await collection.findOne({});
+      expect(findResult.i._bsontype).equals('Timestamp');
+      expect(findResult.i.toInt()).to.equal(100);
+      expect(findResult.j.toString()).to.equal('200');
     });
 
-    it('shouldCorrectlyInsertAndQueryUndefined', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly insert and query undefined', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('test_insert_and_query_undefined');
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('test_insert_and_query_undefined');
+      // Insert the update
+      await collection.insertOne({ i: undefined }, configuration.writeConcernMax());
 
-          // Insert the update
-          collection.insert({ i: undefined }, configuration.writeConcernMax(), function (err, r) {
-            expect(err).to.not.exist;
-            test.ok(r);
-
-            // Locate document
-            collection.findOne({}, function (err, item) {
-              expect(item.i).to.not.exist;
-
-              client.close(done);
-            });
-          });
-        });
-      }
+      // Locate document
+      const item = await collection.findOne({});
+      expect(item.i).to.be.null;
     });
 
-    it('shouldCorrectlySerializeDBRefToJSON', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const dbref = new DBRef(
-          'foo',
-          ObjectId.createFromHexString('fc24a04d4560531f00000000'),
-          null
-        );
-        JSON.stringify(dbref);
-        done();
-      }
+    it('should correctly serialize DBRef to JSON', async function () {
+      const dbref = new DBRef(
+        'foo',
+        ObjectId.createFromHexString('fc24a04d4560531f00000000'),
+        null
+      );
+      JSON.stringify(dbref);
     });
 
-    it('shouldCorrectlyInsertDocumentWithUUID', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly insert document with UUID', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection<{ _id: string; field: string }>('insert_doc_with_uuid');
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('insert_doc_with_uuid');
+      await collection.insertOne(
+        { _id: '12345678123456781234567812345678', field: '1' },
+        configuration.writeConcernMax()
+      );
 
-          collection.insert(
-            { _id: '12345678123456781234567812345678', field: '1' },
-            configuration.writeConcernMax(),
-            function (err, result) {
-              expect(err).to.not.exist;
-              test.ok(result);
+      const items = await collection.find({ _id: '12345678123456781234567812345678' }).toArray();
+      test.equal(items[0]._id, '12345678123456781234567812345678');
+      test.equal(items[0].field, '1');
 
-              collection
-                .find({ _id: '12345678123456781234567812345678' })
-                .toArray(function (err, items) {
-                  expect(err).to.not.exist;
-                  test.equal(items[0]._id, '12345678123456781234567812345678');
-                  test.equal(items[0].field, '1');
+      // Generate a binary id
+      const binaryUUID = new Binary(
+        Buffer.from('00000078123456781234567812345678', 'hex'),
+        Binary.SUBTYPE_UUID
+      );
 
-                  // Generate a binary id
-                  const binaryUUID = new Binary(
-                    Buffer.from('00000078123456781234567812345678', 'hex'),
-                    Binary.SUBTYPE_UUID
-                  );
+      // UUID must be 16 bytes
+      expect(binaryUUID.buffer).to.have.property('byteLength', 16);
 
-                  // UUID must be 16 bytes
-                  expect(binaryUUID.buffer).to.have.property('byteLength', 16);
-
-                  collection.insert(
-                    { _id: binaryUUID, field: '2' },
-                    configuration.writeConcernMax(),
-                    function (err, result) {
-                      expect(err).to.not.exist;
-                      test.ok(result);
-
-                      collection.find({ _id: binaryUUID }).toArray(function (err, items) {
-                        expect(err).to.not.exist;
-                        test.equal(items[0].field, '2');
-                        client.close(done);
-                      });
-                    }
-                  );
-                });
-            }
-          );
-        });
-      }
+      await collection.insertOne({ _id: binaryUUID, field: '2' }, configuration.writeConcernMax());
+      const docs = await collection.find({ _id: binaryUUID }).toArray();
+      test.equal(docs[0].field, '2');
     });
 
-    it('shouldCorrectlyCallCallbackWithDbDriverInStrictMode', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    // REMOVE
+    // it('shouldCorrectlyCallCallbackWithDbDriverInStrictMode', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('test_insert_and_update_no_callback_strict');
+    //
+    //       collection.insert(
+    //         { _id: '12345678123456781234567812345678', field: '1' },
+    //         configuration.writeConcernMax(),
+    //         function (err, result) {
+    //           expect(err).to.not.exist;
+    //           test.ok(result);
+    //
+    //           collection.updateOne(
+    //             { _id: '12345678123456781234567812345678' },
+    //             { $set: { field: 0 } },
+    //             configuration.writeConcernMax(),
+    //             function (err, r) {
+    //               expect(err).to.not.exist;
+    //               expect(r).property('matchedCount').to.equal(1);
+    //               client.close(done);
+    //             }
+    //           );
+    //         }
+    //       );
+    //     });
+    //   }
+    // });
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('test_insert_and_update_no_callback_strict');
+    it('should correctly insert DBRef with Db not defined', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
-          collection.insert(
-            { _id: '12345678123456781234567812345678', field: '1' },
-            configuration.writeConcernMax(),
-            function (err, result) {
-              expect(err).to.not.exist;
-              test.ok(result);
+      const doc = { _id: new ObjectId() };
+      const doc2 = { _id: new ObjectId() };
+      const doc3 = { _id: new ObjectId() };
 
-              collection.updateOne(
-                { _id: '12345678123456781234567812345678' },
-                { $set: { field: 0 } },
-                configuration.writeConcernMax(),
-                function (err, r) {
-                  expect(err).to.not.exist;
-                  expect(r).property('matchedCount').to.equal(1);
-                  client.close(done);
-                }
-              );
-            }
-          );
-        });
-      }
+      await collection.insertOne(doc, configuration.writeConcernMax());
+
+      // Create object with dbref
+      doc2.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
+      doc3.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, undefined);
+
+      await collection.insertMany([doc2, doc3], configuration.writeConcernMax());
+
+      // Get all items
+      const items = await collection.find().toArray();
+      test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
+      test.equal(doc._id.toString(), items[1].ref.oid.toString());
+      expect(items[1].ref.db).to.not.exist;
+
+      test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[2].ref.namespace);
+      test.equal(doc._id.toString(), items[2].ref.oid.toString());
+      expect(items[2].ref.db).to.not.exist;
     });
 
-    it('shouldCorrectlyInsertDBRefWithDbNotDefined', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    // REMOVE
+    // it('shouldCorrectlyInsertUpdateRemoveWithNoOptions', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions');
+    //
+    //       collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
+    //         expect(err).to.not.exist;
+    //         test.ok(result);
+    //
+    //         collection.update(
+    //           { a: 1 },
+    //           { $set: { a: 2 } },
+    //           configuration.writeConcernMax(),
+    //           function (err, result) {
+    //             expect(err).to.not.exist;
+    //             test.ok(result);
+    //
+    //             collection.deleteMany(
+    //               { a: 2 },
+    //               configuration.writeConcernMax(),
+    //               function (err, result) {
+    //                 expect(err).to.not.exist;
+    //                 test.ok(result);
+    //
+    //                 collection.count(function (err, count) {
+    //                   test.equal(0, count);
+    //                   client.close(done);
+    //                 });
+    //               }
+    //             );
+    //           }
+    //         );
+    //       });
+    //     });
+    //   }
+    // });
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
+    // REMOVE
+    // it('shouldCorrectlyExecuteMultipleFetches', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     // Search parameter
+    //     const to = 'ralph';
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('shouldCorrectlyExecuteMultipleFetches');
+    //       // Execute query
+    //       collection.insert(
+    //         { addresses: { localPart: 'ralph' } },
+    //         configuration.writeConcernMax(),
+    //         function (err, result) {
+    //           expect(err).to.not.exist;
+    //           test.ok(result);
+    //
+    //           // Let's find our user
+    //           collection.findOne({ 'addresses.localPart': to }, function (err, doc) {
+    //             expect(err).to.not.exist;
+    //             test.equal(to, doc.addresses.localPart);
+    //             client.close(done);
+    //           });
+    //         }
+    //       );
+    //     });
+    //   }
+    // });
 
-          const doc = { _id: new ObjectId() };
-          const doc2 = { _id: new ObjectId() };
-          const doc3 = { _id: new ObjectId() };
+    // REMOVE
+    // it('shouldCorrectlyFailWhenNoObjectToUpdate', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('shouldCorrectlyFailWhenNoObjectToUpdate');
+    //
+    //       collection.update(
+    //         { _id: new ObjectId() },
+    //         { $set: { email: 'update' } },
+    //         configuration.writeConcernMax(),
+    //         function (err, result) {
+    //           expect(err).to.not.exist;
+    //           expect(result).property('matchedCount').to.equal(0);
+    //           client.close(done);
+    //         }
+    //       );
+    //     });
+    //   }
+    // });
 
-          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
+    it('should correctly insert object and retrieve it when containing array and IsoDate', async function () {
+      const configuration = this.configuration;
+      const doc = {
+        _id: new ObjectId('4e886e687ff7ef5e00000162'),
+        str: 'foreign',
+        type: 2,
+        timestamp: ISODate('2011-10-02T14:00:08.383Z'),
+        links: [
+          'http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/'
+        ]
+      };
 
-            // Create object with dbref
-            doc2.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
-            doc3.ref = new DBRef(
-              'shouldCorrectlyInsertDBRefWithDbNotDefined',
-              doc._id,
-              configuration.db_name
-            );
+      const db = client.db(configuration.db);
+      const collection = db.collection(
+        'Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate'
+      );
 
-            collection.insert(
-              [doc2, doc3],
-              configuration.writeConcernMax(),
-              function (err, result) {
-                expect(err).to.not.exist;
-                test.ok(result);
+      await collection.insertOne(doc, configuration.writeConcernMax());
 
-                // Get all items
-                collection.find().toArray(function (err, items) {
-                  test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[1].ref.namespace);
-                  test.equal(doc._id.toString(), items[1].ref.oid.toString());
-                  expect(items[1].ref.db).to.not.exist;
-
-                  test.equal('shouldCorrectlyInsertDBRefWithDbNotDefined', items[2].ref.namespace);
-                  test.equal(doc._id.toString(), items[2].ref.oid.toString());
-                  expect(items[2].ref.db).to.not.exist;
-
-                  client.close(done);
-                });
-              }
-            );
-          });
-        });
-      }
-    });
-
-    it('shouldCorrectlyInsertUpdateRemoveWithNoOptions', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions');
-
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            collection.update(
-              { a: 1 },
-              { $set: { a: 2 } },
-              configuration.writeConcernMax(),
-              function (err, result) {
-                expect(err).to.not.exist;
-                test.ok(result);
-
-                collection.deleteMany(
-                  { a: 2 },
-                  configuration.writeConcernMax(),
-                  function (err, result) {
-                    expect(err).to.not.exist;
-                    test.ok(result);
-
-                    collection.count(function (err, count) {
-                      test.equal(0, count);
-                      client.close(done);
-                    });
-                  }
-                );
-              }
-            );
-          });
-        });
-      }
-    });
-
-    it('shouldCorrectlyExecuteMultipleFetches', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        // Search parameter
-        const to = 'ralph';
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyExecuteMultipleFetches');
-          // Execute query
-          collection.insert(
-            { addresses: { localPart: 'ralph' } },
-            configuration.writeConcernMax(),
-            function (err, result) {
-              expect(err).to.not.exist;
-              test.ok(result);
-
-              // Let's find our user
-              collection.findOne({ 'addresses.localPart': to }, function (err, doc) {
-                expect(err).to.not.exist;
-                test.equal(to, doc.addresses.localPart);
-                client.close(done);
-              });
-            }
-          );
-        });
-      }
-    });
-
-    it('shouldCorrectlyFailWhenNoObjectToUpdate', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyFailWhenNoObjectToUpdate');
-
-          collection.update(
-            { _id: new ObjectId() },
-            { $set: { email: 'update' } },
-            configuration.writeConcernMax(),
-            function (err, result) {
-              expect(err).to.not.exist;
-              expect(result).property('matchedCount').to.equal(0);
-              client.close(done);
-            }
-          );
-        });
-      }
-    });
-
-    it('Should correctly insert object and retrieve it when containing array and IsoDate', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const doc = {
-          _id: new ObjectId('4e886e687ff7ef5e00000162'),
-          str: 'foreign',
-          type: 2,
-          timestamp: ISODate('2011-10-02T14:00:08.383Z'),
-          links: [
-            'http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/'
-          ]
-        };
-
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection(
-            'Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate'
-          );
-
-          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            test.ok(err == null);
-            test.ok(result);
-
-            collection.findOne(function (err, item) {
-              test.ok(err == null);
-              test.deepEqual(doc, item);
-              client.close(done);
-            });
-          });
-        });
-      }
+      const item = await collection.findOne();
+      test.deepEqual(doc, item);
     });
 
     it('inserts and retrieves objects with timestamps', async function () {
@@ -874,718 +651,507 @@ describe.only('crud - insert', function () {
       expect(result).to.deep.equal(doc);
     });
 
-    it('Should Correctly allow for control of serialization of functions on command level', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should Correctly allow for control of serialization of functions on command level', async function () {
+      const configuration = this.configuration;
 
-      test: function (done) {
-        const configuration = this.configuration;
+      const doc = {
+        str: 'String',
+        func: function () {}
+      };
 
-        const doc = {
-          str: 'String',
-          func: function () {}
-        };
+      const db = client.db(configuration.db);
+      const collection = db.collection(
+        'Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level'
+      );
+      await collection.insertOne(doc, configuration.writeConcernMax());
 
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection(
-            'Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level'
-          );
-          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
+      const result = await collection.updateOne(
+        { str: 'String' },
+        { $set: { c: 1, d: function () {} } },
+        { writeConcern: { w: 1 }, serializeFunctions: false }
+      );
+      expect(result).property('matchedCount').to.equal(1);
 
-            collection.update(
-              { str: 'String' },
-              { $set: { c: 1, d: function () {} } },
-              { writeConcern: { w: 1 }, serializeFunctions: false },
-              function (err, result) {
-                expect(err).to.not.exist;
-                expect(result).property('matchedCount').to.equal(1);
+      const item = await collection.findOne({ str: 'String' });
+      expect(item.d).to.not.exist;
 
-                collection.findOne({ str: 'String' }, function (err, item) {
-                  expect(item.d).to.not.exist;
-
-                  // Execute a safe insert with replication to two servers
-                  collection.findOneAndUpdate(
-                    { str: 'String' },
-                    { $set: { f: function () {} } },
-                    {
-                      returnDocument: ReturnDocument.AFTER,
-                      safe: true,
-                      serializeFunctions: true,
-                      includeResultMetadata: true
-                    },
-                    function (err, result) {
-                      test.ok(result.value.f._bsontype === 'Code');
-                      client.close(done);
-                    }
-                  );
-                });
-              }
-            );
-          });
-        });
-      }
-    });
-
-    it('Should Correctly allow for control of serialization of functions on collection level', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-
-        const doc = {
-          str: 'String',
-          func: function () {}
-        };
-
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection(
-            'Should_Correctly_allow_for_control_of_serialization_of_functions_on_collection_level',
-            { serializeFunctions: true }
-          );
-          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            collection.findOne({ str: 'String' }, function (err, item) {
-              test.ok(item.func._bsontype === 'Code');
-              client.close(done);
-            });
-          });
-        });
-      }
-    });
-
-    it('Should Correctly allow for using a Date object as _id', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const doc = {
-          _id: new Date(),
-          str: 'hello'
-        };
-
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('Should_Correctly_allow_for_using_a_Date_object_as__id');
-          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            collection.findOne({ str: 'hello' }, function (err, item) {
-              test.ok(item._id instanceof Date);
-              client.close(done);
-            });
-          });
-        });
-      }
-    });
-
-    it('Should Correctly fail to update returning 0 results', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
-          collection.updateMany(
-            { a: 1 },
-            { $set: { a: 1 } },
-            configuration.writeConcernMax(),
-            function (err, r) {
-              expect(r).property('matchedCount').to.equal(0);
-              client.close(done);
-            }
-          );
-        });
-      }
-    });
-
-    it('Should Correctly update two fields including a sub field', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const doc = {
-          _id: new ObjectId(),
-          Prop1: 'p1',
-          Prop2: 'p2',
-          More: {
-            Sub1: 's1',
-            Sub2: 's2',
-            Sub3: 's3'
-          }
-        };
-
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection(
-            'Should_Correctly_update_two_fields_including_a_sub_field'
-          );
-          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            // Update two fields
-            collection.update(
-              { _id: doc._id },
-              { $set: { Prop1: 'p1_2', 'More.Sub2': 's2_2' } },
-              configuration.writeConcernMax(),
-              function (err, r) {
-                expect(err).to.not.exist;
-                expect(r).property('matchedCount').to.equal(1);
-
-                collection.findOne({ _id: doc._id }, function (err, item) {
-                  expect(err).to.not.exist;
-                  test.equal('p1_2', item.Prop1);
-                  test.equal('s2_2', item.More.Sub2);
-                  client.close(done);
-                });
-              }
-            );
-          });
-        });
-      }
-    });
-
-    it('Should correctly fail due to duplicate key for _id', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection(
-            'Should_Correctly_update_two_fields_including_a_sub_field_2'
-          );
-
-          collection.insertOne({ _id: 1 }, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            // Update two fields
-            collection.insertOne({ _id: 1 }, configuration.writeConcernMax(), function (err, r) {
-              expect(err).to.exist;
-              expect(r).to.not.exist;
-              client.close(done);
-            });
-          });
-        });
-      }
-    });
-
-    it('shouldCorrectlyInsertDocWithCustomId', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyInsertDocWithCustomId');
-          // Insert the update
-          collection.insert(
-            { _id: 0, test: 'hello' },
-            configuration.writeConcernMax(),
-            function (err, result) {
-              expect(err).to.not.exist;
-              test.ok(result);
-
-              collection.findOne({ _id: 0 }, function (err, item) {
-                test.equal(0, item._id);
-                test.equal('hello', item.test);
-                client.close(done);
-              });
-            }
-          );
-        });
-      }
-    });
-
-    it('shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection(
-            'shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne'
-          );
-
-          // Upsert a new doc
-          collection.update(
-            { a: 1 },
-            { $set: { a: 1 } },
-            { upsert: true, writeConcern: { w: 1 } },
-            function (err, result) {
-              expect(err).to.not.exist;
-              expect(result).property('upsertedCount').to.equal(1);
-
-              // Upsert an existing doc
-              collection.update(
-                { a: 1 },
-                { $set: { a: 1 } },
-                { upsert: true, writeConcern: { w: 1 } },
-                function (err, result) {
-                  expect(err).to.not.exist;
-                  expect(result).property('matchedCount').to.equal(1);
-                  client.close(done);
-                }
-              );
-            }
-          );
-        });
-      }
-    });
-
-    it('shouldCorrectlyPerformLargeTextInsert', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyPerformLargeTextInsert');
-
-          // Create large string, insert and then retrive
-          let string = '';
-          // Create large text field
-          for (let i = 0; i < 50000; i++) {
-            string = string + 'a';
-          }
-
-          collection.insert(
-            { a: 1, string: string },
-            configuration.writeConcernMax(),
-            function (err, result) {
-              expect(err).to.not.exist;
-              test.ok(result);
-
-              collection.findOne({ a: 1 }, function (err, doc) {
-                expect(err).to.not.exist;
-                test.equal(50000, doc.string.length);
-                client.close(done);
-              });
-            }
-          );
-        });
-      }
-    });
-
-    it('shouldCorrectlyPerformInsertOfObjectsUsingToBSON', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON');
-
-          // Create document with toBSON method
-          const doc = { a: 1, b: 1 };
-          doc.toBSON = function () {
-            return { c: this.a };
-          };
-
-          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            collection.findOne({ c: 1 }, function (err, doc) {
-              expect(err).to.not.exist;
-              test.deepEqual(1, doc.c);
-              client.close(done);
-            });
-          });
-        });
-      }
-    });
-
-    it('shouldAttempToForceBsonSize', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: 'single' }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          db.createCollection('shouldAttempToForceBsonSize', function (err, collection) {
-            // var doc = {a:1, b:new Binary(Buffer.alloc(16777216)/5)}
-            const doc = [
-              { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
-              { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
-              { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) }
-            ];
-
-            collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-              expect(err).to.not.exist;
-              test.ok(result);
-
-              collection.findOne({ a: 1 }, function (err, doc) {
-                expect(err).to.not.exist;
-                test.deepEqual(1, doc.a);
-
-                client.close(done);
-              });
-            });
-          });
-        });
-      }
-    });
-
-    it('shouldCorrectlyUseCustomObjectToUpdateDocument', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
-
-          collection.insert(
-            { a: { b: { c: 1 } } },
-            configuration.writeConcernMax(),
-            function (err, result) {
-              expect(err).to.not.exist;
-              test.ok(result);
-
-              // Dynamically build query
-              const query = {};
-              query['a'] = {};
-              query.a['b'] = {};
-              query.a.b['c'] = 1;
-
-              // Update document
-              collection.update(
-                query,
-                { $set: { 'a.b.d': 1 } },
-                configuration.writeConcernMax(),
-                function (err, r) {
-                  expect(err).to.not.exist;
-                  expect(r).property('matchedCount').to.equal(1);
-                  client.close(done);
-                }
-              );
-            }
-          );
-        });
-      }
-    });
-
-    it('shouldExecuteInsertWithNoCallbackAndWriteConcern', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
-          collection.insert({ a: { b: { c: 1 } } }).then(
-            () => {
-              client.close(done);
-            },
-            err => {
-              client.close(err2 => done(err || err2));
-            }
-          );
-        });
-      }
-    });
-
-    it('executesCallbackOnceWithOveriddenDefaultDbWriteConcern', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        function cb(err) {
-          expect(err).to.not.exist;
-          client.close(done);
+      // Execute a safe insert with replication to two servers
+      const updateResult = await collection.findOneAndUpdate(
+        { str: 'String' },
+        { $set: { f: function () {} } },
+        {
+          returnDocument: ReturnDocument.AFTER,
+          serializeFunctions: true,
+          includeResultMetadata: true
         }
-
-        const configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('gh-completely2');
-          collection.insert({ a: 1 }, { writeConcern: { w: 0 } }, cb);
-        });
-      }
+      );
+      test.ok(updateResult.value.f._bsontype === 'Code');
     });
 
-    it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly allow for control of serialization of functions on collection level', async function () {
+      const configuration = this.configuration;
 
-      test: function (done) {
-        function cb(err) {
-          expect(err).to.not.exist;
-          client.close(done);
-        }
+      const doc = {
+        str: 'String',
+        func: function () {}
+      };
 
-        const configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('gh-completely3');
-          collection.update(
-            { a: 1 },
-            { $set: { a: 2 } },
-            { upsert: true, writeConcern: { w: 0 } },
-            cb
-          );
-        });
-      }
+      const db = client.db(configuration.db);
+      const collection = db.collection(
+        'Should_Correctly_allow_for_control_of_serialization_of_functions_on_collection_level',
+        { serializeFunctions: true }
+      );
+      await collection.insertOne(doc, configuration.writeConcernMax());
+
+      const item = await collection.findOne({ str: 'String' });
+      test.ok(item.func._bsontype === 'Code');
     });
 
-    it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly allow for using a Date object as _id', async function () {
+      const doc = {
+        _id: new Date(),
+        str: 'hello'
+      };
 
-      test: function (done) {
-        function cb(err) {
-          expect(err).to.not.exist;
-          client.close(done);
-        }
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection<{ _id: Date }>(
+        'Should_Correctly_allow_for_using_a_Date_object_as__id'
+      );
+      await collection.insertOne(doc, configuration.writeConcernMax());
 
-        const configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('gh-completely1');
-          collection.deleteMany({ a: 1 }, { writeConcern: { w: 0 } }, cb);
-        });
-      }
+      const item = await collection.findOne({ str: 'hello' });
+      test.ok(item._id instanceof Date);
     });
 
-    it('handleBSONTypeInsertsCorrectly', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: {
-          topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'],
-          mongodb: '<2.8.0'
-        }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('bson_types_insert');
-
-          const document = {
-            symbol: new BSONSymbol('abcdefghijkl'),
-            objid: new ObjectId('abcdefghijkl'),
-            double: new Double(1),
-            binary: new Binary(Buffer.from('hello world')),
-            minkey: new MinKey(),
-            maxkey: new MaxKey(),
-            code: new Code('function () {}', { a: 55 })
-          };
-
-          collection.insert(document, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function (err, doc) {
-              expect(err).to.not.exist;
-              test.equal('abcdefghijkl', doc.symbol.toString());
-
-              collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function (err, doc) {
-                expect(err).to.not.exist;
-                test.equal('6162636465666768696a6b6c', doc.objid.toString());
-
-                collection.findOne({ double: new Double(1) }, function (err, doc) {
-                  expect(err).to.not.exist;
-                  test.equal(1, doc.double);
-
-                  collection.findOne(
-                    { binary: new Binary(Buffer.from('hello world')) },
-                    function (err, doc) {
-                      expect(err).to.not.exist;
-                      test.equal('hello world', doc.binary.toString());
-
-                      collection.findOne({ minkey: new MinKey() }, function (err, doc) {
-                        expect(err).to.not.exist;
-                        test.ok(doc.minkey._bsontype === 'MinKey');
-
-                        collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
-                          expect(err).to.not.exist;
-                          test.ok(doc.maxkey._bsontype === 'MaxKey');
-
-                          collection.findOne(
-                            { code: new Code('function () {}', { a: 55 }) },
-                            function (err, doc) {
-                              expect(err).to.not.exist;
-                              test.ok(doc != null);
-                              client.close(done);
-                            }
-                          );
-                        });
-                      });
-                    }
-                  );
-                });
-              });
-            });
-          });
-        });
-      }
+    it('should not fail when update returning 0 results', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
+      const r = await collection.updateMany(
+        { a: 1 },
+        { $set: { a: 1 } },
+        configuration.writeConcernMax()
+      );
+      expect(r).property('matchedCount').to.equal(0);
     });
 
-    it('handleBSONTypeInsertsCorrectlyFor28OrHigher', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: {
-          mongodb: '>=2.8.0'
+    it('should correctly update two fields including a sub field', async function () {
+      const configuration = this.configuration;
+      const doc = {
+        _id: new ObjectId(),
+        Prop1: 'p1',
+        Prop2: 'p2',
+        More: {
+          Sub1: 's1',
+          Sub2: 's2',
+          Sub3: 's3'
         }
-      },
+      };
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('Should_Correctly_update_two_fields_including_a_sub_field');
+      await collection.insertOne(doc, configuration.writeConcernMax());
 
-        const document = {
-          string: 'abcdefghijkl',
-          objid: new ObjectId(Buffer.alloc(12, 1)),
-          double: new Double(1),
-          binary: new Binary(Buffer.from('hello world')),
-          minkey: new MinKey(),
-          maxkey: new MaxKey(),
-          code: new Code('function () {}', { a: 55 })
-        };
+      // Update two fields
+      const r = await collection.updateOne(
+        { _id: doc._id },
+        { $set: { Prop1: 'p1_2', 'More.Sub2': 's2_2' } },
+        configuration.writeConcernMax()
+      );
+      expect(r).property('matchedCount').to.equal(1);
 
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('bson_types_insert_1');
+      const item = await collection.findOne({ _id: doc._id });
+      test.equal('p1_2', item.Prop1);
+      test.equal('s2_2', item.More.Sub2);
+    });
 
-          collection.insert(document, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
+    it('should correctly fail due to duplicate key for _id', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection<{ _id: number }>(
+        'Should_Correctly_update_two_fields_including_a_sub_field_2'
+      );
 
-            collection.findOne({ string: 'abcdefghijkl' }, function (err, doc) {
-              expect(err).to.not.exist;
-              test.equal('abcdefghijkl', doc.string.toString());
+      await collection.insertOne({ _id: 1 }, configuration.writeConcernMax());
 
-              collection.findOne({ objid: new ObjectId(Buffer.alloc(12, 1)) }, function (err, doc) {
-                expect(err).to.not.exist;
-                test.equal('01'.repeat(12), doc.objid.toString());
+      // Update two fields
+      const err = await collection
+        .insertOne({ _id: 1 }, configuration.writeConcernMax())
+        .catch(err => err);
+      expect(err).to.be.instanceOf(MongoServerError);
+    });
 
-                collection.findOne({ double: new Double(1) }, function (err, doc) {
-                  expect(err).to.not.exist;
-                  test.equal(1, doc.double);
+    // REMOVE
+    // it('shouldCorrectlyInsertDocWithCustomId', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('shouldCorrectlyInsertDocWithCustomId');
+    //       // Insert the update
+    //       collection.insert(
+    //         { _id: 0, test: 'hello' },
+    //         configuration.writeConcernMax(),
+    //         function (err, result) {
+    //           expect(err).to.not.exist;
+    //           test.ok(result);
+    //
+    //           collection.findOne({ _id: 0 }, function (err, item) {
+    //             test.equal(0, item._id);
+    //             test.equal('hello', item.test);
+    //             client.close(done);
+    //           });
+    //         }
+    //       );
+    //     });
+    //   }
+    // });
 
-                  collection.findOne(
-                    { binary: new Binary(Buffer.from('hello world')) },
-                    function (err, doc) {
-                      expect(err).to.not.exist;
-                      test.equal('hello world', doc.binary.toString());
+    it('should correctly perform upsert against new document and existing one', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection(
+        'shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne'
+      );
 
-                      collection.findOne({ minkey: new MinKey() }, function (err, doc) {
-                        expect(err).to.not.exist;
-                        test.ok(doc.minkey._bsontype === 'MinKey');
+      // Upsert a new doc
+      const u1 = await collection.updateOne(
+        { a: 1 },
+        { $set: { a: 1 } },
+        { upsert: true, writeConcern: { w: 1 } }
+      );
+      expect(u1).property('upsertedCount').to.equal(1);
 
-                        collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
-                          expect(err).to.not.exist;
-                          test.ok(doc.maxkey._bsontype === 'MaxKey');
+      // Upsert an existing doc
+      const u2 = await collection.updateOne(
+        { a: 1 },
+        { $set: { a: 1 } },
+        { upsert: true, writeConcern: { w: 1 } }
+      );
+      expect(u2).property('matchedCount').to.equal(1);
+    });
 
-                          collection.findOne(
-                            { code: new Code('function () {}', { a: 55 }) },
-                            function (err, doc) {
-                              expect(err).to.not.exist;
-                              test.ok(doc != null);
-                              client.close(done);
-                            }
-                          );
-                        });
-                      });
-                    }
-                  );
-                });
-              });
-            });
-          });
-        });
+    it('should correctly perform large text insert', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('shouldCorrectlyPerformLargeTextInsert');
+
+      // Create large string, insert and then retrive
+      let string = '';
+      // Create large text field
+      for (let i = 0; i < 50000; i++) {
+        string = string + 'a';
       }
+
+      await collection.insertOne({ a: 1, string: string }, configuration.writeConcernMax());
+
+      const doc = await collection.findOne({ a: 1 });
+      test.equal(50000, doc.string.length);
+    });
+
+    it('should correctly perform insert of objects using toBSON', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON');
+
+      // Create document with toBSON method
+      const doc = { a: 1, b: 1 };
+      doc.toBSON = function () {
+        return { c: this.a };
+      };
+
+      await collection.insertOne(doc, configuration.writeConcernMax());
+
+      const result = await collection.findOne({ c: 1 });
+      test.deepEqual(1, result.c);
+    });
+
+    // REMOVE
+    // it('shouldAttempToForceBsonSize', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: 'single' }
+    //   },
+    //
+    //   test: function (done) {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       db.createCollection('shouldAttempToForceBsonSize', function (err, collection) {
+    //         // var doc = {a:1, b:new Binary(Buffer.alloc(16777216)/5)}
+    //         const doc = [
+    //           { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
+    //           { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
+    //           { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) }
+    //         ];
+    //
+    //         collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
+    //           expect(err).to.not.exist;
+    //           test.ok(result);
+    //
+    //           collection.findOne({ a: 1 }, function (err, doc) {
+    //             expect(err).to.not.exist;
+    //             test.deepEqual(1, doc.a);
+    //
+    //             client.close(done);
+    //           });
+    //         });
+    //       });
+    //     });
+    //   }
+    // });
+
+    it('should correctly use custom object to update document', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
+
+      await collection.insertOne({ a: { b: { c: 1 } } }, configuration.writeConcernMax());
+
+      // Dynamically build query
+      const query = {};
+      query['a'] = {};
+      query.a['b'] = {};
+      query.a.b['c'] = 1;
+
+      // Update document
+      const r = await collection.updateOne(
+        query,
+        { $set: { 'a.b.d': 1 } },
+        configuration.writeConcernMax()
+      );
+      expect(r).property('matchedCount').to.equal(1);
+    });
+
+    // REMOVE
+    // it('shouldExecuteInsertWithNoCallbackAndWriteConcern', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
+    //       collection.insert({ a: { b: { c: 1 } } }).then(
+    //         () => {
+    //           client.close(done);
+    //         },
+    //         err => {
+    //           client.close(err2 => done(err || err2));
+    //         }
+    //       );
+    //     });
+    //   }
+    // });
+
+    // REMOVE
+    // it('executesCallbackOnceWithOveriddenDefaultDbWriteConcern', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     function cb(err) {
+    //       expect(err).to.not.exist;
+    //       client.close(done);
+    //     }
+    //
+    //     const configuration = this.configuration;
+    //     var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('gh-completely2');
+    //       collection.insert({ a: 1 }, { writeConcern: { w: 0 } }, cb);
+    //     });
+    //   }
+    // });
+
+    // REMOVE
+    // it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     function cb(err) {
+    //       expect(err).to.not.exist;
+    //       client.close(done);
+    //     }
+    //
+    //     const configuration = this.configuration;
+    //     var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('gh-completely3');
+    //       collection.update(
+    //         { a: 1 },
+    //         { $set: { a: 2 } },
+    //         { upsert: true, writeConcern: { w: 0 } },
+    //         cb
+    //       );
+    //     });
+    //   }
+    // });
+
+    // REMOVE
+    // it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     function cb(err) {
+    //       expect(err).to.not.exist;
+    //       client.close(done);
+    //     }
+    //
+    //     const configuration = this.configuration;
+    //     var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('gh-completely1');
+    //       collection.deleteMany({ a: 1 }, { writeConcern: { w: 0 } }, cb);
+    //     });
+    //   }
+    // });
+
+    // REMOVE
+    // it('handleBSONTypeInsertsCorrectly', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: {
+    //       topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'],
+    //       mongodb: '<2.8.0'
+    //     }
+    //   },
+    //
+    //   test: function (done) {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       const collection = db.collection('bson_types_insert');
+    //
+    //       const document = {
+    //         symbol: new BSONSymbol('abcdefghijkl'),
+    //         objid: new ObjectId('abcdefghijkl'),
+    //         double: new Double(1),
+    //         binary: new Binary(Buffer.from('hello world')),
+    //         minkey: new MinKey(),
+    //         maxkey: new MaxKey(),
+    //         code: new Code('function () {}', { a: 55 })
+    //       };
+    //
+    //       collection.insert(document, configuration.writeConcernMax(), function (err, result) {
+    //         expect(err).to.not.exist;
+    //         test.ok(result);
+    //
+    //         collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') }, function (err, doc) {
+    //           expect(err).to.not.exist;
+    //           test.equal('abcdefghijkl', doc.symbol.toString());
+    //
+    //           collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function (err, doc) {
+    //             expect(err).to.not.exist;
+    //             test.equal('6162636465666768696a6b6c', doc.objid.toString());
+    //
+    //             collection.findOne({ double: new Double(1) }, function (err, doc) {
+    //               expect(err).to.not.exist;
+    //               test.equal(1, doc.double);
+    //
+    //               collection.findOne(
+    //                 { binary: new Binary(Buffer.from('hello world')) },
+    //                 function (err, doc) {
+    //                   expect(err).to.not.exist;
+    //                   test.equal('hello world', doc.binary.toString());
+    //
+    //                   collection.findOne({ minkey: new MinKey() }, function (err, doc) {
+    //                     expect(err).to.not.exist;
+    //                     test.ok(doc.minkey._bsontype === 'MinKey');
+    //
+    //                     collection.findOne({ maxkey: new MaxKey() }, function (err, doc) {
+    //                       expect(err).to.not.exist;
+    //                       test.ok(doc.maxkey._bsontype === 'MaxKey');
+    //
+    //                       collection.findOne(
+    //                         { code: new Code('function () {}', { a: 55 }) },
+    //                         function (err, doc) {
+    //                           expect(err).to.not.exist;
+    //                           test.ok(doc != null);
+    //                           client.close(done);
+    //                         }
+    //                       );
+    //                     });
+    //                   });
+    //                 }
+    //               );
+    //             });
+    //           });
+    //         });
+    //       });
+    //     });
+    //   }
+    // });
+
+    it('handles BSON type inserts', async function () {
+      const configuration = this.configuration;
+
+      const document = {
+        string: 'abcdefghijkl',
+        objid: new ObjectId(Buffer.alloc(12, 1)),
+        double: new Double(1),
+        binary: new Binary(Buffer.from('hello world')),
+        minkey: new MinKey(),
+        maxkey: new MaxKey(),
+        code: new Code('function () {}', { a: 55 })
+      };
+
+      const db = client.db(configuration.db);
+      const collection = db.collection('bson_types_insert_1');
+
+      await collection.insertOne(document, configuration.writeConcernMax());
+
+      const doc1 = await collection.findOne({ string: 'abcdefghijkl' });
+      test.equal('abcdefghijkl', doc1.string);
+
+      const doc2 = await collection.findOne({ objid: new ObjectId(Buffer.alloc(12, 1)) });
+      test.equal('01'.repeat(12), doc2.objid.toString());
+
+      const doc3 = await collection.findOne({ double: new Double(1) });
+      test.equal(1, doc3.double);
+
+      const doc4 = await collection.findOne({ binary: new Binary(Buffer.from('hello world')) });
+      test.equal('hello world', doc4.binary.toString());
+
+      const doc5 = await collection.findOne({ minkey: new MinKey() });
+      test.ok(doc5.minkey._bsontype === 'MinKey');
+
+      const doc6 = await collection.findOne({ maxkey: new MaxKey() });
+      test.ok(doc6.maxkey._bsontype === 'MaxKey');
+
+      const doc7 = await collection.findOne({ code: new Code('function () {}', { a: 55 }) });
+      test.equal('abcdefghijkl', doc7.string);
     });
 
     it('lookups for timestamp and date work', async function () {
@@ -1605,240 +1171,101 @@ describe.only('crud - insert', function () {
       expect(docDate).to.not.be.null;
     });
 
-    it('positiveAndNegativeInfinity', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('positive and negative infinity', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('negative_pos');
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('negative_pos');
+      const document = {
+        pos: Number.POSITIVE_INFINITY,
+        neg: Number.NEGATIVE_INFINITY
+      };
 
-          const document = {
-            pos: Number.POSITIVE_INFINITY,
-            neg: Number.NEGATIVE_INFINITY
-          };
+      await collection.insertOne(document, configuration.writeConcernMax());
 
-          collection.insert(document, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            collection.findOne({}, function (err, doc) {
-              expect(err).to.not.exist;
-              test.equal(Number.POSITIVE_INFINITY, doc.pos);
-              test.equal(Number.NEGATIVE_INFINITY, doc.neg);
-              client.close(done);
-            });
-          });
-        });
-      }
+      const doc = await collection.findOne({});
+      test.equal(Number.POSITIVE_INFINITY, doc.pos);
+      test.equal(Number.NEGATIVE_INFINITY, doc.neg);
     });
 
-    it('shouldCorrectlyInsertSimpleRegExpDocument', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly insert simple regExp document', async function () {
+      const regexp = /foobar/i;
 
-      test: function (done) {
-        const regexp = /foobar/i;
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_regex');
+      await collection.insertOne({ b: regexp }, configuration.writeConcernMax());
 
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          db.createCollection('test_regex', function (err, collection) {
-            collection.insert({ b: regexp }, configuration.writeConcernMax(), function (err, ids) {
-              expect(err).to.not.exist;
-              test.ok(ids);
-
-              collection
-                .find({})
-                .project({ b: 1 })
-                .toArray(function (err, items) {
-                  test.equal('' + regexp, '' + items[0].b);
-                  // Let's close the db
-                  client.close(done);
-                });
-            });
-          });
-        });
-      }
+      const items = await collection.find({}).project({ b: 1 }).toArray();
+      test.equal('' + regexp, '' + items[0].b);
     });
 
-    it('shouldCorrectlyInsertSimpleUTF8Regexp', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        if (satisfies(process.versions.node, '22.7.0')) {
-          this.skipReason = 'Node.js 22.7.0 has a UTF-8 encoding bug';
-          this.skip();
-        }
-
-        const regexp = /foobaré/;
-
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const collection = db.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
-
-          collection.insert({ b: regexp }, configuration.writeConcernMax(), function (err, ids) {
-            expect(err).to.not.exist;
-            test.ok(ids);
-
-            collection
-              .find({})
-              .project({ b: 1 })
-              .toArray(function (err, items) {
-                expect(err).to.not.exist;
-                test.equal('' + regexp, '' + items[0].b);
-                // Let's close the db
-                client.close(done);
-              });
-          });
-        });
+    it('should correctly insert simple UTF8 regExp', async function () {
+      if (satisfies(process.versions.node, '22.7.0')) {
+        this.skipReason = 'Node.js 22.7.0 has a UTF-8 encoding bug';
+        this.skip();
       }
+
+      const regexp = /foobaré/;
+
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const collection = db.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
+
+      await collection.insertOne({ b: regexp }, configuration.writeConcernMax());
+
+      const items = await collection.find({}).project({ b: 1 }).toArray();
+      test.equal('' + regexp, '' + items[0].b);
     });
 
-    it('shouldCorrectlyThrowDueToIllegalCollectionName', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should throw due to illegal collection name', function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const k = Buffer.alloc(15);
+      for (let i = 0; i < 15; i++) k[i] = 0;
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const k = Buffer.alloc(15);
-          for (let i = 0; i < 15; i++) k[i] = 0;
+      k.write('hello');
+      k[6] = 0x06;
+      k.write('world', 10);
 
-          k.write('hello');
-          k[6] = 0x06;
-          k.write('world', 10);
-
-          try {
-            db.collection(k.toString());
-            test.fail(false);
-          } catch (err) {} // eslint-disable-line
-
-          client.close(done);
-        });
-      }
+      try {
+        db.collection(k.toString());
+        test.fail(false);
+      } catch (ignore) {} // eslint-disable-line
     });
 
-    it('shouldCorrectlyHonorPromoteLongFalseNativeBSON', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly honor `promoteLong:false` native BSON', async function () {
+      const configuration = this.configuration;
+      const p_client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        promoteLongs: false
+      });
+      await p_client.connect();
+      const db = client.db(configuration.db);
+      await db.collection('shouldCorrectlyHonorPromoteLong').insertOne({
+        doc: Long.fromNumber(10),
+        array: [[Long.fromNumber(10)]]
+      });
+      const doc = await db.collection('shouldCorrectlyHonorPromoteLong').findOne();
 
-      test: async function () {
-        const configuration = this.configuration;
-        const o = configuration.writeConcernMax();
-        o.promoteLongs = false;
-        const client = configuration.newClient(configuration.writeConcernMax(), {
-          maxPoolSize: 1,
-          promoteLongs: false
-        });
-        await client.connect();
-        const db = client.db(configuration.db);
-        await db.collection('shouldCorrectlyHonorPromoteLong').insertOne({
-          doc: Long.fromNumber(10),
-          array: [[Long.fromNumber(10)]]
-        });
-        const doc = await db.collection('shouldCorrectlyHonorPromoteLong').findOne();
+      expect(doc.doc._bsontype === 'Long');
+      expect(doc.array[0][0]._bsontype === 'Long');
 
-        expect(doc.doc._bsontype === 'Long');
-        expect(doc.array[0][0]._bsontype === 'Long');
-
-        await client.close();
-      }
+      await p_client.close();
     });
 
-    it('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly honor promoteLong:false native BSON with getMore', async function () {
+      const configuration = this.configuration;
 
-      test: async function () {
-        const configuration = this.configuration;
-        const o = configuration.writeConcernMax();
-        o.promoteLongs = false;
-
-        const client = configuration.newClient(configuration.writeConcernMax(), {
-          maxPoolSize: 1,
-          promoteLongs: false
-        });
-        await client.connect();
-        const db = client.db(configuration.db);
-        await db
-          .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
-          .insertMany([
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) },
-            { a: Long.fromNumber(10) }
-          ]);
-
-        const docs = await db
-          .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
-          .find({})
-          .batchSize(2)
-          .toArray();
-        const doc = docs.pop();
-        expect(doc.a._bsontype).to.equal('Long');
-        await client.close();
-      }
-    });
-
-    it('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore', {
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: async function () {
-        const db = client.db('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore', {
-          promoteLongs: true
-        });
-        const collection = db.collection('test', { promoteLongs: false });
-        const doc = await collection.insertMany([
+      const p_client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        promoteLongs: false
+      });
+      await p_client.connect();
+      const db = p_client.db(configuration.db);
+      await db
+        .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
+        .insertMany([
           { a: Long.fromNumber(10) },
           { a: Long.fromNumber(10) },
           { a: Long.fromNumber(10) },
@@ -1864,279 +1291,219 @@ describe.only('crud - insert', function () {
           { a: Long.fromNumber(10) },
           { a: Long.fromNumber(10) }
         ]);
-        test.ok(doc);
 
-        const docs = await collection.find({}).batchSize(2).toArray();
-        docs.forEach((d, i) => {
-          expect(d.a, `Failed on the document at index ${i}`).to.not.be.a('number');
-          expect(d.a, `Failed on the document at index ${i}`).to.have.property('_bsontype');
-          expect(d.a._bsontype, `Failed on the document at index ${i}`).to.be.equal('Long');
-        });
-      }
+      const docs = await db
+        .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
+        .find({})
+        .batchSize(2)
+        .toArray();
+      const doc = docs.pop();
+      expect(doc.a._bsontype).to.equal('Long');
+      await p_client.close();
     });
 
-    it('shouldCorrectlyHonorPromoteLongTrueNativeBSON', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly inherit promoteLong:false native BSON with getMore', async function () {
+      const db = client.db('shouldCorrectlyInheritPromoteLongFalseNativeBSONWithGetMore', {
+        promoteLongs: true
+      });
+      const collection = db.collection('test', { promoteLongs: false });
+      const doc = await collection.insertMany([
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) },
+        { a: Long.fromNumber(10) }
+      ]);
+      test.ok(doc);
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert(
-            {
-              doc: Long.fromNumber(10),
-              array: [[Long.fromNumber(10)]]
-            },
-            function (err, doc) {
-              expect(err).to.not.exist;
-              test.ok(doc);
-
-              db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne(
-                function (err, doc) {
-                  expect(err).to.not.exist;
-                  expect(err).to.not.exist;
-                  test.ok('number', typeof doc.doc);
-                  test.ok('number', typeof doc.array[0][0]);
-                  client.close(done);
-                }
-              );
-            }
-          );
-        });
-      }
+      const docs = await collection.find({}).batchSize(2).toArray();
+      docs.forEach((d, i) => {
+        expect(d.a, `Failed on the document at index ${i}`).to.not.be.a('number');
+        expect(d.a, `Failed on the document at index ${i}`).to.have.property('_bsontype');
+        expect(d.a._bsontype, `Failed on the document at index ${i}`).to.be.equal('Long');
+      });
     });
 
-    it('shouldCorrectlyHonorPromoteLongFalseJSBSON', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly honor promoteLong:true native BSON', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      await db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insertOne({
+        doc: Long.fromNumber(10),
+        array: [[Long.fromNumber(10)]]
+      });
 
-      test: async function () {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), {
-          maxPoolSize: 1,
-          promoteLongs: false
-        });
-        await client.connect();
-        const db = client.db(configuration.db);
-        await db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insertOne({
-          doc: Long.fromNumber(10),
-          array: [[Long.fromNumber(10)]]
-        });
-        const doc = await db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne({});
-        expect(doc.doc._bsontype).to.equal('Long');
-        expect(doc.array[0][0]._bsontype).to.equal('Long');
-
-        await client.close();
-      }
+      const doc = await db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne();
+      expect(doc.doc).to.be.a('number');
+      expect(doc.array[0][0]).to.be.a('number');
     });
 
-    it('shouldCorrectlyHonorPromoteLongTrueJSBSON', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    // REMOVE
+    // it('shouldCorrectlyHonorPromoteLongFalseJSBSON', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: async function () {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), {
+    //       maxPoolSize: 1,
+    //       promoteLongs: false
+    //     });
+    //     await client.connect();
+    //     const db = client.db(configuration.db);
+    //     await db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insertOne({
+    //       doc: Long.fromNumber(10),
+    //       array: [[Long.fromNumber(10)]]
+    //     });
+    //     const doc = await db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne({});
+    //     expect(doc.doc._bsontype).to.equal('Long');
+    //     expect(doc.array[0][0]._bsontype).to.equal('Long');
+    //
+    //     await client.close();
+    //   }
+    // });
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert(
-            {
-              doc: Long.fromNumber(10),
-              array: [[Long.fromNumber(10)]]
-            },
-            function (err, doc) {
-              expect(err).to.not.exist;
-              test.ok(doc);
+    // REMOVE
+    // it('shouldCorrectlyHonorPromoteLongTrueJSBSON', {
+    //   // Add a tag that our runner can trigger on
+    //   // in this case we are setting that node needs to be higher than 0.10.X to run
+    //   metadata: {
+    //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    //   },
+    //
+    //   test: function (done) {
+    //     const configuration = this.configuration;
+    //     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    //     client.connect(function (err, client) {
+    //       const db = client.db(configuration.db);
+    //       db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert(
+    //         {
+    //           doc: Long.fromNumber(10),
+    //           array: [[Long.fromNumber(10)]]
+    //         },
+    //         function (err, doc) {
+    //           expect(err).to.not.exist;
+    //           test.ok(doc);
+    //
+    //           db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(
+    //             function (err, doc) {
+    //               expect(err).to.not.exist;
+    //               expect(err).to.not.exist;
+    //               test.ok('number', typeof doc.doc);
+    //               test.ok('number', typeof doc.array[0][0]);
+    //               client.close(done);
+    //             }
+    //           );
+    //         }
+    //       );
+    //     });
+    //   }
+    // });
 
-              db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(
-                function (err, doc) {
-                  expect(err).to.not.exist;
-                  expect(err).to.not.exist;
-                  test.ok('number', typeof doc.doc);
-                  test.ok('number', typeof doc.array[0][0]);
-                  client.close(done);
-                }
-              );
-            }
-          );
-        });
-      }
+    it('should correctly work with checkKeys', async function () {
+      const configuration = this.configuration;
+
+      const db = client.db(configuration.db);
+      const result = await db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').updateOne(
+        {
+          'ps.op.t': 1
+        },
+        { $set: { b: 1 } },
+        { checkKeys: false }
+      );
+      test.ok(result);
     });
 
-    it('shouldCorrectlyWorkWithCheckKeys', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly apply bit operator', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const col = db.collection('shouldCorrectlyApplyBitOperator');
 
-      test: function (done) {
-        const configuration = this.configuration;
+      await col.insertOne({ a: 1, b: 1 });
 
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update(
-            {
-              'ps.op.t': 1
-            },
-            { $set: { b: 1 } },
-            { checkKeys: false },
-            function (err, doc) {
-              expect(err).to.not.exist;
-              test.ok(doc);
+      await col.updateOne({ a: 1 }, { $bit: { b: { and: 0 } } });
 
-              client.close(done);
-            }
-          );
-        });
-      }
-    });
-
-    it('shouldCorrectlyApplyBitOperator', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const col = db.collection('shouldCorrectlyApplyBitOperator');
-
-          col.insert({ a: 1, b: 1 }, function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
-
-            col.update({ a: 1 }, { $bit: { b: { and: 0 } } }, function (err, result) {
-              expect(err).to.not.exist;
-              test.ok(result);
-
-              col.findOne({ a: 1 }, function (err, doc) {
-                expect(err).to.not.exist;
-                test.equal(1, doc.a);
-                test.equal(0, doc.b);
-
-                client.close(done);
-              });
-            });
-          });
-        });
-      }
+      const doc = await col.findOne({ a: 1 });
+      test.equal(1, doc.a);
+      test.equal(0, doc.b);
     });
 
     function trim(str) {
       return str.replace(/\n/g, '').replace(/ /g, '');
     }
 
-    it('shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly perform insert and update with function serialization', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const col = db.collection('shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization', {
+        serializeFunctions: true
+      });
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const col = db.collection(
-            'shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization',
-            {
-              serializeFunctions: true
+      await col.insertOne({
+        a: 1,
+        f: function (x) {
+          return x;
+        }
+      });
+
+      await col.updateOne(
+        { a: 1 },
+        {
+          $set: {
+            f: function (y) {
+              return y;
             }
-          );
+          }
+        }
+      );
 
-          col.insert(
-            {
-              a: 1,
-              f: function (x) {
-                return x;
-              }
-            },
-            function (err, doc) {
-              expect(err).to.not.exist;
-              test.ok(doc);
-
-              col.update(
-                { a: 1 },
-                {
-                  $set: {
-                    f: function (y) {
-                      return y;
-                    }
-                  }
-                },
-                function (err, doc) {
-                  expect(err).to.not.exist;
-                  test.ok(doc);
-
-                  col.findOne({ a: 1 }, function (err, doc) {
-                    expect(err).to.not.exist;
-                    test.equal(trim('function (y){return y;}'), trim(doc.f.code));
-                    client.close(done);
-                  });
-                }
-              );
-            }
-          );
-        });
-      }
+      const doc = await col.findOne({ a: 1 });
+      test.equal(trim('function (y){return y;}'), trim(doc.f.code));
     });
 
-    it('should correctly insert > 1000 docs using insert and insertMany', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should correctly insert > 1000 docs using insertMany', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const col = db.collection('shouldCorrectlyAllowforMoreThanAThousandDocsInsert', {
+        serializeFunctions: true
+      });
+      let docs = [];
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          const col = db.collection('shouldCorrectlyAllowforMoreThanAThousandDocsInsert', {
-            serializeFunctions: true
-          });
-          let docs = [];
-
-          for (let i = 0; i < 2000; i++) {
-            docs.push({ a: i });
-          }
-
-          col.insertMany(docs, function (err, result) {
-            expect(err).to.not.exist;
-            expect(result).property('insertedCount').to.equal(2000);
-
-            docs = [];
-            for (let i = 0; i < 2000; i++) {
-              docs.push({ a: i });
-            }
-
-            col.insertMany(docs, function (err, res) {
-              expect(err).to.not.exist;
-              expect(res).property('insertedCount').to.equal(2000);
-              client.close(done);
-            });
-          });
-        });
+      for (let i = 0; i < 2000; i++) {
+        docs.push({ a: i });
       }
+
+      const result = await col.insertMany(docs);
+      expect(result).property('insertedCount').to.equal(2000);
+
+      docs = [];
+      for (let i = 0; i < 2000; i++) {
+        docs.push({ a: i });
+      }
+
+      const res = await col.insertMany(docs);
+      expect(res).property('insertedCount').to.equal(2000);
     });
 
     it('should return error on unordered insertMany with multiple unique key constraints', async () => {
@@ -2175,195 +1542,128 @@ describe.only('crud - insert', function () {
       expect(insertManyRes.result.getWriteErrors()).to.have.length(1);
     });
 
-    it('Correctly allow forceServerObjectId for insertOne', {
-      metadata: { requires: { topology: ['single'] } },
+    it('correctly allow forceServerObjectId for insertOne', async function () {
+      const started = [];
+      const succeeded = [];
 
-      test: function (done) {
-        const started = [];
-        const succeeded = [];
+      const configuration = this.configuration;
+      const p_client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
+      p_client.on('commandStarted', function (event) {
+        if (event.commandName === 'insert') started.push(event);
+      });
 
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), {
-          maxPoolSize: 1,
-          monitorCommands: true
-        });
-        client.on('commandStarted', function (event) {
-          if (event.commandName === 'insert') started.push(event);
-        });
+      p_client.on('commandSucceeded', function (event) {
+        if (event.commandName === 'insert') succeeded.push(event);
+      });
 
-        client.on('commandSucceeded', function (event) {
-          if (event.commandName === 'insert') succeeded.push(event);
-        });
+      const db = p_client.db(configuration.db);
 
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          expect(err).to.not.exist;
-
-          db.collection('apm_test')
-            .insertOne({ a: 1 }, { forceServerObjectId: true })
-            .then(function () {
-              expect(started[0].command.documents[0]._id).to.not.exist;
-
-              client.close(done);
-            });
-        });
-      }
+      await db.collection('apm_test').insertOne({ a: 1 }, { forceServerObjectId: true });
+      expect(started[0].command.documents[0]._id).to.not.exist;
+      await p_client.close();
     });
 
-    it('Correctly allow forceServerObjectId for insertMany', {
-      metadata: { requires: { topology: ['single'] } },
+    it('correctly allow forceServerObjectId for insertMany', async function () {
+      const started = [];
+      const succeeded = [];
 
-      test: function (done) {
-        const started = [];
-        const succeeded = [];
+      const configuration = this.configuration;
+      const p_client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
+      p_client.on('commandStarted', function (event) {
+        if (event.commandName === 'insert') started.push(event);
+      });
 
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), {
-          maxPoolSize: 1,
-          monitorCommands: true
-        });
-        client.on('commandStarted', function (event) {
-          if (event.commandName === 'insert') started.push(event);
-        });
+      p_client.on('commandSucceeded', function (event) {
+        if (event.commandName === 'insert') succeeded.push(event);
+      });
 
-        client.on('commandSucceeded', function (event) {
-          if (event.commandName === 'insert') succeeded.push(event);
-        });
+      const db = p_client.db(configuration.db);
 
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          expect(err).to.not.exist;
-
-          db.collection('apm_test')
-            .insertMany([{ a: 1 }], { forceServerObjectId: true })
-            .then(function () {
-              expect(started[0].command.documents[0]._id).to.not.exist;
-
-              client.close(done);
-            });
-        });
-      }
+      await db.collection('apm_test').insertMany([{ a: 1 }], { forceServerObjectId: true });
+      expect(started[0].command.documents[0]._id).to.not.exist;
+      await p_client.close();
     });
 
-    it('should return correct number of ids for insertMany { ordered: true }', {
-      metadata: { requires: { topology: ['single'] } },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          expect(err).to.not.exist;
-          db.collection('inserted_ids_test')
-            .insertMany([{}, {}, {}], { ordered: true })
-            .then(function (r) {
-              expect(r).property('insertedCount').to.equal(3);
-              client.close(done);
-            });
-        });
-      }
+    it('should return correct number of ids for insertMany { ordered: true }', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const r = await db
+        .collection('inserted_ids_test')
+        .insertMany([{}, {}, {}], { ordered: true });
+      expect(r).property('insertedCount').to.equal(3);
     });
 
-    it('should return correct number of ids for insertMany { ordered: false }', {
-      metadata: { requires: { topology: ['single'] } },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          expect(err).to.not.exist;
-          db.collection('inserted_ids_test')
-            .insertMany([{}, {}, {}], { ordered: false })
-            .then(function (r) {
-              expect(err).to.not.exist;
-              expect(r).property('insertedCount').to.equal(3);
-              client.close(done);
-            });
-        });
-      }
+    it('should return correct number of ids for insertMany { ordered: false }', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
+      const r = await db
+        .collection('inserted_ids_test')
+        .insertMany([{}, {}, {}], { ordered: false });
+      expect(r).property('insertedCount').to.equal(3);
     });
 
-    it('Insert document including sub documents', {
-      metadata: { requires: { topology: ['single'] } },
+    it('Insert document including sub documents', async function () {
+      const configuration = this.configuration;
+      const db = client.db(configuration.db);
 
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          const db = client.db(configuration.db);
-          expect(err).to.not.exist;
+      const shipment = {
+        shipment1: 'a'
+      };
 
-          const shipment = {
-            shipment1: 'a'
-          };
+      const supplier = {
+        shipments: [shipment]
+      };
 
-          const supplier = {
-            shipments: [shipment]
-          };
+      const product = {
+        suppliers: [supplier]
+      };
 
-          const product = {
-            suppliers: [supplier]
-          };
+      const doc = {
+        a: 1,
+        products: [product]
+      };
 
-          const doc = {
-            a: 1,
-            products: [product]
-          };
+      await db.collection('sub_documents').insertOne(doc);
 
-          db.collection('sub_documents').insertOne(doc, function (err, r) {
-            expect(err).to.not.exist;
-            test.ok(r);
-
-            db.collection('sub_documents')
-              .find({})
-              .next(function (err, v) {
-                expect(err).to.not.exist;
-                test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
-
-                client.close(done);
-              });
-          });
-        });
-      }
+      const v = await db.collection('sub_documents').find({}).next();
+      test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
     });
 
-    it('MongoBulkWriteError and BulkWriteResult should respect BulkWrite', function () {
-      return client
-        .connect()
-        .then(() => {
-          return client.db().collection('test_insertMany_bulkResult').drop();
-        })
-        .catch(ignoreNsNotFound)
-        .then(() => {
-          const collection = client.db().collection('test_insertMany_bulkResult');
-          return collection.insertMany(
-            [
-              { _id: 2, x: 22 },
-              { _id: 2, x: 22 },
-              { _id: 3, x: 33 }
-            ],
-            { ordered: false }
-          );
-        })
-        .then(() => {
-          expect.fail('InsertMany should fail with multi key error');
-        })
-        .catch(error => {
-          expect(error).to.be.instanceOf(MongoBulkWriteError);
-          expect(
-            error.insertedCount,
-            'MongoBulkWriteError.insertedCount did not respect BulkResult.nInserted'
-          ).to.equal(error.result.result.nInserted);
-          expect(
-            error.result.insertedCount,
-            'BulkWriteResult.insertedCount did not respect BulkResult.nInserted'
-          ).to.equal(error.result.result.nInserted);
-          expect(
-            error.result.result.nInserted,
-            'BulkWrite did not correctly represent the operation'
-          ).to.equal(2);
-        })
-        .finally(() => client.db().collection('test_insertMany_bulkResult').drop())
-        .finally(() => client.close());
+    it('MongoBulkWriteError and BulkWriteResult should respect BulkWrite', async function () {
+      await client.db().collection('test_insertMany_bulkResult').drop().catch(ignoreNsNotFound);
+
+      const collection = client
+        .db()
+        .collection<{ _id: number; x: number }>('test_insertMany_bulkResult');
+      const error = await collection
+        .insertMany(
+          [
+            { _id: 2, x: 22 },
+            { _id: 2, x: 22 },
+            { _id: 3, x: 33 }
+          ],
+          { ordered: false }
+        )
+        .catch(err => err);
+      expect(error).to.be.instanceOf(MongoBulkWriteError);
+      expect(
+        error.insertedCount,
+        'MongoBulkWriteError.insertedCount did not respect BulkResult.nInserted'
+      ).to.equal(error.result.result.nInserted);
+      expect(
+        error.result.insertedCount,
+        'BulkWriteResult.insertedCount did not respect BulkResult.nInserted'
+      ).to.equal(error.result.result.nInserted);
+      expect(
+        error.result.result.nInserted,
+        'BulkWrite did not correctly represent the operation'
+      ).to.equal(2);
     });
   });
 });
