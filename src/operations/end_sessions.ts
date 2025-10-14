@@ -11,12 +11,10 @@ import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { CommandOperation } from '../operations/command';
 import { ReadPreference } from '../read_preference';
 import { MongoDBNamespace } from '../utils';
-import { Aspect } from './operation';
+import { Aspect, defineAspects } from './operation';
 
 export class EndSessionsOperation extends CommandOperation<void> {
-  static override aspects = new Set([Aspect.WRITE_OPERATION]);
-
-  override writeConcern?: WriteConcern | undefined = { w: 0 };
+  override writeConcern: WriteConcern = { w: 0 };
   override ns = MongoDBNamespace.fromString('admin.$cmd');
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
 
@@ -42,3 +40,5 @@ export class EndSessionsOperation extends CommandOperation<void> {
     return 'endSessions';
   }
 }
+
+defineAspects(EndSessionsOperation, Aspect.WRITE_OPERATION);
