@@ -172,15 +172,16 @@ describe('Find Cursor', function () {
     });
   });
 
-  context('iterator', function () {
+  context('#forEach', function () {
     it('should iterate each document in a cursor', async function () {
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({}, { batchSize: 2 });
 
       const bag = [];
-      for await (const doc of cursor) {
+      cursor.forEach(doc => {
         bag.push(doc);
-      }
+      });
+
       expect(bag).to.have.lengthOf(6);
     });
   });
@@ -415,8 +416,7 @@ describe('Find Cursor', function () {
 
         await cursor.next();
 
-        let doc: any;
-        while ((doc = (await cursor.next()) && doc != null)) {
+        while ((await cursor.next()) != null) {
           /** empty */
         }
 
@@ -433,8 +433,7 @@ describe('Find Cursor', function () {
 
           await cursor.next();
 
-          let doc: any;
-          while ((doc = (await cursor.next()) && doc != null)) {
+          while ((await cursor.next()) != null) {
             /** empty */
           }
 
@@ -632,8 +631,7 @@ describe('Find Cursor', function () {
 
           await cursor.next();
 
-          let doc: any;
-          while ((doc = (await cursor.next()) && doc != null)) {
+          while ((await cursor.next()) != null) {
             /** empty */
           }
 
