@@ -178,7 +178,7 @@ describe('Find Cursor', function () {
       const cursor = coll.find({}, { batchSize: 2 });
 
       const bag = [];
-      cursor.forEach(doc => {
+      await cursor.forEach(doc => {
         bag.push(doc);
       });
 
