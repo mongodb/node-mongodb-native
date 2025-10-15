@@ -162,10 +162,6 @@ describe('MONGODB-AWS', function () {
       });
     });
 
-    context('when using a custom credential provider', function () {
-      });
-    });
-
     it('should allow empty string in authMechanismProperties.AWS_SESSION_TOKEN to override AWS_SESSION_TOKEN environment variable', function () {
       client = this.configuration.newClient(this.configuration.url(), {
         authMechanismProperties: { AWS_SESSION_TOKEN: '' }
