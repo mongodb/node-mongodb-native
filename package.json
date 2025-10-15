@@ -124,7 +124,7 @@
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
-    "build:dts": "npm run build:ts && api-extractor run && node etc/clean_definition_files.cjs && ESLINT_USE_FLAT_CONFIG=false eslint --no-ignore --fix mongodb.d.ts lib/beta.d.ts",
+    "build:dts": "npm run build:ts && api-extractor run && node etc/clean_definition_files.cjs && ESLINT_USE_FLAT_CONFIG=false eslint --no-ignore --fix mongodb.d.ts",
     "build:docs": "./etc/docs/build.ts",
     "build:typedoc": "typedoc",
     "build:nightly": "node ./.github/scripts/nightly.mjs",
@@ -143,7 +143,6 @@
     "check:unit": "nyc mocha test/unit",
     "check:ts": "node ./node_modules/typescript/bin/tsc -v && node ./node_modules/typescript/bin/tsc --noEmit",
     "check:atlas": "nyc mocha --config test/manual/mocharc.js test/manual/atlas_connectivity.test.ts",
-    "check:resource-management": "nyc mocha --config test/manual/mocharc.js test/manual/resource_management.test.ts",
     "check:drivers-atlas-testing": "nyc mocha --config test/mocha_mongodb.js test/atlas/drivers_atlas_testing.test.ts",
     "check:aws": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_aws.test.ts test/integration/auth/mongodb_aws.prose.test.ts",
     "check:oidc-auth": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/auth.spec.test.ts",

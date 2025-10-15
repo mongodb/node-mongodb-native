@@ -90,7 +90,6 @@ export interface CommandOptions extends BSONSerializeOptions {
   /** Session to use for the operation */
   session?: ClientSession;
   documentsReturnedIn?: string;
-  noResponse?: boolean;
   omitMaxTimeMS?: boolean;
 
   // TODO(NODE-2802): Currently the CommandOptions take a property willRetryWrite which is a hint
@@ -140,9 +139,8 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   /** @internal */
   cancellationToken?: CancellationToken;
-  metadata: ClientMetadata;
   /** @internal */
-  extendedMetadata: Promise<Document>;
+  metadata: Promise<ClientMetadata>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
 }
@@ -468,7 +466,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         signal: options.signal
       });
 
-      if (options.noResponse || message.moreToCome) {
+      if (message.moreToCome) {
         yield MongoDBResponse.empty;
         return;
       }
@@ -568,11 +566,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse
-                ? undefined
-                : message.moreToCome
-                  ? { ok: 1 }
-                  : (object ??= document.toObject(bsonOptions)),
+              message.moreToCome ? { ok: 1 } : (object ??= document.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )

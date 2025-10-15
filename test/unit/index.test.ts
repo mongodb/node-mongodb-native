@@ -27,7 +27,6 @@ const EXPECTED_EXPORTS = [
   'CommandStartedEvent',
   'CommandSucceededEvent',
   'Compressor',
-  'configureExplicitResourceManagement',
   'ConnectionCheckedInEvent',
   'ConnectionCheckedOutEvent',
   'ConnectionCheckOutFailedEvent',

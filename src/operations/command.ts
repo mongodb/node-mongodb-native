@@ -56,11 +56,6 @@ export interface CommandOperationOptions
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
-  /**
-   * @deprecated
-   * This option is deprecated and will be removed in an upcoming major version.
-   */
-  noResponse?: boolean;
 
   /**
    * Used when the command needs to grant access to the underlying namespaces for time series collections.

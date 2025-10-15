@@ -150,8 +150,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
   loadBalanced: boolean;
-  metadata: ClientMetadata;
-  extendedMetadata: Promise<Document>;
+  metadata: Promise<ClientMetadata>;
   serverMonitoringMode: ServerMonitoringMode;
   /** MongoDB server API version */
   serverApi?: ServerApi;
@@ -466,7 +465,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       );
 
       const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
-      if (!skipPingOnConnect && this.s.credentials) {
+      if (!skipPingOnConnect) {
         const connection = await server.pool.checkOut({ timeoutContext: timeoutContext });
         server.pool.checkIn(connection);
         stateTransition(this, STATE_CONNECTED);
@@ -748,10 +747,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   auth(credentials?: MongoCredentials, callback?: Callback): void {
     if (typeof credentials === 'function') ((callback = credentials), (credentials = undefined));
     if (typeof callback === 'function') callback(undefined, true);
-  }
-
-  get clientMetadata(): ClientMetadata {
-    return this.s.options.metadata;
   }
 
   isConnected(): boolean {
