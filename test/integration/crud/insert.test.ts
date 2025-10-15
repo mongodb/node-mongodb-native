@@ -1,4 +1,3 @@
-import { format as f } from 'node:util';
 import * as Script from 'node:vm';
 
 import { expect } from 'chai';
@@ -10,6 +9,7 @@ import {
   Code,
   type Collection,
   DBRef,
+  type Document,
   Double,
   Long,
   MaxKey,
@@ -22,47 +22,13 @@ import {
   ReturnDocument,
   Timestamp
 } from '../../../src';
+import { toISODate } from '../../tools/utils';
 import { assert as test, ignoreNsNotFound, setupDatabase } from '../shared';
 
-/**
- * Module for parsing an ISO 8601 formatted string into a Date object.
- */
-const ISODate = function (str: string | Date): Date {
-  let match: RegExpMatchArray | null;
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const noop = () => {};
 
-  if (str instanceof Date) return str;
-  else if (
-    (match = str.match(
-      /^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/
-    ))
-  ) {
-    const date = new Date();
-    date.setUTCFullYear(Number(match[1]));
-    date.setUTCMonth(Number(match[3]) - 1 || 0);
-    date.setUTCDate(Number(match[5]) || 0);
-    date.setUTCHours(Number(match[7]) || 0);
-    date.setUTCMinutes(Number(match[8]) || 0);
-    date.setUTCSeconds(Number(match[10]) || 0);
-    date.setUTCMilliseconds(Number('.' + match[12]) * 1000 || 0);
-
-    if (match[13] && match[13] !== 'Z') {
-      let h = Number(match[16]) || 0,
-        m = Number(match[17]) || 0;
-
-      h *= 3600000;
-      m *= 60000;
-
-      let offset = h + m;
-      if (match[15] === '+') offset = -offset;
-
-      new Date(date.valueOf() + offset);
-    }
-
-    return date;
-  } else throw new Error('Invalid ISO 8601 date given.', { cause: __filename });
-};
-
-describe.only('crud - insert', function () {
+describe('crud - insert', function () {
   let client: MongoClient;
 
   before(async function () {
@@ -102,22 +68,23 @@ describe.only('crud - insert', function () {
     });
   });
 
-  it('should correctly execute Collection.prototype.insertOne', async function () {
-    const configuration = this.configuration;
-    let url = configuration.url();
-    url =
-      url.indexOf('?') !== -1
-        ? f('%s&%s', url, 'maxPoolSize=100')
-        : f('%s?%s', url, 'maxPoolSize=100');
-
-    const client = configuration.newClient(url);
-    await client.connect();
-    const db = client.db(configuration.db);
-
-    const r = await db.collection('insertOne').insertOne({ a: 1 });
-    expect(r).property('insertedId').to.exist;
-    await client.close();
-  });
+  // TODO(NODE-7219): remove as it duplicates "should correctly perform single insert"
+  // it('should correctly execute Collection.prototype.insertOne', async function () {
+  //   const configuration = this.configuration;
+  //   let url = configuration.url();
+  //   url =
+  //     url.indexOf('?') !== -1
+  //       ? f('%s&%s', url, 'maxPoolSize=100')
+  //       : f('%s?%s', url, 'maxPoolSize=100');
+  //
+  //   const client = configuration.newClient(url);
+  //   await client.connect();
+  //   const db = client.db(configuration.db);
+  //
+  //   const r = await db.collection('insertOne').insertOne({ a: 1 });
+  //   expect(r).property('insertedId').to.exist;
+  //   await client.close();
+  // });
 
   it('rejects when insertMany is passed a non array object', async function () {
     const db = client.db();
@@ -135,10 +102,11 @@ describe.only('crud - insert', function () {
       const configuration = this.configuration;
       const db = client.db(configuration.db);
       const collection = db.collection('shouldCorrectlyPerformSingleInsert');
-      await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
+      const r = await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
+      expect(r).to.have.property('insertedId');
 
-      const item = await collection.findOne();
-      test.equal(1, item.a);
+      const item = await collection.findOne({ _id: r.insertedId });
+      expect(item.a).to.equal(1);
     });
 
     it('insertMany returns the insertedIds and we can look up the documents', async function () {
@@ -232,10 +200,7 @@ describe.only('crud - insert', function () {
       test.equal(date.toString(), doc.date.toString());
       test.equal(date.getTime(), doc.date.getTime());
       test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-      test.equal(
-        motherOfAllDocuments.binary.value().toString('hex'),
-        doc.binary.value().toString('hex')
-      );
+      test.equal(motherOfAllDocuments.binary.toString('hex'), doc.binary.value().toString('hex'));
 
       test.equal(motherOfAllDocuments.int, doc.int);
       test.equal(motherOfAllDocuments.long, doc.long);
@@ -245,7 +210,7 @@ describe.only('crud - insert', function () {
       test.equal(motherOfAllDocuments.where.code, doc.where.code);
       test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
 
-      test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+      test.equal(motherOfAllDocuments.dbref.collection, doc.dbref.collection);
       test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
       test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
     });
@@ -403,7 +368,9 @@ describe.only('crud - insert', function () {
     it('should correctly insert document with UUID', async function () {
       const configuration = this.configuration;
       const db = client.db(configuration.db);
-      const collection = db.collection<{ _id: string; field: string }>('insert_doc_with_uuid');
+      const collection = db.collection<{ _id: string | Binary; field: string }>(
+        'insert_doc_with_uuid'
+      );
 
       await collection.insertOne(
         { _id: '12345678123456781234567812345678', field: '1' },
@@ -428,7 +395,7 @@ describe.only('crud - insert', function () {
       test.equal(docs[0].field, '2');
     });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it's outdated (no callbacks)
     // it('shouldCorrectlyCallCallbackWithDbDriverInStrictMode', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -472,14 +439,16 @@ describe.only('crud - insert', function () {
       const collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
       const doc = { _id: new ObjectId() };
-      const doc2 = { _id: new ObjectId() };
-      const doc3 = { _id: new ObjectId() };
+      const doc2 = {
+        _id: new ObjectId(),
+        ref: new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id)
+      };
+      const doc3 = {
+        _id: new ObjectId(),
+        ref: new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, undefined)
+      };
 
       await collection.insertOne(doc, configuration.writeConcernMax());
-
-      // Create object with dbref
-      doc2.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
-      doc3.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, undefined);
 
       await collection.insertMany([doc2, doc3], configuration.writeConcernMax());
 
@@ -494,7 +463,7 @@ describe.only('crud - insert', function () {
       expect(items[2].ref.db).to.not.exist;
     });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it's redundant and combines many methods into one test
     // it('shouldCorrectlyInsertUpdateRemoveWithNoOptions', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -541,7 +510,7 @@ describe.only('crud - insert', function () {
     //   }
     // });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it duplicates "simple insert"
     // it('shouldCorrectlyExecuteMultipleFetches', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -577,7 +546,7 @@ describe.only('crud - insert', function () {
     //   }
     // });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it duplicates "should not fail when update returning 0 results"
     // it('shouldCorrectlyFailWhenNoObjectToUpdate', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -612,7 +581,7 @@ describe.only('crud - insert', function () {
         _id: new ObjectId('4e886e687ff7ef5e00000162'),
         str: 'foreign',
         type: 2,
-        timestamp: ISODate('2011-10-02T14:00:08.383Z'),
+        timestamp: toISODate('2011-10-02T14:00:08.383Z'),
         links: [
           'http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/'
         ]
@@ -656,7 +625,7 @@ describe.only('crud - insert', function () {
 
       const doc = {
         str: 'String',
-        func: function () {}
+        func: noop
       };
 
       const db = client.db(configuration.db);
@@ -667,7 +636,7 @@ describe.only('crud - insert', function () {
 
       const result = await collection.updateOne(
         { str: 'String' },
-        { $set: { c: 1, d: function () {} } },
+        { $set: { c: 1, d: noop } },
         { writeConcern: { w: 1 }, serializeFunctions: false }
       );
       expect(result).property('matchedCount').to.equal(1);
@@ -678,7 +647,7 @@ describe.only('crud - insert', function () {
       // Execute a safe insert with replication to two servers
       const updateResult = await collection.findOneAndUpdate(
         { str: 'String' },
-        { $set: { f: function () {} } },
+        { $set: { f: noop } },
         {
           returnDocument: ReturnDocument.AFTER,
           serializeFunctions: true,
@@ -693,7 +662,7 @@ describe.only('crud - insert', function () {
 
       const doc = {
         str: 'String',
-        func: function () {}
+        func: noop
       };
 
       const db = client.db(configuration.db);
@@ -782,7 +751,7 @@ describe.only('crud - insert', function () {
       expect(err).to.be.instanceOf(MongoServerError);
     });
 
-    // REMOVE
+    // TODO(7219): remove as it's redundant (custom ids are used in multiple other tests: "with UUID", "Date object as _id")
     // it('shouldCorrectlyInsertDocWithCustomId', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -863,7 +832,7 @@ describe.only('crud - insert', function () {
       const collection = db.collection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON');
 
       // Create document with toBSON method
-      const doc = { a: 1, b: 1 };
+      const doc: Document = { a: 1, b: 1 };
       doc.toBSON = function () {
         return { c: this.a };
       };
@@ -874,7 +843,7 @@ describe.only('crud - insert', function () {
       test.deepEqual(1, result.c);
     });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it duplicates "should correctly perform large text insert"
     // it('shouldAttempToForceBsonSize', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -918,11 +887,9 @@ describe.only('crud - insert', function () {
 
       await collection.insertOne({ a: { b: { c: 1 } } }, configuration.writeConcernMax());
 
-      // Dynamically build query
-      const query = {};
-      query['a'] = {};
-      query.a['b'] = {};
-      query.a.b['c'] = 1;
+      const query = {
+        a: { b: { c: 1 } }
+      };
 
       // Update document
       const r = await collection.updateOne(
@@ -933,7 +900,7 @@ describe.only('crud - insert', function () {
       expect(r).property('matchedCount').to.equal(1);
     });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it's outdated (no callbacks)
     // it('shouldExecuteInsertWithNoCallbackAndWriteConcern', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -959,7 +926,7 @@ describe.only('crud - insert', function () {
     //   }
     // });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it's outdated (no callbacks)
     // it('executesCallbackOnceWithOveriddenDefaultDbWriteConcern', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -983,7 +950,7 @@ describe.only('crud - insert', function () {
     //   }
     // });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it's outdated (no callbacks)
     // it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1012,7 +979,7 @@ describe.only('crud - insert', function () {
     //   }
     // });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it's outdated (no callbacks)
     // it('executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1036,7 +1003,7 @@ describe.only('crud - insert', function () {
     //   }
     // });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it duplicates "handles BSON type inserts"
     // it('handleBSONTypeInsertsCorrectly', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1118,6 +1085,7 @@ describe.only('crud - insert', function () {
       const configuration = this.configuration;
 
       const document = {
+        symbol: new BSONSymbol('abcdefghijkl'),
         string: 'abcdefghijkl',
         objid: new ObjectId(Buffer.alloc(12, 1)),
         double: new Double(1),
@@ -1131,6 +1099,9 @@ describe.only('crud - insert', function () {
       const collection = db.collection('bson_types_insert_1');
 
       await collection.insertOne(document, configuration.writeConcernMax());
+
+      const doc = await collection.findOne({ symbol: new BSONSymbol('abcdefghijkl') });
+      test.equal('abcdefghijkl', doc.symbol.toString());
 
       const doc1 = await collection.findOne({ string: 'abcdefghijkl' });
       test.equal('abcdefghijkl', doc1.string);
@@ -1356,7 +1327,7 @@ describe.only('crud - insert', function () {
       expect(doc.array[0][0]).to.be.a('number');
     });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it duplicates "should correctly honor promoteLong:[true|false]"
     // it('shouldCorrectlyHonorPromoteLongFalseJSBSON', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -1384,7 +1355,7 @@ describe.only('crud - insert', function () {
     //   }
     // });
 
-    // REMOVE
+    // TODO(NODE-7219): remove as it duplicates "should correctly honor promoteLong:true native BSON"
     // it('shouldCorrectlyHonorPromoteLongTrueJSBSON', {
     //   // Add a tag that our runner can trigger on
     //   // in this case we are setting that node needs to be higher than 0.10.X to run
