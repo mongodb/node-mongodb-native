@@ -427,7 +427,7 @@ export function parseOptions(
       const { username, password } = mongoOptions.credentials;
       if (username || password) {
         throw new MongoAPIError(
-          'username and password cannot be provided when using MONGODB-AWS. Credentials must be read in a manner that can be read by the AWS SDK'
+          'username and password cannot be provided when using MONGODB-AWS. Credentials must be provided in a manner that can be read by the AWS SDK.'
         );
       }
       if (mongoOptions.credentials.mechanismProperties.AWS_SESSION_TOKEN) {
