@@ -10,9 +10,10 @@ const sinon = require('sinon');
 const { Writable } = require('stream');
 const { once, on } = require('events');
 const { setTimeout } = require('timers');
-const { ReadPreference } = require('../../mongodb');
-const { ServerType, MongoClientClosedError } = require('../../mongodb');
-const { formatSort } = require('../../mongodb');
+const { ReadPreference } = require('../../../src/read_preference');
+const { ServerType } = require('../../../src/sdam/common');
+const { MongoClientClosedError } = require('../../../src/error');
+const { formatSort } = require('../../../src/sort');
 
 describe('Cursor', function () {
   before(function () {
@@ -217,7 +218,7 @@ describe('Cursor', function () {
                         test.equal(10, count);
 
                         cursor.forEach(
-                          () => {},
+                          () => { },
                           err => {
                             expect(err).to.not.exist;
                             cursor.count((err, count2) => {
@@ -320,7 +321,7 @@ describe('Cursor', function () {
                         test.equal(10, count);
 
                         cursor.forEach(
-                          () => {},
+                          () => { },
                           err => {
                             expect(err).to.not.exist;
                             cursor.count((err, count2) => {
@@ -1906,7 +1907,7 @@ describe('Cursor', function () {
         this.defer(() => cursor.close());
 
         cursor.forEach(
-          () => {},
+          () => { },
           err => {
             expect(err).to.not.exist;
             done();
@@ -1939,7 +1940,7 @@ describe('Cursor', function () {
           try {
             await db.collection('cursor_tailable').drop();
             // eslint-disable-next-line no-empty
-          } catch {}
+          } catch { }
 
           const collection = await db.createCollection('cursor_tailable', {
             capped: true,
@@ -2287,7 +2288,7 @@ describe('Cursor', function () {
             .find()
             .withReadPreference('notsecondary');
           test.ok(false);
-        } catch (err) {} // eslint-disable-line
+        } catch (err) { } // eslint-disable-line
 
         db.collection('shouldFailToSetReadPreferenceOnCursor')
           .find()
@@ -2466,7 +2467,7 @@ describe('Cursor', function () {
 
         const cursor = collection.find({}, { tailable: true });
         cursor.forEach(
-          () => {},
+          () => { },
           err => {
             test.ok(err instanceof Error);
             test.ok(typeof err.code === 'number');
@@ -3470,7 +3471,7 @@ describe('Cursor', function () {
 
       const configuration = this.configuration;
 
-      let cleanup = () => {};
+      let cleanup = () => { };
       let caughtError = undefined;
 
       return (
@@ -3690,7 +3691,7 @@ describe('Cursor', function () {
       const cursor = collection.find();
       this.defer(() => cursor.close());
 
-      const promise = cursor.forEach(() => {});
+      const promise = cursor.forEach(() => { });
       expect(promise).to.exist.and.to.be.an.instanceof(Promise);
       return promise;
     });
