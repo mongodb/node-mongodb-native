@@ -432,7 +432,7 @@ export function parseOptions(
       }
       if (mongoOptions.credentials.mechanismProperties.AWS_SESSION_TOKEN) {
         throw new MongoAPIError(
-          'AWS_SESSION_TOKEN cannot be provided when using MONGODB-AWS. Credentials must be read in a manner that can be read by the AWS SDK'
+          'AWS_SESSION_TOKEN cannot be provided when using MONGODB-AWS. Credentials must be provided in a manner that can be read by the AWS SDK.'
         );
       }
     }
