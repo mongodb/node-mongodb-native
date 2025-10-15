@@ -3,7 +3,7 @@ import type { Readable } from 'stream';
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
-import { type CursorStreamOptions, CursorTimeoutContext } from './cursor/abstract_cursor';
+import { CursorTimeoutContext } from './cursor/abstract_cursor';
 import { ChangeStreamCursor, type ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 import { Db } from './db';
 import {
@@ -17,9 +17,7 @@ import {
 import { MongoClient } from './mongo_client';
 import { type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
-import type { CollationOptions, OperationParent } from './operations/command';
-import type { ReadPreference } from './read_preference';
-import { type AsyncDisposable, configureResourceManagement } from './resource_management';
+import type { OperationParent } from './operations/command';
 import type { ServerSessionId } from './sessions';
 import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
 import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
@@ -44,21 +42,6 @@ const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE] as const;
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
-
-/**
- * @public
- * @deprecated Please use the ChangeStreamCursorOptions type instead.
- */
-export interface ResumeOptions {
-  startAtOperationTime?: Timestamp;
-  batchSize?: number;
-  maxAwaitTimeMS?: number;
-  collation?: CollationOptions;
-  readPreference?: ReadPreference;
-  resumeAfter?: ResumeToken;
-  startAfter?: ResumeToken;
-  fullDocument?: string;
-}
 
 /**
  * Represents the logical starting point for a new ChangeStream or resuming a ChangeStream on the server.
@@ -590,13 +573,10 @@ export class ChangeStream<
   implements AsyncDisposable
 {
   /**
-   * @beta
    * @experimental
    * An alias for {@link ChangeStream.close|ChangeStream.close()}.
    */
-  declare [Symbol.asyncDispose]: () => Promise<void>;
-  /** @internal */
-  async asyncDispose() {
+  async [Symbol.asyncDispose]() {
     await this.close();
   }
 
@@ -614,7 +594,6 @@ export class ChangeStream<
   type: symbol;
   /** @internal */
   private cursor: ChangeStreamCursor<TSchema, TChange>;
-  streamOptions?: CursorStreamOptions;
   /** @internal */
   private cursorStream?: Readable & AsyncIterable<TChange>;
   /** @internal */
@@ -882,13 +861,12 @@ export class ChangeStream<
    *
    * @throws MongoChangeStreamError if the underlying cursor or the change stream is closed
    */
-  stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
+  stream(): Readable & AsyncIterable<TChange> {
     if (this.closed) {
       throw new MongoChangeStreamError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    this.streamOptions = options;
-    return this.cursor.stream(options);
+    return this.cursor.stream();
   }
 
   /** @internal */
@@ -1106,5 +1084,3 @@ export class ChangeStream<
     }
   }
 }
-
-configureResourceManagement(ChangeStream.prototype);

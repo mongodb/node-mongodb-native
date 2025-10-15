@@ -97,15 +97,6 @@ export const PoolState = Object.freeze({
 
 type PoolState = (typeof PoolState)[keyof typeof PoolState];
 
-/**
- * @public
- * @deprecated This interface is deprecated and will be removed in a future release as it is not used
- * in the driver
- */
-export interface CloseOptions {
-  force?: boolean;
-}
-
 /** @public */
 export type ConnectionPoolEvents = {
   connectionPoolCreated(event: ConnectionPoolCreatedEvent): void;
@@ -610,9 +601,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   private createConnection(callback: Callback<Connection>) {
-    // Note that metadata and extendedMetadata may have changed on the client but have
-    // been frozen here, so we pull the extendedMetadata promise always from the client
-    // no mattter what options were set at the construction of the pool.
+    // Note that metadata may have changed on the client but have
+    // been frozen here, so we pull the metadata promise always from the client
+    // no matter what options were set at the construction of the pool.
     const connectOptions: ConnectionOptions = {
       ...this.options,
       id: this.connectionCounter.next().value,
@@ -620,7 +611,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       cancellationToken: this.cancellationToken,
       mongoLogger: this.mongoLogger,
       authProviders: this.server.topology.client.s.authProviders,
-      extendedMetadata: this.server.topology.client.options.extendedMetadata
+      metadata: this.server.topology.client.options.metadata
     };
 
     this.pending++;

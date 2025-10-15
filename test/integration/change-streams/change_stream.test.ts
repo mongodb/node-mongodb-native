@@ -762,7 +762,8 @@ describe('Change Streams', function () {
 
       const transform = doc => ({ doc: JSON.stringify(doc) });
       changeStream
-        .stream({ transform })
+        .stream()
+        .map(transform)
         .on('error', () => null)
         .pipe(outStream)
         .on('error', () => null);

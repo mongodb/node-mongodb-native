@@ -3,7 +3,14 @@ import * as events from 'node:events';
 import { expect } from 'chai';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { type Collection, type FindCursor, type MongoClient } from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  type FindCursor,
+  type MongoClient
+} from '../../mongodb';
+import { configureMongocryptdSpawnHooks } from '../../tools/utils';
+import { filterForCommands } from '../shared';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
 describe('MongoClient.close() Integration', () => {
@@ -490,20 +497,49 @@ describe('MongoClient.close() Integration', () => {
     });
 
     describe('when MongoClient.close is called', function () {
-      it('sends an endSessions command', async function () {
-        await client.db('a').collection('a').insertOne({ a: 1 });
-        await client.db('a').collection('a').insertOne({ a: 1 });
-        await client.db('a').collection('a').insertOne({ a: 1 });
-        const endSessionsStarted = events.once(client, 'commandStarted');
-        const willEndSessions = events.once(client, 'commandSucceeded');
+      describe('when sessions are supported', function () {
+        it('sends an endSessions command', async function () {
+          await client.db('a').collection('a').insertOne({ a: 1 });
+          await client.db('a').collection('a').insertOne({ a: 1 });
+          await client.db('a').collection('a').insertOne({ a: 1 });
+          const endSessionsStarted = events.once(client, 'commandStarted');
+          const willEndSessions = events.once(client, 'commandSucceeded');
 
-        await client.close();
+          await client.close();
 
-        const [startedEv] = await endSessionsStarted;
-        expect(startedEv).to.have.nested.property('command.endSessions').that.has.lengthOf(1);
+          const [startedEv] = await endSessionsStarted;
+          expect(startedEv).to.have.nested.property('command.endSessions').that.has.lengthOf(1);
 
-        const [commandEv] = await willEndSessions;
-        expect(commandEv).to.have.property('commandName', 'endSessions');
+          const [commandEv] = await willEndSessions;
+          expect(commandEv).to.have.property('commandName', 'endSessions');
+        });
+      });
+
+      describe('when sessions are not supported', function () {
+        const mongocryptdTestPort = '27022';
+        let client: MongoClient;
+        const commands: Array<CommandStartedEvent> = [];
+
+        configureMongocryptdSpawnHooks({ port: mongocryptdTestPort });
+
+        beforeEach('configure cryptd client and prepopulate session pool', async function () {
+          client = this.configuration.newClient(`mongodb://localhost:${mongocryptdTestPort}`, {
+            monitorCommands: true
+          });
+
+          client.on('commandStarted', filterForCommands('endSessions', commands));
+
+          // run an operation to instantiate an implicit session (which should be omitted) from the
+          // actual command but still instantiated by the client.  See session prose test 18.
+          await client.db().command({ hello: true });
+          expect(client.s.sessionPool.sessions).to.have.length.greaterThan(0);
+        });
+
+        it('does not execute endSessions', async function () {
+          await client.close();
+
+          expect(commands).to.deep.equal([]);
+        });
       });
     });
   });

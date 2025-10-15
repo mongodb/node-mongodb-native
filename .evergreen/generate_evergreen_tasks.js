@@ -511,17 +511,6 @@ SINGLETON_TASKS.push(
       ]
     },
     {
-      name: 'run-resource-management-async-dispose',
-      tags: ['resource-management'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: LATEST_LTS
-        }),
-        { func: 'install dependencies' },
-        { func: 'check resource management' }
-      ]
-    },
-    {
       name: 'test-explicit-resource-management-feature-integration',
       tags: ['resource-management'],
       commands: [
@@ -623,27 +612,28 @@ for (const serverVersion of ['5.0', 'rapid', 'latest']) {
   });
 }
 
-customDependencyTests.push({
-  name: `test-latest-driver-mongodb-client-encryption-6.0.0`,
-  tags: ['run-custom-dependency-tests'],
-  commands: [
-    updateExpansions({
-      NODE_LTS_VERSION: LOWEST_LTS,
-      VERSION: '7.0',
-      TOPOLOGY: 'replica_set',
-      CLIENT_ENCRYPTION: true
-    }),
-    { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
-    {
-      func: 'install package',
-      vars: {
-        PACKAGE: 'mongodb-client-encryption@6.0.0'
-      }
-    },
-    { func: 'run tests' }
-  ]
-});
+// TODO(NODE-6997): update to 7.0.0 after release
+// customDependencyTests.push({
+//   name: `test-latest-driver-mongodb-client-encryption-6.0.0`,
+//   tags: ['run-custom-dependency-tests'],
+//   commands: [
+//     updateExpansions({
+//       NODE_LTS_VERSION: LOWEST_LTS,
+//       VERSION: '7.0',
+//       TOPOLOGY: 'replica_set',
+//       CLIENT_ENCRYPTION: true
+//     }),
+//     { func: 'install dependencies' },
+//     { func: 'bootstrap mongo-orchestration' },
+//     {
+//       func: 'install package',
+//       vars: {
+//         PACKAGE: 'mongodb-client-encryption@6.0.0'
+//       }
+//     },
+//     { func: 'run tests' }
+//   ]
+// });
 
 const coverageTask = {
   name: 'download and merge coverage'.split(' ').join('-'),

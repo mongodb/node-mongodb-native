@@ -1,11 +1,8 @@
 /* Specification prose tests */
 
-import { type ChildProcess, spawn } from 'node:child_process';
 import { Readable } from 'node:stream';
 
 import { expect } from 'chai';
-import * as os from 'os';
-import * as path from 'path';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
 import { pipeline } from 'stream/promises';
@@ -27,6 +24,7 @@ import {
 import {
   clearFailPoint,
   configureFailPoint,
+  configureMongocryptdSpawnHooks,
   type FailCommandFailPoint,
   makeMultiBatchWrite,
   measureDuration
@@ -127,20 +125,9 @@ describe('CSOT spec prose tests', function () {
 
     let client: MongoClient;
     const mongocryptdTestPort = '23000';
-    let childProcess: ChildProcess;
+    configureMongocryptdSpawnHooks({ port: mongocryptdTestPort });
 
     beforeEach(async function () {
-      const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
-      childProcess = spawn(
-        'mongocryptd',
-        ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
-        {
-          stdio: 'ignore',
-          detached: true
-        }
-      );
-
-      childProcess.on('error', error => console.warn(this.currentTest?.fullTitle(), error));
       client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}/?timeoutMS=1000`, {
         monitorCommands: true
       });
@@ -148,7 +135,6 @@ describe('CSOT spec prose tests', function () {
 
     afterEach(async function () {
       await client.close();
-      childProcess.kill('SIGKILL');
       sinon.restore();
     });
 

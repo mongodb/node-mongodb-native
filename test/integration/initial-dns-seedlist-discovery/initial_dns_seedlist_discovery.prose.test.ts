@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
 
-import { MongoAPIError, Server, ServerDescription, Topology } from '../../mongodb';
+import { ConnectionPool, MongoAPIError, Server, ServerDescription, Topology } from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
@@ -40,6 +40,14 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
             new ServerDescription('a:1'),
             {} as any
           );
+        });
+
+        sinon.stub(ConnectionPool.prototype, 'checkOut').callsFake(async function () {
+          return {};
+        });
+
+        sinon.stub(ConnectionPool.prototype, 'checkIn').callsFake(function () {
+          return;
         });
       });
 

@@ -1,12 +1,11 @@
-import { type Document } from 'bson';
 import { expect } from 'chai';
 
 import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
 import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
 import { type Connection, type ConnectionOptions } from '../../../src/cmap/connection';
 import {
-  addContainerMetadata,
-  type ClientMetadata
+  type ClientMetadata,
+  makeClientMetadata
 } from '../../../src/cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { MongoNetworkError } from '../../../src/error';
@@ -21,10 +20,21 @@ const CONNECT_DEFAULTS = {
   tls: false,
   generation: 1,
   monitorCommands: false,
-  metadata: {} as ClientMetadata,
-  extendedMetadata: addContainerMetadata({} as ClientMetadata),
+  metadata: Promise.resolve({} as ClientMetadata),
   loadBalanced: false
 };
+
+function configureMockEnvHooks(env: NodeJS.ProcessEnv) {
+  const cachedEnv = process.env;
+
+  beforeEach(function () {
+    process.env = env;
+  });
+
+  afterEach(function () {
+    process.env = cachedEnv;
+  });
+}
 
 describe('Connect Tests', function () {
   context('when PLAIN auth enabled', () => {
@@ -187,28 +197,24 @@ describe('Connect Tests', function () {
 
   describe('prepareHandshakeDocument', () => {
     describe('client environment (containers and FAAS)', () => {
-      const cachedEnv = process.env;
-
       context('when only kubernetes is present', () => {
         let authContext;
 
+        configureMockEnvHooks({
+          KUBERNETES_SERVICE_HOST: 'I exist'
+        });
+
         beforeEach(() => {
-          process.env.KUBERNETES_SERVICE_HOST = 'I exist';
           authContext = {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              extendedMetadata: addContainerMetadata({} as ClientMetadata)
+              metadata: makeClientMetadata([], {})
             }
           };
         });
 
         afterEach(() => {
-          if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
-            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
-          } else {
-            delete process.env.KUBERNETES_SERVICE_HOST;
-          }
           authContext = {};
         });
 
@@ -224,13 +230,21 @@ describe('Connect Tests', function () {
 
         context('when 512 byte size limit is exceeded', () => {
           it(`should not 'env' property in client`, async () => {
-            // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
+            // make a metadata object that, with just the name and appName, is already at capacity.
             const longAppName = 's'.repeat(493);
+            const metadata = makeClientMetadata(
+              [
+                {
+                  name: 's'.repeat(128)
+                }
+              ],
+              { appName: longAppName }
+            );
             const longAuthContext = {
               connection: {},
               options: {
                 ...CONNECT_DEFAULTS,
-                extendedMetadata: addContainerMetadata({ appName: longAppName })
+                metadata
               }
             };
             const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
@@ -242,23 +256,22 @@ describe('Connect Tests', function () {
       context('when kubernetes and FAAS are both present', () => {
         let authContext;
 
+        configureMockEnvHooks({
+          KUBERNETES_SERVICE_HOST: 'I exist',
+          AWS_EXECUTION_ENV: 'AWS_Lambda_function'
+        });
+
         beforeEach(() => {
-          process.env.KUBERNETES_SERVICE_HOST = 'I exist';
           authContext = {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              extendedMetadata: addContainerMetadata({ env: { name: 'aws.lambda' } })
+              metadata: makeClientMetadata([], {})
             }
           };
         });
 
         afterEach(() => {
-          if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
-            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
-          } else {
-            delete process.env.KUBERNETES_SERVICE_HOST;
-          }
           authContext = {};
         });
 
@@ -274,16 +287,21 @@ describe('Connect Tests', function () {
 
         context('when 512 byte size limit is exceeded', () => {
           it(`should not have 'container' property in client.env`, async () => {
-            // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
             const longAppName = 's'.repeat(447);
+            // make a metadata object that, with just the name and appName, is already at capacity.
+            const metadata = makeClientMetadata(
+              [
+                {
+                  name: 's'.repeat(128)
+                }
+              ],
+              { appName: longAppName }
+            );
             const longAuthContext = {
               connection: {},
               options: {
                 ...CONNECT_DEFAULTS,
-                extendedMetadata: {
-                  appName: longAppName,
-                  env: { name: 'aws.lambda' }
-                } as unknown as Promise<Document>
+                metadata
               }
             };
             const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
@@ -300,19 +318,7 @@ describe('Connect Tests', function () {
         };
 
         context('when process.env.KUBERNETES_SERVICE_HOST = undefined', () => {
-          beforeEach(() => {
-            delete process.env.KUBERNETES_SERVICE_HOST;
-          });
-
-          afterEach(() => {
-            afterEach(() => {
-              if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
-                process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
-              } else {
-                delete process.env.KUBERNETES_SERVICE_HOST;
-              }
-            });
-          });
+          configureMockEnvHooks({ KUBERNETES_SERVICE_HOST: undefined });
 
           it(`should not have 'env' property in client`, async () => {
             const handshakeDocument = await prepareHandshakeDocument(authContext);
@@ -321,16 +327,8 @@ describe('Connect Tests', function () {
         });
 
         context('when process.env.KUBERNETES_SERVICE_HOST is an empty string', () => {
-          beforeEach(() => {
-            process.env.KUBERNETES_SERVICE_HOST = '';
-          });
-
-          afterEach(() => {
-            if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
-              process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
-            } else {
-              delete process.env.KUBERNETES_SERVICE_HOST;
-            }
+          configureMockEnvHooks({
+            KUBERNETES_SERVICE_HOST: ''
           });
 
           it(`should not have 'env' property in client`, async () => {

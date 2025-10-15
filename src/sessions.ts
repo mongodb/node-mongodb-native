@@ -26,7 +26,6 @@ import { executeOperation } from './operations/execute_operation';
 import { RunCommandOperation } from './operations/run_command';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
-import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
 import { TimeoutContext } from './timeout';
 import {
@@ -118,7 +117,7 @@ export class ClientSession
   /** @internal */
   owner?: symbol | AbstractCursor;
   defaultTransactionOptions: TransactionOptions;
-  /** @deprecated - Will be made internal in the next major release */
+  /** @internal */
   transaction: Transaction;
   /**
    * @internal
@@ -289,13 +288,10 @@ export class ClientSession
     }
   }
   /**
-   * @beta
    * @experimental
    * An alias for {@link ClientSession.endSession|ClientSession.endSession()}.
    */
-  declare [Symbol.asyncDispose]: () => Promise<void>;
-  /** @internal */
-  async asyncDispose() {
+  async [Symbol.asyncDispose]() {
     await this.endSession({ force: true });
   }
 
@@ -822,8 +818,6 @@ export class ClientSession
     }
   }
 }
-
-configureResourceManagement(ClientSession.prototype);
 
 const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
   'CannotSatisfyWriteConcern',

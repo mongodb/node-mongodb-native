@@ -556,6 +556,9 @@ functions:
           export AWS_ACCESS_KEY_ID=${aws_key}
           export AWS_SECRET_ACCESS_KEY=${aws_secret}
 
+          # use Node20
+          export PATH=/opt/devtools/node20/bin:/opt/dev/tools/bin:$PATH
+
           # Download all the task coverage files.
           # NOTE: All coverage files are too large for V8 to handle the resulting call to
           #       JSON.stringify from within nyc, so with stick to Fermiun to include the
@@ -1857,17 +1860,6 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: run lint checks
-  - name: run-resource-management-async-dispose
-    tags:
-      - resource-management
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '22'}
-      - func: install dependencies
-      - func: check resource management
   - name: test-explicit-resource-management-feature-integration
     tags:
       - resource-management
@@ -1994,24 +1986,6 @@ tasks:
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
-  - name: test-latest-driver-mongodb-client-encryption-6.0.0
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: VERSION, value: '7.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CLIENT_ENCRYPTION, value: 'true'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: install package
-        vars:
-          PACKAGE: mongodb-client-encryption@6.0.0
-      - func: run tests
   - name: test-alpine-fle
     tags:
       - alpine-fle
@@ -3205,7 +3179,6 @@ buildvariants:
       - run-custom-csfle-tests-5.0
       - run-custom-csfle-tests-rapid
       - run-custom-csfle-tests-latest
-      - test-latest-driver-mongodb-client-encryption-6.0.0
   - name: rhel8-test-gcp-kms
     display_name: GCP KMS Test
     run_on: debian11-small

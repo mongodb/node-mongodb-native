@@ -9,7 +9,7 @@ const ServerSelectors = require('../../../src/sdam/server_selection');
 
 const sinon = require('sinon');
 const { expect } = require('chai');
-const { topologyWithPlaceholderClient } = require('../../tools/utils');
+const { fakeServer, topologyWithPlaceholderClient } = require('../../tools/utils');
 
 export function serverDescriptionFromDefinition(definition, hosts) {
   hosts = hosts || [];
@@ -105,9 +105,7 @@ export async function executeServerSelectionTest(testDefinition) {
     .stub(Topology.prototype, 'selectServer')
     .callsFake(async function () {
       topologySelectServers.restore();
-
-      const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
-      return fakeServer;
+      return fakeServer();
     });
 
   await topology.connect();
