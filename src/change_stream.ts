@@ -3,7 +3,7 @@ import type { Readable } from 'stream';
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
-import { type CursorStreamOptions, CursorTimeoutContext } from './cursor/abstract_cursor';
+import { CursorTimeoutContext } from './cursor/abstract_cursor';
 import { ChangeStreamCursor, type ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 import { Db } from './db';
 import {
@@ -594,7 +594,6 @@ export class ChangeStream<
   type: symbol;
   /** @internal */
   private cursor: ChangeStreamCursor<TSchema, TChange>;
-  streamOptions?: CursorStreamOptions;
   /** @internal */
   private cursorStream?: Readable & AsyncIterable<TChange>;
   /** @internal */
@@ -862,13 +861,12 @@ export class ChangeStream<
    *
    * @throws MongoChangeStreamError if the underlying cursor or the change stream is closed
    */
-  stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
+  stream(): Readable & AsyncIterable<TChange> {
     if (this.closed) {
       throw new MongoChangeStreamError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    this.streamOptions = options;
-    return this.cursor.stream(options);
+    return this.cursor.stream();
   }
 
   /** @internal */

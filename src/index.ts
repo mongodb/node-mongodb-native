@@ -365,8 +365,7 @@ export type {
 export type {
   AbstractCursorEvents,
   AbstractCursorOptions,
-  CursorFlag,
-  CursorStreamOptions
+  CursorFlag
 } from './cursor/abstract_cursor';
 export type {
   CursorTimeoutContext,

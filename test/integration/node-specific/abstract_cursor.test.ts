@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
-import { Transform } from 'stream';
 import { inspect } from 'util';
 
 import {
@@ -16,7 +15,6 @@ import {
   type MongoClient,
   MongoCursorExhaustedError,
   MongoOperationTimeoutError,
-  MongoServerError,
   TimeoutContext
 } from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
@@ -314,42 +312,6 @@ describe('class AbstractCursor', function () {
         // The first batch exhausted the cursor, the only thing to clean up is the session
         expect(cursor.session.hasEnded).to.be.true;
       });
-    });
-  });
-
-  describe('transform stream error handling', function () {
-    let client: MongoClient;
-    let collection: Collection;
-    const docs = [{ count: 0 }];
-
-    beforeEach(async function () {
-      client = this.configuration.newClient();
-
-      collection = client.db('abstract_cursor_integration').collection('test');
-
-      await collection.insertMany(docs);
-    });
-
-    afterEach(async function () {
-      await collection.deleteMany({});
-      await client.close();
-    });
-
-    it('propagates errors to transform stream', async function () {
-      const transform = new Transform({
-        transform(data, encoding, callback) {
-          callback(null, data);
-        }
-      });
-
-      // MongoServerError: unknown operator: $bar
-      const stream = collection.find({ foo: { $bar: 25 } }).stream({ transform });
-
-      const error: Error | null = await new Promise(resolve => {
-        stream.on('error', error => resolve(error));
-        stream.on('end', () => resolve(null));
-      });
-      expect(error).to.be.instanceof(MongoServerError);
     });
   });
 
