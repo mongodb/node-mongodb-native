@@ -1,13 +1,14 @@
 import { expect } from 'chai';
+import { satisfies } from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient } from '../../mongodb';
-import { vs25Predicate } from './client_side_encryption.prose.test';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
-    predicate: vs25Predicate
+    predicate: () =>
+      satisfies(process.version, '<25.0.0') ? true : 'TODO(NODE-7252): fix these tests in v25'
   }
 };
 
