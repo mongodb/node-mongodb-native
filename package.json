@@ -35,7 +35,7 @@
     "gcp-metadata": "^7.0.1",
     "kerberos": "^2.0.1",
     "mongodb-client-encryption": "^7.0.0-alpha",
-    "snappy": "^7.3.0",
+    "snappy": "^7.3.2",
     "socks": "^2.8.6"
   },
   "peerDependenciesMeta": {
