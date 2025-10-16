@@ -5,22 +5,22 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
-import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import {
-  AWSSDKCredentialProvider,
   type CommandOptions,
-  Connection,
   type Document,
   MongoAWSError,
   type MongoClient,
-  MongoDBAWS,
   type MongoDBNamespace,
   type MongoDBResponseConstructor,
   MongoMissingCredentialsError,
   MongoMissingDependencyError,
-  MongoServerError,
-  setDifference
-} from '../../mongodb';
+  MongoServerError
+} from '../../../src';
+import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
+import { AWSSDKCredentialProvider } from '../../../src/cmap/auth/aws_temporary_credentials';
+import { MongoDBAWS } from '../../../src/cmap/auth/mongodb_aws';
+import { Connection } from '../../../src/cmap/connection';
+import { setDifference } from '../../../src/utils';
 
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 
