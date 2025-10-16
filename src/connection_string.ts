@@ -417,12 +417,6 @@ export function parseOptions(
       });
     }
 
-    if (isAws && mongoOptions.credentials.username && !mongoOptions.credentials.password) {
-      throw new MongoMissingCredentialsError(
-        `When using ${mongoOptions.credentials.mechanism} password must be set when a username is specified`
-      );
-    }
-
     if (isAws) {
       const { username, password } = mongoOptions.credentials;
       if (username || password) {
