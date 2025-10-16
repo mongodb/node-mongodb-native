@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
+import { type MongoClient } from '../../../src';
 import {
   CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_READY,
-  type MongoClient,
   SERVER_HEARTBEAT_FAILED,
   SERVER_HEARTBEAT_SUCCEEDED
-} from '../../mongodb';
+} from '../../../src/constants';
 
 describe('Server Discovery and Monitoring Prose Tests', function () {
   context('Monitors sleep at least minHeartbeatFrequencyMS between checks', function () {
