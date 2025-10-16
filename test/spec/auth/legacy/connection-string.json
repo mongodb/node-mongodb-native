@@ -441,6 +441,21 @@
       }
     },
     {
+      "description": "should throw an exception if username provided (MONGODB-AWS)",
+      "uri": "mongodb://user@localhost.com/?authMechanism=MONGODB-AWS",
+      "valid": false
+    },
+    {
+      "description": "should throw an exception if username and password provided (MONGODB-AWS)",
+      "uri": "mongodb://user:pass@localhost.com/?authMechanism=MONGODB-AWS",
+      "valid": false
+    },
+    {
+      "description": "should throw an exception if AWS_SESSION_TOKEN provided (MONGODB-AWS)",
+      "uri": "mongodb://localhost/?authMechanism=MONGODB-AWS&authMechanismProperties=AWS_SESSION_TOKEN:token",
+      "valid": false
+    },
+    {
       "description": "should recognise the mechanism with test environment (MONGODB-OIDC)",
       "uri": "mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:test",
       "valid": true,
