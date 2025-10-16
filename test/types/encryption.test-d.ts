@@ -1,6 +1,6 @@
 import { expectAssignable } from 'tsd';
 
-import type { AutoEncryptionOptions } from '../mongodb';
+import type { AutoEncryptionOptions } from '../../src';
 
 // Empty credentials support on each provider
 expectAssignable<AutoEncryptionOptions>({
