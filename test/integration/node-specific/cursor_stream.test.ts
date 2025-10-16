@@ -1,10 +1,11 @@
-'use strict';
-const { expect } = require('chai');
-const { Binary } = require('../../mongodb');
-const { setTimeout, setImmediate } = require('timers');
+import { setImmediate, setTimeout } from 'node:timers';
+
+import { expect } from 'chai';
+
+import { Binary, type MongoClient } from '../../mongodb';
 
 describe('Cursor Streams', function () {
-  let client;
+  let client: MongoClient;
 
   beforeEach(async function () {
     client = this.configuration.newClient();
@@ -20,30 +21,30 @@ describe('Cursor Streams', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var docs = [];
-      var j = 0;
+      const self = this;
+      const docs = [];
+      let j = 0;
 
-      for (var i = 0; i < 3000; i++) {
+      for (let i = 0; i < 3000; i++) {
         docs.push({ a: i });
       }
 
-      var allDocs = [];
+      const allDocs = [];
       while (docs.length > 0) {
         allDocs.push(docs.splice(0, 1000));
       }
 
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
+        const db = client.db(self.configuration.db);
         db.createCollection(
           'test_streaming_function_with_limit_for_fetching2',
           function (err, collection) {
-            var left = allDocs.length;
-            for (var i = 0; i < allDocs.length; i++) {
+            let left = allDocs.length;
+            for (let i = 0; i < allDocs.length; i++) {
               collection.insert(allDocs[i], { writeConcern: { w: 1 } }, function (err) {
                 expect(err).to.not.exist;
 
@@ -51,8 +52,8 @@ describe('Cursor Streams', function () {
 
                 if (left === 0) {
                   // Perform a find to get a cursor
-                  var stream = collection.find({}).stream();
-                  var data = [];
+                  const stream = collection.find({}).stream();
+                  const data = [];
 
                   // For each data item
                   stream.on('data', function () {
@@ -94,39 +95,39 @@ describe('Cursor Streams', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var docs = [];
+      const self = this;
+      const docs = [];
 
-      for (var i = 0; i < 10000; i++) {
+      for (let i = 0; i < 10000; i++) {
         docs.push({ a: i, bin: new Binary(Buffer.alloc(256)) });
       }
 
-      var j = 0;
+      let j = 0;
 
-      var allDocs = [];
+      const allDocs = [];
       while (docs.length > 0) {
         allDocs.push(docs.splice(0, 1000));
       }
 
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
+        const db = client.db(self.configuration.db);
         db.createCollection(
           'test_streaming_function_with_limit_for_fetching_2',
           function (err, collection) {
-            var left = allDocs.length;
-            for (var i = 0; i < allDocs.length; i++) {
+            let left = allDocs.length;
+            for (let i = 0; i < allDocs.length; i++) {
               collection.insert(allDocs[i], { writeConcern: { w: 1 } }, function (err) {
                 expect(err).to.not.exist;
                 left = left - 1;
 
                 if (left === 0) {
                   // Perform a find to get a cursor
-                  var stream = collection.find({}).stream();
-                  var data = [];
+                  const stream = collection.find({}).stream();
+                  const data = [];
 
                   // For each data item
                   stream.on('data', function () {
@@ -168,21 +169,21 @@ describe('Cursor Streams', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var docs = [];
-      var counter = 0;
-      var counter2 = 0;
+      const self = this;
+      const docs = [];
+      let counter = 0;
+      let counter2 = 0;
 
-      for (var i = 0; i < 1000; i++) {
+      for (let i = 0; i < 1000; i++) {
         docs.push({ a: i, bin: new Binary(Buffer.alloc(256)) });
       }
 
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
+        const db = client.db(self.configuration.db);
         db.createCollection(
           'test_streaming_function_with_limit_for_fetching_3',
           function (err, collection) {
@@ -190,7 +191,7 @@ describe('Cursor Streams', function () {
               expect(err).to.not.exist;
 
               // Perform a find to get a cursor
-              var stream = collection.find({}).stream();
+              const stream = collection.find({}).stream();
 
               // For each data item
               stream.on('data', function () {
@@ -282,8 +283,8 @@ describe('Cursor Streams', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const self = this;
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
 
@@ -314,24 +315,24 @@ describe('Cursor Streams', function () {
     },
 
     test: function (done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+      const self = this;
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
 
       client.connect(function (err, client) {
-        var db = client.db(self.configuration.db);
-        var docs = [];
-        var received = [];
+        const db = client.db(self.configuration.db);
+        const docs = [];
+        const received = [];
 
-        for (var i = 0; i < 1000; i++) {
+        for (let i = 0; i < 1000; i++) {
           docs.push({ a: i, field: 'hello world' });
         }
 
         db.collection('cursor_sort_stream').insertMany(docs, function (err) {
           expect(err).to.not.exist;
 
-          var cursor = db
+          const cursor = db
             .collection('cursor_sort_stream')
             .find({})
             .project({ a: 1 })
