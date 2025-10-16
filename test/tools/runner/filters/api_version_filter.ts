@@ -1,4 +1,4 @@
-import { type MongoClient } from '../../../mongodb';
+import { type MongoClient } from '../../../../src';
 import { Filter } from './filter';
 
 /**
