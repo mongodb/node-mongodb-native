@@ -10,7 +10,6 @@ import { setTimeout } from 'timers';
 import { TLSSocket } from 'tls';
 import { promisify } from 'util';
 
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import {
   Connection,
   ConnectionPool,
@@ -21,7 +20,8 @@ import {
   Timeout,
   TimeoutContext,
   Topology
-} from '../../mongodb';
+} from '../../../src';
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { measureDuration, sleep } from '../../tools/utils';
 import { createTimerSandbox } from '../../unit/timer_sandbox';
 
