@@ -1,251 +1,292 @@
 import { expect } from 'chai';
 
-import { Long } from '../../mongodb';
-import * as mongodb from '../../mongodb';
+import {
+  type AbstractOperation,
+  type Admin,
+  type Collection,
+  type Db,
+  Long,
+  type MongoClient,
+  type Server
+} from '../../../src';
+import { AggregateOperation } from '../../../src/operations/aggregate';
+import { CountOperation } from '../../../src/operations/count';
+import { CreateCollectionOperation } from '../../../src/operations/create_collection';
+import {
+  DeleteManyOperation,
+  DeleteOneOperation,
+  DeleteOperation
+} from '../../../src/operations/delete';
+import { DistinctOperation } from '../../../src/operations/distinct';
+import { DropCollectionOperation, DropDatabaseOperation } from '../../../src/operations/drop';
+import { EstimatedDocumentCountOperation } from '../../../src/operations/estimated_document_count';
+import { FindOperation } from '../../../src/operations/find';
+import {
+  FindAndModifyOperation,
+  FindOneAndDeleteOperation,
+  FindOneAndReplaceOperation,
+  FindOneAndUpdateOperation
+} from '../../../src/operations/find_and_modify';
+import { GetMoreOperation } from '../../../src/operations/get_more';
+import {
+  CreateIndexesOperation,
+  DropIndexOperation,
+  ListIndexesOperation
+} from '../../../src/operations/indexes';
+import { InsertOneOperation, InsertOperation } from '../../../src/operations/insert';
+import { KillCursorsOperation } from '../../../src/operations/kill_cursors';
+import { ListCollectionsOperation } from '../../../src/operations/list_collections';
+import { ListDatabasesOperation } from '../../../src/operations/list_databases';
+import { ProfilingLevelOperation } from '../../../src/operations/profiling_level';
+import { RemoveUserOperation } from '../../../src/operations/remove_user';
+import { RenameOperation } from '../../../src/operations/rename';
+import { RunCommandOperation } from '../../../src/operations/run_command';
+import { CreateSearchIndexesOperation } from '../../../src/operations/search_indexes/create';
+import { DropSearchIndexOperation } from '../../../src/operations/search_indexes/drop';
+import { UpdateSearchIndexOperation } from '../../../src/operations/search_indexes/update';
+import { SetProfilingLevelOperation } from '../../../src/operations/set_profiling_level';
+import { DbStatsOperation } from '../../../src/operations/stats';
+import {
+  ReplaceOneOperation,
+  UpdateManyOperation,
+  UpdateOneOperation,
+  UpdateOperation
+} from '../../../src/operations/update';
+import { ValidateCollectionOperation } from '../../../src/operations/validate_collection';
+import { TimeoutContext } from '../../../src/timeout';
+import { MongoDBNamespace } from '../../../src/utils';
 
 describe('abstract operation', function () {
   describe('command name getter', function () {
     interface AbstractOperationSubclasses {
-      subclassCreator: () => mongodb.AbstractOperation;
+      subclassCreator: () => AbstractOperation;
       subclassType: any;
       correctCommandName: string;
     }
 
-    let client: mongodb.MongoClient;
-    let db: mongodb.Db;
-    let admin: mongodb.Admin;
-    let collection: mongodb.Collection;
+    let client: MongoClient;
+    let db: Db;
+    let admin: Admin;
+    let collection: Collection;
 
     const subclassArray: AbstractOperationSubclasses[] = [
       {
-        subclassCreator: () =>
-          new mongodb.AggregateOperation(collection.fullNamespace, [{ a: 1 }], {}),
-        subclassType: mongodb.AggregateOperation,
+        subclassCreator: () => new AggregateOperation(collection.fullNamespace, [{ a: 1 }], {}),
+        subclassType: AggregateOperation,
         correctCommandName: 'aggregate'
       },
       {
-        subclassCreator: () => new mongodb.CountOperation(collection.fullNamespace, { a: 1 }, {}),
-        subclassType: mongodb.CountOperation,
+        subclassCreator: () => new CountOperation(collection.fullNamespace, { a: 1 }, {}),
+        subclassType: CountOperation,
         correctCommandName: 'count'
       },
       {
-        subclassCreator: () => new mongodb.CreateCollectionOperation(db, 'name'),
-        subclassType: mongodb.CreateCollectionOperation,
+        subclassCreator: () => new CreateCollectionOperation(db, 'name'),
+        subclassType: CreateCollectionOperation,
         correctCommandName: 'create'
       },
       {
         subclassCreator: () =>
-          new mongodb.DeleteOperation(collection.fullNamespace, [{ q: { a: 1 }, limit: 1 }], {}),
-        subclassType: mongodb.DeleteOperation,
+          new DeleteOperation(collection.fullNamespace, [{ q: { a: 1 }, limit: 1 }], {}),
+        subclassType: DeleteOperation,
         correctCommandName: 'delete'
       },
       {
         subclassCreator: () =>
-          new mongodb.DeleteOneOperation(collection.fullNamespace, [{ q: { a: 1 }, limit: 1 }], {}),
-        subclassType: mongodb.DeleteOneOperation,
+          new DeleteOneOperation(collection.fullNamespace, [{ q: { a: 1 }, limit: 1 }], {}),
+        subclassType: DeleteOneOperation,
         correctCommandName: 'delete'
       },
       {
         subclassCreator: () =>
-          new mongodb.DeleteManyOperation(
-            collection.fullNamespace,
-            [{ q: { a: 1 }, limit: 1 }],
-            {}
-          ),
-        subclassType: mongodb.DeleteManyOperation,
+          new DeleteManyOperation(collection.fullNamespace, [{ q: { a: 1 }, limit: 1 }], {}),
+        subclassType: DeleteManyOperation,
         correctCommandName: 'delete'
       },
       {
-        subclassCreator: () => new mongodb.DistinctOperation(collection, 'a', { a: 1 }),
-        subclassType: mongodb.DistinctOperation,
+        subclassCreator: () => new DistinctOperation(collection, 'a', { a: 1 }),
+        subclassType: DistinctOperation,
         correctCommandName: 'distinct'
       },
       {
-        subclassCreator: () => new mongodb.DropCollectionOperation(db, 'collectionName', {}),
-        subclassType: mongodb.DropCollectionOperation,
+        subclassCreator: () => new DropCollectionOperation(db, 'collectionName', {}),
+        subclassType: DropCollectionOperation,
         correctCommandName: 'drop'
       },
       {
-        subclassCreator: () => new mongodb.DropDatabaseOperation(db, {}),
-        subclassType: mongodb.DropDatabaseOperation,
+        subclassCreator: () => new DropDatabaseOperation(db, {}),
+        subclassType: DropDatabaseOperation,
         correctCommandName: 'dropDatabase'
       },
       {
-        subclassCreator: () => new mongodb.EstimatedDocumentCountOperation(collection, {}),
-        subclassType: mongodb.EstimatedDocumentCountOperation,
+        subclassCreator: () => new EstimatedDocumentCountOperation(collection, {}),
+        subclassType: EstimatedDocumentCountOperation,
         correctCommandName: 'count'
       },
       {
-        subclassCreator: () => new mongodb.FindOperation(collection.fullNamespace),
-        subclassType: mongodb.FindOperation,
+        subclassCreator: () => new FindOperation(collection.fullNamespace),
+        subclassType: FindOperation,
         correctCommandName: 'find'
       },
       {
-        subclassCreator: () => new mongodb.FindAndModifyOperation(collection, { a: 1 }, {}),
-        subclassType: mongodb.FindAndModifyOperation,
+        subclassCreator: () => new FindAndModifyOperation(collection, { a: 1 }, {}),
+        subclassType: FindAndModifyOperation,
         correctCommandName: 'findAndModify'
       },
       {
-        subclassCreator: () => new mongodb.FindOneAndDeleteOperation(collection, { a: 1 }, {}),
-        subclassType: mongodb.FindOneAndDeleteOperation,
+        subclassCreator: () => new FindOneAndDeleteOperation(collection, { a: 1 }, {}),
+        subclassType: FindOneAndDeleteOperation,
+        correctCommandName: 'findAndModify'
+      },
+      {
+        subclassCreator: () => new FindOneAndReplaceOperation(collection, { a: 2 }, { a: 1 }, {}),
+        subclassType: FindOneAndReplaceOperation,
+        correctCommandName: 'findAndModify'
+      },
+      {
+        subclassCreator: () => new FindOneAndUpdateOperation(collection, { a: 2 }, { $a: 1 }, {}),
+        subclassType: FindOneAndUpdateOperation,
         correctCommandName: 'findAndModify'
       },
       {
         subclassCreator: () =>
-          new mongodb.FindOneAndReplaceOperation(collection, { a: 2 }, { a: 1 }, {}),
-        subclassType: mongodb.FindOneAndReplaceOperation,
-        correctCommandName: 'findAndModify'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.FindOneAndUpdateOperation(collection, { a: 2 }, { $a: 1 }, {}),
-        subclassType: mongodb.FindOneAndUpdateOperation,
-        correctCommandName: 'findAndModify'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.GetMoreOperation(
+          new GetMoreOperation(
             collection.fullNamespace,
             Long.fromNumber(1),
-            {} as any as mongodb.Server,
+            {} as any as Server,
             {}
           ),
-        subclassType: mongodb.GetMoreOperation,
+        subclassType: GetMoreOperation,
         correctCommandName: 'getMore'
       },
       {
         subclassCreator: () =>
-          mongodb.CreateIndexesOperation.fromIndexDescriptionArray(db, 'bar', [{ key: { a: 1 } }]),
-        subclassType: mongodb.CreateIndexesOperation,
+          CreateIndexesOperation.fromIndexDescriptionArray(db, 'bar', [{ key: { a: 1 } }]),
+        subclassType: CreateIndexesOperation,
         correctCommandName: 'createIndexes'
       },
       {
-        subclassCreator: () => new mongodb.DropIndexOperation(collection, 'a', {}),
-        subclassType: mongodb.DropIndexOperation,
+        subclassCreator: () => new DropIndexOperation(collection, 'a', {}),
+        subclassType: DropIndexOperation,
         correctCommandName: 'dropIndexes'
       },
       {
-        subclassCreator: () => new mongodb.ListIndexesOperation(collection, {}),
-        subclassType: mongodb.ListIndexesOperation,
+        subclassCreator: () => new ListIndexesOperation(collection, {}),
+        subclassType: ListIndexesOperation,
         correctCommandName: 'listIndexes'
       },
       {
-        subclassCreator: () =>
-          new mongodb.InsertOperation(collection.fullNamespace, [{ a: 1 }], {}),
-        subclassType: mongodb.InsertOperation,
+        subclassCreator: () => new InsertOperation(collection.fullNamespace, [{ a: 1 }], {}),
+        subclassType: InsertOperation,
         correctCommandName: 'insert'
       },
       {
-        subclassCreator: () => new mongodb.InsertOneOperation(collection, { a: 1 }, {}),
-        subclassType: mongodb.InsertOneOperation,
+        subclassCreator: () => new InsertOneOperation(collection, { a: 1 }, {}),
+        subclassType: InsertOneOperation,
         correctCommandName: 'insert'
       },
       {
         subclassCreator: () =>
-          new mongodb.KillCursorsOperation(
+          new KillCursorsOperation(
             Long.fromNumber(1),
             collection.fullNamespace,
-            {} as any as mongodb.Server,
+            {} as any as Server,
             {}
           ),
-        subclassType: mongodb.KillCursorsOperation,
+        subclassType: KillCursorsOperation,
         correctCommandName: 'killCursors'
       },
       {
-        subclassCreator: () => new mongodb.ListCollectionsOperation(db, { a: 1 }, {}),
-        subclassType: mongodb.ListCollectionsOperation,
+        subclassCreator: () => new ListCollectionsOperation(db, { a: 1 }, {}),
+        subclassType: ListCollectionsOperation,
         correctCommandName: 'listCollections'
       },
       {
-        subclassCreator: () => new mongodb.ListDatabasesOperation(db, {}),
-        subclassType: mongodb.ListDatabasesOperation,
+        subclassCreator: () => new ListDatabasesOperation(db, {}),
+        subclassType: ListDatabasesOperation,
         correctCommandName: 'listDatabases'
       },
       {
-        subclassCreator: () => new mongodb.ProfilingLevelOperation(db, {}),
-        subclassType: mongodb.ProfilingLevelOperation,
+        subclassCreator: () => new ProfilingLevelOperation(db, {}),
+        subclassType: ProfilingLevelOperation,
         correctCommandName: 'profile'
       },
       {
-        subclassCreator: () => new mongodb.RemoveUserOperation(db, 'userToDrop', {}),
-        subclassType: mongodb.RemoveUserOperation,
+        subclassCreator: () => new RemoveUserOperation(db, 'userToDrop', {}),
+        subclassType: RemoveUserOperation,
         correctCommandName: 'dropUser'
       },
       {
-        subclassCreator: () => new mongodb.RenameOperation(collection, 'newName', {}),
-        subclassType: mongodb.RenameOperation,
+        subclassCreator: () => new RenameOperation(collection, 'newName', {}),
+        subclassType: RenameOperation,
         correctCommandName: 'renameCollection'
       },
       {
         subclassCreator: () =>
-          new mongodb.RunCommandOperation(
-            new mongodb.MongoDBNamespace('foo', 'bar'),
+          new RunCommandOperation(
+            new MongoDBNamespace('foo', 'bar'),
             { dummyCommand: 'dummyCommand' },
             {}
           ),
-        subclassType: mongodb.RunCommandOperation,
+        subclassType: RunCommandOperation,
         correctCommandName: 'runCommand'
       },
       {
         subclassCreator: () =>
-          new mongodb.CreateSearchIndexesOperation(collection, [{ definition: { a: 1 } }]),
-        subclassType: mongodb.CreateSearchIndexesOperation,
+          new CreateSearchIndexesOperation(collection, [{ definition: { a: 1 } }]),
+        subclassType: CreateSearchIndexesOperation,
         correctCommandName: 'createSearchIndexes'
       },
       {
-        subclassCreator: () => new mongodb.DropSearchIndexOperation(collection, 'dummyName'),
-        subclassType: mongodb.DropSearchIndexOperation,
+        subclassCreator: () => new DropSearchIndexOperation(collection, 'dummyName'),
+        subclassType: DropSearchIndexOperation,
         correctCommandName: 'dropSearchIndex'
       },
       {
         subclassCreator: () =>
-          new mongodb.UpdateSearchIndexOperation(collection, 'dummyName', {
+          new UpdateSearchIndexOperation(collection, 'dummyName', {
             a: 1
           }),
-        subclassType: mongodb.UpdateSearchIndexOperation,
+        subclassType: UpdateSearchIndexOperation,
         correctCommandName: 'updateSearchIndex'
       },
       {
-        subclassCreator: () => new mongodb.SetProfilingLevelOperation(db, 'all', {}),
-        subclassType: mongodb.SetProfilingLevelOperation,
+        subclassCreator: () => new SetProfilingLevelOperation(db, 'all', {}),
+        subclassType: SetProfilingLevelOperation,
         correctCommandName: 'profile'
       },
       {
-        subclassCreator: () => new mongodb.DbStatsOperation(db, {}),
-        subclassType: mongodb.DbStatsOperation,
+        subclassCreator: () => new DbStatsOperation(db, {}),
+        subclassType: DbStatsOperation,
         correctCommandName: 'dbStats'
       },
       {
         subclassCreator: () =>
-          new mongodb.UpdateOperation(
-            collection.fullNamespace,
-            [{ q: { a: 1 }, u: { $a: 2 } }],
-            {}
-          ),
-        subclassType: mongodb.UpdateOperation,
+          new UpdateOperation(collection.fullNamespace, [{ q: { a: 1 }, u: { $a: 2 } }], {}),
+        subclassType: UpdateOperation,
         correctCommandName: 'update'
       },
       {
         subclassCreator: () =>
-          new mongodb.UpdateOneOperation(collection.fullNamespace, { a: 1 }, { $a: 2 }, {}),
-        subclassType: mongodb.UpdateOneOperation,
+          new UpdateOneOperation(collection.fullNamespace, { a: 1 }, { $a: 2 }, {}),
+        subclassType: UpdateOneOperation,
         correctCommandName: 'update'
       },
       {
         subclassCreator: () =>
-          new mongodb.UpdateManyOperation(collection.fullNamespace, { a: 1 }, { $a: 2 }, {}),
-        subclassType: mongodb.UpdateManyOperation,
+          new UpdateManyOperation(collection.fullNamespace, { a: 1 }, { $a: 2 }, {}),
+        subclassType: UpdateManyOperation,
         correctCommandName: 'update'
       },
       {
         subclassCreator: () =>
-          new mongodb.ReplaceOneOperation(collection.fullNamespace, { a: 1 }, { b: 1 }, {}),
-        subclassType: mongodb.ReplaceOneOperation,
+          new ReplaceOneOperation(collection.fullNamespace, { a: 1 }, { b: 1 }, {}),
+        subclassType: ReplaceOneOperation,
         correctCommandName: 'update'
       },
       {
-        subclassCreator: () => new mongodb.ValidateCollectionOperation(admin, 'bar', {}),
-        subclassType: mongodb.ValidateCollectionOperation,
+        subclassCreator: () => new ValidateCollectionOperation(admin, 'bar', {}),
+        subclassType: ValidateCollectionOperation,
         correctCommandName: 'validate'
       }
     ];
@@ -269,7 +310,7 @@ describe('abstract operation', function () {
           expect(subclassInstance.commandName).to.equal(correctCommandName);
         });
 
-        if (subclassType !== mongodb.RunCommandOperation) {
+        if (subclassType !== RunCommandOperation) {
           it(
             `operation.commandName is a key in the command document`,
             {
@@ -278,7 +319,7 @@ describe('abstract operation', function () {
             async function () {
               const session = client.startSession();
               const pool = Array.from(client.topology.s.servers.values())[0].pool;
-              const timeoutContext = mongodb.TimeoutContext.create({
+              const timeoutContext = TimeoutContext.create({
                 waitQueueTimeoutMS: 1000,
                 serverSelectionTimeoutMS: 1000
               });
