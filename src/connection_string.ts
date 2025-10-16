@@ -7,12 +7,7 @@ import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
 import { Compressor, type CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
-import {
-  MongoAPIError,
-  MongoInvalidArgumentError,
-  MongoMissingCredentialsError,
-  MongoParseError
-} from './error';
+import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from './error';
 import {
   MongoClient,
   type MongoClientOptions,
