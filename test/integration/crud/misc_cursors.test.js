@@ -1542,34 +1542,22 @@ describe.only('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        const options = { capped: true, size: 8 };
-        db.createCollection('should_await_data', options, (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const options = { capped: true, size: 8 };
+      const collection = await db.createCollection('should_await_data', options);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            // Create cursor with awaitData, and timeout after the period specified
-            var cursor = collection.find({}, { tailable: true, awaitData: true });
-            cursor.forEach(
-              () => cursor.kill(),
-              () => {
-                // kill cursor b/c cursor is tailable / awaitable
-                cursor.close(done);
-              }
-            );
-          });
-        });
-      });
+      // Create cursor with awaitData, and timeout after the period specified
+      var cursor = collection.find({}, { tailable: true, awaitData: true });
+      await cursor.forEach(() => cursor.kill());
+      await cursor.close();
     }
   });
 
@@ -1836,32 +1824,29 @@ describe.only('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        try {
-          db.collection('shouldFailToSetReadPreferenceOnCursor')
-            .find()
-            .withReadPreference('notsecondary');
-          test.ok(false);
-        } catch (err) { } // eslint-disable-line
-
-        db.collection('shouldFailToSetReadPreferenceOnCursor')
+      const db = client.db(configuration.db);
+      try {
+        await db
+          .collection('shouldFailToSetReadPreferenceOnCursor')
           .find()
-          .withReadPreference('secondary');
+          .withReadPreference('notsecondary');
+        test.ok(false);
+      } catch (err) { } // eslint-disable-line
 
-        done();
-      });
+      await db
+        .collection('shouldFailToSetReadPreferenceOnCursor')
+        .find()
+        .withReadPreference('secondary');
     }
   });
 
   it('should allow setting the cursors readConcern through a builder', {
     metadata: { requires: { mongodb: '>=3.2' } },
-    test: function (done) {
+    test: async function () {
       const client = this.configuration.newClient({ monitorCommands: true });
       const events = [];
       client.on('commandStarted', event => {
@@ -1873,14 +1858,12 @@ describe.only('Cursor', function () {
       const cursor = db.collection('foo').find().withReadConcern('local');
       expect(cursor).property('readConcern').to.have.property('level').equal('local');
 
-      cursor.toArray(err => {
-        expect(err).to.not.exist;
+      await cursor.toArray();
 
-        expect(events).to.have.length(1);
-        const findCommand = events[0];
-        expect(findCommand).nested.property('command.readConcern').to.eql({ level: 'local' });
-        client.close(done);
-      });
+      expect(events).to.have.length(1);
+      const findCommand = events[0];
+      expect(findCommand).nested.property('command.readConcern').to.eql({ level: 'local' });
+      await client.close();
     }
   });
 
