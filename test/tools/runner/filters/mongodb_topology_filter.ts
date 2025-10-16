@@ -1,4 +1,4 @@
-import { type MongoClient, TopologyType } from '../../../mongodb';
+import { type MongoClient, TopologyType } from '../../../../src';
 import { Filter } from './filter';
 
 /**
