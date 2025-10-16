@@ -3,15 +3,10 @@ import type Sinon from 'sinon';
 // eslint-disable-next-line no-duplicate-imports
 import * as sinon from 'sinon';
 
-import {
-  Connection,
-  LEGACY_HELLO_COMMAND,
-  MongoServerError,
-  MongoServerSelectionError,
-  OpMsgRequest,
-  OpQueryRequest,
-  ServerApiVersion
-} from '../../mongodb';
+import { MongoServerError, MongoServerSelectionError, ServerApiVersion } from '../../../src';
+import { OpMsgRequest, OpQueryRequest } from '../../../src/cmap/commands';
+import { Connection } from '../../../src/cmap/connection';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 
 describe('MongoDB Handshake', () => {
   let client;
