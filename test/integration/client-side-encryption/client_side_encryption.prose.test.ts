@@ -42,7 +42,7 @@ export const vs25Predicate = () =>
   satisfies(process.version, '<25.0.0') ? true : 'TODO(NODE-7250): fix these tests in v25';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => { };
+const noop = () => {};
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
