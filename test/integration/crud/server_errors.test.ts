@@ -1,12 +1,7 @@
-'use strict';
-const { setupDatabase } = require('../shared');
-const chai = require('chai');
+import { expect } from 'chai';
 
-const expect = chai.expect;
-const sinonChai = require('sinon-chai');
-const { MongoServerError } = require('../../mongodb');
-
-chai.use(sinonChai);
+import { MongoServerError } from '../../mongodb';
+import { setupDatabase } from '../shared';
 
 describe('Errors', function () {
   before(function () {
