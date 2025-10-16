@@ -1,8 +1,7 @@
-'use strict';
+import { expect } from 'chai';
 
-const { setupDatabase, assert: test } = require(`../shared`);
-const { expect } = require('chai');
-const { MongoClient, MongoInvalidArgumentError, MongoServerError } = require('../../mongodb');
+import { type Db, MongoClient, MongoInvalidArgumentError, MongoServerError } from '../../mongodb';
+import { assert as test, setupDatabase } from '../shared';
 
 describe('Db', function () {
   before(function () {
@@ -10,8 +9,8 @@ describe('Db', function () {
   });
 
   context('when given illegal db name', function () {
-    let client;
-    let db;
+    let client: MongoClient;
+    let db: Db;
 
     beforeEach(function () {
       client = this.configuration.newClient();
@@ -59,10 +58,10 @@ describe('Db', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var _db = client.db('nonexistingdb');
+        const _db = client.db('nonexistingdb');
 
         _db.dropDatabase(function (err, result) {
           expect(err).to.not.exist;
@@ -80,8 +79,8 @@ describe('Db', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(err => {
         expect(err).to.not.exist;
 
@@ -101,12 +100,12 @@ describe('Db', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
-        var db1 = client.db('node972');
+        const db1 = client.db('node972');
         db1.collection('node972.test').insertOne({ a: 1 }, function (err) {
           expect(err).to.not.exist;
 
@@ -129,14 +128,14 @@ describe('Db', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
         // Get a db we that does not have any collections
-        var db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommand');
+        const db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommand');
 
         // Create a collection
         db1.collection('test').insertOne({ a: 1 }, function (err) {
@@ -147,7 +146,7 @@ describe('Db', function () {
             expect(err).to.not.exist;
 
             // Get listCollections filtering out the name
-            var cursor = db1.listCollections({ name: 'test1' });
+            const cursor = db1.listCollections({ name: 'test1' });
             cursor.toArray(function (err, names) {
               expect(err).to.not.exist;
               test.equal(1, names.length);
@@ -166,14 +165,14 @@ describe('Db', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
         // Get a db we that does not have any collections
-        var db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize');
+        const db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize');
 
         // Create a collection
         db1.collection('test').insertOne({ a: 1 }, function (err) {
@@ -184,7 +183,7 @@ describe('Db', function () {
             expect(err).to.not.exist;
 
             // Get listCollections filtering out the name
-            var cursor = db1.listCollections({ name: 'test' }, { batchSize: 1 });
+            const cursor = db1.listCollections({ name: 'test' }, { batchSize: 1 });
             cursor.toArray(function (err, names) {
               expect(err).to.not.exist;
               test.equal(1, names.length);
@@ -203,14 +202,14 @@ describe('Db', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
         // Get a db we that does not have any collections
-        var db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThem');
+        const db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThem');
 
         // Create a collection
         db1.collection('test.collection1').insertOne({ a: 1 }, function (err) {
@@ -221,13 +220,13 @@ describe('Db', function () {
             expect(err).to.not.exist;
 
             // Get listCollections filtering out the name
-            var cursor = db1.listCollections({ name: /test.collection/ });
+            const cursor = db1.listCollections({ name: /test.collection/ });
             cursor.toArray(function (err, names) {
               expect(err).to.not.exist;
               test.equal(2, names.length);
 
               // Get listCollections filtering out the name
-              var cursor = db1.listCollections({ name: 'test.collection1' }, {});
+              const cursor = db1.listCollections({ name: 'test.collection1' }, {});
               cursor.toArray(function (err, names) {
                 expect(err).to.not.exist;
                 test.equal(1, names.length);
@@ -250,14 +249,14 @@ describe('Db', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
 
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
         // Get a db we that does not have any collections
-        var db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThemFor28');
+        const db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThemFor28');
 
         // Create a collection
         db1.collection('test.collection1').insertOne({ a: 1 }, function (err) {
@@ -268,7 +267,7 @@ describe('Db', function () {
             expect(err).to.not.exist;
 
             // Get listCollections filtering out the name
-            var cursor = db1.listCollections({ name: /test.collection/ }, { batchSize: 1 });
+            const cursor = db1.listCollections({ name: /test.collection/ }, { batchSize: 1 });
             cursor.toArray(function (err, names) {
               expect(err).to.not.exist;
               test.equal(2, names.length);
