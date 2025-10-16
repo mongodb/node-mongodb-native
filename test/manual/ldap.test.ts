@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoClient } from '../mongodb';
+import { MongoClient } from '../../src';
 
 describe('LDAP', function () {
   const { SASL_USER, SASL_PASS, SASL_HOST } = process.env;

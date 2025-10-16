@@ -6,12 +6,8 @@ import { promises as fs } from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import * as sinon from 'sinon';
 
-import {
-  LEGACY_HELLO_COMMAND,
-  MongoClient,
-  type MongoClientOptions,
-  MongoServerSelectionError
-} from '../mongodb';
+import { MongoClient, type MongoClientOptions, MongoServerSelectionError } from '../../src';
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 
 const REQUIRED_ENV = ['MONGODB_URI', 'TLS_KEY_FILE', 'TLS_CA_FILE', 'TLS_CRL_FILE'];
 
