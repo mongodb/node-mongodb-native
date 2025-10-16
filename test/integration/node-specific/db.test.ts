@@ -1,7 +1,13 @@
 import { expect } from 'chai';
 
-import { type Db, MongoClient, MongoInvalidArgumentError, MongoServerError } from '../../mongodb';
-import { assert as test, setupDatabase } from '../shared';
+import {
+  Collection,
+  type Db,
+  MongoClient,
+  MongoInvalidArgumentError,
+  MongoServerError
+} from '../../../src';
+import { setupDatabase } from '../shared';
 
 describe('Db', function () {
   before(function () {
@@ -52,236 +58,123 @@ describe('Db', function () {
     expect(error).to.be.instanceOf(Error);
   });
 
-  it('shouldCorrectlyGetErrorDroppingNonExistingDb', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        const _db = client.db('nonexistingdb');
-
-        _db.dropDatabase(function (err, result) {
-          expect(err).to.not.exist;
-          test.equal(true, result);
-
-          client.close(done);
-        });
-      });
-    }
+  it('should not throw error dropping non existing Db', async function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    const _db = client.db('nonexistingdb');
+    await _db.dropDatabase();
+    await client.close();
   });
 
-  it.skip('shouldCorrectlyThrowWhenTryingToReOpenConnection', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  // TODO(NODE-7192): remove test as it doesn't test anything
+  // it.skip('shouldCorrectlyThrowWhenTryingToReOpenConnection', {
+  //   metadata: {
+  //     requires: { topology: ['single', 'replicaset', 'sharded'] }
+  //   },
+  //
+  //   test: function (done) {
+  //     var configuration = this.configuration;
+  //     var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+  //     client.connect(err => {
+  //       expect(err).to.not.exist;
+  //
+  //       try {
+  //         client.connect(function () {});
+  //         test.ok(false);
+  //       } catch {
+  //         client.close(done);
+  //       }
+  //     });
+  //   }
+  // });
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(err => {
-        expect(err).to.not.exist;
+  it('should not cut collection name when it is the same as the database', async function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    const db1 = client.db('node972');
+    await db1.collection('node972.test').insertOne({ a: 1 });
 
-        try {
-          client.connect(function () {});
-          test.ok(false);
-        } catch {
-          client.close(done);
-        }
-      });
-    }
+    const collections = await db1.collections();
+    const collection = collections.find(c => c.collectionName === 'node972.test');
+    expect(collection).to.be.instanceOf(Collection);
+    await client.close();
   });
 
-  it('should not cut collection name when it is the same as the database', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should correctly use cursor with list collections command', async function () {
+    const configuration = this.configuration;
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
-        const db1 = client.db('node972');
-        db1.collection('node972.test').insertOne({ a: 1 }, function (err) {
-          expect(err).to.not.exist;
+    const db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommand');
 
-          db1.collections(function (err, collections) {
-            expect(err).to.not.exist;
-            collections = collections.map(function (c) {
-              return c.collectionName;
-            });
-            test.notEqual(-1, collections.indexOf('node972.test'));
-            client.close(done);
-          });
-        });
-      });
-    }
+    // create 2 collections by inserting documents in them
+    await db1.collection('test').insertOne({ a: 1 });
+    await db1.collection('test1').insertOne({ a: 1 });
+
+    // Get listCollections filtering out the name
+    const collections = await db1.listCollections({ name: 'test1' }).toArray();
+    expect(collections.length).to.equal(1);
+    await client.close();
   });
 
-  it('shouldCorrectlyUseCursorWithListCollectionsCommand', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should correctly use cursor with listCollections command and batchSize', async function () {
+    const configuration = this.configuration;
 
-    test: function (done) {
-      const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    const db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize');
 
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
+    await db1.collection('test').insertOne({ a: 1 });
 
-        // Get a db we that does not have any collections
-        const db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommand');
+    await db1.collection('test1').insertOne({ a: 1 });
 
-        // Create a collection
-        db1.collection('test').insertOne({ a: 1 }, function (err) {
-          expect(err).to.not.exist;
-
-          // Create a collection
-          db1.collection('test1').insertOne({ a: 1 }, function () {
-            expect(err).to.not.exist;
-
-            // Get listCollections filtering out the name
-            const cursor = db1.listCollections({ name: 'test1' });
-            cursor.toArray(function (err, names) {
-              expect(err).to.not.exist;
-              test.equal(1, names.length);
-
-              client.close(done);
-            });
-          });
-        });
-      });
-    }
+    // Get listCollections filtering out the name
+    const collections = await db1.listCollections({ name: 'test' }, { batchSize: 1 }).toArray();
+    expect(collections.length).to.equal(1);
+    await client.close();
   });
 
-  it('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should correctly list collection names with . in the middle', async function () {
+    const configuration = this.configuration;
 
-    test: function (done) {
-      const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    const db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThem');
 
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
+    await db1.collection('test.collection1').insertOne({ a: 1 });
+    await db1.collection('test.collection2').insertOne({ a: 1 });
 
-        // Get a db we that does not have any collections
-        const db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize');
+    const collections = await db1.listCollections({ name: /test.collection/ }).toArray();
+    expect(collections.length).to.equal(2);
 
-        // Create a collection
-        db1.collection('test').insertOne({ a: 1 }, function (err) {
-          expect(err).to.not.exist;
-
-          // Create a collection
-          db1.collection('test1').insertOne({ a: 1 }, function () {
-            expect(err).to.not.exist;
-
-            // Get listCollections filtering out the name
-            const cursor = db1.listCollections({ name: 'test' }, { batchSize: 1 });
-            cursor.toArray(function (err, names) {
-              expect(err).to.not.exist;
-              test.equal(1, names.length);
-
-              client.close(done);
-            });
-          });
-        });
-      });
-    }
+    // Get listCollections filtering out the name
+    const filteredCollections = await db1
+      .listCollections({ name: 'test.collection1' }, {})
+      .toArray();
+    expect(filteredCollections.length).to.equal(1);
+    await client.close();
   });
 
-  it('should correctly list collection names with . in the middle', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should correctly list collection names with batchSize 1', async function () {
+    const configuration = this.configuration;
 
-    test: function (done) {
-      const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    const db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThemFor28');
 
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
+    await db1.collection('test.collection1').insertOne({ a: 1 });
 
-        // Get a db we that does not have any collections
-        const db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThem');
+    await db1.collection('test.collection2').insertOne({ a: 1 });
 
-        // Create a collection
-        db1.collection('test.collection1').insertOne({ a: 1 }, function (err) {
-          expect(err).to.not.exist;
-
-          // Create a collection
-          db1.collection('test.collection2').insertOne({ a: 1 }, function () {
-            expect(err).to.not.exist;
-
-            // Get listCollections filtering out the name
-            const cursor = db1.listCollections({ name: /test.collection/ });
-            cursor.toArray(function (err, names) {
-              expect(err).to.not.exist;
-              test.equal(2, names.length);
-
-              // Get listCollections filtering out the name
-              const cursor = db1.listCollections({ name: 'test.collection1' }, {});
-              cursor.toArray(function (err, names) {
-                expect(err).to.not.exist;
-                test.equal(1, names.length);
-
-                client.close(done);
-              });
-            });
-          });
-        });
-      });
-    }
-  });
-
-  it('should correctly list collection names with batchSize 1 for 2.8 or higher', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded'],
-        mongodb: '>= 2.8.0'
-      }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-
-        // Get a db we that does not have any collections
-        const db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThemFor28');
-
-        // Create a collection
-        db1.collection('test.collection1').insertOne({ a: 1 }, function (err) {
-          expect(err).to.not.exist;
-
-          // Create a collection
-          db1.collection('test.collection2').insertOne({ a: 1 }, function () {
-            expect(err).to.not.exist;
-
-            // Get listCollections filtering out the name
-            const cursor = db1.listCollections({ name: /test.collection/ }, { batchSize: 1 });
-            cursor.toArray(function (err, names) {
-              expect(err).to.not.exist;
-              test.equal(2, names.length);
-
-              client.close(done);
-            });
-          });
-        });
-      });
-    }
+    // Get listCollections filtering out the name
+    const collections = await db1
+      .listCollections({ name: /test.collection/ }, { batchSize: 1 })
+      .toArray();
+    expect(collections.length).to.equal(2);
+    await client.close();
   });
 
   it('should throw if Db.collection is passed a deprecated callback argument', () => {
     const client = new MongoClient('mongodb://iLoveJavascript');
+    // @ts-expect-error Not allowed in TS, but can be used in JS
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     expect(() => client.db('test').collection('test', () => {})).to.throw(
       'The callback form of this helper has been removed.'
     );
