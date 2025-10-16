@@ -2,6 +2,7 @@ import { BSON, EJSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { satisfies } from 'semver';
 
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
@@ -37,12 +38,16 @@ export const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoi
   return result;
 };
 
+export const vs25Predicate = () =>
+  satisfies(process.version, '<25.0.0') ? true : 'TODO(NODE-7250): fix these tests in v25';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => {};
+const noop = () => { };
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
-    topology: '!load-balanced'
+    topology: '!load-balanced',
+    predicate: vs25Predicate
   }
 };
 
@@ -50,7 +55,8 @@ const eeMetadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
     mongodb: '>=7.0.0',
-    topology: ['replicaset', 'sharded']
+    topology: ['replicaset', 'sharded'],
+    predicate: vs25Predicate
   }
 };
 
@@ -1717,7 +1723,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       function () {}
     ).skipReason = 'TODO(NODE-4840): Node does not support any OCSP options';
 
-    context('Case 6: named KMS providers apply TLS options', function () {
+    context('Case 6: named KMS providers apply TLS options', metadata, function () {
       afterEach(() => keyvaultClient?.close());
       beforeEach(async function () {
         const shouldSkip = this.configuration.filters.ClientSideEncryptionFilter.filter({

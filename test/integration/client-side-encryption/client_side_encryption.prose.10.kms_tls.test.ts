@@ -2,10 +2,12 @@ import { expect } from 'chai';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient } from '../../mongodb';
+import { vs25Predicate } from './client_side_encryption.prose.test';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
-    clientSideEncryption: true
+    clientSideEncryption: true,
+    predicate: vs25Predicate
   }
 };
 
