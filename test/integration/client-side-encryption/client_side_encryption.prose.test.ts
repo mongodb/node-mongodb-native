@@ -39,7 +39,7 @@ export const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoi
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => { };
+const noop = () => {};
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
@@ -1724,7 +1724,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       'Case 5: `tlsDisableOCSPEndpointCheck` is permitted',
       metadata,
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      function () { }
+      function () {}
     ).skipReason = 'TODO(NODE-4840): Node does not support any OCSP options';
 
     context('Case 6: named KMS providers apply TLS options', kmsTlsMetadata, function () {
