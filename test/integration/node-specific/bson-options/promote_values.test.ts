@@ -1,7 +1,7 @@
-'use strict';
-const { expect } = require('chai');
-const { Long, Int32, Double } = require('../../../mongodb');
-const { assert: test, setupDatabase } = require('../../shared');
+import { expect } from 'chai';
+
+import { Double, Int32, Long } from '../../../mongodb';
+import { assert as test, setupDatabase } from '../../shared';
 
 describe('Promote Values', function () {
   before(function () {
@@ -16,13 +16,13 @@ describe('Promote Values', function () {
     },
 
     test: async function () {
-      let configuration = this.configuration;
-      let client = configuration.newClient(configuration.writeConcernMax(), {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         promoteValues: false
       });
       await client.connect();
-      let db = client.db(configuration.db);
+      const db = client.db(configuration.db);
 
       await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
         doc: Long.fromNumber(10),
@@ -30,7 +30,7 @@ describe('Promote Values', function () {
         double: 2.2222,
         array: [[Long.fromNumber(10)]]
       });
-      let doc = await db.collection('shouldCorrectlyHonorPromoteValues').findOne();
+      const doc = await db.collection('shouldCorrectlyHonorPromoteValues').findOne();
       expect(Long.fromNumber(10)).deep.equals(doc.doc);
       expect(new Int32(10)).deep.equals(doc.int);
       expect(new Double(2.2222)).deep.equals(doc.double);
@@ -47,7 +47,7 @@ describe('Promote Values', function () {
     },
 
     test: async function () {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient({}, { promoteValues: false });
       await client.connect();
       const db = client.db(configuration.db);
@@ -166,10 +166,10 @@ describe('Promote Values', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient();
       client.connect(function (err, client) {
-        var docs = new Array(150).fill(0).map(function (_, i) {
+        const docs = new Array(150).fill(0).map(function (_, i) {
           return {
             _id: 'needle_' + i,
             is_even: i % 2,
@@ -179,7 +179,7 @@ describe('Promote Values', function () {
           };
         });
 
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
 
         db.collection('haystack').insertMany(docs, function (errInsert) {
           if (errInsert) throw errInsert;

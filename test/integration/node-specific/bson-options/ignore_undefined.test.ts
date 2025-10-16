@@ -1,14 +1,14 @@
-'use strict';
-const { expect } = require('chai');
-const { assert: test, setupDatabase } = require('../../shared');
-const { ObjectId } = require('../../../mongodb');
+import { expect } from 'chai';
+
+import { type MongoClient, ObjectId } from '../../../mongodb';
+import { assert as test, setupDatabase } from '../../shared';
 
 describe('Ignore Undefined', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
 
-  let client;
+  let client: MongoClient;
 
   beforeEach(async function () {
     client = this.configuration.newClient();
@@ -22,15 +22,15 @@ describe('Ignore Undefined', function () {
     metadata: { requires: { topology: ['single'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         ignoreUndefined: true
       });
 
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue');
+        const db = client.db(configuration.db);
+        const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue');
 
         // Ignore the undefined field
         collection.insert({ a: 1, b: undefined }, configuration.writeConcernMax(), function (err) {
@@ -53,7 +53,7 @@ describe('Ignore Undefined', function () {
       metadata: { requires: { topology: ['single'] } },
 
       test: function (done) {
-        var configuration = this.configuration;
+        const configuration = this.configuration;
         const client = configuration.newClient(
           {},
           {
@@ -62,8 +62,8 @@ describe('Ignore Undefined', function () {
         );
 
         client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
+          const db = client.db(configuration.db);
+          const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
           collection.insert({ a: 1, b: undefined }, function (err) {
             expect(err).to.not.exist;
 
@@ -100,16 +100,16 @@ describe('Ignore Undefined', function () {
     metadata: { requires: { topology: ['single'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         ignoreUndefined: true
       });
 
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue2');
-        var id = new ObjectId();
+        const db = client.db(configuration.db);
+        const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue2');
+        const id = new ObjectId();
 
         collection.updateOne(
           { _id: id, a: 1, b: undefined },
@@ -120,7 +120,7 @@ describe('Ignore Undefined', function () {
             collection.findOne({ _id: id }, function (err, item) {
               test.equal(1, item.a);
               test.ok(item.b === undefined);
-              var id = new ObjectId();
+              const id = new ObjectId();
 
               collection.updateMany(
                 { _id: id, a: 1, b: undefined },
@@ -131,7 +131,7 @@ describe('Ignore Undefined', function () {
                   collection.findOne({ _id: id }, function (err, item) {
                     test.equal(1, item.a);
                     test.ok(item.b === undefined);
-                    var id = new ObjectId();
+                    const id = new ObjectId();
 
                     collection.update(
                       { _id: id, a: 1, b: undefined },

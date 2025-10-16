@@ -1,7 +1,6 @@
-'use strict';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
-const { BSONRegExp } = require('../../../mongodb');
+import { BSONRegExp } from '../../../mongodb';
 
 describe('BSONRegExp', () => {
   describe('bsonRegExp option', () => {

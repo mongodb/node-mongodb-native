@@ -1,7 +1,6 @@
-'use strict';
-const { expect } = require('chai');
+import { expect } from 'chai';
 
-const { assert: test, setupDatabase } = require('../../shared');
+import { assert as test, setupDatabase } from '../../shared';
 
 describe('Promote Buffers', function () {
   before(function () {
@@ -16,14 +15,14 @@ describe('Promote Buffers', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         promoteBuffers: true
       });
 
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer1').insert(
           {
             doc: Buffer.alloc(256)
@@ -51,11 +50,11 @@ describe('Promote Buffers', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
 
       const client = configuration.newClient({}, { promoteBuffers: true });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
 
         db.collection('shouldCorrectlyHonorPromoteBuffer2').insert(
           {
@@ -84,11 +83,11 @@ describe('Promote Buffers', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
 
       const client = configuration.newClient({}, { promoteBuffers: true });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
 
         db.collection('shouldCorrectlyHonorPromoteBuffer3').insert(
           {
@@ -119,11 +118,11 @@ describe('Promote Buffers', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
 
       const client = configuration.newClient();
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer4').insert(
           {
             doc: Buffer.alloc(256)
@@ -155,11 +154,11 @@ describe('Promote Buffers', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
 
       const client = configuration.newClient();
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer5').insert(
           {
             doc: Buffer.alloc(256)
