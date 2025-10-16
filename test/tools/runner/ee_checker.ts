@@ -19,6 +19,12 @@ events.EventEmitter = class RequireErrorListenerEventEmitter extends EventEmitte
         return;
       }
 
+      // gcp-metadata uses logging-utils whose AdhocDebugLogger extends EE
+      // https://github.com/googleapis/gax-nodejs/blob/acfbe801d92219693b7ea5487ef701a77657dec8/logging-utils/src/logging-utils.ts#L163
+      if (this.constructor.name === 'AdhocDebugLogger') {
+        return;
+      }
+
       if (this.listenerCount('error') === 0) {
         throw ctorCallSite;
       }
