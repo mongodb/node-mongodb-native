@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoServerError } from '../../mongodb';
+import { type MongoClient, MongoServerError } from '../../../src';
 import { setupDatabase } from '../shared';
 
 describe('Errors', function () {
@@ -8,7 +8,7 @@ describe('Errors', function () {
     return setupDatabase(this.configuration);
   });
 
-  let client;
+  let client: MongoClient;
 
   beforeEach(function () {
     client = this.configuration.newClient(this.configuration.writeConcernMax(), { maxPoolSize: 1 });
@@ -19,65 +19,55 @@ describe('Errors', function () {
     return client.close();
   });
 
-  it('should fail insert due to unique index', function (done) {
+  it('should fail insert due to unique index', async function () {
     const db = client.db(this.configuration.db);
-    db.createCollection('test_failing_insert_due_to_unique_index', (err, collection) => {
-      expect(err).to.not.exist;
-      collection.createIndexes(
-        [
-          {
-            name: 'test_failing_insert_due_to_unique_index',
-            key: { a: 1 },
-            unique: true
-          }
-        ],
-        { writeConcern: { w: 1 } },
-        err => {
-          expect(err).to.not.exist;
+    const collection = await db.createCollection('test_failing_insert_due_to_unique_index');
+    await collection.createIndexes([
+      {
+        name: 'test_failing_insert_due_to_unique_index',
+        key: { a: 1 },
+        unique: true
+      }
+    ]);
 
-          collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
-            expect(err).to.not.exist;
+    await collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } });
 
-            collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
-              expect(err.code).to.equal(11000);
-              done();
-            });
-          });
-        }
-      );
-    });
+    const err = await collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }).catch(err => err);
+    expect(err).to.be.instanceOf(MongoServerError);
+    expect(err.code).to.equal(11000);
   });
 
-  it('should fail insert due to unique index strict', function (done) {
-    const db = client.db(this.configuration.db);
-    db.dropCollection('test_failing_insert_due_to_unique_index_strict', () => {
-      db.createCollection('test_failing_insert_due_to_unique_index_strict', err => {
-        expect(err).to.not.exist;
-        const collection = db.collection('test_failing_insert_due_to_unique_index_strict');
-        collection.createIndexes(
-          [
-            {
-              name: 'test_failing_insert_due_to_unique_index_strict',
-              key: { a: 1 },
-              unique: true
-            }
-          ],
-          { writeConcern: { w: 1 } },
-          err => {
-            expect(err).to.not.exist;
-            collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
-              expect(err).to.not.exist;
-
-              collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
-                expect(err.code).to.equal(11000);
-                done();
-              });
-            });
-          }
-        );
-      });
-    });
-  });
+  // TODO(NODE-7219): remove as it duplicates "should fail insert due to unique index"
+  // it('should fail insert due to unique index strict', function (done) {
+  //   const db = client.db(this.configuration.db);
+  //   db.dropCollection('test_failing_insert_due_to_unique_index_strict', () => {
+  //     db.createCollection('test_failing_insert_due_to_unique_index_strict', err => {
+  //       expect(err).to.not.exist;
+  //       const collection = db.collection('test_failing_insert_due_to_unique_index_strict');
+  //       collection.createIndexes(
+  //         [
+  //           {
+  //             name: 'test_failing_insert_due_to_unique_index_strict',
+  //             key: { a: 1 },
+  //             unique: true
+  //           }
+  //         ],
+  //         { writeConcern: { w: 1 } },
+  //         err => {
+  //           expect(err).to.not.exist;
+  //           collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
+  //             expect(err).to.not.exist;
+  //
+  //             collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
+  //               expect(err.code).to.equal(11000);
+  //               done();
+  //             });
+  //           });
+  //         }
+  //       );
+  //     });
+  //   });
+  // });
 
   const PROJECTION_ERRORS = new Set([
     'Projection cannot have a mix of inclusion and exclusion.',
