@@ -1,8 +1,9 @@
-'use strict';
-const { expect } = require('chai');
+import { expect } from 'chai';
+
+import { type MongoClient } from '../../mongodb';
 
 describe('Remove', function () {
-  let client;
+  let client: MongoClient;
 
   beforeEach(async function () {
     client = this.configuration.newClient();
