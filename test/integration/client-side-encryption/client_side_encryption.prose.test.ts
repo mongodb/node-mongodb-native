@@ -2,6 +2,7 @@ import { BSON, EJSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { satisfies } from 'semver';
 
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
@@ -43,6 +44,15 @@ const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
     topology: '!load-balanced'
+  }
+};
+
+const kmsTlsMetadata: MongoDBMetadataUI = {
+  requires: {
+    clientSideEncryption: true,
+    topology: '!load-balanced',
+    predicate: () =>
+      satisfies(process.version, '<25.0.0') ? true : 'TODO(NODE-7252): fix these tests in v25'
   }
 };
 
@@ -1369,7 +1379,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
    * - Create client encryption expired
    * - Create client encryption invalid hostname
    */
-  context('KMS TLS Options Tests', metadata, function () {
+  context('KMS TLS Options Tests', kmsTlsMetadata, function () {
     let clientNoTls;
     let clientWithTls;
     let clientWithTlsExpired;
@@ -1506,7 +1516,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
 
     // Case 1.
-    context('Case 1: AWS', metadata, function () {
+    context('Case 1: AWS', kmsTlsMetadata, function () {
       const masterKey = {
         region: 'us-east-1',
         key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
@@ -1515,7 +1525,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:9000' };
       const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:9001' };
 
-      it('should fail with no TLS', metadata, async function () {
+      it('should fail with no TLS', async function () {
         // NODE-6861: flakiness is caused by mock KMS servers
         this.retries(2);
 
@@ -1528,7 +1538,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
 
-      it('should succeed with valid TLS options', metadata, async function () {
+      it('should succeed with valid TLS options', async function () {
         try {
           await clientEncryptionWithTls.createDataKey('aws', { masterKey });
           expect.fail('it must fail to parse response');
@@ -1551,7 +1561,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
 
-      it('should fail with an invalid hostname', metadata, async function () {
+      it('should fail with an invalid hostname', async function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('aws', {
             masterKey: masterKeyInvalidHostname
@@ -1565,13 +1575,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
 
     // Case 2.
-    context('Case 2: Azure', metadata, function () {
+    context('Case 2: Azure', kmsTlsMetadata, function () {
       const masterKey = {
         keyVaultEndpoint: 'doesnotexist.invalid',
         keyName: 'foo'
       };
 
-      it('should fail with no TLS', metadata, async function () {
+      it('should fail with no TLS', async function () {
         // NODE-6861: flakiness is caused by mock KMS servers
         this.retries(2);
 
@@ -1584,7 +1594,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
 
-      it('should succeed with valid TLS options', metadata, async function () {
+      it('should succeed with valid TLS options', async function () {
         try {
           await clientEncryptionWithTls.createDataKey('azure', { masterKey });
           expect.fail('it must fail with HTTP 404');
@@ -1605,7 +1615,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
 
-      it('should fail with an invalid hostname', metadata, async function () {
+      it('should fail with an invalid hostname', async function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('azure', { masterKey });
           expect.fail('it must fail with invalid hostnames');
@@ -1617,7 +1627,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
 
     // Case 3.
-    context('Case 3: GCP', metadata, function () {
+    context('Case 3: GCP', kmsTlsMetadata, function () {
       const masterKey = {
         projectId: 'foo',
         location: 'bar',
@@ -1625,7 +1635,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         keyName: 'foo'
       };
 
-      it('should fail with no TLS', metadata, async function () {
+      it('should fail with no TLS', async function () {
         // NODE-6861: flakiness is caused by mock KMS servers
         this.retries(2);
 
@@ -1638,7 +1648,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
 
-      it('should succeed with valid TLS options', metadata, async function () {
+      it('should succeed with valid TLS options', async function () {
         try {
           await clientEncryptionWithTls.createDataKey('gcp', { masterKey });
           expect.fail('it must fail with HTTP 404');
@@ -1659,7 +1669,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
 
-      it('should fail with an invalid hostname', metadata, async function () {
+      it('should fail with an invalid hostname', async function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('gcp', { masterKey });
           expect.fail('it must fail with invalid hostnames');
@@ -1671,7 +1681,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
 
     // Case 4.
-    context('Case 4: KMIP', metadata, function () {
+    context('Case 4: KMIP', kmsTlsMetadata, function () {
       const masterKey = {};
 
       it('should fail with no TLS', metadata, async function () {
@@ -1699,7 +1709,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       });
 
-      it('should fail with an invalid hostname', metadata, async function () {
+      it('should fail with an invalid hostname', async function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('kmip', { masterKey });
           expect.fail('it must fail with invalid hostnames');
@@ -1717,7 +1727,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       function () {}
     ).skipReason = 'TODO(NODE-4840): Node does not support any OCSP options';
 
-    context('Case 6: named KMS providers apply TLS options', function () {
+    context('Case 6: named KMS providers apply TLS options', kmsTlsMetadata, function () {
       afterEach(() => keyvaultClient?.close());
       beforeEach(async function () {
         const shouldSkip = this.configuration.filters.ClientSideEncryptionFilter.filter({
