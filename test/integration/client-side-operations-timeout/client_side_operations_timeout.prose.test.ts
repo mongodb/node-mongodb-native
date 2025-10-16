@@ -7,10 +7,10 @@ import * as semver from 'semver';
 import * as sinon from 'sinon';
 import { pipeline } from 'stream/promises';
 
-import { type CommandStartedEvent } from '../../../mongodb';
 import {
   Binary,
   ClientEncryption,
+  type CommandStartedEvent,
   type CommandSucceededEvent,
   GridFSBucket,
   MongoBulkWriteError,
