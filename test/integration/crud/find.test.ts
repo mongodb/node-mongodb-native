@@ -925,8 +925,7 @@ describe('Find', function () {
   //   }
   // });
 
-  // TODO: NODE-3819: Unskip flaky tests.
-  it.skip('should correctly iterate over collection', async function () {
+  it('should correctly iterate over collection', async function () {
     const db = client.db(this.configuration.db);
 
     const collection = db.collection('shouldCorrectlyIterateOverCollection');
@@ -947,7 +946,7 @@ describe('Find', function () {
     }
 
     expect(iteratedCount).to.equal(500);
-  }).skipReason = 'TODO(NODE-3819): flaky tests (on macOS)';
+  });
 
   it('should correctly error out findOneAndUpdate on duplicate record', async function () {
     const configuration = this.configuration;
@@ -1461,22 +1460,22 @@ describe('Find', function () {
   //   }
   // });
 
-  it('Should correctly apply db level options to find cursor', async function () {
+  it('should correctly apply db level options to find cursor', async function () {
     const configuration = this.configuration;
-    const client = configuration.newClient({}, { ignoreUndefined: true });
-    await client.connect();
-    const db = client.db(configuration.db);
+    const p_client = configuration.newClient({}, { ignoreUndefined: true });
+    await p_client.connect();
+    const db = p_client.db(configuration.db);
     const collection = db.collection('test_find_simple_cursor_inheritance');
 
     // Insert some test documents
     await collection.insertMany([{ a: 2 }, { b: 3, c: undefined }]);
-    // Ensure correct insertion testing via the cursor and the count function
-    const cursor = collection.find({ c: undefined });
+
+    const cursor = collection.find({ c: { $exists: false } });
 
     const documents = await cursor.toArray();
     test.equal(2, documents.length);
-    // Let's close the db
-    await client.close();
+
+    await p_client.close();
   });
 
   it('should respect client-level read preference', {
