@@ -1960,34 +1960,24 @@ describe.only('Cursor', function () {
     await client.close();
   });
 
-  it('shouldFailToTailANormalCollection', function (done) {
+  it('shouldFailToTailANormalCollection', async function () {
     const configuration = this.configuration;
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      var collection = db.collection('shouldFailToTailANormalCollection');
-      var docs = [];
-      for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
+    const db = client.db(configuration.db);
+    var collection = db.collection('shouldFailToTailANormalCollection');
+    var docs = [];
+    for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
 
-      collection.insert(docs, configuration.writeConcernMax(), err => {
-        expect(err).to.not.exist;
+    await collection.insert(docs, configuration.writeConcernMax());
 
-        const cursor = collection.find({}, { tailable: true });
-        cursor.forEach(
-          () => { },
-          err => {
-            test.ok(err instanceof Error);
-            test.ok(typeof err.code === 'number');
+    const cursor = collection.find({}, { tailable: true });
+    const err = await cursor.forEach(() => { }).catch(e => e);
+    test.ok(err instanceof Error);
+    test.ok(typeof err.code === 'number');
 
-            // Close cursor b/c we did not exhaust cursor
-            cursor.close();
-            done();
-          }
-        );
-      });
-    });
+    // Close cursor b/c we did not exhaust cursor
+    cursor.close();
   });
 
   it('shouldCorrectlyUseFindAndCursorCount', {
@@ -3166,47 +3156,42 @@ describe.only('Cursor', function () {
     });
   });
 
-  it('should not consume first document on hasNext when streaming', function (done) {
+  it('should not consume first document on hasNext when streaming', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
-    client.connect(err => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+    await client.connect();
 
-      const collection = client.db().collection('documents');
-      collection.drop(() => {
-        const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
-        collection.insertMany(docs, err => {
-          expect(err).to.not.exist;
+    const collection = client.db().collection('documents');
+    await collection.drop();
 
-          const cursor = collection.find({}, { sort: { a: 1 } });
-          cursor.hasNext((err, hasNext) => {
-            expect(err).to.not.exist;
-            expect(hasNext).to.be.true;
+    const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
+    await collection.insertMany(docs);
 
-            const collected = [];
-            const stream = new Writable({
-              objectMode: true,
-              write: (chunk, encoding, next) => {
-                collected.push(chunk);
-                next(undefined, chunk);
-              }
-            });
+    const cursor = collection.find({}, { sort: { a: 1 } });
+    const hasNext = await cursor.hasNext();
+    expect(hasNext).to.be.true;
 
-            const cursorStream = cursor.stream();
-
-            cursorStream.on('end', () => {
-              expect(collected).to.have.length(3);
-              expect(collected).to.eql(docs);
-              done();
-            });
-
-            cursorStream.pipe(stream);
-          });
-        });
-      });
+    const collected = [];
+    const stream = new Writable({
+      objectMode: true,
+      write: (chunk, encoding, next) => {
+        collected.push(chunk);
+        next(undefined, chunk);
+      }
     });
+
+    const cursorStream = cursor.stream();
+
+    cursorStream.on('end', () => {
+      expect(collected).to.have.length(3);
+      expect(collected).to.eql(docs);
+    });
+
+    const promise = once(cursorStream, 'end');
+    cursorStream.pipe(stream);
+    await promise;
+    await client.close();
   });
 
   describe('transforms', function () {
