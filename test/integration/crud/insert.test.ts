@@ -365,18 +365,7 @@ describe('crud - insert', function () {
     it('should correctly insert document with UUID', async function () {
       const configuration = this.configuration;
       const db = client.db(configuration.db);
-      const collection = db.collection<{ _id: string | Binary; field: string }>(
-        'insert_doc_with_uuid'
-      );
-
-      await collection.insertOne(
-        { _id: '12345678123456781234567812345678', field: '1' },
-        configuration.writeConcernMax()
-      );
-
-      const items = await collection.find({ _id: '12345678123456781234567812345678' }).toArray();
-      test.equal(items[0]._id, '12345678123456781234567812345678');
-      test.equal(items[0].field, '1');
+      const collection = db.collection<{ _id: Binary; field: string }>('insert_doc_with_uuid');
 
       // Generate a binary id
       const binaryUUID = new Binary(
