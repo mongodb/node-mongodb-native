@@ -22,11 +22,8 @@ import {
   ReturnDocument,
   Timestamp
 } from '../../../src';
-import { toISODate } from '../../tools/utils';
+import { noop } from '../../../src/utils';
 import { assert as test, ignoreNsNotFound, setupDatabase } from '../shared';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => {};
 
 describe('crud - insert', function () {
   let client: MongoClient;
@@ -581,7 +578,7 @@ describe('crud - insert', function () {
         _id: new ObjectId('4e886e687ff7ef5e00000162'),
         str: 'foreign',
         type: 2,
-        timestamp: toISODate('2011-10-02T14:00:08.383Z'),
+        timestamp: new Date('2011-10-02T14:00:08.383Z'),
         links: [
           'http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/'
         ]
