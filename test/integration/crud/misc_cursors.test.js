@@ -1099,79 +1099,77 @@ describe.only('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
-      for (var i = 0; i < 1000; i++) {
-        docs[i] = { a: i + 1 };
+      for (var n = 0; n < 1000; n++) {
+        docs[n] = { a: n + 1 };
       }
 
       var count = 0;
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('Should_be_able_to_stream_documents', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('Should_be_able_to_stream_documents');
 
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            var paused = 0,
-              closed = 0,
-              resumed = 0,
-              i = 0;
+      var paused = 0,
+        closed = 0,
+        resumed = 0,
+        i = 0,
+        err = null;
 
-            const cursor = collection.find();
-            const stream = cursor.stream();
+      const cursor = collection.find();
+      const stream = cursor.stream();
 
-            stream.on('data', function (doc) {
-              test.equal(true, !!doc);
-              test.equal(true, !!doc.a);
-              count = count + 1;
+      stream.on('data', function (doc) {
+        test.equal(true, !!doc);
+        test.equal(true, !!doc.a);
+        count = count + 1;
 
-              if (paused > 0 && 0 === resumed) {
-                err = new Error('data emitted during pause');
-                return testDone();
-              }
+        if (paused > 0 && 0 === resumed) {
+          err = new Error('data emitted during pause');
+          testDone();
+          return;
+        }
 
-              if (++i === 3) {
-                stream.pause();
-                paused++;
+        if (++i === 3) {
+          stream.pause();
+          paused++;
 
-                setTimeout(function () {
-                  stream.resume();
-                  resumed++;
-                }, 20);
-              }
-            });
-
-            stream.once('error', function (er) {
-              err = er;
-              testDone();
-            });
-
-            stream.once('end', function () {
-              closed++;
-              testDone();
-            });
-
-            function testDone() {
-              expect(err).to.not.exist;
-              test.equal(i, docs.length);
-              test.equal(1, closed);
-              test.equal(1, paused);
-              test.equal(1, resumed);
-              test.strictEqual(cursor.closed, true);
-              done();
-            }
-          });
-        });
+          setTimeout(function () {
+            stream.resume();
+            resumed++;
+          }, 20);
+        }
       });
+
+      stream.once('error', function (er) {
+        err = er;
+        testDone();
+      });
+
+      stream.once('end', function () {
+        closed++;
+        testDone();
+      });
+
+      function testDone() {
+        expect(err).to.not.exist;
+        test.equal(i, docs.length);
+        test.equal(1, closed);
+        test.equal(1, paused);
+        test.equal(1, resumed);
+        test.strictEqual(cursor.closed, true);
+      }
+
+      const promise = once(stream, 'end');
+      await promise;
+      await client.close();
     }
   });
 
@@ -3028,31 +3026,23 @@ describe.only('Cursor', function () {
     });
   });
 
-  it('should return false when exhausted and hasNext called more than once', function (done) {
+  it('should return false when exhausted and hasNext called more than once', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      db.createCollection('cursor_hasNext_test').then(() => {
-        const cursor = db.collection('cursor_hasNext_test').find();
-        this.defer(() => cursor.close());
+    const db = client.db(configuration.db);
+    await db.createCollection('cursor_hasNext_test');
+    const cursor = db.collection('cursor_hasNext_test').find();
 
-        cursor
-          .hasNext()
-          .then(val1 => {
-            expect(val1).to.equal(false);
-            return cursor.hasNext();
-          })
-          .then(val2 => {
-            expect(val2).to.equal(false);
-            done();
-          });
-      });
-    });
+    const val1 = await cursor.hasNext();
+    expect(val1).to.equal(false);
+    const val2 = await cursor.hasNext();
+    expect(val2).to.equal(false);
+
+    await cursor.close();
+    await client.close();
   });
 
   const testTransformStream = (config, _done) => {
@@ -3266,7 +3256,7 @@ describe.only('Cursor', function () {
 
   context('sort', function () {
     const findSort = (input, output) =>
-      function (done) {
+      async function () {
         const client = this.configuration.newClient({ monitorCommands: true });
         const events = [];
         client.on('commandStarted', event => {
@@ -3277,16 +3267,14 @@ describe.only('Cursor', function () {
         const db = client.db('test');
         const collection = db.collection('test_sort_dos');
         const cursor = collection.find({}, { sort: input });
-        cursor.next(err => {
-          expect(err).to.not.exist;
-          expect(events[0].command.sort).to.be.instanceOf(Map);
-          expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-          client.close(done);
-        });
+        await cursor.next();
+        expect(events[0].command.sort).to.be.instanceOf(Map);
+        expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
+        await client.close();
       };
 
     const cursorSort = (input, output) =>
-      function (done) {
+      async function () {
         const client = this.configuration.newClient({ monitorCommands: true });
         const events = [];
         client.on('commandStarted', event => {
@@ -3297,12 +3285,10 @@ describe.only('Cursor', function () {
         const db = client.db('test');
         const collection = db.collection('test_sort_dos');
         const cursor = collection.find({}).sort(input);
-        cursor.next(err => {
-          expect(err).to.not.exist;
-          expect(events[0].command.sort).to.be.instanceOf(Map);
-          expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-          client.close(done);
-        });
+        await cursor.next();
+        expect(events[0].command.sort).to.be.instanceOf(Map);
+        expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
+        await client.close();
       };
 
     it('should use find options object', findSort({ alpha: 1 }, new Map([['alpha', 1]])));
