@@ -301,6 +301,14 @@ describe('Connection', function () {
                 req.reply({ ok: 1 });
               }, 800);
             })
+            .addMessageHandler('endSessions', req => {
+              // TODO(NODE-6287): remove support for QP_QUERY from the mock server
+              // The mock server doesn't understand OP_MSG.  So, MongoClient.close()'s use of the OP_MSG flag `moreToCome: true`
+              // on endSessions isn't relevant, and this test hangs unless we have a handler for `endSessions`.
+              // In practice, this isn't going to happen because we don't use OP_QUERY anywhere except for the initial
+              // handshake.
+              req.reply({ ok: 1 });
+            })
             .addMessageHandler('hello', req => {
               req.reply(Object.assign({}, mock.HELLO));
             })

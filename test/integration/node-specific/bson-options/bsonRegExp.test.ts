@@ -1,12 +1,11 @@
-'use strict';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
-const { BSONRegExp } = require('../../../mongodb');
+import { BSONRegExp, type MongoClient } from '../../../../src';
 
 describe('BSONRegExp', () => {
   describe('bsonRegExp option', () => {
     // define client and option for tests to use
-    let client;
+    let client: MongoClient;
     const option = { bsonRegExp: true };
     for (const passOptionTo of ['client', 'db', 'collection', 'operation']) {
       it(`should respond with BSONRegExp class with option passed to ${passOptionTo}`, async function () {
