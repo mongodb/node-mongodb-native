@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { Binary, type Collection, type Db, type MongoClient, MongoServerError } from '../../../src';
 import { sleep } from '../../tools/utils';
 
-describe.only('Cursor Streams', function () {
+describe('Cursor Streams', function () {
   let client: MongoClient;
   let db: Db;
 
