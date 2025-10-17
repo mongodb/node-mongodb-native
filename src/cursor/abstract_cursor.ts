@@ -686,7 +686,7 @@ export abstract class AbstractCursor<
   async toArray(): Promise<TSchema[]> {
     this.signal?.throwIfAborted();
 
-    const array: TSchema[] = [];
+    let array: TSchema[] = [];
     // at the end of the loop (since readBufferedDocuments is called) the buffer will be empty
     // then, the 'await of' syntax will run a getMore call
     for await (const document of this) {
@@ -697,7 +697,9 @@ export abstract class AbstractCursor<
           array.push(await this.transformDocument(doc));
         }
       } else {
-        array.push(...docs);
+        // Note: previous versions of this logic used `array.push(...)`, which adds each item
+        // to the callstack.  For large arrays, this can exceed the maximum call size.
+        array = array.concat(docs);
       }
     }
     return array;

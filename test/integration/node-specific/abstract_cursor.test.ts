@@ -428,8 +428,8 @@ describe('class AbstractCursor', function () {
 
     afterEach(async function () {
       sinon.restore();
-      await cursor.close();
-      await client.close();
+      await cursor?.close();
+      await client?.close();
     });
 
     it('iterates per batch not per document', async () => {
@@ -439,6 +439,39 @@ describe('class AbstractCursor', function () {
       const numDocuments = numBatches * batchSize;
       expect(nextSpy.callCount).to.be.lessThan(numDocuments);
     });
+
+    it(
+      'does not exceed stack size for large arrays',
+      // $documents was added in 6.0
+      { requires: { mongodb: '>=6.0' } },
+      async function () {
+        await client
+          .db()
+          .aggregate([
+            {
+              $documents: [
+                {
+                  doc: 'foo'
+                }
+              ]
+            },
+            {
+              $set: {
+                field: {
+                  $reduce: {
+                    input: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                    initialValue: [0],
+                    in: { $concatArrays: ['$$value', '$$value'] }
+                  }
+                }
+              }
+            },
+            { $unwind: '$field' },
+            { $limit: 1000000 }
+          ])
+          .toArray();
+      }
+    );
   });
 
   describe('externally provided timeout contexts', function () {
