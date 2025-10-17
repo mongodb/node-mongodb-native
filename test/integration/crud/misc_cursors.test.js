@@ -1180,54 +1180,49 @@ describe.only('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var i = 0,
         docs = [{ b: 2 }, { b: 3 }],
         doneCalled = 0;
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection(
-          'immediately_destroying_a_stream_prevents_the_query_from_executing',
-          (err, collection) => {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection(
+        'immediately_destroying_a_stream_prevents_the_query_from_executing'
+      );
 
-            // insert all docs
-            collection.insertMany(docs, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
+      // insert all docs
+      await collection.insertMany(docs, configuration.writeConcernMax());
 
-              const cursor = collection.find();
-              const stream = cursor.stream();
+      const cursor = collection.find();
+      const stream = cursor.stream();
 
-              stream.on('data', function () {
-                i++;
-              });
-
-              cursor.once('close', testDone('close'));
-              stream.once('error', testDone('error'));
-
-              stream.destroy();
-
-              function testDone() {
-                return err => {
-                  ++doneCalled;
-
-                  if (doneCalled === 1) {
-                    expect(err).to.not.exist;
-                    test.strictEqual(0, i);
-                    test.strictEqual(true, cursor.closed);
-                    done();
-                  }
-                };
-              }
-            });
-          }
-        );
+      stream.on('data', function () {
+        i++;
       });
+
+      cursor.once('close', testDone('close'));
+      stream.once('error', testDone('error'));
+      const promise = once(cursor, 'close');
+
+      stream.destroy();
+
+      function testDone() {
+        return err => {
+          ++doneCalled;
+
+          if (doneCalled === 1) {
+            expect(err).to.not.exist;
+            test.strictEqual(0, i);
+            test.strictEqual(true, cursor.closed);
+          }
+        };
+      }
+
+      await cursor.close();
+      await promise;
     }
   });
 
