@@ -1,6 +1,6 @@
 'use strict';
 
-const { MongoClient } = require('../../../../src');
+const { MongoClient } = require('../../../mongodb');
 
 // Yes, we are shadowing a global here but we are not actually ever printing anything in this file
 // This just so the examples can use console.log to make for nice copy pasting
