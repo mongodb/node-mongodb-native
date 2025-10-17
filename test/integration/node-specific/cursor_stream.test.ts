@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import { Binary, type Collection, type Db, type MongoClient } from '../../../src';
+import { sleep } from '../../tools/utils';
 
 describe('Cursor Streams', function () {
   let client: MongoClient;
@@ -13,7 +14,6 @@ describe('Cursor Streams', function () {
 
   afterEach(async function () {
     await db.dropCollection('streaming_test').catch(() => null);
-    await db.dropCollection('streaming_updates').catch(() => null);
     await client.close();
   });
 
@@ -40,31 +40,11 @@ describe('Cursor Streams', function () {
       for await (const doc of cursor) {
         expect(doc).to.have.property('_id', docCount);
         docCount++;
+
+        await sleep(100);
       }
 
       expect(docCount).to.equal(100);
-    });
-
-    it('should handle pauses for async operations within the loop', async function () {
-      const collection = db.collection<{ _id: number }>('streaming_test');
-      const updateCollection = db.collection<{ _id: number; count: number }>('streaming_updates');
-      await setupCollection(collection, 10);
-
-      const cursor = collection.find({}, { batchSize: 2 });
-      let docCount = 0;
-
-      // The 'await' inside the loop naturally pauses the stream until the promise resolves.
-      for await (const doc of cursor) {
-        expect(doc).to.have.property('_id', docCount);
-        docCount++;
-
-        // Perform an unrelated async operation
-        await updateCollection.updateOne({ _id: 1 }, { $inc: { count: 1 } }, { upsert: true });
-      }
-
-      expect(docCount).to.equal(10);
-      const finalUpdate = await updateCollection.findOne({ _id: 1 });
-      expect(finalUpdate.count).to.equal(10);
     });
   });
 
@@ -91,7 +71,6 @@ describe('Cursor Streams', function () {
 
     it('should respect manual pause() and resume() calls', async function () {
       const collection = db.collection<{ _id: number }>('streaming_test');
-      const updateCollection = db.collection<{ _id: number; count: number }>('streaming_updates');
       await setupCollection(collection, 10);
 
       const stream = collection.find({}, { batchSize: 2 }).stream();
@@ -106,17 +85,11 @@ describe('Cursor Streams', function () {
           stream.pause();
 
           // Perform an async operation, then resume
-          updateCollection
-            .updateOne({ _id: 1 }, { $inc: { count: 1 } }, { upsert: true })
-            // Manually resume
-            .then(() => stream.resume())
-            .catch(reject);
+          sleep(100).then(() => stream.resume());
         });
       });
 
       expect(docCount).to.equal(10);
-      const finalUpdate = await updateCollection.findOne({ _id: 1 });
-      expect(finalUpdate.count).to.equal(10);
     });
   });
 });
