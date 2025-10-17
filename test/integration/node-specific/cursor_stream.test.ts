@@ -1,9 +1,11 @@
+import { once } from 'node:events';
+
 import { expect } from 'chai';
 
-import { Binary, type Collection, type Db, type MongoClient } from '../../../src';
+import { Binary, type Collection, type Db, type MongoClient, MongoServerError } from '../../../src';
 import { sleep } from '../../tools/utils';
 
-describe('Cursor Streams', function () {
+describe.only('Cursor Streams', function () {
   let client: MongoClient;
   let db: Db;
 
@@ -91,5 +93,20 @@ describe('Cursor Streams', function () {
 
       expect(docCount).to.equal(10);
     });
+  });
+
+  it('should throws error', async function () {
+    const cursor = db.collection('myCollection').find({
+      timestamp: { $ltx: '1111' } // Error in query.
+    });
+
+    const stream = cursor.stream();
+    const onError = once(stream, 'error');
+    stream.pipe(process.stdout);
+
+    const [error] = await onError;
+
+    expect(error).to.be.instanceof(MongoServerError);
+    expect(error.message).to.include('unknown operator');
   });
 });
