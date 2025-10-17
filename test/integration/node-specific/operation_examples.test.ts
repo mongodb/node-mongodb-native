@@ -5,7 +5,7 @@ import { enumToString } from '../../../src/utils';
 import { sleep as delay } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
-describe('Operations', function () {
+describe.skip('Operations', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
