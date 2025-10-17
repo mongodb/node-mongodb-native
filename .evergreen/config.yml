@@ -1468,28 +1468,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run-compression-tests
-  - name: test-zstd-1.x-compression
-    tags:
-      - latest
-      - zstd
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: auth}
-            - {key: COMPRESSOR, value: zstd}
-            - {key: CLIENT_ENCRYPTION, value: 'false'}
-            - {key: TEST_CSFLE, value: 'false'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: install package
-        vars:
-          PACKAGE: '@mongodb-js/zstd@1.x'
-      - func: run-compression-tests
-  - name: test-zstd-2.x-compression
+  - name: test-zstd-compression
     tags:
       - latest
       - zstd
@@ -2887,8 +2866,7 @@ buildvariants:
       - test-socks5-csfle
       - test-socks5-tls
       - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
+      - test-zstd-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -2942,8 +2920,7 @@ buildvariants:
       - test-socks5-csfle
       - test-socks5-tls
       - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
+      - test-zstd-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -2995,8 +2972,7 @@ buildvariants:
       - test-socks5-csfle
       - test-socks5-tls
       - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
+      - test-zstd-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3040,8 +3016,7 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
+      - test-zstd-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
@@ -3085,8 +3060,7 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-snappy-compression
-      - test-zstd-1.x-compression
-      - test-zstd-2.x-compression
+      - test-zstd-compression
       - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
