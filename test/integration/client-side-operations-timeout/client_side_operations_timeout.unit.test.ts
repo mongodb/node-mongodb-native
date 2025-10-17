@@ -10,18 +10,11 @@ import { setTimeout } from 'timers';
 import { TLSSocket } from 'tls';
 import { promisify } from 'util';
 
-import {
-  Connection,
-  ConnectionPool,
-  CSOTTimeoutContext,
-  type MongoClient,
-  MongoOperationTimeoutError,
-  ObjectId,
-  Timeout,
-  TimeoutContext,
-  Topology
-} from '../../../src';
+import { Connection, type MongoClient, MongoOperationTimeoutError, ObjectId } from '../../../src';
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
+import { ConnectionPool } from '../../../src/cmap/connection_pool';
+import { Topology } from '../../../src/sdam/topology';
+import { CSOTTimeoutContext, Timeout, TimeoutContext } from '../../../src/timeout';
 import { measureDuration, sleep } from '../../tools/utils';
 import { createTimerSandbox } from '../../unit/timer_sandbox';
 
