@@ -799,12 +799,8 @@ describe('crud - insert', function () {
       const db = client.db(configuration.db);
       const collection = db.collection('shouldCorrectlyPerformLargeTextInsert');
 
-      // Create large string, insert and then retrive
-      let string = '';
-      // Create large text field
-      for (let i = 0; i < 50000; i++) {
-        string = string + 'a';
-      }
+      // Create large string, insert and then retrieve
+      const string = 'a'.repeat(50000);
 
       await collection.insertOne({ a: 1, string: string }, configuration.writeConcernMax());
 
@@ -866,25 +862,26 @@ describe('crud - insert', function () {
     //   }
     // });
 
-    it('should correctly use custom object to update document', async function () {
-      const configuration = this.configuration;
-      const db = client.db(configuration.db);
-      const collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
-
-      await collection.insertOne({ a: { b: { c: 1 } } }, configuration.writeConcernMax());
-
-      const query = {
-        a: { b: { c: 1 } }
-      };
-
-      // Update document
-      const r = await collection.updateOne(
-        query,
-        { $set: { 'a.b.d': 1 } },
-        configuration.writeConcernMax()
-      );
-      expect(r).property('matchedCount').to.equal(1);
-    });
+    // TODO(NODE-7219): remove as it's irrelevant for insert functionality
+    // it('should correctly use custom object to update document', async function () {
+    //   const configuration = this.configuration;
+    //   const db = client.db(configuration.db);
+    //   const collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
+    //
+    //   await collection.insertOne({ a: { b: { c: 1 } } }, configuration.writeConcernMax());
+    //
+    //   const query = {
+    //     a: { b: { c: 1 } }
+    //   };
+    //
+    //   // Update document
+    //   const r = await collection.updateOne(
+    //     query,
+    //     { $set: { 'a.b.d': 1 } },
+    //     configuration.writeConcernMax()
+    //   );
+    //   expect(r).property('matchedCount').to.equal(1);
+    // });
 
     // TODO(NODE-7219): remove as it's outdated (no callbacks)
     // it('shouldExecuteInsertWithNoCallbackAndWriteConcern', {
