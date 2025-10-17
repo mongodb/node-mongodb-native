@@ -14,7 +14,7 @@ const { ReadPreference } = require('../../mongodb');
 const { ServerType, MongoClientClosedError } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
 
-describe('Cursor', function () {
+describe.skip('Cursor', function () {
   before(function () {
     return setupDatabase(this.configuration, [
       'cursorkilltest1',

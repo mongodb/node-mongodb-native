@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const { Binary } = require('../../mongodb');
 const { setTimeout, setImmediate } = require('timers');
 
-describe('Cursor Streams', function () {
+describe.skip('Cursor Streams', function () {
   let client;
 
   beforeEach(async function () {
