@@ -2536,37 +2536,32 @@ describe.only('Cursor', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('cursor_limit_skip_correctly');
+      const db = client.db(configuration.db);
+      var collection = db.collection('cursor_limit_skip_correctly');
 
-        // Insert x number of docs
-        var ordered = collection.initializeUnorderedBulkOp();
+      // Insert x number of docs
+      var ordered = collection.initializeUnorderedBulkOp();
 
-        for (var i = 0; i < 100; i++) {
-          ordered.insert({ a: i });
-        }
+      for (var i = 0; i < 100; i++) {
+        ordered.insert({ a: i });
+      }
 
-        ordered.execute({ writeConcern: { w: 1 } }, err => {
-          expect(err).to.not.exist;
+      await ordered.execute({ writeConcern: { w: 1 } });
 
-          // Let's attempt to skip and limit
-          var cursor = collection.find({}).batchSize(10);
-          const stream = cursor.stream();
-          stream.on('data', function () {
-            stream.destroy();
-          });
-
-          cursor.on('close', function () {
-            done();
-          });
-        });
+      // Let's attempt to skip and limit
+      var cursor = collection.find({}).batchSize(10);
+      const stream = cursor.stream();
+      stream.on('data', function () {
+        stream.destroy();
       });
+
+      const onClose = once(cursor, 'close');
+      await cursor.close();
+      await onClose;
     }
   });
 
@@ -2683,7 +2678,7 @@ describe.only('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
       const configuration = this.configuration;
 
@@ -2692,32 +2687,17 @@ describe.only('Cursor', function () {
         docs[i] = { a: i, createdAt: new Date(d) };
       }
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_1_');
 
-        const db = client.db(configuration.db);
-        db.createCollection(
-          'Should_correctly_execute_count_on_cursor_1_',
-          function (err, collection) {
-            expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            // insert all docs
-            collection.insert(docs, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
-
-              // Create a cursor for the content
-              var cursor = collection.find({});
-              cursor.batchSize(-10).next(err => {
-                expect(err).to.not.exist;
-                test.ok(cursor.id.equals(BSON.Long.ZERO));
-
-                done();
-              });
-            });
-          }
-        );
-      });
+      // Create a cursor for the content
+      var cursor = collection.find({});
+      await cursor.batchSize(-10).next();
+      test.ok(cursor.id.equals(BSON.Long.ZERO));
     }
   });
 
@@ -2728,7 +2708,7 @@ describe.only('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var started = [];
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
@@ -2739,28 +2719,26 @@ describe.only('Cursor', function () {
         if (event.commandName === 'count') started.push(event);
       });
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.collection('cursor_count_test', { readConcern: { level: 'local' } })
-          .find({ project: '123' })
-          .limit(5)
-          .skip(5)
-          .hint({ project: 1 })
-          .count(err => {
-            expect(err).to.not.exist;
-            test.equal(1, started.length);
-            if (started[0].command.readConcern)
-              test.deepEqual({ level: 'local' }, started[0].command.readConcern);
-            test.deepEqual({ project: 1 }, started[0].command.hint);
-            test.equal(5, started[0].command.skip);
-            test.equal(5, started[0].command.limit);
+      const db = client.db(configuration.db);
+      await db
+        .collection('cursor_count_test', { readConcern: { level: 'local' } })
+        .find({ project: '123' })
+        .limit(5)
+        .skip(5)
+        .hint({ project: 1 })
+        .count();
 
-            done();
-          });
-      });
+      test.equal(1, started.length);
+      if (started[0].command.readConcern) {
+        test.deepEqual({ level: 'local' }, started[0].command.readConcern);
+      }
+      test.deepEqual({ project: 1 }, started[0].command.hint);
+      test.equal(5, started[0].command.skip);
+      test.equal(5, started[0].command.limit);
+
+      await client.close();
     }
   });
 
@@ -2771,7 +2749,7 @@ describe.only('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var started = [];
 
       const configuration = this.configuration;
@@ -2779,34 +2757,28 @@ describe.only('Cursor', function () {
         if (event.commandName === 'count') started.push(event);
       });
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
-          {
-            project: '123'
-          },
-          {
-            readConcern: { level: 'local' },
-            limit: 5,
-            skip: 5,
-            hint: { project: 1 }
-          },
-          err => {
-            expect(err).to.not.exist;
-            test.equal(1, started.length);
-            if (started[0].command.readConcern)
-              test.deepEqual({ level: 'local' }, started[0].command.readConcern);
-            test.deepEqual({ project: 1 }, started[0].command.hint);
-            test.equal(5, started[0].command.skip);
-            test.equal(5, started[0].command.limit);
+      const db = client.db(configuration.db);
+      await db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
+        {
+          project: '123'
+        },
+        {
+          readConcern: { level: 'local' },
+          limit: 5,
+          skip: 5,
+          hint: { project: 1 }
+        }
+      );
 
-            done();
-          }
-        );
-      });
+      test.equal(1, started.length);
+      if (started[0].command.readConcern) {
+        test.deepEqual({ level: 'local' }, started[0].command.readConcern);
+      }
+      test.deepEqual({ project: 1 }, started[0].command.hint);
+      test.equal(5, started[0].command.skip);
+      test.equal(5, started[0].command.limit);
     }
   });
 
