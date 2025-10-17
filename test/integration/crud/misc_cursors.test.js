@@ -217,7 +217,7 @@ describe.only('Cursor', function () {
       const db = client.db(configuration.db);
       const collection = await db.createCollection('test_count.ext');
 
-      const count = await collection.find().count();
+      await collection.find().count();
 
       async function insert() {
         for (var i = 0; i < 10; i++) {
@@ -1440,33 +1440,24 @@ describe.only('Cursor', function () {
     }
   );
 
-  it('shouldAwaitDataWithDocumentsAvailable', function (done) {
+  it('shouldAwaitDataWithDocumentsAvailable', async function () {
     // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
 
     const configuration = this.configuration;
     const client = configuration.newClient({ maxPoolSize: 1 });
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      const options = { capped: true, size: 8 };
-      db.createCollection('should_await_data_no_docs', options, (err, collection) => {
-        expect(err).to.not.exist;
+    const db = client.db(configuration.db);
+    const options = { capped: true, size: 8 };
+    const collection = await db.createCollection('should_await_data_no_docs', options);
 
-        // Create cursor with awaitData, and timeout after the period specified
-        const cursor = collection.find({}, { tailable: true, awaitData: true });
-        this.defer(() => cursor.close());
+    // Create cursor with awaitData, and timeout after the period specified
+    const cursor = collection.find({}, { tailable: true, awaitData: true });
+    // this.defer(() => cursor.close());
 
-        cursor.forEach(
-          () => { },
-          err => {
-            expect(err).to.not.exist;
-            done();
-          }
-        );
-      });
-    });
+    await cursor.forEach(() => { });
+    await cursor.close();
+    await client.close();
   });
 
   context('awaiting data core tailable cursor test', () => {
@@ -1560,7 +1551,7 @@ describe.only('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
       docs[0] = {
         _keywords: [
@@ -1739,39 +1730,20 @@ describe.only('Cursor', function () {
       };
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        // Insert all the docs
-        var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      // Insert all the docs
+      var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
+      await collection.insert(docs, configuration.writeConcernMax());
 
-          collection.createIndex({ _keywords: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.createIndex({ _keywords: 1 }, configuration.writeConcernMax());
 
-            collection
-              .find({ _keywords: 'red' })
-              .limit(10)
-              .toArray(function (err, result) {
-                expect(err).to.not.exist;
-                test.ok(result != null);
+      let result = await collection.find({ _keywords: 'red' }).limit(10).toArray();
+      test.ok(result != null);
 
-                collection
-                  .find({ _keywords: 'red' }, {})
-                  .limit(10)
-                  .explain(function (err, result) {
-                    expect(err).to.not.exist;
-                    test.ok(result != null);
-
-                    done();
-                  });
-              });
-          });
-        });
-      });
+      result = await collection.find({ _keywords: 'red' }, {}).limit(10).explain();
+      test.ok(result != null);
     }
   });
 
@@ -2476,7 +2448,6 @@ describe.only('Cursor', function () {
     metadata: { requires: { topology: ['single'], mongodb: '<7.0.0' } },
 
     test: function (done) {
-      console.log(`pavel >>> test started`);
       const configuration = this.configuration;
       const client = configuration.newClient();
       client.connect((err, client) => {
@@ -3035,7 +3006,7 @@ describe.only('Cursor', function () {
     await client.close();
   });
 
-  const testTransformStream = (config, _done) => {
+  const testTransformStream = async config => {
     const client = config.client;
     const configuration = config.configuration;
     const collectionName = config.collectionName;
@@ -3043,46 +3014,49 @@ describe.only('Cursor', function () {
     const expectedSet = config.expectedSet;
 
     let cursor;
-    const done = err => cursor.close(err2 => client.close(err3 => _done(err || err2 || err3)));
+    const done = async err => {
+      await cursor.close();
+      await client.close();
+      if (err) {
+        throw err;
+      }
+    };
 
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      let collection;
-      const docs = [
-        { _id: 0, a: { b: 1, c: 0 } },
-        { _id: 1, a: { b: 1, c: 0 } },
-        { _id: 2, a: { b: 1, c: 0 } }
-      ];
-      const resultSet = new Set();
-      Promise.resolve()
-        .then(() => db.createCollection(collectionName))
-        .then(() => (collection = db.collection(collectionName)))
-        .then(() => collection.insertMany(docs))
-        .then(() => {
-          cursor = collection.find();
-          return cursor.stream().map(transformFunc ?? (doc => doc));
-        })
-        .then(stream => {
-          stream.on('data', function (doc) {
-            resultSet.add(doc);
-          });
+    const db = client.db(configuration.db);
+    const docs = [
+      { _id: 0, a: { b: 1, c: 0 } },
+      { _id: 1, a: { b: 1, c: 0 } },
+      { _id: 2, a: { b: 1, c: 0 } }
+    ];
+    const resultSet = new Set();
+    await db.createCollection(collectionName);
+    const collection = await db.collection(collectionName);
+    await collection.insertMany(docs);
+    cursor = await collection.find();
+    const stream = await cursor.stream().map(transformFunc ?? (doc => doc));
 
-          stream.once('end', function () {
-            expect(resultSet).to.deep.equal(expectedSet);
-            done();
-          });
-
-          stream.once('error', e => {
-            done(e);
-          });
-        })
-        .catch(e => done(e));
+    stream.on('data', function (doc) {
+      resultSet.add(doc);
     });
+
+    stream.once('end', function () {
+      expect(resultSet).to.deep.equal(expectedSet);
+      done();
+    });
+
+    stream.once('error', e => {
+      done(e);
+    });
+
+    const promise = once(stream, 'end');
+    await promise;
+    await cursor.close();
+    await client.close();
   };
 
-  it('stream should apply the supplied transformation function to each document in the stream', function (done) {
+  it('stream should apply the supplied transformation function to each document in the stream', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     const expectedDocs = [
@@ -3098,10 +3072,10 @@ describe.only('Cursor', function () {
       expectedSet: new Set(expectedDocs)
     };
 
-    testTransformStream(config, done);
+    await testTransformStream(config);
   });
 
-  it('stream should return a stream of unmodified docs if no transform function applied', function (done) {
+  it('stream should return a stream of unmodified docs if no transform function applied', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     const expectedDocs = [
@@ -3117,7 +3091,7 @@ describe.only('Cursor', function () {
       expectedSet: new Set(expectedDocs)
     };
 
-    testTransformStream(config, done);
+    await testTransformStream(config);
   });
 
   it.skip('should apply parent read preference to count command', function (done) {
@@ -3162,8 +3136,9 @@ describe.only('Cursor', function () {
 
     await client.connect();
 
-    const collection = client.db().collection('documents');
-    await collection.drop();
+    const collection = client.db(configuration.db).collection('documents');
+    const err = await collection.drop().catch(e => e);
+    expect(err).to.exist;
 
     const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
     await collection.insertMany(docs);
