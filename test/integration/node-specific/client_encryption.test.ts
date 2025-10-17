@@ -2,8 +2,15 @@ import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as sinon from 'sinon';
 
-import { MongoCryptError } from '../../../src';
-import { Binary, type Collection, Int32, Long, type MongoClient, UUID } from '../../../src';
+import {
+  Binary,
+  type Collection,
+  Int32,
+  Long,
+  type MongoClient,
+  MongoCryptError,
+  UUID
+} from '../../../src';
 import {
   ClientEncryption,
   type DataKey
