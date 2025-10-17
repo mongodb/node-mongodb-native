@@ -2429,45 +2429,35 @@ describe.only('Cursor', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'], mongodb: '<7.0.0' } },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var options = { capped: true, size: 8 };
-        db.createCollection(
-          'should_await_data_max_awaittime_ms',
-          options,
-          function (err, collection) {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      var options = { capped: true, size: 8 };
+      const collection = await db.createCollection('should_await_data_max_awaittime_ms', options);
 
-            collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-              // Create cursor with awaitData, and timeout after the period specified
-              var cursor = collection
-                .find({})
-                .addCursorFlag('tailable', true)
-                .addCursorFlag('awaitData', true)
-                .maxAwaitTimeMS(500);
+      // Create cursor with awaitData, and timeout after the period specified
+      var cursor = collection
+        .find({})
+        .addCursorFlag('tailable', true)
+        .addCursorFlag('awaitData', true)
+        .maxAwaitTimeMS(500);
 
-              const s = new Date();
-              cursor.forEach(
-                () => {
-                  setTimeout(() => cursor.close(), 300);
-                },
-                () => {
-                  test.ok(new Date().getTime() - s.getTime() >= 500);
-                  done();
-                }
-              );
-            });
-          }
-        );
-      });
+      const s = new Date();
+      const err = await cursor
+        .forEach(async () => {
+          await sleep(300);
+          await cursor.close();
+        })
+        .catch(e => e);
+      test.ok(err instanceof Error);
+      test.ok(new Date().getTime() - s.getTime() >= 500);
+      await cursor.close();
+      await client.close();
     }
   });
 
