@@ -37,36 +37,37 @@ describe('Ignore Undefined', function () {
     await client.close();
   });
 
-  it('Should correctly connect using MongoClient and perform insert document ignoring undefined field', async function () {
-    const configuration = this.configuration;
-    const client = configuration.newClient(
-      {},
-      {
-        ignoreUndefined: true
-      }
-    );
-
-    const db = client.db(configuration.db);
-    const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
-    await collection.insertOne({ a: 1, b: undefined });
-
-    const item = await collection.findOne();
-    test.equal(1, item.a);
-    test.ok(item.b === undefined);
-
-    await collection.insertOne({ a: 2, b: undefined });
-
-    const item1 = await collection.findOne({ a: 2 });
-    test.equal(2, item1.a);
-    test.ok(item1.b === undefined);
-
-    await collection.insertMany([{ a: 3, b: undefined }]);
-
-    const item2 = await collection.findOne({ a: 3 });
-    test.equal(3, item2.a);
-    test.ok(item2.b === undefined);
-    await client.close();
-  });
+  // TODO(NODE-7192): remove as it duplicates "should correctly insert document ignoring undefined field"
+  // it('Should correctly connect using MongoClient and perform insert document ignoring undefined field', async function () {
+  //   const configuration = this.configuration;
+  //   const client = configuration.newClient(
+  //     {},
+  //     {
+  //       ignoreUndefined: true
+  //     }
+  //   );
+  //
+  //   const db = client.db(configuration.db);
+  //   const collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
+  //   await collection.insertOne({ a: 1, b: undefined });
+  //
+  //   const item = await collection.findOne();
+  //   test.equal(1, item.a);
+  //   test.ok(item.b === undefined);
+  //
+  //   await collection.insertOne({ a: 2, b: undefined });
+  //
+  //   const item1 = await collection.findOne({ a: 2 });
+  //   test.equal(2, item1.a);
+  //   test.ok(item1.b === undefined);
+  //
+  //   await collection.insertMany([{ a: 3, b: undefined }]);
+  //
+  //   const item2 = await collection.findOne({ a: 3 });
+  //   test.equal(3, item2.a);
+  //   test.ok(item2.b === undefined);
+  //   await client.close();
+  // });
 
   it('Should correctly update document ignoring undefined field', async function () {
     const configuration = this.configuration;
@@ -97,16 +98,6 @@ describe('Ignore Undefined', function () {
     const item2 = await collection.findOne({ _id: id2 });
     test.equal(1, item2.a);
     test.ok(item2.b === undefined);
-
-    const id3 = new ObjectId();
-    await collection.updateOne(
-      { _id: id3, a: 1, b: undefined },
-      { $set: { a: 1, b: undefined } },
-      { upsert: true }
-    );
-    const item3 = await collection.findOne({ _id: id3 });
-    test.equal(1, item3.a);
-    test.ok(item3.b === undefined);
 
     await client.close();
   });

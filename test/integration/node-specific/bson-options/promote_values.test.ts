@@ -155,7 +155,7 @@ describe('Promote Values', function () {
 
     const stream = db
       .collection('haystack')
-      .find({}, { limit: 102, promoteValues: false })
+      .find({}, { batchSize: 50, promoteValues: false })
       .stream();
 
     for await (const doc of stream) {
