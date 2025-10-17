@@ -1,16 +1,19 @@
-'use strict';
-const { expect } = require('chai');
-const { filterForCommands } = require('../shared');
-const {
-  promiseWithResolvers,
-  MongoCursorExhaustedError,
-  CursorTimeoutContext,
-  TimeoutContext,
-  MongoAPIError
-} = require('../../mongodb');
+import { expect } from 'chai';
+
+import {
+  type Collection,
+  type FindCursor,
+  MongoAPIError,
+  type MongoClient,
+  MongoCursorExhaustedError
+} from '../../../src';
+import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
+import { TimeoutContext } from '../../../src/timeout';
+import { promiseWithResolvers } from '../../../src/utils';
+import { filterForCommands } from '../shared';
 
 describe('Find Cursor', function () {
-  let client;
+  let client: MongoClient;
 
   beforeEach(async function () {
     const setupClient = this.configuration.newClient();
@@ -32,20 +35,16 @@ describe('Find Cursor', function () {
   });
 
   context('#next', function () {
-    it('should support a batch size', function (done) {
+    it('should support a batch size', async function () {
       const commands = [];
       client.on('commandStarted', filterForCommands(['getMore'], commands));
 
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({}, { batchSize: 2 });
-      this.defer(() => cursor.close());
 
-      cursor.toArray((err, docs) => {
-        expect(err).to.not.exist;
-        expect(docs).to.have.length(6);
-        expect(commands).to.have.length(3);
-        done();
-      });
+      const docs = await cursor.toArray();
+      expect(docs).to.have.length(6);
+      expect(commands).to.have.length(3);
     });
   });
 
@@ -174,50 +173,36 @@ describe('Find Cursor', function () {
   });
 
   context('#forEach', function () {
-    it('should iterate each document in a cursor', function (done) {
+    it('should iterate each document in a cursor', async function () {
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({}, { batchSize: 2 });
 
       const bag = [];
-      cursor.forEach(
-        doc => bag.push(doc),
-        err => {
-          expect(err).to.not.exist;
-          expect(bag).to.have.lengthOf(6);
-          done();
-        }
-      );
+      await cursor.forEach(doc => {
+        bag.push(doc);
+      });
+
+      expect(bag).to.have.lengthOf(6);
     });
   });
 
   context('#tryNext', function () {
-    it('should return control to the user if an empty batch is returned', function (done) {
+    it('should return control to the user if an empty batch is returned', async function () {
       const db = client.db();
-      db.createCollection('try_next', { capped: true, size: 10000000 }, () => {
-        const coll = db.collection('try_next');
-        coll.insertMany([{}, {}], err => {
-          expect(err).to.not.exist;
+      await db.createCollection('try_next', { capped: true, size: 10000000 });
+      const coll = db.collection('try_next');
+      await coll.insertMany([{}, {}]);
 
-          const cursor = coll.find({}, { tailable: true, awaitData: true });
-          this.defer(() => cursor.close());
+      const cursor = coll.find({}, { tailable: true, awaitData: true });
 
-          cursor.tryNext((err, doc) => {
-            expect(err).to.not.exist;
-            expect(doc).to.exist;
+      const doc1 = await cursor.tryNext();
+      expect(doc1).to.exist;
 
-            cursor.tryNext((err, doc) => {
-              expect(err).to.not.exist;
-              expect(doc).to.exist;
+      const doc2 = await cursor.tryNext();
+      expect(doc2).to.exist;
 
-              cursor.tryNext((err, doc) => {
-                expect(err).to.not.exist;
-                expect(doc).to.be.null;
-                done();
-              });
-            });
-          });
-        });
-      });
+      const doc3 = await cursor.tryNext();
+      expect(doc3).to.be.null;
     });
   });
 
@@ -293,51 +278,36 @@ describe('Find Cursor', function () {
       }
     });
 
-    it('should end an implicit session on rewind', {
-      metadata: { requires: { mongodb: '>=3.6' } },
-      test: function (done) {
-        const coll = client.db().collection('abstract_cursor');
-        const cursor = coll.find({}, { batchSize: 1 });
-        this.defer(() => cursor.close());
+    it('should end an implicit session on rewind', async function () {
+      const coll = client.db().collection('abstract_cursor');
+      const cursor = coll.find({}, { batchSize: 1 });
 
-        cursor.next((err, doc) => {
-          expect(err).to.not.exist;
-          expect(doc).to.exist;
+      const doc = await cursor.next();
+      expect(doc).to.exist;
 
-          const session = cursor.session;
-          expect(session).property('hasEnded').to.be.false;
-          cursor.rewind();
-          expect(session).property('hasEnded').to.be.true;
-          done();
-        });
-      }
+      const session = cursor.session;
+      expect(session).property('hasEnded').to.be.false;
+      cursor.rewind();
+      expect(session).property('hasEnded').to.be.true;
     });
 
-    it('should not end an explicit session on rewind', {
-      metadata: { requires: { mongodb: '>=3.6' } },
-      test: function (done) {
-        const coll = client.db().collection('abstract_cursor');
-        const session = client.startSession();
+    it('should not end an explicit session on rewind', async function () {
+      const coll = client.db().collection('abstract_cursor');
+      const cursor = coll.find({}, { batchSize: 1, session: client.startSession() });
 
-        const cursor = coll.find({}, { batchSize: 1, session });
-        this.defer(() => cursor.close());
+      const doc = await cursor.next();
+      expect(doc).to.exist;
 
-        cursor.next((err, doc) => {
-          expect(err).to.not.exist;
-          expect(doc).to.exist;
+      const session = cursor.session;
+      expect(session).property('hasEnded').to.be.false;
+      cursor.rewind();
+      expect(session).property('hasEnded').to.be.false;
 
-          const session = cursor.session;
-          expect(session).property('hasEnded').to.be.false;
-          cursor.rewind();
-          expect(session).property('hasEnded').to.be.false;
-
-          session.endSession(done);
-        });
-      }
+      await session.endSession();
     });
 
     it('emits close after rewind', async () => {
-      let cursor;
+      let cursor: FindCursor;
       try {
         const coll = client.db().collection('abstract_cursor');
         cursor = coll.find({}, { batchSize: 1 });
@@ -359,41 +329,33 @@ describe('Find Cursor', function () {
   context('#allowDiskUse', function () {
     it('should set allowDiskUse to true by default', {
       metadata: { requires: { mongodb: '>=4.4' } },
-      test: function (done) {
+      test: async function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['find'], commands));
 
         const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { sort: 'foo' });
         cursor.allowDiskUse();
-        this.defer(() => cursor.close());
 
-        cursor.toArray(err => {
-          expect(err).to.not.exist;
-          expect(commands).to.have.length(1);
-          expect(commands[0].command.allowDiskUse).to.equal(true);
-          done();
-        });
+        await cursor.toArray();
+        expect(commands).to.have.length(1);
+        expect(commands[0].command.allowDiskUse).to.equal(true);
       }
     });
 
     it('should set allowDiskUse to false if specified', {
       metadata: { requires: { mongodb: '>=4.4' } },
-      test: function (done) {
+      test: async function () {
         const commands = [];
         client.on('commandStarted', filterForCommands(['find'], commands));
 
         const coll = client.db().collection('abstract_cursor');
         const cursor = coll.find({}, { sort: 'foo' });
         cursor.allowDiskUse(false);
-        this.defer(() => cursor.close());
 
-        cursor.toArray(err => {
-          expect(err).to.not.exist;
-          expect(commands).to.have.length(1);
-          expect(commands[0].command.allowDiskUse).to.equal(false);
-          done();
-        });
+        await cursor.toArray();
+        expect(commands).to.have.length(1);
+        expect(commands[0].command.allowDiskUse).to.equal(false);
       }
     });
 
@@ -411,9 +373,9 @@ describe('Find Cursor', function () {
   });
 
   describe('mixing iteration APIs', function () {
-    let client;
-    let collection;
-    let cursor;
+    let client: MongoClient;
+    let collection: Collection;
+    let cursor: FindCursor;
 
     beforeEach(async function () {
       client = this.configuration.newClient();
@@ -437,7 +399,7 @@ describe('Find Cursor', function () {
         });
 
         await cursor.next();
-        // eslint-disable-next-line no-unused-vars
+
         for await (const _ of cursor) {
           /* empty */
         }
@@ -454,8 +416,7 @@ describe('Find Cursor', function () {
 
         await cursor.next();
 
-        let doc;
-        while ((doc = (await cursor.next()) && doc != null)) {
+        while ((await cursor.next()) != null) {
           /** empty */
         }
 
@@ -472,8 +433,7 @@ describe('Find Cursor', function () {
 
           await cursor.next();
 
-          let doc;
-          while ((doc = (await cursor.next()) && doc != null)) {
+          while ((await cursor.next()) != null) {
             /** empty */
           }
 
@@ -543,7 +503,7 @@ describe('Find Cursor', function () {
             await promise;
 
             let count = 0;
-            // eslint-disable-next-line no-unused-vars
+
             for await (const _ of cursor) {
               count++;
             }
@@ -587,7 +547,7 @@ describe('Find Cursor', function () {
           cursor = collection.find({});
 
           await cursor.toArray();
-          // eslint-disable-next-line no-unused-vars
+
           for await (const _ of cursor) {
             expect.fail('should not iterate');
           }
@@ -633,7 +593,7 @@ describe('Find Cursor', function () {
         });
 
         await cursor.next();
-        // eslint-disable-next-line no-unused-vars
+
         for await (const _ of cursor) {
           /* empty */
         }
@@ -647,7 +607,6 @@ describe('Find Cursor', function () {
           it('throws a MongoCursorExhaustedError', async function () {
             cursor = collection.find({}, { batchSize: 1 });
 
-            // eslint-disable-next-line no-unused-vars
             for await (const _ of cursor) {
               /* empty */
               break;
@@ -672,8 +631,7 @@ describe('Find Cursor', function () {
 
           await cursor.next();
 
-          let doc;
-          while ((doc = (await cursor.next()) && doc != null)) {
+          while ((await cursor.next()) != null) {
             /** empty */
           }
 
@@ -715,7 +673,7 @@ describe('Find Cursor', function () {
           cursor = collection.find({}, { batchSize: 1 });
 
           await cursor.toArray();
-          // eslint-disable-next-line no-unused-vars
+
           for await (const _ of cursor) {
             expect.fail('should not iterate');
           }

@@ -7,12 +7,7 @@ import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
 import { Compressor, type CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
-import {
-  MongoAPIError,
-  MongoInvalidArgumentError,
-  MongoMissingCredentialsError,
-  MongoParseError
-} from './error';
+import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from './error';
 import {
   MongoClient,
   type MongoClientOptions,
@@ -417,10 +412,18 @@ export function parseOptions(
       });
     }
 
-    if (isAws && mongoOptions.credentials.username && !mongoOptions.credentials.password) {
-      throw new MongoMissingCredentialsError(
-        `When using ${mongoOptions.credentials.mechanism} password must be set when a username is specified`
-      );
+    if (isAws) {
+      const { username, password } = mongoOptions.credentials;
+      if (username || password) {
+        throw new MongoAPIError(
+          'username and password cannot be provided when using MONGODB-AWS. Credentials must be provided in a manner that can be read by the AWS SDK.'
+        );
+      }
+      if (mongoOptions.credentials.mechanismProperties.AWS_SESSION_TOKEN) {
+        throw new MongoAPIError(
+          'AWS_SESSION_TOKEN cannot be provided when using MONGODB-AWS. Credentials must be provided in a manner that can be read by the AWS SDK.'
+        );
+      }
     }
 
     mongoOptions.credentials.validate();
