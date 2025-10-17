@@ -3,6 +3,7 @@ const events = require('events');
 
 const EventEmitter = events.EventEmitter;
 
+// TODO(NODE-7253): revisit this testing approach
 events.EventEmitter = class RequireErrorListenerEventEmitter extends EventEmitter {
   constructor(...args) {
     super(...args);
