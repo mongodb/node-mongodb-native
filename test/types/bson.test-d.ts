@@ -1,6 +1,6 @@
 import { expectType } from 'tsd';
 
-import type { BSONSerializeOptions, Document } from '../mongodb';
+import type { BSONSerializeOptions, Document } from '../../src';
 
 const options: BSONSerializeOptions = {};
 

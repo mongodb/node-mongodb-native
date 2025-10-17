@@ -27,7 +27,7 @@ import type {
   ServerSessionId,
   Timestamp,
   UpdateDescription
-} from '../mongodb';
+} from '../../src';
 
 declare const changeStreamOptions: ChangeStreamOptions;
 type ChangeStreamOperationType =

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import type { MongoClient } from '../mongodb';
+import type { MongoClient } from '../../src';
 
 const REQUIRED_DBS = ['admin', 'local', 'config'];
 const DB_NAME = 'listDatabasesTest';

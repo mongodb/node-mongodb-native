@@ -1,6 +1,6 @@
 import { expectType } from 'tsd';
 
-import { type Document, MongoClient } from '../mongodb';
+import { type Document, MongoClient } from '../../src';
 
 const client = new MongoClient('');
 const admin = client.db().admin();

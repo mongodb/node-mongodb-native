@@ -1,4 +1,4 @@
-import { type KMSProviders } from './mongodb';
+import { type KMSProviders } from './../src';
 
 const csfleKMSProviders = {
   aws: {

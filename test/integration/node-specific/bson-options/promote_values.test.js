@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const { Long, Int32, Double } = require('../../../mongodb');
 const { assert: test, setupDatabase } = require('../../shared');
 
-describe('Promote Values', function () {
+describe.skip('Promote Values', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

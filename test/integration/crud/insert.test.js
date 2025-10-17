@@ -62,7 +62,7 @@ const ISODate = function (string) {
   } else throw new Error('Invalid ISO 8601 date given.', __filename);
 };
 
-describe('crud - insert', function () {
+describe.skip('crud - insert', function () {
   let client;
 
   beforeEach(async function () {

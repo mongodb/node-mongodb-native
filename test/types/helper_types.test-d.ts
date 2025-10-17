@@ -16,7 +16,7 @@ import {
   type NumericType,
   type OneOrMore,
   type OnlyFieldsOfType
-} from '../mongodb';
+} from '../../src';
 
 expectType<IsAny<any, true, false>>(true);
 expectNotType<IsAny<number, true, false>>(true);

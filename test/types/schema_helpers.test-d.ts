@@ -1,15 +1,15 @@
 import { type Document, ObjectId } from 'bson';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
-import type { Collection } from '../../src';
 import type {
+  Collection,
   EnhancedOmit,
   InferIdType,
   OptionalId,
   OptionalUnlessRequiredId,
   WithId,
   WithoutId
-} from '../mongodb';
+} from '../../src';
 
 /** ----------------------------------------------------------------------
  * InferIdType

@@ -8,7 +8,7 @@ import {
   type MongoClient,
   ReadPreference,
   TopologyType
-} from '../../mongodb';
+} from '../../../src';
 
 describe('IPv6 Addresses', () => {
   let client: MongoClient;

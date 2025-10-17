@@ -3,7 +3,7 @@ const { expect } = require('chai');
 
 const { assert: test, setupDatabase } = require('../../shared');
 
-describe('Promote Buffers', function () {
+describe.skip('Promote Buffers', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

@@ -7,20 +7,19 @@ import * as semver from 'semver';
 import * as sinon from 'sinon';
 import { pipeline } from 'stream/promises';
 
-import { type CommandStartedEvent } from '../../../mongodb';
 import {
   Binary,
   ClientEncryption,
+  type CommandStartedEvent,
   type CommandSucceededEvent,
   GridFSBucket,
   MongoBulkWriteError,
   MongoClient,
   MongoOperationTimeoutError,
   MongoServerSelectionError,
-  now,
-  ObjectId,
-  squashError
-} from '../../mongodb';
+  ObjectId
+} from '../../../src';
+import { now, squashError } from '../../../src/utils';
 import {
   clearFailPoint,
   configureFailPoint,

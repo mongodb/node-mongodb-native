@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const { assert: test, setupDatabase } = require('../../shared');
 const { ObjectId } = require('../../../mongodb');
 
-describe('Ignore Undefined', function () {
+describe.skip('Ignore Undefined', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

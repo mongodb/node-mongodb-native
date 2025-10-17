@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoClient, MongoServerSelectionError, ReadPreference } from '../../mongodb';
+import { MongoClient, MongoServerSelectionError, ReadPreference } from '../../../src';
 
 describe('Error (Integration)', function () {
   it('NODE-5296: handles aggregate errors from dns lookup', async function () {
