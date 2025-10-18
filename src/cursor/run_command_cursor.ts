@@ -159,7 +159,7 @@ export class RunCommandCursor extends AbstractCursor {
   }
 
   /** @internal */
-  override async getMore(_batchSize: number): Promise<CursorResponse> {
+  override async getMore(): Promise<CursorResponse> {
     if (!this.session) {
       throw new MongoRuntimeError(
         'Unexpected null session. A cursor creating command should have set this'
