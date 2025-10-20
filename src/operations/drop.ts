@@ -87,10 +87,11 @@ export async function dropCollections(
         await executeOperation(db.client, dropOp, timeoutContext);
       } catch (err) {
         console.log(collectionName, err);
+        // Note in FLE the error code is an Int32, where we expect a JS number, so we test
+        // the message as well here and below.
         if (
           !(err instanceof MongoServerError) ||
-          err.code !== MONGODB_ERROR_CODES.NamespaceNotFound ||
-          !/ns not found/.test(err.message)
+          (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound && !/ns not found/.test(err.message))
         ) {
           throw err;
         }
@@ -108,8 +109,7 @@ export async function dropCollections(
     console.log(name, err);
     if (
       !(err instanceof MongoServerError) ||
-      err.code !== MONGODB_ERROR_CODES.NamespaceNotFound ||
-      !/ns not found/.test(err.message)
+      (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound && !/ns not found/.test(err.message))
     ) {
       throw err;
     }
