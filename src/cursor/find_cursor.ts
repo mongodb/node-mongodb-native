@@ -16,7 +16,7 @@ import { FindOperation, type FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
-import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
+import { emitWarningOnce, mergeOptions, type MongoDBNamespace, noop, squashError } from '../utils';
 import { type InitialCursorResponse } from './abstract_cursor';
 import { ExplainableCursor } from './explainable_cursor';
 
@@ -98,37 +98,50 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
   }
 
   /** @internal */
-  override async getMore(batchSize: number): Promise<CursorResponse> {
+  override async getMore(): Promise<CursorResponse> {
     const numReturned = this.numReturned;
-    if (numReturned) {
-      // TODO(DRIVERS-1448): Remove logic to enforce `limit` in the driver
-      const limit = this.findOptions.limit;
-      batchSize =
-        limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
+    const limit = this.findOptions.limit ?? Infinity;
+    const remaining = limit - numReturned;
 
-      if (batchSize <= 0) {
-        try {
-          await this.close();
-        } catch (error) {
-          squashError(error);
-          // this is an optimization for the special case of a limit for a find command to avoid an
-          // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
-          // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
-          // produces results for the find command.  Once a batch is filled up, it is returned and only
-          // on the subsequent getMore will the query framework consider the limit, determine the cursor
-          // is exhausted and return a cursorId of zero.
-          // instead, if we determine there are no more documents to request from the server, we preemptively
-          // close the cursor
-        }
-        return CursorResponse.emptyGetMore;
+    if (numReturned === limit && !this.id?.isZero()) {
+      // this is an optimization for the special case of a limit for a find command to avoid an
+      // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
+      // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
+      // produces results for the find command.  Once a batch is filled up, it is returned and only
+      // on the subsequent getMore will the query framework consider the limit, determine the cursor
+      // is exhausted and return a cursorId of zero.
+      // instead, if we determine there are no more documents to request from the server, we preemptively
+      // close the cursor
+      try {
+        await this.close();
+      } catch (error) {
+        squashError(error);
       }
+      return CursorResponse.emptyGetMore;
     }
 
-    const response = await super.getMore(batchSize);
-    // TODO: wrap this in some logic to prevent it from happening if we don't need this support
-    this.numReturned = this.numReturned + response.batchSize;
+    // TODO(DRIVERS-1448): Remove logic to enforce `limit` in the driver
+    let cleanup: () => void = noop;
+    const { batchSize } = this.cursorOptions;
+    if (batchSize != null && batchSize > remaining) {
+      this.cursorOptions.batchSize = remaining;
 
-    return response;
+      // After executing the final getMore, re-assign the batchSize back to its original value so that
+      // if the cursor is rewound and executed, the batchSize is still correct.
+      cleanup = () => {
+        this.cursorOptions.batchSize = batchSize;
+      };
+    }
+
+    try {
+      const response = await super.getMore();
+
+      this.numReturned = this.numReturned + response.batchSize;
+
+      return response;
+    } finally {
+      cleanup?.();
+    }
   }
 
   /**
