@@ -1,16 +1,11 @@
 import { expect } from 'chai';
 
-import {
-  Code,
-  enumToString,
-  type MongoClient,
-  ProfilingLevel,
-  ReturnDocument
-} from '../../mongodb';
+import { Code, type MongoClient, ProfilingLevel, ReturnDocument } from '../../../src';
+import { enumToString } from '../../../src/utils';
 import { sleep as delay } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
-describe('Operations', function () {
+describe.only('Operations', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
@@ -3989,77 +3984,47 @@ describe('Operations', function () {
   });
 
   /**
-   * A simple example showing the listening to a capped collection using a Promise.
+   * A simple example showing the listening to a capped collection.
    *
    * example-class Db
    * example-method createCollection
    */
-  it('Should correctly add capped collection options to cursor With Promises', {
-    metadata: { requires: { topology: ['single'] } },
+  it('Should correctly add capped collection options to cursor', async function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), {
+      maxPoolSize: 1
+    });
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
+    await client.connect();
+    const db = client.db(configuration.db);
 
-      client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-        // Create a capped collection with a maximum of 1000 documents
-        let collection;
+    const collection = await db.createCollection('a_simple_collection_2_with_promise', {
+      capped: true,
+      size: 100000,
+      max: 1000,
+      writeConcern: { w: 1 }
+    });
+    const docs: Array<{ a: number }> = [];
+    for (let i = 0; i < 10000; i++) docs.push({ a: i });
 
-        db.createCollection('a_simple_collection_2_with_promise', {
-          capped: true,
-          size: 100000,
-          max: 1000,
-          writeConcern: { w: 1 }
-        })
-          .then(function (_collection) {
-            collection = _collection;
+    // Insert a document in the capped collection
+    await collection.insertMany(docs, configuration.writeConcernMax());
+    let total = 0;
 
-            const docs: Array<{ a: number }> = [];
-            for (let i = 0; i < 1000; i++) docs.push({ a: i });
+    // Get the cursor
+    const cursor = collection
+      .find({ a: { $gte: 0 } })
+      .addCursorFlag('tailable', true)
+      .addCursorFlag('awaitData', true);
 
-            // Insert a document in the capped collection
-            return collection.insertMany(docs, configuration.writeConcernMax());
-          })
-          .then(function (result) {
-            expect(result).to.exist;
+    const stream = cursor.stream();
 
-            let total = 0;
-
-            // Get the cursor
-            const cursor = collection
-              .find({ a: { $gte: 0 } })
-              .addCursorFlag('tailable', true)
-              .addCursorFlag('awaitData', true);
-
-            const stream = cursor.stream();
-            stream.on('data', function (d) {
-              expect(d).to.exist;
-              total = total + 1;
-
-              if (total === 1000) {
-                cursor.close();
-              }
-            });
-
-            cursor.on('close', function () {
-              // TODO: forced because the cursor is still open/active
-              client.close(true, done);
-            });
-          });
-      });
-      // END
+    for await (const d of stream) {
+      expect(d).to.have.property('_id');
+      total = total + 1;
+      if (total === 1000) await cursor.close();
     }
+    await client.close();
   });
 
   describe('Transaction Examples', function () {
