@@ -30,13 +30,13 @@
     "mongodb-connection-string-url": "^3.0.2"
   },
   "peerDependencies": {
-    "@aws-sdk/credential-providers": "^3.188.0",
-    "@mongodb-js/zstd": "^1.1.0 || ^2.0.0",
-    "gcp-metadata": "^5.2.0",
+    "@aws-sdk/credential-providers": "^3.806.0",
+    "@mongodb-js/zstd": "^2.0.0",
+    "gcp-metadata": "^7.0.1",
     "kerberos": "^2.0.1",
     "mongodb-client-encryption": "^7.0.0-alpha",
     "snappy": "^7.3.2",
-    "socks": "^2.7.1"
+    "socks": "^2.8.6"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/credential-providers": {
@@ -92,7 +92,7 @@
     "eslint-plugin-tsdoc": "^0.4.0",
     "eslint-plugin-unused-imports": "^4.2.0",
     "express": "^5.1.0",
-    "gcp-metadata": "^5.3.0",
+    "gcp-metadata": "^7.0.1",
     "js-yaml": "^4.1.0",
     "mocha": "^11.7.1",
     "mocha-sinon": "^2.1.2",
@@ -144,7 +144,7 @@
     "check:ts": "node ./node_modules/typescript/bin/tsc -v && node ./node_modules/typescript/bin/tsc --noEmit",
     "check:atlas": "nyc mocha --config test/manual/mocharc.js test/manual/atlas_connectivity.test.ts",
     "check:drivers-atlas-testing": "nyc mocha --config test/mocha_mongodb.js test/atlas/drivers_atlas_testing.test.ts",
-    "check:aws": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_aws.test.ts",
+    "check:aws": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_aws.test.ts test/integration/auth/mongodb_aws.prose.test.ts",
     "check:oidc-auth": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/auth.spec.test.ts",
     "check:oidc-test": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_oidc.prose.test.ts",
     "check:oidc-azure": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_oidc_azure.prose.05.test.ts",
