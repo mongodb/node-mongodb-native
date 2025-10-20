@@ -90,7 +90,8 @@ export async function dropCollections(
         // the message as well here and below.
         if (
           !(err instanceof MongoServerError) ||
-          (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound && !/ns not found/.test(err.message))
+          (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound &&
+            !/ns not found|ns does not exist/.test(err.message))
         ) {
           throw err;
         }
