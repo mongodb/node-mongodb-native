@@ -100,7 +100,7 @@ describe('Retryable Writes Spec Prose', () => {
       );
 
       testCollection = client.db('retryable-writes-prose').collection('pool-clear-retry');
-      await testCollection.drop().catch(() => null);
+      await testCollection.drop();
 
       // ii. Enable the following failpoint:
       // NOTE: "ix. Disable the failpoint" is done in afterEach

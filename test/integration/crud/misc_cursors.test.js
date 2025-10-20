@@ -1698,7 +1698,7 @@ describe('Cursor', function () {
 
   it('destroying a stream stops it', async function () {
     const db = client.db();
-    await db.dropCollection('destroying_a_stream_stops_it').catch(() => null);
+    await db.dropCollection('destroying_a_stream_stops_it');
     const collection = await db.createCollection('destroying_a_stream_stops_it');
 
     const docs = Array.from({ length: 10 }, (_, i) => ({ b: i + 1 }));
@@ -1852,10 +1852,7 @@ describe('Cursor', function () {
     'closes cursors when client is closed even if it has not been exhausted',
     { requires: { topology: '!replicaset' } },
     async function () {
-      await client
-        .db()
-        .dropCollection('test_cleanup_tailable')
-        .catch(() => null);
+      await client.db().dropCollection('test_cleanup_tailable');
 
       const collection = await client
         .db()

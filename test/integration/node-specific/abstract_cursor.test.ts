@@ -596,7 +596,7 @@ describe('class AbstractCursor', function () {
     beforeEach(async function () {
       client = this.configuration.newClient();
       collection = client.db('activeCursors').collection('activeCursors');
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await collection.insertMany(Array.from({ length: 50 }, (_, i) => ({ i })));
     });
 

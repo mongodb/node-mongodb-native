@@ -181,7 +181,7 @@ describe('Ignore Undefined', function () {
   describe('ignoreUndefined A server', function () {
     it('should correctly execute insert culling undefined', async function () {
       const coll = client.db().collection('insert1');
-      await coll.drop().catch();
+      await coll.drop();
       const objectId = new ObjectId();
       const res = await coll.insertOne(
         { _id: objectId, a: 1, b: undefined },

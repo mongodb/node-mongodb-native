@@ -130,8 +130,8 @@ describe('Client Side Encryption Functional', function () {
       const dataDb = client.db(dataDbName);
       const keyVaultDb = client.db(keyVaultDbName);
 
-      await dataDb.dropCollection(dataCollName).catch(() => null);
-      await keyVaultDb.dropCollection(keyVaultCollName).catch(() => null);
+      await dataDb.dropCollection(dataCollName);
+      await keyVaultDb.dropCollection(keyVaultCollName);
       await keyVaultDb.createCollection(keyVaultCollName);
       const dataKey = await encryption.createDataKey('local');
 
@@ -314,8 +314,8 @@ describe('Client Side Encryption Functional', function () {
         const dataDb = client.db(dataDbName);
         const keyVaultDb = client.db(keyVaultDbName);
 
-        await dataDb.dropCollection(dataCollName).catch(() => null);
-        await keyVaultDb.dropCollection(keyVaultCollName).catch(() => null);
+        await dataDb.dropCollection(dataCollName);
+        await keyVaultDb.dropCollection(keyVaultCollName);
         await keyVaultDb.createCollection(keyVaultCollName);
         const dataKey = await encryption.createDataKey('local');
 
@@ -448,8 +448,7 @@ describe('Client Side Encryption Functional', function () {
       const internalClient = this.configuration.newClient();
       await internalClient
         .db('keyvault')
-        .dropCollection('datakeys', { writeConcern: { w: 'majority' } })
-        .catch(() => null);
+        .dropCollection('datakeys', { writeConcern: { w: 'majority' } });
       await internalClient.db('keyvault').createCollection('datakeys');
       await internalClient.close();
 
@@ -1121,16 +1120,8 @@ describe('CSOT', function () {
             configureFailPoint: 'failCommand',
             mode: 'off'
           } as FailCommandFailPoint);
-        await client
-          .db('db')
-          .collection('newnew')
-          .drop()
-          .catch(() => null);
-        await client
-          .db('keyvault')
-          .collection('datakeys')
-          .drop()
-          .catch(() => null);
+        await client.db('db').collection('newnew').drop();
+        await client.db('keyvault').collection('datakeys').drop();
         await client.close();
       });
 

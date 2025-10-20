@@ -88,10 +88,7 @@ describe('MaxTimeMS', function () {
 
     beforeEach(async function () {
       client = this.configuration.newClient({ monitorCommands: true });
-      await client
-        .db()
-        .dropCollection('cappedAt3')
-        .catch(() => null);
+      await client.db().dropCollection('cappedAt3');
       cappedCollection = await client
         .db()
         .createCollection('cappedAt3', { capped: true, size: 4096, max: 3 });

@@ -89,12 +89,12 @@ describe('CRUD API', function () {
       );
 
       collection = client.db('findOne').collection('findOne');
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await collection.insertMany([{ _id: 1 }, { _id: 2 }]);
     });
 
     afterEach(async () => {
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await client.close();
     });
 
@@ -159,12 +159,12 @@ describe('CRUD API', function () {
       );
 
       collection = client.db('countDocuments').collection('countDocuments');
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await collection.insertMany([{ _id: 1 }, { _id: 2 }]);
     });
 
     afterEach(async () => {
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await client.close();
     });
 
@@ -218,12 +218,12 @@ describe('CRUD API', function () {
 
     beforeEach(async () => {
       collection = client.db().collection('t');
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
     });
 
     afterEach(async () => {
-      await collection?.drop().catch(() => null);
+      await collection?.drop();
     });
 
     const makeCursor = () => {
@@ -881,12 +881,12 @@ describe('CRUD API', function () {
       );
 
       collection = client.db('updateManyTest').collection('updateManyTest');
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await collection.insertMany([{ a: 1 }, { a: 2 }]);
     });
 
     afterEach(async function () {
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await client.close();
     });
 

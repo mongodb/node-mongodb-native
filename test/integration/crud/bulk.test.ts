@@ -1432,9 +1432,7 @@ describe('Bulk', function () {
     const documents = [{ s: largeString }, { s: largeString }];
 
     const db = client.db();
-    await db.dropCollection('doesnt_matter').catch(() => {
-      // ignore
-    });
+    await db.dropCollection('doesnt_matter');
     await db.createCollection('doesnt_matter');
     const coll = db.collection('doesnt_matter');
     await coll.insertMany(documents, { ordered: true });
@@ -1446,9 +1444,7 @@ describe('Bulk', function () {
     const documents = [{ s: largeString }, { s: largeString }];
 
     const db = client.db();
-    await db.dropCollection('doesnt_matter').catch(() => {
-      // ignore
-    });
+    await db.dropCollection('doesnt_matter');
     await db.createCollection('doesnt_matter');
     const coll = db.collection('doesnt_matter');
     await coll.insertMany(documents, { ordered: false });

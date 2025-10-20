@@ -143,13 +143,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
     await client.connect();
     // 3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_.
     const keyDb = client.db(keyVaultDbName);
-    await keyDb
-      .dropCollection(keyVaultCollName, { writeConcern: new WriteConcern('majority') })
-      .catch((e: Error) => {
-        if (!/ns/i.test(e.message)) {
-          throw e;
-        }
-      });
+    await keyDb.dropCollection(keyVaultCollName, { writeConcern: new WriteConcern('majority') });
     const keyColl = keyDb.collection(keyVaultCollName);
     await keyColl.insertMany(
       [corpusKeyLocal, corpusKeyAws, corpusKeyAzure, corpusKeyGcp, corpusKeyKmip],
@@ -164,13 +158,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
     beforeEach(async function () {
       // 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <../corpus/corpus-schema.json>`_.
       const dataDb = client.db(dataDbName);
-      await dataDb
-        .dropCollection(dataCollName, { writeConcern: new WriteConcern('majority') })
-        .catch((e: Error) => {
-          if (!/ns/i.test(e.message)) {
-            throw e;
-          }
-        });
+      await dataDb.dropCollection(dataCollName, { writeConcern: new WriteConcern('majority') });
       await dataDb.createCollection(dataCollName, {
         validator: { $jsonSchema: corpusSchema },
         writeConcern: new WriteConcern('majority')

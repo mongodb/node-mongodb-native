@@ -15,17 +15,9 @@ describe('useBigInt64 option', function () {
   let coll: Collection;
 
   afterEach(async function () {
-    if (client) {
-      if (coll) {
-        await coll.drop().catch(() => null);
-      }
-
-      if (db) {
-        await db.dropDatabase().catch(() => null);
-      }
-
-      await client.close();
-    }
+    await coll?.drop();
+    await db?.dropDatabase();
+    await client?.close();
   });
 
   describe('when not provided to client', function () {
@@ -82,7 +74,7 @@ describe('useBigInt64 option', function () {
       client = await this.configuration.newClient().connect();
 
       db = client.db(this.configuration.db, { useBigInt64: false });
-      await db.dropCollection('useBigInt64Test').catch(() => null);
+      await db.dropCollection('useBigInt64Test');
       coll = await db.createCollection('useBigInt64Test', { useBigInt64: true });
     });
 
@@ -98,7 +90,7 @@ describe('useBigInt64 option', function () {
     beforeEach(async function () {
       client = await this.configuration.newClient().connect();
       db = client.db(this.configuration.db);
-      await db.dropCollection('useBigInt64Test').catch(() => null);
+      await db.dropCollection('useBigInt64Test');
     });
 
     it('supercedes collection level when set to false at operation level', async function () {
@@ -117,7 +109,7 @@ describe('useBigInt64 option', function () {
     beforeEach(async function () {
       client = await this.configuration.newClient().connect();
       db = client.db(this.configuration.db);
-      await db.dropCollection('useBigInt64Test').catch(() => null);
+      await db.dropCollection('useBigInt64Test');
     });
 
     it('supercedes collection level when set to true at operation level', async function () {
@@ -137,7 +129,7 @@ describe('useBigInt64 option', function () {
       client = await this.configuration.newClient({}, { useBigInt64: true }).connect();
 
       db = client.db(this.configuration.db);
-      await db.dropCollection('useBigInt64Test').catch(() => null);
+      await db.dropCollection('useBigInt64Test');
 
       coll = await db.createCollection('useBigInt64Test');
       await coll.insertOne({ a: new BSON.Long(1) });

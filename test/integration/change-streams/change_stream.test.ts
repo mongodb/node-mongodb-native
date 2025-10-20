@@ -563,7 +563,7 @@ describe('Change Streams', function () {
     async test() {
       const collection = db.collection('resumeAfterTest2');
 
-      await collection.drop().catch(() => null);
+      await collection.drop();
 
       let resumeToken;
       const docs = [{ a: 0 }, { a: 1 }, { a: 2 }];
