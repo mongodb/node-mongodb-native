@@ -12,7 +12,7 @@ import {
   MongoDriverError,
   MongoInvalidArgumentError
 } from '../../../src';
-import { assert as test, ignoreNsNotFound } from '../shared';
+import { assert as test } from '../shared';
 
 const MAX_BSON_SIZE = 16777216;
 const DB_NAME = 'bulk_operations_tests';
@@ -1474,7 +1474,7 @@ describe('Bulk', function () {
 
   it('should promote a single error to the top-level message, and preserve writeErrors', async function () {
     const coll = client.db().collection<{ _id: number; a: number }>('single_bulk_write_error');
-    await coll.drop().catch(ignoreNsNotFound);
+    await coll.drop();
     await coll.insertMany(Array.from({ length: 4 }, (_, i) => ({ _id: i, a: i })));
     const err = await coll
       .bulkWrite([
@@ -1490,7 +1490,7 @@ describe('Bulk', function () {
 
   it('should preserve order of operation index in unordered bulkWrite', async function () {
     const coll = client.db().collection<{ _id: number; a: number }>('bulk_write_ordering_test');
-    await coll.drop().catch(ignoreNsNotFound);
+    await coll.drop();
     await coll.insertMany(Array.from({ length: 4 }, (_, i) => ({ _id: i, a: i })));
     await coll.createIndex({ a: 1 }, { unique: true });
     const err = await coll
@@ -1513,7 +1513,7 @@ describe('Bulk', function () {
 
   it('should preserve order of operation index in unordered bulk operation', async function () {
     const coll = client.db().collection('unordered_preserve_order');
-    await coll.drop().catch(ignoreNsNotFound);
+    await coll.drop();
     const batch = coll.initializeUnorderedBulkOp();
     batch.insert({ _id: 1, a: 0 });
     batch.insert({ _id: 1, a: 0 });
@@ -1528,7 +1528,7 @@ describe('Bulk', function () {
 
   it('should not fail on the first error in an unorderd bulkWrite', async function () {
     const coll = client.db().collection('bulk_op_ordering_test');
-    await coll.drop().catch(ignoreNsNotFound);
+    await coll.drop();
     await coll.createIndex({ email: 1 }, { unique: true, background: false });
     await Promise.all([
       coll.updateOne(

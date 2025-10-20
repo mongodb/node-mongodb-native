@@ -23,7 +23,7 @@ import {
   Timestamp
 } from '../../../src';
 import { noop } from '../../../src/utils';
-import { assert as test, ignoreNsNotFound, setupDatabase } from '../shared';
+import { assert as test, setupDatabase } from '../shared';
 
 describe('crud - insert', function () {
   let client: MongoClient;
@@ -1590,7 +1590,7 @@ describe('crud - insert', function () {
     });
 
     it('MongoBulkWriteError and BulkWriteResult should respect BulkWrite', async function () {
-      await client.db().collection('test_insertMany_bulkResult').drop().catch(ignoreNsNotFound);
+      await client.db().collection('test_insertMany_bulkResult').drop();
 
       const collection = client
         .db()

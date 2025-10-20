@@ -86,9 +86,11 @@ export async function dropCollections(
       try {
         await executeOperation(db.client, dropOp, timeoutContext);
       } catch (err) {
+        console.log(collectionName, err);
         if (
           !(err instanceof MongoServerError) ||
-          err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
+          err.code !== MONGODB_ERROR_CODES.NamespaceNotFound ||
+          !/ns not found/.test(err.message)
         ) {
           throw err;
         }
@@ -96,11 +98,23 @@ export async function dropCollections(
     }
   }
 
-  return await executeOperation(
-    db.client,
-    new DropCollectionOperation(db, name, options),
-    timeoutContext
-  );
+  try {
+    return await executeOperation(
+      db.client,
+      new DropCollectionOperation(db, name, options),
+      timeoutContext
+    );
+  } catch (err) {
+    console.log(name, err);
+    if (
+      !(err instanceof MongoServerError) ||
+      err.code !== MONGODB_ERROR_CODES.NamespaceNotFound ||
+      !/ns not found/.test(err.message)
+    ) {
+      throw err;
+    }
+    return false;
+  }
 }
 
 /** @public */

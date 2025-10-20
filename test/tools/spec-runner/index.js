@@ -283,26 +283,16 @@ function prepareDatabaseForSuite(suite, context) {
       }
       return coll.drop(options);
     })
-    .catch(err => {
-      if (!err.message.match(/ns not found/)) throw err;
-    })
     .then(() => {
       if (suite.key_vault_data) {
         const dataKeysCollection = context.sharedClient.db('keyvault').collection('datakeys');
-        return dataKeysCollection
-          .drop({ writeConcern: { w: 'majority' } })
-          .catch(err => {
-            if (!err.message.match(/ns not found/)) {
-              throw err;
-            }
-          })
-          .then(() => {
-            if (suite.key_vault_data.length) {
-              return dataKeysCollection.insertMany(suite.key_vault_data, {
-                writeConcern: { w: 'majority' }
-              });
-            }
-          });
+        return dataKeysCollection.drop({ writeConcern: { w: 'majority' } }).then(() => {
+          if (suite.key_vault_data.length) {
+            return dataKeysCollection.insertMany(suite.key_vault_data, {
+              writeConcern: { w: 'majority' }
+            });
+          }
+        });
       }
     })
     .then(() => {
@@ -698,11 +688,7 @@ const kOperations = new Map([
       const collectionName = operation.arguments.collection;
       const encryptedFields = operation.arguments.encryptedFields;
       const session = maybeSession(operation, context);
-      return db.dropCollection(collectionName, { session, encryptedFields }).catch(err => {
-        if (!err.message.match(/ns not found/)) {
-          throw err;
-        }
-      });
+      return db.dropCollection(collectionName, { session, encryptedFields });
     }
   ],
   [
@@ -783,12 +769,7 @@ const kOperations = new Map([
           .toArray()
           .then(results => results.map(({ name }) => name))
           .then(indexes => expect(indexes).to.not.include(indexName))
-      ).catch(err => {
-        // The error message can differ slightly with the same error code.
-        if (!err.message.match(/ns not found|ns does not exist/)) {
-          throw err;
-        }
-      });
+      );
     }
   ]
 ]);
