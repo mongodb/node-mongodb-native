@@ -61,7 +61,7 @@ const INVALID_STAGE_OPTIONS = new Set([
 
 export function filterOutOptions(options: AnyOptions): AnyOptions {
   const filterOptions: AnyOptions = {};
-  for (const name in options) {
+  for (const name of Object.keys(options)) {
     if (!INVALID_STAGE_OPTIONS.has(name)) {
       filterOptions[name] = options[name];
     }
