@@ -55,7 +55,8 @@ const INVALID_STAGE_OPTIONS = new Set([
   'serializeFunctions',
   'timeoutContext',
   'timeoutMS',
-  'useBigInt64'
+  'useBigInt64',
+  'writeConcern'
 ]);
 
 export function filterOutOptions(options: AnyOptions): AnyOptions {

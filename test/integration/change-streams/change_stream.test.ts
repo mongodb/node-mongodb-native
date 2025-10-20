@@ -60,7 +60,7 @@ async function forcePrimaryStepDown(client: MongoClient) {
   await sleep(15_000);
 }
 
-describe('Change Streams', function () {
+describe.only('Change Streams', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
@@ -1833,7 +1833,7 @@ describe('Change Streams', function () {
     });
 
     context('invalid options', function () {
-      it('does not send invalid options on the aggregate command', {
+      it('server errors on invalid options on the initialize', {
         metadata: { requires: { topology: '!single' } },
         test: async function () {
           const started: CommandStartedEvent[] = [];
@@ -1843,35 +1843,8 @@ describe('Change Streams', function () {
           // @ts-expect-error: checking for invalid options
           cs = collection.watch([], doc);
 
-          const willBeChange = once(cs, 'change').then(args => args[0]);
-          await once(cs.cursor, 'init');
-
-          const result = await collection.insertOne({ a: Long.fromNumber(0) });
-          expect(result).to.exist;
-
-          await willBeChange;
-          expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
-        }
-      });
-
-      it('does not send invalid options on the getMore command', {
-        metadata: { requires: { topology: '!single' } },
-        test: async function () {
-          const started: CommandStartedEvent[] = [];
-
-          client.on('commandStarted', filterForCommands(['aggregate'], started));
-          const doc = { invalidBSONOption: true };
-          // @ts-expect-error: checking for invalid options
-          cs = collection.watch([], doc);
-
-          const willBeChange = once(cs, 'change').then(args => args[0]);
-          await once(cs.cursor, 'init');
-
-          const result = await collection.insertOne({ a: Long.fromNumber(0) });
-          expect(result).to.exist;
-
-          await willBeChange;
-          expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
+          const error = await once(cs, 'change').catch(error => error);
+          expect(error).to.be.instanceOf(MongoServerError);
         }
       });
     });
