@@ -15,8 +15,8 @@ describe('useBigInt64 option', function () {
   let coll: Collection;
 
   afterEach(async function () {
-    await coll?.drop();
-    await db?.dropDatabase();
+    await coll?.drop().catch(() => null);
+    await db?.dropDatabase().catch(() => null);
     await client?.close();
   });
 
