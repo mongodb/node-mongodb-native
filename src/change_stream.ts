@@ -15,7 +15,7 @@ import {
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
-import { type InferIdType, TypedEventEmitter } from './mongo_types';
+import { type Abortable, type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { OperationParent } from './operations/command';
 import type { ServerSessionId } from './sessions';
@@ -34,39 +34,12 @@ const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
-const INVALID_STAGE_OPTIONS = new Set([
-  'authdb',
-  'batchSize',
-  'bsonRegExp',
-  'collation',
-  'comment',
-  'dbName',
-  'enableUtf8Validation',
-  'fieldsAsRaw',
-  'ignoreUndefined',
-  'maxAwaitTimeMS',
-  'maxTimeMS',
-  'promoteBuffers',
-  'promoteLongs',
-  'promoteValues',
-  'raw',
-  'rawData',
-  'readPreference',
-  'serializeFunctions',
-  'timeoutContext',
-  'timeoutMS',
-  'useBigInt64',
-  'writeConcern'
-]);
+const INVALID_STAGE_OPTIONS = buildDisallowedChangeStreamOptions();
 
 export function filterOutOptions(options: AnyOptions): AnyOptions {
-  const filterOptions: AnyOptions = {};
-  for (const name of Object.keys(options)) {
-    if (!INVALID_STAGE_OPTIONS.has(name)) {
-      filterOptions[name] = options[name];
-    }
-  }
-  return filterOptions;
+  return Object.fromEntries(
+    Object.entries(options).filter(([k, _]) => INVALID_STAGE_OPTIONS.has(k))
+  );
 }
 
 /**
@@ -1109,4 +1082,72 @@ export class ChangeStream<
       throw changeStreamError;
     }
   }
+}
+
+/**
+ * This function returns a list of options that are *not* supported by the $changeStream
+ * aggregation stage.  This is best-effort - it uses the options "officially supported" by the driver
+ * to derive a list of known, unsupported options for the $changeStream stage.
+ *
+ * Notably, at runtime, users can still provide options unknown to the driver and the driver will
+ * *not* filter them out of the options object (see NODE-5510).
+ */
+function buildDisallowedChangeStreamOptions(): Set<string> {
+  /** hard-coded list of allowed ChangeStream options */
+  type CSOptions =
+    | 'resumeAfter'
+    | 'startAfter'
+    | 'startAtOperationTime'
+    | 'fullDocument'
+    | 'fullDocumentBeforeChange'
+    | 'showExpandedEvents';
+
+  /**
+   * a type representing all known options that the driver supports that are *not* change stream stage options.
+   *
+   * each known key is mapped to a non-optional string, so that if new driver-specific options are added, the
+   * instantiation of `denyList` below results in a TS error.
+   */
+  type DisallowedOptions = {
+    [k in Exclude<keyof ChangeStreamOptions, CSOptions>]: string;
+  };
+
+  const denyList: DisallowedOptions = {
+    explain: '',
+    checkKeys: '',
+    serializeFunctions: '',
+    ignoreUndefined: '',
+    useBigInt64: '',
+    promoteLongs: '',
+    promoteBuffers: '',
+    promoteValues: '',
+    fieldsAsRaw: '',
+    bsonRegExp: '',
+    raw: '',
+    readConcern: '',
+    collation: '',
+    maxTimeMS: '',
+    comment: '',
+    dbName: '',
+    authdb: '',
+    rawData: '',
+    session: '',
+    willRetryWrite: '',
+    readPreference: '',
+    bypassPinningCheck: '',
+    omitMaxTimeMS: '',
+    timeoutMS: '',
+    enableUtf8Validation: '',
+    allowDiskUse: '',
+    batchSize: '',
+    bypassDocumentValidation: '',
+    cursor: '',
+    maxAwaitTimeMS: '',
+    hint: '',
+    let: '',
+    out: '',
+    timeoutMode: ''
+  };
+
+  return new Set(Object.keys(denyList));
 }
