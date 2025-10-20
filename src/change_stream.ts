@@ -34,31 +34,37 @@ const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
-const INVALID_STAGE_OPTIONS = [
-  'raw',
-  'useBigInt64',
+const INVALID_STAGE_OPTIONS = new Set([
+  'authdb',
+  'batchSize',
+  'bsonRegExp',
+  'collation',
+  'comment',
+  'dbName',
+  'enableUtf8Validation',
+  'fieldsAsRaw',
+  'ignoreUndefined',
+  'maxAwaitTimeMS',
+  'maxTimeMS',
+  'promoteBuffers',
   'promoteLongs',
   'promoteValues',
-  'promoteBuffers',
-  'ignoreUndefined',
-  'bsonRegExp',
+  'raw',
+  'rawData',
+  'readPreference',
   'serializeFunctions',
-  'fieldsAsRaw',
-  'enableUtf8Validation',
+  'timeoutContext',
   'timeoutMS',
-  'readPreference'
-];
+  'useBigInt64'
+]);
 
-export function filterOutOptions(options: AnyOptions, names: ReadonlyArray<string>): AnyOptions {
+export function filterOutOptions(options: AnyOptions): AnyOptions {
   const filterOptions: AnyOptions = {};
-
   for (const name in options) {
-    if (!names.includes(name)) {
+    if (!INVALID_STAGE_OPTIONS.has(name)) {
       filterOptions[name] = options[name];
     }
   }
-
-  // Filtered options
   return filterOptions;
 }
 
@@ -919,7 +925,7 @@ export class ChangeStream<
   private _createChangeStreamCursor(
     options: ChangeStreamOptions | ChangeStreamCursorOptions
   ): ChangeStreamCursor<TSchema, TChange> {
-    const changeStreamStageOptions: Document = filterOutOptions(options, INVALID_STAGE_OPTIONS);
+    const changeStreamStageOptions: Document = filterOutOptions(options);
     if (this.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
       changeStreamStageOptions.allChangesForCluster = true;
     }
