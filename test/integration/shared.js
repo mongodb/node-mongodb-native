@@ -99,7 +99,7 @@ async function setupDatabase(configuration, dbsToClean) {
       for await (const { name } of db.listCollections({}, { nameOnly: true })) {
         const collection = db.collection(name);
         await collection.deleteMany({}).catch(() => null);
-        await collection.drop();
+        await collection.drop().catch(() => null);
       }
     }
   } finally {
