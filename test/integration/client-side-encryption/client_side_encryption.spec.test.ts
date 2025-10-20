@@ -8,7 +8,7 @@ import {
 } from '../../tools/spec-runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
-describe.only('Client Side Encryption (Legacy)', function () {
+describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
     path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),
