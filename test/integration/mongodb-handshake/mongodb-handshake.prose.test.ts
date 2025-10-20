@@ -361,7 +361,6 @@ describe('Client Metadata Update Prose Tests', function () {
     let initialClientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
 
-    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
     let client: MongoClient;
 
     // | Case | Name      | Version | Platform           |
@@ -478,7 +477,6 @@ describe('Client Metadata Update Prose Tests', function () {
   describe('Test 4: Multiple Metadata Updates with Duplicate Data', function () {
     let initialClientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
-    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
     let client: MongoClient;
 
     afterEach(async function () {
@@ -571,7 +569,6 @@ describe('Client Metadata Update Prose Tests', function () {
   describe('Test 5: Metadata is not appended if identical to initial metadata', function () {
     let initialClientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
-    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
     let client: MongoClient;
 
     // 1. Create a `MongoClient` instance with the following:
@@ -649,7 +646,6 @@ describe('Client Metadata Update Prose Tests', function () {
   describe('Test 6: Metadata is not appended if identical to initial metadata (separated by non-identical metadata)', function () {
     let clientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
-    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
     let client: MongoClient;
 
     afterEach(async function () {
@@ -741,7 +737,6 @@ describe('Client Metadata Update Prose Tests', function () {
   describe('Test 7: Empty strings are considered unset when appending duplicate metadata', function () {
     let initialClientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
-    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
     let client: MongoClient;
 
     afterEach(async function () {
@@ -845,7 +840,6 @@ describe('Client Metadata Update Prose Tests', function () {
   describe('Test 8: Empty strings are considered unset when appending metadata identical to initial metadata', function () {
     let initialClientMetadata: ClientMetadata;
     let updatedClientMetadata: ClientMetadata;
-    // TODO(NODE-6599): mongodb-legacy adds additional client metadata, breaking these prose tests
     let client: MongoClient;
 
     afterEach(async function () {
