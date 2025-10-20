@@ -60,7 +60,7 @@ async function forcePrimaryStepDown(client: MongoClient) {
   await sleep(15_000);
 }
 
-describe.only('Change Streams', function () {
+describe('Change Streams', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
