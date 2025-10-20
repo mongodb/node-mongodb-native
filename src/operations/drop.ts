@@ -1,4 +1,4 @@
-import { type Connection, MongoServerError } from '..';
+import { type Connection, type MongoError, MongoServerError } from '..';
 import type { Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
@@ -39,6 +39,13 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
 
   override handleOk(_response: InstanceType<typeof this.SERVER_COMMAND_RESPONSE_TYPE>): boolean {
     return true;
+  }
+
+  override handleError(error: MongoError): boolean {
+    if (!(error instanceof MongoServerError)) throw error;
+    if (Number(error.code) !== MONGODB_ERROR_CODES.NamespaceNotFound) throw error;
+
+    return false;
   }
 }
 
@@ -83,37 +90,15 @@ export async function dropCollections(
     for (const collectionName of [escCollection, ecocCollection]) {
       // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
       const dropOp = new DropCollectionOperation(db, collectionName, options);
-      try {
-        await executeOperation(db.client, dropOp, timeoutContext);
-      } catch (err) {
-        // Note in FLE the error code is an Int32, where we expect a JS number, so we test
-        // the message as well here and below.
-        if (
-          !(err instanceof MongoServerError) ||
-          (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound &&
-            !/ns not found|ns does not exist/.test(err.message))
-        ) {
-          throw err;
-        }
-      }
+      await executeOperation(db.client, dropOp, timeoutContext);
     }
   }
 
-  try {
-    return await executeOperation(
-      db.client,
-      new DropCollectionOperation(db, name, options),
-      timeoutContext
-    );
-  } catch (err) {
-    if (
-      !(err instanceof MongoServerError) ||
-      (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound && !/ns not found/.test(err.message))
-    ) {
-      throw err;
-    }
-    return false;
-  }
+  return await executeOperation(
+    db.client,
+    new DropCollectionOperation(db, name, options),
+    timeoutContext
+  );
 }
 
 /** @public */
