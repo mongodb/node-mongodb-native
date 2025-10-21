@@ -43,7 +43,7 @@ describe('14. Decryption Events', metadata, function () {
       .collection('decryption_events')
       .deleteMany({})
       .catch(() => null);
-    await db.dropCollection('decryption_events').catch(() => null);
+    await db.dropCollection('decryption_events');
     await db.createCollection('decryption_events');
     // Create a ClientEncryption object named ``clientEncryption`` with these options:
     //   ClientEncryptionOpts {

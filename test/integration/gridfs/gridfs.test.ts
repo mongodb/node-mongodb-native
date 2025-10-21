@@ -22,9 +22,9 @@ describe('GridFS', () => {
     db = client.db('gridfsTest');
 
     // Reset namespace
-    await db.dropCollection('fs.files').catch(() => null);
-    await db.dropCollection('fs.chunks').catch(() => null);
-    await db.dropDatabase().catch(() => null);
+    await db.dropCollection('fs.files');
+    await db.dropCollection('fs.chunks');
+    await db.dropDatabase();
     await sleep(100);
 
     commandStartedEvents = [];

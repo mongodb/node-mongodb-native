@@ -38,7 +38,7 @@ describe('Find', function () {
     const configuration = this.configuration;
 
     const db = client.db(configuration.db);
-    await db.dropCollection('test_find_simple').catch(() => null);
+    await db.dropCollection('test_find_simple');
     const collection = db.collection('test_find_simple');
     const docs = [{ a: 2 }, { b: 3 }];
 
@@ -101,7 +101,7 @@ describe('Find', function () {
     const configuration = this.configuration;
 
     const db = client.db(configuration.db);
-    await db.dropCollection('test_find_advanced').catch(() => null);
+    await db.dropCollection('test_find_advanced');
     const collection = db.collection('test_find_advanced');
     const docs = [{ a: 1 }, { a: 2 }, { b: 3 }];
 

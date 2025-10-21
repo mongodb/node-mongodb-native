@@ -91,7 +91,7 @@ describe('ObjectId', function () {
     const oid3 = new ObjectId();
 
     const collection = client.db().collection<{ _id: ObjectId }>('oid_range');
-    await collection.drop().catch(() => null);
+    await collection.drop();
 
     // Insertion intentionally out of order, we want to filter out 3 with a range query
     await collection.insertMany([{ _id: oid1 }, { _id: oid3 }, { _id: oid2 }]);

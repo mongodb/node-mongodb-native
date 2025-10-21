@@ -23,7 +23,7 @@ import {
   Timestamp
 } from '../../../src';
 import { noop } from '../../../src/utils';
-import { assert as test, ignoreNsNotFound, setupDatabase } from '../shared';
+import { assert as test, setupDatabase } from '../shared';
 
 describe('crud - insert', function () {
   let client: MongoClient;
@@ -1463,7 +1463,7 @@ describe('crud - insert', function () {
     it('should return error on unordered insertMany with multiple unique key constraints', async () => {
       const col = client.db().collection('insertManyMultipleWriteErrors');
 
-      await col.drop().catch(() => null);
+      await col.drop();
 
       const createIndexRes = await col.createIndex({ a: 1 }, { unique: true });
       expect(createIndexRes).to.equal('a_1');
@@ -1481,7 +1481,7 @@ describe('crud - insert', function () {
     it('should return error on ordered insertMany with multiple unique key constraints', async () => {
       const col = client.db().collection('insertManyMultipleWriteErrors');
 
-      await col.drop().catch(() => null);
+      await col.drop();
 
       const createIndexRes = await col.createIndex({ a: 1 }, { unique: true });
       expect(createIndexRes).to.equal('a_1');
@@ -1590,7 +1590,7 @@ describe('crud - insert', function () {
     });
 
     it('MongoBulkWriteError and BulkWriteResult should respect BulkWrite', async function () {
-      await client.db().collection('test_insertMany_bulkResult').drop().catch(ignoreNsNotFound);
+      await client.db().collection('test_insertMany_bulkResult').drop();
 
       const collection = client
         .db()

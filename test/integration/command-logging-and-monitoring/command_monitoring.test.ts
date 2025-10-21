@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { type MongoClient, ObjectId, ReadPreference } from '../../mongodb';
-import { filterForCommands, ignoreNsNotFound, setupDatabase } from '../shared';
+import { filterForCommands, setupDatabase } from '../shared';
 
 describe('Command Monitoring', function () {
   let client: MongoClient;
@@ -164,7 +164,6 @@ describe('Command Monitoring', function () {
       return db
         .collection('apm_test_2')
         .drop()
-        .catch(ignoreNsNotFound)
         .then(() => {
           // Insert test documents
           return db
@@ -235,7 +234,6 @@ describe('Command Monitoring', function () {
       return db
         .collection('apm_test_2')
         .drop()
-        .catch(ignoreNsNotFound)
         .then(() => {
           // Insert test documents
           return db
@@ -328,7 +326,6 @@ describe('Command Monitoring', function () {
       return db
         .collection('apm_test_2')
         .drop()
-        .catch(ignoreNsNotFound)
         .then(() =>
           db
             .collection('apm_test_2')
@@ -531,12 +528,10 @@ describe('Command Monitoring', function () {
     const desiredEvents = ['aggregate', 'getMore'];
     client.on('commandStarted', filterForCommands(desiredEvents, started));
     client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
-
     const db = client.db(this.configuration.db);
     return db
       .collection('apm_test_u_4')
       .drop()
-      .catch(ignoreNsNotFound)
       .then(() => db.collection('apm_test_u_4').insertMany(docs))
       .then(r => {
         expect(r).to.exist;

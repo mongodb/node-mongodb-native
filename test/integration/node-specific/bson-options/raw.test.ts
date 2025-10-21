@@ -41,7 +41,7 @@ describe('raw bson support', () => {
       beforeEach(async function () {
         client = this.configuration.newClient();
         collection = client.db('test_raw').collection('test_raw');
-        await collection.drop().catch(() => null);
+        await collection.drop();
         await collection.insertOne({ _id: 1, myData: 'hello' });
         await collection.insertOne({ _id: 2, myData: 'bye bye' });
       });

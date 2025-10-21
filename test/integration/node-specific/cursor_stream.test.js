@@ -223,8 +223,8 @@ describe('Cursor Streams', function () {
     const collection = db.collection('streaming');
     const updateCollection = db.collection('update_within_streaming');
 
-    await collection.drop().catch(() => null);
-    await updateCollection.drop().catch(() => null);
+    await collection.drop();
+    await updateCollection.drop();
 
     const docs = Array.from({ length: 10 }, (_, i) => ({
       _id: i,

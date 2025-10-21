@@ -71,7 +71,7 @@ describe('Sessions Prose Tests', () => {
 
       // reset test collection
       testCollection = client.db('test').collection('too.many.sessions');
-      await testCollection.drop().catch(() => null);
+      await testCollection.drop();
     });
 
     afterEach(async () => {
