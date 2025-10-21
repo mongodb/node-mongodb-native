@@ -76,7 +76,7 @@ describe('ObjectId', function () {
     date.setMilliseconds(0);
 
     const epochSeconds = date.getTime() / 1000;
-    const oid = new ObjectId(epochSeconds);
+    const oid = ObjectId.createFromTime(epochSeconds);
     const time = oid.getTimestamp();
 
     expect(time).to.deep.equal(date);
