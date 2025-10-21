@@ -2239,10 +2239,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       await client.connect();
 
       // Using client, drop the collection keyvault.datakeys.
-      await client
-        .db('keyvault')
-        .dropCollection('datakeys')
-        .catch(() => null);
+      await client.db('keyvault').dropCollection('datakeys');
 
       await client
         .db('keyvault')
@@ -2389,10 +2386,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             client1.mongoLogger?.trace('client', 'dropping datakeys collection');
 
             // Step 1. Drop the collection ``keyvault.datakeys``
-            await client1
-              .db('keyvault')
-              .dropCollection('datakeys')
-              .catch(() => null);
+            await client1.db('keyvault').dropCollection('datakeys');
 
             client1.mongoLogger?.trace('client', 'dropped datakeys collection');
 

@@ -15,7 +15,7 @@ export async function before() {
   await driver.resetTmpDir();
 
   bucket = driver.bucket(driver.client.db(driver.DB_NAME));
-  await bucket.drop().catch(() => null);
+  await bucket.drop();
 
   const gridfs_multi = path.resolve(PARALLEL_DIRECTORY, 'gridfs_multi');
 

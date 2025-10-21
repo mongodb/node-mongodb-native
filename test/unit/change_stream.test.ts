@@ -2,6 +2,7 @@ import { Long, Timestamp } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+import { filterOutOptions } from '../../src/change_stream';
 import { ChangeStreamCursor } from '../../src/cursor/change_stream_cursor';
 import { MongoClient } from '../../src/mongo_client';
 import { MongoDBNamespace } from '../../src/utils';
@@ -9,6 +10,28 @@ import { MongoDBNamespace } from '../../src/utils';
 describe('ChangeStreamCursor', function () {
   afterEach(function () {
     sinon.restore();
+  });
+
+  describe('#filterOutOptions', function () {
+    const options = {
+      raw: false,
+      useBigInt64: false,
+      promoteLongs: true,
+      promoteValues: true,
+      promoteBuffers: false,
+      ignoreUndefined: false,
+      bsonRegExp: false,
+      serializeFunctions: false,
+      fieldsAsRaw: {},
+      enableUtf8Validation: true,
+      fullDocument: true
+    };
+
+    it('filters out all invalid options', function () {
+      expect(filterOutOptions(options)).to.deep.equal({
+        fullDocument: true
+      });
+    });
   });
 
   describe('get resumeOptions()', function () {

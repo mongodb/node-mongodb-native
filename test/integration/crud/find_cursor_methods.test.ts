@@ -20,8 +20,8 @@ describe('Find Cursor', function () {
     const docs = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }, { a: 6 }];
     const coll = setupClient.db().collection('abstract_cursor');
     const tryNextColl = setupClient.db().collection('try_next');
-    await coll.drop().catch(() => null);
-    await tryNextColl.drop().catch(() => null);
+    await coll.drop();
+    await tryNextColl.drop();
     await coll.insertMany(docs);
     await setupClient.close();
   });
@@ -121,12 +121,12 @@ describe('Find Cursor', function () {
 
     beforeEach(async function () {
       collection = client.db().collection('abstract_cursor');
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }]);
     });
 
     afterEach(async function () {
-      await collection?.drop().catch(() => null);
+      await collection?.drop();
     });
 
     context('when closed before completely iterated', () => {

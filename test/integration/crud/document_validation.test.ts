@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../../src';
-import { ignoreNsNotFound, setupDatabase } from '../shared';
+import { setupDatabase } from '../shared';
 
 describe('Document Validation', function () {
   let client: MongoClient;
@@ -28,7 +28,7 @@ describe('Document Validation', function () {
       const col = db.collection('createValidationCollection');
 
       // Drop the collection
-      await col.drop().catch(ignoreNsNotFound);
+      await col.drop();
       // Create a collection with a validator
       await db.createCollection('createValidationCollection', {
         validator: { a: { $exists: true } }
@@ -56,7 +56,7 @@ describe('Document Validation', function () {
       const col = db.collection('createValidationCollection');
 
       // Drop the collection
-      await col.drop().catch(ignoreNsNotFound);
+      await col.drop();
       // Create a collection with a validator
       await db.createCollection('createValidationCollection', {
         validator: { a: { $exists: true } }
@@ -97,7 +97,7 @@ describe('Document Validation', function () {
       const col = db.collection('createValidationCollection');
 
       // Drop the collection
-      await col.drop().catch(ignoreNsNotFound);
+      await col.drop();
       // Create a collection with a validator
       await db.createCollection('createValidationCollection', {
         validator: { a: { $exists: true } }
@@ -123,7 +123,7 @@ describe('Document Validation', function () {
       const col = db.collection('createValidationCollection');
 
       // Drop the collection
-      await col.drop().catch(ignoreNsNotFound);
+      await col.drop();
       // Create a collection with a validator
       await db.createCollection('createValidationCollection', {
         validator: { a: { $exists: true } }
@@ -176,7 +176,7 @@ describe('Document Validation', function () {
       const col = db.collection('createValidationCollectionOut');
 
       // Drop the collection
-      await col.drop().catch(ignoreNsNotFound);
+      await col.drop();
       // Create a collection with a validator
       await db.createCollection('createValidationCollectionOut', {
         validator: { a: { $exists: true } }

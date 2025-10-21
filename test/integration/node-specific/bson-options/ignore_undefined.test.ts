@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { type MongoClient, ObjectId } from '../../../../src';
-import { assert as test, ignoreNsNotFound, setupDatabase } from '../../shared';
+import { assert as test, setupDatabase } from '../../shared';
 
 describe('Ignore Undefined', function () {
   before(function () {
@@ -181,7 +181,7 @@ describe('Ignore Undefined', function () {
   describe('ignoreUndefined A server', function () {
     it('should correctly execute insert culling undefined', async function () {
       const coll = client.db().collection('insert1');
-      await coll.drop().catch(ignoreNsNotFound);
+      await coll.drop();
       const objectId = new ObjectId();
       const res = await coll.insertOne(
         { _id: objectId, a: 1, b: undefined },
@@ -197,7 +197,7 @@ describe('Ignore Undefined', function () {
 
     it('should correctly execute update culling undefined', async function () {
       const coll = client.db().collection('update1');
-      await coll.drop().catch(ignoreNsNotFound);
+      await coll.drop();
       const objectId = new ObjectId();
       const res = await coll.updateOne(
         { _id: objectId, a: 1, b: undefined },
@@ -214,7 +214,7 @@ describe('Ignore Undefined', function () {
 
     it('should correctly execute remove culling undefined', async function () {
       const coll = client.db().collection('remove1');
-      await coll.drop().catch(ignoreNsNotFound);
+      await coll.drop();
       const objectId = new ObjectId();
       const res = await coll.insertMany([
         { id: objectId, a: 1, b: undefined },
@@ -228,7 +228,7 @@ describe('Ignore Undefined', function () {
 
     it('should correctly execute remove not culling undefined', async function () {
       const coll = client.db().collection('remove1');
-      await coll.drop().catch(ignoreNsNotFound);
+      await coll.drop();
       const objectId = new ObjectId();
       const res = await coll.insertMany([
         { id: objectId, a: 1, b: undefined },

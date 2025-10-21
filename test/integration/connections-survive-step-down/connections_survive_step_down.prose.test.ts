@@ -33,7 +33,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
     // - Create a collection object from the ``MongoClient``, using ``step-down`` for the database and collection name.
     collection = client.db('step-down').collection('step-down');
     // - Drop the test collection, using ``writeConcern`` "majority".
-    await collection.drop({ writeConcern: { w: 'majority' } }).catch(() => null);
+    await collection.drop({ writeConcern: { w: 'majority' } });
     // - Execute the "create" command to recreate the collection, using writeConcern: "majority".
     collection = await client
       .db('step-down')

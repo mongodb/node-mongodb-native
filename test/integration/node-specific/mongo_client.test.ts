@@ -716,7 +716,7 @@ describe('class MongoClient', function () {
     beforeEach(async function () {
       client = this.configuration.newClient();
       collection = client.db('activeCursors').collection('activeCursors');
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await collection.insertMany(Array.from({ length: 50 }, (_, _id) => ({ _id })));
 
       kills.length = 0;
@@ -980,7 +980,7 @@ describe('class MongoClient', function () {
 
       beforeEach(async () => {
         collection = client.db('test').collection('activeCursors');
-        await collection.drop().catch(() => null);
+        await collection.drop();
         await collection.insertMany(Array.from({ length: 50 }, (_, _id) => ({ _id })));
 
         kills.length = 0;

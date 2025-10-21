@@ -20,7 +20,7 @@ export async function before() {
 
   bucket = driver.bucket(driver.client.db(driver.DB_NAME));
 
-  await bucket.drop().catch(() => null);
+  await bucket.drop();
 
   // Create the bucket.
   const stream = bucket.openUploadStream('gridfstest');

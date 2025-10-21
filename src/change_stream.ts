@@ -20,16 +20,7 @@ import type { AggregateOptions } from './operations/aggregate';
 import type { OperationParent } from './operations/command';
 import type { ServerSessionId } from './sessions';
 import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
-import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
-
-const CHANGE_STREAM_OPTIONS = [
-  'resumeAfter',
-  'startAfter',
-  'startAtOperationTime',
-  'fullDocument',
-  'fullDocumentBeforeChange',
-  'showExpandedEvents'
-] as const;
+import { type AnyOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
 const CHANGE_DOMAIN_TYPES = {
   COLLECTION: Symbol('Collection'),
@@ -42,6 +33,14 @@ const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE] as const;
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
+
+const INVALID_STAGE_OPTIONS = buildDisallowedChangeStreamOptions();
+
+export function filterOutOptions(options: AnyOptions): AnyOptions {
+  return Object.fromEntries(
+    Object.entries(options).filter(([k, _]) => !INVALID_STAGE_OPTIONS.has(k))
+  );
+}
 
 /**
  * Represents the logical starting point for a new ChangeStream or resuming a ChangeStream on the server.
@@ -898,7 +897,7 @@ export class ChangeStream<
   private _createChangeStreamCursor(
     options: ChangeStreamOptions | ChangeStreamCursorOptions
   ): ChangeStreamCursor<TSchema, TChange> {
-    const changeStreamStageOptions = filterOptions(options, CHANGE_STREAM_OPTIONS);
+    const changeStreamStageOptions: Document = filterOutOptions(options);
     if (this.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
       changeStreamStageOptions.allChangesForCluster = true;
     }
@@ -1083,4 +1082,77 @@ export class ChangeStream<
       throw changeStreamError;
     }
   }
+}
+
+/**
+ * This function returns a list of options that are *not* supported by the $changeStream
+ * aggregation stage.  This is best-effort - it uses the options "officially supported" by the driver
+ * to derive a list of known, unsupported options for the $changeStream stage.
+ *
+ * Notably, at runtime, users can still provide options unknown to the driver and the driver will
+ * *not* filter them out of the options object (see NODE-5510).
+ */
+function buildDisallowedChangeStreamOptions(): Set<string> {
+  /** hard-coded list of allowed ChangeStream options */
+  type CSOptions =
+    | 'resumeAfter'
+    | 'startAfter'
+    | 'startAtOperationTime'
+    | 'fullDocument'
+    | 'fullDocumentBeforeChange'
+    | 'showExpandedEvents';
+
+  /**
+   * a type representing all known options that the driver supports that are *not* change stream stage options.
+   *
+   * each known key is mapped to a non-optional string, so that if new driver-specific options are added, the
+   * instantiation of `denyList` below results in a TS error.
+   */
+  type DisallowedOptions = {
+    [k in Exclude<
+      keyof ChangeStreamOptions & { timeoutContext: TimeoutContext },
+      CSOptions
+    >]: string;
+  };
+
+  const denyList: DisallowedOptions = {
+    allowDiskUse: '',
+    authdb: '',
+    batchSize: '',
+    bsonRegExp: '',
+    bypassDocumentValidation: '',
+    bypassPinningCheck: '',
+    checkKeys: '',
+    collation: '',
+    comment: '',
+    cursor: '',
+    dbName: '',
+    enableUtf8Validation: '',
+    explain: '',
+    fieldsAsRaw: '',
+    hint: '',
+    ignoreUndefined: '',
+    let: '',
+    maxAwaitTimeMS: '',
+    maxTimeMS: '',
+    omitMaxTimeMS: '',
+    out: '',
+    promoteBuffers: '',
+    promoteLongs: '',
+    promoteValues: '',
+    raw: '',
+    rawData: '',
+    readConcern: '',
+    readPreference: '',
+    serializeFunctions: '',
+    session: '',
+    timeoutContext: '',
+    timeoutMS: '',
+    timeoutMode: '',
+    useBigInt64: '',
+    willRetryWrite: '',
+    writeConcern: ''
+  };
+
+  return new Set(Object.keys(denyList));
 }

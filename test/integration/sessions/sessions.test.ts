@@ -386,7 +386,7 @@ describe('Sessions Spec', function () {
         .connect();
       // reset test collection
       testCollection = utilClient.db('test').collection('too.many.sessions');
-      await testCollection.drop().catch(() => null);
+      await testCollection.drop();
       await utilClient.close();
 
       // Fresh unused client for the test
