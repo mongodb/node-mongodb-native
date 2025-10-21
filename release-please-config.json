@@ -10,9 +10,7 @@
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false,
       "draft": false,
-      "prerelease-type": "alpha",
-      "prerelease": true,
-      "versioning": "prerelease"
+      "prerelease": false
     }
   }
 }
