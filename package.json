@@ -26,14 +26,14 @@
   },
   "dependencies": {
     "@mongodb-js/saslprep": "^1.3.0",
-    "bson": "^6.10.4",
-    "mongodb-connection-string-url": "^3.0.2"
+    "bson": "^7.0.0-alpha",
+    "mongodb-connection-string-url": "^4.0.0-alpha"
   },
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.806.0",
-    "@mongodb-js/zstd": "^2.0.0",
+    "@mongodb-js/zstd": "^3.0.0-alpha",
     "gcp-metadata": "^7.0.1",
-    "kerberos": "^2.0.1",
+    "kerberos": "3.0.0-alpha",
     "mongodb-client-encryption": "^7.0.0-alpha",
     "snappy": "^7.3.2",
     "socks": "^2.8.6"
@@ -67,7 +67,7 @@
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@microsoft/api-extractor": "^7.52.11",
     "@microsoft/tsdoc-config": "^0.17.1",
-    "@mongodb-js/zstd": "^2.0.1",
+    "@mongodb-js/zstd": "^3.0.0-alpha",
     "@types/chai": "^4.3.17",
     "@types/chai-subset": "^1.3.5",
     "@types/express": "^5.0.3",
