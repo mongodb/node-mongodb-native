@@ -97,7 +97,6 @@
     "mocha": "^11.7.1",
     "mocha-sinon": "^2.1.2",
     "mongodb-client-encryption": "^7.0.0-alpha.1",
-    "mongodb-legacy": "^6.1.3",
     "nyc": "^15.1.0",
     "prettier": "^3.6.2",
     "semver": "^7.7.2",

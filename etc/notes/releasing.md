@@ -162,6 +162,5 @@ The following is a list of packages the Node.js team is responsible for and thes
 - https://github.com/mongodb-js/mongodb-client-encryption
 - https://github.com/mongodb-js/kerberos
 - https://github.com/mongodb-js/zstd
-- https://github.com/mongodb-js/nodejs-mongodb-legacy
 - https://github.com/mongodb-js/mongodb-connection-string-url
 - https://github.com/mongodb-js/dbx-js-tools (Node.js team developer tools, not a product)
