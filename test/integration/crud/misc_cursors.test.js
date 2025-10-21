@@ -10,9 +10,10 @@ const sinon = require('sinon');
 const { Writable } = require('stream');
 const { once, on } = require('events');
 const { setTimeout } = require('timers');
-const { ReadPreference } = require('../../mongodb');
-const { ServerType, MongoClientClosedError } = require('../../mongodb');
-const { formatSort } = require('../../mongodb');
+const { ReadPreference } = require('../../../src/read_preference');
+const { ServerType } = require('../../../src/sdam/common');
+const { MongoClientClosedError } = require('../../../src/error');
+const { formatSort } = require('../../../src/sort');
 
 describe('Cursor', function () {
   before(function () {
@@ -23,6 +24,9 @@ describe('Cursor', function () {
     ]);
   });
 
+  /**
+   * @type {import('../../../src/mongo_client').MongoClient}
+   */
   let client;
 
   beforeEach(async function () {
@@ -64,34 +68,21 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('close_on_next', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('close_on_next');
 
-          collection.insert(
-            [{ a: 1 }, { a: 1 }, { a: 1 }],
-            configuration.writeConcernMax(),
-            err => {
-              expect(err).to.not.exist;
+      await collection.insert([{ a: 1 }, { a: 1 }, { a: 1 }], configuration.writeConcernMax());
 
-              var cursor = collection.find({});
-              this.defer(() => cursor.close());
+      var cursor = collection.find({});
+      // this.defer(() => cursor.close());
 
-              cursor.batchSize(2);
-              cursor.next(err => {
-                expect(err).to.not.exist;
-                done();
-              });
-            }
-          );
-        });
-      });
+      cursor.batchSize(2);
+      await cursor.next();
+      await cursor.close();
     }
   });
 
@@ -102,31 +93,19 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('trigger_get_more', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('trigger_get_more');
 
-          collection.insert(
-            [{ a: 1 }, { a: 1 }, { a: 1 }],
-            configuration.writeConcernMax(),
-            err => {
-              expect(err).to.not.exist;
-              const cursor = collection.find({}).batchSize(2);
-              this.defer(() => cursor.close());
-              cursor.toArray(err => {
-                expect(err).to.not.exist;
-                done();
-              });
-            }
-          );
-        });
-      });
+      await collection.insert([{ a: 1 }, { a: 1 }, { a: 1 }], configuration.writeConcernMax());
+
+      const cursor = collection.find({}).batchSize(2);
+
+      await cursor.toArray();
+      await cursor.close();
     }
   });
 
@@ -137,27 +116,18 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_explain', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_explain');
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            collection.find({ a: 1 }).explain((err, explanation) => {
-              expect(err).to.not.exist;
-              expect(explanation).to.exist;
-              done();
-            });
-          });
-        });
-      });
+      const explanation = await collection.find({ a: 1 }).explain();
+
+      expect(explanation).to.exist;
     }
   });
 
@@ -168,79 +138,48 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_count', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_count');
+      await collection.find().count();
 
-          collection.find().count(err => {
-            expect(err).to.not.exist;
+      async function insert() {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
+        }
+      }
 
-            function insert(callback) {
-              var total = 10;
+      async function finished() {
+        let count = await collection.find().count();
+        test.equal(10, count);
+        test.ok(count.constructor === Number);
 
-              for (var i = 0; i < 10; i++) {
-                collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                  expect(e).to.not.exist;
-                  total = total - 1;
-                  if (total === 0) callback();
-                });
-              }
-            }
+        count = await collection.find({}, { limit: 5 }).count();
+        test.equal(5, count);
 
-            function finished() {
-              collection.find().count((err, count) => {
-                expect(err).to.not.exist;
-                test.equal(10, count);
-                test.ok(count.constructor === Number);
+        count = await collection.find({}, { skip: 5 }).count();
+        test.equal(5, count);
 
-                collection.find({}, { limit: 5 }).count((err, count) => {
-                  expect(err).to.not.exist;
-                  test.equal(5, count);
+        count = await db.collection('acollectionthatdoesn').count();
 
-                  collection.find({}, { skip: 5 }).count((err, count) => {
-                    expect(err).to.not.exist;
-                    test.equal(5, count);
+        test.equal(0, count);
 
-                    db.collection('acollectionthatdoesn').count((err, count) => {
-                      expect(err).to.not.exist;
-                      test.equal(0, count);
+        var cursor = collection.find();
+        count = await cursor.count();
+        test.equal(10, count);
 
-                      var cursor = collection.find();
-                      cursor.count((err, count) => {
-                        expect(err).to.not.exist;
-                        test.equal(10, count);
+        await cursor.forEach(() => { });
 
-                        cursor.forEach(
-                          () => {},
-                          err => {
-                            expect(err).to.not.exist;
-                            cursor.count((err, count2) => {
-                              expect(err).to.not.exist;
-                              expect(count2).to.equal(10);
-                              expect(count2).to.equal(count);
-                              done();
-                            });
-                          }
-                        );
-                      });
-                    });
-                  });
-                });
-              });
-            }
+        const count2 = await cursor.count();
+        expect(count2).to.equal(10);
+        expect(count2).to.equal(count);
+      }
 
-            insert(function () {
-              finished();
-            });
-          });
-        });
-      });
+      await insert();
+      await finished();
     }
   });
 
@@ -271,79 +210,47 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_count.ext', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_count.ext');
 
-          collection.find().count(err => {
-            expect(err).to.not.exist;
+      await collection.find().count();
 
-            function insert(callback) {
-              var total = 10;
+      async function insert() {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
+        }
+      }
 
-              for (var i = 0; i < 10; i++) {
-                collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                  expect(e).to.not.exist;
-                  total = total - 1;
-                  if (total === 0) callback();
-                });
-              }
-            }
+      async function finished() {
+        let count = await collection.find().count();
+        test.equal(10, count);
+        test.ok(count.constructor === Number);
 
-            function finished() {
-              collection.find().count((err, count) => {
-                expect(err).to.not.exist;
-                test.equal(10, count);
-                test.ok(count.constructor === Number);
+        count = await collection.find({}, { limit: 5 }).count();
+        test.equal(5, count);
 
-                collection.find({}, { limit: 5 }).count((err, count) => {
-                  expect(err).to.not.exist;
-                  test.equal(5, count);
+        count = await collection.find({}, { skip: 5 }).count();
+        test.equal(5, count);
 
-                  collection.find({}, { skip: 5 }).count((err, count) => {
-                    expect(err).to.not.exist;
-                    test.equal(5, count);
+        count = await db.collection('acollectionthatdoesn').count();
+        test.equal(0, count);
 
-                    db.collection('acollectionthatdoesn').count((err, count) => {
-                      expect(err).to.not.exist;
-                      test.equal(0, count);
+        var cursor = collection.find();
+        count = await cursor.count();
+        test.equal(10, count);
 
-                      var cursor = collection.find();
-                      cursor.count((err, count) => {
-                        expect(err).to.not.exist;
-                        test.equal(10, count);
+        await cursor.forEach(() => { });
 
-                        cursor.forEach(
-                          () => {},
-                          err => {
-                            expect(err).to.not.exist;
-                            cursor.count((err, count2) => {
-                              expect(err).to.not.exist;
-                              expect(count2).to.equal(10);
-                              expect(count2).to.equal(count);
-                              done();
-                            });
-                          }
-                        );
-                      });
-                    });
-                  });
-                });
-              });
-            }
-
-            insert(function () {
-              finished();
-            });
-          });
-        });
-      });
+        const count2 = await cursor.count();
+        expect(count2).to.equal(10);
+        expect(count2).to.equal(count);
+      }
+      await insert();
+      await finished();
     }
   });
 
@@ -354,42 +261,29 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_each', (err, collection) => {
-          expect(err).to.not.exist;
-          function insert(callback) {
-            var total = 10;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_each');
+      async function insert() {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
+        }
+      }
 
-            for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                expect(e).to.not.exist;
-                total = total - 1;
-                if (total === 0) callback();
-              });
-            }
-          }
+      function finished() {
+        const cursor = collection.find();
 
-          function finished() {
-            const cursor = collection.find();
-
-            test.throws(function () {
-              cursor.forEach();
-            });
-
-            done();
-          }
-
-          insert(function () {
-            finished();
-          });
+        test.throws(function () {
+          cursor.forEach();
         });
-      });
+      }
+
+      await insert();
+
+      finished();
     }
   });
 
@@ -400,44 +294,25 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_cursor_limit', (err, collection) => {
-          function insert(callback) {
-            var total = 10;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_cursor_limit');
 
-            for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                expect(e).to.not.exist;
-                total = total - 1;
-                if (total === 0) callback();
-              });
-            }
-          }
+      async function insert() {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
+        }
+      }
 
-          function finished() {
-            collection
-              .find()
-              .limit(5)
-              .toArray((err, items) => {
-                test.equal(5, items.length);
-
-                // Let's close the db
-                expect(err).to.not.exist;
-                done();
-              });
-          }
-
-          insert(function () {
-            finished();
-          });
-        });
-      });
+      async function finished() {
+        const items = await collection.find().limit(5).toArray();
+        test.equal(5, items.length);
+      }
+      await insert();
+      await finished();
     }
   });
 
@@ -448,45 +323,26 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_cursor_negative_one_limit', (err, collection) => {
-          expect(err).to.not.exist;
-          function insert(callback) {
-            var total = 10;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_cursor_negative_one_limit');
 
-            for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                expect(e).to.not.exist;
-                total = total - 1;
-                if (total === 0) callback();
-              });
-            }
-          }
+      async function insert() {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
+        }
+      }
 
-          function finished() {
-            collection
-              .find()
-              .limit(-1)
-              .toArray((err, items) => {
-                expect(err).to.not.exist;
-                test.equal(1, items.length);
+      async function finished() {
+        const items = await collection.find().limit(-1).toArray();
+        test.equal(1, items.length);
+      }
 
-                // Let's close the db
-                done();
-              });
-          }
-
-          insert(function () {
-            finished();
-          });
-        });
-      });
+      await insert();
+      await finished();
     }
   });
 
@@ -497,45 +353,25 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_cursor_any_negative_limit', (err, collection) => {
-          expect(err).to.not.exist;
-          function insert(callback) {
-            var total = 10;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_cursor_any_negative_limit');
 
-            for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                expect(e).to.not.exist;
-                total = total - 1;
-                if (total === 0) callback();
-              });
-            }
-          }
+      async function insert() {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
+        }
+      }
 
-          function finished() {
-            collection
-              .find()
-              .limit(-5)
-              .toArray((err, items) => {
-                expect(err).to.not.exist;
-                test.equal(5, items.length);
-
-                // Let's close the db
-                done();
-              });
-          }
-
-          insert(function () {
-            finished();
-          });
-        });
-      });
+      async function finished() {
+        const items = await collection.find().limit(-5).toArray();
+        test.equal(5, items.length);
+      }
+      await insert();
+      await finished();
     }
   });
 
@@ -546,31 +382,25 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions_2', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_limit_exceptions_2');
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-            const cursor = collection.find();
-            this.defer(() => cursor.close());
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            try {
-              cursor.limit('not-an-integer');
-            } catch (err) {
-              test.equal('Operation "limit" requires an integer', err.message);
-            }
+      const cursor = collection.find();
+      // this.defer(() => cursor.close());
 
-            done();
-          });
-        });
-      });
+      try {
+        cursor.limit('not-an-integer');
+      } catch (err) {
+        test.equal('Operation "limit" requires an integer', err.message);
+      }
+
+      await cursor.clone();
     }
   });
 
@@ -581,33 +411,22 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_limit_exceptions');
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            const cursor = collection.find();
-            this.defer(() => cursor.close());
+      const cursor = collection.find();
+      // this.defer(() => cursor.close());
 
-            cursor.next(err => {
-              expect(err).to.not.exist;
-              expect(() => {
-                cursor.limit(1);
-              }).to.throw(/Cursor is already initialized/);
-
-              done();
-            });
-          });
-        });
-      });
+      await cursor.next();
+      expect(() => {
+        cursor.limit(1);
+      }).to.throw(/Cursor is already initialized/);
     }
   });
 
@@ -619,31 +438,20 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_limit_exceptions_1', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_limit_exceptions_1');
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            const cursor = collection.find();
-            cursor.close(err => {
-              expect(err).to.not.exist;
-              expect(() => {
-                cursor.limit(1);
-              }).to.throw(/not extensible/);
-
-              done();
-            });
-          });
-        });
-      });
+      const cursor = collection.find();
+      await cursor.close();
+      expect(() => {
+        cursor.limit(1);
+      }).to.throw(/not extensible/);
     }
   });
 
@@ -654,66 +462,46 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_skip', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_skip');
 
-          const insert = callback => {
-            var total = 10;
-            for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                expect(e).to.not.exist;
+      const insert = async () => {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
+        }
+      };
 
-                total = total - 1;
-                if (total === 0) callback();
-              });
-            }
-          };
+      await insert();
+      const cursor = collection.find();
+      // this.defer(() => cursor.close());
 
-          insert(() => {
-            const cursor = collection.find();
-            this.defer(() => cursor.close());
+      let count = await cursor.count();
+      test.equal(10, count);
 
-            cursor.count((err, count) => {
-              expect(err).to.not.exist;
-              test.equal(10, count);
-            });
+      const cursor2 = collection.find();
+      // this.defer(() => cursor2.close());
 
-            const cursor2 = collection.find();
-            this.defer(() => cursor2.close());
+      const items = await cursor2.toArray();
+      test.equal(10, items.length);
 
-            cursor2.toArray((err, items) => {
-              expect(err).to.not.exist;
-              test.equal(10, items.length);
+      const items2 = await collection.find().skip(2).toArray();
+      test.equal(8, items2.length);
 
-              collection
-                .find()
-                .skip(2)
-                .toArray((err, items2) => {
-                  expect(err).to.not.exist;
-                  test.equal(8, items2.length);
+      // Check that we have the same elements
+      var numberEqual = 0;
+      var sliced = items.slice(2, 10);
 
-                  // Check that we have the same elements
-                  var numberEqual = 0;
-                  var sliced = items.slice(2, 10);
+      for (var i = 0; i < sliced.length; i++) {
+        if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
+      }
 
-                  for (var i = 0; i < sliced.length; i++) {
-                    if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
-                  }
-
-                  test.equal(8, numberEqual);
-                  done();
-                });
-            });
-          });
-        });
-      });
+      test.equal(8, numberEqual);
+      await cursor.close();
+      await cursor2.close();
     }
   });
 
@@ -724,48 +512,36 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_skip_exceptions', (err, collection) => {
-          expect(err).to.not.exist;
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_skip_exceptions');
 
-            try {
-              collection.find().skip('not-an-integer');
-            } catch (err) {
-              test.equal('Operation "skip" requires an integer', err.message);
-            }
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            const cursor = collection.find();
-            cursor.next(err => {
-              expect(err).to.not.exist;
+      try {
+        collection.find().skip('not-an-integer');
+      } catch (err) {
+        test.equal('Operation "skip" requires an integer', err.message);
+      }
 
-              // NOTE: who cares what you set when closed, if not initialized
-              // expect(() => {
-              //   cursor.skip(1);
-              // }).to.throw(/not extensible/);
+      const cursor = collection.find();
+      await cursor.next();
 
-              const cursor2 = collection.find();
-              cursor2.close(err => {
-                expect(err).to.not.exist;
+      // NOTE: who cares what you set when closed, if not initialized
+      // expect(() => {
+      //   cursor.skip(1);
+      // }).to.throw(/not extensible/);
 
-                // NOTE: who cares what you set when closed, if not initialized
-                // expect(() => {
-                //   cursor2.skip(1);
-                // }).to.throw(/not extensible/);
+      const cursor2 = collection.find();
+      await cursor2.close();
 
-                done();
-              });
-            });
-          });
-        });
-      });
+      // NOTE: who cares what you set when closed, if not initialized
+      // expect(() => {
+      //   cursor2.skip(1);
+      // }).to.throw(/not extensible/);
     }
   });
 
@@ -776,54 +552,39 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_batchSize_exceptions', (err, collection) => {
-          expect(err).to.not.exist;
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_batchSize_exceptions');
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            let cursor = collection.find();
-            try {
-              cursor.batchSize('not-an-integer');
-              test.ok(false);
-            } catch (err) {
-              test.equal('Operation "batchSize" requires an integer', err.message);
-            }
+      let cursor = collection.find();
+      try {
+        cursor.batchSize('not-an-integer');
+        test.ok(false);
+      } catch (err) {
+        test.equal('Operation "batchSize" requires an integer', err.message);
+      }
 
-            cursor = collection.find();
-            cursor.next(err => {
-              expect(err).to.not.exist;
+      cursor = collection.find();
+      await cursor.next();
 
-              cursor.next(err => {
-                expect(err).to.not.exist;
+      await cursor.next();
 
-                // NOTE: who cares what you set when closed, if not initialized
-                // expect(() => {
-                //   cursor.batchSize(1);
-                // }).to.throw(/not extensible/);
+      // NOTE: who cares what you set when closed, if not initialized
+      // expect(() => {
+      //   cursor.batchSize(1);
+      // }).to.throw(/not extensible/);
 
-                const cursor2 = collection.find();
-                cursor2.close(err => {
-                  expect(err).to.not.exist;
+      const cursor2 = collection.find();
+      await cursor2.close();
 
-                  // NOTE: who cares what you set when closed, if not initialized
-                  // expect(() => {
-                  //   cursor2.batchSize(1);
-                  // }).to.throw(/not extensible/);
-
-                  done();
-                });
-              });
-            });
-          });
-        });
-      });
+      // NOTE: who cares what you set when closed, if not initialized
+      // expect(() => {
+      //   cursor2.batchSize(1);
+      // }).to.throw(/not extensible/);
     }
   });
 
@@ -834,67 +595,49 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_multiple_batch_size', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_multiple_batch_size');
 
-          //test with the last batch that is a multiple of batchSize
-          var records = 4;
-          var batchSize = 2;
-          var docs = [];
-          for (var i = 0; i < records; i++) {
-            docs.push({ a: i });
-          }
+      //test with the last batch that is a multiple of batchSize
+      var records = 4;
+      var batchSize = 2;
+      var docs = [];
+      for (var i = 0; i < records; i++) {
+        docs.push({ a: i });
+      }
 
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            const cursor = collection.find({}, { batchSize: batchSize });
+      const cursor = collection.find({}, { batchSize: batchSize });
 
-            //1st
-            cursor.next((err, items) => {
-              expect(err).to.not.exist;
-              test.equal(1, cursor.bufferedCount());
-              test.ok(items != null);
+      //1st
+      let items = await cursor.next();
+      test.equal(1, cursor.bufferedCount());
+      test.ok(items != null);
 
-              //2nd
-              cursor.next((err, items) => {
-                expect(err).to.not.exist;
-                test.equal(0, cursor.bufferedCount());
-                test.ok(items != null);
+      //2nd
+      items = await cursor.next();
+      test.equal(0, cursor.bufferedCount());
+      test.ok(items != null);
 
-                //3rd
-                cursor.next((err, items) => {
-                  expect(err).to.not.exist;
-                  test.equal(1, cursor.bufferedCount());
-                  test.ok(items != null);
+      //3rd
+      items = await cursor.next();
+      test.equal(1, cursor.bufferedCount());
+      test.ok(items != null);
 
-                  //4th
-                  cursor.next((err, items) => {
-                    expect(err).to.not.exist;
-                    test.equal(0, cursor.bufferedCount());
-                    test.ok(items != null);
+      //4th
+      items = await cursor.next();
+      test.equal(0, cursor.bufferedCount());
+      test.ok(items != null);
 
-                    //No more
-                    cursor.next((err, items) => {
-                      expect(err).to.not.exist;
-                      test.ok(items == null);
-                      test.ok(cursor.closed);
-                      done();
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
+      //No more
+      items = await cursor.next();
+      test.ok(items == null);
+      test.ok(cursor.closed);
     }
   });
 
@@ -905,61 +648,43 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_limit_greater_than_batch_size', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_limit_greater_than_batch_size');
 
-          var limit = 4;
-          var records = 10;
-          var batchSize = 3;
-          var docs = [];
-          for (var i = 0; i < records; i++) {
-            docs.push({ a: i });
-          }
+      var limit = 4;
+      var records = 10;
+      var batchSize = 3;
+      var docs = [];
+      for (var i = 0; i < records; i++) {
+        docs.push({ a: i });
+      }
 
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            var cursor = collection.find({}, { batchSize: batchSize, limit: limit });
-            //1st
-            cursor.next(err => {
-              expect(err).to.not.exist;
-              test.equal(2, cursor.bufferedCount());
+      var cursor = collection.find({}, { batchSize: batchSize, limit: limit });
+      //1st
+      await cursor.next();
+      test.equal(2, cursor.bufferedCount());
 
-              //2nd
-              cursor.next(err => {
-                expect(err).to.not.exist;
-                test.equal(1, cursor.bufferedCount());
+      //2nd
+      await cursor.next();
+      test.equal(1, cursor.bufferedCount());
 
-                //3rd
-                cursor.next(err => {
-                  expect(err).to.not.exist;
-                  test.equal(0, cursor.bufferedCount());
+      //3rd
+      await cursor.next();
+      test.equal(0, cursor.bufferedCount());
 
-                  //4th
-                  cursor.next(err => {
-                    expect(err).to.not.exist;
+      //4th
+      await cursor.next();
 
-                    //No more
-                    cursor.next((err, items) => {
-                      expect(err).to.not.exist;
-                      test.ok(items == null);
-                      test.ok(cursor.closed);
-                      done();
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
+      //No more
+      const items = await cursor.next();
+      test.ok(items == null);
+      test.ok(cursor.closed);
     }
   });
 
@@ -970,50 +695,37 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_limit_less_than_batch_size', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_limit_less_than_batch_size');
 
-          var limit = 2;
-          var records = 10;
-          var batchSize = 4;
-          var docs = [];
-          for (var i = 0; i < records; i++) {
-            docs.push({ a: i });
-          }
+      var limit = 2;
+      var records = 10;
+      var batchSize = 4;
+      var docs = [];
+      for (var i = 0; i < records; i++) {
+        docs.push({ a: i });
+      }
 
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            var cursor = collection.find({}, { batchSize: batchSize, limit: limit });
-            //1st
-            cursor.next(err => {
-              expect(err).to.not.exist;
-              test.equal(1, cursor.bufferedCount());
+      var cursor = collection.find({}, { batchSize: batchSize, limit: limit });
+      //1st
+      await cursor.next();
+      test.equal(1, cursor.bufferedCount());
 
-              //2nd
-              cursor.next(err => {
-                expect(err).to.not.exist;
-                test.equal(0, cursor.bufferedCount());
+      //2nd
+      await cursor.next();
+      test.equal(0, cursor.bufferedCount());
 
-                //No more
-                cursor.next((err, items) => {
-                  expect(err).to.not.exist;
-                  test.ok(items == null);
-                  test.ok(cursor.closed);
-                  done();
-                });
-              });
-            });
-          });
-        });
-      });
+      //No more
+      const items = await cursor.next();
+
+      test.ok(items == null);
+      test.ok(cursor.closed);
     }
   });
 
@@ -1024,57 +736,37 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('shouldHandleSkipLimitChaining');
+      const db = client.db(configuration.db);
+      var collection = db.collection('shouldHandleSkipLimitChaining');
 
-        function insert(callback) {
-          var total = 10;
-
-          for (var i = 0; i < 10; i++) {
-            collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-              expect(e).to.not.exist;
-              total = total - 1;
-              if (total === 0) callback();
-            });
-          }
+      async function insert() {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
         }
+      }
 
-        function finished() {
-          collection.find().toArray((err, items) => {
-            expect(err).to.not.exist;
-            test.equal(10, items.length);
+      async function finished() {
+        const items = await collection.find().toArray();
+        test.equal(10, items.length);
 
-            collection
-              .find()
-              .limit(5)
-              .skip(3)
-              .toArray(function (err, items2) {
-                expect(err).to.not.exist;
-                test.equal(5, items2.length);
+        const items2 = await collection.find().limit(5).skip(3).toArray();
+        test.equal(5, items2.length);
 
-                // Check that we have the same elements
-                var numberEqual = 0;
-                var sliced = items.slice(3, 8);
+        // Check that we have the same elements
+        var numberEqual = 0;
+        var sliced = items.slice(3, 8);
 
-                for (var i = 0; i < sliced.length; i++) {
-                  if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
-                }
-                test.equal(5, numberEqual);
-                done();
-              });
-          });
+        for (var i = 0; i < sliced.length; i++) {
+          if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
         }
-
-        insert(function () {
-          finished();
-        });
-      });
+        test.equal(5, numberEqual);
+      }
+      await insert();
+      await finished();
     }
   });
 
@@ -1085,59 +777,37 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_limit_skip_chaining_inline', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_limit_skip_chaining_inline');
 
-          function insert(callback) {
-            var total = 10;
+      async function insert() {
+        for (var i = 0; i < 10; i++) {
+          await collection.insert({ x: i }, configuration.writeConcernMax());
+        }
+      }
 
-            for (var i = 0; i < 10; i++) {
-              collection.insert({ x: i }, configuration.writeConcernMax(), e => {
-                expect(e).to.not.exist;
-                total = total - 1;
-                if (total === 0) callback();
-              });
-            }
-          }
+      async function finished() {
+        const items = await collection.find().toArray();
+        test.equal(10, items.length);
 
-          function finished() {
-            collection.find().toArray((err, items) => {
-              expect(err).to.not.exist;
-              test.equal(10, items.length);
+        const items2 = await collection.find().limit(5).skip(3).toArray();
+        test.equal(5, items2.length);
 
-              collection
-                .find()
-                .limit(5)
-                .skip(3)
-                .toArray(function (err, items2) {
-                  expect(err).to.not.exist;
-                  test.equal(5, items2.length);
+        // Check that we have the same elements
+        var numberEqual = 0;
+        var sliced = items.slice(3, 8);
 
-                  // Check that we have the same elements
-                  var numberEqual = 0;
-                  var sliced = items.slice(3, 8);
-
-                  for (var i = 0; i < sliced.length; i++) {
-                    if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
-                  }
-                  test.equal(5, numberEqual);
-                  done();
-                });
-            });
-          }
-
-          insert(function () {
-            finished();
-          });
-        });
-      });
+        for (var i = 0; i < sliced.length; i++) {
+          if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
+        }
+        test.equal(5, numberEqual);
+      }
+      await insert();
+      await finished();
     }
   });
 
@@ -1148,24 +818,17 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_close_no_query_sent', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_close_no_query_sent');
 
-          const cursor = collection.find();
-          cursor.close(err => {
-            expect(err).to.not.exist;
-            test.equal(true, cursor.closed);
-            done();
-          });
-        });
-      });
+      const cursor = collection.find();
+      await cursor.close();
+
+      test.equal(true, cursor.closed);
     }
   });
 
@@ -1176,78 +839,55 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var COUNT = 1000;
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_refill_via_get_more', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_refill_via_get_more');
 
-          function insert(callback) {
-            var docs = [];
+      async function insert() {
+        var docs = [];
 
-            for (var i = 0; i < COUNT; i++) {
-              docs.push({ a: i });
-            }
+        for (var i = 0; i < COUNT; i++) {
+          docs.push({ a: i });
+        }
 
-            collection.insertMany(docs, configuration.writeConcernMax(), callback);
-          }
+        await collection.insertMany(docs, configuration.writeConcernMax());
+      }
 
-          function finished() {
-            collection.count((err, count) => {
-              expect(err).to.not.exist;
-              test.equal(COUNT, count);
-            });
+      async function finished() {
+        let count = await collection.count();
+        test.equal(COUNT, count);
 
-            var total = 0;
-            collection.find({}, {}).forEach(
-              item => {
-                total = total + item.a;
-              },
-              err => {
-                expect(err).to.not.exist;
-                test.equal(499500, total);
-
-                collection.count((err, count) => {
-                  expect(err).to.not.exist;
-                  test.equal(COUNT, count);
-                });
-
-                collection.count((err, count) => {
-                  expect(err).to.not.exist;
-                  test.equal(COUNT, count);
-
-                  var total2 = 0;
-                  collection.find().forEach(
-                    item => {
-                      total2 = total2 + item.a;
-                    },
-                    err => {
-                      expect(err).to.not.exist;
-                      test.equal(499500, total2);
-                      collection.count((err, count) => {
-                        expect(err).to.not.exist;
-                        test.equal(COUNT, count);
-                        test.equal(total, total2);
-                        done();
-                      });
-                    }
-                  );
-                });
-              }
-            );
-          }
-
-          insert(function () {
-            finished();
-          });
+        var total = 0;
+        await collection.find({}, {}).forEach(item => {
+          total = total + item.a;
         });
-      });
+
+        test.equal(499500, total);
+
+        count = await collection.count();
+        test.equal(COUNT, count);
+
+        count = await collection.count();
+        test.equal(COUNT, count);
+
+        var total2 = 0;
+        await collection.find().forEach(item => {
+          total2 = total2 + item.a;
+        });
+
+        test.equal(499500, total2);
+        count = await collection.count();
+
+        test.equal(COUNT, count);
+        test.equal(total, total2);
+      }
+      await insert();
+      await finished();
     }
   });
 
@@ -1258,78 +898,56 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_refill_via_get_more_alt_coll', (err, collection) => {
-          expect(err).to.not.exist;
-          var COUNT = 1000;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_refill_via_get_more_alt_coll');
 
-          function insert(callback) {
-            var docs = [];
+      var COUNT = 1000;
 
-            for (var i = 0; i < COUNT; i++) {
-              docs.push({ a: i });
-            }
+      async function insert() {
+        var docs = [];
 
-            collection.insertMany(docs, configuration.writeConcernMax(), callback);
-          }
+        for (var i = 0; i < COUNT; i++) {
+          docs.push({ a: i });
+        }
 
-          function finished() {
-            collection.count((err, count) => {
-              expect(err).to.not.exist;
-              test.equal(1000, count);
-            });
+        await collection.insertMany(docs, configuration.writeConcernMax());
+      }
 
-            var total = 0;
-            collection.find().forEach(
-              doc => {
-                total = total + doc.a;
-              },
-              err => {
-                expect(err).to.not.exist;
-                test.equal(499500, total);
+      async function finished() {
+        let count = await collection.count();
+        test.equal(1000, count);
 
-                collection.count((err, count) => {
-                  expect(err).to.not.exist;
-                  test.equal(1000, count);
-                });
-
-                collection.count((err, count) => {
-                  expect(err).to.not.exist;
-                  test.equal(1000, count);
-
-                  var total2 = 0;
-                  collection.find().forEach(
-                    doc => {
-                      total2 = total2 + doc.a;
-                    },
-                    err => {
-                      expect(err).to.not.exist;
-                      expect(total2).to.equal(499500);
-
-                      collection.count((err, count) => {
-                        expect(err).to.not.exist;
-                        expect(count).to.equal(1000);
-                        expect(total2).to.equal(total);
-                        done();
-                      });
-                    }
-                  );
-                });
-              }
-            );
-          }
-
-          insert(function () {
-            finished();
-          });
+        var total = 0;
+        await collection.find().forEach(doc => {
+          total = total + doc.a;
         });
-      });
+
+        test.equal(499500, total);
+
+        count = await collection.count();
+        test.equal(1000, count);
+
+        count = await collection.count();
+        test.equal(1000, count);
+
+        var total2 = 0;
+        await collection.find().forEach(doc => {
+          total2 = total2 + doc.a;
+        });
+
+        expect(total2).to.equal(499500);
+
+        count = await collection.count();
+
+        expect(count).to.equal(1000);
+        expect(total2).to.equal(total);
+      }
+      await insert();
+      await finished();
     }
   });
 
@@ -1340,32 +958,20 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_close_after_query_sent', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_close_after_query_sent');
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            const cursor = collection.find({ a: 1 });
-            cursor.next(err => {
-              expect(err).to.not.exist;
+      const cursor = collection.find({ a: 1 });
+      await cursor.next();
 
-              cursor.close(err => {
-                expect(err).to.not.exist;
-                test.equal(true, cursor.closed);
-                done();
-              });
-            });
-          });
-        });
-      });
+      await cursor.close();
+      test.equal(true, cursor.closed);
     }
   });
 
@@ -1376,32 +982,19 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_count_with_fields', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_count_with_fields');
 
-          collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax());
 
-            collection
-              .find({})
-              .project({ a: 1 })
-              .toArray((err, items) => {
-                expect(err).to.not.exist;
-                test.equal(1, items.length);
-                test.equal(2, items[0].a);
-                expect(items[0].x).to.not.exist;
-                done();
-              });
-          });
-        });
-      });
+      const items = await collection.find({}).project({ a: 1 }).toArray();
+      test.equal(1, items.length);
+      test.equal(2, items[0].a);
+      expect(items[0].x).to.not.exist;
     }
   });
 
@@ -1412,29 +1005,20 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_count_with_fields_using_exclude', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('test_count_with_fields_using_exclude');
 
-          collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insertOne({ x: 1, a: 2 }, configuration.writeConcernMax());
 
-            collection.find({}, { projection: { x: 0 } }).toArray((err, items) => {
-              expect(err).to.not.exist;
-              test.equal(1, items.length);
-              test.equal(2, items[0].a);
-              expect(items[0].x).to.not.exist;
-              done();
-            });
-          });
-        });
-      });
+      const items = await collection.find({}, { projection: { x: 0 } }).toArray();
+
+      test.equal(1, items.length);
+      test.equal(2, items[0].a);
+      expect(items[0].x).to.not.exist;
     }
   });
 
@@ -1445,7 +1029,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -1454,48 +1038,31 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('Should_correctly_execute_count_on_cursor_1', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_1');
 
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            let total = 0;
-            // Create a cursor for the content
-            const cursor = collection.find({});
-            this.defer(() => cursor.close());
+      let total = 0;
+      // Create a cursor for the content
+      const cursor = collection.find({});
+      // this.defer(() => cursor.close());
 
-            cursor.count(err => {
-              expect(err).to.not.exist;
-              // Ensure each returns all documents
-              cursor.forEach(
-                () => {
-                  total++;
-                },
-                err => {
-                  expect(err).to.not.exist;
-                  cursor.count((err, c) => {
-                    expect(err).to.not.exist;
-                    expect(c).to.equal(1000);
-                    expect(total).to.equal(1000);
-                    done();
-                  });
-                }
-              );
-            });
-          });
-        });
+      await cursor.count();
+      // Ensure each returns all documents
+      await cursor.forEach(() => {
+        total++;
       });
+      const c = await cursor.count();
+      expect(c).to.equal(1000);
+      expect(total).to.equal(1000);
     }
   });
 
-  it('does not auto destroy streams', function (done) {
+  it('does not auto destroy streams', async function () {
     const docs = [];
 
     for (var i = 0; i < 10; i++) {
@@ -1503,32 +1070,26 @@ describe('Cursor', function () {
     }
 
     const configuration = this.configuration;
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      db.createCollection('does_not_autodestroy_streams', (err, collection) => {
-        expect(err).to.not.exist;
+    const db = client.db(configuration.db);
+    const collection = await db.createCollection('does_not_autodestroy_streams');
 
-        collection.insertMany(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+    await collection.insertMany(docs, configuration.writeConcernMax());
 
-          const cursor = collection.find();
-          const stream = cursor.stream();
-          stream.on('close', () => {
-            expect.fail('extra close event must not be called');
-          });
-          stream.on('end', () => {
-            client.close();
-            done();
-          });
-          stream.on('data', doc => {
-            expect(doc).to.exist;
-          });
-          stream.resume();
-        });
-      });
+    const cursor = collection.find();
+    const stream = cursor.stream();
+    stream.on('close', () => {
+      expect.fail('extra close event must not be called');
     });
+    stream.on('end', () => {
+      client.close();
+    });
+    stream.on('data', doc => {
+      expect(doc).to.exist;
+    });
+    stream.resume();
+    await once(stream, 'end');
   });
 
   it('should be able to stream documents', {
@@ -1538,79 +1099,77 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
-      for (var i = 0; i < 1000; i++) {
-        docs[i] = { a: i + 1 };
+      for (var n = 0; n < 1000; n++) {
+        docs[n] = { a: n + 1 };
       }
 
       var count = 0;
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('Should_be_able_to_stream_documents', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('Should_be_able_to_stream_documents');
 
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            var paused = 0,
-              closed = 0,
-              resumed = 0,
-              i = 0;
+      var paused = 0,
+        closed = 0,
+        resumed = 0,
+        i = 0,
+        err = null;
 
-            const cursor = collection.find();
-            const stream = cursor.stream();
+      const cursor = collection.find();
+      const stream = cursor.stream();
 
-            stream.on('data', function (doc) {
-              test.equal(true, !!doc);
-              test.equal(true, !!doc.a);
-              count = count + 1;
+      stream.on('data', function (doc) {
+        test.equal(true, !!doc);
+        test.equal(true, !!doc.a);
+        count = count + 1;
 
-              if (paused > 0 && 0 === resumed) {
-                err = new Error('data emitted during pause');
-                return testDone();
-              }
+        if (paused > 0 && 0 === resumed) {
+          err = new Error('data emitted during pause');
+          testDone();
+          return;
+        }
 
-              if (++i === 3) {
-                stream.pause();
-                paused++;
+        if (++i === 3) {
+          stream.pause();
+          paused++;
 
-                setTimeout(function () {
-                  stream.resume();
-                  resumed++;
-                }, 20);
-              }
-            });
-
-            stream.once('error', function (er) {
-              err = er;
-              testDone();
-            });
-
-            stream.once('end', function () {
-              closed++;
-              testDone();
-            });
-
-            function testDone() {
-              expect(err).to.not.exist;
-              test.equal(i, docs.length);
-              test.equal(1, closed);
-              test.equal(1, paused);
-              test.equal(1, resumed);
-              test.strictEqual(cursor.closed, true);
-              done();
-            }
-          });
-        });
+          setTimeout(function () {
+            stream.resume();
+            resumed++;
+          }, 20);
+        }
       });
+
+      stream.once('error', function (er) {
+        err = er;
+        testDone();
+      });
+
+      stream.once('end', function () {
+        closed++;
+        testDone();
+      });
+
+      function testDone() {
+        expect(err).to.not.exist;
+        test.equal(i, docs.length);
+        test.equal(1, closed);
+        test.equal(1, paused);
+        test.equal(1, resumed);
+        test.strictEqual(cursor.closed, true);
+      }
+
+      const promise = once(stream, 'end');
+      await promise;
+      await client.close();
     }
   });
 
@@ -1621,54 +1180,49 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var i = 0,
         docs = [{ b: 2 }, { b: 3 }],
         doneCalled = 0;
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection(
-          'immediately_destroying_a_stream_prevents_the_query_from_executing',
-          (err, collection) => {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection(
+        'immediately_destroying_a_stream_prevents_the_query_from_executing'
+      );
 
-            // insert all docs
-            collection.insertMany(docs, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
+      // insert all docs
+      await collection.insertMany(docs, configuration.writeConcernMax());
 
-              const cursor = collection.find();
-              const stream = cursor.stream();
+      const cursor = collection.find();
+      const stream = cursor.stream();
 
-              stream.on('data', function () {
-                i++;
-              });
-
-              cursor.once('close', testDone('close'));
-              stream.once('error', testDone('error'));
-
-              stream.destroy();
-
-              function testDone() {
-                return err => {
-                  ++doneCalled;
-
-                  if (doneCalled === 1) {
-                    expect(err).to.not.exist;
-                    test.strictEqual(0, i);
-                    test.strictEqual(true, cursor.closed);
-                    done();
-                  }
-                };
-              }
-            });
-          }
-        );
+      stream.on('data', function () {
+        i++;
       });
+
+      cursor.once('close', testDone('close'));
+      stream.once('error', testDone('error'));
+      const promise = once(cursor, 'close');
+
+      stream.destroy();
+
+      function testDone() {
+        return err => {
+          ++doneCalled;
+
+          if (doneCalled === 1) {
+            expect(err).to.not.exist;
+            test.strictEqual(0, i);
+            test.strictEqual(true, cursor.closed);
+          }
+        };
+      }
+
+      await cursor.close();
+      await promise;
     }
   });
 
@@ -1802,49 +1356,43 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('cursor_stream_pipe', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('cursor_stream_pipe');
 
-          var docs = [];
-          'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').forEach(function (name) {
-            docs.push({ name: name });
-          });
-
-          // insert all docs
-          collection.insertMany(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-
-            const filename = path.join(os.tmpdir(), '_nodemongodbnative_stream_out.txt');
-            const out = fs.createWriteStream(filename);
-            const stream = collection.find().stream().map(JSON.stringify);
-
-            stream.pipe(out);
-            // Wait for output stream to close
-            out.on('close', testDone);
-
-            function testDone(err) {
-              // Object.prototype.toString = toString;
-              test.strictEqual(undefined, err);
-              var contents = fs.readFileSync(filename, 'utf8');
-              test.ok(/Aaden/.test(contents));
-              test.ok(/Aaron/.test(contents));
-              test.ok(/Adrian/.test(contents));
-              test.ok(/Aditya/.test(contents));
-              test.ok(/Bob/.test(contents));
-              test.ok(/Joe/.test(contents));
-              fs.unlinkSync(filename);
-              done();
-            }
-          });
-        });
+      var docs = [];
+      'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').forEach(function (name) {
+        docs.push({ name: name });
       });
+
+      // insert all docs
+      await collection.insertMany(docs, configuration.writeConcernMax());
+
+      const filename = path.join(os.tmpdir(), '_nodemongodbnative_stream_out.txt');
+      const out = fs.createWriteStream(filename);
+      const stream = collection.find().stream().map(JSON.stringify);
+
+      stream.pipe(out);
+      // Wait for output stream to close
+      out.on('close', testDone);
+
+      function testDone(err) {
+        // Object.prototype.toString = toString;
+        test.strictEqual(undefined, err);
+        var contents = fs.readFileSync(filename, 'utf8');
+        test.ok(/Aaden/.test(contents));
+        test.ok(/Aaron/.test(contents));
+        test.ok(/Adrian/.test(contents));
+        test.ok(/Aditya/.test(contents));
+        test.ok(/Bob/.test(contents));
+        test.ok(/Joe/.test(contents));
+        fs.unlinkSync(filename);
+      }
+
+      await once(out, 'close');
     }
   });
 
@@ -1884,33 +1432,24 @@ describe('Cursor', function () {
     }
   );
 
-  it('shouldAwaitDataWithDocumentsAvailable', function (done) {
+  it('shouldAwaitDataWithDocumentsAvailable', async function () {
     // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
 
     const configuration = this.configuration;
     const client = configuration.newClient({ maxPoolSize: 1 });
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      const options = { capped: true, size: 8 };
-      db.createCollection('should_await_data_no_docs', options, (err, collection) => {
-        expect(err).to.not.exist;
+    const db = client.db(configuration.db);
+    const options = { capped: true, size: 8 };
+    const collection = await db.createCollection('should_await_data_no_docs', options);
 
-        // Create cursor with awaitData, and timeout after the period specified
-        const cursor = collection.find({}, { tailable: true, awaitData: true });
-        this.defer(() => cursor.close());
+    // Create cursor with awaitData, and timeout after the period specified
+    const cursor = collection.find({}, { tailable: true, awaitData: true });
+    // this.defer(() => cursor.close());
 
-        cursor.forEach(
-          () => {},
-          err => {
-            expect(err).to.not.exist;
-            done();
-          }
-        );
-      });
-    });
+    await cursor.forEach(() => { });
+    await cursor.close();
+    await client.close();
   });
 
   context('awaiting data core tailable cursor test', () => {
@@ -1936,7 +1475,7 @@ describe('Cursor', function () {
           try {
             await db.collection('cursor_tailable').drop();
             // eslint-disable-next-line no-empty
-          } catch {}
+          } catch { }
 
           const collection = await db.createCollection('cursor_tailable', {
             capped: true,
@@ -1978,34 +1517,22 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        const options = { capped: true, size: 8 };
-        db.createCollection('should_await_data', options, (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const options = { capped: true, size: 8 };
+      const collection = await db.createCollection('should_await_data', options);
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-            // Create cursor with awaitData, and timeout after the period specified
-            var cursor = collection.find({}, { tailable: true, awaitData: true });
-            cursor.forEach(
-              () => cursor.kill(),
-              () => {
-                // kill cursor b/c cursor is tailable / awaitable
-                cursor.close(done);
-              }
-            );
-          });
-        });
-      });
+      // Create cursor with awaitData, and timeout after the period specified
+      var cursor = collection.find({}, { tailable: true, awaitData: true });
+      await cursor.forEach(() => cursor.kill());
+      await cursor.close();
     }
   });
 
@@ -2016,7 +1543,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
       docs[0] = {
         _keywords: [
@@ -2195,39 +1722,20 @@ describe('Cursor', function () {
       };
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        // Insert all the docs
-        var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      // Insert all the docs
+      var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
+      await collection.insert(docs, configuration.writeConcernMax());
 
-          collection.createIndex({ _keywords: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      await collection.createIndex({ _keywords: 1 }, configuration.writeConcernMax());
 
-            collection
-              .find({ _keywords: 'red' })
-              .limit(10)
-              .toArray(function (err, result) {
-                expect(err).to.not.exist;
-                test.ok(result != null);
+      let result = await collection.find({ _keywords: 'red' }).limit(10).toArray();
+      test.ok(result != null);
 
-                collection
-                  .find({ _keywords: 'red' }, {})
-                  .limit(10)
-                  .explain(function (err, result) {
-                    expect(err).to.not.exist;
-                    test.ok(result != null);
-
-                    done();
-                  });
-              });
-          });
-        });
-      });
+      result = await collection.find({ _keywords: 'red' }, {}).limit(10).explain();
+      test.ok(result != null);
     }
   });
 
@@ -2238,30 +1746,18 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var doc = { name: 'camera', _keywords: ['compact', 'ii2gd', 'led', 'red', 'aet'] };
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('shouldNotExplainWhenFalse');
-        collection.insert(doc, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      var collection = db.collection('shouldNotExplainWhenFalse');
+      await collection.insert(doc, configuration.writeConcernMax());
 
-          collection
-            .find({ _keywords: 'red' })
-            .limit(10)
-            .toArray(function (err, result) {
-              expect(err).to.not.exist;
-
-              test.equal('camera', result[0].name);
-              done();
-            });
-        });
-      });
+      const result = await collection.find({ _keywords: 'red' }).limit(10).toArray();
+      test.equal('camera', result[0].name);
     }
   });
 
@@ -2272,32 +1768,29 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        try {
-          db.collection('shouldFailToSetReadPreferenceOnCursor')
-            .find()
-            .withReadPreference('notsecondary');
-          test.ok(false);
-        } catch (err) {} // eslint-disable-line
-
-        db.collection('shouldFailToSetReadPreferenceOnCursor')
+      const db = client.db(configuration.db);
+      try {
+        await db
+          .collection('shouldFailToSetReadPreferenceOnCursor')
           .find()
-          .withReadPreference('secondary');
+          .withReadPreference('notsecondary');
+        test.ok(false);
+      } catch (err) { } // eslint-disable-line
 
-        done();
-      });
+      await db
+        .collection('shouldFailToSetReadPreferenceOnCursor')
+        .find()
+        .withReadPreference('secondary');
     }
   });
 
   it('should allow setting the cursors readConcern through a builder', {
     metadata: { requires: { mongodb: '>=3.2' } },
-    test: function (done) {
+    test: async function () {
       const client = this.configuration.newClient({ monitorCommands: true });
       const events = [];
       client.on('commandStarted', event => {
@@ -2309,14 +1802,12 @@ describe('Cursor', function () {
       const cursor = db.collection('foo').find().withReadConcern('local');
       expect(cursor).property('readConcern').to.have.property('level').equal('local');
 
-      cursor.toArray(err => {
-        expect(err).to.not.exist;
+      await cursor.toArray();
 
-        expect(events).to.have.length(1);
-        const findCommand = events[0];
-        expect(findCommand).nested.property('command.readConcern').to.eql({ level: 'local' });
-        client.close(done);
-      });
+      expect(events).to.have.length(1);
+      const findCommand = events[0];
+      expect(findCommand).nested.property('command.readConcern').to.eql({ level: 'local' });
+      await client.close();
     }
   });
 
@@ -2327,53 +1818,40 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('shouldNotFailDueToStackOverflowEach', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('shouldNotFailDueToStackOverflowEach');
 
-          var docs = [];
-          var total = 0;
-          for (var i = 0; i < 30000; i++) docs.push({ a: i });
-          var allDocs = [];
-          var left = 0;
+      var docs = [];
+      var total = 0;
+      for (var i = 0; i < 30000; i++) docs.push({ a: i });
+      var allDocs = [];
+      var left = 0;
 
-          while (docs.length > 0) {
-            allDocs.push(docs.splice(0, 1000));
-          }
-          // Get all batches we must insert
-          left = allDocs.length;
-          var totalI = 0;
+      while (docs.length > 0) {
+        allDocs.push(docs.splice(0, 1000));
+      }
+      // Get all batches we must insert
+      left = allDocs.length;
+      var totalI = 0;
 
-          // Execute inserts
-          for (i = 0; i < left; i++) {
-            collection.insert(allDocs.shift(), configuration.writeConcernMax(), function (err, d) {
-              expect(err).to.not.exist;
+      // Execute inserts
+      for (i = 0; i < left; i++) {
+        const d = await collection.insert(allDocs.shift(), configuration.writeConcernMax());
 
-              left = left - 1;
-              totalI = totalI + d.length;
+        left = left - 1;
+        totalI = totalI + d.length;
 
-              if (left === 0) {
-                collection.find({}).forEach(
-                  () => {
-                    total++;
-                  },
-                  err => {
-                    expect(err).to.not.exist;
-                    expect(total).to.equal(30000);
-                    done();
-                  }
-                );
-              }
-            });
-          }
-        });
-      });
+        if (left === 0) {
+          await collection.find({}).forEach(() => {
+            total++;
+          });
+          expect(total).to.equal(30000);
+        }
+      }
     }
   });
 
@@ -2412,69 +1890,45 @@ describe('Cursor', function () {
     await client.close();
   });
 
-  it('should correctly skip and limit', function (done) {
+  it('should correctly skip and limit', async function () {
     const configuration = this.configuration;
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      var collection = db.collection('shouldCorrectlySkipAndLimit');
-      var docs = [];
-      for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
+    const db = client.db(configuration.db);
+    var collection = db.collection('shouldCorrectlySkipAndLimit');
+    var docs = [];
+    for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
 
-      collection.insert(docs, configuration.writeConcernMax(), err => {
-        expect(err).to.not.exist;
+    await collection.insert(docs, configuration.writeConcernMax());
 
-        collection
-          .find({}, { OrderNumber: 1 })
-          .skip(10)
-          .limit(10)
-          .toArray((err, items) => {
-            expect(err).to.not.exist;
-            test.equal(10, items[0].OrderNumber);
+    const items = await collection.find({}, { OrderNumber: 1 }).skip(10).limit(10).toArray();
 
-            collection
-              .find({}, { OrderNumber: 1 })
-              .skip(10)
-              .limit(10)
-              .count()
-              .then(count => {
-                test.equal(10, count);
-                client.close(done);
-              });
-          });
-      });
-    });
+    test.equal(10, items[0].OrderNumber);
+
+    const count = await collection.find({}, { OrderNumber: 1 }).skip(10).limit(10).count();
+    test.equal(10, count);
+
+    await client.close();
   });
 
-  it('shouldFailToTailANormalCollection', function (done) {
+  it('shouldFailToTailANormalCollection', async function () {
     const configuration = this.configuration;
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      var collection = db.collection('shouldFailToTailANormalCollection');
-      var docs = [];
-      for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
+    const db = client.db(configuration.db);
+    var collection = db.collection('shouldFailToTailANormalCollection');
+    var docs = [];
+    for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
 
-      collection.insert(docs, configuration.writeConcernMax(), err => {
-        expect(err).to.not.exist;
+    await collection.insert(docs, configuration.writeConcernMax());
 
-        const cursor = collection.find({}, { tailable: true });
-        cursor.forEach(
-          () => {},
-          err => {
-            test.ok(err instanceof Error);
-            test.ok(typeof err.code === 'number');
+    const cursor = collection.find({}, { tailable: true });
+    const err = await cursor.forEach(() => { }).catch(e => e);
+    test.ok(err instanceof Error);
+    test.ok(typeof err.code === 'number');
 
-            // Close cursor b/c we did not exhaust cursor
-            cursor.close();
-            done();
-          }
-        );
-      });
-    });
+    // Close cursor b/c we did not exhaust cursor
+    cursor.close();
   });
 
   it('shouldCorrectlyUseFindAndCursorCount', {
@@ -2484,43 +1938,32 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
       // Establish connection to db
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
+      const db = client.db(configuration.db);
 
-        // Create a lot of documents to insert
-        var docs = [];
-        for (var i = 0; i < 100; i++) {
-          docs.push({ a: i });
-        }
+      // Create a lot of documents to insert
+      var docs = [];
+      for (var i = 0; i < 100; i++) {
+        docs.push({ a: i });
+      }
 
-        // Create a collection
-        db.createCollection('test_close_function_on_cursor_2', (err, collection) => {
-          expect(err).to.not.exist;
+      // Create a collection
+      const collection = await db.createCollection('test_close_function_on_cursor_2');
 
-          // Insert documents into collection
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      // Insert documents into collection
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            const cursor = collection.find({});
+      const cursor = collection.find({});
 
-            cursor.count((err, count) => {
-              expect(err).to.not.exist;
-              test.equal(100, count);
-
-              done();
-            });
-          });
-        });
-      });
+      const count = await cursor.count();
+      test.equal(100, count);
       // DOC_END
     }
   });
@@ -2535,57 +1978,41 @@ describe('Cursor', function () {
       }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
       // Establish connection to db
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var col = db.collection('count_hint');
+      const db = client.db(configuration.db);
+      var col = db.collection('count_hint');
 
-        col.insert([{ i: 1 }, { i: 2 }], { writeConcern: { w: 1 } }, err => {
-          expect(err).to.not.exist;
+      await col.insert([{ i: 1 }, { i: 2 }], { writeConcern: { w: 1 } });
 
-          col.createIndex({ i: 1 }, err => {
-            expect(err).to.not.exist;
+      await col.createIndex({ i: 1 });
 
-            col.find({ i: 1 }, { hint: '_id_' }).count((err, count) => {
-              expect(err).to.not.exist;
-              test.equal(1, count);
+      let count = await col.find({ i: 1 }, { hint: '_id_' }).count();
+      test.equal(1, count);
 
-              col.find({}, { hint: '_id_' }).count((err, count) => {
-                expect(err).to.not.exist;
-                test.equal(2, count);
+      count = await col.find({}, { hint: '_id_' }).count();
+      test.equal(2, count);
 
-                col.find({ i: 1 }, { hint: 'BAD HINT' }).count(err => {
-                  test.ok(err != null);
+      const err = await col
+        .find({ i: 1 }, { hint: 'BAD HINT' })
+        .count()
+        .catch(e => e);
+      test.ok(err != null);
 
-                  col.createIndex({ x: 1 }, { sparse: true }, err => {
-                    expect(err).to.not.exist;
+      await col.createIndex({ x: 1 }, { sparse: true });
 
-                    col.find({ i: 1 }, { hint: 'x_1' }).count((err, count) => {
-                      expect(err).to.not.exist;
-                      test.equal(0, count);
+      count = await col.find({ i: 1 }, { hint: 'x_1' }).count();
+      test.equal(0, count);
 
-                      col.find({}, { hint: 'i_1' }).count((err, count) => {
-                        expect(err).to.not.exist;
-                        test.equal(2, count);
+      count = await col.find({}, { hint: 'i_1' }).count();
 
-                        done();
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
+      test.equal(2, count);
       // DOC_END
     }
   });
@@ -2597,44 +2024,30 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
+      const db = client.db(configuration.db);
 
-        const db = client.db(configuration.db);
+      // Create a lot of documents to insert
+      var docs = [];
+      for (var i = 0; i < 100; i++) {
+        docs.push({ a: i });
+      }
 
-        // Create a lot of documents to insert
-        var docs = [];
-        for (var i = 0; i < 100; i++) {
-          docs.push({ a: i });
-        }
+      // Create a collection
+      const collection = await db.createCollection('terminate_each_returning_false');
 
-        // Create a collection
-        db.createCollection('terminate_each_returning_false', (err, collection) => {
-          expect(err).to.not.exist;
+      // Insert documents into collection
+      await collection.insert(docs, configuration.writeConcernMax());
+      var finished = false;
 
-          // Insert documents into collection
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-            var finished = false;
+      await collection.find({}).forEach(doc => {
+        expect(doc).to.exist;
+        test.equal(finished, false);
+        finished = true;
 
-            collection.find({}).forEach(
-              doc => {
-                expect(doc).to.exist;
-                test.equal(finished, false);
-                finished = true;
-
-                done();
-                return false;
-              },
-              err => {
-                expect(err).to.not.exist;
-              }
-            );
-          });
-        });
+        return false;
       });
     }
   });
@@ -2646,31 +2059,23 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var donkey = {
-          color: 'brown'
-        };
+      const db = client.db(configuration.db);
+      var donkey = {
+        color: 'brown'
+      };
 
-        db.collection('donkies').insertOne(donkey, function (err, result) {
-          expect(err).to.not.exist;
+      const result = await db.collection('donkies').insertOne(donkey);
 
-          var query = { _id: result.insertedId };
-          var options = { maxTimeMS: 1000 };
+      var query = { _id: result.insertedId };
+      var options = { maxTimeMS: 1000 };
 
-          db.collection('donkies').findOne(query, options, function (err, doc) {
-            expect(err).to.not.exist;
-            test.equal('brown', doc.color);
+      const doc = await db.collection('donkies').findOne(query, options);
 
-            done();
-          });
-        });
-      });
+      test.equal('brown', doc.color);
     }
   });
 
@@ -2681,53 +2086,38 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        const collectionName = 'should_correctly_handle_batchSize_2';
-        db.collection(collectionName).insert([{ x: 1 }, { x: 2 }, { x: 3 }], err => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collectionName = 'should_correctly_handle_batchSize_2';
+      await db.collection(collectionName).insert([{ x: 1 }, { x: 2 }, { x: 3 }]);
 
-          const cursor = db.collection(collectionName).find({}, { batchSize: 2 });
-          this.defer(() => cursor.close());
+      const cursor = db.collection(collectionName).find({}, { batchSize: 2 });
+      // this.defer(() => cursor.close());
 
-          cursor.next(err => {
-            expect(err).to.not.exist;
+      await cursor.next();
 
-            cursor.next(err => {
-              expect(err).to.not.exist;
+      await cursor.next();
 
-              cursor.next(err => {
-                expect(err).to.not.exist;
-                done();
-              });
-            });
-          });
-        });
-      });
+      await cursor.next();
+
+      await cursor.close();
     }
   });
 
   it('Should report database name and collection name', {
     metadata: { requires: { topology: ['single'] } },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        const cursor = db.collection('myCollection').find({});
-        test.equal('myCollection', cursor.namespace.collection);
-        test.equal('integration_tests', cursor.namespace.db);
-
-        done();
-      });
+      const db = client.db(configuration.db);
+      const cursor = db.collection('myCollection').find({});
+      test.equal('myCollection', cursor.namespace.collection);
+      test.equal('integration_tests', cursor.namespace.db);
     }
   });
 
@@ -2738,7 +2128,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -2747,42 +2137,27 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection(
-          'Should_correctly_execute_count_on_cursor_2',
-          function (err, collection) {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_2');
 
-            // insert all docs
-            collection.insert(docs, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-              // Create a cursor for the content
-              var cursor = collection.find({});
-              cursor.limit(100);
-              cursor.skip(10);
-              cursor.count({ maxTimeMS: 1000 }, err => {
-                expect(err).to.not.exist;
+      // Create a cursor for the content
+      var cursor = collection.find({});
+      cursor.limit(100);
+      cursor.skip(10);
+      await cursor.count({ maxTimeMS: 1000 });
 
-                // Create a cursor for the content
-                var cursor = collection.find({});
-                cursor.limit(100);
-                cursor.skip(10);
-                cursor.maxTimeMS(100);
+      // Create a cursor for the content
+      cursor = collection.find({});
+      cursor.limit(100);
+      cursor.skip(10);
+      cursor.maxTimeMS(100);
 
-                cursor.count(err => {
-                  expect(err).to.not.exist;
-                  done();
-                });
-              });
-            });
-          }
-        );
-      });
+      await cursor.count();
     }
   });
 
@@ -2793,7 +2168,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -2802,31 +2177,17 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection(
-          'Should_correctly_execute_count_on_cursor_3',
-          function (err, collection) {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_3');
 
-            // insert all docs
-            collection.insert(docs, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-              // Create a cursor for the content
-              var cursor = collection.find({}, { maxTimeMS: 100 });
-              cursor.toArray(err => {
-                expect(err).to.not.exist;
-
-                done();
-              });
-            });
-          }
-        );
-      });
+      // Create a cursor for the content
+      var cursor = collection.find({}, { maxTimeMS: 100 });
+      await cursor.toArray();
     }
   });
 
@@ -2837,7 +2198,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -2846,38 +2207,29 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('map_toArray');
+      const db = client.db(configuration.db);
+      var collection = db.collection('map_toArray');
 
-        // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-          // Create a cursor for the content
-          var cursor = collection
-            .find({})
-            .map(function () {
-              return { a: 1 };
-            })
-            .batchSize(5)
-            .limit(10);
+      // Create a cursor for the content
+      var cursor = collection
+        .find({})
+        .map(function () {
+          return { a: 1 };
+        })
+        .batchSize(5)
+        .limit(10);
 
-          cursor.toArray(function (err, docs) {
-            expect(err).to.not.exist;
-            test.equal(10, docs.length);
+      const docs2 = await cursor.toArray();
+      test.equal(10, docs2.length);
 
-            // Ensure all docs where mapped
-            docs.forEach(doc => {
-              expect(doc).property('a').to.equal(1);
-            });
-
-            done();
-          });
-        });
+      // Ensure all docs where mapped
+      docs2.forEach(doc => {
+        expect(doc).property('a').to.equal(1);
       });
     }
   });
@@ -2889,7 +2241,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       const docs = [];
       for (var i = 0; i < 1000; i++) {
         const d = new Date().getTime() + i * 1000;
@@ -2897,34 +2249,26 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        const collection = db.collection('map_next');
+      const db = client.db(configuration.db);
+      const collection = db.collection('map_next');
 
-        // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-          // Create a cursor for the content
-          const cursor = collection
-            .find({})
-            .map(function () {
-              return { a: 1 };
-            })
-            .batchSize(5)
-            .limit(10);
+      // Create a cursor for the content
+      const cursor = collection
+        .find({})
+        .map(function () {
+          return { a: 1 };
+        })
+        .batchSize(5)
+        .limit(10);
 
-          this.defer(() => cursor.close());
-          cursor.next((err, doc) => {
-            expect(err).to.not.exist;
-            test.equal(1, doc.a);
-            done();
-          });
-        });
-      });
+      const doc = await cursor.next();
+      test.equal(1, doc.a);
+      await cursor.close();
     }
   });
 
@@ -2935,7 +2279,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -2944,36 +2288,25 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        const collection = db.collection('map_each');
+      const db = client.db(configuration.db);
+      const collection = db.collection('map_each');
 
-        // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-          // Create a cursor for the content
-          var cursor = collection
-            .find({})
-            .map(function () {
-              return { a: 1 };
-            })
-            .batchSize(5)
-            .limit(10);
+      // Create a cursor for the content
+      var cursor = collection
+        .find({})
+        .map(function () {
+          return { a: 1 };
+        })
+        .batchSize(5)
+        .limit(10);
 
-          cursor.forEach(
-            doc => {
-              test.equal(1, doc.a);
-            },
-            err => {
-              expect(err).to.not.exist;
-              done();
-            }
-          );
-        });
+      await cursor.forEach(doc => {
+        test.equal(1, doc.a);
       });
     }
   });
@@ -2985,7 +2318,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -2994,40 +2327,30 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('map_forEach');
+      const db = client.db(configuration.db);
+      var collection = db.collection('map_forEach');
 
-        // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-          // Create a cursor for the content
-          var cursor = collection
-            .find({})
-            .map(function () {
-              return { a: 2 };
-            })
-            .map(function (x) {
-              return { a: x.a * x.a };
-            })
-            .batchSize(5)
-            .limit(10);
+      // Create a cursor for the content
+      var cursor = collection
+        .find({})
+        .map(function () {
+          return { a: 2 };
+        })
+        .map(function (x) {
+          return { a: x.a * x.a };
+        })
+        .batchSize(5)
+        .limit(10);
 
-          cursor.forEach(
-            doc => {
-              test.equal(4, doc.a);
-            },
-            err => {
-              expect(err).to.not.exist;
-              done();
-            }
-          );
-        });
+      await cursor.forEach(doc => {
+        test.equal(4, doc.a);
       });
+      await cursor.close();
     }
   });
 
@@ -3038,7 +2361,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 1000; i++) {
@@ -3047,37 +2370,27 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('map_mapmapforEach');
+      const db = client.db(configuration.db);
+      var collection = db.collection('map_mapmapforEach');
 
-        // insert all docs
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-          // Create a cursor for the content
-          var cursor = collection
-            .find({})
-            .map(function () {
-              return { a: 1 };
-            })
-            .batchSize(5)
-            .limit(10);
+      // Create a cursor for the content
+      var cursor = collection
+        .find({})
+        .map(function () {
+          return { a: 1 };
+        })
+        .batchSize(5)
+        .limit(10);
 
-          cursor.forEach(
-            doc => {
-              expect(doc).property('a').to.equal(1);
-            },
-            err => {
-              expect(err).to.not.exist;
-              done();
-            }
-          );
-        });
+      await cursor.forEach(doc => {
+        expect(doc).property('a').to.equal(1);
       });
+      await cursor.close();
     }
   });
 
@@ -3086,38 +2399,25 @@ describe('Cursor', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('cursor_limit_skip_correctly');
+      const db = client.db(configuration.db);
+      var collection = db.collection('cursor_limit_skip_correctly');
 
-        // Insert x number of docs
-        var ordered = collection.initializeUnorderedBulkOp();
+      // Insert x number of docs
+      var ordered = collection.initializeUnorderedBulkOp();
 
-        for (var i = 0; i < 6000; i++) {
-          ordered.insert({ a: i });
-        }
+      for (var i = 0; i < 6000; i++) {
+        ordered.insert({ a: i });
+      }
 
-        ordered.execute({ writeConcern: { w: 1 } }, err => {
-          expect(err).to.not.exist;
+      await ordered.execute({ writeConcern: { w: 1 } });
 
-          // Let's attempt to skip and limit
-          collection
-            .find({})
-            .limit(2016)
-            .skip(2016)
-            .toArray(function (err, docs) {
-              expect(err).to.not.exist;
-              test.equal(2016, docs.length);
-
-              done();
-            });
-        });
-      });
+      // Let's attempt to skip and limit
+      const docs = await collection.find({}).limit(2016).skip(2016).toArray();
+      test.equal(2016, docs.length);
     }
   });
 
@@ -3126,45 +2426,35 @@ describe('Cursor', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'], mongodb: '<7.0.0' } },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var options = { capped: true, size: 8 };
-        db.createCollection(
-          'should_await_data_max_awaittime_ms',
-          options,
-          function (err, collection) {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      var options = { capped: true, size: 8 };
+      const collection = await db.createCollection('should_await_data_max_awaittime_ms', options);
 
-            collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
+      await collection.insert({ a: 1 }, configuration.writeConcernMax());
 
-              // Create cursor with awaitData, and timeout after the period specified
-              var cursor = collection
-                .find({})
-                .addCursorFlag('tailable', true)
-                .addCursorFlag('awaitData', true)
-                .maxAwaitTimeMS(500);
+      // Create cursor with awaitData, and timeout after the period specified
+      var cursor = collection
+        .find({})
+        .addCursorFlag('tailable', true)
+        .addCursorFlag('awaitData', true)
+        .maxAwaitTimeMS(500);
 
-              const s = new Date();
-              cursor.forEach(
-                () => {
-                  setTimeout(() => cursor.close(), 300);
-                },
-                () => {
-                  test.ok(new Date().getTime() - s.getTime() >= 500);
-                  done();
-                }
-              );
-            });
-          }
-        );
-      });
+      const s = new Date();
+      const err = await cursor
+        .forEach(async () => {
+          await sleep(300);
+          await cursor.close();
+        })
+        .catch(e => e);
+      test.ok(err instanceof Error);
+      test.ok(new Date().getTime() - s.getTime() >= 500);
+      await cursor.close();
+      await client.close();
     }
   });
 
@@ -3173,37 +2463,32 @@ describe('Cursor', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('cursor_limit_skip_correctly');
+      const db = client.db(configuration.db);
+      var collection = db.collection('cursor_limit_skip_correctly');
 
-        // Insert x number of docs
-        var ordered = collection.initializeUnorderedBulkOp();
+      // Insert x number of docs
+      var ordered = collection.initializeUnorderedBulkOp();
 
-        for (var i = 0; i < 100; i++) {
-          ordered.insert({ a: i });
-        }
+      for (var i = 0; i < 100; i++) {
+        ordered.insert({ a: i });
+      }
 
-        ordered.execute({ writeConcern: { w: 1 } }, err => {
-          expect(err).to.not.exist;
+      await ordered.execute({ writeConcern: { w: 1 } });
 
-          // Let's attempt to skip and limit
-          var cursor = collection.find({}).batchSize(10);
-          const stream = cursor.stream();
-          stream.on('data', function () {
-            stream.destroy();
-          });
-
-          cursor.on('close', function () {
-            done();
-          });
-        });
+      // Let's attempt to skip and limit
+      var cursor = collection.find({}).batchSize(10);
+      const stream = cursor.stream();
+      stream.on('data', function () {
+        stream.destroy();
       });
+
+      const onClose = once(cursor, 'close');
+      await cursor.close();
+      await onClose;
     }
   });
 
@@ -3214,7 +2499,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 1; i++) {
@@ -3223,39 +2508,23 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection(
-          'shouldCorrectlyExecuteEnsureIndexWithNoCallback',
-          function (err, collection) {
-            expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection(
+        'shouldCorrectlyExecuteEnsureIndexWithNoCallback'
+      );
 
-            // ensure index of createdAt index
-            collection.createIndex({ createdAt: 1 }, err => {
-              expect(err).to.not.exist;
+      // ensure index of createdAt index
+      await collection.createIndex({ createdAt: 1 });
 
-              // insert all docs
-              collection.insert(docs, configuration.writeConcernMax(), err => {
-                expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-                // Find with sort
-                collection
-                  .find()
-                  .sort(['createdAt', 'asc'])
-                  .toArray((err, items) => {
-                    expect(err).to.not.exist;
+      // Find with sort
+      const items = await collection.find().sort(['createdAt', 'asc']).toArray();
 
-                    test.equal(1, items.length);
-                    done();
-                  });
-              });
-            });
-          }
-        );
-      });
+      test.equal(1, items.length);
     }
   });
 
@@ -3266,7 +2535,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
 
       for (var i = 0; i < 50; i++) {
@@ -3275,41 +2544,22 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.createCollection('negative_batch_size_and_limit_set', (err, collection) => {
-          expect(err).to.not.exist;
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('negative_batch_size_and_limit_set');
 
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            // Create a cursor for the content
-            var cursor = collection.find({});
-            cursor
-              .limit(100)
-              .skip(0)
-              .count(function (err, c) {
-                expect(err).to.not.exist;
-                test.equal(50, c);
+      // Create a cursor for the content
+      var cursor = collection.find({});
+      var c = await cursor.limit(100).skip(0).count();
+      test.equal(50, c);
 
-                var cursor = collection.find({});
-                cursor
-                  .limit(100)
-                  .skip(0)
-                  .toArray(err => {
-                    expect(err).to.not.exist;
-                    test.equal(50, c);
-
-                    done();
-                  });
-              });
-          });
-        });
-      });
+      cursor = collection.find({});
+      c = (await cursor.limit(100).skip(0).toArray()).length;
+      test.equal(50, c);
     }
   });
 
@@ -3320,7 +2570,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var docs = [];
       const configuration = this.configuration;
 
@@ -3329,32 +2579,17 @@ describe('Cursor', function () {
         docs[i] = { a: i, createdAt: new Date(d) };
       }
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
+      const db = client.db(configuration.db);
+      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_1_');
 
-        const db = client.db(configuration.db);
-        db.createCollection(
-          'Should_correctly_execute_count_on_cursor_1_',
-          function (err, collection) {
-            expect(err).to.not.exist;
+      // insert all docs
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            // insert all docs
-            collection.insert(docs, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
-
-              // Create a cursor for the content
-              var cursor = collection.find({});
-              cursor.batchSize(-10).next(err => {
-                expect(err).to.not.exist;
-                test.ok(cursor.id.equals(BSON.Long.ZERO));
-
-                done();
-              });
-            });
-          }
-        );
-      });
+      // Create a cursor for the content
+      var cursor = collection.find({});
+      await cursor.batchSize(-10).next();
+      test.ok(cursor.id.equals(BSON.Long.ZERO));
     }
   });
 
@@ -3365,7 +2600,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var started = [];
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), {
@@ -3376,28 +2611,26 @@ describe('Cursor', function () {
         if (event.commandName === 'count') started.push(event);
       });
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.collection('cursor_count_test', { readConcern: { level: 'local' } })
-          .find({ project: '123' })
-          .limit(5)
-          .skip(5)
-          .hint({ project: 1 })
-          .count(err => {
-            expect(err).to.not.exist;
-            test.equal(1, started.length);
-            if (started[0].command.readConcern)
-              test.deepEqual({ level: 'local' }, started[0].command.readConcern);
-            test.deepEqual({ project: 1 }, started[0].command.hint);
-            test.equal(5, started[0].command.skip);
-            test.equal(5, started[0].command.limit);
+      const db = client.db(configuration.db);
+      await db
+        .collection('cursor_count_test', { readConcern: { level: 'local' } })
+        .find({ project: '123' })
+        .limit(5)
+        .skip(5)
+        .hint({ project: 1 })
+        .count();
 
-            done();
-          });
-      });
+      test.equal(1, started.length);
+      if (started[0].command.readConcern) {
+        test.deepEqual({ level: 'local' }, started[0].command.readConcern);
+      }
+      test.deepEqual({ project: 1 }, started[0].command.hint);
+      test.equal(5, started[0].command.skip);
+      test.equal(5, started[0].command.limit);
+
+      await client.close();
     }
   });
 
@@ -3408,7 +2641,7 @@ describe('Cursor', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var started = [];
 
       const configuration = this.configuration;
@@ -3416,34 +2649,28 @@ describe('Cursor', function () {
         if (event.commandName === 'count') started.push(event);
       });
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const db = client.db(configuration.db);
-        db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
-          {
-            project: '123'
-          },
-          {
-            readConcern: { level: 'local' },
-            limit: 5,
-            skip: 5,
-            hint: { project: 1 }
-          },
-          err => {
-            expect(err).to.not.exist;
-            test.equal(1, started.length);
-            if (started[0].command.readConcern)
-              test.deepEqual({ level: 'local' }, started[0].command.readConcern);
-            test.deepEqual({ project: 1 }, started[0].command.hint);
-            test.equal(5, started[0].command.skip);
-            test.equal(5, started[0].command.limit);
+      const db = client.db(configuration.db);
+      await db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
+        {
+          project: '123'
+        },
+        {
+          readConcern: { level: 'local' },
+          limit: 5,
+          skip: 5,
+          hint: { project: 1 }
+        }
+      );
 
-            done();
-          }
-        );
-      });
+      test.equal(1, started.length);
+      if (started[0].command.readConcern) {
+        test.deepEqual({ level: 'local' }, started[0].command.readConcern);
+      }
+      test.deepEqual({ project: 1 }, started[0].command.hint);
+      test.equal(5, started[0].command.skip);
+      test.equal(5, started[0].command.limit);
     }
   });
 
@@ -3467,7 +2694,7 @@ describe('Cursor', function () {
 
       const configuration = this.configuration;
 
-      let cleanup = () => {};
+      let cleanup = () => { };
       let caughtError = undefined;
 
       return (
@@ -3687,40 +2914,32 @@ describe('Cursor', function () {
       const cursor = collection.find();
       this.defer(() => cursor.close());
 
-      const promise = cursor.forEach(() => {});
+      const promise = cursor.forEach(() => { });
       expect(promise).to.exist.and.to.be.an.instanceof(Promise);
       return promise;
     });
   });
 
-  it('should return false when exhausted and hasNext called more than once', function (done) {
+  it('should return false when exhausted and hasNext called more than once', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      db.createCollection('cursor_hasNext_test').then(() => {
-        const cursor = db.collection('cursor_hasNext_test').find();
-        this.defer(() => cursor.close());
+    const db = client.db(configuration.db);
+    await db.createCollection('cursor_hasNext_test');
+    const cursor = db.collection('cursor_hasNext_test').find();
 
-        cursor
-          .hasNext()
-          .then(val1 => {
-            expect(val1).to.equal(false);
-            return cursor.hasNext();
-          })
-          .then(val2 => {
-            expect(val2).to.equal(false);
-            done();
-          });
-      });
-    });
+    const val1 = await cursor.hasNext();
+    expect(val1).to.equal(false);
+    const val2 = await cursor.hasNext();
+    expect(val2).to.equal(false);
+
+    await cursor.close();
+    await client.close();
   });
 
-  const testTransformStream = (config, _done) => {
+  const testTransformStream = async config => {
     const client = config.client;
     const configuration = config.configuration;
     const collectionName = config.collectionName;
@@ -3728,46 +2947,49 @@ describe('Cursor', function () {
     const expectedSet = config.expectedSet;
 
     let cursor;
-    const done = err => cursor.close(err2 => client.close(err3 => _done(err || err2 || err3)));
+    const done = async err => {
+      await cursor.close();
+      await client.close();
+      if (err) {
+        throw err;
+      }
+    };
 
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
+    await client.connect();
 
-      const db = client.db(configuration.db);
-      let collection;
-      const docs = [
-        { _id: 0, a: { b: 1, c: 0 } },
-        { _id: 1, a: { b: 1, c: 0 } },
-        { _id: 2, a: { b: 1, c: 0 } }
-      ];
-      const resultSet = new Set();
-      Promise.resolve()
-        .then(() => db.createCollection(collectionName))
-        .then(() => (collection = db.collection(collectionName)))
-        .then(() => collection.insertMany(docs))
-        .then(() => {
-          cursor = collection.find();
-          return cursor.stream().map(transformFunc ?? (doc => doc));
-        })
-        .then(stream => {
-          stream.on('data', function (doc) {
-            resultSet.add(doc);
-          });
+    const db = client.db(configuration.db);
+    const docs = [
+      { _id: 0, a: { b: 1, c: 0 } },
+      { _id: 1, a: { b: 1, c: 0 } },
+      { _id: 2, a: { b: 1, c: 0 } }
+    ];
+    const resultSet = new Set();
+    await db.createCollection(collectionName);
+    const collection = await db.collection(collectionName);
+    await collection.insertMany(docs);
+    cursor = await collection.find();
+    const stream = await cursor.stream().map(transformFunc ?? (doc => doc));
 
-          stream.once('end', function () {
-            expect(resultSet).to.deep.equal(expectedSet);
-            done();
-          });
-
-          stream.once('error', e => {
-            done(e);
-          });
-        })
-        .catch(e => done(e));
+    stream.on('data', function (doc) {
+      resultSet.add(doc);
     });
+
+    stream.once('end', function () {
+      expect(resultSet).to.deep.equal(expectedSet);
+      done();
+    });
+
+    stream.once('error', e => {
+      done(e);
+    });
+
+    const promise = once(stream, 'end');
+    await promise;
+    await cursor.close();
+    await client.close();
   };
 
-  it('stream should apply the supplied transformation function to each document in the stream', function (done) {
+  it('stream should apply the supplied transformation function to each document in the stream', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     const expectedDocs = [
@@ -3783,10 +3005,10 @@ describe('Cursor', function () {
       expectedSet: new Set(expectedDocs)
     };
 
-    testTransformStream(config, done);
+    await testTransformStream(config);
   });
 
-  it('stream should return a stream of unmodified docs if no transform function applied', function (done) {
+  it('stream should return a stream of unmodified docs if no transform function applied', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
     const expectedDocs = [
@@ -3802,7 +3024,7 @@ describe('Cursor', function () {
       expectedSet: new Set(expectedDocs)
     };
 
-    testTransformStream(config, done);
+    await testTransformStream(config);
   });
 
   it.skip('should apply parent read preference to count command', function (done) {
@@ -3841,107 +3063,93 @@ describe('Cursor', function () {
     });
   });
 
-  it('should not consume first document on hasNext when streaming', function (done) {
+  it('should not consume first document on hasNext when streaming', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
-    client.connect(err => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+    await client.connect();
 
-      const collection = client.db().collection('documents');
-      collection.drop(() => {
-        const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
-        collection.insertMany(docs, err => {
-          expect(err).to.not.exist;
+    const collection = client.db(configuration.db).collection('documents');
+    const err = await collection.drop().catch(e => e);
+    expect(err).to.exist;
 
-          const cursor = collection.find({}, { sort: { a: 1 } });
-          cursor.hasNext((err, hasNext) => {
-            expect(err).to.not.exist;
-            expect(hasNext).to.be.true;
+    const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
+    await collection.insertMany(docs);
 
-            const collected = [];
-            const stream = new Writable({
-              objectMode: true,
-              write: (chunk, encoding, next) => {
-                collected.push(chunk);
-                next(undefined, chunk);
-              }
-            });
+    const cursor = collection.find({}, { sort: { a: 1 } });
+    const hasNext = await cursor.hasNext();
+    expect(hasNext).to.be.true;
 
-            const cursorStream = cursor.stream();
-
-            cursorStream.on('end', () => {
-              expect(collected).to.have.length(3);
-              expect(collected).to.eql(docs);
-              done();
-            });
-
-            cursorStream.pipe(stream);
-          });
-        });
-      });
+    const collected = [];
+    const stream = new Writable({
+      objectMode: true,
+      write: (chunk, encoding, next) => {
+        collected.push(chunk);
+        next(undefined, chunk);
+      }
     });
+
+    const cursorStream = cursor.stream();
+
+    cursorStream.on('end', () => {
+      expect(collected).to.have.length(3);
+      expect(collected).to.eql(docs);
+    });
+
+    const promise = once(cursorStream, 'end');
+    cursorStream.pipe(stream);
+    await promise;
+    await client.close();
   });
 
   describe('transforms', function () {
-    it('should correctly apply map transform to cursor as readable stream', function (done) {
+    it('should correctly apply map transform to cursor as readable stream', async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      client.connect(err => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
 
-        const docs = 'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').map(x => ({ name: x }));
-        const coll = client.db(configuration.db).collection('cursor_stream_mapping');
-        coll.insertMany(docs, err => {
-          expect(err).to.not.exist;
+      const docs = 'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').map(x => ({ name: x }));
+      const coll = client.db(configuration.db).collection('cursor_stream_mapping');
+      await coll.insertMany(docs);
+      const bag = [];
+      const stream = coll
+        .find()
+        .project({ _id: 0, name: 1 })
+        .map(doc => ({ mapped: doc }))
+        .stream()
+        .on('data', doc => bag.push(doc));
 
-          const bag = [];
-          const stream = coll
-            .find()
-            .project({ _id: 0, name: 1 })
-            .map(doc => ({ mapped: doc }))
-            .stream()
-            .on('data', doc => bag.push(doc));
-
-          stream.on('error', done).on('end', () => {
-            expect(bag.map(x => x.mapped)).to.eql(docs.map(x => ({ name: x.name })));
-            done();
-          });
-        });
+      stream.on('error', () => expect.fail());
+      stream.on('end', () => {
+        expect(bag.map(x => x.mapped)).to.eql(docs.map(x => ({ name: x.name })));
       });
+      await once(stream, 'end');
+      await client.close();
     });
 
-    it('should correctly apply map transform when converting cursor to array', function (done) {
+    it('should correctly apply map transform when converting cursor to array', async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
-      client.connect(err => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
+      // this.defer(() => client.close());
 
-        const docs = 'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').map(x => ({ name: x }));
-        const coll = client.db(configuration.db).collection('cursor_toArray_mapping');
-        coll.insertMany(docs, err => {
-          expect(err).to.not.exist;
+      const docs = 'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').map(x => ({ name: x }));
+      const coll = client.db(configuration.db).collection('cursor_toArray_mapping');
+      await coll.insertMany(docs);
 
-          coll
-            .find()
-            .project({ _id: 0, name: 1 })
-            .map(doc => ({ mapped: doc }))
-            .toArray((err, mappedDocs) => {
-              expect(err).to.not.exist;
-              expect(mappedDocs.map(x => x.mapped)).to.eql(docs.map(x => ({ name: x.name })));
-              done();
-            });
-        });
-      });
+      const mappedDocs = await coll
+        .find()
+        .project({ _id: 0, name: 1 })
+        .map(doc => ({ mapped: doc }))
+        .toArray();
+      expect(mappedDocs.map(x => x.mapped)).to.eql(docs.map(x => ({ name: x.name })));
+      await client.close();
     });
   });
 
   context('sort', function () {
     const findSort = (input, output) =>
-      function (done) {
+      async function () {
         const client = this.configuration.newClient({ monitorCommands: true });
         const events = [];
         client.on('commandStarted', event => {
@@ -3952,16 +3160,14 @@ describe('Cursor', function () {
         const db = client.db('test');
         const collection = db.collection('test_sort_dos');
         const cursor = collection.find({}, { sort: input });
-        cursor.next(err => {
-          expect(err).to.not.exist;
-          expect(events[0].command.sort).to.be.instanceOf(Map);
-          expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-          client.close(done);
-        });
+        await cursor.next();
+        expect(events[0].command.sort).to.be.instanceOf(Map);
+        expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
+        await client.close();
       };
 
     const cursorSort = (input, output) =>
-      function (done) {
+      async function () {
         const client = this.configuration.newClient({ monitorCommands: true });
         const events = [];
         client.on('commandStarted', event => {
@@ -3972,12 +3178,10 @@ describe('Cursor', function () {
         const db = client.db('test');
         const collection = db.collection('test_sort_dos');
         const cursor = collection.find({}).sort(input);
-        cursor.next(err => {
-          expect(err).to.not.exist;
-          expect(events[0].command.sort).to.be.instanceOf(Map);
-          expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-          client.close(done);
-        });
+        await cursor.next();
+        expect(events[0].command.sort).to.be.instanceOf(Map);
+        expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
+        await client.close();
       };
 
     it('should use find options object', findSort({ alpha: 1 }, new Map([['alpha', 1]])));
