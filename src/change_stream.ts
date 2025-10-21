@@ -898,7 +898,6 @@ export class ChangeStream<
     options: ChangeStreamOptions | ChangeStreamCursorOptions
   ): ChangeStreamCursor<TSchema, TChange> {
     const changeStreamStageOptions: Document = filterOutOptions(options);
-    console.log(changeStreamStageOptions);
     if (this.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
       changeStreamStageOptions.allChangesForCluster = true;
     }
