@@ -1150,7 +1150,8 @@ function buildDisallowedChangeStreamOptions(): Set<string> {
     timeoutMS: '',
     timeoutMode: '',
     useBigInt64: '',
-    willRetryWrite: ''
+    willRetryWrite: '',
+    writeConcern: ''
   };
 
   return new Set(Object.keys(denyList));
