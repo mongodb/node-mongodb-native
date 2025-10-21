@@ -15,7 +15,7 @@ import {
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
-import { type Abortable, type InferIdType, TypedEventEmitter } from './mongo_types';
+import { type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { OperationParent } from './operations/command';
 import type { ServerSessionId } from './sessions';
