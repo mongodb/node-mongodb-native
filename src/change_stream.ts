@@ -38,7 +38,7 @@ const INVALID_STAGE_OPTIONS = buildDisallowedChangeStreamOptions();
 
 export function filterOutOptions(options: AnyOptions): AnyOptions {
   return Object.fromEntries(
-    Object.entries(options).filter(([k, _]) => INVALID_STAGE_OPTIONS.has(k))
+    Object.entries(options).filter(([k, _]) => !INVALID_STAGE_OPTIONS.has(k))
   );
 }
 
@@ -898,6 +898,7 @@ export class ChangeStream<
     options: ChangeStreamOptions | ChangeStreamCursorOptions
   ): ChangeStreamCursor<TSchema, TChange> {
     const changeStreamStageOptions: Document = filterOutOptions(options);
+    console.log(changeStreamStageOptions);
     if (this.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
       changeStreamStageOptions.allChangesForCluster = true;
     }
@@ -1109,44 +1110,48 @@ function buildDisallowedChangeStreamOptions(): Set<string> {
    * instantiation of `denyList` below results in a TS error.
    */
   type DisallowedOptions = {
-    [k in Exclude<keyof ChangeStreamOptions, CSOptions>]: string;
+    [k in Exclude<
+      keyof ChangeStreamOptions & { timeoutContext: TimeoutContext },
+      CSOptions
+    >]: string;
   };
 
   const denyList: DisallowedOptions = {
-    explain: '',
-    checkKeys: '',
-    serializeFunctions: '',
-    ignoreUndefined: '',
-    useBigInt64: '',
-    promoteLongs: '',
-    promoteBuffers: '',
-    promoteValues: '',
-    fieldsAsRaw: '',
-    bsonRegExp: '',
-    raw: '',
-    readConcern: '',
-    collation: '',
-    maxTimeMS: '',
-    comment: '',
-    dbName: '',
-    authdb: '',
-    rawData: '',
-    session: '',
-    willRetryWrite: '',
-    readPreference: '',
-    bypassPinningCheck: '',
-    omitMaxTimeMS: '',
-    timeoutMS: '',
-    enableUtf8Validation: '',
     allowDiskUse: '',
+    authdb: '',
     batchSize: '',
+    bsonRegExp: '',
     bypassDocumentValidation: '',
+    bypassPinningCheck: '',
+    checkKeys: '',
+    collation: '',
+    comment: '',
     cursor: '',
-    maxAwaitTimeMS: '',
+    dbName: '',
+    enableUtf8Validation: '',
+    explain: '',
+    fieldsAsRaw: '',
     hint: '',
+    ignoreUndefined: '',
     let: '',
+    maxAwaitTimeMS: '',
+    maxTimeMS: '',
+    omitMaxTimeMS: '',
     out: '',
-    timeoutMode: ''
+    promoteBuffers: '',
+    promoteLongs: '',
+    promoteValues: '',
+    raw: '',
+    rawData: '',
+    readConcern: '',
+    readPreference: '',
+    serializeFunctions: '',
+    session: '',
+    timeoutContext: '',
+    timeoutMS: '',
+    timeoutMode: '',
+    useBigInt64: '',
+    willRetryWrite: ''
   };
 
   return new Set(Object.keys(denyList));
