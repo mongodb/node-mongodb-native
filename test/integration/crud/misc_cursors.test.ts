@@ -168,7 +168,9 @@ describe('Cursor', function () {
         count = await cursor.count();
         test.equal(10, count);
 
-        await cursor.forEach(() => { });
+        await cursor.forEach(() => {
+          // do nothing
+        });
 
         const count2 = await cursor.count();
         expect(count2).to.equal(10);
@@ -240,7 +242,9 @@ describe('Cursor', function () {
         count = await cursor.count();
         test.equal(10, count);
 
-        await cursor.forEach(() => { });
+        await cursor.forEach(() => {
+          // do nothing
+        });
 
         const count2 = await cursor.count();
         expect(count2).to.equal(10);
@@ -1447,7 +1451,9 @@ describe('Cursor', function () {
     const cursor = collection.find({}, { tailable: true, awaitData: true });
     // this.defer(() => cursor.close());
 
-    await cursor.forEach(() => { });
+    await cursor.forEach(() => {
+      // do nothing
+    });
     await cursor.close();
     await client.close();
   });
@@ -1475,7 +1481,7 @@ describe('Cursor', function () {
           try {
             await db.collection('cursor_tailable').drop();
             // eslint-disable-next-line no-empty
-          } catch { }
+          } catch {}
 
           const collection = await db.createCollection('cursor_tailable', {
             capped: true,
@@ -1923,7 +1929,11 @@ describe('Cursor', function () {
     await collection.insertMany(docs, configuration.writeConcernMax());
 
     const cursor = collection.find({}, { tailable: true });
-    const err = await cursor.forEach(() => { }).catch(e => e);
+    const err = await cursor
+      .forEach(() => {
+        // do nothing
+      })
+      .catch(e => e);
     test.ok(err instanceof Error);
     test.ok(typeof err.code === 'number');
 
@@ -2694,7 +2704,9 @@ describe('Cursor', function () {
 
       const configuration = this.configuration;
 
-      const cleanup = () => { };
+      const cleanup = () => {
+        // do nothing
+      };
       let caughtError = undefined;
 
       return (
@@ -2914,7 +2926,9 @@ describe('Cursor', function () {
       const cursor = collection.find();
       this.defer(() => cursor.close());
 
-      const promise = cursor.forEach(() => { });
+      const promise = cursor.forEach(() => {
+        // do nothing
+      });
       expect(promise).to.exist.and.to.be.an.instanceof(Promise);
       return promise;
     });
