@@ -2,7 +2,7 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 6? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_6.0.0.md)!**
+**Upgrading to version 7? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)!**
 
 ## Quick Links
 
@@ -16,11 +16,9 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | MongoDB Developer Center | [www.mongodb.com/developer](https://www.mongodb.com/developer/languages/javascript/)                                                  |
 | Stack Overflow           | [stackoverflow.com](https://stackoverflow.com/search?q=%28%5Btypescript%5D+or+%5Bjavascript%5D+or+%5Bnode.js%5D%29+and+%5Bmongodb%5D) |
 | Source Code              | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                                              |
-| Upgrade to v6            | [etc/notes/CHANGES_6.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_6.0.0.md)                     |
+| Upgrade to v7            | [etc/notes/CHANGES_7.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)                     |
 | Contributing             | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                                           |
 | Changelog                | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                                     |
-
-
 
 ### Release Integrity
 
@@ -34,6 +32,7 @@ The GitHub release contains a detached signature file for the NPM package (named
 `mongodb-X.Y.Z.tgz.sig`).
 
 The following command returns the link npm package.
+
 ```shell
 npm view mongodb@vX.Y.Z dist.tarball
 ```
@@ -41,12 +40,13 @@ npm view mongodb@vX.Y.Z dist.tarball
 Using the result of the above command, a `curl` command can return the official npm package for the release.
 
 To verify the integrity of the downloaded package, run the following command:
+
 ```shell
 gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
 ```
 
->[!Note]
-No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
+> [!Note]
+> No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
 
 The MongoDB Node.js driver follows [semantic versioning](https://semver.org/) for its releases.
 
@@ -100,7 +100,7 @@ This is the lowest typescript version guaranteed to work with our driver: older 
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
 If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
 
-Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version.  Currently, our Typescript targets es2023.
+Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version. Currently, our Typescript targets es2023.
 
 ## Installation
 
