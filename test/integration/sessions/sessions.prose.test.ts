@@ -1,18 +1,11 @@
 import { expect } from 'chai';
-import { type ChildProcess, spawn } from 'child_process';
 import { once } from 'events';
-import * as os from 'os';
-import * as path from 'path';
 
-import {
-  type Collection,
-  type CommandStartedEvent,
-  MongoClient,
-  MongoDriverError,
-  MongoInvalidArgumentError,
-  ObjectId
-} from '../../mongodb';
-import { sleep } from '../../tools/utils';
+import { type CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { type Collection } from '../../../src/collection';
+import { MongoDriverError, MongoInvalidArgumentError } from '../../../src/error';
+import { MongoClient } from '../../../src/mongo_client';
+import { configureMongocryptdSpawnHooks, sleep } from '../../tools/utils';
 
 describe('Sessions Prose Tests', () => {
   describe('5. Session argument is for the right client', () => {
@@ -78,7 +71,7 @@ describe('Sessions Prose Tests', () => {
 
       // reset test collection
       testCollection = client.db('test').collection('too.many.sessions');
-      await testCollection.drop().catch(() => null);
+      await testCollection.drop();
     });
 
     afterEach(async () => {
@@ -131,23 +124,8 @@ describe('Sessions Prose Tests', () => {
      */
     const mongocryptdTestPort = '27022';
     let client: MongoClient;
-    let childProcess: ChildProcess;
 
-    before(() => {
-      const pidFile = path.join(os.tmpdir(), new ObjectId().toHexString());
-      childProcess = spawn(
-        'mongocryptd',
-        ['--port', mongocryptdTestPort, '--ipv6', '--pidfilepath', pidFile],
-        {
-          stdio: 'ignore',
-          detached: true
-        }
-      );
-
-      childProcess.on('error', err => {
-        console.warn('Sessions prose mongocryptd error:', err);
-      });
-    });
+    configureMongocryptdSpawnHooks({ port: mongocryptdTestPort });
 
     beforeEach(async () => {
       client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`, {
@@ -161,10 +139,6 @@ describe('Sessions Prose Tests', () => {
 
     afterEach(async () => {
       await client?.close();
-    });
-
-    after(() => {
-      childProcess.kill();
     });
 
     it(

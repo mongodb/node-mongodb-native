@@ -39,7 +39,7 @@ function delay(timeout) {
 }
 
 function dropCollection(dbObj, collectionName, options = {}) {
-  return dbObj.dropCollection(collectionName, options).catch(ignoreNsNotFound);
+  return dbObj.dropCollection(collectionName, options);
 }
 
 /**
@@ -84,10 +84,6 @@ function filterOutCommands(commands, bag) {
   return function (event) {
     if (commands.indexOf(event.commandName) === -1) bag.push(event);
   };
-}
-
-function ignoreNsNotFound(err) {
-  if (!err.message.match(/ns not found/)) throw err;
 }
 
 async function setupDatabase(configuration, dbsToClean) {
@@ -204,7 +200,6 @@ module.exports = {
   dropCollection,
   filterForCommands,
   filterOutCommands,
-  ignoreNsNotFound,
   setupDatabase,
   withCursor,
   APMEventCollector

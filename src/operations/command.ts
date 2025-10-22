@@ -53,21 +53,9 @@ export interface CommandOperationOptions
    * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
   comment?: unknown;
-  /**
-   * @deprecated
-   * This option is deprecated and will be removed in a future release as it is not used
-   * in the driver. Use MongoClientOptions or connection string parameters instead.
-   * */
-  retryWrites?: boolean;
-
   // Admin command overrides.
   dbName?: string;
   authdb?: string;
-  /**
-   * @deprecated
-   * This option is deprecated and will be removed in an upcoming major version.
-   */
-  noResponse?: boolean;
 
   /**
    * Used when the command needs to grant access to the underlying namespaces for time series collections.

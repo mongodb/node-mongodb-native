@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 
-import { type ServerCommandOptions, type TimeoutContext } from '.';
+import { TopologyType } from '.';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
@@ -16,13 +16,11 @@ import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
 import {
-  addContainerMetadata,
   type ClientMetadata,
   isDriverInfoEqual,
   makeClientMetadata
 } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import { MongoDBResponse } from './cmap/wire_protocol/responses';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { type AbstractCursor } from './cursor/abstract_cursor';
@@ -44,11 +42,10 @@ import {
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
 import { ClientBulkWriteExecutor } from './operations/client_bulk_write/executor';
+import { EndSessionsOperation } from './operations/end_sessions';
 import { executeOperation } from './operations/execute_operation';
-import { AbstractOperation } from './operations/operation';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
-import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import { readPreferenceServerSelector } from './sdam/server_selection';
@@ -63,7 +60,7 @@ import {
   type HostAddress,
   hostMatchesWildcards,
   isHostMatch,
-  MongoDBNamespace,
+  type MongoDBNamespace,
   noop,
   ns,
   resolveOptions,
@@ -408,31 +405,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * The consolidate, parsed, transformed and merged options.
    */
   public readonly options: Readonly<
-    Omit<
-      MongoOptions,
-      | 'monitorCommands'
-      | 'ca'
-      | 'crl'
-      | 'key'
-      | 'cert'
-      | 'driverInfo'
-      | 'additionalDriverInfo'
-      | 'metadata'
-      | 'extendedMetadata'
-    >
+    Omit<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo'>
   > &
-    Pick<
-      MongoOptions,
-      | 'monitorCommands'
-      | 'ca'
-      | 'crl'
-      | 'key'
-      | 'cert'
-      | 'driverInfo'
-      | 'additionalDriverInfo'
-      | 'metadata'
-      | 'extendedMetadata'
-    >;
+    Pick<MongoOptions, 'monitorCommands' | 'ca' | 'crl' | 'key' | 'cert' | 'driverInfo'> & {
+      /** @internal */
+      metadata: Promise<ClientMetadata>;
+    };
 
   private driverInfoList: DriverInfo[] = [];
 
@@ -485,13 +463,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * @beta
    * @experimental
    * An alias for {@link MongoClient.close|MongoClient.close()}.
    */
-  declare [Symbol.asyncDispose]: () => Promise<void>;
-  /** @internal */
-  async asyncDispose() {
+  async [Symbol.asyncDispose]() {
     await this.close();
   }
 
@@ -506,10 +481,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     if (isDuplicateDriverInfo) return;
 
     this.driverInfoList.push(driverInfo);
-    this.options.metadata = makeClientMetadata(this.driverInfoList, this.options);
-    this.options.extendedMetadata = addContainerMetadata(this.options.metadata)
+    this.options.metadata = makeClientMetadata(this.driverInfoList, this.options)
       .then(undefined, squashError)
-      .then(result => result ?? {}); // ensure Promise<Document>
+      .then(result => result ?? ({} as ClientMetadata)); // ensure Promise<Document>
   }
 
   /** @internal */
@@ -594,20 +568,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * Connect to MongoDB using a url
+   * An optional method to verify a handful of assumptions that are generally useful at application boot-time before using a MongoClient.
+   * For detailed information about the connect process see the MongoClient.connect static method documentation.
    *
-   * @remarks
-   * Calling `connect` is optional since the first operation you perform will call `connect` if it's needed.
-   * `timeoutMS` will bound the time any operation can take before throwing a timeout error.
-   * However, when the operation being run is automatically connecting your `MongoClient` the `timeoutMS` will not apply to the time taken to connect the MongoClient.
-   * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
-   * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
+   * @param url - The MongoDB connection string (supports `mongodb://` and `mongodb+srv://` schemes)
+   * @param options - Optional configuration options for the client
    *
-   * @remarks
-   * The driver will look up corresponding SRV and TXT records if the connection string starts with `mongodb+srv://`.
-   * If those look ups throw a DNS Timeout error, the driver will retry the look up once.
-   *
-   * @see docs.mongodb.org/manual/reference/connection-string/
+   * @see https://www.mongodb.com/docs/manual/reference/connection-string/
    */
   async connect(): Promise<this> {
     if (this.connectionLock) {
@@ -795,40 +762,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       return;
     }
 
-    // If we would attempt to select a server and get nothing back we short circuit
-    // to avoid the server selection timeout.
-    const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
-    const topologyDescription = this.topology.description;
-    const serverDescriptions = Array.from(topologyDescription.servers.values());
-    const servers = selector(topologyDescription, serverDescriptions);
-    if (servers.length !== 0) {
-      const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
-      if (endSessions.length !== 0) {
-        try {
-          class EndSessionsOperation extends AbstractOperation<void> {
-            override ns = MongoDBNamespace.fromString('admin.$cmd');
-            override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
-            override buildCommand(_connection: Connection, _session?: ClientSession): Document {
-              return {
-                endSessions
-              };
-            }
-            override buildOptions(timeoutContext: TimeoutContext): ServerCommandOptions {
-              return {
-                timeoutContext,
-                readPreference: ReadPreference.primaryPreferred,
-                noResponse: true
-              };
-            }
-            override get commandName(): string {
-              return 'endSessions';
-            }
-          }
-          await executeOperation(this, new EndSessionsOperation());
-        } catch (error) {
-          squashError(error);
-        }
-      }
+    const supportsSessions =
+      this.topology.description.type === TopologyType.LoadBalanced ||
+      this.topology.description.logicalSessionTimeoutMinutes != null;
+
+    if (supportsSessions) {
+      await endSessions(this, this.topology);
     }
 
     // clear out references to old topology
@@ -840,6 +779,27 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     const { encrypter } = this.options;
     if (encrypter) {
       await encrypter.close(this);
+    }
+
+    async function endSessions(
+      client: MongoClient,
+      { description: topologyDescription }: Topology
+    ) {
+      // If we would attempt to select a server and get nothing back we short circuit
+      // to avoid the server selection timeout.
+      const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
+      const serverDescriptions = Array.from(topologyDescription.servers.values());
+      const servers = selector(topologyDescription, serverDescriptions);
+      if (servers.length !== 0) {
+        const endSessions = Array.from(client.s.sessionPool.sessions, ({ id }) => id);
+        if (endSessions.length !== 0) {
+          try {
+            await executeOperation(client, new EndSessionsOperation(endSessions));
+          } catch (error) {
+            squashError(error);
+          }
+        }
+      }
     }
   }
 
@@ -868,21 +828,35 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * Connect to MongoDB using a url
+   * Creates a new MongoClient instance and immediately connects it to MongoDB.
+   * This convenience method combines `new MongoClient(url, options)` and `client.connect()` in a single step.
+   *
+   * Connect can be helpful to detect configuration issues early by validating:
+   * - **DNS Resolution**: Verifies that SRV records and hostnames in the connection string resolve DNS entries
+   * - **Network Connectivity**: Confirms that host addresses are reachable and ports are open
+   * - **TLS Configuration**: Validates SSL/TLS certificates, CA files, and encryption settings are correct
+   * - **Authentication**: Verifies that provided credentials are valid
+   * - **Server Compatibility**: Ensures the MongoDB server version is supported by this driver version
+   * - **Load Balancer Setup**: For load-balanced deployments, confirms the service is properly configured
+   *
+   * @returns A promise that resolves to the same MongoClient instance once connected
    *
    * @remarks
-   * Calling `connect` is optional since the first operation you perform will call `connect` if it's needed.
-   * `timeoutMS` will bound the time any operation can take before throwing a timeout error.
-   * However, when the operation being run is automatically connecting your `MongoClient` the `timeoutMS` will not apply to the time taken to connect the MongoClient.
-   * This means the time to setup the `MongoClient` does not count against `timeoutMS`.
-   * If you are using `timeoutMS` we recommend connecting your client explicitly in advance of any operation to avoid this inconsistent execution time.
+   * **Connection is Optional:** Calling `connect` is optional since any operation method (`find`, `insertOne`, etc.)
+   * will automatically perform these same validation steps if the client is not already connected.
+   * However, explicitly calling `connect` can make sense for:
+   * - **Fail-fast Error Detection**: Non-transient connection issues (hostname unresolved, port refused connection) are discovered immediately rather than during your first operation
+   * - **Predictable Performance**: Eliminates first connection overhead from your first database operation
    *
    * @remarks
-   * The programmatically provided options take precedence over the URI options.
+   * **Connection Pooling Impact:** Calling `connect` will populate the connection pool with one connection
+   * to a server selected by the client's configured `readPreference` (defaults to primary).
    *
    * @remarks
-   * The driver will look up corresponding SRV and TXT records if the connection string starts with `mongodb+srv://`.
-   * If those look ups throw a DNS Timeout error, the driver will retry the look up once.
+   * **Timeout Behavior:** When using `timeoutMS`, the connection establishment time does not count against
+   * the timeout for subsequent operations. This means `connect` runs without a `timeoutMS` limit, while
+   * your database operations will still respect the configured timeout. If you need predictable operation
+   * timing with `timeoutMS`, call `connect` explicitly before performing operations.
    *
    * @see https://www.mongodb.com/docs/manual/reference/connection-string/
    */
@@ -1037,8 +1011,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 }
 
-configureResourceManagement(MongoClient.prototype);
-
 /**
  * Parsed Mongo Client Options.
  *
@@ -1105,12 +1077,8 @@ export interface MongoOptions
   compressors: CompressorName[];
   writeConcern: WriteConcern;
   dbName: string;
-  /** @deprecated - Will be made internal in a future major release. */
-  metadata: ClientMetadata;
-  /** @deprecated - Will be made internal in a future major release. */
-  extendedMetadata: Promise<Document>;
-  /** @deprecated - Will be made internal in a future major release. */
-  additionalDriverInfo: DriverInfo[];
+  /** @internal */
+  metadata: Promise<ClientMetadata>;
   /** @internal */
   autoEncrypter?: AutoEncrypter;
   /** @internal */

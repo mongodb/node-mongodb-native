@@ -1,4 +1,4 @@
-import { Readable, Transform } from 'stream';
+import { Readable } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
 import { type OnDemandDocumentDeserializeOptions } from '../cmap/wire_protocol/on_demand/document';
@@ -18,7 +18,6 @@ import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
-import { type AsyncDisposable, configureResourceManagement } from '../resource_management';
 import type { Server } from '../sdam/server';
 import { type ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { type CSOTTimeoutContext, type Timeout, TimeoutContext } from '../timeout';
@@ -58,12 +57,6 @@ export const CURSOR_FLAGS = [
   'exhaust',
   'partial'
 ] as const;
-
-/** @public */
-export interface CursorStreamOptions {
-  /** A transformation method applied to each document emitted by the stream */
-  transform?(this: void, doc: Document): Document;
-}
 
 /** @public */
 export type CursorFlag = (typeof CURSOR_FLAGS)[number];
@@ -437,13 +430,10 @@ export abstract class AbstractCursor<
   }
 
   /**
-   * @beta
    * @experimental
    * An alias for {@link AbstractCursor.close|AbstractCursor.close()}.
    */
-  declare [Symbol.asyncDispose]: () => Promise<void>;
-  /** @internal */
-  async asyncDispose() {
+  async [Symbol.asyncDispose]() {
     await this.close();
   }
 
@@ -523,7 +513,7 @@ export abstract class AbstractCursor<
     }
   }
 
-  stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
+  stream(): Readable & AsyncIterable<TSchema> {
     const readable = new ReadableCursorStream(this);
     const abortListener = addAbortListener(this.signal, function () {
       readable.destroy(this.reason);
@@ -531,31 +521,6 @@ export abstract class AbstractCursor<
     readable.once('end', () => {
       abortListener?.[kDispose]();
     });
-
-    if (options?.transform) {
-      const transform = options.transform;
-
-      const transformedStream = readable.pipe(
-        new Transform({
-          objectMode: true,
-          highWaterMark: 1,
-          transform(chunk, _, callback) {
-            try {
-              const transformed = transform(chunk);
-              callback(undefined, transformed);
-            } catch (err) {
-              callback(err);
-            }
-          }
-        })
-      );
-
-      // Bubble errors to transformed stream, because otherwise no way
-      // to handle this error.
-      readable.on('error', err => transformedStream.emit('error', err));
-
-      return transformedStream;
-    }
 
     return readable;
   }
@@ -701,7 +666,11 @@ export abstract class AbstractCursor<
           array.push(await this.transformDocument(doc));
         }
       } else {
-        array.push(...docs);
+        // Note: previous versions of this logic used `array.push(...)`, which adds each item
+        // to the callstack.  For large arrays, this can exceed the maximum call size.
+        for (const doc of docs) {
+          array.push(doc);
+        }
       }
     }
     return array;
@@ -893,7 +862,7 @@ export abstract class AbstractCursor<
   ): Promise<InitialCursorResponse>;
 
   /** @internal */
-  async getMore(batchSize: number): Promise<CursorResponse> {
+  async getMore(): Promise<CursorResponse> {
     if (this.cursorId == null) {
       throw new MongoRuntimeError(
         'Unexpected null cursor id. A cursor creating command should have set this'
@@ -910,11 +879,10 @@ export abstract class AbstractCursor<
         'Unexpected null session. A cursor creating command should have set this'
       );
     }
-
     const getMoreOptions = {
       ...this.cursorOptions,
       session: this.cursorSession,
-      batchSize
+      batchSize: this.cursorOptions.batchSize
     };
 
     const getMoreOperation = new GetMoreOperation(
@@ -987,14 +955,11 @@ export abstract class AbstractCursor<
       await this.cursorInit();
       // If the cursor died or returned documents, return
       if ((this.documents?.length ?? 0) !== 0 || this.isDead) return;
-      // Otherwise, run a getMore
     }
 
-    // otherwise need to call getMore
-    const batchSize = this.cursorOptions.batchSize || 1000;
-
+    // Otherwise, run a getMore
     try {
-      const response = await this.getMore(batchSize);
+      const response = await this.getMore();
       this.cursorId = response.id;
       this.documents = response;
     } catch (error) {
@@ -1222,8 +1187,6 @@ class ReadableCursorStream extends Readable {
       });
   }
 }
-
-configureResourceManagement(AbstractCursor.prototype);
 
 /**
  * @internal

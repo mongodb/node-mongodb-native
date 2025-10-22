@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { type MongoClient, ObjectId, ReadPreference } from '../../mongodb';
-import { filterForCommands, ignoreNsNotFound, setupDatabase } from '../shared';
+import { filterForCommands, setupDatabase } from '../shared';
 
 describe('Command Monitoring', function () {
   let client: MongoClient;
@@ -164,7 +164,6 @@ describe('Command Monitoring', function () {
       return db
         .collection('apm_test_2')
         .drop()
-        .catch(ignoreNsNotFound)
         .then(() => {
           // Insert test documents
           return db
@@ -235,7 +234,6 @@ describe('Command Monitoring', function () {
       return db
         .collection('apm_test_2')
         .drop()
-        .catch(ignoreNsNotFound)
         .then(() => {
           // Insert test documents
           return db
@@ -328,7 +326,6 @@ describe('Command Monitoring', function () {
       return db
         .collection('apm_test_2')
         .drop()
-        .catch(ignoreNsNotFound)
         .then(() =>
           db
             .collection('apm_test_2')
@@ -515,53 +512,47 @@ describe('Command Monitoring', function () {
     }
   });
 
-  it('should correctly decorate the apm result for aggregation with cursorId', {
-    metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
+  it('should correctly decorate the apm result for aggregation with cursorId', async function () {
+    const started = [];
+    const succeeded = [];
 
-    test: function () {
-      const started = [];
-      const succeeded = [];
+    // Generate docs
+    const docs = [];
+    for (let i = 0; i < 3500; i++) docs.push({ a: i });
 
-      // Generate docs
-      const docs = [];
-      for (let i = 0; i < 2500; i++) docs.push({ a: i });
+    const client = this.configuration.newClient(
+      { writeConcern: { w: 1 } },
+      { maxPoolSize: 1, monitorCommands: true }
+    );
 
-      const client = this.configuration.newClient(
-        { writeConcern: { w: 1 } },
-        { maxPoolSize: 1, monitorCommands: true }
-      );
+    const desiredEvents = ['aggregate', 'getMore'];
+    client.on('commandStarted', filterForCommands(desiredEvents, started));
+    client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
+    const db = client.db(this.configuration.db);
+    return db
+      .collection('apm_test_u_4')
+      .drop()
+      .then(() => db.collection('apm_test_u_4').insertMany(docs))
+      .then(r => {
+        expect(r).to.exist;
+        return db
+          .collection('apm_test_u_4')
+          .aggregate([{ $match: {} }], { batchSize: 1000 })
+          .toArray();
+      })
+      .then(r => {
+        expect(r).to.exist;
+        expect(started).to.have.length(4);
+        expect(succeeded).to.have.length(4);
+        const cursors = succeeded.map(x => x.reply.cursor);
 
-      const desiredEvents = ['aggregate', 'getMore'];
-      client.on('commandStarted', filterForCommands(desiredEvents, started));
-      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
+        // Check we have a cursor
+        expect(cursors[0].id).to.exist;
+        expect(cursors[0].id.toString()).to.equal(cursors[1].id.toString());
+        expect(cursors[3].id.toString()).to.equal('0');
 
-      const db = client.db(this.configuration.db);
-      return db
-        .collection('apm_test_u_4')
-        .drop()
-        .catch(ignoreNsNotFound)
-        .then(() => db.collection('apm_test_u_4').insertMany(docs))
-        .then(r => {
-          expect(r).to.exist;
-          return db
-            .collection('apm_test_u_4')
-            .aggregate([{ $match: {} }])
-            .toArray();
-        })
-        .then(r => {
-          expect(r).to.exist;
-          expect(started).to.have.length(4);
-          expect(succeeded).to.have.length(4);
-          const cursors = succeeded.map(x => x.reply.cursor);
-
-          // Check we have a cursor
-          expect(cursors[0].id).to.exist;
-          expect(cursors[0].id.toString()).to.equal(cursors[1].id.toString());
-          expect(cursors[3].id.toString()).to.equal('0');
-
-          return client.close();
-        });
-    }
+        return client.close();
+      });
   });
 
   it('should correctly decorate the apm result for listCollections with cursorId', {

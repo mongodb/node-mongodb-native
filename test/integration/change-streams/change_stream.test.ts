@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { UUID } from 'bson';
+import { Long, UUID } from 'bson';
 import { expect } from 'chai';
 import { on, once } from 'events';
 import { gte, lt } from 'semver';
@@ -11,19 +11,16 @@ import {
   type ChangeStream,
   type ChangeStreamDocument,
   type ChangeStreamOptions,
-  type Collection,
-  type CommandStartedEvent,
-  type Db,
-  isHello,
-  LEGACY_HELLO_COMMAND,
-  Long,
-  MongoAPIError,
-  MongoChangeStreamError,
-  type MongoClient,
-  MongoServerError,
-  ReadPreference,
   type ResumeToken
-} from '../../mongodb';
+} from '../../../src/change_stream';
+import { type CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { type Collection } from '../../../src/collection';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { type Db } from '../../../src/db';
+import { MongoAPIError, MongoChangeStreamError, MongoServerError } from '../../../src/error';
+import { type MongoClient } from '../../../src/mongo_client';
+import { ReadPreference } from '../../../src/read_preference';
+import { isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 import { type FailCommandFailPoint, sleep } from '../../tools/utils';
@@ -160,10 +157,10 @@ describe('Change Streams', function () {
       });
     });
 
-    it('ignores any invalid option values', function () {
+    it('allows invalid option values', function () {
       const changeStream = collection.watch([], { invalidOption: true });
 
-      expect(changeStream).not.to.have.nested.property(
+      expect(changeStream).to.have.nested.property(
         'cursor.pipeline[0].$changeStream.invalidOption'
       );
     });
@@ -323,30 +320,25 @@ describe('Change Streams', function () {
   it('should properly close ChangeStream cursor', {
     metadata: { requires: { topology: 'replicaset' } },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      await client.connect();
+      const database = client.db('integration_tests');
+      const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
 
-        const database = client.db('integration_tests');
-        const changeStream = database.collection('changeStreamCloseTest').watch(pipeline);
-        this.defer(() => changeStream.close());
+      assert.equal(changeStream.closed, false);
+      assert.equal(changeStream.cursor.closed, false);
 
-        assert.equal(changeStream.closed, false);
-        assert.equal(changeStream.cursor.closed, false);
+      await changeStream.close();
 
-        changeStream.close(err => {
-          expect(err).to.not.exist;
+      // Check the cursor is closed
+      expect(changeStream.closed).to.be.true;
+      expect(changeStream.cursor).property('closed', true);
 
-          // Check the cursor is closed
-          expect(changeStream.closed).to.be.true;
-          expect(changeStream.cursor).property('closed', true);
-          done();
-        });
-      });
+      await changeStream.close();
+      await client.close();
     }
   });
 
@@ -355,32 +347,28 @@ describe('Change Streams', function () {
     {
       metadata: { requires: { topology: 'replicaset' } },
 
-      test: function (done) {
+      test: async function () {
         const configuration = this.configuration;
         const client = configuration.newClient();
 
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
+        await client.connect();
 
-          const forbiddenStage = {};
-          const forbiddenStageName = '$alksdjfhlaskdfjh';
-          forbiddenStage[forbiddenStageName] = 2;
+        const forbiddenStage = {};
+        const forbiddenStageName = '$alksdjfhlaskdfjh';
+        forbiddenStage[forbiddenStageName] = 2;
 
-          const database = client.db('integration_tests');
-          const changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
-          this.defer(() => changeStream.close());
+        const database = client.db('integration_tests');
+        const changeStream = database.collection('forbiddenStageTest').watch([forbiddenStage]);
 
-          changeStream.next(err => {
-            assert.ok(err);
-            assert.ok(err.message);
-            assert.ok(
-              err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
-            );
+        const err = await changeStream.next().catch(e => e);
+        assert.ok(err);
+        assert.ok(err.message);
+        assert.ok(
+          err.message.indexOf(`Unrecognized pipeline stage name: '${forbiddenStageName}'`) > -1
+        );
 
-            done();
-          });
-        });
+        await changeStream.close();
+        await client.close();
       }
     }
   );
@@ -459,37 +447,25 @@ describe('Change Streams', function () {
 
   it('should error if resume token projected out of change stream document using iterator', {
     metadata: { requires: { topology: 'replicaset' } },
-    test(done) {
+    async test() {
       const configuration = this.configuration;
       const client = configuration.newClient();
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
+      await client.connect();
 
-        const database = client.db('integration_tests');
-        const collection = database.collection('resumetokenProjectedOutCallback');
-        const changeStream = collection.watch([{ $project: { _id: false } }]);
+      const database = client.db('integration_tests');
+      const collection = database.collection('resumetokenProjectedOutCallback');
+      const changeStream = collection.watch([{ $project: { _id: false } }]);
 
-        changeStream.hasNext(() => {
-          // trigger initialize
-        });
+      await initIteratorMode(changeStream);
 
-        changeStream.cursor.on('init', () => {
-          collection.insertOne({ b: 2 }, (err, res) => {
-            expect(err).to.be.undefined;
-            expect(res).to.exist;
+      const res = await collection.insertOne({ b: 2 });
+      expect(res).to.exist;
 
-            changeStream.next(err => {
-              expect(err).to.exist;
-              changeStream.close(() => {
-                client.close(() => {
-                  done();
-                });
-              });
-            });
-          });
-        });
-      });
+      const err = await changeStream.next().catch(e => e);
+      expect(err).to.exist;
+      await changeStream.close();
+      await client.close();
     }
   });
 
@@ -587,7 +563,7 @@ describe('Change Streams', function () {
     async test() {
       const collection = db.collection('resumeAfterTest2');
 
-      await collection.drop().catch(() => null);
+      await collection.drop();
 
       let resumeToken;
       const docs = [{ a: 0 }, { a: 1 }, { a: 2 }];
@@ -786,7 +762,8 @@ describe('Change Streams', function () {
 
       const transform = doc => ({ doc: JSON.stringify(doc) });
       changeStream
-        .stream({ transform })
+        .stream()
+        .map(transform)
         .on('error', () => null)
         .pipe(outStream)
         .on('error', () => null);
@@ -1290,7 +1267,7 @@ describe('Change Streams', function () {
         await mock.cleanup();
       });
 
-      it('changeStream should close if cursor id for initial aggregate is Long.ZERO', function (done) {
+      it('changeStream should close if cursor id for initial aggregate is Long.ZERO', async function () {
         mockServer.setMessageHandler(req => {
           const doc = req.document;
           if (isHello(doc)) {
@@ -1319,17 +1296,16 @@ describe('Change Streams', function () {
         const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`, {
           serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
         });
-        client.connect(err => {
-          expect(err).to.not.exist;
-          const collection = client.db('cs').collection('test');
-          const changeStream = collection.watch();
-          changeStream.next((err, doc) => {
-            expect(err).to.exist;
-            expect(doc).to.not.exist;
-            expect(err?.message).to.equal('ChangeStream is closed');
-            changeStream.close(() => client.close(done));
-          });
-        });
+        await client.connect();
+        const collection = client.db('cs').collection('test');
+        const changeStream = collection.watch();
+
+        const err = await changeStream.next().catch(e => e);
+        expect(err).to.exist;
+        expect(err?.message).to.equal('ChangeStream is closed');
+
+        await changeStream.close();
+        await client.close();
       });
     });
   });
@@ -1833,7 +1809,7 @@ describe('Change Streams', function () {
     });
 
     context('invalid options', function () {
-      it('does not send invalid options on the aggregate command', {
+      it('server errors on invalid options on the initialize', {
         metadata: { requires: { topology: '!single' } },
         test: async function () {
           const started: CommandStartedEvent[] = [];
@@ -1843,35 +1819,8 @@ describe('Change Streams', function () {
           // @ts-expect-error: checking for invalid options
           cs = collection.watch([], doc);
 
-          const willBeChange = once(cs, 'change').then(args => args[0]);
-          await once(cs.cursor, 'init');
-
-          const result = await collection.insertOne({ a: Long.fromNumber(0) });
-          expect(result).to.exist;
-
-          await willBeChange;
-          expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
-        }
-      });
-
-      it('does not send invalid options on the getMore command', {
-        metadata: { requires: { topology: '!single' } },
-        test: async function () {
-          const started: CommandStartedEvent[] = [];
-
-          client.on('commandStarted', filterForCommands(['aggregate'], started));
-          const doc = { invalidBSONOption: true };
-          // @ts-expect-error: checking for invalid options
-          cs = collection.watch([], doc);
-
-          const willBeChange = once(cs, 'change').then(args => args[0]);
-          await once(cs.cursor, 'init');
-
-          const result = await collection.insertOne({ a: Long.fromNumber(0) });
-          expect(result).to.exist;
-
-          await willBeChange;
-          expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
+          const error = await once(cs, 'change').catch(error => error);
+          expect(error).to.be.instanceOf(MongoServerError);
         }
       });
     });

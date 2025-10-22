@@ -233,7 +233,7 @@ describe('AbortSignal support', () => {
           const utilClient = this.configuration.newClient();
           try {
             const collection = utilClient.db('abortSignal').collection('support');
-            await collection.drop({}).catch(() => null);
+            await collection.drop({});
             await collection.insertMany([
               { a: 1, ssn: '0000-00-0001' },
               { a: 2, ssn: '0000-00-0002' },
@@ -241,7 +241,7 @@ describe('AbortSignal support', () => {
             ]);
             if (cursorName === 'listCollections') {
               for (let i = 0; i < 3; i++) {
-                await db.dropCollection(`c${i}`).catch(() => null);
+                await db.dropCollection(`c${i}`);
                 await db.createCollection(`c${i}`);
               }
             }
@@ -535,7 +535,7 @@ describe('AbortSignal support', () => {
       const utilClient = this.configuration.newClient();
       try {
         const collection = utilClient.db('abortSignal').collection('support');
-        await collection.drop({}).catch(() => null);
+        await collection.drop({});
         await collection.insertMany([
           { a: 1, ssn: '0000-00-0001' },
           { a: 2, ssn: '0000-00-0002' },
@@ -570,7 +570,7 @@ describe('AbortSignal support', () => {
       const utilClient = this.configuration.newClient();
       try {
         const collection = utilClient.db('abortSignal').collection('support');
-        await collection.drop({}).catch(() => null);
+        await collection.drop({});
         await collection.insertMany([
           { a: 1, ssn: '0000-00-0001' },
           { a: 2, ssn: '0000-00-0002' },

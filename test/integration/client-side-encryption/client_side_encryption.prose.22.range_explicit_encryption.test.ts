@@ -171,26 +171,12 @@ describe('Range Explicit Encryption', function () {
 
         await utilClient.db('db').dropDatabase();
 
-        await utilClient
-          .db('db')
-          .dropCollection('explicit_encryption')
-          .catch(e => {
-            if (!/ns not found/.test(e.message)) {
-              throw e;
-            }
-          });
+        await utilClient.db('db').dropCollection('explicit_encryption');
         await utilClient.db('db').createCollection('explicit_encryption', {
           encryptedFields
         });
 
-        await utilClient
-          .db('keyvault')
-          .dropCollection('datakeys')
-          .catch(e => {
-            if (!/ns not found/.test(e.message)) {
-              throw e;
-            }
-          });
+        await utilClient.db('keyvault').dropCollection('datakeys');
 
         await utilClient.db('keyvault').createCollection('datakeys');
 
@@ -537,7 +523,7 @@ describe('Range Explicit Encryption', function () {
             })
             .catch(e => e);
 
-          expect(resultOrError).to.be.instanceOf(TypeError);
+          expect(resultOrError).to.be.instanceOf(MongoCryptError);
         }
       );
     });

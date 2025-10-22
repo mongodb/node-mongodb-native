@@ -222,7 +222,7 @@ export async function prepareHandshakeDocument(
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
   const { serverApi } = authContext.connection;
-  const clientMetadata: Document = await options.extendedMetadata;
+  const clientMetadata: Document = await options.metadata;
 
   const handshakeDoc: HandshakeDocument = {
     [serverApi?.version || options.loadBalanced === true ? 'hello' : LEGACY_HELLO_COMMAND]: 1,

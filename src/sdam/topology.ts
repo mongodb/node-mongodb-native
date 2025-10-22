@@ -150,8 +150,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
   loadBalanced: boolean;
-  metadata: ClientMetadata;
-  extendedMetadata: Promise<Document>;
+  metadata: Promise<ClientMetadata>;
   serverMonitoringMode: ServerMonitoringMode;
   /** MongoDB server API version */
   serverApi?: ServerApi;
@@ -393,10 +392,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return this.s.options.serverApi;
   }
 
-  get capabilities(): ServerCapabilities {
-    return new ServerCapabilities(this.lastHello());
-  }
-
   /** Initiate server connect */
   async connect(options?: ConnectOptions): Promise<Topology> {
     this.connectionLock ??= this._connect(options);
@@ -470,7 +465,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       );
 
       const skipPingOnConnect = this.s.options.__skipPingOnConnect === true;
-      if (!skipPingOnConnect && this.s.credentials) {
+      if (!skipPingOnConnect) {
         const connection = await server.pool.checkOut({ timeoutContext: timeoutContext });
         server.pool.checkIn(connection);
         stateTransition(this, STATE_CONNECTED);
@@ -752,10 +747,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   auth(credentials?: MongoCredentials, callback?: Callback): void {
     if (typeof credentials === 'function') ((callback = credentials), (credentials = undefined));
     if (typeof callback === 'function') callback(undefined, true);
-  }
-
-  get clientMetadata(): ClientMetadata {
-    return this.s.options.metadata;
   }
 
   isConnected(): boolean {
@@ -1102,53 +1093,4 @@ function isStaleServerDescription(
   return (
     compareTopologyVersion(currentTopologyVersion, incomingServerDescription.topologyVersion) > 0
   );
-}
-
-/**
- * @public
- * @deprecated This class will be removed as dead code in the next major version.
- */
-export class ServerCapabilities {
-  maxWireVersion: number;
-  minWireVersion: number;
-
-  constructor(hello: Document) {
-    this.minWireVersion = hello.minWireVersion || 0;
-    this.maxWireVersion = hello.maxWireVersion || 0;
-  }
-
-  get hasAggregationCursor(): boolean {
-    return true;
-  }
-
-  get hasWriteCommands(): boolean {
-    return true;
-  }
-  get hasTextSearch(): boolean {
-    return true;
-  }
-
-  get hasAuthCommands(): boolean {
-    return true;
-  }
-
-  get hasListCollectionsCommand(): boolean {
-    return true;
-  }
-
-  get hasListIndexesCommand(): boolean {
-    return true;
-  }
-
-  get supportsSnapshotReads(): boolean {
-    return this.maxWireVersion >= 13;
-  }
-
-  get commandsTakeWriteConcern(): boolean {
-    return true;
-  }
-
-  get commandsTakeCollation(): boolean {
-    return true;
-  }
 }

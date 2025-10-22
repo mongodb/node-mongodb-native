@@ -6,10 +6,17 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
 
 import { connect } from '../../../src/cmap/connect';
-import { Connection, SizedMessageTransform } from '../../../src/cmap/connection';
+import { Connection, CryptoConnection, SizedMessageTransform } from '../../../src/cmap/connection';
 import { MongoNetworkTimeoutError, MongoRuntimeError } from '../../../src/error';
 import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
-import { isHello, MongoDBCollectionNamespace, ns, promiseWithResolvers } from '../../../src/utils';
+import {
+  HostAddress,
+  isHello,
+  MongoDBCollectionNamespace,
+  MongoDBNamespace,
+  ns,
+  promiseWithResolvers
+} from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 
 const connectionOptionsDefaults = {
@@ -27,29 +34,6 @@ describe('new Connection()', function () {
   after(() => mock.cleanup());
 
   before(() => mock.createServer().then(s => (server = s)));
-
-  it('supports fire-and-forget messages', async function () {
-    server.setMessageHandler(request => {
-      const doc = request.document;
-      if (isHello(doc)) {
-        request.reply(mock.HELLO);
-      }
-
-      // black hole all other requests
-    });
-
-    const options = {
-      ...connectionOptionsDefaults,
-      connectionType: Connection,
-      hostAddress: server.hostAddress(),
-      authProviders: new MongoClientAuthProviders()
-    };
-
-    const conn = await connect(options);
-    const readSpy = sinon.spy(conn, 'readMany');
-    await conn.command(ns('$admin.cmd'), { ping: 1 }, { noResponse: true });
-    expect(readSpy).to.not.have.been.called;
-  });
 
   it('destroys streams which time out', async function () {
     server.setMessageHandler(request => {
@@ -400,5 +384,24 @@ describe('new Connection()', function () {
       const error = await promise.catch(error => error);
       expect(error).to.be.instanceOf(MongoRuntimeError);
     });
+  });
+});
+
+describe('class CryptoConnection {}', function () {
+  it('CryptoConnection.command() throws if no autoEncrypter is configured', async function () {
+    const connection = new CryptoConnection(new Socket(), {
+      ...connectionOptionsDefaults,
+      hostAddress: HostAddress.fromString('localhost:27017'),
+      authProviders: new MongoClientAuthProviders(),
+      extendedMetadata: Promise.resolve({})
+    });
+
+    const error = await connection
+      .command(MongoDBNamespace.fromString('foo.bar'), {}, {})
+      .catch(e => e);
+
+    expect(error)
+      .to.be.instanceOf(MongoRuntimeError)
+      .to.match(/No AutoEncrypter available for encryption/);
   });
 });

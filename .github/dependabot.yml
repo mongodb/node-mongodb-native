@@ -27,20 +27,23 @@ updates:
       # chai-subset requires @types/chai 4.x.
       - dependency-name: "@types/chai"
         versions: [">=4.0.0"]
-      # nyc is Node18+ only starting on nyc@16.x.
-      - dependency-name: "nyc"
-        versions: [">=16.0.0"]
       # mocha-plugin-eslint breaks our lint configuration
       - dependency-name: "mocha-plugin-eslint"
         versions: [">=10.0.0"]
       # we ignore TS as a part of quarterly dependency updates.
       - dependency-name: "typescript"
-      # stay on the supported major version of gcp-metadata
-      - dependency-name: "gcp-metadata"
-        versions: [">=6.0.0"]
       # NODE-3773: sinon 19+ breaks the srv polling unit tests
       - dependency-name: "sinon"
         versions: ["18.x"]
+
+      # ignore all peer dependencies
+      - dependency-name: "@aws-sdk/credential-providers"
+      - dependency-name: "@mongodb-js/zstd"
+      - dependency-name: "gcp-metadata"
+      - dependency-name: "kerberos"
+      - dependency-name: "mongodb-client-encryption"
+      - dependency-name: "snappy"
+      - dependency-name: "socks"
 
     versioning-strategy: increase
 

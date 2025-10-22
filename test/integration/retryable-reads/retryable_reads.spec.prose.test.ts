@@ -36,7 +36,7 @@ describe('Retryable Reads Spec Prose', () => {
       );
 
       testCollection = client.db('retryable-reads-prose').collection('pool-clear-retry');
-      await testCollection.drop().catch(() => null);
+      await testCollection.drop();
       await testCollection.insertMany([{ test: 1 }, { test: 2 }]);
 
       // 2. Enable the following failpoint:

@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
-import { Transform } from 'stream';
 import { inspect } from 'util';
 
 import {
@@ -16,7 +15,6 @@ import {
   type MongoClient,
   MongoCursorExhaustedError,
   MongoOperationTimeoutError,
-  MongoServerError,
   TimeoutContext
 } from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
@@ -317,42 +315,6 @@ describe('class AbstractCursor', function () {
     });
   });
 
-  describe('transform stream error handling', function () {
-    let client: MongoClient;
-    let collection: Collection;
-    const docs = [{ count: 0 }];
-
-    beforeEach(async function () {
-      client = this.configuration.newClient();
-
-      collection = client.db('abstract_cursor_integration').collection('test');
-
-      await collection.insertMany(docs);
-    });
-
-    afterEach(async function () {
-      await collection.deleteMany({});
-      await client.close();
-    });
-
-    it('propagates errors to transform stream', async function () {
-      const transform = new Transform({
-        transform(data, encoding, callback) {
-          callback(null, data);
-        }
-      });
-
-      // MongoServerError: unknown operator: $bar
-      const stream = collection.find({ foo: { $bar: 25 } }).stream({ transform });
-
-      const error: Error | null = await new Promise(resolve => {
-        stream.on('error', error => resolve(error));
-        stream.on('end', () => resolve(null));
-      });
-      expect(error).to.be.instanceof(MongoServerError);
-    });
-  });
-
   describe('cursor end state', function () {
     let client: MongoClient;
     let cursor: FindCursor;
@@ -428,8 +390,8 @@ describe('class AbstractCursor', function () {
 
     afterEach(async function () {
       sinon.restore();
-      await cursor.close();
-      await client.close();
+      await cursor?.close();
+      await client?.close();
     });
 
     it('iterates per batch not per document', async () => {
@@ -439,6 +401,39 @@ describe('class AbstractCursor', function () {
       const numDocuments = numBatches * batchSize;
       expect(nextSpy.callCount).to.be.lessThan(numDocuments);
     });
+
+    it(
+      'does not exceed stack size for large arrays',
+      // $documents was added in 6.0
+      { requires: { mongodb: '>=6.0' } },
+      async function () {
+        await client
+          .db()
+          .aggregate([
+            {
+              $documents: [
+                {
+                  doc: 'foo'
+                }
+              ]
+            },
+            {
+              $set: {
+                field: {
+                  $reduce: {
+                    input: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                    initialValue: [0],
+                    in: { $concatArrays: ['$$value', '$$value'] }
+                  }
+                }
+              }
+            },
+            { $unwind: '$field' },
+            { $limit: 1000000 }
+          ])
+          .toArray();
+      }
+    );
   });
 
   describe('externally provided timeout contexts', function () {
@@ -601,7 +596,7 @@ describe('class AbstractCursor', function () {
     beforeEach(async function () {
       client = this.configuration.newClient();
       collection = client.db('activeCursors').collection('activeCursors');
-      await collection.drop().catch(() => null);
+      await collection.drop();
       await collection.insertMany(Array.from({ length: 50 }, (_, i) => ({ i })));
     });
 

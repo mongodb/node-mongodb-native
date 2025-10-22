@@ -27,8 +27,7 @@ export function isDriverInfoEqual(info1: DriverInfo, info2: DriverInfo): boolean
 }
 
 /**
- * @public
- * @deprecated This interface will be made internal in the next major release.
+ * @internal
  * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.md#hello-command
  */
 export interface ClientMetadata {
@@ -48,25 +47,15 @@ export interface ClientMetadata {
   };
   /** FaaS environment information */
   env?: {
-    name: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
+    name?: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
     timeout_sec?: Int32;
     memory_mb?: Int32;
     region?: string;
-    url?: string;
+    container?: {
+      runtime?: string;
+      orchestrator?: string;
+    };
   };
-}
-
-/**
- * @public
- * @deprecated This interface will be made internal in the next major release.
- */
-export interface ClientMetadataOptions {
-  driverInfo?: {
-    name?: string;
-    version?: string;
-    platform?: string;
-  };
-  appName?: string;
 }
 
 /** @internal */
@@ -116,10 +105,10 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName'>;
  * 3. Omit the `env` document entirely.
  * 4. Truncate `platform`. -- special we do not truncate this field
  */
-export function makeClientMetadata(
+export async function makeClientMetadata(
   driverInfoList: DriverInfo[],
   { appName = '' }: MakeClientMetadataOptions
-): ClientMetadata {
+): Promise<ClientMetadata> {
   const metadataDocument = new LimitedSizeDocument(512);
 
   // Add app name first, it must be sent
@@ -191,18 +180,20 @@ export function makeClientMetadata(
       }
     }
   }
-  return metadataDocument.toObject() as ClientMetadata;
+  return await addContainerMetadata(metadataDocument.toObject() as ClientMetadata);
 }
 
 let dockerPromise: Promise<boolean>;
+type ContainerMetadata = NonNullable<NonNullable<ClientMetadata['env']>['container']>;
 /** @internal */
-async function getContainerMetadata() {
-  const containerMetadata: Record<string, any> = {};
+async function getContainerMetadata(): Promise<ContainerMetadata> {
   dockerPromise ??= fileIsAccessible('/.dockerenv');
   const isDocker = await dockerPromise;
 
   const { KUBERNETES_SERVICE_HOST = '' } = process.env;
   const isKubernetes = KUBERNETES_SERVICE_HOST.length > 0 ? true : false;
+
+  const containerMetadata: ContainerMetadata = {};
 
   if (isDocker) containerMetadata.runtime = 'docker';
   if (isKubernetes) containerMetadata.orchestrator = 'kubernetes';
@@ -215,15 +206,16 @@ async function getContainerMetadata() {
  * Re-add each metadata value.
  * Attempt to add new env container metadata, but keep old data if it does not fit.
  */
-export async function addContainerMetadata(
-  originalMetadata: ClientMetadata
-): Promise<ClientMetadata> {
+async function addContainerMetadata(originalMetadata: ClientMetadata): Promise<ClientMetadata> {
   const containerMetadata = await getContainerMetadata();
   if (Object.keys(containerMetadata).length === 0) return originalMetadata;
 
   const extendedMetadata = new LimitedSizeDocument(512);
 
-  const extendedEnvMetadata = { ...originalMetadata?.env, container: containerMetadata };
+  const extendedEnvMetadata: NonNullable<ClientMetadata['env']> = {
+    ...originalMetadata?.env,
+    container: containerMetadata
+  };
 
   for (const [key, val] of Object.entries(originalMetadata)) {
     if (key !== 'env') {

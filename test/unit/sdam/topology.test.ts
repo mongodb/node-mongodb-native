@@ -25,6 +25,7 @@ import { Topology } from '../../../src/sdam/topology';
 import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { TimeoutContext } from '../../../src/timeout';
 import { isHello, ns } from '../../../src/utils';
+import { ConnectionPool } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
@@ -51,14 +52,15 @@ describe('Topology (unit)', function () {
 
     after(() => mock.cleanup());
 
-    it('should correctly pass appname', function () {
-      const server: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
+    it('should correctly pass appname', async function () {
+      const topology: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
         metadata: makeClientMetadata([], {
           appName: 'My application name'
         })
       });
 
-      expect(server.clientMetadata?.application.name).to.equal('My application name');
+      const metadata = await topology.s.options.metadata;
+      expect(metadata.application.name).to.equal('My application name');
     });
 
     it('should report the correct platform in client metadata', async function () {
@@ -444,17 +446,12 @@ describe('Topology (unit)', function () {
 
   describe('selectServer()', function () {
     it('should schedule monitoring if no suitable server is found', async function () {
-      const topology = topologyWithPlaceholderClient('someserver:27019', {});
+      const topology = topologyWithPlaceholderClient(
+        'someserver:27019',
+        {},
+        { serverSelectionTimeoutMS: 10 }
+      );
       const requestCheck = sinon.stub(Server.prototype, 'requestCheck');
-
-      // satisfy the initial connect, then restore the original method
-      const selectServer = sinon
-        .stub(Topology.prototype, 'selectServer')
-        .callsFake(async function () {
-          const server = Array.from(this.s.servers.values())[0];
-          selectServer.restore();
-          return server;
-        });
 
       sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
@@ -462,13 +459,10 @@ describe('Topology (unit)', function () {
         return;
       });
 
-      await topology.connect();
-      const err = await topology
-        .selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 })
-        .then(
-          () => null,
-          e => e
-        );
+      const err = await topology.connect().then(
+        () => null,
+        e => e
+      );
       expect(err).to.match(/Server selection timed out/);
       expect(err).to.have.property('reason');
       // When server is created `connect` is called on the monitor. When server selection
@@ -516,12 +510,20 @@ describe('Topology (unit)', function () {
           this.emit('connect');
         });
 
+        sinon.stub(ConnectionPool.prototype, 'checkOut').callsFake(async function () {
+          return {};
+        });
+
+        sinon.stub(ConnectionPool.prototype, 'checkIn').callsFake(function (_) {
+          return;
+        });
+
         const toSelect = 10;
         let completed = 0;
         // methodology:
         //   - perform 9 server selections, a few with a selector that throws an error
         //   - ensure each selection immediately returns an empty result (gated by a boolean)
-        //     guaranteeing tha the queue will be full before the last selection
+        //     guaranteeing that the queue will be full before the last selection
         //   - make one last selection, but ensure that all selections are no longer blocked from
         //     returning their value
         //   - verify that 10 callbacks were called

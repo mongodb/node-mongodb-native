@@ -158,19 +158,18 @@ TASKS.push(
         { func: 'stop-load-balancer' }
       ]
     })),
-    // TODO(NODE-7178): Unskip kerberos tests.
-    // {
-    //   name: 'test-auth-kerberos',
-    //   tags: ['auth', 'kerberos'],
-    //   commands: [
-    //     updateExpansions({
-    //       NATIVE: 'true'
-    //     }),
-    //     { func: 'install dependencies' },
-    //     { func: 'assume secrets manager role' },
-    //     { func: 'run kerberos tests' }
-    //   ]
-    // },
+    {
+      name: 'test-auth-kerberos',
+      tags: ['auth', 'kerberos'],
+      commands: [
+        updateExpansions({
+          NATIVE: 'true'
+        }),
+        { func: 'install dependencies' },
+        { func: 'assume secrets manager role' },
+        { func: 'run kerberos tests' }
+      ]
+    },
     {
       name: 'test-auth-ldap',
       tags: ['auth', 'ldap'],
@@ -243,7 +242,7 @@ TASKS.push({
 });
 
 TASKS.push({
-  name: `test-zstd-1.x-compression`,
+  name: `test-zstd-compression`,
   tags: ['latest', 'zstd'],
   commands: [
     updateExpansions({
@@ -256,31 +255,6 @@ TASKS.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    {
-      func: 'install package',
-      vars: {
-        PACKAGE: '@mongodb-js/zstd@1.x'
-      }
-    },
-    { func: 'run-compression-tests' }
-  ]
-});
-
-TASKS.push({
-  name: `test-zstd-2.x-compression`,
-  tags: ['latest', 'zstd'],
-  commands: [
-    updateExpansions({
-      VERSION: 'latest',
-      TOPOLOGY: 'replica_set',
-      AUTH: 'auth',
-      COMPRESSOR: 'zstd',
-      CLIENT_ENCRYPTION: 'false',
-      TEST_CSFLE: 'false'
-    }),
-    { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
-    // no need to manually install zstd - we specify 2.x as a dev dependency in package.json
     { func: 'run-compression-tests' }
   ]
 });
@@ -511,17 +485,6 @@ SINGLETON_TASKS.push(
       ]
     },
     {
-      name: 'run-resource-management-async-dispose',
-      tags: ['resource-management'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: LATEST_LTS
-        }),
-        { func: 'install dependencies' },
-        { func: 'check resource management' }
-      ]
-    },
-    {
       name: 'test-explicit-resource-management-feature-integration',
       tags: ['resource-management'],
       commands: [
@@ -623,27 +586,28 @@ for (const serverVersion of ['5.0', 'rapid', 'latest']) {
   });
 }
 
-customDependencyTests.push({
-  name: `test-latest-driver-mongodb-client-encryption-6.0.0`,
-  tags: ['run-custom-dependency-tests'],
-  commands: [
-    updateExpansions({
-      NODE_LTS_VERSION: LOWEST_LTS,
-      VERSION: '7.0',
-      TOPOLOGY: 'replica_set',
-      CLIENT_ENCRYPTION: true
-    }),
-    { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
-    {
-      func: 'install package',
-      vars: {
-        PACKAGE: 'mongodb-client-encryption@6.0.0'
-      }
-    },
-    { func: 'run tests' }
-  ]
-});
+// TODO(NODE-6997): update to 7.0.0 after release
+// customDependencyTests.push({
+//   name: `test-latest-driver-mongodb-client-encryption-6.0.0`,
+//   tags: ['run-custom-dependency-tests'],
+//   commands: [
+//     updateExpansions({
+//       NODE_LTS_VERSION: LOWEST_LTS,
+//       VERSION: '7.0',
+//       TOPOLOGY: 'replica_set',
+//       CLIENT_ENCRYPTION: true
+//     }),
+//     { func: 'install dependencies' },
+//     { func: 'bootstrap mongo-orchestration' },
+//     {
+//       func: 'install package',
+//       vars: {
+//         PACKAGE: 'mongodb-client-encryption@6.0.0'
+//       }
+//     },
+//     { func: 'run tests' }
+//   ]
+// });
 
 const coverageTask = {
   name: 'download and merge coverage'.split(' ').join('-'),

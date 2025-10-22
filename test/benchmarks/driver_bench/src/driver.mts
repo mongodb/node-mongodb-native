@@ -202,7 +202,7 @@ export class DriverTester {
     const utilClient = new MongoClient(MONGODB_URI, MONGODB_CLIENT_OPTIONS);
     const db = utilClient.db(DB_NAME);
     const collection = db.collection(COLLECTION_NAME);
-    await collection.drop().catch(() => null);
+    await collection.drop();
     await db.dropDatabase().catch(() => null);
     await utilClient.close();
   }

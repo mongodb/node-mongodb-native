@@ -1698,7 +1698,7 @@ describe('Cursor', function () {
 
   it('destroying a stream stops it', async function () {
     const db = client.db();
-    await db.dropCollection('destroying_a_stream_stops_it').catch(() => null);
+    await db.dropCollection('destroying_a_stream_stops_it');
     const collection = await db.createCollection('destroying_a_stream_stops_it');
 
     const docs = Array.from({ length: 10 }, (_, i) => ({ b: i + 1 }));
@@ -1823,9 +1823,7 @@ describe('Cursor', function () {
 
             const filename = path.join(os.tmpdir(), '_nodemongodbnative_stream_out.txt');
             const out = fs.createWriteStream(filename);
-            const stream = collection.find().stream({
-              transform: doc => JSON.stringify(doc)
-            });
+            const stream = collection.find().stream().map(JSON.stringify);
 
             stream.pipe(out);
             // Wait for output stream to close
@@ -1854,10 +1852,7 @@ describe('Cursor', function () {
     'closes cursors when client is closed even if it has not been exhausted',
     { requires: { topology: '!replicaset' } },
     async function () {
-      await client
-        .db()
-        .dropCollection('test_cleanup_tailable')
-        .catch(() => null);
+      await client.db().dropCollection('test_cleanup_tailable');
 
       const collection = await client
         .db()
@@ -3746,14 +3741,13 @@ describe('Cursor', function () {
         { _id: 2, a: { b: 1, c: 0 } }
       ];
       const resultSet = new Set();
-      const transformParam = transformFunc != null ? { transform: transformFunc } : null;
       Promise.resolve()
         .then(() => db.createCollection(collectionName))
         .then(() => (collection = db.collection(collectionName)))
         .then(() => collection.insertMany(docs))
         .then(() => {
           cursor = collection.find();
-          return cursor.stream(transformParam);
+          return cursor.stream().map(transformFunc ?? (doc => doc));
         })
         .then(stream => {
           stream.on('data', function (doc) {

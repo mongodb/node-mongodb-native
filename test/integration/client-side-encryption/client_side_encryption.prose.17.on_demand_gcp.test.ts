@@ -54,7 +54,7 @@ describe('17. On-demand GCP Credentials', () => {
         .catch(error => error);
       // GaxiosError: Unsuccessful response status code. Request failed with status code 404
       expect(error).to.be.instanceOf(Error);
-      expect(error).property('code', '404');
+      expect(error).property('code', 404);
     }
   );
 

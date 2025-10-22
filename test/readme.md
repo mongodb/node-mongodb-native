@@ -81,6 +81,9 @@ The actual implementations of the spec tests can be unit tests or integration te
 
 ## Running the Tests Locally
 
+> [!NOTE]
+> All scripts mentioned in the readme and in drivers-evergreen-tools expect to be run in bash.  These scripts will work fine in other shells so long as they're launched with the `bash` command.  The outputs of these scripts also expect the user to be running in a bash syntax-like shell; users using `fish` or shells with syntax for declaring environment variables that does not look like `export <name>=<value>` may find that they need to adapt the output of the tooling to work in their shell.
+
 The easiest way to get started running the tests locally is to start a replica set and run all of the integration tests.
 
 Ensure the drivers tools submodule is cloned:
@@ -114,7 +117,8 @@ Then run the tests:
 npm run check:test
 ```
 
-> **Note:** the command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
+> [!NOTE]
+> The command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
 The output will show how many tests passed, failed, and are pending. Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test results. See [Mocha's documentation][mocha-skip] for more information.
 
@@ -152,7 +156,7 @@ softwareupdate --install-rosetta
 By default, the integration tests run with auth-enabled and the mongo orchestration script will run with auth enabled when the `AUTH` variable is set to `auth`. Tests can be run locally without auth by setting the environment variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
 
 ```shell
-AUTH='noauth' TOPOLOGY='server' ./.evergreen/run-orchestration.sh
+AUTH='noauth' TOPOLOGY='server' bash .evergreen/run-orchestration.sh
 AUTH='noauth' npm run check:test
 ```
 
@@ -163,16 +167,16 @@ As we mentioned earlier, the tests check the topology of the MongoDB server bein
 In the steps above, we started a standalone server:
 
 ```sh
-TOPOLOGY='server' ./.evergreen/run-orchestration.sh
+TOPOLOGY='server' bash .evergreen/run-orchestration.sh
 ```
 
 You can use the same [run-orchestration.sh](.evergreen/run-orchestration.sh) script to start a replica set or sharded cluster by passing the appropriate option:
 ```sh
-TOPOLOGY='replica_set' ./.evergreen/run-orchestration.sh
+TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
 ```
 or
 ```sh
-TOPOLOGY='sharded_cluster' ./.evergreen/run-orchestration.sh
+TOPOLOGY='sharded_cluster' bash .evergreen/run-orchestration.sh
 ```
 If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated `maxproc` steps.)
 
@@ -492,7 +496,7 @@ The following steps will walk you through how to start and test a load balancer.
    ```
 1. Start the load balancer by using the [run-load-balancer script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/run-load-balancer.sh) provided in `drivers-evergreen-tools`.
    ```sh
-   $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh start
+   bash $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh start
    ```
    A new file name `lb-expansion.yml` will be automatically created. The contents of the file will be similar in structure to the code below.
    ```yaml
@@ -524,7 +528,7 @@ The following steps will walk you through how to start and test a load balancer.
    Verify that the output from Mocha includes `[ topology type: load-balanced ]`. This indicates the tests successfully accessed the specialized environment variables for load balancer testing.
 1. When you are done testing, shutdown the HAProxy load balancer:
    ```sh
-   $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
+   bash $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
    ```
 
 ### Client-Side Field-Level Encryption (CSFLE)
@@ -642,7 +646,7 @@ TODO(NODE-6698): Update deployed lambda test section.
 
 You must be in an office or connected to the VPN to run these tests.
 
-Run `.evergreen/run-kerberos-tests.sh`.
+Run `bash .evergreen/run-kerberos-tests.sh`.
 
 ### AWS Authentication tests
 
