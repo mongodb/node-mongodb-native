@@ -1,11 +1,5 @@
-import * as BSON from 'bson';
 import { expect } from 'chai';
 import { on, once } from 'events';
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
-import { Writable } from 'stream';
-import { setTimeout } from 'timers';
 
 import { MongoClientClosedError } from '../../../src/error';
 import { type MongoClient } from '../../../src/mongo_client';
@@ -58,54 +52,6 @@ describe('Cursor', function () {
     expect(forEachResult).to.be.undefined;
   });
 
-  it('cursor should close after first next operation', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('close_on_next');
-
-      await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }], configuration.writeConcernMax());
-
-      const cursor = collection.find({});
-      // this.defer(() => cursor.close());
-
-      cursor.batchSize(2);
-      await cursor.next();
-      await cursor.close();
-    }
-  });
-
-  it('cursor should trigger getMore', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('trigger_get_more');
-
-      await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }], configuration.writeConcernMax());
-
-      const cursor = collection.find({}).batchSize(2);
-
-      await cursor.toArray();
-      await cursor.close();
-    }
-  });
-
   it('shouldCorrectlyExecuteCursorExplain', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -144,9 +90,7 @@ describe('Cursor', function () {
       await collection.find().count();
 
       async function insert() {
-        for (let i = 0; i < 10; i++) {
-          await collection.insertMany([{ x: i }], configuration.writeConcernMax());
-        }
+        await collection.insertMany(Array.from({ length: 10 }, (_, i) => ({ x: i })));
       }
 
       async function finished() {
@@ -202,59 +146,6 @@ describe('Cursor', function () {
     }
   });
 
-  it('shouldCorrectlyExecuteCursorCountWithDottedCollectionName', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('test_count.ext');
-
-      await collection.find().count();
-
-      async function insert() {
-        for (let i = 0; i < 10; i++) {
-          await collection.insertOne({ x: i }, configuration.writeConcernMax());
-        }
-      }
-
-      async function finished() {
-        let count = await collection.find().count();
-        test.equal(10, count);
-        test.ok(count.constructor === Number);
-
-        count = await collection.find({}, { limit: 5 }).count();
-        test.equal(5, count);
-
-        count = await collection.find({}, { skip: 5 }).count();
-        test.equal(5, count);
-
-        count = await db.collection('acollectionthatdoesn').count();
-        test.equal(0, count);
-
-        const cursor = collection.find();
-        count = await cursor.count();
-        test.equal(10, count);
-
-        await cursor.forEach(() => {
-          // do nothing
-        });
-
-        const count2 = await cursor.count();
-        expect(count2).to.equal(10);
-        expect(count2).to.equal(count);
-      }
-      await insert();
-      await finished();
-    }
-  });
-
   it('shouldThrowErrorOnEachWhenMissingCallback', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -269,9 +160,7 @@ describe('Cursor', function () {
       const db = client.db(configuration.db);
       const collection = await db.createCollection('test_each');
       async function insert() {
-        for (let i = 0; i < 10; i++) {
-          await collection.insertOne({ x: i }, configuration.writeConcernMax());
-        }
+        await collection.insertMany(Array.from({ length: 10 }, (_, i) => ({ x: i })));
       }
 
       function finished() {
@@ -303,9 +192,7 @@ describe('Cursor', function () {
       const collection = await db.createCollection('test_cursor_limit');
 
       async function insert() {
-        for (let i = 0; i < 10; i++) {
-          await collection.insertOne({ x: i }, configuration.writeConcernMax());
-        }
+        await collection.insertMany(Array.from({ length: 10 }, (_, i) => ({ x: i })));
       }
 
       async function finished() {
@@ -332,9 +219,7 @@ describe('Cursor', function () {
       const collection = await db.createCollection('test_cursor_negative_one_limit');
 
       async function insert() {
-        for (let i = 0; i < 10; i++) {
-          await collection.insertOne({ x: i }, configuration.writeConcernMax());
-        }
+        await collection.insertMany(Array.from({ length: 10 }, (_, i) => ({ x: i })));
       }
 
       async function finished() {
@@ -362,9 +247,7 @@ describe('Cursor', function () {
       const collection = await db.createCollection('test_cursor_any_negative_limit');
 
       async function insert() {
-        for (let i = 0; i < 10; i++) {
-          await collection.insertOne({ x: i }, configuration.writeConcernMax());
-        }
+        await collection.insertMany(Array.from({ length: 10 }, (_, i) => ({ x: i })));
       }
 
       async function finished() {
@@ -393,15 +276,15 @@ describe('Cursor', function () {
       await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
 
       const cursor = collection.find();
-      // this.defer(() => cursor.close());
 
       try {
         cursor.limit('not-an-integer' as any);
+        test.ok(false);
       } catch (err) {
         test.equal('Operation "limit" requires an integer', err.message);
       }
 
-      await cursor.clone();
+      await cursor.close();
     }
   });
 
@@ -422,37 +305,13 @@ describe('Cursor', function () {
       await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
 
       const cursor = collection.find();
-      // this.defer(() => cursor.close());
 
       await cursor.next();
       expect(() => {
         cursor.limit(1);
       }).to.throw(/Cursor is already initialized/);
-    }
-  });
 
-  // NOTE: who cares what you set when the cursor is closed?
-  it.skip('shouldCorrectlyReturnErrorsOnIllegalLimitValuesIsClosedWithinClose', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('test_limit_exceptions_1');
-
-      await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
-
-      const cursor = collection.find();
       await cursor.close();
-      expect(() => {
-        cursor.limit(1);
-      }).to.throw(/not extensible/);
     }
   });
 
@@ -524,25 +383,10 @@ describe('Cursor', function () {
 
       try {
         collection.find().skip('not-an-integer' as any);
+        test.ok(false);
       } catch (err) {
         test.equal('Operation "skip" requires an integer', err.message);
       }
-
-      const cursor = collection.find();
-      await cursor.next();
-
-      // NOTE: who cares what you set when closed, if not initialized
-      // expect(() => {
-      //   cursor.skip(1);
-      // }).to.throw(/not extensible/);
-
-      const cursor2 = collection.find();
-      await cursor2.close();
-
-      // NOTE: who cares what you set when closed, if not initialized
-      // expect(() => {
-      //   cursor2.skip(1);
-      // }).to.throw(/not extensible/);
     }
   });
 
@@ -561,31 +405,13 @@ describe('Cursor', function () {
       const collection = await db.createCollection('test_batchSize_exceptions');
       await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
 
-      let cursor = collection.find();
+      const cursor = collection.find();
       try {
         cursor.batchSize('not-an-integer' as any);
         test.ok(false);
       } catch (err) {
         test.equal('Operation "batchSize" requires an integer', err.message);
       }
-
-      cursor = collection.find();
-      await cursor.next();
-
-      await cursor.next();
-
-      // NOTE: who cares what you set when closed, if not initialized
-      // expect(() => {
-      //   cursor.batchSize(1);
-      // }).to.throw(/not extensible/);
-
-      const cursor2 = collection.find();
-      await cursor2.close();
-
-      // NOTE: who cares what you set when closed, if not initialized
-      // expect(() => {
-      //   cursor2.batchSize(1);
-      // }).to.throw(/not extensible/);
     }
   });
 
@@ -745,9 +571,7 @@ describe('Cursor', function () {
       const collection = db.collection('shouldHandleSkipLimitChaining');
 
       async function insert() {
-        for (let i = 0; i < 10; i++) {
-          await collection.insertOne({ x: i }, configuration.writeConcernMax());
-        }
+        await collection.insertMany(Array.from({ length: 10 }, (_, i) => ({ x: i })));
       }
 
       async function finished() {
@@ -786,9 +610,7 @@ describe('Cursor', function () {
       const collection = await db.createCollection('test_limit_skip_chaining_inline');
 
       async function insert() {
-        for (let i = 0; i < 10; i++) {
-          await collection.insertOne({ x: i }, configuration.writeConcernMax());
-        }
+        await collection.insertMany(Array.from({ length: 10 }, (_, i) => ({ x: i })));
       }
 
       async function finished() {
@@ -830,125 +652,6 @@ describe('Cursor', function () {
       await cursor.close();
 
       test.equal(true, cursor.closed);
-    }
-  });
-
-  it('shouldCorrectlyRefillViaGetMoreCommand', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const COUNT = 1000;
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('test_refill_via_get_more');
-
-      async function insert() {
-        const docs = [];
-
-        for (let i = 0; i < COUNT; i++) {
-          docs.push({ a: i });
-        }
-
-        await collection.insertMany(docs, configuration.writeConcernMax());
-      }
-
-      async function finished() {
-        let count = await collection.count();
-        test.equal(COUNT, count);
-
-        let total = 0;
-        await collection.find({}, {}).forEach(item => {
-          total = total + item.a;
-        });
-
-        test.equal(499500, total);
-
-        count = await collection.count();
-        test.equal(COUNT, count);
-
-        count = await collection.count();
-        test.equal(COUNT, count);
-
-        let total2 = 0;
-        await collection.find().forEach(item => {
-          total2 = total2 + item.a;
-        });
-
-        test.equal(499500, total2);
-        count = await collection.count();
-
-        test.equal(COUNT, count);
-        test.equal(total, total2);
-      }
-      await insert();
-      await finished();
-    }
-  });
-
-  it('shouldCorrectlyRefillViaGetMoreAlternativeCollection', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('test_refill_via_get_more_alt_coll');
-
-      const COUNT = 1000;
-
-      async function insert() {
-        const docs = [];
-
-        for (let i = 0; i < COUNT; i++) {
-          docs.push({ a: i });
-        }
-
-        await collection.insertMany(docs, configuration.writeConcernMax());
-      }
-
-      async function finished() {
-        let count = await collection.count();
-        test.equal(1000, count);
-
-        let total = 0;
-        await collection.find().forEach(doc => {
-          total = total + doc.a;
-        });
-
-        test.equal(499500, total);
-
-        count = await collection.count();
-        test.equal(1000, count);
-
-        count = await collection.count();
-        test.equal(1000, count);
-
-        let total2 = 0;
-        await collection.find().forEach(doc => {
-          total2 = total2 + doc.a;
-        });
-
-        expect(total2).to.equal(499500);
-
-        count = await collection.count();
-
-        expect(count).to.equal(1000);
-        expect(total2).to.equal(total);
-      }
-      await insert();
-      await finished();
     }
   });
 
@@ -1023,46 +726,6 @@ describe('Cursor', function () {
     }
   });
 
-  it('Should correctly execute count on cursor', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-
-      for (let i = 0; i < 1000; i++) {
-        const d = new Date().getTime() + i * 1000;
-        docs[i] = { a: i, createdAt: new Date(d) };
-      }
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_1');
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      let total = 0;
-      // Create a cursor for the content
-      const cursor = collection.find({});
-      // this.defer(() => cursor.close());
-
-      await cursor.count();
-      // Ensure each returns all documents
-      await cursor.forEach(() => {
-        total++;
-      });
-      const c = await cursor.count();
-      expect(c).to.equal(1000);
-      expect(total).to.equal(1000);
-    }
-  });
-
   it('does not auto destroy streams', async function () {
     const docs = [];
 
@@ -1091,87 +754,6 @@ describe('Cursor', function () {
     });
     stream.resume();
     await once(stream, 'end');
-  });
-
-  it('should be able to stream documents', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-
-      for (let n = 0; n < 1000; n++) {
-        docs[n] = { a: n + 1 };
-      }
-
-      let count = 0;
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('Should_be_able_to_stream_documents');
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      let paused = 0,
-        closed = 0,
-        resumed = 0,
-        i = 0,
-        err = null;
-
-      const cursor = collection.find();
-      const stream = cursor.stream();
-
-      stream.on('data', function (doc) {
-        test.equal(true, !!doc);
-        test.equal(true, !!doc.a);
-        count = count + 1;
-
-        if (paused > 0 && 0 === resumed) {
-          err = new Error('data emitted during pause');
-          testDone();
-          return;
-        }
-
-        if (++i === 3) {
-          stream.pause();
-          paused++;
-
-          setTimeout(function () {
-            stream.resume();
-            resumed++;
-          }, 20);
-        }
-      });
-
-      stream.once('error', function (er) {
-        err = er;
-        testDone();
-      });
-
-      stream.once('end', function () {
-        closed++;
-        testDone();
-      });
-
-      function testDone() {
-        expect(err).to.not.exist;
-        test.equal(i, docs.length);
-        test.equal(1, closed);
-        test.equal(1, paused);
-        test.equal(1, resumed);
-        test.strictEqual(cursor.closed, true);
-      }
-
-      const promise = once(stream, 'end');
-      await promise;
-      await client.close();
-    }
   });
 
   it('immediately destroying a stream prevents the query from executing', {
@@ -1204,12 +786,6 @@ describe('Cursor', function () {
         i++;
       });
 
-      cursor.once('close', testDone('close'));
-      stream.once('error', testDone('error'));
-      const promise = once(cursor, 'close');
-
-      stream.destroy();
-
       function testDone() {
         return err => {
           ++doneCalled;
@@ -1221,6 +797,12 @@ describe('Cursor', function () {
           }
         };
       }
+
+      cursor.once('close', testDone('close'));
+      stream.once('error', testDone('error'));
+      const promise = once(cursor, 'close');
+
+      stream.destroy();
 
       await cursor.close();
       await promise;
@@ -1288,6 +870,40 @@ describe('Cursor', function () {
     ]);
   });
 
+  it('Should not emit any events after close event emitted due to cursor killed', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+    test: async function () {
+      const configuration = this.configuration;
+      await client.connect();
+
+      const db = client.db(configuration.db);
+      const collection = db.collection('cursor_limit_skip_correctly');
+
+      // Insert x number of docs
+      const ordered = collection.initializeUnorderedBulkOp();
+
+      for (let i = 0; i < 100; i++) {
+        ordered.insert({ a: i });
+      }
+
+      await ordered.execute({ writeConcern: { w: 1 } });
+
+      // Let's attempt to skip and limit
+      const cursor = collection.find({}).batchSize(10);
+      const stream = cursor.stream();
+      stream.on('data', function () {
+        stream.destroy();
+      });
+
+      const onClose = once(cursor, 'close');
+      await cursor.close();
+      await onClose;
+    }
+  });
+
   // NOTE: skipped for use of topology manager
   // it.skip('cursor stream errors', {
   //   // Add a tag that our runner can trigger on
@@ -1350,56 +966,6 @@ describe('Cursor', function () {
   //   }
   // });
 
-  it('cursor stream pipe', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('cursor_stream_pipe');
-
-      const docs = [];
-      'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').forEach(function (name) {
-        docs.push({ name: name });
-      });
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      const filename = path.join(os.tmpdir(), '_nodemongodbnative_stream_out.txt');
-      const out = fs.createWriteStream(filename);
-      const stream = collection
-        .find()
-        .stream()
-        .map(d => JSON.stringify(d));
-
-      stream.pipe(out);
-      // Wait for output stream to close
-      out.on('close', () => testDone(undefined));
-
-      function testDone(err) {
-        // Object.prototype.toString = toString;
-        test.strictEqual(undefined, err);
-        const contents = fs.readFileSync(filename, 'utf8');
-        test.ok(/Aaden/.test(contents));
-        test.ok(/Aaron/.test(contents));
-        test.ok(/Adrian/.test(contents));
-        test.ok(/Aditya/.test(contents));
-        test.ok(/Bob/.test(contents));
-        test.ok(/Joe/.test(contents));
-        fs.unlinkSync(filename);
-      }
-
-      await once(out, 'close');
-    }
-  });
-
   it(
     'closes cursors when client is closed even if it has not been exhausted',
     { requires: { topology: '!replicaset' } },
@@ -1449,7 +1015,6 @@ describe('Cursor', function () {
 
     // Create cursor with awaitData, and timeout after the period specified
     const cursor = collection.find({}, { tailable: true, awaitData: true });
-    // this.defer(() => cursor.close());
 
     await cursor.forEach(() => {
       // do nothing
@@ -1478,10 +1043,7 @@ describe('Cursor', function () {
         async test() {
           const db = client.db('cursor_tailable');
 
-          try {
-            await db.collection('cursor_tailable').drop();
-            // eslint-disable-next-line no-empty
-          } catch {}
+          await db.collection('cursor_tailable').drop();
 
           const collection = await db.createCollection('cursor_tailable', {
             capped: true,
@@ -1513,258 +1075,6 @@ describe('Cursor', function () {
         }
       }
     );
-  });
-
-  // NOTE: should we continue to let users explicitly `kill` a cursor?
-  it.skip('Should correctly retry tailable cursor connection', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const options = { capped: true, size: 8 };
-      const collection = await db.createCollection('should_await_data', options);
-
-      await collection.insertOne({ a: 1 }, configuration.writeConcernMax());
-
-      // Create cursor with awaitData, and timeout after the period specified
-      const cursor = collection.find({}, { tailable: true, awaitData: true });
-      await cursor.forEach(() => cursor.kill());
-      await cursor.close();
-    }
-  });
-
-  it('shouldCorrectExecuteExplainHonoringLimit', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-      docs[0] = {
-        _keywords: [
-          'compact',
-          'ii2gd',
-          'led',
-          '24-48v',
-          'presse-etoupe',
-          'bexbgl1d24483',
-          'flash',
-          '48v',
-          'eexd',
-          'feu',
-          'presse',
-          'compris',
-          'rouge',
-          'etoupe',
-          'iic',
-          'ii2gdeexdiict5',
-          'red',
-          'aet'
-        ]
-      };
-      docs[1] = {
-        _keywords: [
-          'reducteur',
-          '06212',
-          'd20/16',
-          'manch',
-          'd20',
-          'manchon',
-          'ard',
-          'sable',
-          'irl',
-          'red'
-        ]
-      };
-      docs[2] = {
-        _keywords: [
-          'reducteur',
-          '06214',
-          'manch',
-          'd25/20',
-          'd25',
-          'manchon',
-          'ard',
-          'sable',
-          'irl',
-          'red'
-        ]
-      };
-      docs[3] = {
-        _keywords: [
-          'bar',
-          'rac',
-          'boite',
-          '6790178',
-          '50-240/4-35',
-          '240',
-          'branch',
-          'coulee',
-          'ddc',
-          'red',
-          'ip2x'
-        ]
-      };
-      docs[4] = {
-        _keywords: [
-          'bar',
-          'ip2x',
-          'boite',
-          '6790158',
-          'ddi',
-          '240',
-          'branch',
-          'injectee',
-          '50-240/4-35?',
-          'red'
-        ]
-      };
-      docs[5] = {
-        _keywords: [
-          'bar',
-          'ip2x',
-          'boite',
-          '6790179',
-          'coulee',
-          '240',
-          'branch',
-          'sdc',
-          '50-240/4-35?',
-          'red',
-          'rac'
-        ]
-      };
-      docs[6] = {
-        _keywords: [
-          'bar',
-          'ip2x',
-          'boite',
-          '6790159',
-          '240',
-          'branch',
-          'injectee',
-          '50-240/4-35?',
-          'sdi',
-          'red'
-        ]
-      };
-      docs[7] = {
-        _keywords: [
-          '6000',
-          'r-6000',
-          'resin',
-          'high',
-          '739680',
-          'red',
-          'performance',
-          'brd',
-          'with',
-          'ribbon',
-          'flanges'
-        ]
-      };
-      docs[8] = { _keywords: ['804320', 'for', 'paint', 'roads', 'brd', 'red'] };
-      docs[9] = { _keywords: ['38mm', 'padlock', 'safety', '813594', 'brd', 'red'] };
-      docs[10] = { _keywords: ['114551', 'r6900', 'for', 'red', 'bmp71', 'brd', 'ribbon'] };
-      docs[11] = {
-        _keywords: ['catena', 'diameter', '621482', 'rings', 'brd', 'legend', 'red', '2mm']
-      };
-      docs[12] = {
-        _keywords: ['catena', 'diameter', '621491', 'rings', '5mm', 'brd', 'legend', 'red']
-      };
-      docs[13] = {
-        _keywords: ['catena', 'diameter', '621499', 'rings', '3mm', 'brd', 'legend', 'red']
-      };
-      docs[14] = {
-        _keywords: ['catena', 'diameter', '621508', 'rings', '5mm', 'brd', 'legend', 'red']
-      };
-      docs[15] = {
-        _keywords: [
-          'insert',
-          'for',
-          'cable',
-          '3mm',
-          'carrier',
-          '621540',
-          'blank',
-          'brd',
-          'ademark',
-          'red'
-        ]
-      };
-      docs[16] = {
-        _keywords: [
-          'insert',
-          'for',
-          'cable',
-          '621544',
-          '3mm',
-          'carrier',
-          'brd',
-          'ademark',
-          'legend',
-          'red'
-        ]
-      };
-      docs[17] = {
-        _keywords: ['catena', 'diameter', '6mm', '621518', 'rings', 'brd', 'legend', 'red']
-      };
-      docs[18] = {
-        _keywords: ['catena', 'diameter', '621455', '8mm', 'rings', 'brd', 'legend', 'red']
-      };
-      docs[19] = {
-        _keywords: ['catena', 'diameter', '621464', 'rings', '5mm', 'brd', 'legend', 'red']
-      };
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      // Insert all the docs
-      const collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      await collection.createIndex({ _keywords: 1 });
-
-      const result = await collection.find({ _keywords: 'red' }).limit(10).toArray();
-      test.ok(result != null);
-
-      const result2 = await collection.find({ _keywords: 'red' }, {}).limit(10).explain();
-      test.ok(result2 != null);
-    }
-  });
-
-  it('shouldNotExplainWhenFalse', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const doc = { name: 'camera', _keywords: ['compact', 'ii2gd', 'led', 'red', 'aet'] };
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = db.collection('shouldNotExplainWhenFalse');
-      await collection.insertOne(doc, configuration.writeConcernMax());
-
-      const result = await collection.find({ _keywords: 'red' }).limit(10).toArray();
-      test.equal('camera', result[0].name);
-    }
   });
 
   it('shouldFailToSetReadPreferenceOnCursor', {
@@ -1817,50 +1127,6 @@ describe('Cursor', function () {
     }
   });
 
-  it('shouldNotFailDueToStackOverflowEach', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('shouldNotFailDueToStackOverflowEach');
-
-      const docs = [];
-      let total = 0;
-      for (let i = 0; i < 30000; i++) docs.push({ a: i });
-      const allDocs = [];
-      let left = 0;
-
-      while (docs.length > 0) {
-        allDocs.push(docs.splice(0, 1000));
-      }
-      // Get all batches we must insert
-      left = allDocs.length;
-      let totalI = 0;
-
-      // Execute inserts
-      for (let i = 0; i < left; i++) {
-        const d = await collection.insertMany(allDocs.shift(), configuration.writeConcernMax());
-
-        left = left - 1;
-        totalI = totalI + d.insertedCount;
-
-        if (left === 0) {
-          await collection.find({}).forEach(() => {
-            total++;
-          });
-          expect(total).to.equal(30000);
-        }
-      }
-    }
-  });
-
   it('should not fail due to stack overflow toArray', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
@@ -1896,27 +1162,6 @@ describe('Cursor', function () {
     await client.close();
   });
 
-  it('should correctly skip and limit', async function () {
-    const configuration = this.configuration;
-    await client.connect();
-
-    const db = client.db(configuration.db);
-    const collection = db.collection('shouldCorrectlySkipAndLimit');
-    const docs = [];
-    for (let i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
-
-    await collection.insertMany(docs, configuration.writeConcernMax());
-
-    const items = await collection.find({}, { OrderNumber: 1 }).skip(10).limit(10).toArray();
-
-    test.equal(10, items[0].OrderNumber);
-
-    const count = await collection.find({}, { OrderNumber: 1 }).skip(10).limit(10).count();
-    test.equal(10, count);
-
-    await client.close();
-  });
-
   it('shouldFailToTailANormalCollection', async function () {
     const configuration = this.configuration;
     await client.connect();
@@ -1938,44 +1183,7 @@ describe('Cursor', function () {
     test.ok(typeof err.code === 'number');
 
     // Close cursor b/c we did not exhaust cursor
-    cursor.close();
-  });
-
-  it('shouldCorrectlyUseFindAndCursorCount', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-
-      // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
-      // DOC_START
-      // Establish connection to db
-      await client.connect();
-
-      const db = client.db(configuration.db);
-
-      // Create a lot of documents to insert
-      const docs = [];
-      for (let i = 0; i < 100; i++) {
-        docs.push({ a: i });
-      }
-
-      // Create a collection
-      const collection = await db.createCollection('test_close_function_on_cursor_2');
-
-      // Insert documents into collection
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      const cursor = collection.find({});
-
-      const count = await cursor.count();
-      test.equal(100, count);
-      // DOC_END
-    }
+    await cursor.close();
   });
 
   it('should correctly apply hint to count command for cursor', {
@@ -2062,61 +1270,6 @@ describe('Cursor', function () {
     }
   });
 
-  it('Should correctly handle maxTimeMS as part of findOne options', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const donkey = {
-        color: 'brown'
-      };
-
-      const result = await db.collection('donkies').insertOne(donkey);
-
-      const query = { _id: result.insertedId };
-      const options = { maxTimeMS: 1000 };
-
-      const doc = await db.collection('donkies').findOne(query, options);
-
-      test.equal('brown', doc.color);
-    }
-  });
-
-  it('Should correctly handle batchSize of 2', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collectionName = 'should_correctly_handle_batchSize_2';
-      await db.collection(collectionName).insertMany([{ x: 1 }, { x: 2 }, { x: 3 }]);
-
-      const cursor = db.collection(collectionName).find({}, { batchSize: 2 });
-      // this.defer(() => cursor.close());
-
-      await cursor.next();
-
-      await cursor.next();
-
-      await cursor.next();
-
-      await cursor.close();
-    }
-  });
-
   it('Should report database name and collection name', {
     metadata: { requires: { topology: ['single'] } },
 
@@ -2128,76 +1281,6 @@ describe('Cursor', function () {
       const cursor = db.collection('myCollection').find({});
       test.equal('myCollection', cursor.namespace.collection);
       test.equal('integration_tests', cursor.namespace.db);
-    }
-  });
-
-  it('Should correctly execute count on cursor with maxTimeMS', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-
-      for (let i = 0; i < 1000; i++) {
-        const d = new Date().getTime() + i * 1000;
-        docs[i] = { a: i, createdAt: new Date(d) };
-      }
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_2');
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      // Create a cursor for the content
-      let cursor = collection.find({});
-      cursor.limit(100);
-      cursor.skip(10);
-      await cursor.count({ maxTimeMS: 1000 });
-
-      // Create a cursor for the content
-      cursor = collection.find({});
-      cursor.limit(100);
-      cursor.skip(10);
-      cursor.maxTimeMS(100);
-
-      await cursor.count();
-    }
-  });
-
-  it('Should correctly execute count on cursor with maxTimeMS set using legacy method', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-
-      for (let i = 0; i < 1000; i++) {
-        const d = new Date().getTime() + i * 1000;
-        docs[i] = { a: i, createdAt: new Date(d) };
-      }
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_3');
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      // Create a cursor for the content
-      const cursor = collection.find({}, { maxTimeMS: 100 });
-      await cursor.toArray();
     }
   });
 
@@ -2321,116 +1404,6 @@ describe('Cursor', function () {
     }
   });
 
-  it('Should correctly apply map to forEach', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-
-      for (let i = 0; i < 1000; i++) {
-        const d = new Date().getTime() + i * 1000;
-        docs[i] = { a: i, createdAt: new Date(d) };
-      }
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = db.collection('map_forEach');
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      // Create a cursor for the content
-      const cursor = collection
-        .find({})
-        .map(function () {
-          return { a: 2 };
-        })
-        .map(function (x) {
-          return { a: x.a * x.a };
-        })
-        .batchSize(5)
-        .limit(10);
-
-      await cursor.forEach(doc => {
-        test.equal(4, doc.a);
-      });
-      await cursor.close();
-    }
-  });
-
-  it('Should correctly apply multiple uses of map and apply forEach', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-
-      for (let i = 0; i < 1000; i++) {
-        const d = new Date().getTime() + i * 1000;
-        docs[i] = { a: i, createdAt: new Date(d) };
-      }
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = db.collection('map_mapmapforEach');
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      // Create a cursor for the content
-      const cursor = collection
-        .find({})
-        .map(function () {
-          return { a: 1 };
-        })
-        .batchSize(5)
-        .limit(10);
-
-      await cursor.forEach(doc => {
-        expect(doc).property('a').to.equal(1);
-      });
-      await cursor.close();
-    }
-  });
-
-  it('Should correctly apply skip and limit to large set of documents', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = db.collection('cursor_limit_skip_correctly');
-
-      // Insert x number of docs
-      const ordered = collection.initializeUnorderedBulkOp();
-
-      for (let i = 0; i < 6000; i++) {
-        ordered.insert({ a: i });
-      }
-
-      await ordered.execute({ writeConcern: { w: 1 } });
-
-      // Let's attempt to skip and limit
-      const docs = await collection.find({}).limit(2016).skip(2016).toArray();
-      test.equal(2016, docs.length);
-    }
-  });
-
   it('should tail cursor using maxAwaitTimeMS for 3.2 or higher', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2465,141 +1438,6 @@ describe('Cursor', function () {
       test.ok(new Date().getTime() - s.getTime() >= 500);
       await cursor.close();
       await client.close();
-    }
-  });
-
-  it('Should not emit any events after close event emitted due to cursor killed', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
-
-    test: async function () {
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = db.collection('cursor_limit_skip_correctly');
-
-      // Insert x number of docs
-      const ordered = collection.initializeUnorderedBulkOp();
-
-      for (let i = 0; i < 100; i++) {
-        ordered.insert({ a: i });
-      }
-
-      await ordered.execute({ writeConcern: { w: 1 } });
-
-      // Let's attempt to skip and limit
-      const cursor = collection.find({}).batchSize(10);
-      const stream = cursor.stream();
-      stream.on('data', function () {
-        stream.destroy();
-      });
-
-      const onClose = once(cursor, 'close');
-      await cursor.close();
-      await onClose;
-    }
-  });
-
-  it('shouldCorrectlyExecuteEnsureIndexWithNoCallback', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-
-      for (let i = 0; i < 1; i++) {
-        const d = new Date().getTime() + i * 1000;
-        docs[i] = { createdAt: new Date(d) };
-      }
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection(
-        'shouldCorrectlyExecuteEnsureIndexWithNoCallback'
-      );
-
-      // ensure index of createdAt index
-      await collection.createIndex({ createdAt: 1 });
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      // Find with sort
-      const items = await collection.find().sort(['createdAt', 'asc']).toArray();
-
-      test.equal(1, items.length);
-    }
-  });
-
-  it('Should correctly execute count on cursor with limit and skip', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-
-      for (let i = 0; i < 50; i++) {
-        const d = new Date().getTime() + i * 1000;
-        docs[i] = { a: i, createdAt: new Date(d) };
-      }
-
-      const configuration = this.configuration;
-      await client.connect();
-
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('negative_batch_size_and_limit_set');
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      // Create a cursor for the content
-      let cursor = collection.find({});
-      let c = await cursor.limit(100).skip(0).count();
-      test.equal(50, c);
-
-      cursor = collection.find({});
-      c = (await cursor.limit(100).skip(0).toArray()).length;
-      test.equal(50, c);
-    }
-  });
-
-  it('Should correctly handle negative batchSize and set the limit', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: async function () {
-      const docs = [];
-      const configuration = this.configuration;
-
-      for (let i = 0; i < 50; i++) {
-        const d = new Date().getTime() + i * 1000;
-        docs[i] = { a: i, createdAt: new Date(d) };
-      }
-
-      await client.connect();
-      const db = client.db(configuration.db);
-      const collection = await db.createCollection('Should_correctly_execute_count_on_cursor_1_');
-
-      // insert all docs
-      await collection.insertMany(docs, configuration.writeConcernMax());
-
-      // Create a cursor for the content
-      const cursor = collection.find({});
-      await cursor.batchSize(-10).next();
-      test.ok(cursor.id.equals(BSON.Long.ZERO));
     }
   });
 
@@ -2644,7 +1482,7 @@ describe('Cursor', function () {
     }
   });
 
-  it.skip('Correctly decorate the collection count command with skip, limit, hint, readConcern', {
+  it('Correctly decorate the collection count command with skip, limit, hint, readConcern', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -2681,92 +1519,6 @@ describe('Cursor', function () {
       test.deepEqual({ project: 1 }, started[0].command.hint);
       test.equal(5, started[0].command.skip);
       test.equal(5, started[0].command.limit);
-    }
-  });
-
-  // NOTE: should we allow users to explicitly `kill` a cursor anymore?
-  it.skip('Should properly kill a cursor', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded'],
-        mongodb: '>=3.2.0'
-      }
-    },
-
-    test: function () {
-      // Load up the documents
-      const docs = [];
-      for (let i = 0; i < 1000; i += 1) {
-        docs.push({
-          a: i
-        });
-      }
-
-      const configuration = this.configuration;
-
-      const cleanup = () => {
-        // do nothing
-      };
-      let caughtError = undefined;
-
-      return (
-        client
-          .connect()
-          .then(client => {
-            this.defer(() => client.close());
-            const db = client.db(configuration.db);
-            const collection = db.collection('cursorkilltest1');
-
-            // Insert 1000 documents
-            return collection.insertMany(docs).then(() => {
-              // Generate cursor for find operation
-              const cursor = collection.find({});
-              this.defer(() => cursor.close());
-
-              // Iterate cursor past first element
-              return cursor
-                .next()
-                .then(() => cursor.next())
-                .then(() => {
-                  // Confirm that cursorId is non-zero
-                  const longId = cursor.id;
-                  expect(longId).to.be.an('object');
-                  expect(Object.getPrototypeOf(longId)).to.haveOwnProperty('_bsontype', 'Long');
-                  const id = longId.toNumber();
-
-                  expect(id).to.not.equal(0);
-
-                  // Kill cursor
-                  return new Promise((resolve, reject) =>
-                    cursor.kill((err, r) => (err ? reject(err) : resolve(r)))
-                  ).then(response => {
-                    // sharded clusters will return a long, single return integers
-                    if (
-                      response &&
-                      response.cursorsKilled &&
-                      Array.isArray(response.cursorsKilled)
-                    ) {
-                      response.cursorsKilled = response.cursorsKilled.map(id =>
-                        typeof id === 'number' ? BSON.Long.fromNumber(id) : id
-                      );
-                    }
-
-                    expect(response.ok).to.equal(1);
-                    expect(response.cursorsKilled[0].equals(longId)).to.be.ok;
-                  });
-                });
-            });
-          })
-
-          // Clean up. Make sure that even in case of error, we still always clean up connection
-          .catch(e => (caughtError = e))
-          .then(cleanup)
-          .then(() => {
-            if (caughtError) {
-              throw caughtError;
-            }
-          })
-      );
     }
   });
 
@@ -2953,93 +1705,6 @@ describe('Cursor', function () {
     await client.close();
   });
 
-  const testTransformStream = async config => {
-    const client = config.client;
-    const configuration = config.configuration;
-    const collectionName = config.collectionName;
-    const transformFunc = config.transformFunc;
-    const expectedSet = config.expectedSet;
-
-    await client.connect();
-
-    const db = client.db(configuration.db);
-    const docs = [
-      { _id: 0, a: { b: 1, c: 0 } },
-      { _id: 1, a: { b: 1, c: 0 } },
-      { _id: 2, a: { b: 1, c: 0 } }
-    ];
-    const resultSet = new Set();
-    await db.createCollection(collectionName);
-    const collection = await db.collection(collectionName);
-    await collection.insertMany(docs);
-    const cursor = await collection.find();
-    const stream = await cursor.stream().map(transformFunc ?? (doc => doc));
-
-    const done = async err => {
-      await cursor.close();
-      await client.close();
-      if (err) {
-        throw err;
-      }
-    };
-
-    stream.on('data', function (doc) {
-      resultSet.add(doc);
-    });
-
-    stream.once('end', function () {
-      expect(resultSet).to.deep.equal(expectedSet);
-      done(undefined);
-    });
-
-    stream.once('error', e => {
-      done(e);
-    });
-
-    const promise = once(stream, 'end');
-    await promise;
-    await cursor.close();
-    await client.close();
-  };
-
-  it('stream should apply the supplied transformation function to each document in the stream', async function () {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-    const expectedDocs = [
-      { _id: 0, b: 1, c: 0 },
-      { _id: 1, b: 1, c: 0 },
-      { _id: 2, b: 1, c: 0 }
-    ];
-    const config = {
-      client: client,
-      configuration: configuration,
-      collectionName: 'stream-test-transform',
-      transformFunc: doc => ({ _id: doc._id, b: doc.a.b, c: doc.a.c }),
-      expectedSet: new Set(expectedDocs)
-    };
-
-    await testTransformStream(config);
-  });
-
-  it('stream should return a stream of unmodified docs if no transform function applied', async function () {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-    const expectedDocs = [
-      { _id: 0, a: { b: 1, c: 0 } },
-      { _id: 1, a: { b: 1, c: 0 } },
-      { _id: 2, a: { b: 1, c: 0 } }
-    ];
-    const config = {
-      client: client,
-      configuration: configuration,
-      collectionName: 'transformStream-test-notransform',
-      transformFunc: null,
-      expectedSet: new Set(expectedDocs)
-    };
-
-    await testTransformStream(config);
-  });
-
   // it.skip('should apply parent read preference to count command', function (done) {
   //   // NOTE: this test is skipped because mongo orchestration does not test sharded clusters
   //   // with secondaries. This behavior should be unit tested
@@ -3075,45 +1740,6 @@ describe('Cursor', function () {
   //       .catch(e => close(e));
   //   });
   // });
-
-  it('should not consume first document on hasNext when streaming', async function () {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-
-    await client.connect();
-
-    const collection = client.db(configuration.db).collection('documents');
-    const err = await collection.drop().catch(e => e);
-    expect(err).to.exist;
-
-    const docs = [{ a: 1 }, { a: 2 }, { a: 3 }];
-    await collection.insertMany(docs);
-
-    const cursor = collection.find({}, { sort: { a: 1 } });
-    const hasNext = await cursor.hasNext();
-    expect(hasNext).to.be.true;
-
-    const collected = [];
-    const stream = new Writable({
-      objectMode: true,
-      write: (chunk, encoding, next) => {
-        collected.push(chunk);
-        next(undefined, chunk);
-      }
-    });
-
-    const cursorStream = cursor.stream();
-
-    cursorStream.on('end', () => {
-      expect(collected).to.have.length(3);
-      expect(collected).to.eql(docs);
-    });
-
-    const promise = once(cursorStream, 'end');
-    cursorStream.pipe(stream);
-    await promise;
-    await client.close();
-  });
 
   describe('transforms', function () {
     it('should correctly apply map transform to cursor as readable stream', async function () {
