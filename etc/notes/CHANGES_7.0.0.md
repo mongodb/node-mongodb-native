@@ -17,15 +17,15 @@ The main focus of this release was usability improvements and a streamlined API.
   - [Optional peer dependency releases and version bumps](#optional-peer-dependency-releases-and-version-bumps)
 - [🔐 AWS authentication](#%EF%B8%8F-aws-authentication)
   - [@aws-sdk/credential-providers is now required for MONGODB-AWS authentication](#aws-sdkcredential-providers-is-now-required-for-mongodb-aws-authentication)
-  - [Custom AWS Credential Provider Takes Highest Precedence](#custom-aws-credential-provider-takes-highest-precedence)
-  - [Explicitly Provided Credentials No Longer Accepted With MONGODB-AWS Authentication](#explicitly-provided-credentials-no-longer-accepted-with-mongodb-aws-authentication)
+  - [Custom AWS credential provider takes highest precedence](#custom-aws-credential-provider-takes-highest-precedence)
+  - [Explicitly provided credentials no longer accepted with MONGODB-AWS authentication](#explicitly-provided-credentials-no-longer-accepted-with-mongodb-aws-authentication)
 - [⚙️ Error handling improvements](#️%EF%B8%8F-error-handling-improvements)
-  - [Dropping a Collection No Longer Throws When NS not Found](#dropping-a-collection-no-longer-throws-when-ns-not-found)
-  - [Aggregate with write concern + explain no longer throws client-side](#aggregate-with-write-concern--explain-no-longer-throws-client-side)
+  - [Dropping a collection returns false instead of thowing when NS not found](#dropping-a-collection-returns-false-instead-of-throwing-when-ns-not-found)
+  - [Aggregate with write concern and explain no longer throws client-side](#aggregate-with-write-concern-and-explain-no-longer-throws-client-side)
   - [All encryption-related errors now subclass MongoError](#all-encryption-related-errors-now-subclass-mongoerror)
-  - ['PoolRequstedRetry' Error Label Renamed to 'PoolRequestedRetry'](#poolrequstedretry-error-label-renamed-to-poolrequestedretry)
+  - ['PoolRequstedRetry' error label renamed to 'PoolRequestedRetry'](#poolrequstedretry-error-label-renamed-to-poolrequestedretry)
 - [💥 Misc breaking improvements](#%EF%B8%8F-misc-breaking-improvements)
-  - [Change Streams No Longer Whitelist $changeStream Stage Options](#change-streams-no-longer-whitelist-changestream-stage-options)
+  - [Change streams no longer whitelist $changeStream stage options](#change-streams-no-longer-whitelist-changestream-stage-options)
   - [Cursors no longer provide a default batchSize of 1000 for getMores](#cursors-no-longer-provide-a-default-batchsize-of-1000-for-getmores)
   - [Auto encryption options now include default filenames in TS](#auto-encryption-options-now-include-default-filenames-in-ts)
 - [☀️ Misc non-breaking improvements](#️%EF%B8%8F-misc-non-breaking-improvements)
@@ -55,7 +55,7 @@ This driver version has been updated to use `bson@7.0.0` and `mongodb-connection
 
 ### Optional peer dependency releases and version bumps
 
-- `@mongodb-js/zstd` optional peer depedency minimum version raised to `7.0.0`, dropped support for `1.x` and `2.x` (note that `@mongodb-js/zstd` does not have `3.x-6.x` version releases)
+- `@mongodb-js/zstd` optional peer dependency minimum version raised to `7.0.0`, dropped support for `1.x` and `2.x` (note that `@mongodb-js/zstd` does not have `3.x-6.x` version releases)
 - `kerberos` optional peer dependency minimum version raised to `7.0.0`, dropped support for `2.x` (note that `kerberos` does not have `3.x-6.x` version releases)
 - `mongodb-client-encryption` optional peer dependency minimum version raised to `7.0.0`, dropped support for `6.x`
 
@@ -68,6 +68,8 @@ Additionally, the driver is now compatible with the following packages:
 | socks                         | ^2.8.6        | ^2.7.1         |
 
 ## 🔐 AWS authentication
+
+To improve long-term maintainability and ensure compatibility with AWS updates, we’ve standardized AWS auth to use the official SDK in all cases and made a number of supporting changes outlined below.
 
 ### @aws-sdk/credential-providers is now required for MONGODB-AWS authentication
 
@@ -95,11 +97,11 @@ const client = new MongoClient('mongodb<+srv>://<host>:<port>/?authMechanism=MON
 
 ## ⚙️ Error handling improvements
 
-### Dropping a collection no longer throws when NS not found
+### Dropping a collection returns false instead of throwing when NS not found
 
-This will now return `false` instead.
+This change has been made for consistency with the common drivers specifications.
 
-### Aggregate with write concern + explain no longer throws client-side
+### Aggregate with write concern and explain no longer throws client-side
 
 This will now throw a `MongoServerError` instead.
 
@@ -123,7 +125,7 @@ Uses are now able to pass any option to `collection.watch()` and if it is invali
 
 In driver versions <7.0, the driver provides a default batchSize of 1000 for each getMore when iterating a cursor. This behavior is not ideal because the default is set regardless of the documents being fetched. For example, if a cursor fetches many small documents, the driver's default of 1000 can result in many round-trips to fetch all documents, when the server could fit all documents inside a single getMore if no batchSize were set.
 
-Now, cursors no longer provide a default `batchSize` when executing a getMore. A `batchSize` will only bet set on `getMore` commands if a batchSize has been explicitly configured for the cursor.
+Now, cursors no longer provide a default `batchSize` when executing a getMore. A `batchSize` will only be set on `getMore` commands if a batchSize has been explicitly configured for the cursor.
 
 ### Auto encryption options now include default filenames in TS
 
@@ -139,7 +141,7 @@ var path: AutoEncryptionOptions['extraOptions']['mongocryptdSpawnPath'] = 'mongo
 var path: AutoEncryptionOptions['extraOptions']['cryptSharedLibPath'] = 'some path'; // ERROR
 var path: AutoEncryptionOptions['extraOptions']['cryptSharedLibPath'] = 'mongo_crypt_v1.so'; // OK
 var path: AutoEncryptionOptions['extraOptions']['cryptSharedLibPath'] = 'mongo_crypt_v1.dll'; // OK
-var path: AutoEncryptionOptions['extraOptions']['cryptSharedLibPath'] = 'mongo_crypt_v1.dlyib'; // OK
+var path: AutoEncryptionOptions['extraOptions']['cryptSharedLibPath'] = 'mongo_crypt_v1.dylib'; // OK
 ```
 
 ## ☀️ Misc non-breaking improvements
@@ -150,7 +152,7 @@ The MongoClient connect function will now run a handshake regardless of credenti
 
 ### MongoClient.close() no longer sends endSessions if the topology does not have session support
 
-`MongoClient.close()` attempts to free up any server resources that the client has instantiated, including sessions. Previously, `MongoClient.close()` unconditionally attempted to killall sessions, regardless of whether or not the topology actually supports sessions.
+`MongoClient.close()` attempts to free up any server resources that the client has instantiated, including sessions. Previously, `MongoClient.close()` unconditionally attempted to kill all sessions, regardless of whether or not the topology actually supports sessions.
 
 Now, `MongoClient.close()` only attempts to clean up sessions if the topology supports sessions.
 
