@@ -10,8 +10,6 @@ about the types of tests and how to run them.
   - [About the Tests](#about-the-tests)
     - [Spec Tests](#spec-tests)
   - [Running the Tests Locally](#running-the-tests-locally)
-    - [Testing Against Different Versions](#testing-against-different-versions)
-      - ["Bad CPU type in executable" error](#bad-cpu-type-in-executable-error)
     - [Testing With Authorization-Enabled](#testing-with-authorization-enabled)
     - [Testing Different MongoDB Topologies](#testing-different-mongodb-topologies)
     - [Running Individual Tests](#running-individual-tests)
@@ -120,36 +118,11 @@ npm run check:test
 > [!NOTE]
 > The command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
+[run-orchestration.sh](.evergreen/run-orchestration.sh) has a number of settings that can enabled using env vars. Take a look at that script/repo for more information.
+
 The output will show how many tests passed, failed, and are pending. Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test results. See [Mocha's documentation][mocha-skip] for more information.
 
 In the following subsections, we'll dig into the details of running the tests.
-
-### Testing Against Different Versions
-
-Sometimes you'll need to run tests against a specific version, such as "7.0", and to do that you can use the `VERSION` env var.
-
-```sh
-VERSION=7.0 TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
-```
-
-Older versions of MongoDB may not have Mac binaries, so you may also need to specify a different architecture:
-
-```sh
-VERSION=4.2 ARCH=x86_64 TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
-```
-
-#### "Bad CPU type in executable" error
-
-You may encounter this error if Rosetta isn't properly configured on your system.
-```txt
-OSError: [Errno 86] Bad CPU type in executable: '.../node-mongodb-native/drivers-evergreen-tools/mongodb/bin/mongod'
-```
-
-To fix it, simply run:
-
-```sh
-softwareupdate --install-rosetta
-```
 
 ### Testing With Authorization-Enabled
 
