@@ -62,11 +62,11 @@ This driver version has been updated to use `bson@7.0.0` and `mongodb-connection
 
 Additionally, the driver is now compatible with the following packages:
 
-| Dependency                    | Allowed Range | Previous Range |
-| ----------------------------- | ------------- | -------------- |
-| @aws-sdk/credential-providers | ^3.806.0      | ^3.188.0       |
-| gcp-metadata                  | ^7.0.1        | ^5.2.0         |
-| socks                         | ^2.8.6        | ^2.7.1         |
+| Dependency                    | Previous Range | New Allowed Range |
+| ----------------------------- | -------------- | ----------------- |
+| @aws-sdk/credential-providers | ^3.188.0       | ^3.806.0          |
+| gcp-metadata                  | ^5.2.0         | ^7.0.1            |
+| socks                         | ^2.7.1         | ^2.8.6            |
 
 ## 🔐 AWS authentication
 
