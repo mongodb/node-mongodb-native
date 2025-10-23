@@ -25,7 +25,7 @@ The main focus of this release was usability improvements and a streamlined API.
   - [All encryption-related errors now subclass MongoError](#all-encryption-related-errors-now-subclass-mongoerror)
   - ['PoolRequstedRetry' error label renamed to 'PoolRequestedRetry'](#poolrequstedretry-error-label-renamed-to-poolrequestedretry)
 - [💥 Misc breaking improvements](#-misc-breaking-improvements)
-  - [Change streams no longer whitelist `$changeStream` stage options](#change-streams-no-longer-whitelist-changestream-stage-options)
+  - [Change streams no longer filter `$changeStream` stage options](#change-streams-no-longer-filter-changestream-stage-options)
   - [Cursors no longer provide a default `batchSize` of 1000 for `getMore`s](#cursors-no-longer-provide-a-default-batchsize-of-1000-for-getmores)
   - [Auto encryption options now include default filenames in TS](#auto-encryption-options-now-include-default-filenames-in-ts)
 - [☀️ Misc non-breaking improvements](#%EF%B8%8F-misc-non-breaking-improvements)
@@ -34,7 +34,7 @@ The main focus of this release was usability improvements and a streamlined API.
 - [📜 Removal of deprecated functionality](#-removal-of-deprecated-functionality)
   - [Cursor and ChangeStream `stream()` method no longer accepts a transform](#cursor-and-changestream-stream-method-no-longer-accepts-a-transform)
   - [MONGODB-CR AuthMechanism has been removed](#mongodb-cr-authmechanism-has-been-removed)
-  - [Internal `ClientMetadata` properties have been removed](#internal-clientmetadata-properties-have-been-removed)
+  - [Internal `ClientMetadata` properties have been removed from the public API](#internal-clientmetadata-properties-have-been-removed-from-the-public-api)
   - [`CommandOptions.noResponse` option removed](#commandoptionsnoresponse-option-removed)
   - [Assorted deprecated type, class, and option removals](#assorted-deprecated-type-class-and-option-removals)
 - [⚠️ ALL BREAKING CHANGES](#%EF%B8%8F-all-breaking-changes)
@@ -86,7 +86,7 @@ When providing a custom AWS credential provider via the auth mechanism property 
 
 ### Explicitly provided credentials no longer accepted with MONGODB-AWS authentication
 
-AWS environments (such as AWS Lambda) do not have credentials that are permanent and expire within a set amount of time. Providing credentials in the URI or options would mandate that those credentials would be valid for the life of the `MongoClient`, which is problematic. With this change, the installed required AWS SDK will now fetch credentials using the environment, endpoints, or a custom credential provider.
+AWS environments (such as AWS Lambda) do not have credentials that are permanent and expire within a set amount of time. Providing credentials in the URI or options would mandate that those credentials would be valid for the life of the `MongoClient`, which is problematic. With this change, the fetching of credentials is fully handled by the installed required AWS SDK.
 
 This means that for AWS authentication, all client URIs MUST now be specified as:
 
@@ -95,7 +95,9 @@ import { MongoClient } from 'mongodb';
 
 const client = new MongoClient('mongodb<+srv>://<host>:<port>/?authMechanism=MONGODB-AWS');
 ```
+
 The previous method of providing URI encoded credentials based on the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` directly in the connection string will no longer work.
+
 ## ⚙️ Error handling improvements
 
 ### Dropping a collection returns false instead of throwing when NS not found
@@ -118,9 +120,9 @@ The `PoolClearedError` thrown in cases where the connection pool was cleared now
 
 ## 💥 Misc breaking improvements
 
-### Change streams no longer whitelist `$changeStream` stage options
+### Change streams no longer filter `$changeStream` stage options
 
-Uses are now able to pass any option to `collection.watch()` and if it is invalid in the `$changeStream` stage of the pipeline the server will error. This is to allow users to provide newly added options quickly that are not in our public types.
+Users can now pass any option to `collection.watch()`. If an option is invalid for the `$changeStream` stage of the pipeline, the server will return an error. This change makes it possible to use newly introduced server options without waiting for them to become available in our public type definitions and eliminates the risk of valid but unrecognized options being silently ignored.
 
 ### Cursors no longer provide a default `batchSize` of 1000 for `getMore`s
 
@@ -175,9 +177,9 @@ const stream = cursor.stream().map(JSON.stringify);
 
 This mechanism has been unsupported as of MongoDB 4.0 and attempting to use it will still raise an error.
 
-### Internal `ClientMetadata` properties have been removed
+### Internal `ClientMetadata` properties have been removed from the public API
 
-Previous versions of the driver unintentionally made properties used when constructing client metadata public. These properties have now been made internal. The full list of properties is:
+Previous versions of the driver unintentionally exposed the following properties that have now been made internal:
 
 ```
 MongoClient.options.additionalDriverInfo
