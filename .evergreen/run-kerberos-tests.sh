@@ -28,7 +28,7 @@ export MONGODB_URI="mongodb://${USER}@${SASL_HOST}/${GSSAPI_DB}?authMechanism=GS
 
 set -o xtrace
 
-npm i -D kerberos
+npm i -D kerberos@alpha
 npm run check:kerberos
 
 set +o xtrace
