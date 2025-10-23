@@ -2,7 +2,7 @@
 
 ## About
 
-The following is a detailed collection of the changes in the major v6 release of the `mongodb` package for Node.js.
+The following is a detailed collection of the changes in the major v7 release of the `mongodb` package for Node.js.
 The main focus of this release was usability improvements and a streamlined API. Read on for details!
 
 > [!IMPORTANT]
@@ -82,7 +82,7 @@ npm install @aws-sdk/credential-providers
 
 ### Custom AWS credential provider takes highest precedence
 
-When providing a custom AWS credential provider via the auth mechanism property `AWS_CREDENTIAL_PROVIDER`, it will now take the highest precedence over any other AWS auth method, with the exception of URI parameters or credentials passed directly to the `MongoClient`.
+When providing a custom AWS credential provider via the auth mechanism property `AWS_CREDENTIAL_PROVIDER`, it will now take the highest precedence over any other AWS auth method.
 
 ### Explicitly provided credentials no longer accepted with MONGODB-AWS authentication
 
@@ -245,5 +245,4 @@ CancellationToken;
 
 - **NODE-4243:** drop collection checks ns not found ([#4742](https://github.com/mongodb/node-mongodb-native/issues/4742)) ([a8d7c5f](https://github.com/mongodb/node-mongodb-native/commit/a8d7c5ff6c68ad57291641b2eb14cc27d91508ae))
 - **NODE-7223:** run checkout on connect regardless of credentials ([#4715](https://github.com/mongodb/node-mongodb-native/issues/4715)) ([c5f74ab](https://github.com/mongodb/node-mongodb-native/commit/c5f74abe27acd8661f17046b1740ac74de1be082))
-- **NODE-7260:** update bson alpha to latest ([#4748](https://github.com/mongodb/node-mongodb-native/issues/4748)) ([4e88559](https://github.com/mongodb/node-mongodb-native/commit/4e88559e8785973dc2124a54d5e850a00616bb16))
 - **NODE-7232:** only send endSessions during client close if the topology supports sessions ([#4722](https://github.com/mongodb/node-mongodb-native/issues/4722)) ([cc85ebf](https://github.com/mongodb/node-mongodb-native/commit/cc85ebf246b20e0bae59e1bdcdf0f9c74ea01979))
