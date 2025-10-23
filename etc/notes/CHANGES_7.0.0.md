@@ -37,6 +37,7 @@ The main focus of this release was usability improvements and a streamlined API.
   - [Internal ClientMetadata properties have been removed](#internal-clientmetadata-properties-have-been-removed)
   - [`CommandOptions.noResponse` option removed](#commandoptionsnoresponse-option-removed)
   - [Assorted deprecated type, class, and option removals](#assorted-deprecated-type-class-and-option-removals)
+- [⚠️ ALL BREAKING CHANGES](#%EF%B8%8F-all-breaking-changes)
 
 ## 🛠️ Runtime and dependency updates
 
@@ -240,12 +241,9 @@ CancellationToken;
 - **NODE-6988:** require aws sdk for aws auth ([#4659](https://github.com/mongodb/node-mongodb-native/issues/4659))
 - **NODE-5545:** remove deprecated objects ([#4704](https://github.com/mongodb/node-mongodb-native/issues/4704)) ([cfbada6](https://github.com/mongodb/node-mongodb-native/commit/cfbada66ceb017bdb8fa1ff39257e1ab49ee9e25))
 
-### Features
+### Non-breaking
 
 - **NODE-4243:** drop collection checks ns not found ([#4742](https://github.com/mongodb/node-mongodb-native/issues/4742)) ([a8d7c5f](https://github.com/mongodb/node-mongodb-native/commit/a8d7c5ff6c68ad57291641b2eb14cc27d91508ae))
 - **NODE-7223:** run checkout on connect regardless of credentials ([#4715](https://github.com/mongodb/node-mongodb-native/issues/4715)) ([c5f74ab](https://github.com/mongodb/node-mongodb-native/commit/c5f74abe27acd8661f17046b1740ac74de1be082))
 - **NODE-7260:** update bson alpha to latest ([#4748](https://github.com/mongodb/node-mongodb-native/issues/4748)) ([4e88559](https://github.com/mongodb/node-mongodb-native/commit/4e88559e8785973dc2124a54d5e850a00616bb16))
-
-### Bug Fixes
-
 - **NODE-7232:** only send endSessions during client close if the topology supports sessions ([#4722](https://github.com/mongodb/node-mongodb-native/issues/4722)) ([cc85ebf](https://github.com/mongodb/node-mongodb-native/commit/cc85ebf246b20e0bae59e1bdcdf0f9c74ea01979))
