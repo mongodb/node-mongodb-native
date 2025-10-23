@@ -16,7 +16,7 @@ The main focus of this release was usability improvements and a streamlined API.
   - [`bson` and `mongodb-connection-string-url` versions 7.0.0](#bson-and-mongodb-connection-string-url-versions-700)
   - [Optional peer dependency releases and version bumps](#optional-peer-dependency-releases-and-version-bumps)
 - [🔐 AWS authentication](#-aws-authentication)
-  - [@aws-sdk/credential-providers is now required for MONGODB-AWS authentication](#aws-sdkcredential-providers-is-now-required-for-mongodb-aws-authentication)
+  - [`@aws-sdk/credential-providers` is now required for MONGODB-AWS authentication](#aws-sdkcredential-providers-is-now-required-for-mongodb-aws-authentication)
   - [Custom AWS credential provider takes highest precedence](#custom-aws-credential-provider-takes-highest-precedence)
   - [Explicitly provided credentials no longer accepted with MONGODB-AWS authentication](#explicitly-provided-credentials-no-longer-accepted-with-mongodb-aws-authentication)
 - [⚙️ Error handling improvements](#%EF%B8%8F-error-handling-improvements)
@@ -25,16 +25,16 @@ The main focus of this release was usability improvements and a streamlined API.
   - [All encryption-related errors now subclass MongoError](#all-encryption-related-errors-now-subclass-mongoerror)
   - ['PoolRequstedRetry' error label renamed to 'PoolRequestedRetry'](#poolrequstedretry-error-label-renamed-to-poolrequestedretry)
 - [💥 Misc breaking improvements](#-misc-breaking-improvements)
-  - [Change streams no longer whitelist $changeStream stage options](#change-streams-no-longer-whitelist-changestream-stage-options)
-  - [Cursors no longer provide a default batchSize of 1000 for getMores](#cursors-no-longer-provide-a-default-batchsize-of-1000-for-getmores)
+  - [Change streams no longer whitelist `$changeStream` stage options](#change-streams-no-longer-whitelist-changestream-stage-options)
+  - [Cursors no longer provide a default `batchSize` of 1000 for `getMore`s](#cursors-no-longer-provide-a-default-batchsize-of-1000-for-getmores)
   - [Auto encryption options now include default filenames in TS](#auto-encryption-options-now-include-default-filenames-in-ts)
 - [☀️ Misc non-breaking improvements](#%EF%B8%8F-misc-non-breaking-improvements)
   - [Improve `MongoClient.connect()` consistency across environments](#improve-mongoclientconnect-consistency-across-environments)
-  - [MongoClient.close() no longer sends endSessions if the topology does not have session support](#mongoclientclose-no-longer-sends-endsessions-if-the-topology-does-not-have-session-support)
+  - [`MongoClient.close()` no longer sends `endSessions` if the topology does not have session support](#mongoclientclose-no-longer-sends-endsessions-if-the-topology-does-not-have-session-support)
 - [📜 Removal of deprecated functionality](#-removal-of-deprecated-functionality)
   - [Cursor and ChangeStream `stream()` method no longer accepts a transform](#cursor-and-changestream-stream-method-no-longer-accepts-a-transform)
   - [MONGODB-CR AuthMechanism has been removed](#mongodb-cr-authmechanism-has-been-removed)
-  - [Internal ClientMetadata properties have been removed](#internal-clientmetadata-properties-have-been-removed)
+  - [Internal `ClientMetadata` properties have been removed](#internal-clientmetadata-properties-have-been-removed)
   - [`CommandOptions.noResponse` option removed](#commandoptionsnoresponse-option-removed)
   - [Assorted deprecated type, class, and option removals](#assorted-deprecated-type-class-and-option-removals)
 - [⚠️ ALL BREAKING CHANGES](#%EF%B8%8F-all-breaking-changes)
@@ -43,7 +43,7 @@ The main focus of this release was usability improvements and a streamlined API.
 
 ### Minimum Node.js version is now v20.19.0
 
-The minimum supported Node.js version is now v20.19.0 and our TypeScript target has been updated to ES2023. We strive to keep our minimum supported Node.js version in sync with the runtime's [release cadence](https://nodejs.dev/en/about/releases/) to keep up with the latest security updates and modern language features.
+The minimum supported Node.js version is now [v20.19.0](https://nodejs.org/en/blog/release/v20.19.0) and our TypeScript target has been updated to ES2023. We strive to keep our minimum supported Node.js version in sync with the runtime's [release cadence](https://nodejs.dev/en/about/releases/) to keep up with the latest security updates and modern language features.
 
 Notably, the driver now offers native support for explicit resource management. `Symbol.asyncDispose` implementations are available on the `MongoClient`, `ClientSession`, `ChangeStream` and on cursors.
 
@@ -72,7 +72,7 @@ Additionally, the driver is now compatible with the following packages:
 
 To improve long-term maintainability and ensure compatibility with AWS updates, we’ve standardized AWS auth to use the official SDK in all cases and made a number of supporting changes outlined below.
 
-### @aws-sdk/credential-providers is now required for MONGODB-AWS authentication
+### `@aws-sdk/credential-providers` is now required for MONGODB-AWS authentication
 
 Previous versions of the driver contained two implementations for AWS authentication and could run the risk of the custom driver implementation not supporting all AWS authentication features as well as not being correct when AWS makes changes. Using the official AWS SDK in all cases alleviates these issues.
 
@@ -95,7 +95,7 @@ import { MongoClient } from 'mongodb';
 
 const client = new MongoClient('mongodb<+srv>://<host>:<port>/?authMechanism=MONGODB-AWS');
 ```
-
+The previous method of providing URI encoded credentials based on the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` directly in the connection string will no longer work.
 ## ⚙️ Error handling improvements
 
 ### Dropping a collection returns false instead of throwing when NS not found
@@ -118,19 +118,19 @@ The `PoolClearedError` thrown in cases where the connection pool was cleared now
 
 ## 💥 Misc breaking improvements
 
-### Change streams no longer whitelist $changeStream stage options
+### Change streams no longer whitelist `$changeStream` stage options
 
-Uses are now able to pass any option to `collection.watch()` and if it is invalid in the $changeStream stage of the pipeline the server will error. This is to allow users to provide newly added options quickly that are not in our public types.
+Uses are now able to pass any option to `collection.watch()` and if it is invalid in the `$changeStream` stage of the pipeline the server will error. This is to allow users to provide newly added options quickly that are not in our public types.
 
-### Cursors no longer provide a default batchSize of 1000 for getMores
+### Cursors no longer provide a default `batchSize` of 1000 for `getMore`s
 
-In driver versions <7.0, the driver provides a default batchSize of 1000 for each getMore when iterating a cursor. This behavior is not ideal because the default is set regardless of the documents being fetched. For example, if a cursor fetches many small documents, the driver's default of 1000 can result in many round-trips to fetch all documents, when the server could fit all documents inside a single getMore if no batchSize were set.
+In driver versions <7.0, the driver provides a default `batchSize` of 1000 for each [`getMore`](https://www.mongodb.com/docs/manual/reference/command/getMore/) when iterating a cursor. This behavior is not ideal because the default is set regardless of the documents being fetched. For example, if a cursor fetches many small documents, the driver's default of 1000 can result in many round-trips to fetch all documents, when the server could fit all documents inside a single `getMore` if no `batchSize` were set.
 
-Now, cursors no longer provide a default `batchSize` when executing a getMore. A `batchSize` will only be set on `getMore` commands if a batchSize has been explicitly configured for the cursor.
+Now, cursors no longer provide a default `batchSize` when executing a `getMore`. A `batchSize` will only be set on `getMore` commands if a `batchSize` has been explicitly configured for the cursor.
 
 ### Auto encryption options now include default filenames in TS
 
-A common source of confusion for people configuring auto encryption is where to specify the path to mongocryptd and where to specify the path to crypt_shared. We've now made this clearer in our Typescript users. Typescript now reports errors if the specified filename doesn't match the default name of the file. Some examples:
+A common source of confusion for people configuring auto encryption is where to specify the path to `mongocryptd` and where to specify the path to `crypt_shared`. We've now made this clearer in our Typescript users. Typescript now reports errors if the specified filename doesn't match the default name of the file. Some examples:
 
 ```typescript
 var path: AutoEncryptionOptions['extraOptions']['mongocryptdSpawnPath'] = 'some path'; // ERROR
@@ -149,9 +149,9 @@ var path: AutoEncryptionOptions['extraOptions']['cryptSharedLibPath'] = 'mongo_c
 
 ### Improve `MongoClient.connect()` consistency across environments
 
-The MongoClient connect function will now run a handshake regardless of credentials being defined. The upshot of this change is that connect is more consistent at verifying some fail-fast preconditions regardless of environment. For example, previously, if connecting to a `loadBalanced=true` cluster without authentication there would not have been an error until a command was attempted.
+The `MongoClient` connect function will now run a handshake regardless of credentials being defined. The upshot of this change is that connect is more consistent at verifying some fail-fast preconditions regardless of environment. For example, previously, if connecting to a `loadBalanced=true` cluster without authentication there would not have been an error until a command was attempted.
 
-### MongoClient.close() no longer sends endSessions if the topology does not have session support
+### `MongoClient.close()` no longer sends `endSessions` if the topology does not have session support
 
 `MongoClient.close()` attempts to free up any server resources that the client has instantiated, including sessions. Previously, `MongoClient.close()` unconditionally attempted to kill all sessions, regardless of whether or not the topology actually supports sessions.
 
@@ -175,7 +175,7 @@ const stream = cursor.stream().map(JSON.stringify);
 
 This mechanism has been unsupported as of MongoDB 4.0 and attempting to use it will still raise an error.
 
-### Internal ClientMetadata properties have been removed
+### Internal `ClientMetadata` properties have been removed
 
 Previous versions of the driver unintentionally made properties used when constructing client metadata public. These properties have now been made internal. The full list of properties is:
 
