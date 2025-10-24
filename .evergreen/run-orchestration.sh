@@ -9,6 +9,9 @@ echo  "MONGODB_VERSION=${VERSION}"
 export TOPOLOGY=${TOPOLOGY}
 echo  "TOPOLOGY=${TOPOLOGY}"
 
+export ARCH=${ARCH}
+echo  "ARCH=${ARCH}"
+
 export AUTH=${AUTH}
 echo  "AUTH=${AUTH}"
 
