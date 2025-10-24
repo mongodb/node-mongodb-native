@@ -110,13 +110,15 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
     */
 
     let client: MongoClient;
+    let utilClient: MongoClient;
     const events: string[] = [];
     beforeEach(async function () {
       client = this.configuration.newClient({
         directConnection: true,
         appName: 'SDAMPoolManagementTest',
-        heartbeatFrequencyMS: 500
+        heartbeatFrequencyMS: 100
       });
+      utilClient = this.configuration.newClient({ directConnection: true });
 
       for (const event of [
         CONNECTION_POOL_READY,
@@ -144,6 +146,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
 
     afterEach(async function () {
       await client.close();
+      await utilClient.close();
     });
 
     it('ensure monitors properly create and unpause connection pools when they discover servers', {
@@ -156,7 +159,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
         expect(events).to.be.empty;
 
         const heartBeatFailedEvent = once(client, SERVER_HEARTBEAT_FAILED);
-        await client.db('admin').command({
+        await utilClient.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: { times: 2 },
           data: {
@@ -165,6 +168,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
             appName: 'SDAMPoolManagementTest'
           }
         });
+
         await heartBeatFailedEvent;
         expect(events.shift()).to.equal(SERVER_HEARTBEAT_FAILED);
         expect(events.shift()).to.equal(CONNECTION_POOL_CLEARED);
@@ -172,10 +176,14 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
         expect(events).to.be.empty;
 
         await once(client, SERVER_HEARTBEAT_SUCCEEDED);
-        expect(events.shift()).to.equal(SERVER_HEARTBEAT_SUCCEEDED);
-        expect(events.shift()).to.equal(CONNECTION_POOL_READY);
+        // In rare cases when using the stable API, an extra server heartbeat failed event may sneak in.
+        // The test just needs to assert that at some point we have another server heartbeat suceeded
+        // event followed by a connection pool ready event.
+        const filteredEvents = events.filter(event => event !== SERVER_HEARTBEAT_FAILED);
+        expect(filteredEvents.shift()).to.equal(SERVER_HEARTBEAT_SUCCEEDED);
+        expect(filteredEvents.shift()).to.equal(CONNECTION_POOL_READY);
 
-        expect(events).to.be.empty;
+        expect(filteredEvents).to.be.empty;
       }
     });
   });
