@@ -1,6 +1,6 @@
 {
   "description": "MaxTimeMSExpired server errors are transformed into a custom timeout error",
-  "schemaVersion": "1.9",
+  "schemaVersion": "1.26",
   "runOnRequirements": [
     {
       "minServerVersion": "4.0",
@@ -26,8 +26,10 @@
       "client": {
         "id": "client",
         "uriOptions": {
-          "timeoutMS": 250
+          "timeoutMS": 250,
+          "minPoolSize": 1
         },
+        "awaitMinPoolSizeMS": 10000,
         "useMultipleMongoses": false,
         "observeEvents": [
           "commandStartedEvent"

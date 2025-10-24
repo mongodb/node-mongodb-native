@@ -1,6 +1,6 @@
 description: "MaxTimeMSExpired server errors are transformed into a custom timeout error"
 
-schemaVersion: "1.9"
+schemaVersion: "1.26"
 
 # failCommand is available on 4.0 for replica sets and 4.2 for sharded clusters.
 runOnRequirements:
@@ -17,6 +17,8 @@ createEntities:
       id: &client client
       uriOptions:
         timeoutMS: 250
+        minPoolSize: 1
+      awaitMinPoolSizeMS: 10000
       useMultipleMongoses: false
       observeEvents:
         - commandStartedEvent

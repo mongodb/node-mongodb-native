@@ -1,6 +1,6 @@
 description: "timeoutMS behaves correctly during command execution"
 
-schemaVersion: "1.9"
+schemaVersion: "1.26"
 
 runOnRequirements:
   # Require SERVER-49336 for failCommand + appName on the initial handshake.
@@ -56,6 +56,8 @@ tests:
                   w: 1  # Override server's w:majority default to speed up the test.
                   timeoutMS: 500
                   heartbeatFrequencyMS: 500
+                  minPoolSize: 1
+                awaitMinPoolSizeMS: 10000
                 observeEvents:
                   - commandStartedEvent
             - database:
@@ -127,6 +129,8 @@ tests:
                   w: 1  # Override server's w:majority default to speed up the test.
                   timeoutMS: 10
                   heartbeatFrequencyMS: 500
+                  minPoolSize: 1
+                awaitMinPoolSizeMS: 10000
                 observeEvents:
                   - commandStartedEvent
             - database:
@@ -210,6 +214,8 @@ tests:
                   w: 1  # Override server's w:majority default to speed up the test.
                   timeoutMS: 90
                   heartbeatFrequencyMS: 100000  # Override heartbeatFrequencyMS to ensure only 1 RTT is recorded.
+                  minPoolSize: 1
+                awaitMinPoolSizeMS: 10000
                 observeEvents:
                   - commandStartedEvent
             - database:
