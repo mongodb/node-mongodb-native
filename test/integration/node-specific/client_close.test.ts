@@ -2,13 +2,13 @@ import * as events from 'node:events';
 
 import { expect } from 'chai';
 
-import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   type Collection,
   type CommandStartedEvent,
   type FindCursor,
   type MongoClient
-} from '../../mongodb';
+} from '../../../src';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { configureMongocryptdSpawnHooks } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';

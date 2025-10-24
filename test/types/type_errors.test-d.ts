@@ -1,4 +1,4 @@
-import { MongoClient } from '../mongodb';
+import { MongoClient } from '../../src';
 
 /**
  * This test file should contain examples of known compilation errors

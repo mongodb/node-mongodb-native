@@ -5,7 +5,7 @@ require('source-map-support').install({
   hookRequire: true
 });
 
-import { MongoClient } from '../../../mongodb';
+import { MongoClient } from '../../../../src';
 import { AlpineTestConfiguration, AstrolabeTestConfiguration, TestConfiguration } from '../config';
 import { getEnvironmentalOptions } from '../../utils';
 import * as mock from '../../mongodb-mock/index';

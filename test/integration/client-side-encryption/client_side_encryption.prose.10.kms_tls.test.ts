@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { satisfies } from 'semver';
 
+import { ClientEncryption, type MongoClient } from '../../../src';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { ClientEncryption, type MongoClient } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
   requires: {

@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import {
   Binary,
   BSON,
@@ -8,7 +7,8 @@ import {
   type CommandSucceededEvent,
   type MongoClient,
   MongoNetworkError
-} from '../../mongodb';
+} from '../../../src';
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
