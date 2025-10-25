@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { MongoClient as LegacyMongoClient } from 'mongodb-legacy';
 
 import {
   type CommandStartedEvent,
@@ -414,35 +413,6 @@ describe('Sessions Spec', function () {
       expect(events).to.have.lengthOf(documents.length);
 
       expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(1);
-    });
-  });
-
-  // TODO(NODE-XXXX): LegacyMongoClient uses a released version of the driver so it won't be fixed until the error listeners are published
-  context.skip('when using a LegacyMongoClient', () => {
-    let legacyClient;
-    beforeEach(async function () {
-      const options = this.configuration.serverApi
-        ? { serverApi: this.configuration.serverApi }
-        : {};
-      legacyClient = new LegacyMongoClient(this.configuration.url(), options);
-      legacyClient.on('error', () => null);
-    });
-
-    afterEach(async function () {
-      await legacyClient?.close();
-    });
-
-    it('insertOne accepts session started by legacy client', async () => {
-      const db = legacyClient.db();
-      const collection = db.collection('test');
-      const session = legacyClient.startSession();
-      const error = await collection.insertOne({}, { session }).catch(error => error);
-      expect(error).to.not.be.instanceOf(Error);
-    });
-
-    it('session returned by legacy startSession has reference to legacyClient', async () => {
-      const session = legacyClient.startSession();
-      expect(session).to.have.property('client', legacyClient);
     });
   });
 });
