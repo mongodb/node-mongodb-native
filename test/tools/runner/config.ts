@@ -7,7 +7,6 @@ import ConnectionString from 'mongodb-connection-string-url';
 import * as qs from 'querystring';
 import * as url from 'url';
 
-import { type CompressorName } from '../../../src/cmap/wire_protocol/compression';
 import {
   type AuthMechanism,
   Double,
@@ -19,6 +18,7 @@ import {
   TopologyType,
   type WriteConcernSettings
 } from '../../../src';
+import { type CompressorName } from '../../../src/cmap/wire_protocol/compression';
 import { HostAddress } from '../../../src/utils';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
