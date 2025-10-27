@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 
 import {
-  BSON,
   type Collection,
   type Db,
   MongoAPIError,
   type MongoClient,
   type WithId
-} from '../../../mongodb';
+} from '../../../../src';
+import { BSONError, type Document, Long } from '../../../../src/bson';
 
 describe('useBigInt64 option', function () {
   let client: MongoClient;
@@ -85,7 +85,7 @@ describe('useBigInt64 option', function () {
   });
 
   describe('when set to true at collection level', function () {
-    let res: WithId<BSON.Document> | null;
+    let res: WithId<Document> | null;
 
     beforeEach(async function () {
       client = await this.configuration.newClient().connect();
@@ -104,7 +104,7 @@ describe('useBigInt64 option', function () {
   });
 
   describe('when set to false at collection level', function () {
-    let res: WithId<BSON.Document> | null;
+    let res: WithId<Document> | null;
 
     beforeEach(async function () {
       client = await this.configuration.newClient().connect();
@@ -123,7 +123,7 @@ describe('useBigInt64 option', function () {
   });
 
   describe('when set to true', function () {
-    let res: WithId<BSON.Document> | null;
+    let res: WithId<Document> | null;
 
     beforeEach(async function () {
       client = await this.configuration.newClient({}, { useBigInt64: true }).connect();
@@ -132,7 +132,7 @@ describe('useBigInt64 option', function () {
       await db.dropCollection('useBigInt64Test');
 
       coll = await db.createCollection('useBigInt64Test');
-      await coll.insertOne({ a: new BSON.Long(1) });
+      await coll.insertOne({ a: new Long(1) });
 
       res = await coll.findOne({ a: 1n });
     });
@@ -177,7 +177,7 @@ describe('useBigInt64 option', function () {
           .listCollections()
           .toArray()
           .catch(e => e);
-        expect(e).to.be.instanceOf(BSON.BSONError);
+        expect(e).to.be.instanceOf(BSONError);
       });
     });
 
@@ -194,7 +194,7 @@ describe('useBigInt64 option', function () {
           .insertOne({ name: 'bailey ' })
           .then(() => null)
           .catch(e => e);
-        expect(e).to.be.instanceOf(BSON.BSONError);
+        expect(e).to.be.instanceOf(BSONError);
       });
     });
 
@@ -211,7 +211,7 @@ describe('useBigInt64 option', function () {
           .insertOne({ a: 10n }, { promoteLongs: false, useBigInt64: true })
           .catch(e => e);
 
-        expect(e).to.be.instanceOf(BSON.BSONError);
+        expect(e).to.be.instanceOf(BSONError);
       });
     });
   });
@@ -249,7 +249,7 @@ describe('useBigInt64 option', function () {
           .listCollections()
           .toArray()
           .catch(e => e);
-        expect(e).to.be.instanceOf(BSON.BSONError);
+        expect(e).to.be.instanceOf(BSONError);
       });
     });
 
@@ -266,7 +266,7 @@ describe('useBigInt64 option', function () {
           .insertOne({ name: 'bailey ' })
           .then(() => null)
           .catch(e => e);
-        expect(e).to.be.instanceOf(BSON.BSONError);
+        expect(e).to.be.instanceOf(BSONError);
       });
     });
 
@@ -282,7 +282,7 @@ describe('useBigInt64 option', function () {
           .insertOne({ a: 10n }, { promoteValues: false, useBigInt64: true })
           .catch(e => e);
 
-        expect(e).to.be.instanceOf(BSON.BSONError);
+        expect(e).to.be.instanceOf(BSONError);
       });
     });
   });

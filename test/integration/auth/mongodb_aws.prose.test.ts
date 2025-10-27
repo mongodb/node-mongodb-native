@@ -2,7 +2,8 @@ import * as process from 'node:process';
 
 import { expect } from 'chai';
 
-import { AWSSDKCredentialProvider, type MongoClient, MongoServerError } from '../../mongodb';
+import { type MongoClient, MongoServerError } from '../../../src';
+import { AWSSDKCredentialProvider } from '../../../src/cmap/auth/aws_temporary_credentials';
 
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 

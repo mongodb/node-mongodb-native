@@ -11,7 +11,6 @@ import * as url from 'url';
 import {
   type AuthMechanism,
   Double,
-  HostAddress,
   Long,
   MongoClient,
   type MongoClientOptions,
@@ -19,7 +18,8 @@ import {
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
-} from '../../mongodb';
+} from '../../../src';
+import { HostAddress } from '../../../src/utils';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
 import { flakyTests } from './flaky';

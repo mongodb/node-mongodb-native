@@ -8,10 +8,10 @@ import {
   type ClientSession,
   type Collection,
   MongoClient,
-  type MongoDBOIDC,
   type OIDCCallbackParams,
   type OIDCResponse
-} from '../../mongodb';
+} from '../../../src';
+import { type MongoDBOIDC } from '../../../src/cmap/auth/mongodb_oidc';
 
 const createCallback = (tokenFile = 'test_user1', expiresInSeconds?: number, extraFields?: any) => {
   return async (params: OIDCCallbackParams) => {

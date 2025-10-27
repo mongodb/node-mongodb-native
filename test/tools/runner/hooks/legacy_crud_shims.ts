@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection } from '../../../mongodb';
+import { Collection } from '../../../../src';
 
 // Setup legacy shims for tests that use removed or changed APIs
 const legacyUsageCounts = {

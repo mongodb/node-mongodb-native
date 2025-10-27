@@ -1,6 +1,6 @@
 import { expectDeprecated, expectType } from 'tsd';
 
-import { MongoClient } from '../../../mongodb';
+import { MongoClient } from '../../../../src';
 
 // test collection.countDocuments
 const client = new MongoClient('');

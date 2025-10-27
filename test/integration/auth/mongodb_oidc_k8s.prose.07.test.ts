@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type Collection, MongoClient } from '../../mongodb';
+import { type Collection, MongoClient } from '../../../src';
 
 const DEFAULT_URI = 'mongodb://127.0.0.1:27017';
 
