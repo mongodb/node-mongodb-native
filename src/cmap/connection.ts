@@ -709,7 +709,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
     }
 
-    if (this.socket.write(buffer)) return;
+    try {
+      if (this.socket.write(buffer)) return;
+    } catch (writeError) {
+      const cause = writeError as Error;
+      const networkError = new MongoNetworkError(cause.message, { cause });
+      this.onError(networkError);
+      throw networkError;
+    }
 
     const drainEvent = once<void>(this.socket, 'drain', options);
     const timeout = options?.timeoutContext?.timeoutForSocketWrite;
