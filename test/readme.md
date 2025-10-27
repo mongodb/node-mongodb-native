@@ -118,7 +118,7 @@ npm run check:test
 > [!NOTE]
 > The command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
-[run-orchestration.sh](.evergreen/run-orchestration.sh) has a number of settings that can enabled using env vars. Take a look at that script/repo for more information.
+[../drivers-evergreen-tools/.evergreen/run-orchestration.sh](../drivers-evergreen-tools/.evergreen/run-orchestration.sh) has a number of settings that can enabled using env vars. Take a look at that script/repo for more information.
 
 The output will show how many tests passed, failed, and are pending. Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test results. See [Mocha's documentation][mocha-skip] for more information.
 
