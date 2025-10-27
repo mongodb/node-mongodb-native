@@ -1,4 +1,5 @@
-import { LEGACY_HELLO_COMMAND, MongoClient } from '../mongodb';
+import { MongoClient } from '../../src';
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 
 /**
  * ATLAS_CONNECTIVITY env variable is JSON

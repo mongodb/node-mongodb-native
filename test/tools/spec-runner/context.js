@@ -2,7 +2,7 @@
 const { expect } = require('chai');
 const { setTimeout } = require('timers');
 const { resolveConnectionString } = require('./utils');
-const { ns } = require('../../mongodb');
+const { ns } = require('../../../src/utils');
 const { extractAuthFromConnectionString } = require('../utils');
 
 class Thread {

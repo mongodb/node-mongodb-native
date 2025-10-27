@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { EJSON } from '../mongodb';
+import { EJSON } from '../../src/bson';
 
 function hasDuplicates(testArray) {
   const testNames = testArray.map(test => test.description);

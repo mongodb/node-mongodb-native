@@ -10,13 +10,13 @@ import {
   type CommandStartedEvent,
   type CommandSucceededEvent,
   type Document,
-  LEGACY_HELLO_COMMAND,
   Long,
   type MongoClient,
   MongoNetworkError,
   ObjectId,
   Timestamp
-} from '../../mongodb';
+} from '../../../src';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 
@@ -31,7 +31,7 @@ function triggerResumableError(changeStream: ChangeStream, delay: number, onClos
 function triggerResumableError(
   changeStream: ChangeStream,
   delay: number | (() => void),
-  onClose?: () => void
+  onClose?: (err?: Error) => void
 ) {
   if (typeof delay === 'function') {
     onClose = delay;
@@ -53,7 +53,7 @@ function triggerResumableError(
     }
 
     const nextStub = sinon.stub(changeStream.cursor, 'next').callsFake(async function () {
-      callback(new MongoNetworkError('error triggered from test'));
+      onClose(new MongoNetworkError('error triggered from test'));
       nextStub.restore();
     });
 

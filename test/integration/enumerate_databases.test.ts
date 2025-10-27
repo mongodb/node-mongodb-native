@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { type MongoClient, MongoServerError } from '../mongodb';
+import { type MongoClient, MongoServerError } from '../../src';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/unified_suite_builder';
 
 const metadata: MongoDBMetadataUI = {
