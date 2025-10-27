@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { env } from 'process';
 
+import { Binary } from '../../../src';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
-import { Binary } from '../../mongodb';
 
 const dataKeyOptions = {
   masterKey: {

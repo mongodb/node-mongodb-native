@@ -1,7 +1,11 @@
 import { expectAssignable, expectType } from 'tsd';
 
-import { type IndexInformationOptions, MongoClient } from '../../src';
-import { type IndexDescriptionCompact, type IndexDescriptionInfo } from '../mongodb';
+import {
+  type IndexDescriptionCompact,
+  type IndexDescriptionInfo,
+  type IndexInformationOptions,
+  MongoClient
+} from '../../src';
 
 const client = new MongoClient('');
 const db = client.db('test');

@@ -1,13 +1,13 @@
 'use strict';
 
 const mock = require('./mongodb-mock/index');
-const BSON = require('../mongodb');
-const { LEGACY_HELLO_COMMAND } = require('../mongodb');
-const { isHello } = require('../mongodb');
+const { ObjectId, Timestamp, Long, Binary } = require('../../src');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { isHello } = require('../../src/utils');
 
 class ReplSetFixture {
   constructor() {
-    this.electionIds = [new BSON.ObjectId(), new BSON.ObjectId()];
+    this.electionIds = [new ObjectId(), new ObjectId()];
   }
 
   uri(dbName) {
@@ -121,8 +121,8 @@ class ReplSetFixture {
  */
 function genClusterTime(time) {
   return {
-    clusterTime: new BSON.Timestamp(BSON.Long.fromNumber(time, true)),
-    signature: { hash: new BSON.Binary(Buffer.from('test', 'utf8')), keyId: new BSON.Long(1) }
+    clusterTime: new Timestamp(Long.fromNumber(time, true)),
+    signature: { hash: new Binary(Buffer.from('test', 'utf8')), keyId: new Long(1) }
   };
 }
 

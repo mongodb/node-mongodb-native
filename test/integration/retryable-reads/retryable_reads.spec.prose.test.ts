@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 
-import { type Collection, type MongoClient } from '../../mongodb';
+import { type Collection, type MongoClient } from '../../../src';
 
 describe('Retryable Reads Spec Prose', () => {
   let client: MongoClient, failPointName;

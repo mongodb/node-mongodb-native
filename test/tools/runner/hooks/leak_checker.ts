@@ -3,7 +3,8 @@ import { expect } from 'chai';
 import * as chalk from 'chalk';
 import * as net from 'net';
 
-import { MongoClient, ServerSessionPool } from '../../../mongodb';
+import { MongoClient } from '../../../../src';
+import { ServerSessionPool } from '../../../../src/sessions';
 
 class LeakChecker {
   static originalAcquire: typeof ServerSessionPool.prototype.acquire;
