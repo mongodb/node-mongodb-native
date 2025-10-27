@@ -2,14 +2,9 @@ import { expect } from 'chai';
 import * as net from 'net';
 import * as sinon from 'sinon';
 
-import {
-  BSON,
-  BSONError,
-  type Collection,
-  type MongoClient,
-  MongoServerError,
-  OpMsgResponse
-} from '../../../mongodb';
+import { type Collection, type MongoClient, MongoServerError } from '../../../../src';
+import { BSONError, deserialize } from '../../../../src/bson';
+import { OpMsgResponse } from '../../../../src/cmap/commands';
 
 describe('class MongoDBResponse', () => {
   let client;
@@ -46,12 +41,8 @@ describe('class MongoDBResponse', () => {
 
               // Check that the server sent us broken BSON (bad UTF)
               expect(() => {
-                BSON.deserialize(spy.returnValues[0], { validation: { utf8: true } });
-              }).to.throw(
-                BSON.BSONError,
-                /Invalid UTF/i,
-                'did not generate error with invalid utf8'
-              );
+                deserialize(spy.returnValues[0], { validation: { utf8: true } });
+              }).to.throw(BSONError, /Invalid UTF/i, 'did not generate error with invalid utf8');
             }
 
             await generateWriteErrorWithInvalidUtf8();

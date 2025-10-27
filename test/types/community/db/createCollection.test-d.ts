@@ -5,7 +5,7 @@ import {
   type CreateCollectionOptions,
   MongoClient,
   type ObjectId
-} from '../../../mongodb';
+} from '../../../../src';
 
 const client = new MongoClient('');
 const db = client.db('test');

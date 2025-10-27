@@ -10,19 +10,18 @@ import {
   AggregationCursor,
   Code,
   type Collection,
-  Connection,
-  ConnectionPool,
   type Db,
   FindCursor,
   ListCollectionsCursor,
   type Log,
   type MongoClient,
   MongoServerError,
-  promiseWithResolvers,
-  ReadPreference,
-  setDifference,
-  StateMachine
-} from '../../mongodb';
+  ReadPreference
+} from '../../../src';
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
+import { Connection } from '../../../src/cmap/connection';
+import { ConnectionPool } from '../../../src/cmap/connection_pool';
+import { promiseWithResolvers, setDifference } from '../../../src/utils';
 import {
   clearFailPoint,
   configureFailPoint,
