@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 
+import { WriteConcern } from '../../../src';
 import { AggregateOperation } from '../../../src/operations/aggregate';
-import { MongoDBNamespace, WriteConcern } from '../../mongodb';
+import { MongoDBNamespace } from '../../../src/utils';
 
 describe('AggregateOperation', function () {
   const ns = new MongoDBNamespace('test', 'coll');
@@ -64,7 +65,7 @@ describe('AggregateOperation', function () {
     });
 
     context('when no writable stages', function () {
-      const operation = new AggregateOperation(ns, [{ $project: { name: 1 } }], { dbName: ns });
+      const operation = new AggregateOperation(ns, [{ $project: { name: 1 } }], { dbName: ns.db });
 
       it('sets hasWriteStage to false', function () {
         expect(operation.hasWriteStage).to.be.false;

@@ -2,10 +2,8 @@ import { expect } from 'chai';
 import { spawnSync } from 'child_process';
 import { dirname } from 'path';
 
-import { BSON } from '../../mongodb';
+import { EJSON } from '../../../src/bson';
 import { getEncryptExtraOptions } from '../../tools/utils';
-
-const { EJSON } = BSON;
 
 describe('crypt shared library', () => {
   it('should fail if no library can be found in the search path and cryptSharedLibRequired is set', async function () {

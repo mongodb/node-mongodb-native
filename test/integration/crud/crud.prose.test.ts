@@ -1,18 +1,18 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { type CommandStartedEvent } from '../../../mongodb';
 import {
   type ClientBulkWriteModel,
   type ClientSession,
   type Collection,
+  type CommandStartedEvent,
   type Document,
   MongoBulkWriteError,
   type MongoClient,
   MongoClientBulkWriteError,
   MongoInvalidArgumentError,
   MongoServerError
-} from '../../mongodb';
+} from '../../../src';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 

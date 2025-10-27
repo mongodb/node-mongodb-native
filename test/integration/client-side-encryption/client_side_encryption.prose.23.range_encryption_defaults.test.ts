@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
+import { type Binary, Int32, Long } from '../../../src';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { type Binary, Int32, Long } from '../../mongodb';
 
 const metaData: MongoDBMetadataUI = {
   requires: {

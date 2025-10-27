@@ -7,16 +7,15 @@ import {
   AbstractCursor,
   type Collection,
   type CommandStartedEvent,
-  CSOTTimeoutContext,
-  CursorTimeoutContext,
   CursorTimeoutMode,
   type FindCursor,
   MongoAPIError,
   type MongoClient,
   MongoCursorExhaustedError,
-  MongoOperationTimeoutError,
-  TimeoutContext
-} from '../../mongodb';
+  MongoOperationTimeoutError
+} from '../../../src';
+import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
+import { CSOTTimeoutContext, TimeoutContext } from '../../../src/timeout';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 

@@ -17,11 +17,11 @@ import {
   type HostAddress,
   MongoClient,
   type MongoClientOptions,
-  now,
-  OP_MSG,
-  Topology,
   type TopologyOptions
-} from '../mongodb';
+} from '../../src';
+import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
+import { Topology } from '../../src/sdam/topology';
+import { now } from '../../src/utils';
 import { type TestConfiguration } from './runner/config';
 
 export function ensureCalledWith(stub: any, args: any[]) {

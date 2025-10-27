@@ -9,9 +9,9 @@ import {
   type MongoClient,
   MongoError,
   MongoServerError,
-  MongoWriteConcernError,
-  Server
-} from '../../mongodb';
+  MongoWriteConcernError
+} from '../../../src';
+import { Server } from '../../../src/sdam/server';
 import { sleep } from '../../tools/utils';
 
 describe('Retryable Writes Spec Prose', () => {

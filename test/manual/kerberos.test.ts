@@ -2,7 +2,7 @@ import * as chai from 'chai';
 import { promises as dns } from 'dns';
 import * as sinon from 'sinon';
 
-import { MongoClient } from '../mongodb';
+import { MongoClient } from '../../src';
 
 const expect = chai.expect;
 
