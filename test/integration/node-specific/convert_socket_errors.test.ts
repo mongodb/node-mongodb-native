@@ -7,6 +7,7 @@ import { type Collection, type Document, type MongoClient, MongoNetworkError } f
 import { Connection } from '../../../src/cmap/connection';
 import { ns } from '../../../src/utils';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
+import { filterForCommands } from '../shared';
 
 describe('Socket Errors', () => {
   describe('when a socket emits an error', () => {
@@ -81,7 +82,6 @@ describe('Socket Errors', () => {
   describe('when an error is thrown writing data to a socket', () => {
     let client: MongoClient;
     let collection: Collection<Document>;
-    let errorCount = 0;
 
     beforeEach(async function () {
       client = this.configuration.newClient({ monitorCommands: true });
@@ -96,7 +96,6 @@ describe('Socket Errors', () => {
           //@ts-expect-error: private property
           const socket = connection.socket;
           const stub = sinon.stub(socket, 'write').callsFake(function () {
-            errorCount++;
             stub.restore();
             throw new Error('This socket has been ended by the other party');
           });
@@ -110,26 +109,18 @@ describe('Socket Errors', () => {
     });
 
     it('retries and succeeds', async () => {
-      const initialErrorCount = errorCount;
       const commandSucceededEvents: string[] = [];
       const commandFailedEvents: string[] = [];
       const commandStartedEvents: string[] = [];
 
-      client.on('commandStarted', event => {
-        if (event.commandName === 'find') commandStartedEvents.push(event.commandName);
-      });
-      client.on('commandSucceeded', event => {
-        if (event.commandName === 'find') commandSucceededEvents.push(event.commandName);
-      });
-      client.on('commandFailed', event => {
-        if (event.commandName === 'find') commandFailedEvents.push(event.commandName);
-      });
+      client.on('commandStarted', filterForCommands('find', commandStartedEvents));
+      client.on('commandSucceeded', filterForCommands('find', commandSucceededEvents));
+      client.on('commandFailed', filterForCommands('find', commandFailedEvents));
 
       // call find, fail once, succeed on retry
       const item = await collection.findOne({});
-      // check that an object was returned
+      // check that we didn't find anything, as expected
       expect(item).to.be.null;
-      expect(errorCount).to.be.equal(initialErrorCount + 1);
       // check that we have the expected command monitoring events
       expect(commandStartedEvents).to.have.length(2);
       expect(commandFailedEvents).to.have.length(1);
