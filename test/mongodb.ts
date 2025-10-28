@@ -1,7 +1,5 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import * as process from 'node:process';
-import * as vm from 'node:vm';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function printExports() {
@@ -22,78 +20,6 @@ function printExports() {
   for (const srcFile of driverSourceFiles) {
     console.log(`export * from '${path.relative(__dirname, srcFile)}';`);
   }
-}
-
-/**
- * Using node's require resolution logic this function will locate the entrypoint for the `'mongodb-legacy'` module,
- * then execute the `mongodb-legacy` module in a `vm` context that replaces the global require function with a custom
- * implementation. The custom version of `require` will return the local instance of the driver import (magically compiled by ts-node) when
- * the module specifier is 'mongodb' and otherwise defer to the normal require behavior to import relative files and stdlib modules.
- * Each of the legacy module's patched classes are placed on the input object.
- *
- * @param exportsToOverride - An object that is an import of the MongoDB driver to be modified by this function
- */
-function importMongoDBLegacy(exportsToOverride: Record<string, unknown>) {
-  const mongodbLegacyEntryPoint = require.resolve('mongodb-legacy');
-  const mongodbLegacyLocation = path.dirname(mongodbLegacyEntryPoint);
-  const mongodbLegacyIndex = fs.readFileSync(mongodbLegacyEntryPoint, {
-    encoding: 'utf8'
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const localMongoDB = require('../src/index');
-  const ctx = vm.createContext({
-    module: { exports: null },
-    require: (mod: string) => {
-      if (mod === 'mongodb') {
-        return localMongoDB;
-      } else if (mod.startsWith('.')) {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        return require(path.join(mongodbLegacyLocation, mod));
-      }
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      return require(mod);
-    }
-  });
-  vm.runInContext(mongodbLegacyIndex, ctx);
-
-  const mongodbLegacy = ctx.module.exports;
-
-  Object.defineProperty(exportsToOverride, 'Admin', { get: () => mongodbLegacy.Admin });
-  Object.defineProperty(exportsToOverride, 'FindCursor', { get: () => mongodbLegacy.FindCursor });
-  Object.defineProperty(exportsToOverride, 'ListCollectionsCursor', {
-    get: () => mongodbLegacy.ListCollectionsCursor
-  });
-  Object.defineProperty(exportsToOverride, 'ListIndexesCursor', {
-    get: () => mongodbLegacy.ListIndexesCursor
-  });
-  Object.defineProperty(exportsToOverride, 'AggregationCursor', {
-    get: () => mongodbLegacy.AggregationCursor
-  });
-  Object.defineProperty(exportsToOverride, 'ChangeStream', {
-    get: () => mongodbLegacy.ChangeStream
-  });
-  Object.defineProperty(exportsToOverride, 'Collection', { get: () => mongodbLegacy.Collection });
-  Object.defineProperty(exportsToOverride, 'Db', { get: () => mongodbLegacy.Db });
-  Object.defineProperty(exportsToOverride, 'GridFSBucket', {
-    get: () => mongodbLegacy.GridFSBucket
-  });
-  Object.defineProperty(exportsToOverride, 'ClientSession', {
-    get: () => mongodbLegacy.ClientSession
-  });
-  Object.defineProperty(exportsToOverride, 'MongoClient', { get: () => mongodbLegacy.MongoClient });
-  Object.defineProperty(exportsToOverride, 'ClientSession', {
-    get: () => mongodbLegacy.ClientSession
-  });
-  Object.defineProperty(exportsToOverride, 'GridFSBucketWriteStream', {
-    get: () => mongodbLegacy.GridFSBucketWriteStream
-  });
-  Object.defineProperty(exportsToOverride, 'OrderedBulkOperation', {
-    get: () => mongodbLegacy.OrderedBulkOperation
-  });
-  Object.defineProperty(exportsToOverride, 'UnorderedBulkOperation', {
-    get: () => mongodbLegacy.UnorderedBulkOperation
-  });
 }
 
 export * from '../src/admin';
@@ -212,16 +138,3 @@ export * from '../src/write_concern';
 
 // Must be last for precedence
 export * from '../src/index';
-
-/**
- * TODO(NODE-4979): ENABLE_MONGODB_LEGACY is 'true' by default for now
- */
-const ENABLE_MONGODB_LEGACY =
-  typeof process.env.ENABLE_MONGODB_LEGACY === 'string' && process.env.ENABLE_MONGODB_LEGACY !== ''
-    ? process.env.ENABLE_MONGODB_LEGACY
-    : 'true';
-
-if (ENABLE_MONGODB_LEGACY === 'true') {
-  // Override our own exports with the legacy patched ones
-  importMongoDBLegacy(module.exports);
-}

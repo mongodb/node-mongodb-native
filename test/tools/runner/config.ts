@@ -4,7 +4,6 @@ import * as types from 'node:util/types';
 import { expect } from 'chai';
 import { type Context } from 'mocha';
 import ConnectionString from 'mongodb-connection-string-url';
-import { type CompressorName } from 'mongodb-legacy';
 import * as qs from 'querystring';
 import * as url from 'url';
 
@@ -19,6 +18,7 @@ import {
   TopologyType,
   type WriteConcernSettings
 } from '../../../src';
+import { type CompressorName } from '../../../src/cmap/wire_protocol/compression';
 import { HostAddress } from '../../../src/utils';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
