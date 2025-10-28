@@ -17,6 +17,7 @@ import {
   type ConnectionCheckOutStartedEvent,
   type ConnectionClosedEvent,
   type ConnectionCreatedEvent,
+  type ConnectionPool,
   type ConnectionPoolClearedEvent,
   type ConnectionPoolClosedEvent,
   type ConnectionPoolCreatedEvent,
@@ -39,6 +40,8 @@ import {
   type ServerHeartbeatStartedEvent,
   type ServerHeartbeatSucceededEvent,
   type ServerOpeningEvent,
+  Timeout,
+  TimeoutError,
   type TopologyClosedEvent,
   type TopologyDescription,
   type TopologyDescriptionChangedEvent,
@@ -622,6 +625,26 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         try {
           new EntityEventRegistry(client, entity.client, map).register();
           await client.connect();
+          if (entity.client.awaitMinPoolSizeMS) {
+            if (client.topology?.s?.servers) {
+              const timeout = Timeout.expires(entity.client.awaitMinPoolSizeMS);
+              for (const server of client.topology.s.servers.values()) {
+                const pool = server.pool;
+                try {
+                  await Promise.race([checkMinPoolSize(pool), timeout]);
+                } catch (error) {
+                  if (TimeoutError.is(error)) {
+                    throw new AssertionError(
+                      `Timed out waiting for min pool size to be populated within ${entity.client.awaitMinPoolSizeMS}ms`
+                    );
+                  }
+                  throw error;
+                } finally {
+                  timeout.clear();
+                }
+              }
+            }
+          }
         } catch (error) {
           console.error('failed to connect entity', entity);
           // In the case where multiple clients are defined in the test and any one of them failed
@@ -720,4 +743,13 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     }
     return map;
   }
+}
+
+function checkMinPoolSize(pool: ConnectionPool): Promise<boolean> {
+  return new Promise(resolve => {
+    while (pool.options.minPoolSize < pool.totalConnectionCount) {
+      // Just looping until the min pool size is reached.
+    }
+    resolve(true);
+  });
 }
