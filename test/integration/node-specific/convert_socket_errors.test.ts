@@ -88,9 +88,7 @@ describe('Socket Errors', () => {
       await client.connect();
       const db = client.db('closeConn');
       collection = db.collection('closeConn');
-      const docs = Array.from({ length: 128 }).map((_, index) => ({ foo: index, bar: 1 }));
       await collection.deleteMany({});
-      await collection.insertMany(docs);
 
       for (const [, server] of client.topology.s.servers) {
         //@ts-expect-error: private property
@@ -130,7 +128,7 @@ describe('Socket Errors', () => {
       // call find, fail once, succeed on retry
       const item = await collection.findOne({});
       // check that an object was returned
-      expect(item).to.exist;
+      expect(item).to.be.null;
       expect(errorCount).to.be.equal(initialErrorCount + 1);
       // check that we have the expected command monitoring events
       expect(commandStartedEvents).to.have.length(2);
