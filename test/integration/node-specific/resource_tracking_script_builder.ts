@@ -106,7 +106,6 @@ export async function runScriptAndReturnHeapInfo(
   };
   log('starting');
   const scriptName = `${name}.cjs`;
-  const heapsnapshotFile = `${name}.heapsnapshot.json`;
 
   const scriptContent = await testScriptFactory(
     name,
@@ -148,6 +147,10 @@ export async function runScriptAndReturnHeapInfo(
   const startingMemoryUsed = starting.value[0].startingMemoryUsed;
   const endingMemoryUsed = ending.value[0].endingMemoryUsed;
 
+  const {
+    value: [{ clientsInMemory }]
+  } = await messages.next();
+
   // make sure the process ended
   const [exitCode] = await willClose;
 
@@ -155,21 +158,16 @@ export async function runScriptAndReturnHeapInfo(
 
   expect(exitCode, 'process should have exited with zero').to.equal(0);
 
-  const heap = await readFile(heapsnapshotFile, { encoding: 'utf8' }).then(c =>
-    parseSnapshot(JSON.parse(c))
-  );
-
   log('done.');
 
   // If any of the above throws we won't reach these unlinks that clean up the created files.
   // This is intentional so that when debugging the file will still be present to check it for errors
   await unlink(scriptName);
-  await unlink(heapsnapshotFile);
 
   return {
     startingMemoryUsed,
     endingMemoryUsed,
-    heap
+    clientsInMemory
   };
 }
 

@@ -59,11 +59,16 @@ async function main() {
   process.send({ endingMemoryUsed });
   log('second message sent.');
 
-  const start = now();
-  v8.writeHeapSnapshot(`${name}.heapsnapshot.json`);
-  const end = now();
+  const clientsInMemory = v8.queryObjects(MongoClient);
 
-  log(`heap snapshot written in ${end - start}ms. script exiting`);
+  process.send({ clientsInMemory });
+
+  log('clients instances in memory sent.');
+  // const start = now();
+  // v8.writeHeapSnapshot(`${name}.heapsnapshot.json`);
+  // const end = now();
+
+  // log(`heap snapshot written in ${end - start}ms. script exiting`);
 }
 
 main()
