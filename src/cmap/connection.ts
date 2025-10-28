@@ -712,8 +712,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     try {
       if (this.socket.write(buffer)) return;
     } catch (writeError) {
-      const cause = writeError as Error;
-      const networkError = new MongoNetworkError(cause.message, { cause });
+      const networkError = new MongoNetworkError('unexpected error writing to socket', {
+        cause: writeError
+      });
       this.onError(networkError);
       throw networkError;
     }

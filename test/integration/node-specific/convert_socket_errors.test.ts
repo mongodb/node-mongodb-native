@@ -78,18 +78,13 @@ describe('Socket Errors', () => {
     });
   });
 
-  describe('when encountering connection error', () => {
+  describe('when an error is thrown writing data to a socket', () => {
     let client: MongoClient;
     let collection: Collection<Document>;
-
-    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4' } };
+    let errorCount = 0;
 
     beforeEach(async function () {
-      if (!this.configuration.filters.NodeVersionFilter.filter({ metadata })) {
-        return;
-      }
-
-      client = this.configuration.newClient({});
+      client = this.configuration.newClient({ monitorCommands: true });
       await client.connect();
       const db = client.db('closeConn');
       collection = db.collection('closeConn');
@@ -102,7 +97,9 @@ describe('Socket Errors', () => {
         for (const connection of server.pool.connections) {
           //@ts-expect-error: private property
           const socket = connection.socket;
-          sinon.stub(socket, 'write').callsFake(function () {
+          const stub = sinon.stub(socket, 'write').callsFake(function () {
+            errorCount++;
+            stub.restore();
             throw new Error('This socket has been ended by the other party');
           });
         }
@@ -114,10 +111,31 @@ describe('Socket Errors', () => {
       await client.close();
     });
 
-    it('throws a MongoNetworkError and retries', metadata, async () => {
+    it('retries and succeeds', async () => {
+      const initialErrorCount = errorCount;
+      const commandSucceededEvents: string[] = [];
+      const commandFailedEvents: string[] = [];
+      const commandStartedEvents: string[] = [];
+
+      client.on('commandStarted', event => {
+        if (event.commandName === 'find') commandStartedEvents.push(event.commandName);
+      });
+      client.on('commandSucceeded', event => {
+        if (event.commandName === 'find') commandSucceededEvents.push(event.commandName);
+      });
+      client.on('commandFailed', event => {
+        if (event.commandName === 'find') commandFailedEvents.push(event.commandName);
+      });
+
+      // call find, fail once, succeed on retry
       const item = await collection.findOne({});
+      // check that an object was returned
       expect(item).to.exist;
-      console.log(item);
+      expect(errorCount).to.be.equal(initialErrorCount + 1);
+      // check that we have the expected command monitoring events
+      expect(commandStartedEvents).to.have.length(2);
+      expect(commandFailedEvents).to.have.length(1);
+      expect(commandSucceededEvents).to.have.length(1);
     });
   });
 });
