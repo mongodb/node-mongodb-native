@@ -4,6 +4,7 @@ import type {
   AutoEncryptionOptions,
   AWSEncryptionKeyOptions,
   AzureEncryptionKeyOptions,
+  BulkWriteResult,
   ClientEncryption,
   ClientEncryptionEncryptOptions,
   GCPEncryptionKeyOptions,
@@ -156,4 +157,14 @@ expectAssignable<RequiredCreateEncryptedCollectionSettings>({
       cryptSharedLibPath: 'libmongocrypt.so'
     }
   });
+}
+
+{
+  const clientEncryption: ClientEncryption = null as never;
+  expectType<Promise<{ bulkWriteResult?: BulkWriteResult }>>(
+    clientEncryption.rewrapManyDataKey({})
+  );
+  expectType<Promise<{ bulkWriteResult?: BulkWriteResult }>>(
+    clientEncryption.rewrapManyDataKey({}, { provider: 'aws' })
+  );
 }
