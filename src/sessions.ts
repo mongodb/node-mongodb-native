@@ -1,3 +1,5 @@
+import { setTimeout } from 'timers/promises';
+
 import { Binary, type Document, Long, type Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
@@ -768,7 +770,7 @@ export class ClientSession
 
           if (
             fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-            (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
+            (this.timeoutContext?.csotEnabled() || now() - startTime < MAX_TIMEOUT)
           ) {
             continue;
           }
@@ -776,7 +778,7 @@ export class ClientSession
           throw fnError;
         }
 
-        while (!committed) {
+        for (let retry = 0; !committed; ++retry) {
           try {
             /*
              * We will rely on ClientSession.commitTransaction() to
@@ -786,26 +788,53 @@ export class ClientSession
             await this.commitTransaction();
             committed = true;
           } catch (commitError) {
-            /*
-             * Note: a maxTimeMS error will have the MaxTimeMSExpired
-             * code (50) and can be reported as a top-level error or
-             * inside writeConcernError, ex.
-             * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
-             * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
-             */
-            if (
-              !isMaxTimeMSExpiredError(commitError) &&
-              commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult) &&
-              (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
-            ) {
-              continue;
-            }
+            const hasNotTimedOut =
+              this.timeoutContext?.csotEnabled() || now() - startTime < MAX_TIMEOUT;
 
-            if (
-              commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-              (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
-            ) {
-              break;
+            /**
+             * will the provided backoffMS exceed the withTransaction's deadline?
+             */
+            const willExceedTransactionDeadline = (backoffMS: number) => {
+              return (
+                (this.timeoutContext?.csotEnabled() &&
+                  backoffMS > this.timeoutContext.remainingTimeMS) ||
+                now() + backoffMS > startTime + MAX_TIMEOUT
+              );
+            };
+
+            // If CSOT is enabled, we repeatedly retry until timeoutMS expires.
+            // If CSOT is not enabled, do we still have time remaining or have we timed out?
+            if (hasNotTimedOut) {
+              if (
+                !isMaxTimeMSExpiredError(commitError) &&
+                commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)
+              ) {
+                /*
+                 * Note: a maxTimeMS error will have the MaxTimeMSExpired
+                 * code (50) and can be reported as a top-level error or
+                 * inside writeConcernError, ex.
+                 * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
+                 * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
+                 */
+
+                const BACKOFF_INITIAL_MS = 1;
+                const BACKOFF_MAX_MS = 500;
+                const jitter = Math.random();
+                const backoffMS =
+                  jitter * Math.min(BACKOFF_INITIAL_MS * 1.25 ** retry, BACKOFF_MAX_MS);
+
+                if (willExceedTransactionDeadline(backoffMS)) {
+                  break;
+                }
+
+                await setTimeout(backoffMS);
+
+                continue;
+              }
+
+              if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+                break;
+              }
             }
 
             throw commitError;
