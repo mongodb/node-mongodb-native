@@ -144,8 +144,12 @@ export async function runScriptAndReturnHeapInfo(
 
   log('fetching messages 3: ', ending);
 
-  const startingMemoryUsed = starting.value[0].startingMemoryUsed;
-  const endingMemoryUsed = ending.value[0].endingMemoryUsed;
+  const {
+    value: [{ startingMemoryUsed }]
+  } = starting;
+  const {
+    value: [{ endingMemoryUsed }]
+  } = ending;
 
   const {
     value: [{ clientsInMemory }]
