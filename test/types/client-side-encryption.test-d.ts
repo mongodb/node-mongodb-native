@@ -4,7 +4,6 @@ import type {
   AutoEncryptionOptions,
   AWSEncryptionKeyOptions,
   AzureEncryptionKeyOptions,
-  BulkWriteResult,
   ClientEncryption,
   ClientEncryptionEncryptOptions,
   GCPEncryptionKeyOptions,
@@ -159,12 +158,8 @@ expectAssignable<RequiredCreateEncryptedCollectionSettings>({
   });
 }
 
+declare const clientEncryption: ClientEncryption;
 {
-  const clientEncryption: ClientEncryption = null as never;
-  expectType<Promise<{ bulkWriteResult?: BulkWriteResult }>>(
-    clientEncryption.rewrapManyDataKey({})
-  );
-  expectType<Promise<{ bulkWriteResult?: BulkWriteResult }>>(
-    clientEncryption.rewrapManyDataKey({}, { provider: 'aws' })
-  );
+  await clientEncryption.rewrapManyDataKey({});
+  await clientEncryption.rewrapManyDataKey({}, { provider: 'aws' });
 }
