@@ -629,9 +629,12 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           if (entity.client.awaitMinPoolSizeMS) {
             if (client.topology?.s?.servers) {
               const timeout = Timeout.expires(entity.client.awaitMinPoolSizeMS);
-              const poolSizeChecks = client.topology.s.servers
-                .values()
-                .map(server => checkMinPoolSize(server.pool));
+              const servers = client.topology.s.servers.values();
+              // map() is not available until Node 22.
+              const poolSizeChecks = [];
+              for (const server of servers) {
+                poolSizeChecks.push(checkMinPoolSize(server.pool));
+              }
               try {
                 await Promise.race([Promise.allSettled(poolSizeChecks), timeout]);
               } catch (error) {
