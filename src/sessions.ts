@@ -768,7 +768,7 @@ export class ClientSession
 
           if (
             fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-            (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
+            (this.timeoutContext?.csotEnabled() || now() - startTime < MAX_TIMEOUT)
           ) {
             continue;
           }
@@ -786,26 +786,26 @@ export class ClientSession
             await this.commitTransaction();
             committed = true;
           } catch (commitError) {
-            /*
-             * Note: a maxTimeMS error will have the MaxTimeMSExpired
-             * code (50) and can be reported as a top-level error or
-             * inside writeConcernError, ex.
-             * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
-             * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
-             */
-            if (
-              !isMaxTimeMSExpiredError(commitError) &&
-              commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult) &&
-              (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
-            ) {
-              continue;
-            }
+            // If CSOT is enabled, we repeatedly retry until timeoutMS expires.
+            // If CSOT is not enabled, do we still have time remaining or have we timed out?
+            if (this.timeoutContext?.csotEnabled() || now() - startTime < MAX_TIMEOUT) {
+              if (
+                !isMaxTimeMSExpiredError(commitError) &&
+                commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)
+              ) {
+                /*
+                 * Note: a maxTimeMS error will have the MaxTimeMSExpired
+                 * code (50) and can be reported as a top-level error or
+                 * inside writeConcernError, ex.
+                 * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
+                 * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
+                 */
+                continue;
+              }
 
-            if (
-              commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-              (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
-            ) {
-              break;
+              if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+                break;
+              }
             }
 
             throw commitError;
