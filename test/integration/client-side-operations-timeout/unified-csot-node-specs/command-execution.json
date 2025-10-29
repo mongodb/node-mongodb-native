@@ -1,6 +1,6 @@
 {
   "description": "timeoutMS behaves correctly during command execution",
-  "schemaVersion": "1.9",
+  "schemaVersion": "1.26",
   "runOnRequirements": [
     {
       "minServerVersion": "4.4.7",
@@ -68,8 +68,10 @@
                     "appName": "reduceMaxTimeMSTest",
                     "w": 1,
                     "timeoutMS": 500,
-                    "heartbeatFrequencyMS": 500
+                    "heartbeatFrequencyMS": 500,
+                    "minPoolSize": 1
                   },
+                  "awaitMinPoolSizeMS": 10000,
                   "observeEvents": [
                     "commandStartedEvent"
                   ]
