@@ -1,5 +1,6 @@
 import { AssertionError, expect } from 'chai';
 import { EventEmitter } from 'events';
+import { setImmediate } from 'timers';
 
 import {
   AbstractCursor,
@@ -628,20 +629,20 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           if (entity.client.awaitMinPoolSizeMS) {
             if (client.topology?.s?.servers) {
               const timeout = Timeout.expires(entity.client.awaitMinPoolSizeMS);
-              for (const server of client.topology.s.servers.values()) {
-                const pool = server.pool;
-                try {
-                  await Promise.race([checkMinPoolSize(pool), timeout]);
-                } catch (error) {
-                  if (TimeoutError.is(error)) {
-                    throw new AssertionError(
-                      `Timed out waiting for min pool size to be populated within ${entity.client.awaitMinPoolSizeMS}ms`
-                    );
-                  }
-                  throw error;
-                } finally {
-                  timeout.clear();
+              const poolSizeChecks = client.topology.s.servers
+                .values()
+                .map(server => checkMinPoolSize(server.pool));
+              try {
+                await Promise.race([Promise.allSettled(poolSizeChecks), timeout]);
+              } catch (error) {
+                if (TimeoutError.is(error)) {
+                  throw new AssertionError(
+                    `Timed out waiting for min pool size to be populated within ${entity.client.awaitMinPoolSizeMS}ms`
+                  );
                 }
+                throw error;
+              } finally {
+                timeout.clear();
               }
             }
           }
@@ -747,9 +748,13 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
 
 function checkMinPoolSize(pool: ConnectionPool): Promise<boolean> {
   return new Promise(resolve => {
-    while (pool.options.minPoolSize < pool.totalConnectionCount) {
-      // Just looping until the min pool size is reached.
-    }
-    resolve(true);
+    const checkSize = () => {
+      if (pool.totalConnectionCount >= pool.options.minPoolSize) {
+        resolve(true);
+      } else {
+        setImmediate(checkSize);
+      }
+    };
+    checkSize();
   });
 }
