@@ -629,9 +629,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           if (entity.client.awaitMinPoolSizeMS) {
             if (client.topology?.s?.servers) {
               const timeout = Timeout.expires(entity.client.awaitMinPoolSizeMS);
-              const poolSizeChecks = client.topology.s.servers
-                .values()
-                .map(server => checkMinPoolSize(server.pool));
+              const servers = client.topology.s.servers.values();
+              const poolSizeChecks = Array.from(servers).map(server =>
+                checkMinPoolSize(server.pool)
+              );
               try {
                 await Promise.race([Promise.allSettled(poolSizeChecks), timeout]);
               } catch (error) {
