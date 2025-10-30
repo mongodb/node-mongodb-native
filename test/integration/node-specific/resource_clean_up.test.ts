@@ -17,7 +17,7 @@ const MB_PERMITTED_OFFSET = 5;
 describe('Driver Resources', () => {
   let startingMemoryUsed;
   let endingMemoryUsed;
-  let heap;
+  let clientsInMemory;
 
   beforeEach(function () {
     if (globalThis.AbortController == null) {
@@ -34,12 +34,6 @@ describe('Driver Resources', () => {
 
   context('on MongoClient.close()', () => {
     before('create leak reproduction script', async function () {
-      if (process.version.includes('v24')) {
-        if (this.test) {
-          this.test.skipReason = 'TODO(NODE-6945): Fix v24 heap snapshot parsing';
-        }
-        this.test?.skip();
-      }
       if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
         return;
       }
@@ -58,7 +52,7 @@ describe('Driver Resources', () => {
 
       startingMemoryUsed = res.startingMemoryUsed;
       endingMemoryUsed = res.endingMemoryUsed;
-      heap = res.heap;
+      clientsInMemory = res.clientsInMemory;
     });
 
     describe('ending memory usage', () => {
@@ -77,11 +71,10 @@ describe('Driver Resources', () => {
 
     describe('ending heap snapshot', () => {
       it('has 0 MongoClients in memory', async () => {
-        const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
         // lengthOf crashes chai b/c it tries to print out a gigantic diff
         expect(
-          clients.length,
-          `expected no MongoClients in the heapsnapshot, found ${clients.length}`
+          clientsInMemory,
+          `expected no MongoClients in the heapsnapshot, found ${clientsInMemory}`
         ).to.equal(0);
       });
     });

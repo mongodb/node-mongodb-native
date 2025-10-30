@@ -4,7 +4,6 @@
 
 const driverPath = DRIVER_SOURCE_PATH;
 const func = FUNCTION_STRING;
-const name = SCRIPT_NAME_STRING;
 const uri = URI_STRING;
 const iterations = ITERATIONS_STRING;
 const { inspect } = require('util');
@@ -15,7 +14,6 @@ const v8 = require('node:v8');
 const util = require('node:util');
 const timers = require('node:timers');
 
-const now = performance.now.bind(performance);
 const sleep = util.promisify(timers.setTimeout);
 
 const run = func;
@@ -59,11 +57,11 @@ async function main() {
   process.send({ endingMemoryUsed });
   log('second message sent.');
 
-  const start = now();
-  v8.writeHeapSnapshot(`${name}.heapsnapshot.json`);
-  const end = now();
+  const clientsInMemory = v8.queryObjects(MongoClient);
 
-  log(`heap snapshot written in ${end - start}ms. script exiting`);
+  process.send({ clientsInMemory });
+
+  log('clients instances in memory sent.');
 }
 
 main()

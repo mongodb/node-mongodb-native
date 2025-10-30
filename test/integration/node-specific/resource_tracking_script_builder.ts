@@ -7,7 +7,6 @@ import { inspect } from 'node:util';
 
 import { AssertionError, expect } from 'chai';
 import type * as timers from 'timers';
-import { parseSnapshot } from 'v8-heapsnapshot';
 
 import type * as mongodb from '../../../src';
 import { type TestConfiguration } from '../../tools/runner/config';
@@ -105,7 +104,6 @@ export async function runScriptAndReturnHeapInfo(
   };
   log('starting');
   const scriptName = `${name}.cjs`;
-  const heapsnapshotFile = `${name}.heapsnapshot.json`;
 
   const scriptContent = await testScriptFactory(
     name,
@@ -144,8 +142,16 @@ export async function runScriptAndReturnHeapInfo(
 
   log('fetching messages 3: ', ending);
 
-  const startingMemoryUsed = starting.value[0].startingMemoryUsed;
-  const endingMemoryUsed = ending.value[0].endingMemoryUsed;
+  const {
+    value: [{ startingMemoryUsed }]
+  } = starting;
+  const {
+    value: [{ endingMemoryUsed }]
+  } = ending;
+
+  const {
+    value: [{ clientsInMemory }]
+  } = await messages.next();
 
   // make sure the process ended
   const [exitCode] = await willClose;
@@ -154,21 +160,16 @@ export async function runScriptAndReturnHeapInfo(
 
   expect(exitCode, 'process should have exited with zero').to.equal(0);
 
-  const heap = await readFile(heapsnapshotFile, { encoding: 'utf8' }).then(c =>
-    parseSnapshot(JSON.parse(c))
-  );
-
   log('done.');
 
   // If any of the above throws we won't reach these unlinks that clean up the created files.
   // This is intentional so that when debugging the file will still be present to check it for errors
   await unlink(scriptName);
-  await unlink(heapsnapshotFile);
 
   return {
     startingMemoryUsed,
     endingMemoryUsed,
-    heap
+    clientsInMemory
   };
 }
 
