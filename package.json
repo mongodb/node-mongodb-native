@@ -136,7 +136,7 @@
     "check:eslint": "npm run build:dts && ESLINT_USE_FLAT_CONFIG=false eslint -v && ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=0 --ext '.js,.ts' src test",
     "check:tsd": "tsd --version && tsd",
     "check:dependencies": "mocha test/action/dependency.test.ts",
-    "check:dts": "node ./node_modules/typescript/bin/tsc --target es2015 --module node16 --noEmit mongodb.d.ts && tsd",
+    "check:dts": "node ./node_modules/typescript/bin/tsc --target es2023 --module commonjs --noEmit mongodb.d.ts && tsd",
     "check:search-indexes": "nyc mocha --config test/mocha_mongodb.js test/manual/search-index-management.prose.test.ts",
     "check:test": "mocha --config test/mocha_mongodb.js test/integration",
     "check:unit": "nyc mocha test/unit",

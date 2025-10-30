@@ -285,7 +285,7 @@ export class ClientEncryption {
    */
   async rewrapManyDataKey(
     filter: Filter<DataKey>,
-    options: ClientEncryptionRewrapManyDataKeyProviderOptions
+    options?: ClientEncryptionRewrapManyDataKeyProviderOptions
   ): Promise<{ bulkWriteResult?: BulkWriteResult }> {
     let keyEncryptionKeyBson = undefined;
     if (options) {

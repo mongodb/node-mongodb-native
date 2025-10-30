@@ -157,3 +157,9 @@ expectAssignable<RequiredCreateEncryptedCollectionSettings>({
     }
   });
 }
+
+declare const clientEncryption: ClientEncryption;
+{
+  await clientEncryption.rewrapManyDataKey({});
+  await clientEncryption.rewrapManyDataKey({}, { provider: 'aws' });
+}
