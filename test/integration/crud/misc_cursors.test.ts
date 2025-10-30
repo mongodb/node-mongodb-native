@@ -770,7 +770,7 @@ describe('Cursor', function () {
   //         for (let ii = 0; ii < 10; ++ii) docs.push({ b: ii + 1 });
 
   //         // insert all docs
-  //         collection.insert(docs, configuration.writeConcernMax(), err => {
+  //         collection.insertMany(docs, configuration.writeConcernMax(), err => {
   //           expect(err).to.not.exist;
 
   //           let finished = 0,

@@ -169,7 +169,7 @@ describe('Causal Consistency - prose tests', function () {
           let firstOperationTime;
           return db
             .collection('causal_test')
-            .insert({}, { session: session })
+            .insertOne({}, { session: session })
             .then(() => {
               firstOperationTime = test.commands.succeeded[0].reply.operationTime;
               return db.collection('causal_test').findOne({}, { session: session });
