@@ -4,13 +4,13 @@ import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
 import {
   type MongoClient,
-  MONGODB_ERROR_CODES,
   MongoParseError,
   MongoServerError,
-  ns,
   ReadPreference,
   TopologyType
-} from '../../mongodb';
+} from '../../../src';
+import { MONGODB_ERROR_CODES } from '../../../src/error';
+import { ns } from '../../../src/utils';
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';

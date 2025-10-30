@@ -3,17 +3,17 @@ import ConnectionString from 'mongodb-connection-string-url';
 import { coerce, gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   type AutoEncryptionOptions,
   type CollectionOptions,
   type DbOptions,
   type Document,
-  getMongoDBClientEncryption,
   type MongoClient,
   ReturnDocument
-} from '../../mongodb';
+} from '../../../src';
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { getMongoDBClientEncryption } from '../../../src/deps';
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
 import { MalformedOperationError } from './operations';
