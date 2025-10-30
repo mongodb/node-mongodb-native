@@ -150,7 +150,7 @@ describe('Server Selection Sharded Retryable Writes Prose tests', function () {
         await client
           .db('test')
           .collection('test')
-          .insert({ a: 1 })
+          .insertOne({ a: 1 })
           .catch(() => null);
         expect(commandFailedEvents[0].address).to.equal(commandSucceededEvents[0].address);
       });
