@@ -66,28 +66,6 @@ describe('Db', function () {
     await client.close();
   });
 
-  // TODO(NODE-7192): remove test as it doesn't test anything
-  // it.skip('shouldCorrectlyThrowWhenTryingToReOpenConnection', {
-  //   metadata: {
-  //     requires: { topology: ['single', 'replicaset', 'sharded'] }
-  //   },
-  //
-  //   test: function (done) {
-  //     var configuration = this.configuration;
-  //     var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-  //     client.connect(err => {
-  //       expect(err).to.not.exist;
-  //
-  //       try {
-  //         client.connect(function () {});
-  //         test.ok(false);
-  //       } catch {
-  //         client.close(done);
-  //       }
-  //     });
-  //   }
-  // });
-
   it('should not cut collection name when it is the same as the database', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
