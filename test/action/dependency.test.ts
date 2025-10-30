@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import { expect } from 'chai';
 
 import { dependencies, peerDependencies, peerDependenciesMeta } from '../../package.json';
-import { setDifference } from '../mongodb';
+import { setDifference } from '../../src/utils';
 import { alphabetically, itInNodeProcess, sorted } from '../tools/utils';
 
 const EXPECTED_DEPENDENCIES = sorted(
@@ -82,16 +82,15 @@ describe('package.json', function () {
         });
 
         if (depName === 'snappy') {
-          itInNodeProcess(
-            'getSnappy returns rejected import',
-            async function ({ expect, mongodb }) {
-              const snappyImport = mongodb.getSnappy();
-              expect(snappyImport).to.have.nested.property(
-                'kModuleError.name',
-                'MongoMissingDependencyError'
-              );
-            }
-          );
+          itInNodeProcess('getSnappy returns rejected import', async function ({ expect }) {
+            // @ts-expect-error: import from the inside forked process
+            const { getSnappy } = await import('./src/deps.ts');
+            const snappyImport = getSnappy();
+            expect(snappyImport).to.have.nested.property(
+              'kModuleError.name',
+              'MongoMissingDependencyError'
+            );
+          });
         }
       });
 
@@ -111,14 +110,13 @@ describe('package.json', function () {
         });
 
         if (depName === 'snappy') {
-          itInNodeProcess(
-            'getSnappy returns fulfilled import',
-            async function ({ expect, mongodb }) {
-              const snappyImport = mongodb.getSnappy();
-              expect(snappyImport).to.have.property('compress').that.is.a('function');
-              expect(snappyImport).to.have.property('uncompress').that.is.a('function');
-            }
-          );
+          itInNodeProcess('getSnappy returns fulfilled import', async function ({ expect }) {
+            // @ts-expect-error: import from the inside forked process
+            const { getSnappy } = await import('./src/deps.ts');
+            const snappyImport = getSnappy();
+            expect(snappyImport).to.have.property('compress').that.is.a('function');
+            expect(snappyImport).to.have.property('uncompress').that.is.a('function');
+          });
         }
       });
     }

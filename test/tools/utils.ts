@@ -293,14 +293,13 @@ export function topologyWithPlaceholderClient(
 
 export async function itInNodeProcess(
   title: string,
-  fn: (d: { expect: typeof import('chai').expect; mongodb: typeof import('../mongodb') }) => void
+  fn: (d: { expect: typeof import('chai').expect }) => void
 ) {
   it(title, async () => {
     const script = `
       import { expect } from 'chai';
-      import * as mongodb from './test/mongodb';
       const run = ${fn};
-      run({ expect, mongodb }).then(
+      run({ expect }).then(
         () => {
           process.exitCode = 0;
         },

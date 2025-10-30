@@ -38,7 +38,7 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent
-} from '../../mongodb';
+} from '../../../src';
 import { ejson } from '../utils';
 import { type CmapEvent, type CommandEvent, type EntitiesMap, type SdamEvent } from './entities';
 import {

@@ -6,6 +6,7 @@ import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
+import { ConnectionPool } from '../../../src/cmap/connection_pool';
 import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
 import {
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
@@ -25,7 +26,6 @@ import { Topology } from '../../../src/sdam/topology';
 import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { TimeoutContext } from '../../../src/timeout';
 import { isHello, ns } from '../../../src/utils';
-import { ConnectionPool } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 

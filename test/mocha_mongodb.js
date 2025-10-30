@@ -27,7 +27,9 @@ module.exports = {
     'test/integration/node-specific/examples/handler.test.js',
     'test/integration/node-specific/examples/aws_handler.js',
     'test/integration/node-specific/examples/aws_handler.test.js',
-    'test/integration/node-specific/examples/setup.js'
+    'test/integration/node-specific/examples/setup.js',
+    'test/integration/node-specific/examples/transactions.test.js',
+    'test/integration/node-specific/examples/versioned_api.js'
   ],
   'node-option': Number(major) >= 23 ? ['no-experimental-strip-types'] : undefined
 };

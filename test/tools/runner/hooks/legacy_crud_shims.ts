@@ -14,25 +14,21 @@ const legacyUsageMaximums = {
 };
 
 // @ts-expect-error: Method no longer exists on Collection
-Collection.prototype.insert = function (docs, options, callback) {
+Collection.prototype.insert = function (docs, options) {
   legacyUsageCounts.insert += 1;
-  callback =
-    typeof callback === 'function' ? callback : typeof options === 'function' ? options : undefined;
   options = options != null && typeof options === 'object' ? options : { ordered: false };
 
   docs = Array.isArray(docs) ? docs : [docs];
 
-  return this.insertMany(docs, options, callback);
+  return this.insertMany(docs, options);
 };
 
 // @ts-expect-error: Method no longer exists on Collection
-Collection.prototype.update = function (filter, update, options, callback) {
+Collection.prototype.update = function (filter, update, options) {
   legacyUsageCounts.update += 1;
-  callback =
-    typeof callback === 'function' ? callback : typeof options === 'function' ? options : undefined;
   options = options != null && typeof options === 'object' ? options : {};
 
-  return this.updateMany(filter, update, options, callback);
+  return this.updateMany(filter, update, options);
 };
 
 function assertLegacyAPIUsageDoesNotIncrease() {

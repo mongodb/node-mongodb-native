@@ -9,7 +9,7 @@ const Request = require('./request');
 const { Query } = require('./protocol');
 const EventEmitter = require('events');
 const { setTimeout } = require('timers');
-const { HostAddress } = require('../../../mongodb');
+const { HostAddress } = require('../../../../src/utils');
 
 /*
  * MockServer class
