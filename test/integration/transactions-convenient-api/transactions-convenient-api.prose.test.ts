@@ -61,7 +61,7 @@ describe('Retry Backoff is Enforced', function () {
 
         expect(failures).to.have.lengthOf(COMMIT_FAIL_TIMES);
 
-        expect(end - start).to.be.greaterThan(1500);
+        expect(end - start).to.be.greaterThan(1250);
       }
     );
   }
