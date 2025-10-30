@@ -1,6 +1,6 @@
 {
   "description": "runCursorCommand",
-  "schemaVersion": "1.9",
+  "schemaVersion": "1.26",
   "runOnRequirements": [
     {
       "minServerVersion": "4.4"
@@ -16,6 +16,10 @@
     {
       "client": {
         "id": "commandClient",
+        "uriOptions": {
+          "minPoolSize": 1
+        },
+        "awaitMinPoolSizeMS": 10000,
         "useMultipleMongoses": false,
         "observeEvents": [
           "commandStartedEvent",

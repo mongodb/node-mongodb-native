@@ -1,6 +1,6 @@
 description: "sessions inherit timeoutMS from their parent MongoClient"
 
-schemaVersion: "1.9"
+schemaVersion: "1.26"
 
 runOnRequirements:
   - minServerVersion: "4.4"
@@ -14,6 +14,8 @@ createEntities:
       id: &client client
       uriOptions:
         timeoutMS: 500
+        minPoolSize: 1
+      awaitMinPoolSizeMS: 10000
       useMultipleMongoses: false
       observeEvents:
         - commandStartedEvent
