@@ -1,3 +1,4 @@
+'use strict';
 const { MongoClient } = require('mongodb');
 
 describe('examples.versionedApi:', function () {
