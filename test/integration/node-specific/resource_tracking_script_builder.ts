@@ -9,23 +9,24 @@ import { AssertionError, expect } from 'chai';
 import type * as timers from 'timers';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
-import { type MongoClient } from '../../../src';
+import type * as mongodb from '../../../src';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { type sleep } from '../../tools/utils';
 
 export type ResourceTestFunction = HeapResourceTestFunction | ProcessResourceTestFunction;
 
 export type HeapResourceTestFunction = (options: {
-  MongoClient: typeof MongoClient;
+  MongoClient: typeof mongodb.MongoClient;
   uri: string;
   iteration: number;
 }) => Promise<void>;
 
 export type ProcessResourceTestFunction = (options: {
-  MongoClient: typeof MongoClient;
+  MongoClient: typeof mongodb.MongoClient;
   uri?: string;
   log?: (out: any) => void;
   expect: typeof expect;
+  mongodb?: typeof mongodb;
   sleep?: typeof sleep;
   getTimerCount?: () => number;
   timers?: typeof timers;
