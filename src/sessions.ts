@@ -731,10 +731,10 @@ export class ClientSession
     const startTime = this.timeoutContext?.csotEnabled() ? this.timeoutContext.start : now();
 
     let committed = false;
-    let result: any;
+    let result: T;
 
     try {
-      while (!committed) {
+      for (let retry = 0; !committed; ++retry) {
         this.startTransaction(options); // may throw on error
 
         try {
@@ -778,7 +778,7 @@ export class ClientSession
           throw fnError;
         }
 
-        for (let retry = 0; !committed; ++retry) {
+        while (!committed) {
           try {
             /*
              * We will rely on ClientSession.commitTransaction() to
@@ -816,7 +816,10 @@ export class ClientSession
                  * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
                  * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
                  */
+                continue;
+              }
 
+              if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
                 const BACKOFF_INITIAL_MS = 1;
                 const BACKOFF_MAX_MS = 500;
                 const jitter = Math.random();
@@ -829,10 +832,6 @@ export class ClientSession
 
                 await setTimeout(backoffMS);
 
-                continue;
-              }
-
-              if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
                 break;
               }
             }
@@ -841,6 +840,7 @@ export class ClientSession
           }
         }
       }
+
       return result;
     } finally {
       this.timeoutContext = null;

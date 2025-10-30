@@ -5,6 +5,8 @@ import { type CommandFailedEvent, type MongoClient } from '../../mongodb';
 import { configureFailPoint } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
+const COMMIT_FAIL_TIMES = 35;
+
 describe('Retry Backoff is Enforced', function () {
   // Drivers should test that retries within `withTransaction` do not occur immediately. Optionally, set BACKOFF_INITIAL to a
   // higher value to decrease flakiness of this test. Configure a fail point that forces 30 retries. Check that the total
@@ -24,12 +26,11 @@ describe('Retry Backoff is Enforced', function () {
     await configureFailPoint(this.configuration, {
       configureFailPoint: 'failCommand',
       mode: {
-        times: 30
+        times: COMMIT_FAIL_TIMES
       },
       data: {
         failCommands: ['commitTransaction'],
-        errorCode: 24,
-        errorLabels: ['UnknownTransactionCommitResult']
+        errorCode: 24
       }
     });
   });
@@ -39,20 +40,29 @@ describe('Retry Backoff is Enforced', function () {
   });
 
   for (let i = 0; i < 250; ++i) {
-    test.only('works' + i, async function () {
-      const start = performance.now();
+    test.only(
+      'works' + i,
+      {
+        requires: {
+          mongodb: '>=4.4', // failCommand
+          topology: '!single' // transactions can't run on standalone servers
+        }
+      },
+      async function () {
+        const start = performance.now();
 
-      await client.withSession(async s => {
-        await s.withTransaction(async s => {
-          await client.db('foo').collection('bar').insertOne({ name: 'bailey' }, { session: s });
+        await client.withSession(async s => {
+          await s.withTransaction(async s => {
+            await client.db('foo').collection('bar').insertOne({ name: 'bailey' }, { session: s });
+          });
         });
-      });
 
-      const end = performance.now();
+        const end = performance.now();
 
-      expect(failures).to.have.lengthOf(30);
+        expect(failures).to.have.lengthOf(COMMIT_FAIL_TIMES);
 
-      expect(end - start).to.be.greaterThan(1250);
-    });
+        expect(end - start).to.be.greaterThan(1500);
+      }
+    );
   }
 });
