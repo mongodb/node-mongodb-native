@@ -1,6 +1,6 @@
 {
   "description": "timeoutMS behaves correctly for the withTransaction API",
-  "schemaVersion": "1.9",
+  "schemaVersion": "1.26",
   "runOnRequirements": [
     {
       "minServerVersion": "4.4",
@@ -21,8 +21,10 @@
       "client": {
         "id": "client",
         "uriOptions": {
-          "timeoutMS": 500
+          "timeoutMS": 500,
+          "minPoolSize": 1
         },
+        "awaitMinPoolSizeMS": 10000,
         "useMultipleMongoses": false,
         "observeEvents": [
           "commandStartedEvent"

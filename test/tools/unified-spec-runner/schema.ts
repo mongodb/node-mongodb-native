@@ -155,6 +155,7 @@ export interface ClientEntity {
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
   observeSensitiveCommands?: boolean;
+  awaitMinPoolSizeMS?: number;
   // Was optionally scheduled for removal in NODE-6783, but opted to keep it for potential future use.
   storeEventsAsEntities?: StoreEventsAsEntity[];
   autoEncryptOpts?: Pick<
