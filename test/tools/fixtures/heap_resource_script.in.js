@@ -4,7 +4,6 @@
 
 const driverPath = DRIVER_SOURCE_PATH;
 const func = FUNCTION_STRING;
-const name = SCRIPT_NAME_STRING;
 const uri = URI_STRING;
 const iterations = ITERATIONS_STRING;
 const { inspect } = require('util');
@@ -15,7 +14,6 @@ const v8 = require('node:v8');
 const util = require('node:util');
 const timers = require('node:timers');
 
-const now = performance.now.bind(performance);
 const sleep = util.promisify(timers.setTimeout);
 
 const run = func;

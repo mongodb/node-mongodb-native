@@ -7,7 +7,6 @@ import { inspect } from 'node:util';
 
 import { AssertionError, expect } from 'chai';
 import type * as timers from 'timers';
-import { parseSnapshot } from 'v8-heapsnapshot';
 
 import type * as mongodb from '../../mongodb';
 import { type MongoClient } from '../../mongodb';
