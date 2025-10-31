@@ -315,35 +315,6 @@ describe('CRUD API', function () {
       await db.collection('t1').drop();
     });
 
-    // TODO(NODE-7219): Remove test as it doesn't test correct aggregation execution
-    // it('allMethods', async function () {
-    //   const cursor = db.collection('t1').aggregate([{ $match: {} }], {
-    //     allowDiskUse: true,
-    //     batchSize: 2,
-    //     maxTimeMS: 50
-    //   });
-    //
-    //   // Exercise all the options
-    //   cursor
-    //     .geoNear({ geo: 1 })
-    //     .group({ group: 1 })
-    //     .limit(10)
-    //     .match({ match: 1 })
-    //     .maxTimeMS(10)
-    //     .out('collection')
-    //     .project({ project: 1 })
-    //     .redact({ redact: 1 })
-    //     .skip(1)
-    //     .sort({ sort: 1 })
-    //     .batchSize(10)
-    //     .unwind('name');
-    //
-    //   // Execute the command with all steps defined
-    //   // will fail
-    //   const err = await cursor.toArray().catch(err => err);
-    //   expect(err).to.be.instanceof(MongoServerError);
-    // });
-
     it('#toArray()', async function () {
       const cursor = db.collection('t1').aggregate();
       cursor.match({ a: 1 });
@@ -477,15 +448,6 @@ describe('CRUD API', function () {
   });
 
   describe('should correctly execute update methods using crud api', function () {
-    // TODO(NODE-7219): Remove test. There is no `update` method anymore
-    // it('legacy update', async function () {
-    //   const db = client.db();
-    //   const r = await db
-    //     .collection('t3_1')
-    //     .update({ a: 1 }, { $set: { a: 2 } }, { upsert: true });
-    //   expect(r).property('upsertedCount').to.equal(1);
-    // });
-
     it('#updateOne()', async function () {
       const db = client.db();
       const i = await db.collection('t3_2').insertMany([{ c: 1 }], { writeConcern: { w: 1 } });
@@ -804,25 +766,6 @@ describe('CRUD API', function () {
       .updateOne({ _id: 1 }, { $set: { x: 1 } }, { upsert: true, writeConcern: { w: 0 } });
     test.ok(r != null);
   });
-
-  // TODO(NODE-7219): Remove test as it duplicates the one from the above
-  // it('should correctly execute crud operations using w:0', {
-  //   metadata: {
-  //     requires: { topology: ['single', 'replicaset', 'sharded'] }
-  //   },
-  //
-  //   test: async function () {
-  //     const db = client.db();
-  //
-  //     const collection = db.collection<{ _id: number }>('w0crudoperations');
-  //     const r = await collection.updateOne(
-  //       { _id: 1 },
-  //       { $set: { x: 1 } },
-  //       { upsert: true, writeConcern: { w: 0 } }
-  //     );
-  //     test.ok(r != null);
-  //   }
-  // });
 
   describe('when performing a multi-batch unordered bulk write that has a duplicate key', function () {
     it('throws a MongoBulkWriteError indicating the duplicate key document failed', async function () {

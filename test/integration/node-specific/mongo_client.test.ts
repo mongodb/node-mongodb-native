@@ -381,68 +381,6 @@ describe('class MongoClient', function () {
     await client.close();
   });
 
-  // TODO(NODE-7219): remove unnecessary test
-  // it('should open a new MongoClient connection', {
-  //   metadata: {
-  //     requires: {
-  //       topology: ['single']
-  //     }
-  //   },
-
-  //   test: function (done) {
-  //     const configuration = this.configuration;
-  //     const client = configuration.newClient();
-  //     client.connect(function (err, mongoclient) {
-  //       expect(err).to.not.exist;
-
-  //       mongoclient
-  //         .db('integration_tests')
-  //         .collection('new_mongo_client_collection')
-  //         .insertOne({ a: 1 }, function (err, r) {
-  //           expect(err).to.not.exist;
-  //           expect(r).to.be.an('object');
-
-  //           mongoclient.close(done);
-  //         });
-  //     });
-  //   }
-  // });
-
-  // TODO(NODE-7219): remove unnecessary test
-  // it('should correctly connect with MongoClient `connect` using Promise', function () {
-  //   const configuration = this.configuration;
-  //   let url = configuration.url();
-  //   url = url.indexOf('?') !== -1 ? `${url}&maxPoolSize=100` : `${url}?maxPoolSize=100`;
-
-  //   const client = configuration.newClient(url);
-  //   return client.connect().then(() => client.close());
-  // });
-
-  // TODO(NODE-7219): remove unnecessary test
-  // it('should open a new MongoClient connection using promise', {
-  //   metadata: {
-  //     requires: {
-  //       topology: ['single']
-  //     }
-  //   },
-
-  //   test: function (done) {
-  //     const configuration = this.configuration;
-  //     const client = configuration.newClient();
-  //     client.connect().then(function (mongoclient) {
-  //       mongoclient
-  //         .db('integration_tests')
-  //         .collection('new_mongo_client_collection')
-  //         .insertOne({ a: 1 })
-  //         .then(function (r) {
-  //           expect(r).to.exist;
-
-  //           mongoclient.close(done);
-  //         });
-  //     });
-  //   }
-  // });
-
   it('should be able to access a database named "constructor"', function () {
     const client = this.configuration.newClient();
     let err;

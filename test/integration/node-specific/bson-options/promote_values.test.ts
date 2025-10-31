@@ -31,65 +31,6 @@ describe('Promote Values', function () {
     await client.close();
   });
 
-  // TODO(NODE-7192): remove as it duplicates "should correctly honor promoteValues when creating an instance using Db"
-  // it('should correctly honor promoteValues when creating an instance using MongoClient', {
-  //   // Add a tag that our runner can trigger on
-  //   // in this case we are setting that node needs to be higher than 0.10.X to run
-  //   metadata: {
-  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-  //   },
-  //
-  //   test: async function () {
-  //     const configuration = this.configuration;
-  //     const client = configuration.newClient({}, { promoteValues: false });
-  //     await client.connect();
-  //     const db = client.db(configuration.db);
-  //
-  //     await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
-  //       doc: Long.fromNumber(10),
-  //       int: 10,
-  //       double: 2.2222,
-  //       array: [[Long.fromNumber(10)]]
-  //     });
-  //
-  //     const doc = await db.collection('shouldCorrectlyHonorPromoteValues').findOne();
-  //     expect(Long.fromNumber(10)).deep.equals(doc.doc);
-  //     expect(new Int32(10)).deep.equals(doc.int);
-  //     expect(new Double(2.2222)).deep.equals(doc.double);
-  //
-  //     await client.close();
-  //   }
-  // });
-
-  // TODO(NODE-7192): remove as it duplicates "should correctly honor promoteValues when creating an instance using Db"
-  // it('should correctly honor promoteValues at cursor level', {
-  //   // Add a tag that our runner can trigger on
-  //   // in this case we are setting that node needs to be higher than 0.10.X to run
-  //   metadata: {
-  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-  //   },
-  //
-  //   test: async function () {
-  //     const configuration = this.configuration;
-  //     const client = configuration.newClient({}, { promoteValues: false });
-  //     await client.connect();
-  //     const db = client.db(configuration.db);
-  //     await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
-  //       doc: Long.fromNumber(10),
-  //       int: 10,
-  //       double: 2.2222,
-  //       array: [[Long.fromNumber(10)]]
-  //     });
-  //
-  //     const doc = await db.collection('shouldCorrectlyHonorPromoteValues').find().next();
-  //     expect(doc.doc).to.deep.equal(Long.fromNumber(10));
-  //     expect(doc.int).to.deep.equal(new Int32(10));
-  //     expect(doc.double).to.deep.equal(new Double(2.2222));
-  //
-  //     await client.close();
-  //   }
-  // });
-
   it('should correctly honor promoteValues at cursor find level', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient();

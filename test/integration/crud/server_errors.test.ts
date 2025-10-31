@@ -37,38 +37,6 @@ describe('Errors', function () {
     expect(err.code).to.equal(11000);
   });
 
-  // TODO(NODE-7219): remove as it duplicates "should fail insert due to unique index"
-  // it('should fail insert due to unique index strict', function (done) {
-  //   const db = client.db(this.configuration.db);
-  //   db.dropCollection('test_failing_insert_due_to_unique_index_strict', () => {
-  //     db.createCollection('test_failing_insert_due_to_unique_index_strict', err => {
-  //       expect(err).to.not.exist;
-  //       const collection = db.collection('test_failing_insert_due_to_unique_index_strict');
-  //       collection.createIndexes(
-  //         [
-  //           {
-  //             name: 'test_failing_insert_due_to_unique_index_strict',
-  //             key: { a: 1 },
-  //             unique: true
-  //           }
-  //         ],
-  //         { writeConcern: { w: 1 } },
-  //         err => {
-  //           expect(err).to.not.exist;
-  //           collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
-  //             expect(err).to.not.exist;
-  //
-  //             collection.insertOne({ a: 2 }, { writeConcern: { w: 1 } }, err => {
-  //               expect(err.code).to.equal(11000);
-  //               done();
-  //             });
-  //           });
-  //         }
-  //       );
-  //     });
-  //   });
-  // });
-
   const PROJECTION_ERRORS = new Set([
     'Projection cannot have a mix of inclusion and exclusion.',
     'Cannot do exclusion on field b in inclusion projection'

@@ -333,7 +333,7 @@ describe('Indexes', function () {
 
     beforeEach(async function () {
       collection = await db.createCollection('test_drop_indexes');
-      await collection.insert({ a: 1 });
+      await collection.insertOne({ a: 1 });
       // Create an index on the collection
       await db.createIndex(collection.collectionName, 'a');
     });
@@ -383,7 +383,7 @@ describe('Indexes', function () {
 
     beforeEach(async function () {
       collection = await db.createCollection('test_index_exists');
-      await collection.insert({ a: 1 });
+      await collection.insertOne({ a: 1 });
 
       await db.createIndex(collection.collectionName, 'a');
       await db.createIndex(collection.collectionName, ['c', 'd', 'e']);

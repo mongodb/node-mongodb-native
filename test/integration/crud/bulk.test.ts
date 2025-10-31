@@ -1376,22 +1376,6 @@ describe('Bulk', function () {
     expect(error).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
   });
 
-  // TODO(NODE-7219): remove outdated test
-  // it('should return an error instead of throwing when an empty bulk operation is submitted (with promise)', function () {
-  //   return client
-  //     .db()
-  //     .collection('doesnt_matter')
-  //     .insertMany([])
-  //
-  //     .then(function () {
-  //       test.equal(false, true); // this should not happen!
-  //     })
-  //     .catch(function (err) {
-  //       expect(err).to.be.instanceOf(MongoDriverError);
-  //       expect(err).to.have.property('message', 'Invalid BulkOperation, Batch cannot be empty');
-  //     });
-  // });
-
   it('should properly account for array key size in bulk unordered inserts', async function () {
     const documents = new Array(20000).fill('').map(() => ({
       arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
