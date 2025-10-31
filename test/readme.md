@@ -118,6 +118,8 @@ npm run check:test
 > [!NOTE]
 > The command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
+[../drivers-evergreen-tools/.evergreen/run-orchestration.sh](../drivers-evergreen-tools/.evergreen/run-orchestration.sh) has a number of settings that can enabled using env vars. Take a look at that script/repo for more information.
+
 The output will show how many tests passed, failed, and are pending. Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test results. See [Mocha's documentation][mocha-skip] for more information.
 
 In the following subsections, we'll dig into the details of running the tests.
@@ -130,6 +132,7 @@ By default, the integration tests run with auth-enabled and the mongo orchestrat
 AUTH='noauth' TOPOLOGY='server' bash .evergreen/run-orchestration.sh
 AUTH='noauth' npm run check:test
 ```
+
 ### Testing Different MongoDB Topologies
 
 As we mentioned earlier, the tests check the topology of the MongoDB server being used and run the tests associated with that topology. Tests that don't have a matching topology will be skipped.
@@ -509,7 +512,7 @@ The following steps will walk you through how to run the tests for CSFLE.
 ```bash
 npm install mongodb-client-encryption
 ```
-> [!NOTE] 
+> [!NOTE]
 > If developing changes in `mongodb-client-encryption`, you can link it locally using `etc/tooling/fle.sh`.
 
 2. Load FLE credentials and download crypt_shared
@@ -521,8 +524,8 @@ source .evergreen/setup-fle.sh
 ```
 
 > [!NOTE]
-> By default, `setup-fle.sh` installs crypt_shared.  If you want to test with mongocryptd instead, set the RUN_WITH_MONGOCRYPTD environment variable before 
-> sourcing `setup-fle.sh`. 
+> By default, `setup-fle.sh` installs crypt_shared.  If you want to test with mongocryptd instead, set the RUN_WITH_MONGOCRYPTD environment variable before
+> sourcing `setup-fle.sh`.
 
 3. Run the functional tests:
 ```bash
@@ -550,7 +553,7 @@ All of this is handled in the csfle/azurekms and csfle/gcpkms folders in drivers
 
 #### Azure KMS
 
-1. Provision an Azure server.  You must set the `AZUREKMS_VMNAME_PREFIX` variable: 
+1. Provision an Azure server.  You must set the `AZUREKMS_VMNAME_PREFIX` variable:
 
 ```bash
 export AZUREKMS_VMNAME_PREFIX: "NODE_DRIVER"
