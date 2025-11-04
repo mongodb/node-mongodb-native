@@ -31,6 +31,8 @@ The main focus of this release was usability improvements and a streamlined API.
 - [☀️ Misc non-breaking improvements](#%EF%B8%8F-misc-non-breaking-improvements)
   - [Improve `MongoClient.connect()` consistency across environments](#improve-mongoclientconnect-consistency-across-environments)
   - [`MongoClient.close()` no longer sends `endSessions` if the topology does not have session support](#mongoclientclose-no-longer-sends-endsessions-if-the-topology-does-not-have-session-support)
+  - [Wrap socket write in a try/catch to ensure errors can be properly wrapped](#wrap-socket-write-in-a-trycatch-to-ensure-errors-can-be-properly-wrapped)
+  - [`ClientEncryption.rewrapManyDataKey()` options now correctly marked as optional](#clientEncryptionrewrapManyDataKey-options-now-correctly-marked-as-optional)
 - [📜 Removal of deprecated functionality](#-removal-of-deprecated-functionality)
   - [Cursor and ChangeStream `stream()` method no longer accepts a transform](#cursor-and-changestream-stream-method-no-longer-accepts-a-transform)
   - [MONGODB-CR AuthMechanism has been removed](#mongodb-cr-authmechanism-has-been-removed)
@@ -159,6 +161,14 @@ The `MongoClient` connect function will now run a handshake regardless of creden
 
 Now, `MongoClient.close()` only attempts to clean up sessions if the topology supports sessions.
 
+### Wrap socket write in a try/catch to ensure errors can be properly wrapped
+
+One `socket.write` call was not correctly wrapped in a try/catch block and network errors could bubble up to the driver. This call is now properly wrapped and will result in a retry.
+
+### `ClientEncryption.rewrapManyDataKey()` options now correctly marked as optional
+
+The options parameter for the `ClientEncryption.rewrapManyDataKey()` method is now correctly marked as optional in its TypeScript definition. This change aligns the type signature with the method's implementation and documentation, resolving a type mismatch for TypeScript users.
+
 ## 📜 Removal of deprecated functionality
 
 ### Cursor and ChangeStream `stream()` method no longer accepts a transform
@@ -248,3 +258,5 @@ CancellationToken;
 - **NODE-4243:** drop collection checks ns not found ([#4742](https://github.com/mongodb/node-mongodb-native/issues/4742)) ([a8d7c5f](https://github.com/mongodb/node-mongodb-native/commit/a8d7c5ff6c68ad57291641b2eb14cc27d91508ae))
 - **NODE-7223:** run checkout on connect regardless of credentials ([#4715](https://github.com/mongodb/node-mongodb-native/issues/4715)) ([c5f74ab](https://github.com/mongodb/node-mongodb-native/commit/c5f74abe27acd8661f17046b1740ac74de1be082))
 - **NODE-7232:** only send endSessions during client close if the topology supports sessions ([#4722](https://github.com/mongodb/node-mongodb-native/issues/4722)) ([cc85ebf](https://github.com/mongodb/node-mongodb-native/commit/cc85ebf246b20e0bae59e1bdcdf0f9c74ea01979))
+- **NODE-7067:** Wrap socket write in a try/catch to ensure errors can be properly wrapped ([#4759](https://github.com/mongodb/node-mongodb-native/issues/4759)) ([66c18b7](https://github.com/mongodb/node-mongodb-native/commit/66c18b7ee948e43847b324b25b552c2ff9ca851c))
+- **NODE-7247:** clarify #rewrapManyDataKey() parameter types ([#4760](https://github.com/mongodb/node-mongodb-native/issues/4760)) ([cb522bf](https://github.com/mongodb/node-mongodb-native/commit/cb522bfd0c45086a821e4918c0f1af33c68cfa7a))
