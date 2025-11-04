@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
   id-token: write
 
-name: release-latest
+name: release-6.x
 
 jobs:
   release_please:
