@@ -59,9 +59,12 @@ export const CURSOR_FLAGS = [
   'partial'
 ] as const;
 
-/** @public */
+/**
+ * @public
+ * @deprecated Will be removed in the next major version
+ */
 export interface CursorStreamOptions {
-  /** A transformation method applied to each document emitted by the stream */
+  /** @deprecated Will be removed in the next major version */
   transform?(this: void, doc: Document): Document;
 }
 
