@@ -91,6 +91,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   /** Session to use for the operation */
   session?: ClientSession;
   documentsReturnedIn?: string;
+  /** @deprecated Will be removed in the next major version. */
   noResponse?: boolean;
   omitMaxTimeMS?: boolean;
 
@@ -139,6 +140,7 @@ export interface ConnectionOptions
   tls: boolean;
   noDelay?: boolean;
   socketTimeoutMS?: number;
+  /** @deprecated Will be removed in the next major version */
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
   /** @internal */
