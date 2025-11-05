@@ -233,7 +233,7 @@ CancellationToken;
 
 ## ⚠️ ALL BREAKING CHANGES
 
-- **NODE-7259:** use alphas of all supporting packages ([#4746](https://github.com/mongodb/node-mongodb-native/issues/4746))
+- **NODE-7286:** Update dependencies to v7 ([#4780](https://github.com/mongodb/node-mongodb-native/issues/4780))
 - **NODE-5510:** dont filter change stream options ([#4723](https://github.com/mongodb/node-mongodb-native/issues/4723))
 - **NODE-6296:** remove cursor default batch size of 1000 ([#4729](https://github.com/mongodb/node-mongodb-native/issues/4729))
 - **NODE-7150:** update peer dependency matrix for 3rd party peer deps ([#4720](https://github.com/mongodb/node-mongodb-native/issues/4720))
