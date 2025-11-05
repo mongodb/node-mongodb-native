@@ -1526,7 +1526,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:9000' };
       const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:9001' };
 
-      it('should fail with no TLS', metadata, async function () {
+      it('should fail with no TLS', kmsTlsMetadata, async function () {
+        // NODE-6861: flakiness is caused by mock KMS servers
+        this.retries(2);
         try {
           await clientEncryptionNoTls.createDataKey('aws', { masterKey });
           expect.fail('it must fail with no tls');
@@ -1630,7 +1632,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         keyName: 'foo'
       };
 
-      it('should fail with no TLS', metadata, async function () {
+      it('should fail with no TLS', kmsTlsMetadata, async function () {
+        // NODE-6861: flakiness is caused by mock KMS servers
+        this.retries(2);
         try {
           await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
           expect.fail('it must fail with no tls');
