@@ -15,7 +15,7 @@ Otherwise, feel free to remove this section.
 #### What is the motivation for this change?
 
 <!--
-Remove this section if there is an associated Jira ticket explaining the motiviation for this change. If there is not, please fill this section out with 
+Remove this section if there is an associated Jira ticket explaining the motivation for this change. If there is not, please fill this section out with
 information explaining why this change is valuable.
 -->
 
