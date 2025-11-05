@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.21.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v6.21.0) (2025-11-05)
+
+
+### Features
+
+* **NODE-7230:** add deprecations of items to be removed in v7 ([#4774](https://github.com/mongodb/node-mongodb-native/issues/4774)) ([5104c0f](https://github.com/mongodb/node-mongodb-native/commit/5104c0fc9a931d778e9741cce8bdbf7f998499fa))
+
 ## [6.20.0](https://github.com/mongodb/node-mongodb-native/compare/v6.19.0...v6.20.0) (2025-09-17)
 
 
