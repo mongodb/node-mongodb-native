@@ -501,7 +501,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   private deserializeError(document: Document, bsonOptions: DeserializeOptions): Document {
     return document.toObject({ ...bsonOptions, promoteValues: true });
-  };
+  }
 
   private async *sendCommand(
     ns: MongoDBNamespace,
