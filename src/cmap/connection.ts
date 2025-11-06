@@ -499,6 +499,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
+  private deserializeError(document: Document, bsonOptions: DeserializeOptions): Document {
+    return document.toObject({ ...bsonOptions, promoteValues: true });
+  };
+
   private async *sendCommand(
     ns: MongoDBNamespace,
     command: Document,
@@ -551,10 +555,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         if (document.ok === 0) {
           if (options.timeoutContext?.csotEnabled() && document.isMaxTimeExpiredError) {
             throw new MongoOperationTimeoutError('Server reported a timeout error', {
-              cause: new MongoServerError((object ??= document.toObject(bsonOptions)))
+              cause: new MongoServerError((object ??= this.deserializeError(document, bsonOptions)))
             });
           }
-          throw new MongoServerError((object ??= document.toObject(bsonOptions)));
+          throw new MongoServerError((object ??= this.deserializeError(document, bsonOptions)));
         }
 
         if (this.shouldEmitAndLogCommand) {
