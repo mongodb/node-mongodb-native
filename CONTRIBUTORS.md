@@ -56,9 +56,11 @@
 
 ## Maintainers
 
-- Durran Jordan <<durran@gmail.com>>
-- Daria Pardue <<daria.pardue@mongodb.com>>
 - Bailey Pearson <<bailey.pearson@mongodb.com>>
+- Daria Pardue <<daria.pardue@mongodb.com>>
+- Durran Jordan <<durran@gmail.com>>
+- Pavel Safronov <<pavel.safronov@mongodb.com>>
+- Sergey Zelenov <<sergey.zelenov@mongodb.com>>
 
 ## Community Types
 
