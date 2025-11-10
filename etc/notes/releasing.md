@@ -156,6 +156,8 @@ an alpha.
 
 Example PR: https://github.com/mongodb-js/mongodb-client-encryption/pull/104
 
+See the tip in the [release-please](#release-please) section for what to do if you need to release a major version with no user-facing changes relative to the last released alpha.
+
 ## Packages
 
 The following is a list of packages the Node.js team is responsible for and these release instructions apply to.
