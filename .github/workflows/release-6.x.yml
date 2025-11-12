@@ -99,7 +99,7 @@ jobs:
       - name: Install Node and dependencies
         uses: mongodb-labs/drivers-github-tools/node/setup@v2
 
-      - run: npm publish --provenance --tag=6.x
+      - run: npm publish --provenance --tag=6x
         if: ${{ needs.release_please.outputs.release_created }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
