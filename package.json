@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "6.20.0",
+  "version": "7.0.0",
   "description": "The official MongoDB driver for Node.js",
   "main": "lib/index.js",
   "files": [
@@ -97,7 +97,7 @@
     "mocha": "^11.7.5",
     "mocha-sinon": "^2.1.2",
     "mongodb-client-encryption": "^7.0.0",
-    "nyc": "^15.1.0",
+    "nyc": "^17.1.0",
     "prettier": "^3.6.2",
     "semver": "^7.7.2",
     "sinon": "^18.0.1",

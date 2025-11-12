@@ -1611,7 +1611,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -1626,7 +1626,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -1641,7 +1641,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -1656,7 +1656,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -1671,7 +1671,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -1686,7 +1686,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -1701,7 +1701,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -1716,7 +1716,7 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
@@ -1841,6 +1841,17 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: run unit tests
+  - name: run-unit-tests-node-24
+    tags:
+      - unit-tests
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '24'}
+      - func: install dependencies
+      - func: run unit tests
   - name: run-lint-checks
     tags:
       - lint-checks
@@ -1849,7 +1860,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: run lint checks
   - name: test-explicit-resource-management-feature-integration
@@ -1862,7 +1873,7 @@ tasks:
           updates:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: check resource management feature integration
@@ -1978,6 +1989,24 @@ tasks:
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
+  - name: test-latest-driver-mongodb-client-encryption-7.0.0
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: install package
+        vars:
+          PACKAGE: mongodb-client-encryption@7.0.0
+      - func: run tests
   - name: test-alpine-fle
     tags:
       - alpine-fle
@@ -2449,7 +2478,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2465,7 +2494,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2481,7 +2510,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2497,7 +2526,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2513,7 +2542,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2529,7 +2558,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2545,7 +2574,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2561,7 +2590,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '22'}
+            - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -2943,6 +2972,61 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: rhel80-large-Node24
+    display_name: rhel8 Node24
+    run_on: rhel80-large
+    expansions:
+      NODE_LTS_VERSION: 24
+      CLIENT_ENCRYPTION: 'true'
+      TEST_CSFLE: 'true'
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-latest-server-v1-api
+      - test-x509-authentication
+      - test-atlas-connectivity
+      - test-5.0-load-balanced
+      - test-6.0-load-balanced
+      - test-7.0-load-balanced
+      - test-8.0-load-balanced
+      - test-rapid-load-balanced
+      - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-socks5
+      - test-socks5-csfle
+      - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-compression
+      - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: rhel80-large-node-latest
     display_name: rhel8 Node Latest
     run_on: rhel80-large
@@ -3084,6 +3168,50 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: windows-vsCurrent-large-Node24
+    display_name: Windows Node24
+    run_on: windows-vsCurrent-large
+    expansions:
+      NODE_LTS_VERSION: 24
+      CLIENT_ENCRYPTION: 'false'
+      TEST_CSFLE: 'false'
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-latest-server-v1-api
+      - test-socks5
+      - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-compression
+      - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: rhel8-node20.19.0-test-csfle-mongocryptd
     display_name: rhel 8 Node20.19.0 test mongocryptd
     run_on: rhel80-large
@@ -3100,8 +3228,8 @@ buildvariants:
       - test-5.0-csfle-mongocryptd
       - test-4.4-csfle-mongocryptd
       - test-4.2-csfle-mongocryptd
-  - name: rhel8-node22-test-csfle-mongocryptd
-    display_name: rhel 8 Node22 test mongocryptd
+  - name: rhel8-node24-test-csfle-mongocryptd
+    display_name: rhel 8 Node24 test mongocryptd
     run_on: rhel80-large
     expansions:
       CLIENT_ENCRYPTION: true
@@ -3117,10 +3245,10 @@ buildvariants:
       - test-4.4-csfle-mongocryptd
       - test-4.2-csfle-mongocryptd
   - name: macos-14-arm64
-    display_name: MacOS 14 ARM Node22
+    display_name: MacOS 14 ARM Node24
     run_on: macos-14-arm64
     expansions:
-      NODE_LTS_VERSION: 22
+      NODE_LTS_VERSION: 24
       CLIENT_ENCRYPTION: true
     tasks:
       - test-rapid-server
@@ -3140,7 +3268,7 @@ buildvariants:
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu2004-small
     expansions:
-      NODE_LTS_VERSION: 22
+      NODE_LTS_VERSION: 24
     tasks:
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
@@ -3169,6 +3297,7 @@ buildvariants:
       - run-custom-csfle-tests-5.0
       - run-custom-csfle-tests-rapid
       - run-custom-csfle-tests-latest
+      - test-latest-driver-mongodb-client-encryption-7.0.0
   - name: rhel8-test-gcp-kms
     display_name: GCP KMS Test
     run_on: debian11-small
@@ -3186,7 +3315,7 @@ buildvariants:
     display_name: MONGODB-OIDC Auth Tests
     run_on: ubuntu2004-small
     expansions:
-      NODE_LTS_VERSION: 22
+      NODE_LTS_VERSION: 24
     batchtime: 20160
     tasks:
       - testtestoidc_task_group

@@ -2,7 +2,7 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 6? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_6.0.0.md)!**
+**Upgrading to version 7? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)!**
 
 ## Quick Links
 
@@ -16,11 +16,9 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | MongoDB Developer Center | [www.mongodb.com/developer](https://www.mongodb.com/developer/languages/javascript/)                                                  |
 | Stack Overflow           | [stackoverflow.com](https://stackoverflow.com/search?q=%28%5Btypescript%5D+or+%5Bjavascript%5D+or+%5Bnode.js%5D%29+and+%5Bmongodb%5D) |
 | Source Code              | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                                              |
-| Upgrade to v6            | [etc/notes/CHANGES_6.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_6.0.0.md)                     |
+| Upgrade to v7            | [etc/notes/CHANGES_7.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md)                     |
 | Contributing             | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                                           |
 | Changelog                | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                                     |
-
-
 
 ### Release Integrity
 
@@ -34,6 +32,7 @@ The GitHub release contains a detached signature file for the NPM package (named
 `mongodb-X.Y.Z.tgz.sig`).
 
 The following command returns the link npm package.
+
 ```shell
 npm view mongodb@vX.Y.Z dist.tarball
 ```
@@ -41,12 +40,13 @@ npm view mongodb@vX.Y.Z dist.tarball
 Using the result of the above command, a `curl` command can return the official npm package for the release.
 
 To verify the integrity of the downloaded package, run the following command:
+
 ```shell
 gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
 ```
 
->[!Note]
-No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
+> [!Note]
+> No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
 
 The MongoDB Node.js driver follows [semantic versioning](https://semver.org/) for its releases.
 
@@ -83,15 +83,14 @@ For exhaustive server and runtime version compatibility matrices, please refer t
 
 The following table describes add-on component version compatibility for the Node.js driver. Only packages with versions in these supported ranges are stable when used in combination.
 
-| Component                                                                            | `mongodb@3.x`      | `mongodb@4.x`      | `mongodb@5.x`      | `mongodb@<6.12` | `mongodb@>=6.12`   | `mongodb@>=7`       |
-| ------------------------------------------------------------------------------------ | ------------------ | ------------------ | ------------------ | --------------- | ------------------ | ------------------- |
-| [bson](https://www.npmjs.com/package/bson)                                           | ^1.0.0             | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | ^7.0.0              |
-| [bson-ext](https://www.npmjs.com/package/bson-ext)                                   | ^1.0.0 \|\| ^2.0.0 | ^4.0.0             | N/A                | N/A             | N/A                | N/A                 |
-| [kerberos](https://www.npmjs.com/package/kerberos)                                   | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^1.0.0 \|\| ^2.0.0 | ^2.0.1          | ^2.0.1             | ^7.0.0              |
-| [mongodb-client-encryption](https://www.npmjs.com/package/mongodb-client-encryption) | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^2.3.0             | ^6.0.0          | ^6.0.0             | ^7.0.0              |
-| [mongodb-legacy](https://www.npmjs.com/package/mongodb-legacy)                       | N/A                | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | N/A                 |
-| [@mongodb-js/zstd](https://www.npmjs.com/package/@mongodb-js/zstd)                   | N/A                | ^1.0.0             | ^1.0.0             | ^1.1.0          | ^1.1.0 \|\| ^2.0.0 | ^7.0.0              |
-
+| Component                                                                            | `mongodb@3.x`      | `mongodb@4.x`      | `mongodb@5.x`      | `mongodb@<6.12` | `mongodb@>=6.12`   | `mongodb@7.x` |
+| ------------------------------------------------------------------------------------ | ------------------ | ------------------ | ------------------ | --------------- | ------------------ | ------------- |
+| [bson](https://www.npmjs.com/package/bson)                                           | ^1.0.0             | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | ^7.0.0        |
+| [bson-ext](https://www.npmjs.com/package/bson-ext)                                   | ^1.0.0 \|\| ^2.0.0 | ^4.0.0             | N/A                | N/A             | N/A                | N/A           |
+| [kerberos](https://www.npmjs.com/package/kerberos)                                   | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^1.0.0 \|\| ^2.0.0 | ^2.0.1          | ^2.0.1             | ^7.0.0        |
+| [mongodb-client-encryption](https://www.npmjs.com/package/mongodb-client-encryption) | ^1.0.0             | ^1.0.0 \|\| ^2.0.0 | ^2.3.0             | ^6.0.0          | ^6.0.0             | ^7.0.0        |
+| [mongodb-legacy](https://www.npmjs.com/package/mongodb-legacy)                       | N/A                | ^4.0.0             | ^5.0.0             | ^6.0.0          | ^6.0.0             | N/A           |
+| [@mongodb-js/zstd](https://www.npmjs.com/package/@mongodb-js/zstd)                   | N/A                | ^1.0.0             | ^1.0.0             | ^1.1.0          | ^1.1.0 \|\| ^2.0.0 | ^7.0.0        |
 
 #### Typescript Version
 
@@ -100,7 +99,7 @@ This is the lowest typescript version guaranteed to work with our driver: older 
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
 If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
 
-Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version.  Currently, our Typescript targets es2023.
+Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version. Currently, our Typescript targets es2023.
 
 ## Installation
 
