@@ -46,7 +46,7 @@ jobs:
 
       # Setup Node.js and npm install
       - name: Install Node and dependencies
-        uses: mongodb-labs/drivers-github-tools/node/setup@v2
+        uses: mongodb-labs/drivers-github-tools/node/setup@v3
 
       # See: https://github.com/googleapis/release-please/issues/1274
 

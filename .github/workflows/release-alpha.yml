@@ -27,7 +27,7 @@ jobs:
           fi
       - uses: actions/checkout@v5
       - name: Install Node and dependencies
-        uses: mongodb-labs/drivers-github-tools/node/setup@v2
+        uses: mongodb-labs/drivers-github-tools/node/setup@v3
       - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
       - run: npm publish --provenance --tag=alpha
         env:
