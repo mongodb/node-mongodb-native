@@ -41,17 +41,17 @@ jobs:
           ref: '5.x'
 
       - name: Install Node and dependencies
-        uses: mongodb-labs/drivers-github-tools/node/setup@v2
+        uses: mongodb-labs/drivers-github-tools/node/setup@v3
         with:
           ignore_install_scripts: false
 
       - name: Load version and package info
-        uses: mongodb-labs/drivers-github-tools/node/get_version_info@v2
+        uses: mongodb-labs/drivers-github-tools/node/get_version_info@v3
         with:
           npm_package_name: mongodb
 
       - name: actions/compress_sign_and_upload
-        uses: mongodb-labs/drivers-github-tools/node/sign_node_package@v2
+        uses: mongodb-labs/drivers-github-tools/node/sign_node_package@v3
         with:
           aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
           aws_region_name: us-east-1
@@ -67,13 +67,13 @@ jobs:
       # only used for mongodb-client-encryption
       - name: Augment SBOM and copy to release assets
         if: ${{ '' != '' }}
-        uses: mongodb-labs/drivers-github-tools/sbom@v2
+        uses: mongodb-labs/drivers-github-tools/sbom@v3
         with:
           silk_asset_group: ''
           sbom_file_name: sbom.json
 
       - name: Generate authorized pub report
-        uses: mongodb-labs/drivers-github-tools/full-report@v2
+        uses: mongodb-labs/drivers-github-tools/full-report@v3
         with:
           release_version: ${{ env.package_version }}
           product_name: mongodb
@@ -85,7 +85,7 @@ jobs:
           evergreen_project: mongo-node-driver-next
           evergreen_commit: ${{ env.commit }}
 
-      - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v2
+      - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v3
         with:
           version: ${{ env.package_version }}
           product_name: mongodb
@@ -101,7 +101,7 @@ jobs:
           ref: '5.x'
 
       - name: Install Node and dependencies
-        uses: mongodb-labs/drivers-github-tools/node/setup@v2
+        uses: mongodb-labs/drivers-github-tools/node/setup@v3
 
       - run: npm publish --provenance --tag=5x
         if: ${{ needs.release_please.outputs.release_created }}
