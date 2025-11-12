@@ -46,6 +46,9 @@ Merging the release PR will make the action create a Github Release and subseque
 > [!TIP]
 > See the release workflow here: [.github/workflows/release.yml](.github/workflows/release.yml)
 
+> [!TIP]
+> If there have been no releasable units since the last release and you need to force a new release PR to exist (e.g., because you released an alpha and now want to release a major version), you can add the text "Release-As: x.x.x" to any commit body and release-please will open a new PR for that version. Read more [here](https://github.com/googleapis/release-please#how-do-i-change-the-version-number).
+
 ## Release Notes
 
 The contents of the release PR's body becomes the contents of the Github Release.
@@ -152,6 +155,8 @@ After merging the a PR with the above changes, release-please should re-create t
 an alpha.
 
 Example PR: https://github.com/mongodb-js/mongodb-client-encryption/pull/104
+
+See the tip in the [release-please](#release-please) section for what to do if you need to release a major version with no user-facing changes relative to the last released alpha.
 
 ## Packages
 
