@@ -4,7 +4,6 @@ import type {
   MongoLoggableComponent,
   ObjectId,
   ReadConcernLevel,
-  ReadPreferenceMode,
   ServerApiVersion,
   SeverityLevel,
   TagSet,
@@ -260,16 +259,19 @@ export interface ServerApi {
   strict?: boolean;
   deprecationErrors?: boolean;
 }
+
+export type UnifiedReadPreference = {
+  mode: string;
+  tagSets?: TagSet[];
+  maxStalenessSeconds?: number;
+  hedge?: { enabled: boolean };
+};
+
 export interface CollectionOrDatabaseOptions {
   readConcern?: {
     level: ReadConcernLevel;
   };
-  readPreference?: {
-    mode: ReadPreferenceMode;
-    maxStalenessSeconds: number;
-    tags: TagSet[];
-    hedge: { enabled: boolean };
-  };
+  readPreference?: UnifiedReadPreference;
   writeConcern?: {
     w: W;
     wtimeoutMS: number;

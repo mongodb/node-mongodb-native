@@ -9,6 +9,8 @@ import {
   type DbOptions,
   type Document,
   type MongoClient,
+  ReadPreference,
+  ReadPreferenceMode,
   ReturnDocument
 } from '../../../src';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
@@ -23,7 +25,8 @@ import type {
   ExpectedEventsForClient,
   KMSProvidersEntity,
   RunOnRequirement,
-  StringOrPlaceholder
+  StringOrPlaceholder,
+  UnifiedReadPreference
 } from './schema';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
@@ -190,16 +193,42 @@ export function patchVersion(version: string): string {
   return `${major}.${minor ?? 0}.${patch ?? 0}`;
 }
 
+export function makeNodeReadPrefFromUnified(
+  readPreferenceFromTest: UnifiedReadPreference
+): ReadPreference {
+  const validModes = Object.values(ReadPreferenceMode);
+  const testModeLowered = readPreferenceFromTest.mode?.toLowerCase();
+  const mode = validModes.find(m => m.toLowerCase() === testModeLowered);
+  expect(mode, 'test file defines unsupported readPreference mode').to.not.be.null;
+
+  return ReadPreference.fromOptions({
+    readPreference: {
+      mode,
+      tags: readPreferenceFromTest.tagSets,
+      maxStalenessSeconds: readPreferenceFromTest.maxStalenessSeconds,
+      hedge: readPreferenceFromTest.hedge
+    }
+  });
+}
+
 export function patchDbOptions(options: CollectionOrDatabaseOptions = {}): DbOptions {
-  // TODO
-  return { ...options } as DbOptions;
+  // @ts-expect-error: there is incompatibilities between unified options and node options, but it mostly works as is. See the readPref fixing below.
+  const dbOptions: DbOptions = { ...options };
+  if (dbOptions.readPreference) {
+    dbOptions.readPreference = makeNodeReadPrefFromUnified(options.readPreference);
+  }
+  return dbOptions;
 }
 
 export function patchCollectionOptions(
   options: CollectionOrDatabaseOptions = {}
 ): CollectionOptions {
-  // TODO
-  return { ...options } as CollectionOptions;
+  // @ts-expect-error: there is incompatibilities between unified options and node options, but it mostly works as is. See the readPref fixing below.
+  const collectionOptions: CollectionOptions = { ...options };
+  if (collectionOptions.readPreference) {
+    collectionOptions.readPreference = makeNodeReadPrefFromUnified(options.readPreference);
+  }
+  return collectionOptions;
 }
 
 export function translateOptions(options: Document): Document {

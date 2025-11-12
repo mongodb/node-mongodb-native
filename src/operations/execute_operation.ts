@@ -82,11 +82,6 @@ export async function executeOperation<
     session = client.startSession({ owner, explicit: false });
   } else if (session.hasEnded) {
     throw new MongoExpiredSessionError('Use of expired sessions is not permitted');
-  } else if (
-    session.snapshotEnabled &&
-    maxWireVersion(topology) < MIN_SUPPORTED_SNAPSHOT_READS_WIRE_VERSION
-  ) {
-    throw new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later');
   } else if (session.client !== client) {
     throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');
   }
@@ -209,6 +204,13 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
     timeoutContext,
     signal: operation.options.signal
   });
+
+  if (
+    session?.snapshotEnabled &&
+    maxWireVersion(topology) < MIN_SUPPORTED_SNAPSHOT_READS_WIRE_VERSION
+  ) {
+    throw new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later');
+  }
 
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
   const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
