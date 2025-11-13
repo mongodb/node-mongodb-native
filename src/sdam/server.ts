@@ -356,7 +356,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     } catch (operationError) {
       if (
         operationError instanceof MongoError &&
-        operationError.code === MONGODB_ERROR_CODES.Reauthenticate
+        operationError.code?.valueOf() === MONGODB_ERROR_CODES.Reauthenticate
       ) {
         reauthPromise = this.pool.reauthenticate(conn);
         reauthPromise.then(undefined, error => {
