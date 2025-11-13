@@ -62,6 +62,7 @@ tests:
           isTimeoutError: false
 
   - description: "error on aggregate if maxAwaitTimeMS is greater than timeoutMS"
+    skipReason: NODE-7297
     operations:
       - name: aggregate
         object: *collection
@@ -99,6 +100,7 @@ tests:
           isTimeoutError: false
 
   - description: "error on aggregate if maxAwaitTimeMS is equal to timeoutMS"
+    skipReason: NODE-7297
     operations:
       - name: aggregate
         object: *collection
@@ -298,6 +300,7 @@ tests:
                 collection: *collectionName
 
   - description: "apply remaining timeoutMS if less than maxAwaitTimeMS"
+    skipReason: NODE-7297
     operations:
       - name: failPoint
         object: testRunner
