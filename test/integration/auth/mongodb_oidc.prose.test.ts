@@ -417,6 +417,70 @@ describe('OIDC Auth Spec Tests', function () {
         });
       });
 
+      describe('4.1 Reauthentication Succeeds (promoteValues: false)', function () {
+        let utilClient: MongoClient;
+        const callbackSpy = sinon.spy(createCallback());
+        // Create an OIDC configured client.
+        // Set a fail point for find commands of the form:
+        // {
+        //   configureFailPoint: "failCommand",
+        //   mode: {
+        //     times: 1
+        //   },
+        //   data: {
+        //     failCommands: [
+        //       "find"
+        //     ],
+        //     errorCode: 391 // ReauthenticationRequired
+        //   }
+        // }
+        // Perform a find operation that succeeds.
+        // Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
+        // Close the client.
+        beforeEach(async function () {
+          client = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: callbackSpy
+            },
+            retryReads: false,
+            promoteValues: false
+          });
+          utilClient = new MongoClient(uriSingle, {
+            authMechanismProperties: {
+              OIDC_CALLBACK: createCallback()
+            },
+            retryReads: false
+          });
+          collection = client.db('test').collection('test');
+          await utilClient
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
+        });
+
+        afterEach(async function () {
+          await utilClient.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          await utilClient.close();
+        });
+
+        it('successfully authenticates', async function () {
+          await collection.findOne();
+          expect(callbackSpy).to.have.been.calledTwice;
+        });
+      });
+
       describe('4.2 Read Commands Fail If Reauthentication Fails', function () {
         let utilClient: MongoClient;
         const callbackSpy = sinon.spy(createBadCallback());
