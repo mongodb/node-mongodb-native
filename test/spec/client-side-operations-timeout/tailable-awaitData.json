@@ -3,7 +3,8 @@
   "schemaVersion": "1.9",
   "runOnRequirements": [
     {
-      "minServerVersion": "4.4"
+      "minServerVersion": "4.4",
+      "serverless": "forbid"
     }
   ],
   "createEntities": [
@@ -77,7 +78,7 @@
       ]
     },
     {
-      "description": "error if maxAwaitTimeMS is greater than timeoutMS",
+      "description": "error on find if maxAwaitTimeMS is greater than timeoutMS",
       "operations": [
         {
           "name": "find",
@@ -89,13 +90,50 @@
             "maxAwaitTimeMS": 10
           },
           "expectError": {
-            "isClientError": true
+            "isClientError": true,
+            "isTimeoutError": false
           }
         }
       ]
     },
     {
-      "description": "error if maxAwaitTimeMS is equal to timeoutMS",
+      "description": "error on aggregate if maxAwaitTimeMS is greater than timeoutMS",
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 5,
+            "maxAwaitTimeMS": 10
+          },
+          "expectError": {
+            "isClientError": true,
+            "isTimeoutError": false
+          }
+        }
+      ]
+    },
+    {
+      "description": "error on watch if maxAwaitTimeMS is greater than timeoutMS",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 5,
+            "maxAwaitTimeMS": 10
+          },
+          "expectError": {
+            "isClientError": true,
+            "isTimeoutError": false
+          }
+        }
+      ]
+    },
+    {
+      "description": "error on find if maxAwaitTimeMS is equal to timeoutMS",
       "operations": [
         {
           "name": "find",
@@ -107,7 +145,44 @@
             "maxAwaitTimeMS": 5
           },
           "expectError": {
-            "isClientError": true
+            "isClientError": true,
+            "isTimeoutError": false
+          }
+        }
+      ]
+    },
+    {
+      "description": "error on aggregate if maxAwaitTimeMS is equal to timeoutMS",
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 5,
+            "maxAwaitTimeMS": 5
+          },
+          "expectError": {
+            "isClientError": true,
+            "isTimeoutError": false
+          }
+        }
+      ]
+    },
+    {
+      "description": "error on watch if maxAwaitTimeMS is equal to timeoutMS",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 5,
+            "maxAwaitTimeMS": 5
+          },
+          "expectError": {
+            "isClientError": true,
+            "isTimeoutError": false
           }
         }
       ]
@@ -411,6 +486,141 @@
                     ]
                   },
                   "collection": "coll"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "apply remaining timeoutMS if less than maxAwaitTimeMS",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 30
+              }
+            }
+          }
+        },
+        {
+          "name": "createFindCursor",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "cursorType": "tailableAwait",
+            "batchSize": 1,
+            "maxAwaitTimeMS": 100,
+            "timeoutMS": 200
+          },
+          "saveResultAsEntity": "tailableCursor"
+        },
+        {
+          "name": "iterateOnce",
+          "object": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor",
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "maxTimeMS": {
+                    "$$lte": 100
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "maxTimeMS": {
+                    "$$lte": 70
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "apply maxAwaitTimeMS if less than remaining timeout",
+      "operations": [
+        {
+          "name": "createFindCursor",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "cursorType": "tailableAwait",
+            "batchSize": 1,
+            "maxAwaitTimeMS": 100,
+            "timeoutMS": 200
+          },
+          "saveResultAsEntity": "tailableCursor"
+        },
+        {
+          "name": "iterateOnce",
+          "object": "tailableCursor"
+        },
+        {
+          "name": "iterateOnce",
+          "object": "tailableCursor"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "maxTimeMS": {
+                    "$$lte": 100
+                  }
                 }
               }
             }
