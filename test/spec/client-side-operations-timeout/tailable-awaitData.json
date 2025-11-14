@@ -98,7 +98,6 @@
     },
     {
       "description": "error on aggregate if maxAwaitTimeMS is greater than timeoutMS",
-      "skipReason": "NODE-7297",
       "operations": [
         {
           "name": "aggregate",
@@ -154,7 +153,6 @@
     },
     {
       "description": "error on aggregate if maxAwaitTimeMS is equal to timeoutMS",
-      "skipReason": "NODE-7297",
       "operations": [
         {
           "name": "aggregate",
@@ -497,7 +495,6 @@
     },
     {
       "description": "apply remaining timeoutMS if less than maxAwaitTimeMS",
-      "skipReason": "NODE-7297",
       "operations": [
         {
           "name": "failPoint",

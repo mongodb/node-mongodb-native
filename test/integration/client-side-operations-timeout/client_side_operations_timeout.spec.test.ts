@@ -18,7 +18,10 @@ const skippedTests = {
   'timeoutMS is refreshed for getMore - failure':
     'TODO(DRIVERS-2965): see modified test in unified-csot-node-specs',
   'timeoutMS applies to full resume attempt in a next call': 'TODO(DRIVERS-3006)',
-  'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set': 'TODO(DRIVERS-3018)'
+  'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set': 'TODO(DRIVERS-3018)',
+  'error on aggregate if maxAwaitTimeMS is greater than timeoutMS': 'TODO(NODE-7297)',
+  'error on aggregate if maxAwaitTimeMS is equal to timeoutMS': 'TODO(NODE-7297)',
+  'apply remaining timeoutMS if less than maxAwaitTimeMS': 'TODO(NODE-7297)'
 };
 
 describe('CSOT spec tests', function () {
