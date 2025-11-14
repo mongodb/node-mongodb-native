@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.1](https://github.com/mongodb/node-mongodb-native/compare/v7.0.0...v7.0.1) (2025-11-14)
+
+
+### Bug Fixes
+
+* **NODE-7290:** use valueof for error code check ([#4791](https://github.com/mongodb/node-mongodb-native/issues/4791)) ([1cc3d1c](https://github.com/mongodb/node-mongodb-native/commit/1cc3d1c952274b2fc18ffd4898978af97f76b554))
+
 ## [7.0.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v7.0.0) (2025-11-06)
 
 
