@@ -4,8 +4,6 @@ import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
 import { clearTimeout, setTimeout } from 'timers';
-import * as url from 'url';
-import { URL } from 'url';
 import { promisify } from 'util';
 
 import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
@@ -1218,7 +1216,7 @@ export async function request(
       method: 'GET',
       timeout: 10000,
       json: true,
-      ...url.parse(uri),
+      url: new URL(uri),
       ...options
     };
 
