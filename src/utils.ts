@@ -1159,13 +1159,6 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
   }
 }
 
-interface RequestOptions {
-  json?: boolean;
-  method?: string;
-  timeout?: number;
-  headers?: http.OutgoingHttpHeaders;
-}
-
 /**
  * Perform a get request that returns status and body.
  * @internal
