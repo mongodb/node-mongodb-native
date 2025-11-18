@@ -4,8 +4,6 @@ import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
 import { clearTimeout, setTimeout } from 'timers';
-import * as url from 'url';
-import { URL } from 'url';
 import { promisify } from 'util';
 
 import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
@@ -1161,13 +1159,6 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
   }
 }
 
-interface RequestOptions {
-  json?: boolean;
-  method?: string;
-  timeout?: number;
-  headers?: http.OutgoingHttpHeaders;
-}
-
 /**
  * Perform a get request that returns status and body.
  * @internal
@@ -1197,64 +1188,6 @@ export function get(
     timeoutId = setTimeout(() => {
       request.destroy(new MongoNetworkTimeoutError(`request timed out after 10 seconds`));
     }, 10000);
-  });
-}
-
-export async function request(uri: string): Promise<Record<string, any>>;
-export async function request(
-  uri: string,
-  options?: { json?: true } & RequestOptions
-): Promise<Record<string, any>>;
-export async function request(
-  uri: string,
-  options?: { json: false } & RequestOptions
-): Promise<string>;
-export async function request(
-  uri: string,
-  options: RequestOptions = {}
-): Promise<string | Record<string, any>> {
-  return await new Promise<string | Record<string, any>>((resolve, reject) => {
-    const requestOptions = {
-      method: 'GET',
-      timeout: 10000,
-      json: true,
-      ...url.parse(uri),
-      ...options
-    };
-
-    const req = http.request(requestOptions, res => {
-      res.setEncoding('utf8');
-
-      let data = '';
-      res.on('data', d => {
-        data += d;
-      });
-
-      res.once('end', () => {
-        if (options.json === false) {
-          resolve(data);
-          return;
-        }
-
-        try {
-          const parsed = JSON.parse(data);
-          resolve(parsed);
-        } catch {
-          // TODO(NODE-3483)
-          reject(new MongoRuntimeError(`Invalid JSON response: "${data}"`));
-        }
-      });
-    });
-
-    req.once('timeout', () =>
-      req.destroy(
-        new MongoNetworkTimeoutError(
-          `Network request to ${uri} timed out after ${options.timeout} ms`
-        )
-      )
-    );
-    req.once('error', error => reject(error));
-    req.end();
   });
 }
 
