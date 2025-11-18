@@ -820,11 +820,11 @@ export class ClientSession
               }
 
               if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-                const BACKOFF_INITIAL_MS = 1;
+                const BACKOFF_INITIAL_MS = 5;
                 const BACKOFF_MAX_MS = 500;
                 const jitter = Math.random();
                 const backoffMS =
-                  jitter * Math.min(BACKOFF_INITIAL_MS * 1.25 ** retry, BACKOFF_MAX_MS);
+                  jitter * Math.min(BACKOFF_INITIAL_MS * 1.5 ** retry, BACKOFF_MAX_MS);
 
                 if (willExceedTransactionDeadline(backoffMS)) {
                   break;

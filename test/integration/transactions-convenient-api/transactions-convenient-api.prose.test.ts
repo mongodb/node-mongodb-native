@@ -1,68 +1,72 @@
 import { expect } from 'chai';
 import { test } from 'mocha';
+import * as sinon from 'sinon';
 
-import { type CommandFailedEvent, type MongoClient } from '../../mongodb';
-import { configureFailPoint } from '../../tools/utils';
-import { filterForCommands } from '../shared';
+import { type MongoClient } from '../../../src';
+import { configureFailPoint, type FailCommandFailPoint, measureDuration } from '../../tools/utils';
 
-const COMMIT_FAIL_TIMES = 35;
+const failCommand: FailCommandFailPoint = {
+  configureFailPoint: 'failCommand',
+  mode: {
+    times: 13
+  },
+  data: {
+    failCommands: ['commitTransaction'],
+    errorCode: 251
+  }
+};
 
 describe('Retry Backoff is Enforced', function () {
-  // Drivers should test that retries within `withTransaction` do not occur immediately. Optionally, set BACKOFF_INITIAL to a
-  // higher value to decrease flakiness of this test. Configure a fail point that forces 30 retries. Check that the total
-  // time for all retries exceeded 1.25 seconds.
-
   let client: MongoClient;
-  let failures: Array<CommandFailedEvent>;
 
   beforeEach(async function () {
-    client = this.configuration.newClient({}, { monitorCommands: true });
-
-    failures = [];
-    client.on('commandFailed', filterForCommands('commitTransaction', failures));
-
-    await client.connect();
-
-    await configureFailPoint(this.configuration, {
-      configureFailPoint: 'failCommand',
-      mode: {
-        times: COMMIT_FAIL_TIMES
-      },
-      data: {
-        failCommands: ['commitTransaction'],
-        errorCode: 24
-      }
-    });
+    client = this.configuration.newClient();
   });
 
   afterEach(async function () {
+    sinon.restore();
     await client?.close();
   });
 
-  for (let i = 0; i < 250; ++i) {
-    test.only(
-      'works' + i,
-      {
-        requires: {
-          mongodb: '>=4.4', // failCommand
-          topology: '!single' // transactions can't run on standalone servers
-        }
-      },
-      async function () {
-        const start = performance.now();
+  test(
+    'works',
+    {
+      requires: {
+        mongodb: '>=4.4', // failCommand
+        topology: '!single' // transactions can't run on standalone servers
+      }
+    },
+    async function () {
+      const randomStub = sinon.stub(Math, 'random');
 
-        await client.withSession(async s => {
+      randomStub.returns(0);
+
+      await configureFailPoint(this.configuration, failCommand);
+
+      const { duration: noBackoffTime } = await measureDuration(() => {
+        return client.withSession(async s => {
           await s.withTransaction(async s => {
             await client.db('foo').collection('bar').insertOne({ name: 'bailey' }, { session: s });
           });
         });
+      });
 
-        const end = performance.now();
+      randomStub.returns(1);
 
-        expect(failures).to.have.lengthOf(COMMIT_FAIL_TIMES);
+      await configureFailPoint(this.configuration, failCommand);
 
-        expect(end - start).to.be.greaterThan(1250);
-      }
-    );
-  }
+      const { duration: fullBackoffDuration } = await measureDuration(() => {
+        return client.withSession(async s => {
+          await s.withTransaction(async s => {
+            await client.db('foo').collection('bar').insertOne({ name: 'bailey' }, { session: s });
+          });
+        });
+      });
+
+      expect(fullBackoffDuration).to.be.within(
+        noBackoffTime + 2200 - 1000,
+        noBackoffTime + 2200 + 1000
+      );
+    }
+  );
 });
