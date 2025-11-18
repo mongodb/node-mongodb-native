@@ -1,4 +1,3 @@
-import { promisify } from 'util';
 import * as zlib from 'zlib';
 
 import { LEGACY_HELLO_COMMAND } from '../../constants';
@@ -43,8 +42,23 @@ export const uncompressibleCommands = new Set([
 
 const ZSTD_COMPRESSION_LEVEL = 3;
 
-const zlibInflate = promisify(zlib.inflate.bind(zlib));
-const zlibDeflate = promisify(zlib.deflate.bind(zlib));
+const zlibInflate = (buf: zlib.InputType) => {
+  return new Promise<Buffer>((resolve, reject) => {
+    zlib.inflate(buf, (error, result) => {
+      if (error) reject(error);
+      resolve(result);
+    });
+  });
+};
+
+const zlibDeflate = (buf: zlib.InputType, options: zlib.ZlibOptions) => {
+  return new Promise<Buffer>((resolve, reject) => {
+    zlib.deflate(buf, options, (error, result) => {
+      if (error) reject(error);
+      resolve(result);
+    });
+  });
+};
 
 let zstd: ZStandard;
 let Snappy: SnappyLib | null = null;
