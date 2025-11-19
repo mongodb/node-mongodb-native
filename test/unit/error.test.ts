@@ -10,7 +10,7 @@ import * as importsFromErrorSrc from '../../src/error';
 import {
   isResumableError,
   isRetryableReadError,
-  isSDAMUnrecoverableError,
+  isStateChangeError,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   MONGODB_ERROR_CODES,
@@ -211,26 +211,13 @@ describe('MongoErrors', () => {
     });
   });
 
-  describe('#isSDAMUnrecoverableError', function () {
-    context('when the error is a MongoParseError', function () {
-      it('returns true', function () {
-        const error = new MongoParseError('');
-        expect(isSDAMUnrecoverableError(error)).to.be.true;
-      });
-    });
-
-    context('when the error is null', function () {
-      it('returns true', function () {
-        expect(isSDAMUnrecoverableError(null)).to.be.true;
-      });
-    });
-
+  describe('#isStateChangeError', function () {
     context('when the error has a "node is recovering" error code', function () {
       it('returns true', function () {
         const error = new MongoError('');
         // Code for NotPrimaryOrSecondary
         error.code = 13436;
-        expect(isSDAMUnrecoverableError(error)).to.be.true;
+        expect(isStateChangeError(error)).to.be.true;
       });
     });
 
@@ -239,7 +226,7 @@ describe('MongoErrors', () => {
         const error = new MongoError('');
         // Code for NotWritablePrimary
         error.code = 10107;
-        expect(isSDAMUnrecoverableError(error)).to.be.true;
+        expect(isStateChangeError(error)).to.be.true;
       });
     });
 
@@ -250,7 +237,7 @@ describe('MongoErrors', () => {
           // If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not writable primary" error.
           const error = new MongoError(NODE_IS_RECOVERING_ERROR_MESSAGE.source);
           error.code = 555;
-          expect(isSDAMUnrecoverableError(error)).to.be.false;
+          expect(isStateChangeError(error)).to.be.false;
         });
       }
     );
@@ -262,7 +249,7 @@ describe('MongoErrors', () => {
           const error = new MongoError(
             `this is ${LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE.source}.`
           );
-          expect(isSDAMUnrecoverableError(error)).to.be.true;
+          expect(isStateChangeError(error)).to.be.true;
         });
       }
     );
@@ -272,7 +259,7 @@ describe('MongoErrors', () => {
       function () {
         it('returns true', function () {
           const error = new MongoError(`the ${NODE_IS_RECOVERING_ERROR_MESSAGE} from an error`);
-          expect(isSDAMUnrecoverableError(error)).to.be.true;
+          expect(isStateChangeError(error)).to.be.true;
         });
       }
     );
@@ -284,7 +271,7 @@ describe('MongoErrors', () => {
           const error = new MongoError(
             `this is ${LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE}, so we have a problem `
           );
-          expect(isSDAMUnrecoverableError(error)).to.be.true;
+          expect(isStateChangeError(error)).to.be.true;
         });
       }
     );
