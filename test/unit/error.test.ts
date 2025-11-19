@@ -26,7 +26,6 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoOperationTimeoutError,
-  MongoParseError,
   MongoRuntimeError,
   MongoServerError,
   MongoSystemError,
