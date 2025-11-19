@@ -401,36 +401,45 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     const isNetworkTimeoutBeforeHandshakeError =
       error instanceof MongoNetworkError && error.beforeHandshake;
     const isAuthHandshakeError = error.hasErrorLabel(MongoErrorLabel.HandshakeError);
-    if (isNetworkNonTimeoutError || isNetworkTimeoutBeforeHandshakeError || isAuthHandshakeError) {
-      // In load balanced mode we never mark the server as unknown and always
-      // clear for the specific service id.
+
+    // TODO: considering parse errors as SDAM unrecoverable errors seem
+    // questionable.  What if the parse error only comes from an application connection,
+    // indicating some bytes were lost in transmission?  It seems overkill to completely
+    // kill the server.
+    // Parse errors from monitoring connections are already handled because the
+    // error would be wrapped in a ServerHeartbeatFailedEvent, which would mark the
+    // server unknown and clear the pool.  Can we remove this?
+    if (isStateChangeError(error) || error instanceof MongoParseError) {
+      const shouldClearPool = isNodeShuttingDownError(error);
+
+      // from the SDAM spec: The driver MUST synchronize clearing the pool with updating the topology.
+      // In load balanced mode: there is no monitoring, so there is no topology to update.  We simply clear the pool.
+      // For other topologies: the `ResetPool` label instructs the topology to clear the server's pool in `updateServer()`.
+      if (!this.loadBalanced) {
+        if (shouldClearPool) {
+          error.addErrorLabel(MongoErrorLabel.ResetPool);
+        }
+        markServerUnknown(this, error);
+        process.nextTick(() => this.requestCheck());
+        return;
+      }
+
+      if (connection && shouldClearPool) {
+        this.pool.clear({ serviceId: connection.serviceId });
+      }
+    } else if (
+      isNetworkNonTimeoutError ||
+      isNetworkTimeoutBeforeHandshakeError ||
+      isAuthHandshakeError
+    ) {
+      // from the SDAM spec: The driver MUST synchronize clearing the pool with updating the topology.
+      // In load balanced mode: there is no monitoring, so there is no topology to update.  We simply clear the pool.
+      // For other topologies: the `ResetPool` label instructs the topology to clear the server's pool in `updateServer()`.
       if (!this.loadBalanced) {
         error.addErrorLabel(MongoErrorLabel.ResetPool);
         markServerUnknown(this, error);
       } else if (connection) {
         this.pool.clear({ serviceId: connection.serviceId });
-      }
-    } else {
-      // TODO: considering parse errors as SDAM unrecoverable errors seem
-      // questionable.  What if the parse error only comes from an application connection,
-      // indicating some bytes were lost in transmission?  It seems overkill to completely
-      // kill the server.
-      // Parse errors from monitoring connections are already handled because the
-      // error would be wrapped in a ServerHeartbeatFailedEvent, which would mark the
-      // server unknown and clear the pool.  Can we remove this?
-      if (isStateChangeError(error) || error instanceof MongoParseError) {
-        const shouldClearPool = isNodeShuttingDownError(error);
-        if (this.loadBalanced && connection && shouldClearPool) {
-          this.pool.clear({ serviceId: connection.serviceId });
-        }
-
-        if (!this.loadBalanced) {
-          if (shouldClearPool) {
-            error.addErrorLabel(MongoErrorLabel.ResetPool);
-          }
-          markServerUnknown(this, error);
-          process.nextTick(() => this.requestCheck());
-        }
       }
     }
   }
