@@ -22,12 +22,13 @@ import {
 import {
   type AnyError,
   isNodeShuttingDownError,
-  isSDAMUnrecoverableError,
+  isStateChangeError,
   MONGODB_ERROR_CODES,
   MongoError,
   MongoErrorLabel,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoParseError,
   MongoRuntimeError,
   MongoServerClosedError,
   type MongoServerError,
@@ -412,7 +413,14 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         this.pool.clear({ serviceId: connection.serviceId });
       }
     } else {
-      if (isSDAMUnrecoverableError(error)) {
+      // TODO: considering parse errors as SDAM unrecoverable errors seem
+      // questionable.  What if the parse error only comes from an application connection,
+      // indicating some bytes were lost in transmission?  It seems overkill to completely
+      // kill the server.
+      // Parse errors from monitoring connections are already handled because the
+      // error would be wrapped in a ServerHeartbeatFailedEvent, which would mark the
+      // server unknown and clear the pool.  Can we remove this?
+      if (isStateChangeError(error) || error instanceof MongoParseError) {
         if (shouldHandleStateChangeError(this, error)) {
           const shouldClearPool = isNodeShuttingDownError(error);
           if (this.loadBalanced && connection && shouldClearPool) {
