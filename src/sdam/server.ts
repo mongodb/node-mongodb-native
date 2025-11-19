@@ -392,9 +392,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
-    const isStaleError =
-      error.connectionGeneration && error.connectionGeneration < this.pool.generation;
-    if (isStaleError) {
+    if (isStaleError(this, error)) {
       return;
     }
 
@@ -421,19 +419,17 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       // error would be wrapped in a ServerHeartbeatFailedEvent, which would mark the
       // server unknown and clear the pool.  Can we remove this?
       if (isStateChangeError(error) || error instanceof MongoParseError) {
-        if (shouldHandleStateChangeError(this, error)) {
-          const shouldClearPool = isNodeShuttingDownError(error);
-          if (this.loadBalanced && connection && shouldClearPool) {
-            this.pool.clear({ serviceId: connection.serviceId });
-          }
+        const shouldClearPool = isNodeShuttingDownError(error);
+        if (this.loadBalanced && connection && shouldClearPool) {
+          this.pool.clear({ serviceId: connection.serviceId });
+        }
 
-          if (!this.loadBalanced) {
-            if (shouldClearPool) {
-              error.addErrorLabel(MongoErrorLabel.ResetPool);
-            }
-            markServerUnknown(this, error);
-            process.nextTick(() => this.requestCheck());
+        if (!this.loadBalanced) {
+          if (shouldClearPool) {
+            error.addErrorLabel(MongoErrorLabel.ResetPool);
           }
+          markServerUnknown(this, error);
+          process.nextTick(() => this.requestCheck());
         }
       }
     }
@@ -568,12 +564,6 @@ function connectionIsStale(pool: ConnectionPool, connection: Connection) {
   return connection.generation !== pool.generation;
 }
 
-function shouldHandleStateChangeError(server: Server, err: MongoError) {
-  const etv = err.topologyVersion;
-  const stv = server.description.topologyVersion;
-  return compareTopologyVersion(stv, etv) < 0;
-}
-
 function inActiveTransaction(session: ClientSession | undefined, cmd: Document) {
   return session && session.inTransaction() && !isTransactionCommand(cmd);
 }
@@ -582,4 +572,16 @@ function inActiveTransaction(session: ClientSession | undefined, cmd: Document) 
  * does not check if the server supports retryable writes */
 function isRetryableWritesEnabled(topology: Topology) {
   return topology.s.options.retryWrites !== false;
+}
+
+function isStaleError(server: Server, error: MongoError): boolean {
+  const currentGeneration = server.pool.generation;
+  const generation = error.connectionGeneration;
+
+  if (generation && generation < currentGeneration) {
+    return true;
+  }
+
+  const currentTopologyVersion = server.description.topologyVersion;
+  return compareTopologyVersion(currentTopologyVersion, error.topologyVersion) >= 0;
 }
