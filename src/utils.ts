@@ -1238,7 +1238,7 @@ export function squashError(_error: unknown) {
 export const randomBytes = (size: number) => {
   return new Promise<Buffer>((resolve, reject) => {
     crypto.randomBytes(size, (error: Error | null, buf: Buffer) => {
-      if (error) reject(error);
+      if (error) return reject(error);
       resolve(buf);
     });
   });

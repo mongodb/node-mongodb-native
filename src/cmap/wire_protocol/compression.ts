@@ -45,7 +45,7 @@ const ZSTD_COMPRESSION_LEVEL = 3;
 const zlibInflate = (buf: zlib.InputType) => {
   return new Promise<Buffer>((resolve, reject) => {
     zlib.inflate(buf, (error, result) => {
-      if (error) reject(error);
+      if (error) return reject(error);
       resolve(result);
     });
   });
@@ -54,7 +54,7 @@ const zlibInflate = (buf: zlib.InputType) => {
 const zlibDeflate = (buf: zlib.InputType, options: zlib.ZlibOptions) => {
   return new Promise<Buffer>((resolve, reject) => {
     zlib.deflate(buf, options, (error, result) => {
-      if (error) reject(error);
+      if (error) return reject(error);
       resolve(result);
     });
   });

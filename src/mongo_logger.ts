@@ -244,7 +244,7 @@ export function createStdioLogger(stream: {
       return new Promise((resolve, reject) => {
         const logLine = inspect(log, { compact: true, breakLength: Infinity });
         stream.write(`${logLine}\n`, 'utf-8', error => {
-          if (error) reject(error);
+          if (error) return reject(error);
           resolve(true);
         });
       });
