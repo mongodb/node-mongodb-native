@@ -4,7 +4,6 @@ import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
 import { clearTimeout, setTimeout } from 'timers';
-import { promisify } from 'util';
 
 import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
@@ -1236,7 +1235,14 @@ export function squashError(_error: unknown) {
   return;
 }
 
-export const randomBytes = promisify(crypto.randomBytes);
+export const randomBytes = (size: number) => {
+  return new Promise<Buffer>((resolve, reject) => {
+    crypto.randomBytes(size, (error: Error | null, buf: Buffer) => {
+      if (error) return reject(error);
+      resolve(buf);
+    });
+  });
+};
 
 /**
  * Replicates the events.once helper.

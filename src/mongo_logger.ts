@@ -1,4 +1,4 @@
-import { inspect, promisify } from 'util';
+import { inspect } from 'util';
 
 import {
   type Binary,
@@ -240,11 +240,15 @@ export function createStdioLogger(stream: {
   write: NodeJS.WriteStream['write'];
 }): MongoDBLogWritable {
   return {
-    write: promisify((log: Log, cb: (error?: Error | null) => void): unknown => {
-      const logLine = inspect(log, { compact: true, breakLength: Infinity });
-      stream.write(`${logLine}\n`, 'utf-8', cb);
-      return;
-    })
+    write: (log: Log): Promise<unknown> => {
+      return new Promise((resolve, reject) => {
+        const logLine = inspect(log, { compact: true, breakLength: Infinity });
+        stream.write(`${logLine}\n`, 'utf-8', error => {
+          if (error) return reject(error);
+          resolve(true);
+        });
+      });
+    }
   };
 }
 
