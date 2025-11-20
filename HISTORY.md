@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.0](https://github.com/mongodb/node-mongodb-native/compare/v7.0.0...v7.1.0) (2025-11-20)
+
+
+### Features
+
+* **NODE-7304:** remove usages in src of promisify ([#4799](https://github.com/mongodb/node-mongodb-native/issues/4799)) ([761b9bf](https://github.com/mongodb/node-mongodb-native/commit/761b9bfab8dfc8e3e7e311731d7a5cda1285bc6c))
+
+
+### Bug Fixes
+
+* **NODE-7290:** use valueof for error code check ([#4791](https://github.com/mongodb/node-mongodb-native/issues/4791)) ([1cc3d1c](https://github.com/mongodb/node-mongodb-native/commit/1cc3d1c952274b2fc18ffd4898978af97f76b554))
+
 ## [7.0.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v7.0.0) (2025-11-06)
 
 
