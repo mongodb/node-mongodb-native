@@ -1,0 +1,113 @@
+name: Post-Merge SBOM Update
+
+on:
+  push:
+    branches: 
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+env:
+  SBOM_FILE: "sbom.json"
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sbom:
+    name: Generate SBOM and Create PR
+    runs-on: ubuntu-latest
+    
+    concurrency:
+      group: sbom-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository (Base Branch)
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Node and dependencies
+        uses: mongodb-labs/drivers-github-tools/node/setup@v3
+        with:
+          ignore_install_scripts: false
+
+      - name: Load version and package info
+        uses: mongodb-labs/drivers-github-tools/node/get_version_info@v3
+        with:
+          npm_package_name: mongodb
+
+      - name: Generate/Update package-lock.json
+        run: |
+          echo "Resolving dependencies and generating package-lock.json..."
+          npm install --package-lock-only
+          echo "package-lock.json generated with resolved versions"
+
+      - name: Setup SBOM environment
+        uses: ./.github/actions/setup-sbom
+
+      - name: Generate SBOM
+        uses: ./.github/actions/sbom-update
+        with:
+          output-file: ${SBOM_FILE}
+
+      - name: Check for Changes in sbom.json
+        id: git_status
+        run: |
+          # Filter to remove/normalize serialNumber and timestamp fields
+          JQ_NORMALIZER='del(.serialNumber) | del(.metadata.timestamp) | walk(if type == "object" and .timestamp then .timestamp = "TIMESTAMP_NORMALIZED" else . end)'
+          
+          # Check if the base file exists in Git (to prevent errors on first commit)
+          if ! git show HEAD:$SBOM_FILE > /dev/null 2>&1; then
+              echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
+              exit 0
+          fi
+          
+          # Compare the normalized committed version vs. the normalized current version
+          if diff -q \
+             <(git show HEAD:$SBOM_FILE | jq -r "$JQ_NORMALIZER") \
+             <(cat $SBOM_FILE | jq -r "$JQ_NORMALIZER"); then
+             
+             echo "HAS_CHANGES=false" >> $GITHUB_OUTPUT
+             echo "No changes detected in sbom.json"
+          else
+             echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
+             echo "Changes detected in sbom.json"
+          fi
+
+      - name: Create Pull Request
+        if: steps.git_status.outputs.HAS_CHANGES == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update SBOM after dependency changes'
+          branch: auto-update-sbom-${{ github.run_id }}
+          delete-branch: true
+          title: 'chore: Update SBOM'
+          body: |
+            ## Automated SBOM Update
+            
+            This PR was automatically generated because package files changed.
+            
+            ### Environment
+            - Node.js version: ${{ steps.versions.outputs.node-version }}
+            
+            ### Changes
+            - Updated `sbom.json` to reflect current dependencies
+            
+            ### Verification
+            The SBOM was generated using CycloneDX NPM.
+
+            ### Triggered by
+            - Commit: ${{ github.sha }}
+            - Workflow run: ${{ github.run_id }}
+            
+            ---
+            _This PR was created automatically by the [SBOM workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})_
+          labels: |
+            sbom
+            automated
+            dependencies

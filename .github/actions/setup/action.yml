@@ -1,0 +1,19 @@
+name: Setup Node SBOM
+description: Sets up environment for generating SBOM in Node.js projects
+inputs:
+  working-directory:
+    description: "The directory where package.json is located"
+    required: false
+    default: "."
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js (for cdxgen)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install cdxgen
+      shell: bash
+      run: npm install -g @cyclonedx/cdxgen

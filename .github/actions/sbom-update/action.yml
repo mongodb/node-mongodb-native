@@ -1,0 +1,27 @@
+name: Generate SBOM
+description: Generates CycloneDX SBOM using cdxgen
+inputs:
+  output-file:
+    description: "Output filename for the SBOM"
+    required: false
+    default: "sbom.json"
+
+runs:
+  using: composite
+  steps:
+    - name: Generate SBOM
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "Generating SBOM for 'node' project..."
+        cdxgen -t 'node' --spec-version 1.5 --json-pretty -o ${{ inputs.output-file }} .
+
+    - name: Validate SBOM
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.output-file }}" ]; then
+          echo "Error: SBOM file not found"
+          exit 1
+        fi
+        
+        echo "SBOM file validated: ${{ inputs.output-file }}"
