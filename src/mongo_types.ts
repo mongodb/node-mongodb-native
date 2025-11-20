@@ -128,7 +128,7 @@ export interface FilterOperators<TValue> extends NonObjectIdLikeDocument {
   $in?: ReadonlyArray<TValue>;
   $lt?: TValue;
   $lte?: TValue;
-  $ne?: TValue;
+  $ne?: TValue | null;
   $nin?: ReadonlyArray<TValue>;
   // Logical
   $not?: TValue extends string ? FilterOperators<TValue> | RegExp : FilterOperators<TValue>;
