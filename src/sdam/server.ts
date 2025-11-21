@@ -402,13 +402,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       error instanceof MongoNetworkError && error.beforeHandshake;
     const isAuthHandshakeError = error.hasErrorLabel(MongoErrorLabel.HandshakeError);
 
-    // TODO: considering parse errors as SDAM unrecoverable errors seem
-    // questionable.  What if the parse error only comes from an application connection,
-    // indicating some bytes were lost in transmission?  It seems overkill to completely
-    // kill the server.
-    // Parse errors from monitoring connections are already handled because the
-    // error would be wrapped in a ServerHeartbeatFailedEvent, which would mark the
-    // server unknown and clear the pool.  Can we remove this?
+    // Perhaps questionable and divergent from the spec, but considering MongoParseErrors like state change errors was legacy behavior.
     if (isStateChangeError(error) || error instanceof MongoParseError) {
       const shouldClearPool = isNodeShuttingDownError(error);
 
