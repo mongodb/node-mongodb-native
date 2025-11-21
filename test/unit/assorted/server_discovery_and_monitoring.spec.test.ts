@@ -4,9 +4,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
 
+import { Connection } from '../../../src/cmap/connection';
 import { ConnectionPool } from '../../../src/cmap/connection_pool';
 import {
   HEARTBEAT_EVENTS,
+  LEGACY_HELLO_COMMAND,
   SERVER_CLOSED,
   SERVER_DESCRIPTION_CHANGED,
   SERVER_OPENING,
@@ -37,6 +39,7 @@ import {
 import { Server } from '../../../src/sdam/server';
 import { ServerDescription, type TopologyVersion } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
+import { TimeoutContext } from '../../../src/timeout';
 import { isRecord, ns, squashError } from '../../../src/utils';
 import { ejson, fakeServer } from '../../tools/utils';
 
@@ -311,6 +314,102 @@ const SDAM_EVENTS = [
   ...HEARTBEAT_EVENTS
 ];
 
+function makeConnectionsError(appError: ApplicationError): sinon.SinonStub[] {
+  switch (appError.when) {
+    case 'beforeHandshakeCompletes':
+      return stubBeforeHandshake(appError);
+    case 'afterHandshakeCompletes':
+      return [
+        sinon.stub(ConnectionPool.prototype, 'checkOut').callsFake(checkoutStubImpl(appError))
+      ];
+    default:
+      throw new Error('unexpected value for `.when`: ' + appError.when);
+  }
+
+  // if `appError.when === 'beforeHandshake`:
+  //   "Simulate this mock error as if it occurred during a new connection's handshake for an application operation."
+  // This function mocks the basic `createConnection` API to return an unconnected socket, and uses a special connection
+  // subclass that always throws when `command()` is executed.
+  function stubBeforeHandshake(appError: ApplicationError) {
+    const stubs = [];
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const net: typeof import('net') = require('net');
+
+    const netStub = sinon.stub(net, 'createConnection');
+
+    netStub.callsFake(function createConnectionStub() {
+      const socket = new net.Socket();
+      process.nextTick(() => socket.emit('connect'));
+      return socket;
+    });
+
+    stubs.push(netStub);
+
+    class StubbedConnection extends Connection {
+      override command(
+        _ns: unknown,
+        command: Document,
+        _options?: unknown,
+        _responseType?: unknown
+      ): Promise<any> {
+        if (command.hello || command[LEGACY_HELLO_COMMAND]) {
+          throw new MongoNetworkError(`error executing command`, { beforeHandshake: true });
+        }
+
+        throw new Error('unexpected command: ', command);
+      }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const connectionUtils: typeof import('../../../src/cmap/connect') = require('../../../src/cmap/connect');
+
+    const wrapped = sinon
+      .stub(connectionUtils, 'connect')
+      .callsFake(async function connect(options) {
+        const generation =
+          typeof appError.generation === 'number' ? appError.generation : options.generation;
+        return wrapped.wrappedMethod({
+          ...options,
+          generation,
+          connectionType: StubbedConnection
+        });
+      });
+
+    stubs.push(wrapped);
+
+    return stubs;
+  }
+
+  // "Simulate this mock error as if it occurred on an established connection for an application operation (i.e. after the connection pool check out succeeds)."
+  // This one is simple - return a stubbed connection that always throws.  No need to worry about the internals of `connect()`.
+  function checkoutStubImpl(appError: ApplicationError) {
+    return async function () {
+      const connectionPoolGeneration = this.generation;
+      const fakeConnection = {
+        generation:
+          typeof appError.generation === 'number' ? appError.generation : connectionPoolGeneration,
+        async command(_, __, ___) {
+          switch (appError.type) {
+            case 'network':
+              throw new MongoNetworkError('test generated');
+            case 'timeout':
+              throw new MongoNetworkTimeoutError('xxx timed out');
+            case 'command':
+              throw new MongoServerError(appError.response);
+            default:
+              throw new Error(
+                // @ts-expect-error `.type` is never, but we want to access it in this unreachable code to
+                // throw a helpful error message.
+                `SDAM unit test runner error: unexpected appError.type field: ${appError.type}`
+              );
+          }
+        }
+      };
+      return fakeConnection as any as Connection;
+    };
+  }
+}
+
 async function executeSDAMTest(testData: SDAMTest) {
   const client = new MongoClient(testData.uri);
   // listen for SDAM monitoring events
@@ -337,20 +436,23 @@ async function executeSDAMTest(testData: SDAMTest) {
         // phase with applicationErrors simulating error's from network, timeouts, server
         for (const appError of phase.applicationErrors) {
           // Stub will return appError to SDAM machinery
-          const checkOutStub = sinon
-            .stub(ConnectionPool.prototype, 'checkOut')
-            .callsFake(checkoutStubImpl(appError));
+
+          const stubs = makeConnectionsError(appError);
 
           const server = client.topology.s.servers.get(appError.address);
 
           // Run a dummy command to encounter the error
-          const res = server.command.bind(server)(
-            new RunCommandOperation(ns('admin.$cmd'), { ping: 1 }, {})
+          const res = server.command(
+            new RunCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}),
+            TimeoutContext.create({
+              serverSelectionTimeoutMS: 30_000,
+              waitQueueTimeoutMS: 10_000
+            })
           );
           const thrownError = await res.catch(error => error);
 
           // Restore the stub before asserting anything in case of errors
-          checkOutStub.restore();
+          stubs.forEach(stub => stub.restore());
 
           const isApplicationError = error => {
             // These errors all come from the withConnection stub
@@ -410,28 +512,6 @@ async function executeSDAMTest(testData: SDAMTest) {
   } finally {
     await client.close().catch(squashError);
   }
-}
-
-function checkoutStubImpl(appError) {
-  return async function () {
-    const connectionPoolGeneration = this.generation;
-    const fakeConnection = {
-      generation:
-        typeof appError.generation === 'number' ? appError.generation : connectionPoolGeneration,
-      async command(_, __, ___) {
-        if (appError.type === 'network') {
-          throw new MongoNetworkError('test generated');
-        } else if (appError.type === 'timeout') {
-          throw new MongoNetworkTimeoutError('xxx timed out', {
-            beforeHandshake: appError.when === 'beforeHandshakeCompletes'
-          });
-        } else {
-          throw new MongoServerError(appError.response);
-        }
-      }
-    };
-    return fakeConnection;
-  };
 }
 
 function assertTopologyDescriptionOutcomeExpectations(

@@ -35,6 +35,11 @@ import {
 /** @public */
 export type Stream = Socket | TLSSocket;
 
+function applyBackpressureLabels(error: MongoError) {
+  error.addErrorLabel(MongoErrorLabel.SystemOverloadedError);
+  error.addErrorLabel(MongoErrorLabel.RetryableError);
+}
+
 export async function connect(options: ConnectionOptions): Promise<Connection> {
   let connection: Connection | null = null;
   try {
@@ -103,6 +108,8 @@ export async function performInitialHandshake(
   const authContext = new AuthContext(conn, credentials, options);
   conn.authContext = authContext;
 
+  // If we encounter an error preparing the handshake document, do NOT apply backpressure labels.  Errors
+  // encountered building the handshake document are all client-side, and do not indicate an overloaded server.
   const handshakeDoc = await prepareHandshakeDocument(authContext);
 
   // @ts-expect-error: TODO(NODE-5141): The options need to be filtered properly, Connection options differ from Command options
@@ -163,12 +170,15 @@ export async function performInitialHandshake(
     try {
       await provider.auth(authContext);
     } catch (error) {
+      // NOTE: If we encounter an error authenticating a connection, do NOT apply backpressure labels.
+
       if (error instanceof MongoError) {
         error.addErrorLabel(MongoErrorLabel.HandshakeError);
         if (needsRetryableWriteLabel(error, response.maxWireVersion, conn.description.type)) {
           error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
         }
       }
+
       throw error;
     }
   }
@@ -189,6 +199,9 @@ export async function performInitialHandshake(
       if (error instanceof MongoError) {
         error.addErrorLabel(MongoErrorLabel.HandshakeError);
       }
+      // If we encounter an error executing the initial handshake, apply backpressure labels.
+      applyBackpressureLabels(error);
+
       throw error;
     }
   }
@@ -424,6 +437,8 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     socket = await connectedSocket;
     return socket;
   } catch (error) {
+    // If we encounter a SystemOverloaded error while establishing a socket, apply the backpressure labels to it.
+    applyBackpressureLabels(error);
     socket.destroy();
     throw error;
   } finally {
