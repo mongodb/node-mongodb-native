@@ -1,0 +1,116 @@
+# Tests in this file are generated from backpressure-retry-loop.yml.template.
+
+description: tests that operations respect overload backoff retry loop
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.4' # failCommand
+    topologies: [replicaset, sharded, load-balanced]
+
+createEntities:
+  -
+    client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents: [commandStartedEvent, commandSucceededEvent, commandFailedEvent]
+
+  -
+    client:
+      id: &internal_client internal_client
+      useMultipleMongoses: false
+
+  -
+    database:
+      id: &internal_db internal_db
+      client: *internal_client
+      databaseName: &database_name retryable-writes-tests
+
+  -
+    collection:
+      id: &internal_collection retryable-writes-tests
+      database: *internal_db
+      collectionName: &collection_name coll
+
+  -
+    database:
+      id: &database database
+      client: *client
+      databaseName: *database_name
+      
+  -
+    collection:
+      id: &collection collection
+      database: *database
+      collectionName: *collection_name
+
+initialData:
+- collectionName: *collection_name
+  databaseName: *database_name
+  documents: []
+
+_yamlAnchors:
+  bulWriteInsertNamespace: &client_bulk_write_ns retryable-writes-tests.coll
+
+tests:
+{% for operation in operations %}
+  -
+    description: '{{operation.object}}.{{operation.operation_name}} retries using operation loop'
+    {%- if ((operation.operation_name == 'clientBulkWrite')) %}
+    runOnRequirements:
+      - minServerVersion: '8.0' # client bulk write added to server in 8.0
+    {%- endif %}
+    operations:
+        {%- if operation.operation_name == "dropIndex" %}
+      -
+        object: *internal_collection
+        name: createIndex
+        arguments:
+          keys: { x: 11 }
+          name: "x_11"
+        {%- endif %}      
+
+
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *internal_client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 3 }
+            data:
+              failCommands: [{{operation.command_name}}]
+              errorLabels: [RetryableError, SystemOverloadedError]
+              errorCode: 2
+      
+      -
+        object: *{{operation.object}}
+        name: {{operation.operation_name}}
+        {%- if operation.arguments|length > 0 %}
+        arguments:
+          {%- for arg in operation.arguments %}
+          {{arg}}
+          {%- endfor -%}
+        {%- endif %}
+
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandSucceededEvent:
+              commandName: {{operation.command_name}}
+{% endfor -%}
