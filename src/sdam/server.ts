@@ -400,7 +400,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       error instanceof MongoNetworkError && !(error instanceof MongoNetworkTimeoutError);
     const isNetworkTimeoutBeforeHandshakeError =
       error instanceof MongoNetworkError && error.beforeHandshake;
-    const isAuthHandshakeError = error.hasErrorLabel(MongoErrorLabel.HandshakeError);
+    const isAuthOrEstablishmentHandshakeError = error.hasErrorLabel(MongoErrorLabel.HandshakeError);
+    const isSystemOverloadError = error.hasErrorLabel(MongoErrorLabel.SystemOverloadedError);
 
     // TODO: considering parse errors as SDAM unrecoverable errors seem
     // questionable.  What if the parse error only comes from an application connection,
@@ -430,8 +431,12 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     } else if (
       isNetworkNonTimeoutError ||
       isNetworkTimeoutBeforeHandshakeError ||
-      isAuthHandshakeError
+      isAuthOrEstablishmentHandshakeError
     ) {
+      // Do NOT clear the pool if we encounter a system overloaded error.
+      if (isSystemOverloadError) {
+        return;
+      }
       // from the SDAM spec: The driver MUST synchronize clearing the pool with updating the topology.
       // In load balanced mode: there is no monitoring, so there is no topology to update.  We simply clear the pool.
       // For other topologies: the `ResetPool` label instructs the topology to clear the server's pool in `updateServer()`.
