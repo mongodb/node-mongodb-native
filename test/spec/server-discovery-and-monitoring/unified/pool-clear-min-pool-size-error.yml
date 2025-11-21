@@ -68,7 +68,7 @@ tests:
           - poolClearedEvent: {}
           - connectionClosedEvent: {}
 
-  - description: Pool is cleared on handshake error during minPoolSize population
+  - description: Pool is not cleared on handshake error during minPoolSize population
     operations:
       - name: createEntities
         object: testRunner
@@ -123,13 +123,6 @@ tests:
         arguments:
           client: *client
           event:
-            poolClearedEvent: {}
-          count: 1
-      - name: waitForEvent
-        object: testRunner
-        arguments:
-          client: *client
-          event:
             connectionClosedEvent: {}
           count: 1
     expectEvents:
@@ -139,6 +132,4 @@ tests:
           - connectionCreatedEvent: {}
           - connectionReadyEvent: {}
           - connectionCreatedEvent: {}
-          - poolClearedEvent: {}
           - connectionClosedEvent: {}
-
