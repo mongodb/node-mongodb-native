@@ -42,7 +42,7 @@ export class TopologyDescription {
   logicalSessionTimeoutMinutes: number | null;
   heartbeatFrequencyMS: number;
   localThresholdMS: number;
-  commonWireVersion: number;
+  commonWireVersion: number | null;
   /**
    * Create a TopologyDescription
    */
@@ -66,7 +66,7 @@ export class TopologyDescription {
     this.setName = setName ?? null;
     this.maxElectionId = maxElectionId ?? null;
     this.maxSetVersion = maxSetVersion ?? null;
-    this.commonWireVersion = commonWireVersion ?? 0;
+    this.commonWireVersion = commonWireVersion ?? null;
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
