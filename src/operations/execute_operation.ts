@@ -30,7 +30,12 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { RETRY_COST, TOKEN_REFRESH_RATE } from '../token_bucket';
-import { abortable, maxWireVersion, supportsRetryableWrites } from '../utils';
+import {
+  abortable,
+  exponentialBackoffDelayProvider,
+  maxWireVersion,
+  supportsRetryableWrites
+} from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
 
@@ -245,14 +250,28 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
 
   let systemOverloadRetryAttempt = 0;
   const maxSystemOverloadRetryAttempts = 5;
+  const backoffDelayProvider = exponentialBackoffDelayProvider(
+    10_000, // MAX_BACKOFF
+    100, // base backoff
+    2 // backoff rate
+  );
 
   while (true) {
     if (previousOperationError) {
       if (previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadError)) {
         systemOverloadRetryAttempt += 1;
 
-        // if the SystemOverloadError is not retryable, throw.
-        if (!previousOperationError.hasErrorLabel(MongoErrorLabel.RetryableError)) {
+        if (
+          // if the SystemOverloadError is not retryable, throw.
+          !previousOperationError.hasErrorLabel(MongoErrorLabel.RetryableError) ||
+          !(
+            // if retryable writes or reads are not configured, throw.
+            (
+              (hasReadAspect && topology.s.options.retryReads) ||
+              (hasWriteAspect && topology.s.options.retryWrites)
+            )
+          )
+        ) {
           throw previousOperationError;
         }
 
@@ -261,12 +280,7 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
           throw previousOperationError;
         }
 
-        const delayMS =
-          Math.random() *
-          Math.min(
-            10_000, // MAX_BACKOFF,
-            100 * 2 ** systemOverloadRetryAttempt
-          );
+        const { value: delayMS } = backoffDelayProvider.next();
 
         // if the delay would exhaust the CSOT timeout, short-circuit.
         if (timeoutContext.csotEnabled() && delayMS > timeoutContext.remainingTimeMS) {
