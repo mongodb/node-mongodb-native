@@ -59,7 +59,7 @@ type ResultTypeFromOperation<TOperation extends AbstractOperation> = ReturnType<
  * The expectation is that this function:
  * - Connects the MongoClient if it has not already been connected, see {@link autoConnect}
  * - Creates a session if none is provided and cleans up the session it creates
- * - Tries an operation and retries under certain conditions, see {@link tryOperation}
+ * - Tries an operation and retries under certain conditions, see {@link executeOperationWithRetries}
  *
  * @typeParam T - The operation's type
  * @typeParam TResult - The type of the operation's result, calculated from T
@@ -129,7 +129,7 @@ export async function executeOperation<
   });
 
   try {
-    return await tryOperation(operation, {
+    return await executeOperationWithRetries(operation, {
       topology,
       timeoutContext,
       session,
@@ -193,7 +193,10 @@ type RetryOptions = {
  *
  * @param operation - The operation to execute
  * */
-async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFromOperation<T>>(
+async function executeOperationWithRetries<
+  T extends AbstractOperation,
+  TResult = ResultTypeFromOperation<T>
+>(
   operation: T,
   { topology, timeoutContext, session, readPreference }: RetryOptions
 ): Promise<TResult> {
@@ -246,7 +249,7 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
   const maxNonOverloadRetryAttempts = willRetry ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
   let previousOperationError: MongoError | undefined;
   let previousServer: ServerDescription | undefined;
-  const nonOverloadRetryAttempt = 0;
+  let nonOverloadRetryAttempt = 0;
 
   let systemOverloadRetryAttempt = 0;
   const maxSystemOverloadRetryAttempts = 5;
@@ -306,8 +309,9 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
           signal: operation.options.signal
         });
       } else {
+        nonOverloadRetryAttempt++;
         // we have no more retry attempts, throw.
-        if (nonOverloadRetryAttempt >= maxNonOverloadRetryAttempts) {
+        if (nonOverloadRetryAttempt > maxNonOverloadRetryAttempts) {
           throw previousOperationError;
         }
 
