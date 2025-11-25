@@ -99,7 +99,9 @@ export const MongoErrorLabel = Object.freeze({
   ResetPool: 'ResetPool',
   PoolRequestedRetry: 'PoolRequestedRetry',
   InterruptInUseConnections: 'InterruptInUseConnections',
-  NoWritesPerformed: 'NoWritesPerformed'
+  NoWritesPerformed: 'NoWritesPerformed',
+  SystemOverloadError: 'SystemOverloadError',
+  RetryableError: 'RetryableError'
 } as const);
 
 /** @public */
