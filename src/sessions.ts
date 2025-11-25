@@ -788,7 +788,9 @@ export class ClientSession
             await this.commitTransaction();
             committed = true;
           } catch (commitError) {
-            // If CSOT is enabled, we repeatedly retry until timeoutMS expires.
+            // If CSOT is enabled, we repeatedly retry until timeoutMS expires.  This is enforced by providing a
+            // timeoutContext to each async API, which know how to cancel themselves (i.e., the next retry will
+            // abort the withTransaction call).
             // If CSOT is not enabled, do we still have time remaining or have we timed out?
             const hasNotTimedOut =
               this.timeoutContext?.csotEnabled() || now() - startTime < MAX_TIMEOUT;
