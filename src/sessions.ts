@@ -792,10 +792,10 @@ export class ClientSession
             // timeoutContext to each async API, which know how to cancel themselves (i.e., the next retry will
             // abort the withTransaction call).
             // If CSOT is not enabled, do we still have time remaining or have we timed out?
-            const hasNotTimedOut =
-              this.timeoutContext?.csotEnabled() || now() - startTime < MAX_TIMEOUT;
+            const hasTimedOut =
+              !this.timeoutContext?.csotEnabled() && now() - startTime >= MAX_TIMEOUT;
 
-            if (hasNotTimedOut) {
+            if (!hasTimedOut) {
               if (
                 !isMaxTimeMSExpiredError(commitError) &&
                 commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)
@@ -813,9 +813,10 @@ export class ClientSession
               if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
                 const BACKOFF_INITIAL_MS = 5;
                 const BACKOFF_MAX_MS = 500;
+                const BACKOFF_GROWTH = 1.5;
                 const jitter = Math.random();
                 const backoffMS =
-                  jitter * Math.min(BACKOFF_INITIAL_MS * 1.5 ** retry, BACKOFF_MAX_MS);
+                  jitter * Math.min(BACKOFF_INITIAL_MS * BACKOFF_GROWTH ** retry, BACKOFF_MAX_MS);
 
                 const willExceedTransactionDeadline =
                   (this.timeoutContext?.csotEnabled() &&
