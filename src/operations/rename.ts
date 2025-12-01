@@ -14,7 +14,7 @@ export interface RenameOptions extends Omit<CommandOperationOptions, 'rawData'> 
   /**
    * @deprecated
    *
-   * This option has been dead code since at least Node driver version 4.x.  It will
+   * This option has been dead code since at least Node driver version 4.x. It will
    * be removed in a future major release.
    */
   new_collection?: boolean;
