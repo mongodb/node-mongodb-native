@@ -38,6 +38,7 @@ import {
 } from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
+import { RunCommandOperation } from './run_command';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -264,16 +265,16 @@ async function executeOperationWithRetries<
       if (previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
         systemOverloadRetryAttempt += 1;
 
+        // if retryable writes or reads are not configured, throw.
+        const isOperationConfiguredForRetry =
+          (hasReadAspect && topology.s.options.retryReads) ||
+          (hasWriteAspect && topology.s.options.retryWrites);
+        const isRunCommand = operation instanceof RunCommandOperation;
+
         if (
           // if the SystemOverloadError is not retryable, throw.
           !previousOperationError.hasErrorLabel(MongoErrorLabel.RetryableError) ||
-          !(
-            // if retryable writes or reads are not configured, throw.
-            (
-              (hasReadAspect && topology.s.options.retryReads) ||
-              (hasWriteAspect && topology.s.options.retryWrites)
-            )
-          )
+          !(isOperationConfiguredForRetry || isRunCommand)
         ) {
           throw previousOperationError;
         }
@@ -360,7 +361,10 @@ async function executeOperationWithRetries<
 
     try {
       // If attempt > 0 and we are command batching we need to reset the batch.
-      if (nonOverloadRetryAttempt > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
+      if (
+        (nonOverloadRetryAttempt > 0 || systemOverloadRetryAttempt > 0) &&
+        operation.hasAspect(Aspect.COMMAND_BATCHING)
+      ) {
         operation.resetBatch();
       }
 

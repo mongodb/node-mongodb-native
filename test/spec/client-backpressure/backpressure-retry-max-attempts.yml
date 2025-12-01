@@ -1,0 +1,753 @@
+# Tests in this file are generated from backpressure-retry-loop.yml.template.
+
+description: tests that operations retry at most maxAttempts=5 times
+
+schemaVersion: '1.0'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.4' # failCommand
+    topologies: [replicaset, sharded, load-balanced]
+
+createEntities:
+  -
+    client:
+      id: &client client
+      useMultipleMongoses: false
+
+  -
+    client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+
+  -
+    database:
+      id: &database database
+      client: *client
+      databaseName: &database_name retryable-writes-tests
+  -
+    collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests:
+
+  -
+    description: 'client.listDatabases retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [listDatabases]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *client
+        name: listDatabases
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'client.listDatabaseNames retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [listDatabases]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *client
+        name: listDatabaseNames
+        expectError: true
+
+  -
+    description: 'client.createChangeStream retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [aggregate]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *client
+        name: createChangeStream
+        arguments:
+          pipeline: []
+        saveResultAsEntity: changeStream
+        expectError: true
+
+  -
+    description: 'client.clientBulkWrite retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [bulkWrite]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *client
+        name: clientBulkWrite
+        arguments:
+          models:
+          - insertOne:
+              namespace: retryable-writes-tests.coll
+              document: { _id: 8, x: 88 }
+        expectError: true
+
+  -
+    description: 'database.aggregate retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [aggregate]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *database
+        name: aggregate
+        arguments:
+          pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
+        expectError: true
+
+  -
+    description: 'database.listCollections retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [listCollections]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *database
+        name: listCollections
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'database.listCollectionNames retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [listCollections]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *database
+        name: listCollectionNames
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'database.runCommand retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [ping]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *database
+        name: runCommand
+        arguments:
+          command: { ping: 1 }
+          commandName: ping
+        expectError: true
+
+  -
+    description: 'database.createChangeStream retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [aggregate]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *database
+        name: createChangeStream
+        arguments:
+          pipeline: []
+        saveResultAsEntity: changeStream
+        expectError: true
+
+  -
+    description: 'collection.aggregate retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [aggregate]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: aggregate
+        arguments:
+          pipeline: []
+        expectError: true
+
+  -
+    description: 'collection.countDocuments retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [aggregate]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: countDocuments
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'collection.estimatedDocumentCount retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [count]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: estimatedDocumentCount
+        expectError: true
+
+  -
+    description: 'collection.distinct retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [distinct]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: distinct
+        arguments:
+          fieldName: x
+          filter: {}
+        expectError: true
+
+  -
+    description: 'collection.find retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [find]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: find
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'collection.findOne retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [find]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: findOne
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'collection.listIndexes retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [listIndexes]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: listIndexes
+        expectError: true
+
+  -
+    description: 'collection.listIndexNames retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [listIndexes]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: listIndexNames
+        expectError: true
+
+  -
+    description: 'collection.createChangeStream retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [aggregate]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: createChangeStream
+        arguments:
+          pipeline: []
+        saveResultAsEntity: changeStream
+        expectError: true
+
+  -
+    description: 'collection.insertOne retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [insert]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: insertOne
+        arguments:
+          document: { _id: 2, x: 22 }
+        expectError: true
+
+  -
+    description: 'collection.insertMany retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [insert]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: insertMany
+        arguments:
+          documents:
+            - { _id: 2, x: 22 }
+        expectError: true
+
+  -
+    description: 'collection.deleteOne retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [delete]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: deleteOne
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'collection.deleteMany retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [delete]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: deleteMany
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'collection.replaceOne retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [update]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: replaceOne
+        arguments:
+          filter: {}
+          replacement: { x: 22 }
+        expectError: true
+
+  -
+    description: 'collection.updateOne retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [update]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: updateOne
+        arguments:
+          filter: {}
+          update: { $set: { x: 22 } }
+        expectError: true
+
+  -
+    description: 'collection.updateMany retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [update]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: updateMany
+        arguments:
+          filter: {}
+          update: { $set: { x: 22 } }
+        expectError: true
+
+  -
+    description: 'collection.findOneAndDelete retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [findAndModify]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: findOneAndDelete
+        arguments:
+          filter: {}
+        expectError: true
+
+  -
+    description: 'collection.findOneAndReplace retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [findAndModify]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: findOneAndReplace
+        arguments:
+          filter: {}
+          replacement: { x: 22 }
+        expectError: true
+
+  -
+    description: 'collection.findOneAndUpdate retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [findAndModify]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: findOneAndUpdate
+        arguments:
+          filter: {}
+          update: { $set: { x: 22 } }
+        expectError: true
+
+  -
+    description: 'collection.bulkWrite retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [insert]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: bulkWrite
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 2, x: 22 }
+        expectError: true
+
+  -
+    description: 'collection.createIndex retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [createIndexes]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: createIndex
+        arguments:
+          keys: { x: 11 }
+          name: "x_11"
+        expectError: true
+
+  -
+    description: 'collection.dropIndex retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [dropIndexes]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: dropIndex
+        arguments:
+          name: "x_11"
+        expectError: true
+
+  -
+    description: 'collection.dropIndexes retries at most maxAttempts times (maxAttempts=5)'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [dropIndexes]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *collection
+        name: dropIndexes
+        expectError: true

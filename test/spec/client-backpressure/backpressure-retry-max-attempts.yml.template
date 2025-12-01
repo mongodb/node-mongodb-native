@@ -1,0 +1,72 @@
+# Tests in this file are generated from backpressure-retry-max-attempts.yml.template.
+
+description: tests that operations retry at most maxAttempts=5 times
+
+schemaVersion: '1.0'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.4' # failCommand
+    topologies: [replicaset, sharded, load-balanced]
+
+createEntities:
+  -
+    client:
+      id: &client client
+      useMultipleMongoses: false
+
+  -
+    client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+
+  -
+    database:
+      id: &database database
+      client: *client
+      databaseName: &database_name retryable-writes-tests
+  -
+    collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests:
+{% for operation in operations %}
+  -
+    description: '{{operation.object}}.{{operation.operation_name}} retries at most maxAttempts=5 times'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 6 }
+            data:
+              failCommands: [{{operation.command_name}}]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *{{operation.object}}
+        name: {{operation.operation_name}}
+        {%- if operation.arguments|length > 0 %}
+        arguments:
+          {%- for arg in operation.arguments %}
+          {{arg}}
+          {%- endfor -%}
+        {%- endif %}
+        {%- if operation.operation_name == "createChangeStream" %}
+        saveResultAsEntity: changeStream
+        {%- endif %}
+        expectError: true
+{% endfor -%}

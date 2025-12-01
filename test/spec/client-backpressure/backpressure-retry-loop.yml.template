@@ -1,0 +1,128 @@
+# Tests in this file are generated from backpressure-retry-loop.yml.template.
+
+description: tests that operations respect overload backoff retry loop
+
+schemaVersion: '1.0'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.4' # failCommand
+    topologies: [replicaset, sharded, load-balanced]
+
+createEntities:
+  -
+    client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents: [ 'commandStartedEvent', 'commandSucceededEvent', 'commandFailedEvent' ]
+
+  -
+    client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+
+  -
+    database:
+      id: &utilDb utilDb
+      client: *failPointClient
+      databaseName: &database_name retryable-writes-tests
+
+  -
+    collection:
+      id: &utilCollection utilCollection
+      database: *utilDb
+      collectionName: &collection_name coll
+
+  -
+    database:
+      id: &database database
+      client: *client
+      databaseName: &database_name retryable-writes-tests
+  -
+    collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collection_name coll
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests:
+{% for operation in operations %}
+  -
+    description: '{{operation.object}}.{{operation.operation_name}} retries using operation loop'
+    operations:
+      -
+        object: *utilCollection
+        name: deleteMany
+        arguments:
+          filter: {}
+
+      -
+        object: *utilCollection
+        name: deleteMany
+        arguments:
+          documents:
+            - { _id: 1, x: 11 }
+
+        {%- if operation.operation_name == "dropIndex" %}
+      -
+        object: *utilCollection
+        name: createIndex
+        arguments:
+          keys: { x: 11 }
+          name: "x_11"
+        {%- endif %}      
+
+
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 3 }
+            data:
+              failCommands: [{{operation.command_name}}]
+              errorLabels: ["RetryableError", "SystemOverloadedError"]
+              errorCode: 2
+      
+      -
+        object: *{{operation.object}}
+        name: {{operation.operation_name}}
+        {%- if operation.arguments|length > 0 %}
+        arguments:
+          {%- for arg in operation.arguments %}
+          {{arg}}
+          {%- endfor -%}
+        {%- endif %}
+        {%- if operation.operation_name == "createChangeStream" %}
+        saveResultAsEntity: changeStream
+        {%- endif %}
+        expectError: false
+
+    expectEvents:
+      - client: "client"
+        events:
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandSucceededEvent:
+              commandName: {{operation.command_name}}
+{% endfor -%}
