@@ -280,7 +280,7 @@ async function executeOperationWithRetries<
         }
 
         // if we have exhausted overload retry attempts, throw.
-        if (systemOverloadRetryAttempt >= maxSystemOverloadRetryAttempts) {
+        if (systemOverloadRetryAttempt > maxSystemOverloadRetryAttempts) {
           throw previousOperationError;
         }
 

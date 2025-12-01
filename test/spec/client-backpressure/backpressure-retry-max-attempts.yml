@@ -1,4 +1,4 @@
-# Tests in this file are generated from backpressure-retry-loop.yml.template.
+# Tests in this file are generated from backpressure-retry-max-attempts.yml.template.
 
 description: tests that operations retry at most maxAttempts=5 times
 
@@ -14,6 +14,7 @@ createEntities:
     client:
       id: &client client
       useMultipleMongoses: false
+      observeEvents: [ 'commandStartedEvent', 'commandSucceededEvent', 'commandFailedEvent' ]
 
   -
     client:
@@ -42,7 +43,7 @@ initialData:
 tests:
 
   -
-    description: 'client.listDatabases retries at most maxAttempts times (maxAttempts=5)'
+    description: 'client.listDatabases retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -50,7 +51,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [listDatabases]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -63,8 +64,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+
+
   -
-    description: 'client.listDatabaseNames retries at most maxAttempts times (maxAttempts=5)'
+    description: 'client.listDatabaseNames retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -72,7 +104,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [listDatabases]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -83,8 +115,39 @@ tests:
         name: listDatabaseNames
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+          - commandStartedEvent:
+              commandName: listDatabases
+          - commandFailedEvent:
+              commandName: listDatabases
+
+
   -
-    description: 'client.createChangeStream retries at most maxAttempts times (maxAttempts=5)'
+    description: 'client.createChangeStream retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -92,7 +155,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [aggregate]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -106,8 +169,41 @@ tests:
         saveResultAsEntity: changeStream
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+
+
   -
-    description: 'client.clientBulkWrite retries at most maxAttempts times (maxAttempts=5)'
+    description: 'client.clientBulkWrite retries at most maxAttempts=5 times'
+    runOnRequirements:
+      minServerVersion: '8.0'
     operations:
       - name: failPoint
         object: testRunner
@@ -115,7 +211,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [bulkWrite]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -131,8 +227,39 @@ tests:
               document: { _id: 8, x: 88 }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: bulkWrite
+          - commandFailedEvent:
+              commandName: bulkWrite
+          - commandStartedEvent:
+              commandName: bulkWrite
+          - commandFailedEvent:
+              commandName: bulkWrite
+          - commandStartedEvent:
+              commandName: bulkWrite
+          - commandFailedEvent:
+              commandName: bulkWrite
+          - commandStartedEvent:
+              commandName: bulkWrite
+          - commandFailedEvent:
+              commandName: bulkWrite
+          - commandStartedEvent:
+              commandName: bulkWrite
+          - commandFailedEvent:
+              commandName: bulkWrite
+          - commandStartedEvent:
+              commandName: bulkWrite
+          - commandFailedEvent:
+              commandName: bulkWrite
+
+
   -
-    description: 'database.aggregate retries at most maxAttempts times (maxAttempts=5)'
+    description: 'database.aggregate retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -140,7 +267,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [aggregate]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -153,8 +280,39 @@ tests:
           pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+
+
   -
-    description: 'database.listCollections retries at most maxAttempts times (maxAttempts=5)'
+    description: 'database.listCollections retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -162,7 +320,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [listCollections]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -175,8 +333,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+
+
   -
-    description: 'database.listCollectionNames retries at most maxAttempts times (maxAttempts=5)'
+    description: 'database.listCollectionNames retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -184,7 +373,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [listCollections]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -197,8 +386,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+          - commandStartedEvent:
+              commandName: listCollections
+          - commandFailedEvent:
+              commandName: listCollections
+
+
   -
-    description: 'database.runCommand retries at most maxAttempts times (maxAttempts=5)'
+    description: 'database.runCommand retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -206,7 +426,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [ping]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -220,8 +440,39 @@ tests:
           commandName: ping
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: ping
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: ping
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: ping
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: ping
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: ping
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: ping
+          - commandFailedEvent:
+              commandName: ping
+
+
   -
-    description: 'database.createChangeStream retries at most maxAttempts times (maxAttempts=5)'
+    description: 'database.createChangeStream retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -229,7 +480,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [aggregate]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -243,8 +494,39 @@ tests:
         saveResultAsEntity: changeStream
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+
+
   -
-    description: 'collection.aggregate retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.aggregate retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -252,7 +534,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [aggregate]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -265,8 +547,39 @@ tests:
           pipeline: []
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+
+
   -
-    description: 'collection.countDocuments retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.countDocuments retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -274,7 +587,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [aggregate]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -287,8 +600,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+
+
   -
-    description: 'collection.estimatedDocumentCount retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.estimatedDocumentCount retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -296,7 +640,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [count]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -307,8 +651,39 @@ tests:
         name: estimatedDocumentCount
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: count
+          - commandFailedEvent:
+              commandName: count
+          - commandStartedEvent:
+              commandName: count
+          - commandFailedEvent:
+              commandName: count
+          - commandStartedEvent:
+              commandName: count
+          - commandFailedEvent:
+              commandName: count
+          - commandStartedEvent:
+              commandName: count
+          - commandFailedEvent:
+              commandName: count
+          - commandStartedEvent:
+              commandName: count
+          - commandFailedEvent:
+              commandName: count
+          - commandStartedEvent:
+              commandName: count
+          - commandFailedEvent:
+              commandName: count
+
+
   -
-    description: 'collection.distinct retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.distinct retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -316,7 +691,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [distinct]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -330,8 +705,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: distinct
+          - commandFailedEvent:
+              commandName: distinct
+          - commandStartedEvent:
+              commandName: distinct
+          - commandFailedEvent:
+              commandName: distinct
+          - commandStartedEvent:
+              commandName: distinct
+          - commandFailedEvent:
+              commandName: distinct
+          - commandStartedEvent:
+              commandName: distinct
+          - commandFailedEvent:
+              commandName: distinct
+          - commandStartedEvent:
+              commandName: distinct
+          - commandFailedEvent:
+              commandName: distinct
+          - commandStartedEvent:
+              commandName: distinct
+          - commandFailedEvent:
+              commandName: distinct
+
+
   -
-    description: 'collection.find retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.find retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -339,7 +745,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [find]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -352,8 +758,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+
+
   -
-    description: 'collection.findOne retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.findOne retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -361,7 +798,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [find]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -374,8 +811,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+
+
   -
-    description: 'collection.listIndexes retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.listIndexes retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -383,7 +851,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [listIndexes]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -394,8 +862,39 @@ tests:
         name: listIndexes
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+
+
   -
-    description: 'collection.listIndexNames retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.listIndexNames retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -403,7 +902,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [listIndexes]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -414,8 +913,39 @@ tests:
         name: listIndexNames
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+          - commandStartedEvent:
+              commandName: listIndexes
+          - commandFailedEvent:
+              commandName: listIndexes
+
+
   -
-    description: 'collection.createChangeStream retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.createChangeStream retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -423,7 +953,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [aggregate]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -437,8 +967,39 @@ tests:
         saveResultAsEntity: changeStream
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+
+
   -
-    description: 'collection.insertOne retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.insertOne retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -446,7 +1007,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [insert]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -459,8 +1020,39 @@ tests:
           document: { _id: 2, x: 22 }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+
+
   -
-    description: 'collection.insertMany retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.insertMany retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -468,7 +1060,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [insert]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -482,8 +1074,39 @@ tests:
             - { _id: 2, x: 22 }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+
+
   -
-    description: 'collection.deleteOne retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.deleteOne retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -491,7 +1114,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [delete]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -504,8 +1127,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+
+
   -
-    description: 'collection.deleteMany retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.deleteMany retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -513,7 +1167,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [delete]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -526,8 +1180,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+          - commandStartedEvent:
+              commandName: delete
+          - commandFailedEvent:
+              commandName: delete
+
+
   -
-    description: 'collection.replaceOne retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.replaceOne retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -535,7 +1220,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [update]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -549,8 +1234,39 @@ tests:
           replacement: { x: 22 }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+
+
   -
-    description: 'collection.updateOne retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.updateOne retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -558,7 +1274,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [update]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -572,8 +1288,39 @@ tests:
           update: { $set: { x: 22 } }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+
+
   -
-    description: 'collection.updateMany retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.updateMany retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -581,7 +1328,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [update]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -595,8 +1342,39 @@ tests:
           update: { $set: { x: 22 } }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+
+
   -
-    description: 'collection.findOneAndDelete retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.findOneAndDelete retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -604,7 +1382,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [findAndModify]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -617,8 +1395,39 @@ tests:
           filter: {}
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+
+
   -
-    description: 'collection.findOneAndReplace retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.findOneAndReplace retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -626,7 +1435,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [findAndModify]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -640,8 +1449,39 @@ tests:
           replacement: { x: 22 }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+
+
   -
-    description: 'collection.findOneAndUpdate retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.findOneAndUpdate retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -649,7 +1489,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [findAndModify]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -663,8 +1503,39 @@ tests:
           update: { $set: { x: 22 } }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandFailedEvent:
+              commandName: findAndModify
+
+
   -
-    description: 'collection.bulkWrite retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.bulkWrite retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -672,7 +1543,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [insert]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -687,8 +1558,39 @@ tests:
                 document: { _id: 2, x: 22 }
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+
+
   -
-    description: 'collection.createIndex retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.createIndex retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -696,7 +1598,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [createIndexes]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -710,8 +1612,39 @@ tests:
           name: "x_11"
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: createIndexes
+          - commandFailedEvent:
+              commandName: createIndexes
+          - commandStartedEvent:
+              commandName: createIndexes
+          - commandFailedEvent:
+              commandName: createIndexes
+          - commandStartedEvent:
+              commandName: createIndexes
+          - commandFailedEvent:
+              commandName: createIndexes
+          - commandStartedEvent:
+              commandName: createIndexes
+          - commandFailedEvent:
+              commandName: createIndexes
+          - commandStartedEvent:
+              commandName: createIndexes
+          - commandFailedEvent:
+              commandName: createIndexes
+          - commandStartedEvent:
+              commandName: createIndexes
+          - commandFailedEvent:
+              commandName: createIndexes
+
+
   -
-    description: 'collection.dropIndex retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.dropIndex retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -719,7 +1652,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [dropIndexes]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -732,8 +1665,39 @@ tests:
           name: "x_11"
         expectError: true
 
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+
+
   -
-    description: 'collection.dropIndexes retries at most maxAttempts times (maxAttempts=5)'
+    description: 'collection.dropIndexes retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -741,7 +1705,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [dropIndexes]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -751,3 +1715,34 @@ tests:
         object: *collection
         name: dropIndexes
         expectError: true
+
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+          - commandStartedEvent:
+              commandName: dropIndexes
+          - commandFailedEvent:
+              commandName: dropIndexes
+

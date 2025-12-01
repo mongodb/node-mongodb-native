@@ -14,6 +14,7 @@ createEntities:
     client:
       id: &client client
       useMultipleMongoses: false
+      observeEvents: [ 'commandStartedEvent', 'commandSucceededEvent', 'commandFailedEvent' ]
 
   -
     client:
@@ -43,6 +44,10 @@ tests:
 {% for operation in operations %}
   -
     description: '{{operation.object}}.{{operation.operation_name}} retries at most maxAttempts=5 times'
+    {%- if ((operation.operation_name == 'clientBulkWrite')) %}
+    runOnRequirements:
+      minServerVersion: '8.0'
+    {%- endif %}
     operations:
       - name: failPoint
         object: testRunner
@@ -50,7 +55,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 6 }
+            mode: alwaysOn
             data:
               failCommands: [{{operation.command_name}}]
               errorLabels: ["RetryableError", "SystemOverloadedError"]
@@ -69,4 +74,35 @@ tests:
         saveResultAsEntity: changeStream
         {%- endif %}
         expectError: true
+
+    expectEvents:
+      - client: "client"
+        events:
+          # we expect 6 pairs of command started and succeeded events: 1 initial 
+          # attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+
 {% endfor -%}

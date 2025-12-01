@@ -56,6 +56,10 @@ tests:
 {% for operation in operations %}
   -
     description: '{{operation.object}}.{{operation.operation_name}} retries using operation loop'
+    {%- if ((operation.operation_name == 'clientBulkWrite')) %}
+    runOnRequirements:
+      minServerVersion: '8.0'
+    {%- endif %}
     operations:
       -
         object: *utilCollection
