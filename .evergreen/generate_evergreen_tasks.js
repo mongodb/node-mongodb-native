@@ -532,7 +532,8 @@ function* makeTypescriptTasks() {
     };
   }
 
-  yield makeCheckTypesTask('next');
+  // TODO(NODE-7233): unskip ts@next tests once we adopt Typescript 6.0.
+  // yield makeCheckTypesTask('next');
   yield makeCheckTypesTask('current');
   yield makeCheckTypesTask('5.6');
 
