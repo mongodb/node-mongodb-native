@@ -436,8 +436,7 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
 
 /** @internal */
 export function now(): number {
-  const hrtime = process.hrtime();
-  return Math.floor(hrtime[0] * 1000 + hrtime[1] / 1000000);
+  return Math.floor(performance.now());
 }
 
 /** @internal */
