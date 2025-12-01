@@ -261,7 +261,7 @@ async function executeOperationWithRetries<
 
   while (true) {
     if (previousOperationError) {
-      if (previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadError)) {
+      if (previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
         systemOverloadRetryAttempt += 1;
 
         if (
@@ -279,7 +279,7 @@ async function executeOperationWithRetries<
         }
 
         // if we have exhausted overload retry attempts, throw.
-        if (systemOverloadRetryAttempt > maxSystemOverloadRetryAttempts) {
+        if (systemOverloadRetryAttempt >= maxSystemOverloadRetryAttempts) {
           throw previousOperationError;
         }
 
@@ -311,7 +311,7 @@ async function executeOperationWithRetries<
       } else {
         nonOverloadRetryAttempt++;
         // we have no more retry attempts, throw.
-        if (nonOverloadRetryAttempt > maxNonOverloadRetryAttempts) {
+        if (nonOverloadRetryAttempt >= maxNonOverloadRetryAttempts) {
           throw previousOperationError;
         }
 
@@ -381,7 +381,7 @@ async function executeOperationWithRetries<
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;
 
-      if (!operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadError)) {
+      if (!operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
         // if an operation fails with an error that does not contain the SystemOverloadError, deposit 1 token.
         topology.tokenBucket.deposit(RETRY_COST);
       }
