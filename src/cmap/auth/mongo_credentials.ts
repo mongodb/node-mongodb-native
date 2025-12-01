@@ -45,7 +45,8 @@ export const DEFAULT_ALLOWED_HOSTS = [
   '*.mongodbgov.net',
   'localhost',
   '127.0.0.1',
-  '::1'
+  '::1',
+  '*.mongo.com'
 ];
 
 /** Error for when the token audience is missing in the environment. */
