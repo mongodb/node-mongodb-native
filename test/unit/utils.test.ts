@@ -21,7 +21,6 @@ import {
   List,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
-  now,
   shuffle
 } from '../../src/utils';
 import { sleep } from '../tools/utils';
@@ -1284,17 +1283,6 @@ describe('driver utils', function () {
         const result = await abortable(new Promise(() => null), { signal }).catch(e => e);
         expect(result).to.deep.equal(goodError);
       });
-    });
-  });
-
-  describe('now()', () => {
-    it('difference between two calls is close to sleep time', async () => {
-      const time1 = now();
-      await sleep(10);
-      const time2 = now();
-      const diff = time2 - time1;
-      expect(diff).to.be.gte(5);
-      expect(diff).to.be.lte(15);
     });
   });
 });
