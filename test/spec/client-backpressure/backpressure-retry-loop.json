@@ -381,9 +381,11 @@
     },
     {
       "description": "client.clientBulkWrite retries using operation loop",
-      "runOnRequirements": {
-        "minServerVersion": "8.0"
-      },
+      "runOnRequirements": [
+        {
+          "minServerVersion": "8.0"
+        }
+      ],
       "operations": [
         {
           "object": "utilCollection",

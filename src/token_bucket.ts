@@ -1,3 +1,6 @@
+/**
+ * @internal
+ */
 export class TokenBucket {
   private budget: number;
   constructor(allowance: number) {

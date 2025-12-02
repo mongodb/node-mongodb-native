@@ -58,7 +58,7 @@ tests:
     description: '{{operation.object}}.{{operation.operation_name}} retries using operation loop'
     {%- if ((operation.operation_name == 'clientBulkWrite')) %}
     runOnRequirements:
-      minServerVersion: '8.0'
+      - minServerVersion: '8.0' # client bulk write added to server in 8.0
     {%- endif %}
     operations:
       -

@@ -35,7 +35,7 @@ Drivers should test that retries do not occur immediately when a SystemOverloade
             }
         ```
 
-    3. Execute the following command.  Expect that the command errors.  Measure the duration of the command execution.
+    3. Execute the following command. Expect that the command errors. Measure the duration of the command execution.
 
         ```javascript
            const start = performance.now();
@@ -44,16 +44,17 @@ Drivers should test that retries do not occur immediately when a SystemOverloade
            ).to.be.an.instanceof(MongoServerError);
            const end = performance.now();
         ```
-    
-    4. Configure the random number generator used for jitter to always return `1`. 
+
+    4. Configure the random number generator used for jitter to always return `1`.
+
     5. Execute step 3 again.
+
     6. Compare the two time between the two runs.
     ```python
     assertTrue(absolute_value(with_backoff_time - (no_backoff_time + 3.1 seconds)) < 1)
     ```
-    The sum of 5 backoffs is 3.1 seconds. There is a 1-second window to account for potential variance between
-    the two runs.
-
+    The sum of 5 backoffs is 3.1 seconds. There is a 1-second window to account for potential variance between the two
+    runs.
 
 ## Changelog
 
