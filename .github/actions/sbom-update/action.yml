@@ -14,7 +14,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         echo "Generating SBOM for 'node' project..."
-        cdxgen -t 'node' --spec-version 1.5 --json-pretty -o ${{ inputs.output-file }} .
+        npx @cyclonedx/cyclonedx-npm --output-file sbom.json --output-format json --spec-version 1.5
 
     - name: Validate SBOM
       shell: bash
