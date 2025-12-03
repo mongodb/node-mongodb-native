@@ -166,7 +166,7 @@ export const sleep = promisify(setTimeout);
  * If you are using sinon fake timers, it can end up blocking queued IO from running
  * awaiting a nextTick call will allow the event loop to process Networking/FS callbacks
  */
-export const processTick = () => new Promise(resolve => process.nextTick(resolve));
+export const processTick = () => new Promise(resolve => queueMicrotask(resolve));
 
 export function getIndicesOfAuthInUrl(connectionString: string | string[]) {
   const doubleSlashIndex = connectionString.indexOf('//');
