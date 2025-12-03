@@ -209,6 +209,7 @@ export interface HandshakeDocument extends Document {
   compression: string[];
   saslSupportedMechs?: string;
   loadBalanced?: boolean;
+  backpressure: true;
 }
 
 /**
@@ -226,6 +227,7 @@ export async function prepareHandshakeDocument(
 
   const handshakeDoc: HandshakeDocument = {
     [serverApi?.version || options.loadBalanced === true ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
+    backpressure: true,
     helloOk: true,
     client: clientMetadata,
     compression: compressors

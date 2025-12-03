@@ -1431,3 +1431,13 @@ export async function abortable<T>(
     abortListener?.[kDispose]();
   }
 }
+
+export function* exponentialBackoffDelayProvider(
+  maxBackoff: number,
+  baseBackoff: number,
+  backoffIncreaseRate: number
+): Generator<number> {
+  for (let i = 0; ; i++) {
+    yield Math.random() * Math.min(maxBackoff, baseBackoff * backoffIncreaseRate ** i);
+  }
+}
