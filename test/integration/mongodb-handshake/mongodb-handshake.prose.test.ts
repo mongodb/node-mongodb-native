@@ -948,7 +948,7 @@ describe('Client Metadata Update Prose Tests', function () {
 });
 
 // TODO: add prose test descriptions here to align the test with the spec.
-describe.only('Backpressure Metadata', function () {
+describe('Backpressure Metadata', function () {
   let client: MongoClient;
   let spy: sinon.SinonSpy<Parameters<typeof Connection.prototype.command>>;
 
