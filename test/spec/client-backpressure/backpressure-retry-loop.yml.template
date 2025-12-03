@@ -67,13 +67,6 @@ tests:
         arguments:
           filter: {}
 
-      -
-        object: *utilCollection
-        name: deleteMany
-        arguments:
-          documents:
-            - { _id: 1, x: 11 }
-
         {%- if operation.operation_name == "dropIndex" %}
       -
         object: *utilCollection

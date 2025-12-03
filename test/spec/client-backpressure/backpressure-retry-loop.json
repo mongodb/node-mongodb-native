@@ -86,18 +86,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -187,18 +175,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -282,18 +258,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -389,18 +353,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -503,18 +455,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -611,18 +551,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -712,18 +640,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -810,18 +726,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -917,18 +821,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -1016,18 +908,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -1120,18 +1000,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -1221,18 +1089,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -1316,18 +1172,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -1421,18 +1265,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -1519,18 +1351,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -1623,18 +1443,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -1721,18 +1529,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -1816,18 +1612,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -1921,18 +1705,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -2022,18 +1794,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -2131,18 +1891,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -2229,18 +1977,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -2333,18 +2069,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -2434,18 +2158,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -2543,18 +2255,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -2649,18 +2349,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -2747,18 +2435,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -2854,18 +2530,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -2957,18 +2621,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -3070,18 +2722,6 @@
           }
         },
         {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
-          }
-        },
-        {
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
@@ -3171,18 +2811,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {
@@ -3282,18 +2910,6 @@
           "name": "deleteMany",
           "arguments": {
             "filter": {}
-          }
-        },
-        {
-          "object": "utilCollection",
-          "name": "deleteMany",
-          "arguments": {
-            "documents": [
-              {
-                "_id": 1,
-                "x": 11
-              }
-            ]
           }
         },
         {

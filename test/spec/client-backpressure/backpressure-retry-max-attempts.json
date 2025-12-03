@@ -294,7 +294,6 @@
           "arguments": {
             "pipeline": []
           },
-          "saveResultAsEntity": "changeStream",
           "expectError": {
             "isError": true
           }
@@ -938,7 +937,6 @@
           "arguments": {
             "pipeline": []
           },
-          "saveResultAsEntity": "changeStream",
           "expectError": {
             "isError": true
           }
@@ -1858,7 +1856,6 @@
           "arguments": {
             "pipeline": []
           },
-          "saveResultAsEntity": "changeStream",
           "expectError": {
             "isError": true
           }

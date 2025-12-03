@@ -168,7 +168,6 @@ tests:
         name: createChangeStream
         arguments:
           pipeline: []
-        saveResultAsEntity: changeStream
         expectError: 
           isError: true
 
@@ -499,7 +498,6 @@ tests:
         name: createChangeStream
         arguments:
           pipeline: []
-        saveResultAsEntity: changeStream
         expectError: 
           isError: true
 
@@ -981,7 +979,6 @@ tests:
         name: createChangeStream
         arguments:
           pipeline: []
-        saveResultAsEntity: changeStream
         expectError: 
           isError: true
 
