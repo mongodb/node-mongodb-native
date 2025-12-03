@@ -2,7 +2,7 @@
 
 description: tests that operations respect overload backoff retry loop
 
-schemaVersion: '1.0'
+schemaVersion: '1.3'
 
 runOnRequirements:
   -
@@ -88,7 +88,6 @@ tests:
         name: listDatabases
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -142,7 +141,6 @@ tests:
       -
         object: *client
         name: listDatabaseNames
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -199,7 +197,6 @@ tests:
         arguments:
           pipeline: []
         saveResultAsEntity: changeStream
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -260,7 +257,6 @@ tests:
           - insertOne:
               namespace: retryable-writes-tests.coll
               document: { _id: 8, x: 88 }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -316,7 +312,6 @@ tests:
         name: aggregate
         arguments:
           pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -372,7 +367,6 @@ tests:
         name: listCollections
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -428,7 +422,6 @@ tests:
         name: listCollectionNames
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -485,7 +478,6 @@ tests:
         arguments:
           command: { ping: 1 }
           commandName: ping
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -542,7 +534,6 @@ tests:
         arguments:
           pipeline: []
         saveResultAsEntity: changeStream
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -598,7 +589,6 @@ tests:
         name: aggregate
         arguments:
           pipeline: []
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -654,7 +644,6 @@ tests:
         name: countDocuments
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -708,7 +697,6 @@ tests:
       -
         object: *collection
         name: estimatedDocumentCount
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -765,7 +753,6 @@ tests:
         arguments:
           fieldName: x
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -821,7 +808,6 @@ tests:
         name: find
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -877,7 +863,6 @@ tests:
         name: findOne
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -931,7 +916,6 @@ tests:
       -
         object: *collection
         name: listIndexes
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -985,7 +969,6 @@ tests:
       -
         object: *collection
         name: listIndexNames
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1042,7 +1025,6 @@ tests:
         arguments:
           pipeline: []
         saveResultAsEntity: changeStream
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1098,7 +1080,6 @@ tests:
         name: insertOne
         arguments:
           document: { _id: 2, x: 22 }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1155,7 +1136,6 @@ tests:
         arguments:
           documents:
             - { _id: 2, x: 22 }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1211,7 +1191,6 @@ tests:
         name: deleteOne
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1267,7 +1246,6 @@ tests:
         name: deleteMany
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1324,7 +1302,6 @@ tests:
         arguments:
           filter: {}
           replacement: { x: 22 }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1381,7 +1358,6 @@ tests:
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1438,7 +1414,6 @@ tests:
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1494,7 +1469,6 @@ tests:
         name: findOneAndDelete
         arguments:
           filter: {}
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1551,7 +1525,6 @@ tests:
         arguments:
           filter: {}
           replacement: { x: 22 }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1608,7 +1581,6 @@ tests:
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1666,7 +1638,6 @@ tests:
           requests:
             - insertOne:
                 document: { _id: 2, x: 22 }
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1723,7 +1694,6 @@ tests:
         arguments:
           keys: { x: 11 }
           name: "x_11"
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1785,7 +1755,6 @@ tests:
         name: dropIndex
         arguments:
           name: "x_11"
-        expectError: false
 
     expectEvents:
       - client: "client"
@@ -1839,7 +1808,6 @@ tests:
       -
         object: *collection
         name: dropIndexes
-        expectError: false
 
     expectEvents:
       - client: "client"

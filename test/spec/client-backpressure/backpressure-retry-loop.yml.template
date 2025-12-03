@@ -2,7 +2,7 @@
 
 description: tests that operations respect overload backoff retry loop
 
-schemaVersion: '1.0'
+schemaVersion: '1.3'
 
 runOnRequirements:
   -
@@ -108,7 +108,6 @@ tests:
         {%- if operation.operation_name == "createChangeStream" %}
         saveResultAsEntity: changeStream
         {%- endif %}
-        expectError: false
 
     expectEvents:
       - client: "client"

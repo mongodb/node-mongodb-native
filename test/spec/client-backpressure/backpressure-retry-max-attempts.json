@@ -1,6 +1,6 @@
 {
   "description": "tests that operations retry at most maxAttempts=5 times",
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.3",
   "runOnRequirements": [
     {
       "minServerVersion": "4.4",
@@ -91,7 +91,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -189,7 +191,9 @@
         {
           "object": "client",
           "name": "listDatabaseNames",
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -291,7 +295,9 @@
             "pipeline": []
           },
           "saveResultAsEntity": "changeStream",
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -407,7 +413,9 @@
               }
             ]
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -515,7 +523,9 @@
               }
             ]
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -616,7 +626,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -717,7 +729,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -821,7 +835,9 @@
             },
             "commandName": "ping"
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -923,7 +939,9 @@
             "pipeline": []
           },
           "saveResultAsEntity": "changeStream",
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1024,7 +1042,9 @@
           "arguments": {
             "pipeline": []
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1125,7 +1145,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1223,7 +1245,9 @@
         {
           "object": "collection",
           "name": "estimatedDocumentCount",
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1325,7 +1349,9 @@
             "fieldName": "x",
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1426,7 +1452,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1527,7 +1555,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1625,7 +1655,9 @@
         {
           "object": "collection",
           "name": "listIndexes",
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1723,7 +1755,9 @@
         {
           "object": "collection",
           "name": "listIndexNames",
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1825,7 +1859,9 @@
             "pipeline": []
           },
           "saveResultAsEntity": "changeStream",
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -1929,7 +1965,9 @@
               "x": 22
             }
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2035,7 +2073,9 @@
               }
             ]
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2136,7 +2176,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2237,7 +2279,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2341,7 +2385,9 @@
               "x": 22
             }
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2447,7 +2493,9 @@
               }
             }
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2553,7 +2601,9 @@
               }
             }
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2654,7 +2704,9 @@
           "arguments": {
             "filter": {}
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2758,7 +2810,9 @@
               "x": 22
             }
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2864,7 +2918,9 @@
               }
             }
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -2974,7 +3030,9 @@
               }
             ]
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -3078,7 +3136,9 @@
             },
             "name": "x_11"
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -3179,7 +3239,9 @@
           "arguments": {
             "name": "x_11"
           },
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -3277,7 +3339,9 @@
         {
           "object": "collection",
           "name": "dropIndexes",
-          "expectError": true
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
