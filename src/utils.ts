@@ -434,10 +434,13 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
   };
 }
 
-/** @internal */
-export function now(): number {
-  const hrtime = process.hrtime();
-  return Math.floor(hrtime[0] * 1000 + hrtime[1] / 1000000);
+/**
+ * This function returns the number of milliseconds since an arbitrary point in time.
+ * This function should only be used to measure time intervals.
+ * @internal
+ * */
+export function processTimeMS(): number {
+  return Math.floor(performance.now());
 }
 
 /** @internal */
@@ -446,7 +449,7 @@ export function calculateDurationInMs(started: number | undefined): number {
     return -1;
   }
 
-  const elapsed = now() - started;
+  const elapsed = processTimeMS() - started;
   return elapsed < 0 ? 0 : elapsed;
 }
 

@@ -45,7 +45,7 @@ import {
   List,
   makeStateMachine,
   noop,
-  now,
+  processTimeMS,
   promiseWithResolvers,
   shuffle
 } from '../utils';
@@ -602,7 +602,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       resolve,
       reject,
       cancelled: false,
-      startTime: now(),
+      startTime: processTimeMS(),
       operationName: options.operationName,
       waitingLogged: false,
       previousServer: options.previousServer
@@ -1001,7 +1001,8 @@ function processWaitQueue(topology: Topology) {
               waitQueueMember.serverSelector,
               topology.description,
               topology.s.serverSelectionTimeoutMS !== 0
-                ? topology.s.serverSelectionTimeoutMS - (now() - waitQueueMember.startTime)
+                ? topology.s.serverSelectionTimeoutMS -
+                  (processTimeMS() - waitQueueMember.startTime)
                 : -1,
               waitQueueMember.operationName
             )

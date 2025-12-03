@@ -21,7 +21,7 @@ import {
 } from '../../src';
 import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
 import { Topology } from '../../src/sdam/topology';
-import { now } from '../../src/utils';
+import { processTimeMS } from '../../src/utils';
 import { type TestConfiguration } from './runner/config';
 
 export function ensureCalledWith(stub: any, args: any[]) {
@@ -483,9 +483,9 @@ export async function measureDuration<T>(f: () => Promise<T>): Promise<{
   duration: number;
   result: T | Error;
 }> {
-  const start = now();
+  const start = processTimeMS();
   const result = await f().catch(e => e);
-  const end = now();
+  const end = processTimeMS();
   return {
     duration: end - start,
     result

@@ -5,7 +5,7 @@ import * as sinon from 'sinon';
 import { MongoRuntimeError } from '../../src/error';
 import { MongoClient } from '../../src/mongo_client';
 import { applySession, ClientSession, ServerSession, ServerSessionPool } from '../../src/sessions';
-import { isHello, now } from '../../src/utils';
+import { isHello, processTimeMS } from '../../src/utils';
 import { genClusterTime } from '../tools/common';
 import * as mock from '../tools/mongodb-mock/index';
 
@@ -513,7 +513,7 @@ describe('Sessions - unit', function () {
 
     it('should remove sessions which have timed out on acquire, and return a fresh session', function () {
       const oldSession = new ServerSession();
-      oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
+      oldSession.lastUse = processTimeMS() - 30 * 60 * 1000; // add 30min
 
       const pool = new ServerSessionPool(client);
       pool.sessions.push(oldSession);
@@ -527,7 +527,7 @@ describe('Sessions - unit', function () {
     describe('release()', () => {
       const makeOldSession = () => {
         const oldSession = new ServerSession();
-        oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
+        oldSession.lastUse = processTimeMS() - 30 * 60 * 1000; // add 30min
         return oldSession;
       };
 
@@ -603,7 +603,7 @@ describe('Sessions - unit', function () {
 
     it('should not reintroduce a soon-to-expire session to the pool on release', function () {
       const session = new ServerSession();
-      session.lastUse = now() - 9.5 * 60 * 1000; // add 9.5min
+      session.lastUse = processTimeMS() - 9.5 * 60 * 1000; // add 9.5min
 
       const pool = new ServerSessionPool(client);
 
