@@ -6,10 +6,10 @@ import { TopologyDescription } from '../../../src/sdam/topology_description';
 
 describe('TopologyDescription', function () {
   describe('#constructor', function () {
-    it('sets commonWireVersion to null', function () {
+    it('sets commonWireVersion to 0', function () {
       const initial = new TopologyDescription(TopologyType.ReplicaSetWithPrimary);
 
-      expect(initial.commonWireVersion).to.equal(null);
+      expect(initial.commonWireVersion).to.equal(0);
     });
   });
 

@@ -771,7 +771,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return result;
   }
 
-  get commonWireVersion(): number | null {
+  get commonWireVersion(): number {
     return this.description.commonWireVersion;
   }
 

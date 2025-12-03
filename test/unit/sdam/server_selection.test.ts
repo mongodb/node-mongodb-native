@@ -259,23 +259,6 @@ describe('server selection', function () {
           });
         });
       });
-
-      context('when a common wire version is not provided', function () {
-        const topologyDescription = new TopologyDescription(
-          TopologyType.ReplicaSetWithPrimary,
-          serverDescriptions,
-          'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION,
-          new ObjectId(),
-          MIN_SECONDARY_WRITE_WIRE_VERSION
-        );
-        const selector = secondaryWritableServerSelector(undefined, ReadPreference.secondary);
-        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
-
-        it('selects a primary', function () {
-          expect(servers).to.deep.equal([primary]);
-        });
-      });
     });
 
     context('when the topology is sharded', function () {

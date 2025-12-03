@@ -42,7 +42,7 @@ export class TopologyDescription {
   logicalSessionTimeoutMinutes: number | null;
   heartbeatFrequencyMS: number;
   localThresholdMS: number;
-  commonWireVersion: number | null;
+  commonWireVersion: number;
   /**
    * Create a TopologyDescription
    */
@@ -66,7 +66,7 @@ export class TopologyDescription {
     this.setName = setName ?? null;
     this.maxElectionId = maxElectionId ?? null;
     this.maxSetVersion = maxSetVersion ?? null;
-    this.commonWireVersion = commonWireVersion ?? null;
+    this.commonWireVersion = commonWireVersion ?? 0;
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
@@ -192,7 +192,7 @@ export class TopologyDescription {
 
     // update common wire version
     if (serverDescription.maxWireVersion !== 0) {
-      if (commonWireVersion == null) {
+      if (commonWireVersion === 0) {
         commonWireVersion = serverDescription.maxWireVersion;
       } else {
         commonWireVersion = Math.min(commonWireVersion, serverDescription.maxWireVersion);
