@@ -19,7 +19,7 @@ import {
   MongoServerSelectionError,
   ObjectId
 } from '../../../src';
-import { now, squashError } from '../../../src/utils';
+import { processTimeMS, squashError } from '../../../src/utils';
 import {
   clearFailPoint,
   configureFailPoint,
@@ -916,7 +916,7 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a server selection timeout error after no more than 15ms.
        */
       client = new MongoClient('mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20');
-      const start = now();
+      const start = processTimeMS();
 
       const maybeError = await client
         .db('test')
@@ -926,7 +926,7 @@ describe('CSOT spec prose tests', function () {
           () => null,
           e => e
         );
-      const end = now();
+      const end = processTimeMS();
 
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
@@ -940,7 +940,7 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a server selection timeout error after no more than 15ms.
        */
       client = new MongoClient('mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20');
-      const start = now();
+      const start = processTimeMS();
 
       const maybeError = await client
         .db('test')
@@ -950,7 +950,7 @@ describe('CSOT spec prose tests', function () {
           () => null,
           e => e
         );
-      const end = now();
+      const end = processTimeMS();
 
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
@@ -964,7 +964,7 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a server selection timeout error after no more than 15ms.
        */
       client = new MongoClient('mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10');
-      const start = now();
+      const start = processTimeMS();
       const maybeError = await client
         .db('test')
         .admin()
@@ -973,7 +973,7 @@ describe('CSOT spec prose tests', function () {
           () => null,
           e => e
         );
-      const end = now();
+      const end = processTimeMS();
 
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
@@ -987,7 +987,7 @@ describe('CSOT spec prose tests', function () {
        *   - Expect this to fail with a server selection timeout error after no more than 15ms.
        */
       client = new MongoClient('mongodb://invalid/?timeoutMS=0&serverSelectionTimeoutMS=10');
-      const start = now();
+      const start = processTimeMS();
       const maybeError = await client
         .db('test')
         .admin()
@@ -996,7 +996,7 @@ describe('CSOT spec prose tests', function () {
           () => null,
           e => e
         );
-      const end = now();
+      const end = processTimeMS();
 
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
@@ -1040,7 +1040,7 @@ describe('CSOT spec prose tests', function () {
         serverSelectionTimeoutMS: 20,
         timeoutMS: 10
       });
-      const start = now();
+      const start = processTimeMS();
       const maybeError = await client
         .db('db')
         .collection('coll')
@@ -1049,7 +1049,7 @@ describe('CSOT spec prose tests', function () {
           () => null,
           e => e
         );
-      const end = now();
+      const end = processTimeMS();
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     }).skipReason =
@@ -1092,7 +1092,7 @@ describe('CSOT spec prose tests', function () {
         serverSelectionTimeoutMS: 10,
         timeoutMS: 20
       });
-      const start = now();
+      const start = processTimeMS();
       const maybeError = await client
         .db('db')
         .collection('coll')
@@ -1101,7 +1101,7 @@ describe('CSOT spec prose tests', function () {
           () => null,
           e => e
         );
-      const end = now();
+      const end = processTimeMS();
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
       expect(end - start).to.be.lte(15);
     }).skipReason =

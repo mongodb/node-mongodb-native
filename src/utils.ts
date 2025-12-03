@@ -434,8 +434,12 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
   };
 }
 
-/** @internal */
-export function now(): number {
+/**
+ * This function returns the number of milliseconds since an arbitrary point in time.
+ * This function should only be used to measure time intervals.
+ * @internal
+ * */
+export function processTimeMS(): number {
   return Math.floor(performance.now());
 }
 
@@ -445,7 +449,7 @@ export function calculateDurationInMs(started: number | undefined): number {
     return -1;
   }
 
-  const elapsed = now() - started;
+  const elapsed = processTimeMS() - started;
   return elapsed < 0 ? 0 : elapsed;
 }
 

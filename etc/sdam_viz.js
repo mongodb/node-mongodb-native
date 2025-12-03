@@ -5,7 +5,7 @@
 // npx ts-node etc/sdam_viz.js -h
 
 const { MongoClient } = require('../src');
-const { now, calculateDurationInMs, arrayStrictEqual, errorStrictEqual } = require('../src/utils');
+const { calculateDurationInMs, arrayStrictEqual, errorStrictEqual, processTimeMS } = require('../src/utils');
 
 const util = require('util');
 const chalk = require('chalk');
@@ -207,7 +207,7 @@ async function scheduleWriteWorkload(client) {
   const currentWriteWorkload = writeWorkloadCounter++;
 
   try {
-    const start = now();
+    const start = processTimeMS();
     await client.db('test').collection('test').insertOne({ a: 42 });
     averageWriteMS = 0.2 * calculateDurationInMs(start) + 0.8 * averageWriteMS;
 

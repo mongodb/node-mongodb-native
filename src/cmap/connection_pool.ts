@@ -36,7 +36,7 @@ import {
   List,
   makeCounter,
   noop,
-  now,
+  processTimeMS,
   promiseWithResolvers
 } from '../utils';
 import { connect } from './connect';
@@ -319,7 +319,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * explicitly destroyed by the new owner.
    */
   async checkOut(options: { timeoutContext: TimeoutContext } & Abortable): Promise<Connection> {
-    const checkoutTime = now();
+    const checkoutTime = processTimeMS();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -616,7 +616,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this.pending++;
     // This is our version of a "virtual" no-I/O connection as the spec requires
-    const connectionCreatedTime = now();
+    const connectionCreatedTime = processTimeMS();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CREATED,
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
