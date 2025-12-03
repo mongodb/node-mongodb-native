@@ -1,0 +1,83 @@
+description: backpressure-network-timeout-error
+schemaVersion: "1.17"
+runOnRequirements:
+  - minServerVersion: "4.4"
+    serverless: forbid
+    topologies:
+      - single
+      - replicaset
+      - sharded
+createEntities:
+  - client:
+      id: setupClient
+      useMultipleMongoses: false
+initialData:
+  - collectionName: backpressure-network-timeout-error
+    databaseName: sdam-tests
+    documents:
+      - _id: 1
+      - _id: 2
+tests:
+  - description: apply backpressure on network timeout error during connection establishment
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: client
+                useMultipleMongoses: false
+                observeEvents:
+                  - serverDescriptionChangedEvent
+                  - poolClearedEvent
+                uriOptions:
+                  retryWrites: false
+                  heartbeatFrequencyMS: 1000000
+                  appname: backpressureNetworkTimeoutErrorTest
+                  serverMonitoringMode: poll
+                  connectTimeoutMS: 250
+                  socketTimeoutMS: 250
+            - database:
+                id: database
+                client: client
+                databaseName: sdam-tests
+            - collection:
+                id: collection
+                database: database
+                collectionName: backpressure-network-timeout-error
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: client
+          event:
+            serverDescriptionChangedEvent: {}
+          count: 1
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: setupClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: alwaysOn
+            data:
+              failCommands:
+                - isMaster
+                - hello
+              blockConnection: true
+              blockTimeMS: 500
+              appName: backpressureNetworkTimeoutErrorTest
+      - name: insertMany
+        object: collection
+        arguments:
+          documents:
+            - _id: 3
+            - _id: 4
+        expectError:
+          isError: true
+          errorLabelsContain:
+            - SystemOverloadedError
+            - RetryableError
+    expectEvents:
+      - client: client
+        eventType: cmap
+        events: []

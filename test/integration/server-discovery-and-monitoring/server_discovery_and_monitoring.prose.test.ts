@@ -1,13 +1,18 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { type MongoClient } from '../../../src';
+import {
+  type ConnectionCheckOutFailedEvent,
+  type ConnectionPoolClearedEvent,
+  type MongoClient
+} from '../../../src';
 import {
   CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_READY,
   SERVER_HEARTBEAT_FAILED,
   SERVER_HEARTBEAT_SUCCEEDED
 } from '../../../src/constants';
+import { sleep } from '../../tools/utils';
 
 describe('Server Discovery and Monitoring Prose Tests', function () {
   context('Monitors sleep at least minHeartbeatFrequencyMS between checks', function () {
@@ -186,5 +191,75 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
         expect(filteredEvents).to.be.empty;
       }
     });
+  });
+
+  context('Connection Pool Backpressure', function () {
+    let client: MongoClient;
+    const checkoutFailedEvents: Array<ConnectionCheckOutFailedEvent> = [];
+    const poolClearedEvents: Array<ConnectionPoolClearedEvent> = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { maxConnecting: 100 });
+
+      client.on('connectionCheckOutFailed', e => checkoutFailedEvents.push(e));
+      client.on('connectionPoolCleared', e => poolClearedEvents.push(e));
+
+      await client.connect();
+
+      const admin = client.db('admin').admin();
+      await admin.command({
+        setParameter: 1,
+        ingressConnectionEstablishmentRateLimiterEnabled: true
+      });
+      await admin.command({
+        setParameter: 1,
+        ingressConnectionEstablishmentRatePerSec: 20
+      });
+      await admin.command({
+        setParameter: 1,
+        ingressConnectionEstablishmentBurstCapacitySecs: 1
+      });
+      await admin.command({
+        setParameter: 1,
+        ingressConnectionEstablishmentMaxQueueDepth: 1
+      });
+
+      await client.db('test').collection('test').insertOne({});
+    });
+
+    afterEach(async function () {
+      // give the time to recover from the connection storm before cleaning up.
+      await sleep(1000);
+
+      const admin = client.db('admin').admin();
+      await admin.command({
+        setParameter: 1,
+        ingressConnectionEstablishmentRateLimiterEnabled: false
+      });
+
+      await client.close();
+    });
+
+    it(
+      'does not clear the pool when connections are closed due to connection storms',
+      {
+        requires: {
+          mongodb: '>=7.0' // rate limiting added in 7.0
+        }
+      },
+      async function () {
+        await Promise.allSettled(
+          Array.from({ length: 100 }).map(() =>
+            client
+              .db('test')
+              .collection('test')
+              .findOne({ $where: 'function() { sleep(2000); return true; }' })
+          )
+        );
+
+        expect(poolClearedEvents).to.be.empty;
+        expect(checkoutFailedEvents.length).to.be.greaterThan(10);
+      }
+    );
   });
 });
