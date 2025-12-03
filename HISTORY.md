@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.0](https://github.com/mongodb/node-mongodb-native/compare/v7.0.0...v7.1.0) (2025-12-03)
+
+
+### Features
+
+* **NODE-7304:** remove usages in src of promisify ([#4799](https://github.com/mongodb/node-mongodb-native/issues/4799)) ([761b9bf](https://github.com/mongodb/node-mongodb-native/commit/761b9bfab8dfc8e3e7e311731d7a5cda1285bc6c))
+* **NODE-7319:** update allowed hosts list with *.mongo.com ([#4802](https://github.com/mongodb/node-mongodb-native/issues/4802)) ([bfb7160](https://github.com/mongodb/node-mongodb-native/commit/bfb71603fdfaaaebf418a3064f293d2c95697865))
+* **NODE-7330:** deprecate RenameCollectionOptions.new_collection ([#4815](https://github.com/mongodb/node-mongodb-native/issues/4815)) ([a96fa26](https://github.com/mongodb/node-mongodb-native/commit/a96fa26dea3060828af747f0f2974229018de730))
+
+
+### Bug Fixes
+
+* **NODE-7290:** use valueof for error code check ([#4791](https://github.com/mongodb/node-mongodb-native/issues/4791)) ([1cc3d1c](https://github.com/mongodb/node-mongodb-native/commit/1cc3d1c952274b2fc18ffd4898978af97f76b554))
+* **NODE-7307:** Replace node:process.hrtime() with performance.now() ([#4816](https://github.com/mongodb/node-mongodb-native/issues/4816)) ([ae2e037](https://github.com/mongodb/node-mongodb-native/commit/ae2e037e896fbc673061da49a7c45743ae145651))
+
 ## [7.0.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v7.0.0) (2025-11-06)
 
 
