@@ -231,7 +231,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this.mongoLogger = this.server.topology.client?.mongoLogger;
     this.component = 'connection';
 
-    process.nextTick(() => {
+    queueMicrotask(() => {
       this.emitAndLog(ConnectionPool.CONNECTION_POOL_CREATED, new ConnectionPoolCreatedEvent(this));
     });
   }
@@ -342,7 +342,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     });
 
     this.waitQueue.push(waitQueueMember);
-    process.nextTick(() => this.processWaitQueue());
+    queueMicrotask(() => this.processWaitQueue());
 
     try {
       timeout?.throwIfExpired();
@@ -405,7 +405,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this.destroyConnection(connection, reason);
     }
 
-    process.nextTick(() => this.processWaitQueue());
+    queueMicrotask(() => this.processWaitQueue());
   }
 
   /**
@@ -461,7 +461,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     if (interruptInUseConnections) {
-      process.nextTick(() => this.interruptInUseConnections(oldGeneration));
+      queueMicrotask(() => this.interruptInUseConnections(oldGeneration));
     }
 
     this.processWaitQueue();
@@ -702,7 +702,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this.createConnection((err, connection) => {
         if (!err && connection) {
           this.connections.push(connection);
-          process.nextTick(() => this.processWaitQueue());
+          queueMicrotask(() => this.processWaitQueue());
         }
         if (this.poolState === PoolState.ready) {
           clearTimeout(this.minPoolSizeTimer);
@@ -809,7 +809,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             waitQueueMember.resolve(connection);
           }
         }
-        process.nextTick(() => this.processWaitQueue());
+        queueMicrotask(() => this.processWaitQueue());
       });
     }
     this.processingWaitQueue = false;

@@ -130,7 +130,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       expect(topology.description).to.have.property('type', TopologyType.Sharded);
       const servers = Array.from(topology.description.servers.keys());
       expect(servers).to.deep.equal(srvAddresses(recordSets[0]));
-      process.nextTick(() => srvPoller.trigger(recordSets[1]));
+      queueMicrotask(() => srvPoller.trigger(recordSets[1]));
 
       await once(topology, 'topologyDescriptionChanged');
 
@@ -296,7 +296,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         const callback = args[args.length - 1] as (err: null, address: string, family: 4) => void;
 
         if (hostname.includes('test.mock.test.build.10gen.cc')) {
-          return process.nextTick(callback, null, '127.0.0.1', 4);
+          return queueMicrotask(() => callback(null, '127.0.0.1', 4));
         }
 
         const { wrappedMethod: lookup } = lookupStub;
