@@ -259,23 +259,6 @@ describe('server selection', function () {
           });
         });
       });
-
-      context('when a common wire version is not provided', function () {
-        const topologyDescription = new TopologyDescription(
-          TopologyType.ReplicaSetWithPrimary,
-          serverDescriptions,
-          'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION,
-          new ObjectId(),
-          MIN_SECONDARY_WRITE_WIRE_VERSION
-        );
-        const selector = secondaryWritableServerSelector(undefined, ReadPreference.secondary);
-        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
-
-        it('selects a primary', function () {
-          expect(servers).to.deep.equal([primary]);
-        });
-      });
     });
 
     context('when the topology is sharded', function () {
@@ -343,23 +326,6 @@ describe('server selection', function () {
           it('selects a mongos', function () {
             expect(servers).to.deep.equal([mongos]);
           });
-        });
-      });
-
-      context('when a common wire version is not provided', function () {
-        const topologyDescription = new TopologyDescription(
-          TopologyType.Sharded,
-          serverDescriptions,
-          'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION,
-          new ObjectId(),
-          MIN_SECONDARY_WRITE_WIRE_VERSION
-        );
-        const selector = secondaryWritableServerSelector();
-        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
-
-        it('selects a mongos', function () {
-          expect(servers).to.deep.equal([mongos]);
         });
       });
     });
@@ -431,23 +397,6 @@ describe('server selection', function () {
           });
         });
       });
-
-      context('when a common wire version is not provided', function () {
-        const topologyDescription = new TopologyDescription(
-          TopologyType.LoadBalanced,
-          serverDescriptions,
-          'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION,
-          new ObjectId(),
-          MIN_SECONDARY_WRITE_WIRE_VERSION
-        );
-        const selector = secondaryWritableServerSelector();
-        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
-
-        it('selects a load balancer', function () {
-          expect(servers).to.deep.equal([loadBalancer]);
-        });
-      });
     });
 
     context('when the topology is single', function () {
@@ -517,23 +466,6 @@ describe('server selection', function () {
           });
         });
       });
-
-      context('when a common wire version is not provided', function () {
-        const topologyDescription = new TopologyDescription(
-          TopologyType.Single,
-          serverDescriptions,
-          'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION,
-          new ObjectId(),
-          MIN_SECONDARY_WRITE_WIRE_VERSION
-        );
-        const selector = secondaryWritableServerSelector();
-        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
-
-        it('selects a standalone', function () {
-          expect(servers).to.deep.equal([single]);
-        });
-      });
     });
 
     context('localThresholdMS is respected as an option', function () {
@@ -580,7 +512,7 @@ describe('server selection', function () {
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
-        const selector = secondaryWritableServerSelector();
+        const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
         const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
         expect(servers).to.have.lengthOf(2);
         const selectedAddresses = new Set(servers.map(({ address }) => address));
@@ -599,7 +531,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION,
           { localThresholdMS: 5 }
         );
-        const selector = secondaryWritableServerSelector();
+        const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
         const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
         expect(servers).to.have.lengthOf(1);
         const selectedAddresses = new Set(servers.map(({ address }) => address));
