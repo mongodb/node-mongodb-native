@@ -13,7 +13,7 @@ import {
   CONNECTION_READY
 } from '../constants';
 import type { MongoError } from '../error';
-import { now } from '../utils';
+import { processTimeMS } from '../utils';
 import type { Connection } from './connection';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 
@@ -145,7 +145,7 @@ export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   /** @internal */
   constructor(pool: ConnectionPool, connection: Connection, connectionCreatedEventTime: number) {
     super(pool);
-    this.durationMS = now() - connectionCreatedEventTime;
+    this.durationMS = processTimeMS() - connectionCreatedEventTime;
     this.connectionId = connection.id;
   }
 }
@@ -224,7 +224,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
     error?: MongoError
   ) {
     super(pool);
-    this.durationMS = now() - checkoutTime;
+    this.durationMS = processTimeMS() - checkoutTime;
     this.reason = reason;
     this.error = error;
   }
@@ -252,7 +252,7 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   /** @internal */
   constructor(pool: ConnectionPool, connection: Connection, checkoutTime: number) {
     super(pool);
-    this.durationMS = now() - checkoutTime;
+    this.durationMS = processTimeMS() - checkoutTime;
     this.connectionId = connection.id;
   }
 }

@@ -42,7 +42,7 @@ import {
   List,
   MongoDBNamespace,
   noop,
-  now,
+  processTimeMS,
   squashError,
   uuidV4
 } from './utils';
@@ -726,7 +726,9 @@ export class ClientSession
           })
         : null;
 
-    const startTime = this.timeoutContext?.csotEnabled() ? this.timeoutContext.start : now();
+    const startTime = this.timeoutContext?.csotEnabled()
+      ? this.timeoutContext.start
+      : processTimeMS();
 
     let committed = false;
     let result: any;
@@ -768,7 +770,7 @@ export class ClientSession
 
           if (
             fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-            (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
+            (this.timeoutContext != null || processTimeMS() - startTime < MAX_TIMEOUT)
           ) {
             continue;
           }
@@ -796,14 +798,14 @@ export class ClientSession
             if (
               !isMaxTimeMSExpiredError(commitError) &&
               commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult) &&
-              (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
+              (this.timeoutContext != null || processTimeMS() - startTime < MAX_TIMEOUT)
             ) {
               continue;
             }
 
             if (
               commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-              (this.timeoutContext != null || now() - startTime < MAX_TIMEOUT)
+              (this.timeoutContext != null || processTimeMS() - startTime < MAX_TIMEOUT)
             ) {
               break;
             }
@@ -943,7 +945,7 @@ export class ServerSession {
       return;
     }
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
-    this.lastUse = now();
+    this.lastUse = processTimeMS();
     this.txnNumber = 0;
     this.isDirty = false;
   }
@@ -1078,7 +1080,7 @@ export function applySession(
   }
 
   // mark the last use of this session, and apply the `lsid`
-  serverSession.lastUse = now();
+  serverSession.lastUse = processTimeMS();
   command.lsid = serverSession.id;
 
   const inTxnOrTxnCommand = session.inTransaction() || isTransactionCommand(command);
