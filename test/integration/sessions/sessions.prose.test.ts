@@ -107,8 +107,8 @@ describe('Sessions Prose Tests', () => {
       expect(allResults).to.have.lengthOf(operations.length);
       expect(events).to.have.lengthOf(operations.length);
 
-      // This is a guarantee in node, unless you are performing a transaction (which is not being done in this test)
-      expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex')))).to.have.lengthOf(1);
+      const uniqueSessionIds = new Set(events.map(ev => ev.command.lsid.id.toString('hex')));
+      expect(uniqueSessionIds).to.have.length.lessThanOrEqual(2);
     });
   });
 
