@@ -199,8 +199,10 @@ export async function performInitialHandshake(
       if (error instanceof MongoError) {
         error.addErrorLabel(MongoErrorLabel.HandshakeError);
       }
-      // If we encounter an error executing the initial handshake, apply backpressure labels.
-      applyBackpressureLabels(error);
+      // If we encounter a network error executing the initial handshake, apply backpressure labels.
+      if (error instanceof MongoNetworkError) {
+        applyBackpressureLabels(error);
+      }
 
       throw error;
     }
@@ -437,7 +439,9 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     socket = await connectedSocket;
     return socket;
   } catch (error) {
-    // If we encounter a SystemOverloaded error while establishing a socket, apply the backpressure labels to it.
+    // If we encounter an error while establishing a socket, apply the backpressure labels to it.  We cannot
+    // differentiate between DNS, TLS errors and network errors without refactoring our connection establishment to
+    // handle all three steps separately.
     applyBackpressureLabels(error);
     socket.destroy();
     throw error;
