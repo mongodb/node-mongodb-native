@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 import { spawnSync } from 'child_process';
 import { dirname } from 'path';

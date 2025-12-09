@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import { AbstractCursor, ChangeStream, ClientSession, GridFSBucket, MongoClient } from 'mongodb';

@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
 import { clearTimeout, setTimeout } from 'timers';

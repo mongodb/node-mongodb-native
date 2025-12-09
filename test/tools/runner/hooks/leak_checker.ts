@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
+
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 import * as chalk from 'chalk';
 import * as net from 'net';

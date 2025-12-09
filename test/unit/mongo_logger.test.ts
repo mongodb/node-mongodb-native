@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { BSONRegExp, Code, Double, EJSON, Int32, MaxKey, MinKey, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';

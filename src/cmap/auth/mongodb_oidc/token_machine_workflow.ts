@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import * as fs from 'fs';
 
 import { MongoAWSError } from '../../../error';

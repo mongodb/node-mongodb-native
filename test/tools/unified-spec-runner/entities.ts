@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { AssertionError, expect } from 'chai';
 import { EventEmitter } from 'events';
 import { setImmediate } from 'timers';

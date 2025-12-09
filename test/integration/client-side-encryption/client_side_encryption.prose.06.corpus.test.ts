@@ -1,5 +1,7 @@
 // The corpus test exhaustively enumerates all ways to encrypt all BSON value types. Note, the test data includes BSON binary subtype 4 (or standard UUID), which MUST be decoded and encoded as subtype 4. Run the test as follows.
 
+import * as process from 'node:process';
+
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';

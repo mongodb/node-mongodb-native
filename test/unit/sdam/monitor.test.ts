@@ -1,5 +1,6 @@
 import { once } from 'node:events';
 import * as net from 'node:net';
+import * as process from 'node:process';
 
 import { Long, ObjectId } from 'bson';
 import { expect } from 'chai';

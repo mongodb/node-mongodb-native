@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import * as BSON from 'bson';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';

@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 import { ConnectionString } from 'mongodb-connection-string-url';
 

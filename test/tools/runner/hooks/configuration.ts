@@ -5,6 +5,8 @@ require('source-map-support').install({
   hookRequire: true
 });
 
+import * as process from 'node:process';
+
 import { MongoClient } from '../../../../src';
 import { AlpineTestConfiguration, AstrolabeTestConfiguration, TestConfiguration } from '../config';
 import { getEnvironmentalOptions } from '../../utils';

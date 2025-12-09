@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { type MongoClient } from '../../../../src';
 import { Filter } from './filter';
 

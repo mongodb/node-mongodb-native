@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';

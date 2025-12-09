@@ -1,4 +1,5 @@
 import { writeFile } from 'node:fs/promises';
+import * as process from 'node:process';
 
 import * as path from 'path';
 

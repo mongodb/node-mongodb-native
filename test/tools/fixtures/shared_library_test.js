@@ -2,6 +2,7 @@
 const { EJSON } = require('bson');
 const { AutoEncrypter } = require('../../../lib/client-side-encryption/auto_encrypter');
 const { MongoClient } = require('../../../lib/mongo_client');
+const process = require('node:process');
 
 try {
   const extraOptions = JSON.parse(process.env.EXTRA_OPTIONS);

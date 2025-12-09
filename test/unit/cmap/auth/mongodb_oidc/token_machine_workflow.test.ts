@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/token_machine_workflow';

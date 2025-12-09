@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
+import * as process from 'node:process';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';

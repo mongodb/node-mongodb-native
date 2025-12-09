@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 
 import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';

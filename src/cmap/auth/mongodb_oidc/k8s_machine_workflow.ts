@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { readFile } from 'fs/promises';
 
 import type { OIDCCallbackFunction, OIDCResponse } from '../mongodb_oidc';

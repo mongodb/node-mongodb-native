@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { getAwsCredentialProvider, getGcpMetadata } from '../../../src/deps';
 
 // Data Key Stuff

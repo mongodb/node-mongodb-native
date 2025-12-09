@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { MockServer } = require('./src/server.js');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const process = require('node:process');
 
 let mockServers = [];
 
