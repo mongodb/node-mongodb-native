@@ -199,6 +199,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
     const poolClearedEvents: Array<ConnectionPoolClearedEvent> = [];
 
     beforeEach(async function () {
+      // 1. Create a test client that listens to CMAP events, with maxConnecting=100.
       client = this.configuration.newClient({}, { maxConnecting: 100 });
 
       client.on('connectionCheckOutFailed', e => checkoutFailedEvents.push(e));
@@ -206,6 +207,13 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
 
       await client.connect();
 
+      // 2. Run the following commands to set up the rate limiter.
+      // ```python
+      // client.admin.command("setParameter", 1, ingressConnectionEstablishmentRateLimiterEnabled=True)
+      // client.admin.command("setParameter", 1, ingressConnectionEstablishmentRatePerSec=20)
+      // client.admin.command("setParameter", 1, ingressConnectionEstablishmentBurstCapacitySecs=1)
+      // client.admin.command("setParameter", 1, ingressConnectionEstablishmentMaxQueueDepth=1)
+      // ```
       const admin = client.db('admin').admin();
       await admin.command({
         setParameter: 1,
@@ -224,13 +232,17 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
         ingressConnectionEstablishmentMaxQueueDepth: 1
       });
 
+      // 3. Add a document to the test collection so that the sleep operations will actually block:
+      // `client.test.test.insert_one({})`.
       await client.db('test').collection('test').insertOne({});
     });
 
     afterEach(async function () {
-      // give the time to recover from the connection storm before cleaning up.
+      // 7. Sleep for 1 second to clear the rate limiter.
       await sleep(1000);
 
+      // 8. Ensure that the following command runs at test teardown even if the test fails.
+      // `client.admin("setParameter", 1, ingressConnectionEstablishmentRateLimiterEnabled=False)`.
       const admin = client.db('admin').admin();
       await admin.command({
         setParameter: 1,
@@ -244,10 +256,14 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
       'does not clear the pool when connections are closed due to connection storms',
       {
         requires: {
+          // This test requires MongoDB 7.0+.
           mongodb: '>=7.0' // rate limiting added in 7.0
         }
       },
       async function () {
+        // 4. Run the following find command on the collection in 100 parallel threads/coroutines. Run these commands concurrently
+        // but block on their completion, and ignore errors raised by the command.
+        // `client.test.test.find_one({"$where": "function() { sleep(2000); return true; }})`
         await Promise.allSettled(
           Array.from({ length: 100 }).map(() =>
             client
@@ -257,8 +273,11 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
           )
         );
 
-        expect(poolClearedEvents).to.be.empty;
+        // 5. Assert that at least 10 `ConnectionCheckOutFailedEvent` occurred.
         expect(checkoutFailedEvents.length).to.be.at.least(10);
+
+        // 6. Assert that 0 `PoolClearedEvent` occurred.
+        expect(poolClearedEvents).to.be.empty;
       }
     );
   });
