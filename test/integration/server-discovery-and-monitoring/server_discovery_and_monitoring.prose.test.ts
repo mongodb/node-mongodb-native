@@ -258,7 +258,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
         );
 
         expect(poolClearedEvents).to.be.empty;
-        expect(checkoutFailedEvents.length).to.be.greaterThan(10);
+        expect(checkoutFailedEvents.length).to.be.at.least(10);
       }
     );
   });

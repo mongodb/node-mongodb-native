@@ -339,7 +339,7 @@ function makeConnectionsError(appError: ApplicationError): sinon.SinonStub[] {
 
     netStub.callsFake(function createConnectionStub() {
       const socket = new net.Socket();
-      process.nextTick(() => socket.emit('connect'));
+      queueMicrotask(() => socket.emit('connect'));
       return socket;
     });
 
