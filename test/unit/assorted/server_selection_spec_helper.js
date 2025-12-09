@@ -137,7 +137,11 @@ export async function executeServerSelectionTest(testDefinition) {
 
   // default to serverSelectionTimeoutMS of `100` for unit tests
   try {
-    const server = await topology.selectServer(selector, { serverSelectionTimeoutMS: 50 });
+    const server = await topology.selectServer(selector, {
+      serverSelectionTimeoutMS: 50,
+      deprioritizedServers: [],
+      operationName: 'test operation'
+    });
 
     if (testDefinition.error) throw new Error('Expected an error, but found none!');
     if (expectedServers.length === 0 && server !== null) {

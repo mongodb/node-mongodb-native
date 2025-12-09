@@ -105,7 +105,7 @@ export interface ServerSelectionRequest {
   cancelled: boolean;
   operationName: string;
   waitingLogged: boolean;
-  previousServer?: ServerDescription;
+  deprioritizedServers: ServerDescription[];
 }
 
 /** @internal */
@@ -169,7 +169,7 @@ export interface SelectServerOptions {
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
   operationName: string;
-  previousServer?: ServerDescription;
+  deprioritizedServers: ServerDescription[];
   /**
    * @internal
    * TODO(NODE-6496): Make this required by making ChangeStream use LegacyTimeoutContext
@@ -455,7 +455,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const selectServerOptions = {
       operationName: 'handshake',
       ...options,
-      timeoutContext
+      timeoutContext,
+      deprioritizedServers: []
     };
 
     try {
@@ -605,7 +606,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       startTime: processTimeMS(),
       operationName: options.operationName,
       waitingLogged: false,
-      previousServer: options.previousServer
+      deprioritizedServers: options.deprioritizedServers
     };
 
     const abortListener = addAbortListener(options.signal, function () {
@@ -957,13 +958,9 @@ function processWaitQueue(topology: Topology) {
     let selectedDescriptions;
     try {
       const serverSelector = waitQueueMember.serverSelector;
-      const previousServer = waitQueueMember.previousServer;
+      const deprioritizedServers = waitQueueMember.deprioritizedServers;
       selectedDescriptions = serverSelector
-        ? serverSelector(
-            topology.description,
-            serverDescriptions,
-            previousServer ? [previousServer] : []
-          )
+        ? serverSelector(topology.description, serverDescriptions, deprioritizedServers)
         : serverDescriptions;
     } catch (selectorError) {
       if (

@@ -789,7 +789,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       // to avoid the server selection timeout.
       const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
       const serverDescriptions = Array.from(topologyDescription.servers.values());
-      const servers = selector(topologyDescription, serverDescriptions);
+      const servers = selector(topologyDescription, serverDescriptions, []);
       if (servers.length !== 0) {
         const endSessions = Array.from(client.s.sessionPool.sessions, ({ id }) => id);
         if (endSessions.length !== 0) {

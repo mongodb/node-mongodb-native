@@ -12,6 +12,7 @@ import { type ServerType, type TopologyType } from '../../../src/sdam/common';
 import { type ServerDescription, type TagSet } from '../../../src/sdam/server_description';
 import {
   readPreferenceServerSelector,
+  type ServerSelector,
   writableServerSelector
 } from '../../../src/sdam/server_selection';
 import { TopologyDescription } from '../../../src/sdam/topology_description';
@@ -41,6 +42,7 @@ interface ServerSelectionLogicTest {
    */
   suitable_servers: never;
   in_latency_window: ServerSelectionLogicTestServer[];
+  deprioritized_servers?: ServerSelectionLogicTestServer[];
 }
 
 function readPreferenceFromDefinition(definition) {
@@ -96,8 +98,11 @@ export function runServerSelectionLogicTest(testDefinition: ServerSelectionLogic
   const expectedServers = serverDescriptionsToMap(
     testDefinition.in_latency_window.map(s => serverDescriptionFromDefinition(s))
   );
+  const deprioritized =
+    testDefinition.deprioritized_servers?.map(s => serverDescriptionFromDefinition(s, allHosts)) ??
+    [];
 
-  let selector;
+  let selector: ServerSelector;
   if (testDefinition.operation === 'write') {
     selector = writableServerSelector();
   } else if (testDefinition.operation === 'read' || testDefinition.read_preference) {
@@ -107,10 +112,11 @@ export function runServerSelectionLogicTest(testDefinition: ServerSelectionLogic
     expect.fail('test operation was neither read nor write, and no read preference was provided.');
   }
 
-  const result = selector(topologyDescription, serversInTopology);
+  const result = selector(topologyDescription, serversInTopology, deprioritized);
 
   expect(result.length).to.equal(expectedServers.size);
 
+  // console.error({ result, expectedServers });
   for (const server of result) {
     const expectedServer = expectedServers.get(server.address);
     expect(expectedServer).to.exist;

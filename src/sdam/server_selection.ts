@@ -15,8 +15,22 @@ export const MIN_SECONDARY_WRITE_WIRE_VERSION = 13;
 export type ServerSelector = (
   topologyDescription: TopologyDescription,
   servers: ServerDescription[],
-  deprioritized?: ServerDescription[]
+  deprioritized: ServerDescription[]
 ) => ServerDescription[];
+
+function sdEquals(a: ServerDescription, b: ServerDescription) {
+  return a.address === b.address && a.equals(b);
+}
+function filterDeprioritized(
+  candidates: ServerDescription[],
+  deprioritized: ServerDescription[]
+): ServerDescription[] {
+  const filtered = candidates.filter(
+    candidate => !deprioritized.some(serverDescription => sdEquals(serverDescription, candidate))
+  );
+
+  return filtered.length ? filtered : candidates;
+}
 
 /**
  * Returns a server selector that selects for writable servers
@@ -24,12 +38,15 @@ export type ServerSelector = (
 export function writableServerSelector(): ServerSelector {
   return function writableServer(
     topologyDescription: TopologyDescription,
-    servers: ServerDescription[]
+    servers: ServerDescription[],
+    deprioritized: ServerDescription[]
   ): ServerDescription[] {
-    return latencyWindowReducer(
-      topologyDescription,
-      servers.filter((s: ServerDescription) => s.isWritable)
+    const eligibleServers = filterDeprioritized(
+      servers.filter(({ isWritable }) => isWritable),
+      deprioritized
     );
+
+    return latencyWindowReducer(topologyDescription, eligibleServers);
   };
 }
 
@@ -39,8 +56,9 @@ export function writableServerSelector(): ServerSelector {
  */
 export function sameServerSelector(description?: ServerDescription): ServerSelector {
   return function sameServerSelector(
-    topologyDescription: TopologyDescription,
-    servers: ServerDescription[]
+    _topologyDescription: TopologyDescription,
+    servers: ServerDescription[],
+    _deprioritized: ServerDescription[]
   ): ServerDescription[] {
     if (!description) return [];
     // Filter the servers to match the provided description only if
@@ -218,10 +236,7 @@ function latencyWindowReducer(
   );
 
   const high = low + topologyDescription.localThresholdMS;
-  return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
-    if (server.roundTripTime <= high && server.roundTripTime >= low) result.push(server);
-    return result;
-  }, []);
+  return servers.filter(server => server.roundTripTime <= high && server.roundTripTime >= low);
 }
 
 // filters
@@ -245,6 +260,18 @@ function loadBalancerFilter(server: ServerDescription): boolean {
   return server.type === ServerType.LoadBalancer;
 }
 
+function isDeprioritizedFactory(
+  deprioritized: ServerDescription[]
+): (server: ServerDescription) => boolean {
+  return server =>
+    // if any deprioritized servers equal the server, here we are.
+    !deprioritized.some(deprioritizedServer => {
+      const result = sdEquals(deprioritizedServer, server);
+      // console.error(result);
+      return result;
+    });
+}
+
 /**
  * Returns a function which selects servers based on a provided read preference
  *
@@ -258,7 +285,7 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
   return function readPreferenceServers(
     topologyDescription: TopologyDescription,
     servers: ServerDescription[],
-    deprioritized: ServerDescription[] = []
+    deprioritized: ServerDescription[]
   ): ServerDescription[] {
     if (topologyDescription.type === TopologyType.LoadBalanced) {
       return servers.filter(loadBalancerFilter);
@@ -273,38 +300,79 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
     }
 
     if (topologyDescription.type === TopologyType.Sharded) {
-      const filtered = servers.filter(server => {
-        return !deprioritized.includes(server);
-      });
-      const selectable = filtered.length > 0 ? filtered : deprioritized;
+      const selectable = filterDeprioritized(servers, deprioritized);
       return latencyWindowReducer(topologyDescription, selectable.filter(knownFilter));
     }
 
     const mode = readPreference.mode;
     if (mode === ReadPreference.PRIMARY) {
-      return servers.filter(primaryFilter);
+      return filterDeprioritized(servers.filter(primaryFilter), deprioritized);
     }
 
     if (mode === ReadPreference.PRIMARY_PREFERRED) {
-      const result = servers.filter(primaryFilter);
-      if (result.length) {
-        return result;
+      const primary = servers.filter(primaryFilter);
+
+      // If there is a primary and it is not deprioritized, use the primary.  Otherwise,
+      // check for secondaries.
+      const eligiblePrimary = primary.filter(isDeprioritizedFactory(deprioritized));
+      if (eligiblePrimary.length) {
+        return eligiblePrimary;
       }
-    }
 
-    const filter = mode === ReadPreference.NEAREST ? nearestFilter : secondaryFilter;
-    const selectedServers = latencyWindowReducer(
-      topologyDescription,
-      tagSetReducer(
+      const secondaries = tagSetReducer(
         readPreference,
-        maxStalenessReducer(readPreference, topologyDescription, servers.filter(filter))
-      )
-    );
+        maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))
+      );
+      const deprioritizedSecondaries = secondaries.filter(isDeprioritizedFactory(deprioritized));
 
-    if (mode === ReadPreference.SECONDARY_PREFERRED && selectedServers.length === 0) {
-      return servers.filter(primaryFilter);
+      // console.error({ deprioritizedSecondaries, secondaries, deprioritized });
+      if (deprioritizedSecondaries.length)
+        return latencyWindowReducer(topologyDescription, deprioritizedSecondaries);
+
+      // if we make it here, we have no primaries or secondaries that not deprioritized.
+      // prefer the primary (which may not exist, if the topology has no primary).
+      // otherwise, return the secondaries (which also may not exist, but there is nothing else to check here).
+      return primary.length ? primary : latencyWindowReducer(topologyDescription, secondaries);
     }
 
-    return selectedServers;
+    // TODO: should we be applying the latency window to nearest servers?
+    if (mode === 'nearest') {
+      // if read preference is nearest
+      return latencyWindowReducer(
+        topologyDescription,
+        filterDeprioritized(
+          tagSetReducer(
+            readPreference,
+            maxStalenessReducer(readPreference, topologyDescription, servers.filter(nearestFilter))
+          ),
+          deprioritized
+        )
+      );
+    }
+
+    const filter = secondaryFilter;
+
+    const secondaries = tagSetReducer(
+      readPreference,
+      maxStalenessReducer(readPreference, topologyDescription, servers.filter(filter))
+    );
+    const eligibleSecondaries = secondaries.filter(isDeprioritizedFactory(deprioritized));
+
+    if (eligibleSecondaries.length)
+      return latencyWindowReducer(topologyDescription, eligibleSecondaries);
+
+    // we have no eligible secondaries, try for a primary.
+    if (mode === ReadPreference.SECONDARY_PREFERRED) {
+      const primary = servers.filter(primaryFilter);
+      const eligiblePrimary = primary.filter(isDeprioritizedFactory(deprioritized));
+
+      if (eligiblePrimary.length) return eligiblePrimary;
+
+      // we have no eligible primary nor secondaries that have not been deprioritized
+      return secondaries.length ? latencyWindowReducer(topologyDescription, secondaries) : primary;
+    }
+
+    // return all secondaries in the latency window.
+    return latencyWindowReducer(topologyDescription, secondaries);
   };
 }

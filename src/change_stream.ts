@@ -1073,7 +1073,8 @@ export class ChangeStream<
     try {
       await topology.selectServer(this.cursor.readPreference, {
         operationName: 'reconnect topology in change stream',
-        timeoutContext: this.timeoutContext
+        timeoutContext: this.timeoutContext,
+        deprioritizedServers: []
       });
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
     } catch {
