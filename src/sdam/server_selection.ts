@@ -1,4 +1,4 @@
-import { MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { ReadPreference } from '../read_preference';
 import { ServerType, TopologyType } from './common';
 import type { ServerDescription, TagSet } from './server_description';
@@ -282,6 +282,99 @@ function isDeprioritizedFactory(
     !deprioritized.has(server);
 }
 
+function secondarySelector(
+  readPreference: ReadPreference,
+  topologyDescription: TopologyDescription,
+  servers: ServerDescription[],
+  deprioritized: DeprioritizedServers
+) {
+  const mode = readPreference.mode;
+  switch (mode) {
+    case 'primary':
+      // Note: no need to filter for deprioritized servers.  A replica set has only one primary; that means that
+      // we are in one of two scenarios:
+      // 1. deprioritized servers is empty - return the primary.
+      // 2. deprioritized servers contains the primary - return the primary.
+      return servers.filter(primaryFilter);
+    case 'primaryPreferred': {
+      const primary = servers.filter(primaryFilter);
+
+      // If there is a primary and it is not deprioritized, use the primary.  Otherwise,
+      // check for secondaries.
+      const eligiblePrimary = primary.filter(isDeprioritizedFactory(deprioritized));
+      if (eligiblePrimary.length) {
+        return eligiblePrimary;
+      }
+
+      // If we make it here, we either have:
+      // 1. a deprioritized primary
+      // 2. no eligible primary
+      // secondaries take precedence of deprioritized primaries.
+      const secondaries = tagSetReducer(
+        readPreference,
+        maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))
+      );
+
+      const eligibleSecondaries = secondaries.filter(isDeprioritizedFactory(deprioritized));
+      if (eligibleSecondaries.length) {
+        return latencyWindowReducer(topologyDescription, eligibleSecondaries);
+      }
+
+      // if we make it here, we have no primaries or secondaries that not deprioritized.
+      // prefer the primary (which may not exist, if the topology has no primary).
+      // otherwise, return the secondaries (which also may not exist, but there is nothing else to check here).
+      return primary.length ? primary : latencyWindowReducer(topologyDescription, secondaries);
+    }
+    case 'nearest': {
+      const eligible = filterDeprioritized(
+        tagSetReducer(
+          readPreference,
+          maxStalenessReducer(readPreference, topologyDescription, servers.filter(nearestFilter))
+        ),
+        deprioritized
+      );
+      return latencyWindowReducer(topologyDescription, eligible);
+    }
+    case 'secondary':
+    case 'secondaryPreferred': {
+      const secondaries = tagSetReducer(
+        readPreference,
+        maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))
+      );
+      const eligibleSecondaries = secondaries.filter(isDeprioritizedFactory(deprioritized));
+
+      if (eligibleSecondaries.length) {
+        return latencyWindowReducer(topologyDescription, eligibleSecondaries);
+      }
+
+      // we have no eligible secondaries, try for a primary if we can.
+      if (mode === ReadPreference.SECONDARY_PREFERRED) {
+        const primary = servers.filter(primaryFilter);
+
+        // unlike readPreference=primary, here we do filter for deprioritized servers.
+        // if the primary is deprioritized, deprioritized secondaries take precedence.
+        const eligiblePrimary = primary.filter(isDeprioritizedFactory(deprioritized));
+        if (eligiblePrimary.length) return eligiblePrimary;
+
+        // we have no eligible primary nor secondaries that have not been deprioritized
+        return secondaries.length
+          ? latencyWindowReducer(topologyDescription, secondaries)
+          : primary;
+      }
+
+      // return all secondaries in the latency window.
+      return latencyWindowReducer(topologyDescription, secondaries);
+    }
+
+    default: {
+      const _exhaustiveCheck: never = mode;
+      throw new MongoRuntimeError(
+        `unexpected readPreference=${mode} (should never happen).  Please report a bug in the Node driver Jira project.`
+      );
+    }
+  }
+}
+
 /**
  * Returns a function which selects servers based on a provided read preference
  *
@@ -297,92 +390,26 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
     servers: ServerDescription[],
     deprioritized: DeprioritizedServers
   ): ServerDescription[] {
-    if (topologyDescription.type === TopologyType.LoadBalanced) {
-      return servers.filter(loadBalancerFilter);
-    }
-
-    if (topologyDescription.type === TopologyType.Unknown) {
-      return [];
-    }
-
-    if (topologyDescription.type === TopologyType.Single) {
-      return latencyWindowReducer(topologyDescription, servers.filter(knownFilter));
-    }
-
-    if (topologyDescription.type === TopologyType.Sharded) {
-      const selectable = filterDeprioritized(servers, deprioritized);
-      return latencyWindowReducer(topologyDescription, selectable.filter(knownFilter));
-    }
-
-    const mode = readPreference.mode;
-    if (mode === ReadPreference.PRIMARY) {
-      return filterDeprioritized(servers.filter(primaryFilter), deprioritized);
-    }
-
-    if (mode === ReadPreference.PRIMARY_PREFERRED) {
-      const primary = servers.filter(primaryFilter);
-
-      // If there is a primary and it is not deprioritized, use the primary.  Otherwise,
-      // check for secondaries.
-      const eligiblePrimary = primary.filter(isDeprioritizedFactory(deprioritized));
-      if (eligiblePrimary.length) {
-        return eligiblePrimary;
+    switch (topologyDescription.type) {
+      case 'Single':
+        return latencyWindowReducer(topologyDescription, servers.filter(knownFilter));
+      case 'ReplicaSetNoPrimary':
+      case 'ReplicaSetWithPrimary':
+        return secondarySelector(readPreference, topologyDescription, servers, deprioritized);
+      case 'Sharded': {
+        const selectable = filterDeprioritized(servers, deprioritized);
+        return latencyWindowReducer(topologyDescription, selectable.filter(knownFilter));
       }
-
-      const secondaries = tagSetReducer(
-        readPreference,
-        maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))
-      );
-      const deprioritizedSecondaries = secondaries.filter(isDeprioritizedFactory(deprioritized));
-
-      // console.error({ deprioritizedSecondaries, secondaries, deprioritized });
-      if (deprioritizedSecondaries.length)
-        return latencyWindowReducer(topologyDescription, deprioritizedSecondaries);
-
-      // if we make it here, we have no primaries or secondaries that not deprioritized.
-      // prefer the primary (which may not exist, if the topology has no primary).
-      // otherwise, return the secondaries (which also may not exist, but there is nothing else to check here).
-      return primary.length ? primary : latencyWindowReducer(topologyDescription, secondaries);
+      case 'Unknown':
+        return [];
+      case 'LoadBalanced':
+        return servers.filter(loadBalancerFilter);
+      default: {
+        const _exhaustiveCheck: never = topologyDescription.type;
+        throw new MongoRuntimeError(
+          `unexpected topology type: ${topologyDescription.type} (this should never happen).  Please file a bug in the Node driver Jira project.`
+        );
+      }
     }
-
-    // TODO: should we be applying the latency window to nearest servers?
-    if (mode === 'nearest') {
-      // if read preference is nearest
-      return latencyWindowReducer(
-        topologyDescription,
-        filterDeprioritized(
-          tagSetReducer(
-            readPreference,
-            maxStalenessReducer(readPreference, topologyDescription, servers.filter(nearestFilter))
-          ),
-          deprioritized
-        )
-      );
-    }
-
-    const filter = secondaryFilter;
-
-    const secondaries = tagSetReducer(
-      readPreference,
-      maxStalenessReducer(readPreference, topologyDescription, servers.filter(filter))
-    );
-    const eligibleSecondaries = secondaries.filter(isDeprioritizedFactory(deprioritized));
-
-    if (eligibleSecondaries.length)
-      return latencyWindowReducer(topologyDescription, eligibleSecondaries);
-
-    // we have no eligible secondaries, try for a primary.
-    if (mode === ReadPreference.SECONDARY_PREFERRED) {
-      const primary = servers.filter(primaryFilter);
-      const eligiblePrimary = primary.filter(isDeprioritizedFactory(deprioritized));
-
-      if (eligiblePrimary.length) return eligiblePrimary;
-
-      // we have no eligible primary nor secondaries that have not been deprioritized
-      return secondaries.length ? latencyWindowReducer(topologyDescription, secondaries) : primary;
-    }
-
-    // return all secondaries in the latency window.
-    return latencyWindowReducer(topologyDescription, secondaries);
   };
 }
