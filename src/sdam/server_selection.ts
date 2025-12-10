@@ -113,7 +113,7 @@ function maxStalenessReducer(
       primaryFilter
     )[0];
 
-    return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
+    return servers.filter((server: ServerDescription) => {
       const stalenessMS =
         server.lastUpdateTime -
         server.lastWriteDate -
@@ -122,12 +122,8 @@ function maxStalenessReducer(
 
       const staleness = stalenessMS / 1000;
       const maxStalenessSeconds = readPreference.maxStalenessSeconds ?? 0;
-      if (staleness <= maxStalenessSeconds) {
-        result.push(server);
-      }
-
-      return result;
-    }, []);
+      return staleness <= maxStalenessSeconds;
+    });
   }
 
   if (topologyDescription.type === TopologyType.ReplicaSetNoPrimary) {
@@ -139,40 +135,38 @@ function maxStalenessReducer(
       s.lastWriteDate > max.lastWriteDate ? s : max
     );
 
-    return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
+    return servers.filter((server: ServerDescription) => {
       const stalenessMS =
         sMax.lastWriteDate - server.lastWriteDate + topologyDescription.heartbeatFrequencyMS;
 
       const staleness = stalenessMS / 1000;
       const maxStalenessSeconds = readPreference.maxStalenessSeconds ?? 0;
-      if (staleness <= maxStalenessSeconds) {
-        result.push(server);
-      }
-
-      return result;
-    }, []);
+      return staleness <= maxStalenessSeconds;
+    });
   }
 
   return servers;
 }
 
 /**
- * Determines whether a server's tags match a given set of tags
+ * Determines whether a server's tags match a given set of tags.
+ *
+ * A tagset matches the server's tags if every k-v pair in the tagset
+ * is also in the server's tagset.
+ *
+ * Note that this does not requires that every k-v pair in the server's tagset is also
+ * in the client's tagset.  The server's tagset is required only to be a superset of the
+ * client's tags.
+ *
+ * @see https://github.com/mongodb/specifications/blob/master/source/server-selection/server-selection.md#tag_sets
  *
  * @param tagSet - The requested tag set to match
  * @param serverTags - The server's tags
  */
 function tagSetMatch(tagSet: TagSet, serverTags: TagSet) {
-  const keys = Object.keys(tagSet);
-  const serverTagKeys = Object.keys(serverTags);
-  for (let i = 0; i < keys.length; ++i) {
-    const key = keys[i];
-    if (serverTagKeys.indexOf(key) === -1 || serverTags[key] !== tagSet[key]) {
-      return false;
-    }
-  }
-
-  return true;
+  return Object.entries(tagSet).every(
+    ([key, value]) => serverTags[key] != null && serverTags[key] === value
+  );
 }
 
 /**
@@ -183,24 +177,17 @@ function tagSetMatch(tagSet: TagSet, serverTags: TagSet) {
  * @returns The list of servers matching the requested tags
  */
 function tagSetReducer(
-  readPreference: ReadPreference,
+  { tags }: ReadPreference,
   servers: ServerDescription[]
 ): ServerDescription[] {
-  if (
-    readPreference.tags == null ||
-    (Array.isArray(readPreference.tags) && readPreference.tags.length === 0)
-  ) {
+  if (tags == null || tags.length === 0) {
+    // empty tag sets match all servers
     return servers;
   }
 
-  for (let i = 0; i < readPreference.tags.length; ++i) {
-    const tagSet = readPreference.tags[i];
-    const serversMatchingTagset = servers.reduce(
-      (matched: ServerDescription[], server: ServerDescription) => {
-        if (tagSetMatch(tagSet, server.tags)) matched.push(server);
-        return matched;
-      },
-      []
+  for (const tagSet of tags) {
+    const serversMatchingTagset = servers.filter((s: ServerDescription) =>
+      tagSetMatch(tagSet, s.tags)
     );
 
     if (serversMatchingTagset.length) {
