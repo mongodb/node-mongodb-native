@@ -285,7 +285,12 @@ export function topologyWithPlaceholderClient(
   options: Partial<TopologyOptions>
 ): Topology {
   return new Topology(
-    new MongoClient('mongodb://iLoveJavaScript'),
+    new MongoClient(
+      'mongodb://iLoveJavaScript',
+      options.serverSelectionTimeoutMS
+        ? { serverSelectionTimeoutMS: options.serverSelectionTimeoutMS }
+        : {}
+    ),
     seeds,
     options as TopologyOptions
   );

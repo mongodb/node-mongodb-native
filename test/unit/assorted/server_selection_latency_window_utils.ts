@@ -6,6 +6,7 @@ import { join } from 'path';
 import { ReadPreference } from '../../../src/read_preference';
 import { type ServerType, STATE_CONNECTED, type TopologyType } from '../../../src/sdam/common';
 import { type Server } from '../../../src/sdam/server';
+import { DeprioritizedServers } from '../../../src/sdam/server_selection';
 import { type Topology } from '../../../src/sdam/topology';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';
@@ -134,7 +135,10 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
   const selectedServers: Server[] = [];
 
   for (let i = 0; i < test.iterations; ++i) {
-    const server: Server = await topology.selectServer(ReadPreference.NEAREST, {});
+    const server: Server = await topology.selectServer(ReadPreference.NEAREST, {
+      deprioritizedServers: new DeprioritizedServers(),
+      operationName: 'test operation'
+    });
     selectedServers.push(server);
   }
 
