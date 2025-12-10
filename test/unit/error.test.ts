@@ -34,6 +34,7 @@ import {
   type TopologyOptions
 } from '../../src/index';
 import { RunCommandOperation } from '../../src/operations/run_command';
+import { DeprioritizedServers } from '../../src/sdam/server_selection';
 import { type Topology } from '../../src/sdam/topology';
 import { TimeoutContext } from '../../src/timeout';
 import { isHello, ns, setDifference } from '../../src/utils';
@@ -386,7 +387,7 @@ describe('MongoErrors', () => {
         .then(topology =>
           topology.selectServer('primary', {
             timeoutContext,
-            deprioritizedServers: [],
+            deprioritizedServers: new DeprioritizedServers(),
             operationName: 'test operation'
           })
         )
@@ -434,7 +435,7 @@ describe('MongoErrors', () => {
         );
         const server = await topology.selectServer('primary', {
           timeoutContext,
-          deprioritizedServers: [],
+          deprioritizedServers: new DeprioritizedServers(),
           operationName: 'test operation'
         });
         try {

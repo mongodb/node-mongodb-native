@@ -11,6 +11,7 @@ import {
 import { type ServerType, type TopologyType } from '../../../src/sdam/common';
 import { type ServerDescription, type TagSet } from '../../../src/sdam/server_description';
 import {
+  DeprioritizedServers,
   readPreferenceServerSelector,
   type ServerSelector,
   writableServerSelector
@@ -98,9 +99,9 @@ export function runServerSelectionLogicTest(testDefinition: ServerSelectionLogic
   const expectedServers = serverDescriptionsToMap(
     testDefinition.in_latency_window.map(s => serverDescriptionFromDefinition(s))
   );
-  const deprioritized =
-    testDefinition.deprioritized_servers?.map(s => serverDescriptionFromDefinition(s, allHosts)) ??
-    [];
+  const deprioritized = new DeprioritizedServers(
+    testDefinition.deprioritized_servers?.map(s => serverDescriptionFromDefinition(s, allHosts))
+  );
 
   let selector: ServerSelector;
   if (testDefinition.operation === 'write') {

@@ -17,8 +17,8 @@ import {
 } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ReadPreference } from '../read_preference';
-import type { ServerDescription } from '../sdam/server_description';
 import {
+  DeprioritizedServers,
   sameServerSelector,
   secondaryWritableServerSelector,
   type ServerSelector
@@ -208,7 +208,7 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
     operationName: operation.commandName,
     timeoutContext,
     signal: operation.options.signal,
-    deprioritizedServers: []
+    deprioritizedServers: new DeprioritizedServers()
   });
 
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
@@ -235,7 +235,7 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
 
   const maxTries = willRetry ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
   let previousOperationError: MongoError | undefined;
-  const deprioritizedServers: ServerDescription[] = [];
+  const deprioritizedServers = new DeprioritizedServers();
 
   for (let tries = 0; tries < maxTries; tries++) {
     if (previousOperationError) {
@@ -304,7 +304,7 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
       ) {
         throw previousOperationError;
       }
-      deprioritizedServers.push(server.description);
+      deprioritizedServers.add(server.description);
       previousOperationError = operationError;
 
       // Reset timeouts

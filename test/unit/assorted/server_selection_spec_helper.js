@@ -139,7 +139,7 @@ export async function executeServerSelectionTest(testDefinition) {
   try {
     const server = await topology.selectServer(selector, {
       serverSelectionTimeoutMS: 50,
-      deprioritizedServers: [],
+      deprioritizedServers: new ServerSelectors.DeprioritizedServers(),
       operationName: 'test operation'
     });
 

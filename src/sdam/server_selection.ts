@@ -15,19 +15,33 @@ export const MIN_SECONDARY_WRITE_WIRE_VERSION = 13;
 export type ServerSelector = (
   topologyDescription: TopologyDescription,
   servers: ServerDescription[],
-  deprioritized: ServerDescription[]
+  deprioritized: DeprioritizedServers
 ) => ServerDescription[];
 
-function sdEquals(a: ServerDescription, b: ServerDescription) {
-  return a.address === b.address && a.equals(b);
+/** @internal */
+export class DeprioritizedServers {
+  private deprioritized: Set<string> = new Set();
+
+  constructor(descriptions?: Iterable<ServerDescription>) {
+    for (const description of descriptions ?? []) {
+      this.add(description);
+    }
+  }
+
+  add({ address }: ServerDescription) {
+    this.deprioritized.add(address);
+  }
+
+  has({ address }: ServerDescription): boolean {
+    return this.deprioritized.has(address);
+  }
 }
+
 function filterDeprioritized(
   candidates: ServerDescription[],
-  deprioritized: ServerDescription[]
+  deprioritized: DeprioritizedServers
 ): ServerDescription[] {
-  const filtered = candidates.filter(
-    candidate => !deprioritized.some(serverDescription => sdEquals(serverDescription, candidate))
-  );
+  const filtered = candidates.filter(candidate => !deprioritized.has(candidate));
 
   return filtered.length ? filtered : candidates;
 }
@@ -39,7 +53,7 @@ export function writableServerSelector(): ServerSelector {
   return function writableServer(
     topologyDescription: TopologyDescription,
     servers: ServerDescription[],
-    deprioritized: ServerDescription[]
+    deprioritized: DeprioritizedServers
   ): ServerDescription[] {
     const eligibleServers = filterDeprioritized(
       servers.filter(({ isWritable }) => isWritable),
@@ -58,7 +72,7 @@ export function sameServerSelector(description?: ServerDescription): ServerSelec
   return function sameServerSelector(
     _topologyDescription: TopologyDescription,
     servers: ServerDescription[],
-    _deprioritized: ServerDescription[]
+    _deprioritized: DeprioritizedServers
   ): ServerDescription[] {
     if (!description) return [];
     // Filter the servers to match the provided description only if
@@ -261,15 +275,11 @@ function loadBalancerFilter(server: ServerDescription): boolean {
 }
 
 function isDeprioritizedFactory(
-  deprioritized: ServerDescription[]
+  deprioritized: DeprioritizedServers
 ): (server: ServerDescription) => boolean {
   return server =>
     // if any deprioritized servers equal the server, here we are.
-    !deprioritized.some(deprioritizedServer => {
-      const result = sdEquals(deprioritizedServer, server);
-      // console.error(result);
-      return result;
-    });
+    !deprioritized.has(server);
 }
 
 /**
@@ -285,7 +295,7 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
   return function readPreferenceServers(
     topologyDescription: TopologyDescription,
     servers: ServerDescription[],
-    deprioritized: ServerDescription[]
+    deprioritized: DeprioritizedServers
   ): ServerDescription[] {
     if (topologyDescription.type === TopologyType.LoadBalanced) {
       return servers.filter(loadBalancerFilter);

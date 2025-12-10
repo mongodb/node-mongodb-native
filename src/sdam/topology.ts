@@ -70,7 +70,11 @@ import {
 import type { ServerMonitoringMode } from './monitor';
 import { Server, type ServerEvents, type ServerOptions } from './server';
 import { compareTopologyVersion, ServerDescription } from './server_description';
-import { readPreferenceServerSelector, type ServerSelector } from './server_selection';
+import {
+  DeprioritizedServers,
+  readPreferenceServerSelector,
+  type ServerSelector
+} from './server_selection';
 import {
   ServerSelectionFailedEvent,
   ServerSelectionStartedEvent,
@@ -105,7 +109,7 @@ export interface ServerSelectionRequest {
   cancelled: boolean;
   operationName: string;
   waitingLogged: boolean;
-  deprioritizedServers: ServerDescription[];
+  deprioritizedServers: DeprioritizedServers;
 }
 
 /** @internal */
@@ -169,7 +173,9 @@ export interface SelectServerOptions {
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
   operationName: string;
-  deprioritizedServers: ServerDescription[];
+
+  /** @internal */
+  deprioritizedServers: DeprioritizedServers;
   /**
    * @internal
    * TODO(NODE-6496): Make this required by making ChangeStream use LegacyTimeoutContext
@@ -456,7 +462,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       operationName: 'handshake',
       ...options,
       timeoutContext,
-      deprioritizedServers: []
+      deprioritizedServers: new DeprioritizedServers()
     };
 
     try {
