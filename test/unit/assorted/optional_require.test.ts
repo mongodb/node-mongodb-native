@@ -4,7 +4,6 @@ import { resolve } from 'path';
 
 import { AuthContext } from '../../../src/cmap/auth/auth_provider';
 import { GSSAPI } from '../../../src/cmap/auth/gssapi';
-import { MongoDBAWS } from '../../../src/cmap/auth/mongodb_aws';
 import { compress } from '../../../src/cmap/wire_protocol/compression';
 import { MongoMissingDependencyError } from '../../../src/error';
 import { HostAddress } from '../../../src/utils';
@@ -47,22 +46,6 @@ describe('optionalRequire', function () {
           () => null,
           e => e
         );
-
-      expect(error).to.be.instanceOf(MongoMissingDependencyError);
-    });
-  });
-
-  describe('aws4', function () {
-    it('should error if not installed', async function () {
-      const moduleName = 'aws4';
-      if (moduleExistsSync(moduleName)) {
-        return this.skip();
-      }
-      const mdbAWS = new MongoDBAWS();
-
-      const error = await mdbAWS
-        .auth(new AuthContext({ hello: { maxWireVersion: 9 } }, true, null))
-        .catch(error => error);
 
       expect(error).to.be.instanceOf(MongoMissingDependencyError);
     });

@@ -1,6 +1,6 @@
+import { aws4Sign } from '../../aws4';
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { aws4 } from '../../deps';
 import {
   MongoCompatibilityError,
   MongoMissingCredentialsError,
@@ -44,11 +44,6 @@ export class MongoDBAWS extends AuthProvider {
     if (!authContext.credentials) {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
-
-    if ('kModuleError' in aws4) {
-      throw aws4['kModuleError'];
-    }
-    const { sign } = aws4;
 
     if (maxWireVersion(connection) < 9) {
       throw new MongoCompatibilityError(
@@ -114,7 +109,7 @@ export class MongoDBAWS extends AuthProvider {
     }
 
     const body = 'Action=GetCallerIdentity&Version=2011-06-15';
-    const options = sign(
+    const options = aws4Sign(
       {
         method: 'POST',
         host,
