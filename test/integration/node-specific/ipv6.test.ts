@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as net from 'net';
-import * as process from 'process';
+import * as os from 'os';
 import * as sinon from 'sinon';
 
 import {
@@ -16,7 +16,7 @@ describe('IPv6 Addresses', () => {
 
   beforeEach(async function () {
     if (
-      process.platform === 'linux' ||
+      os.platform() === 'linux' ||
       this.configuration.topologyType !== TopologyType.ReplicaSetWithPrimary
     ) {
       if (this.currentTest) {

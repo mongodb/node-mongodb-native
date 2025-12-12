@@ -1,4 +1,5 @@
 import { readFile } from 'fs/promises';
+import * as os from 'os';
 import { dirname, resolve } from 'path';
 import * as process from 'process';
 import { satisfies } from 'semver';
@@ -74,7 +75,7 @@ export class ClientSideEncryptionFilter extends Filter {
     }
 
     // TODO(NODE-3401): unskip csfle tests on windows
-    if (process.env.TEST_CSFLE && process.platform !== 'win32') {
+    if (process.env.TEST_CSFLE && os.platform() !== 'win32') {
       if (this.version == null) {
         throw new Error('FLE tests must run, but mongodb client encryption was not installed.');
       }

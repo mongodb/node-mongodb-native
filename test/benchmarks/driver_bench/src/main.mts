@@ -71,7 +71,7 @@ const systemInfo = () =>
     `\n- cpu: ${platform.name}`,
     `- cores: ${platform.cores}`,
     `- arch: ${os.arch()}`,
-    `- os: ${process.platform} (${os.release()})`,
+    `- os: ${os.platform()} (${os.release()})`,
     `- ram: ${platform.ram}`,
     `- node: ${process.version}`,
     `- running ${total} benchmarks`,

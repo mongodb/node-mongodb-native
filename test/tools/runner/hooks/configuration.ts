@@ -5,6 +5,7 @@ require('source-map-support').install({
   hookRequire: true
 });
 
+import * as os from 'os';
 import { MongoClient } from '../../../../src';
 import { AlpineTestConfiguration, AstrolabeTestConfiguration, TestConfiguration } from '../config';
 import { getEnvironmentalOptions } from '../../utils';
@@ -151,7 +152,7 @@ const testConfigBeforeHook = async function () {
     topology: this.configuration.topologyType,
     version: this.configuration.buildInfo.version,
     node: process.version,
-    os: process.platform,
+    os: os.platform(),
     alpineLinux: Boolean(process.env.ALPINE),
     cryptdUri: process.env.MONGOCRYPTD_URI,
     pid: process.pid,
