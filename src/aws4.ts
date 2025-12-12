@@ -1,5 +1,4 @@
 import * as crypto from 'node:crypto';
-import * as queryString from 'node:querystring';
 
 export interface AWS4 {
   /**
@@ -42,6 +41,29 @@ export interface AWS4 {
   };
 }
 
+const getHash = (str: string): string => {
+  return crypto.createHash('sha256').update(str, 'utf8').digest('hex');
+};
+const getHmacArray = (key: string | Uint8Array, str: string): Uint8Array => {
+  return crypto.createHmac('sha256', key).update(str, 'utf8').digest();
+};
+const getHmacString = (key: Uint8Array, str: string): string => {
+  return crypto.createHmac('sha256', key).update(str, 'utf8').digest('hex');
+};
+
+const getEnvCredentials = () => {
+  const env = process.env;
+  return {
+    accessKeyId: env.AWS_ACCESS_KEY_ID || env.AWS_ACCESS_KEY,
+    secretAccessKey: env.AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_KEY,
+    sessionToken: env.AWS_SESSION_TOKEN
+  };
+};
+
+const convertHeaderValue = (value: string | number) => {
+  return value.toString().trim().replace(/\s+/g, ' ');
+};
+
 export function aws4Sign(
   this: void,
   options: {
@@ -75,118 +97,56 @@ export function aws4Sign(
     'X-Amz-Date': string;
   };
 } {
-  let path: string;
-  let query: queryString.ParsedUrlQuery | undefined;
+  const method = options.method;
+  const canonicalUri = options.path;
+  const canonicalQuerystring = '';
+  const creds = credentials || getEnvCredentials();
 
-  const encode = (str: string) => {
-    const encoded = encodeURIComponent(str);
-    const replaced = encoded.replace(/[!'()*]/g, function (c) {
-      return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-    });
-    return replaced;
-  };
+  const date = new Date();
+  const requestDateTime = date.toISOString().replace(/[:-]|\.\d{3}/g, '');
+  const requestDate = requestDateTime.substring(0, 8);
 
-  const queryIndex = options.path.indexOf('?');
-  if (queryIndex < 0) {
-    path = options.path;
-    query = undefined;
-  } else {
-    path = options.path.slice(0, queryIndex);
-    query = queryString.parse(options.path.slice(queryIndex + 1));
-  }
-
-  let canonicalQuerystring = '';
-  if (query) {
-    const isS3 = options.service === 's3';
-    const useFirstArrayValue = isS3;
-    // const decodeSlashesInPath = isS3;
-    // const decodePath = isS3;
-    // const normalizePath = !isS3;
-    const queryStrings: string[] = [];
-    const sortedQueryKeys = Object.keys(query).sort();
-    for (const key of sortedQueryKeys) {
-      if (!key) {
-        continue;
-      }
-
-      const encodedKey = encode(key);
-      let value: string | string[] | undefined = query[key];
-      if (Array.isArray(value)) {
-        let values: string[] = value;
-        if (useFirstArrayValue) {
-          values = [value[0]];
-        }
-
-        for (const item of values) {
-          const encodedValue = encode(item);
-          queryStrings.push(`${encodedKey}=${encodedValue}`);
-        }
-      } else {
-        value = value ?? '';
-        const encodedValue = encode(value);
-        queryStrings.push(`${encodedKey}=${encodedValue}`);
-      }
-    }
-    canonicalQuerystring = queryStrings.join('&');
-  }
-
-  const convertHeaderValue = (value: string | number) => {
-    return value.toString().trim().replace(/\s+/g, ' ');
-  };
   const headers: string[] = [
-    `content-length:${convertHeaderValue(options.headers['Content-Length'])}\n`,
-    `content-type:${convertHeaderValue(options.headers['Content-Type'])}\n`,
-    `x-mongodb-gs2-cb-flag:${convertHeaderValue(options.headers['X-MongoDB-GS2-CB-Flag'])}\n`,
-    `x-mongodb-server-nonce:${convertHeaderValue(options.headers['X-MongoDB-Server-Nonce'])}\n`
+    `content-length:${convertHeaderValue(options.headers['Content-Length'])}`,
+    `content-type:${convertHeaderValue(options.headers['Content-Type'])}`,
+    `host:${convertHeaderValue(options.host)}`,
+    `x-amz-date:${convertHeaderValue(requestDateTime)}`,
+    `x-mongodb-gs2-cb-flag:${convertHeaderValue(options.headers['X-MongoDB-GS2-CB-Flag'])}`,
+    `x-mongodb-server-nonce:${convertHeaderValue(options.headers['X-MongoDB-Server-Nonce'])}`
   ];
+  if ('sessionToken' in creds && creds.sessionToken) {
+    headers.push(`x-amz-security-token:${convertHeaderValue(creds.sessionToken)}`);
+  }
   const canonicalHeaders = headers.sort().join('\n');
+  const canonicalHeaderNames = headers.map(header => header.split(':', 2)[0].toLowerCase());
+  const signedHeaders = canonicalHeaderNames.sort().join(';');
 
-  const signedHeaders = 'content-length;content-type;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce';
-
-  const getHash = (str: string): string => {
-    return crypto.createHash('sha256').update(str, 'utf8').digest('hex');
-  };
-  const getHmac = (key: string, str: string): string => {
-    return crypto.createHmac('sha256', key).update(str, 'utf8').digest('hex');
-  };
   const hashedPayload = getHash(options.body || '');
 
-  const canonicalUri = path;
   const canonicalRequest = [
-    options.method,
+    method,
     canonicalUri,
     canonicalQuerystring,
-    canonicalHeaders,
+    canonicalHeaders + '\n',
     signedHeaders,
     hashedPayload
   ].join('\n');
 
-  const canonicRequestHash = getHash(canonicalRequest);
-  const requestDateTime = new Date().toISOString().replace(/[:-]|\.\d{3}/g, '');
-  const requestDate = requestDateTime.substring(0, 8);
+  const canonicalRequestHash = getHash(canonicalRequest);
   const credentialScope = `${requestDate}/${options.region}/${options.service}/aws4_request`;
 
   const stringToSign = [
     'AWS4-HMAC-SHA256',
     requestDateTime,
     credentialScope,
-    canonicRequestHash
+    canonicalRequestHash
   ].join('\n');
 
-  const getEnvCredentials = () => {
-    const env = process.env;
-    return {
-      accessKeyId: env.AWS_ACCESS_KEY_ID || env.AWS_ACCESS_KEY,
-      secretAccessKey: env.AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_KEY,
-      sessionToken: env.AWS_SESSION_TOKEN
-    };
-  };
-  const creds = credentials || getEnvCredentials();
-  const dateKey = getHmac('AWS4' + creds.secretAccessKey, requestDate);
-  const dateRegionKey = getHmac(dateKey, options.region);
-  const dateRegionServiceKey = getHmac(dateRegionKey, options.service);
-  const signingKey = getHmac(dateRegionServiceKey, 'aws4_request');
-  const signature = getHmac(signingKey, stringToSign);
+  const dateKey = getHmacArray('AWS4' + creds.secretAccessKey, requestDate);
+  const dateRegionKey = getHmacArray(dateKey, options.region);
+  const dateRegionServiceKey = getHmacArray(dateRegionKey, options.service);
+  const signingKey = getHmacArray(dateRegionServiceKey, 'aws4_request');
+  const signature = getHmacString(signingKey, stringToSign);
 
   const authorizationHeader = [
     'AWS4-HMAC-SHA256 Credential=' + creds.accessKeyId + '/' + credentialScope,
@@ -201,7 +161,3 @@ export function aws4Sign(
     }
   };
 }
-
-// export const aws4: AWS4 = {
-//   sign: aws4Sign
-// };

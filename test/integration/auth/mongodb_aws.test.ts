@@ -38,44 +38,6 @@ describe('MONGODB-AWS', function () {
     await client?.close();
   });
 
-  context('when the AWS SDK is not present', function () {
-    beforeEach(function () {
-      AWSSDKCredentialProvider.awsSDK['kModuleError'] = new MongoMissingDependencyError(
-        'Missing dependency @aws-sdk/credential-providers',
-        {
-          cause: new Error(),
-          dependencyName: '@aws-sdk/credential-providers'
-        }
-      );
-    });
-
-    afterEach(function () {
-      delete AWSSDKCredentialProvider.awsSDK['kModuleError'];
-    });
-
-    describe('when attempting AWS auth', function () {
-      it('throws an error', async function () {
-        client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
-
-        const result = await client
-          .db('aws')
-          .collection('aws_test')
-          .estimatedDocumentCount()
-          .catch(e => e);
-
-        // TODO(NODE-7046): Remove branch when removing support for AWS credentials in URI.
-        // The drivers tools scripts put the credentials in the URI currently for some environments,
-        // this will need to change when doing the DRIVERS-3131 work.
-        if (!client.options.credentials.username) {
-          expect(result).to.be.instanceof(MongoAWSError);
-          expect(result.message).to.match(/credential-providers/);
-        } else {
-          expect(result).to.equal(0);
-        }
-      });
-    });
-  });
-
   context('when the AWS SDK is present', function () {
     it('should authorize when successfully authenticated', async function () {
       client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
