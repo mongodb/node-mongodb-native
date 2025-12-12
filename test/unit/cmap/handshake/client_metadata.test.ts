@@ -154,7 +154,7 @@ describe('client metadata module', () => {
           os: {
             type: os.type(),
             name: process.platform,
-            architecture: process.arch,
+            architecture: os.arch(),
             version: os.release()
           },
           platform: `Node.js ${process.version}, ${os.endianness()}`
@@ -180,7 +180,7 @@ describe('client metadata module', () => {
           os: {
             type: os.type(),
             name: process.platform,
-            architecture: process.arch,
+            architecture: os.arch(),
             version: os.release()
           },
           platform: `Node.js ${process.version}, ${os.endianness()}|myPlatform`
@@ -204,7 +204,7 @@ describe('client metadata module', () => {
           os: {
             type: os.type(),
             name: process.platform,
-            architecture: process.arch,
+            architecture: os.arch(),
             version: os.release()
           },
           platform: `Node.js ${process.version}, ${os.endianness()}`
@@ -230,7 +230,7 @@ describe('client metadata module', () => {
           os: {
             type: os.type(),
             name: process.platform,
-            architecture: process.arch,
+            architecture: os.arch(),
             version: os.release()
           },
           platform: `Node.js ${process.version}, ${os.endianness()}`
@@ -249,7 +249,7 @@ describe('client metadata module', () => {
           os: {
             type: os.type(),
             name: process.platform,
-            architecture: process.arch,
+            architecture: os.arch(),
             version: os.release()
           },
           platform: `Node.js ${process.version}, ${os.endianness()}`
