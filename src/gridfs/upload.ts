@@ -165,7 +165,7 @@ export class GridFSBucketWriteStream extends Writable {
         }
       );
     } else {
-      return process.nextTick(callback);
+      return queueMicrotask(callback);
     }
   }
 
@@ -188,7 +188,7 @@ export class GridFSBucketWriteStream extends Writable {
   /** @internal */
   override _final(callback: (error?: Error | null) => void): void {
     if (this.state.streamEnd) {
-      return process.nextTick(callback);
+      return queueMicrotask(callback);
     }
     this.state.streamEnd = true;
     writeRemnant(this, callback);
@@ -220,11 +220,11 @@ export class GridFSBucketWriteStream extends Writable {
 
 function handleError(stream: GridFSBucketWriteStream, error: Error, callback: Callback): void {
   if (stream.state.errored) {
-    process.nextTick(callback);
+    queueMicrotask(callback);
     return;
   }
   stream.state.errored = true;
-  process.nextTick(callback, error);
+  queueMicrotask(() => callback(error));
 }
 
 function createChunkDoc(filesId: ObjectId, n: number, data: Buffer): GridFSChunk {
@@ -283,7 +283,7 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
 
 function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
   if (stream.done) {
-    return process.nextTick(callback);
+    return queueMicrotask(callback);
   }
 
   if (stream.state.streamEnd && stream.state.outstandingRequests === 0 && !stream.state.errored) {
@@ -327,7 +327,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
     return;
   }
 
-  process.nextTick(callback);
+  queueMicrotask(callback);
 }
 
 async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
@@ -425,7 +425,7 @@ function doWrite(
   if (stream.pos + inputBuf.length < stream.chunkSizeBytes) {
     inputBuf.copy(stream.bufToStore, stream.pos);
     stream.pos += inputBuf.length;
-    process.nextTick(callback);
+    queueMicrotask(callback);
     return;
   }
 
@@ -530,7 +530,7 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void
 
 function isAborted(stream: GridFSBucketWriteStream, callback: Callback<void>): boolean {
   if (stream.state.aborted) {
-    process.nextTick(callback, new MongoAPIError('Stream has been aborted'));
+    queueMicrotask(() => callback(new MongoAPIError('Stream has been aborted')));
     return true;
   }
   return false;
