@@ -1078,7 +1078,7 @@ function processWaitQueue(topology: Topology) {
   if (topology.waitQueue.length > 0) {
     // ensure all server monitors attempt monitoring soon
     for (const [, server] of topology.s.servers) {
-      process.nextTick(function scheduleServerCheck() {
+      queueMicrotask(function scheduleServerCheck() {
         return server.requestCheck();
       });
     }

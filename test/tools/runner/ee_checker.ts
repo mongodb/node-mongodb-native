@@ -11,7 +11,7 @@ events.EventEmitter = class RequireErrorListenerEventEmitter extends EventEmitte
     super(...args);
     const ctorCallSite = new Error('EventEmitter must add an error listener synchronously');
     ctorCallSite.stack;
-    process.nextTick(() => {
+    queueMicrotask(() => {
       const isChangeStream = this.constructor.name
         .toLowerCase()
         .includes('ChangeStream'.toLowerCase());

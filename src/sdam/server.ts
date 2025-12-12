@@ -416,7 +416,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           error.addErrorLabel(MongoErrorLabel.ResetPool);
         }
         markServerUnknown(this, error);
-        process.nextTick(() => this.requestCheck());
+        queueMicrotask(() => this.requestCheck());
         return;
       }
 

@@ -159,7 +159,7 @@ describe('Connect Tests', function () {
         const cancellationToken = new CancellationToken();
         // Make sure the cancel listener is added before emitting cancel
         cancellationToken.addListener('newListener', () => {
-          process.nextTick(() => {
+          queueMicrotask(() => {
             cancellationToken.emit('cancel');
           });
         });
