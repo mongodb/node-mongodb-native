@@ -1,3 +1,4 @@
+import * as process from 'node:process';
 import * as util from 'node:util';
 import * as types from 'node:util/types';
 

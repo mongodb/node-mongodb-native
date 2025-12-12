@@ -50,6 +50,10 @@
       {
         "name": "setInterval",
         "message": "Use `import { setInterval } from 'timers';` instead"
+      },
+      {
+        "name": "process",
+        "message": "Use `import * as process from 'node:process';` instead"
       }
     ],
     "prettier/prettier": "error",

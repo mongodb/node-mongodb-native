@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const events = require('events');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const process = require('node:process');
 
 const EventEmitter = events.EventEmitter;
 

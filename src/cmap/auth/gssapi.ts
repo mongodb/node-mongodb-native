@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import * as dns from 'dns';
 
 import { getKerberos, type Kerberos, type KerberosClient } from '../../deps';

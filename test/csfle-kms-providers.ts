@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { type KMSProviders } from './../src';
 
 const csfleKMSProviders = {

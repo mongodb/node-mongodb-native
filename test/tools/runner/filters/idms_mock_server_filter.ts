@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { get } from 'http';
 
 import { Filter } from './filter';

@@ -3,6 +3,7 @@ import { on, once } from 'node:events';
 import { openSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
+import * as process from 'node:process';
 import { inspect } from 'node:util';
 
 import { AssertionError, expect } from 'chai';

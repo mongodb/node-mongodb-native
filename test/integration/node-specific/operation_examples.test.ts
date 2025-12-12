@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 
 import { Code, type MongoClient, ProfilingLevel, ReturnDocument } from '../../../src';

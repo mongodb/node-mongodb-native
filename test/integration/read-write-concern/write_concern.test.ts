@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 import { on, once } from 'events';
 import * as sinon from 'sinon';

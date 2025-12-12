@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { clearTimeout, setTimeout } from 'timers';
 
 import type { ObjectId } from '../bson';

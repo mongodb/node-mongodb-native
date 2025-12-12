@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { type AWSCredentials, getAwsCredentialProvider } from '../../deps';
 import { MongoAWSError } from '../../error';
 

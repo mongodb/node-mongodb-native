@@ -1,4 +1,5 @@
 import * as events from 'node:events';
+import * as process from 'node:process';
 
 import { expect } from 'chai';
 

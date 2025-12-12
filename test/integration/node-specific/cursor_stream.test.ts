@@ -1,5 +1,6 @@
 import { strictEqual } from 'node:assert';
 import { on, once } from 'node:events';
+import * as process from 'node:process';
 
 import { expect } from 'chai';
 

@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';

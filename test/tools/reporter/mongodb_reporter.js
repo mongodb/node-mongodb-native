@@ -2,6 +2,7 @@
 'use strict';
 const mocha = require('mocha');
 const chalk = require('chalk');
+const process = require('node:process');
 
 chalk.level = 3;
 

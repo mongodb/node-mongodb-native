@@ -1,3 +1,4 @@
+import * as process from 'node:process';
 import * as Script from 'node:vm';
 
 import { expect } from 'chai';
@@ -745,7 +746,7 @@ describe('crud - insert', function () {
       try {
         db.collection(k.toString());
         test.fail(false);
-      } catch (ignore) {} // eslint-disable-line
+      } catch (ignore) { } // eslint-disable-line
     });
 
     it('should correctly honor `promoteLong:false` native BSON', async function () {

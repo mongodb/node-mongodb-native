@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { BSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';

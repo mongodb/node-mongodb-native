@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import * as dns from 'dns';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';

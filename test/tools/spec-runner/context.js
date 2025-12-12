@@ -4,6 +4,7 @@ const { setTimeout } = require('timers');
 const { resolveConnectionString } = require('./utils');
 const { ns } = require('../../../src/utils');
 const { extractAuthFromConnectionString } = require('../utils');
+const process = require('node:process');
 
 class Thread {
   constructor() {

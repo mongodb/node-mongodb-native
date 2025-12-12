@@ -3,6 +3,7 @@ import { on, once } from 'node:events';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
+import * as process from 'node:process';
 
 import { EJSON } from 'bson';
 import * as BSON from 'bson';
