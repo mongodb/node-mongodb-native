@@ -1,5 +1,3 @@
-import * as process from 'node:process';
-
 import { Writable } from 'stream';
 
 import { type Document, ObjectId } from '../bson';

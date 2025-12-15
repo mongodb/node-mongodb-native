@@ -1,5 +1,3 @@
-import * as process from 'node:process';
-
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents } from '../cmap/connection';

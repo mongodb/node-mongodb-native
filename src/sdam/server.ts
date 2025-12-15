@@ -1,5 +1,3 @@
-import * as process from 'node:process';
-
 import type { Document } from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import { type CommandOptions, Connection } from '../cmap/connection';
