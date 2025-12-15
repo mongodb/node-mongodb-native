@@ -1,6 +1,6 @@
 {
-  "description": "pool-cleared-on-min-pool-size-population-error",
-  "schemaVersion": "1.4",
+  "description": "backpressure-server-description-unchanged-on-min-pool-size-population-error",
+  "schemaVersion": "1.17",
   "runOnRequirements": [
     {
       "minServerVersion": "4.4",
@@ -20,33 +20,8 @@
   ],
   "tests": [
     {
-      "description": "Pool is cleared on authentication error during minPoolSize population",
-      "runOnRequirements": [
-        {
-          "auth": true
-        }
-      ],
+      "description": "the server description is not changed on handshake error during minPoolSize population",
       "operations": [
-        {
-          "name": "failPoint",
-          "object": "testRunner",
-          "arguments": {
-            "client": "setupClient",
-            "failPoint": {
-              "configureFailPoint": "failCommand",
-              "mode": {
-                "times": 1
-              },
-              "data": {
-                "failCommands": [
-                  "saslContinue"
-                ],
-                "appName": "authErrorTest",
-                "errorCode": 18
-              }
-            }
-          }
-        },
         {
           "name": "createEntities",
           "object": "testRunner",
@@ -56,17 +31,40 @@
                 "client": {
                   "id": "client",
                   "observeEvents": [
-                    "connectionCreatedEvent",
-                    "poolClearedEvent",
+                    "serverDescriptionChangedEvent",
                     "connectionClosedEvent"
                   ],
                   "uriOptions": {
                     "appname": "authErrorTest",
-                    "minPoolSize": 1
+                    "minPoolSize": 5,
+                    "maxConnecting": 1,
+                    "serverMonitoringMode": "poll",
+                    "heartbeatFrequencyMS": 1000000
                   }
                 }
               }
             ]
+          }
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "setupClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "skip": 1
+              },
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "isMaster"
+                ],
+                "appName": "authErrorTest",
+                "closeConnection": true
+              }
+            }
           }
         },
         {
@@ -75,7 +73,7 @@
           "arguments": {
             "client": "client",
             "event": {
-              "poolClearedEvent": {}
+              "serverDescriptionChangedEvent": {}
             },
             "count": 1
           }
@@ -95,16 +93,10 @@
       "expectEvents": [
         {
           "client": "client",
-          "eventType": "cmap",
+          "eventType": "sdam",
           "events": [
             {
-              "connectionCreatedEvent": {}
-            },
-            {
-              "poolClearedEvent": {}
-            },
-            {
-              "connectionClosedEvent": {}
+              "serverDescriptionChangedEvent": {}
             }
           ]
         }

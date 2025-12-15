@@ -17,7 +17,7 @@
         "isMaster",
         "hello"
       ],
-      "closeConnection": true,
+      "errorCode": 91,
       "appName": "poolCreateMinSizeErrorTest"
     }
   },
