@@ -43,13 +43,4 @@ phases:
     when: beforeHandshakeCompletes
     maxWireVersion: 9
     type: timeout
-  outcome:
-    servers:
-      a:27017:
-        type: Unknown
-        topologyVersion: null
-        pool:
-          generation: 1
-    topologyType: ReplicaSetNoPrimary
-    logicalSessionTimeoutMinutes: null
-    setName: rs
+  outcome: *outcome
