@@ -30,7 +30,7 @@ describe('AwsSigV4', function () {
       'X-MongoDB-Server-Nonce': 'fakenonce',
       'X-MongoDB-GS2-CB-Flag': 'n'
     };
-    const options = aws4Sign(
+    const signed = aws4Sign(
       {
         method: 'POST',
         host,
@@ -43,8 +43,8 @@ describe('AwsSigV4', function () {
       credentials
     );
 
-    const authorization = options.headers.Authorization;
-    const xAmzDate = options.headers['X-Amz-Date'];
+    const authorization = signed.headers.Authorization;
+    const xAmzDate = signed.headers['X-Amz-Date'];
 
     const fetchHeaders = new Headers();
     for (const [key, value] of Object.entries(headers)) {
@@ -67,6 +67,23 @@ describe('AwsSigV4', function () {
       /<GetCallerIdentityResponse xmlns="https:\/\/sts.amazonaws.com\/doc\/2011-06-15\/">/
     );
   };
+
+  describe('AWS4 signs requests with missing AWS env vars', function () {
+    before(function () {
+      if (
+        process.env.AWS_ACCESS_KEY_ID ||
+        process.env.AWS_SECRET_ACCESS_KEY ||
+        process.env.AWS_SESSION_TOKEN
+      ) {
+        this.skipReason = 'Skipping missing credentials test because AWS credentials are set';
+        this.skip();
+      }
+    });
+
+    it('AWS4 signs requests with missing aws env vars', async () => {
+      await testSigning(undefined);
+    });
+  });
 
   describe('AWS4 signs requests with AWS permanent env vars', function () {
     before(function () {
@@ -94,12 +111,12 @@ describe('AwsSigV4', function () {
     });
 
     it('AWS4 signs requests with AWS session env vars', async () => {
-      const awsCredentials = {
+      const awsSesssionCredentials = {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
         sessionToken: process.env.AWS_SESSION_TOKEN
       };
-      await testSigning(awsCredentials);
+      await testSigning(awsSesssionCredentials);
     });
   });
 });

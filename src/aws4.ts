@@ -1,5 +1,39 @@
 import * as crypto from 'node:crypto';
 
+export type Options = {
+  path: '/';
+  body: string;
+  host: string;
+  method: 'POST';
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded';
+    'Content-Length': number;
+    'X-MongoDB-Server-Nonce': string;
+    'X-MongoDB-GS2-CB-Flag': 'n';
+  };
+  service: string;
+  region: string;
+  date?: Date;
+};
+
+export type AwsSessionCredentials = {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken: string;
+};
+
+export type AwsLongtermCredentials = {
+  accessKeyId: string;
+  secretAccessKey: string;
+};
+
+export type SignedHeaders = {
+  headers: {
+    Authorization: string;
+    'X-Amz-Date': string;
+  };
+};
+
 export interface AWS4 {
   /**
    * Created these inline types to better assert future usage of this API
@@ -8,37 +42,9 @@ export interface AWS4 {
    */
   sign(
     this: void,
-    options: {
-      path: '/';
-      body: string;
-      host: string;
-      method: 'POST';
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded';
-        'Content-Length': number;
-        'X-MongoDB-Server-Nonce': string;
-        'X-MongoDB-GS2-CB-Flag': 'n';
-      };
-      service: string;
-      region: string;
-    },
-    credentials:
-      | {
-          accessKeyId: string;
-          secretAccessKey: string;
-          sessionToken: string;
-        }
-      | {
-          accessKeyId: string;
-          secretAccessKey: string;
-        }
-      | undefined
-  ): {
-    headers: {
-      Authorization: string;
-      'X-Amz-Date': string;
-    };
-  };
+    options: Options,
+    credentials: AwsSessionCredentials | AwsLongtermCredentials | undefined
+  ): SignedHeaders;
 }
 
 const getHash = (str: string): string => {
@@ -66,43 +72,15 @@ const convertHeaderValue = (value: string | number) => {
 
 export function aws4Sign(
   this: void,
-  options: {
-    path: '/';
-    body: string;
-    host: string;
-    method: 'POST';
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded';
-      'Content-Length': number;
-      'X-MongoDB-Server-Nonce': string;
-      'X-MongoDB-GS2-CB-Flag': 'n';
-    };
-    service: string;
-    region: string;
-  },
-  credentials:
-    | {
-        accessKeyId: string;
-        secretAccessKey: string;
-        sessionToken: string;
-      }
-    | {
-        accessKeyId: string;
-        secretAccessKey: string;
-      }
-    | undefined
-): {
-  headers: {
-    Authorization: string;
-    'X-Amz-Date': string;
-  };
-} {
+  options: Options,
+  credentials: AwsSessionCredentials | AwsLongtermCredentials | undefined
+): SignedHeaders {
   const method = options.method;
   const canonicalUri = options.path;
   const canonicalQuerystring = '';
   const creds = credentials || getEnvCredentials();
 
-  const date = new Date();
+  const date = options.date || new Date();
   const requestDateTime = date.toISOString().replace(/[:-]|\.\d{3}/g, '');
   const requestDate = requestDateTime.substring(0, 8);
 
