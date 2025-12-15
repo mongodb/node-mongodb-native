@@ -9,13 +9,6 @@ import { aws4Sign } from '../../../src/aws4';
 // To run this test, simply run `./etc/aws-test.sh`.
 
 describe('AwsSigV4', function () {
-  beforeEach(function () {
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-      this.skipReason = 'AWS credentials are not present in the environment';
-      this.skip();
-    }
-  });
-
   const testSigning = async credentials => {
     const host = 'sts.amazonaws.com';
     const body = 'Action=GetCallerIdentity&Version=2011-06-15';
@@ -50,7 +43,7 @@ describe('AwsSigV4', function () {
     for (const [key, value] of Object.entries(headers)) {
       fetchHeaders.append(key, value.toString());
     }
-    if (credentials.sessionToken) {
+    if (credentials && credentials.sessionToken) {
       fetchHeaders.append('X-Amz-Security-Token', credentials.sessionToken);
     }
     fetchHeaders.append('Authorization', authorization);
@@ -60,12 +53,20 @@ describe('AwsSigV4', function () {
       headers: fetchHeaders,
       body
     });
-    expect(response.status).to.equal(200);
-    expect(response.statusText).to.equal('OK');
     const text = await response.text();
-    expect(text).to.match(
-      /<GetCallerIdentityResponse xmlns="https:\/\/sts.amazonaws.com\/doc\/2011-06-15\/">/
-    );
+
+    const expectSuccess = credentials !== undefined;
+    if (expectSuccess) {
+      expect(response.status).to.equal(200);
+      expect(response.statusText).to.equal('OK');
+      expect(text).to.match(
+        /<GetCallerIdentityResponse xmlns="https:\/\/sts.amazonaws.com\/doc\/2011-06-15\/">/
+      );
+    } else {
+      expect(response.status).to.equal(403);
+      expect(response.statusText).to.equal('Forbidden');
+      expect(text).to.match(/<Code>InvalidClientTokenId<\/Code>/);
+    }
   };
 
   describe('AWS4 signs requests with missing AWS env vars', function () {
@@ -75,6 +76,11 @@ describe('AwsSigV4', function () {
         process.env.AWS_SECRET_ACCESS_KEY ||
         process.env.AWS_SESSION_TOKEN
       ) {
+        console.log('Skipping missing credentials test because AWS credentials are set: ', {
+          AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? 'SET' : 'NOT SET',
+          AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? 'SET' : 'NOT SET',
+          AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN ? 'SET' : 'NOT SET'
+        });
         this.skipReason = 'Skipping missing credentials test because AWS credentials are set';
         this.skip();
       }
@@ -88,7 +94,19 @@ describe('AwsSigV4', function () {
   describe('AWS4 signs requests with AWS permanent env vars', function () {
     before(function () {
       if (process.env.AWS_SESSION_TOKEN) {
+        console.log('Skipping permanent credentials test because AWS_SESSION_TOKEN is set', {
+          AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN ? 'SET' : 'NOT SET'
+        });
         this.skipReason = 'Skipping permanent credentials test because session token is set';
+        this.skip();
+      }
+
+      if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+        console.log('Skipping permanent credentials test because AWS credentials are not set', {
+          AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? 'SET' : 'NOT SET',
+          AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? 'SET' : 'NOT SET'
+        });
+        this.skipReason = 'Skipping permanent credentials test because AWS credentials are not set';
         this.skip();
       }
     });
@@ -105,7 +123,19 @@ describe('AwsSigV4', function () {
   describe('AWS4 signs requests with AWS session env vars', function () {
     before(function () {
       if (!process.env.AWS_SESSION_TOKEN) {
+        console.log('Skipping session credentials test because AWS_SESSION_TOKEN is not set', {
+          AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN ? 'SET' : 'NOT SET'
+        });
         this.skipReason = 'Skipping session credentials test because session token is not set';
+        this.skip();
+      }
+
+      if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+        console.log('Skipping session credentials test because AWS credentials are not set', {
+          AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? 'SET' : 'NOT SET',
+          AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? 'SET' : 'NOT SET'
+        });
+        this.skipReason = 'Skipping session credentials test because AWS credentials are not set';
         this.skip();
       }
     });
