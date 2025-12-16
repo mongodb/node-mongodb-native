@@ -776,7 +776,7 @@ export class ClientSession
             throw fnError;
           }
 
-          // 7.i If the ClientSession is in the "starting transaction" or "transaction in progress" state, invoke abortTransaction on the session
+          // 6.i If the ClientSession is in the "starting transaction" or "transaction in progress" state, invoke abortTransaction on the session
           if (
             this.transaction.state === TxnState.STARTING_TRANSACTION ||
             this.transaction.state === TxnState.TRANSACTION_IN_PROGRESS
