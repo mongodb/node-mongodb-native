@@ -727,7 +727,7 @@ export class ClientSession
         : null;
 
     // 1. Record the current monotonic time, which will be used to enforce the 120-second timeout before later retry attempts.
-    const startTime = this.timeoutContext?.csotEnabled() // This is strictly to appease TS, since the timeoutContext is always CSOT or null
+    const startTime = this.timeoutContext?.csotEnabled() // This is strictly to appease TS.  We must narrow the context to a CSOT context before accessing `.start`.
       ? this.timeoutContext.start
       : processTimeMS();
 
