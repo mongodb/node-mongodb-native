@@ -739,7 +739,11 @@ export class ClientSession
     let lastError: Error | null = null;
 
     try {
-      retryTransaction: for (let attempt = 0, isRetry = attempt > 0; !committed; ++attempt) {
+      retryTransaction: for (
+        let attempt = 0, isRetry = false;
+        !committed;
+        ++attempt, isRetry = attempt > 0
+      ) {
         if (isRetry) {
           const BACKOFF_INITIAL_MS = 5;
           const BACKOFF_MAX_MS = 500;
