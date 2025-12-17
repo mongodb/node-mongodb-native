@@ -31,26 +31,6 @@ describe('Verify AWS4 signature generation', () => {
     date
   };
 
-  it('should generate correct credentials for missing credentials', () => {
-    const signed = aws4Sign(request, undefined);
-
-    expect(signed.headers['X-Amz-Date']).to.exist;
-    expect(signed.headers['X-Amz-Date']).to.equal('20251215T123456Z');
-    expect(signed.headers['Authorization']).to.exist;
-    expect(signed.headers['Authorization']).to.equal(
-      'AWS4-HMAC-SHA256 Credential=undefined/20251215/us-east-1/sts/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce, Signature=8854aaaeec4bf1f820435b60e216b610e92fa53cbfca71b269f2c334e02c1c45'
-    );
-
-    // Uncomment the following lines if you want to compare with the old aws4 library.
-    // Remember to import aws4 at the top of the file, like this: import * as aws4sign from 'aws4';
-
-    // const oldSigned = aws4sign.sign(request, undefined);
-    // expect(oldSigned.headers['X-Amz-Date']).to.exist;
-    // expect(oldSigned.headers['X-Amz-Date']).to.equal(signed.headers['X-Amz-Date']);
-    // expect(oldSigned.headers['Authorization']).to.exist;
-    // expect(oldSigned.headers['Authorization']).to.equal(signed.headers['Authorization']);
-  });
-
   it('should generate correct credentials for permanent credentials', () => {
     const signed = aws4Sign(request, awsCredentials);
 

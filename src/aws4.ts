@@ -1,5 +1,7 @@
 import * as crypto from 'node:crypto';
 
+import { type AWSCredentials } from './deps';
+
 export type Options = {
   path: '/';
   body: string;
@@ -16,17 +18,6 @@ export type Options = {
   date?: Date;
 };
 
-export type AwsSessionCredentials = {
-  accessKeyId: string;
-  secretAccessKey: string;
-  sessionToken: string;
-};
-
-export type AwsLongtermCredentials = {
-  accessKeyId: string;
-  secretAccessKey: string;
-};
-
 export type SignedHeaders = {
   headers: {
     Authorization: string;
@@ -34,73 +25,89 @@ export type SignedHeaders = {
   };
 };
 
-export interface AWS4 {
-  /**
-   * Created these inline types to better assert future usage of this API
-   * @param options - options for request
-   * @param credentials - AWS credential details, sessionToken should be omitted entirely if its false-y
-   */
-  sign(
-    this: void,
-    options: Options,
-    credentials: AwsSessionCredentials | AwsLongtermCredentials | undefined
-  ): SignedHeaders;
-}
-
 const getHash = (str: string): string => {
   return crypto.createHash('sha256').update(str, 'utf8').digest('hex');
 };
-const getHmacArray = (key: string | Uint8Array, str: string): Uint8Array => {
+const getHmacBuffer = (key: string | Uint8Array, str: string): Uint8Array => {
   return crypto.createHmac('sha256', key).update(str, 'utf8').digest();
 };
 const getHmacString = (key: Uint8Array, str: string): string => {
   return crypto.createHmac('sha256', key).update(str, 'utf8').digest('hex');
 };
 
-const getEnvCredentials = () => {
-  const env = process.env;
-  return {
-    accessKeyId: env.AWS_ACCESS_KEY_ID || env.AWS_ACCESS_KEY,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_KEY,
-    sessionToken: env.AWS_SESSION_TOKEN
-  };
-};
-
 const convertHeaderValue = (value: string | number) => {
   return value.toString().trim().replace(/\s+/g, ' ');
 };
 
-export function aws4Sign(
-  this: void,
-  options: Options,
-  credentials: AwsSessionCredentials | AwsLongtermCredentials | undefined
-): SignedHeaders {
-  const method = options.method;
-  const canonicalUri = options.path;
-  const canonicalQuerystring = '';
-  const creds = credentials || getEnvCredentials();
+/**
+ * This method implements AWS Signature 4 logic for a very specific request format.
+ * The signing logic is described here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-create-signed-request.html
+ * @param options
+ * @param credentials
+ * @returns
+ */
+export function aws4Sign(options: Options, credentials: AWSCredentials): SignedHeaders {
+  /**
+   * From the spec: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-create-signed-request.html
+   *
+   * Summary of signing steps
+   * 1. Create a canonical request
+   *    Arrange the contents of your request (host, action, headers, etc.) into a standard canonical format. The canonical request is one of the inputs used to create the string to sign.
+   * 2. Create a hash of the canonical request
+   *    Hash the canonical request using the same algorithm that you used to create the hash of the payload. The hash of the canonical request is a string of lowercase hexadecimal characters.
+   * 3. Create a string to sign
+   *    Create a string to sign with the canonical request and extra information such as the algorithm, request date, credential scope, and the hash of the canonical request.
+   * 4. Derive a signing key
+   *    Use the secret access key to derive the key used to sign the request.
+   * 5. Calculate the signature
+   *    Perform a keyed hash operation on the string to sign using the derived signing key as the hash key.
+   * 6. Add the signature to the request
+   *    Add the calculated signature to an HTTP header or to the query string of the request.
+   */
 
+  // 1: Create a canonical request
+
+  // Date – The date and time used to sign the request. If not provided, use the current date.
   const date = options.date || new Date();
+  // RequestDateTime – The date and time used in the credential scope. This value is the current UTC time in ISO 8601 format (for example, 20130524T000000Z).
   const requestDateTime = date.toISOString().replace(/[:-]|\.\d{3}/g, '');
+  // RequestDate – The date used in the credential scope. This value is the current UTC date in YYYYMMDD format (for example, 20130524).
   const requestDate = requestDateTime.substring(0, 8);
+  // Method – The HTTP request method. For us, this is always 'POST'.
+  const method = options.method;
+  // CanonicalUri – The URI-encoded version of the absolute path component URI, starting with the / that follows the domain name and up to the end of the string
+  // For our requests, this is always '/'
+  const canonicalUri = options.path;
+  // CanonicalQueryString – The URI-encoded query string parameters. For our requests, there are no query string parameters, so this is always an empty string.
+  const canonicalQuerystring = '';
 
-  const headers: string[] = [
-    `content-length:${convertHeaderValue(options.headers['Content-Length'])}`,
-    `content-type:${convertHeaderValue(options.headers['Content-Type'])}`,
-    `host:${convertHeaderValue(options.host)}`,
-    `x-amz-date:${convertHeaderValue(requestDateTime)}`,
-    `x-mongodb-gs2-cb-flag:${convertHeaderValue(options.headers['X-MongoDB-GS2-CB-Flag'])}`,
-    `x-mongodb-server-nonce:${convertHeaderValue(options.headers['X-MongoDB-Server-Nonce'])}`
-  ];
-  if ('sessionToken' in creds && creds.sessionToken) {
-    headers.push(`x-amz-security-token:${convertHeaderValue(creds.sessionToken)}`);
+  // CanonicalHeaders – A list of request headers with their values. Individual header name and value pairs are separated by the newline character ("\n").
+  // All of our known/expected headers are included here, there are no extra headers.
+  const headers = new Headers({
+    'content-length': convertHeaderValue(options.headers['Content-Length']),
+    'content-type': convertHeaderValue(options.headers['Content-Type']),
+    host: convertHeaderValue(options.host),
+    'x-amz-date': convertHeaderValue(requestDateTime),
+    'x-mongodb-gs2-cb-flag': convertHeaderValue(options.headers['X-MongoDB-GS2-CB-Flag']),
+    'x-mongodb-server-nonce': convertHeaderValue(options.headers['X-MongoDB-Server-Nonce'])
+  });
+  // If session token is provided, include it in the headers
+  if ('sessionToken' in credentials && credentials.sessionToken) {
+    headers.append('x-amz-security-token', convertHeaderValue(credentials.sessionToken));
   }
-  const canonicalHeaders = headers.sort().join('\n');
-  const canonicalHeaderNames = headers.map(header => header.split(':', 2)[0].toLowerCase());
+  // Canonical headers are lowercased and sorted.
+  const canonicalHeaders = Array.from(headers.entries())
+    .map(([key, value]) => `${key.toLowerCase()}:${value}`)
+    .sort()
+    .join('\n');
+  const canonicalHeaderNames = Array.from(headers.keys()).map(header => header.toLowerCase());
+  // SignedHeaders – An alphabetically sorted, semicolon-separated list of lowercase request header names.
   const signedHeaders = canonicalHeaderNames.sort().join(';');
 
-  const hashedPayload = getHash(options.body || '');
+  // HashedPayload – A string created using the payload in the body of the HTTP request as input to a hash function. This string uses lowercase hexadecimal characters.
+  const hashedPayload = getHash(options.body);
 
+  // CanonicalRequest – A string that includes the above elements, separated by newline characters.
   const canonicalRequest = [
     method,
     canonicalUri,
@@ -110,28 +117,40 @@ export function aws4Sign(
     hashedPayload
   ].join('\n');
 
-  const canonicalRequestHash = getHash(canonicalRequest);
+  // 2. Create a hash of the canonical request
+  // HashedCanonicalRequest – A string created by using the canonical request as input to a hash function.
+  const hashedCanonicalRequest = getHash(canonicalRequest);
+
+  // 3. Create a string to sign
+  // Algorithm – The algorithm used to create the hash of the canonical request. For SigV4, use AWS4-HMAC-SHA256.
+  const algorithm = 'AWS4-HMAC-SHA256';
+  // CredentialScope – The credential scope, which restricts the resulting signature to the specified Region and service.
+  // Has the following format: YYYYMMDD/region/service/aws4_request.
   const credentialScope = `${requestDate}/${options.region}/${options.service}/aws4_request`;
+  // StringToSign – A string that includes the above elements, separated by newline characters.
+  const stringToSign = [algorithm, requestDateTime, credentialScope, hashedCanonicalRequest].join(
+    '\n'
+  );
 
-  const stringToSign = [
-    'AWS4-HMAC-SHA256',
-    requestDateTime,
-    credentialScope,
-    canonicalRequestHash
-  ].join('\n');
+  // 4. Derive a signing key
+  // To derive a signing key for SigV4, perform a succession of keyed hash operations (HMAC) on the request date, Region, and service, with your AWS secret access key as the key for the initial hashing operation.
+  const dateKey = getHmacBuffer('AWS4' + credentials.secretAccessKey, requestDate);
+  const dateRegionKey = getHmacBuffer(dateKey, options.region);
+  const dateRegionServiceKey = getHmacBuffer(dateRegionKey, options.service);
+  const signingKey = getHmacBuffer(dateRegionServiceKey, 'aws4_request');
 
-  const dateKey = getHmacArray('AWS4' + creds.secretAccessKey, requestDate);
-  const dateRegionKey = getHmacArray(dateKey, options.region);
-  const dateRegionServiceKey = getHmacArray(dateRegionKey, options.service);
-  const signingKey = getHmacArray(dateRegionServiceKey, 'aws4_request');
+  // 5. Calculate the signature
   const signature = getHmacString(signingKey, stringToSign);
 
+  // 6. Add the signature to the request
+  // Calculate the Authorization header
   const authorizationHeader = [
-    'AWS4-HMAC-SHA256 Credential=' + creds.accessKeyId + '/' + credentialScope,
+    'AWS4-HMAC-SHA256 Credential=' + credentials.accessKeyId + '/' + credentialScope,
     'SignedHeaders=' + signedHeaders,
     'Signature=' + signature
   ].join(', ');
 
+  // Return the calculated headers
   return {
     headers: {
       Authorization: authorizationHeader,

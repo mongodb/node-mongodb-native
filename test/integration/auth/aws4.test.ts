@@ -69,28 +69,6 @@ describe('AwsSigV4', function () {
     }
   };
 
-  describe('AWS4 signs requests with missing AWS env vars', function () {
-    before(function () {
-      if (
-        process.env.AWS_ACCESS_KEY_ID ||
-        process.env.AWS_SECRET_ACCESS_KEY ||
-        process.env.AWS_SESSION_TOKEN
-      ) {
-        console.log('Skipping missing credentials test because AWS credentials are set: ', {
-          AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? 'SET' : 'NOT SET',
-          AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ? 'SET' : 'NOT SET',
-          AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN ? 'SET' : 'NOT SET'
-        });
-        this.skipReason = 'Skipping missing credentials test because AWS credentials are set';
-        this.skip();
-      }
-    });
-
-    it('AWS4 signs requests with missing aws env vars', async () => {
-      await testSigning(undefined);
-    });
-  });
-
   describe('AWS4 signs requests with AWS permanent env vars', function () {
     before(function () {
       if (process.env.AWS_SESSION_TOKEN) {
