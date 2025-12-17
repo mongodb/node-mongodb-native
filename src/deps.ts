@@ -89,7 +89,7 @@ export interface AWSCredentials {
   expiration?: Date;
 }
 
-type CredentialProvider = {
+export type CredentialProvider = {
   fromNodeProviderChain(
     this: void,
     options: { clientConfig: { region: string } }

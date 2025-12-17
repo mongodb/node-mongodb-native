@@ -6,6 +6,7 @@ import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
 import {
+  type AWSCredentials,
   type CommandOptions,
   type Document,
   MongoAWSError,
@@ -16,6 +17,7 @@ import {
   MongoMissingDependencyError,
   MongoServerError
 } from '../../../src';
+import { aws4Sign } from '../../../src/aws4';
 import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import { AWSSDKCredentialProvider } from '../../../src/cmap/auth/aws_temporary_credentials';
 import { MongoDBAWS } from '../../../src/cmap/auth/mongodb_aws';
@@ -223,6 +225,104 @@ describe('MONGODB-AWS', function () {
         // and defaults to 2 seconds - so we ensure this timeout happens below 12s
         // instead of the 10s-12s range previously.
         expect(timeTaken).to.be.below(12000);
+      });
+    });
+
+    // This test verifies that our AWS SigV4 signing works correctly with real AWS credentials.
+    // This is done by calculating a signature, then using it to make a real request to the AWS STS service.
+    // There are two tests here: one for permanent credentials, and one for session credentials.
+    // Permanent credentials are tested by Evergreen task "aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables"
+    // Session credentials are tested by Evergreen task "aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables"
+    describe('AwsSigV4 works with SDK credentials', function () {
+      let credentials: AWSCredentials;
+
+      beforeEach(async function () {
+        const sdk = AWSSDKCredentialProvider.awsSDK;
+        if ('kModuleError' in sdk) {
+          this.skipReason = 'AWS SDK not installed';
+          this.skip();
+        } else {
+          credentials = await sdk.fromNodeProviderChain()();
+        }
+      });
+
+      const testSigning = async creds => {
+        const host = 'sts.amazonaws.com';
+        const body = 'Action=GetCallerIdentity&Version=2011-06-15';
+        const headers: {
+          'Content-Type': 'application/x-www-form-urlencoded';
+          'Content-Length': number;
+          'X-MongoDB-Server-Nonce': string;
+          'X-MongoDB-GS2-CB-Flag': 'n';
+        } = {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': body.length,
+          'X-MongoDB-Server-Nonce': 'fakenonce',
+          'X-MongoDB-GS2-CB-Flag': 'n'
+        };
+        const signed = aws4Sign(
+          {
+            method: 'POST',
+            host,
+            path: '/',
+            region: 'us-east-1',
+            service: 'sts',
+            headers: headers,
+            body
+          },
+          creds
+        );
+
+        const authorization = signed.headers.Authorization;
+        const xAmzDate = signed.headers['X-Amz-Date'];
+
+        const fetchHeaders = new Headers();
+        for (const [key, value] of Object.entries(headers)) {
+          fetchHeaders.append(key, value.toString());
+        }
+        if (credentials && credentials.sessionToken) {
+          fetchHeaders.append('X-Amz-Security-Token', credentials.sessionToken);
+        }
+        fetchHeaders.append('Authorization', authorization);
+        fetchHeaders.append('X-Amz-Date', xAmzDate);
+        const response = await fetch('https://sts.amazonaws.com', {
+          method: 'POST',
+          headers: fetchHeaders,
+          body
+        });
+        const text = await response.text();
+
+        expect(response.status).to.equal(200);
+        expect(response.statusText).to.equal('OK');
+        expect(text).to.match(
+          /<GetCallerIdentityResponse xmlns="https:\/\/sts.amazonaws.com\/doc\/2011-06-15\/">/
+        );
+      };
+
+      describe('when using premanent credentials', function () {
+        beforeEach(async function () {
+          if ('sessionToken' in credentials && credentials.sessionToken) {
+            this.skipReason = 'permanent credentials not found in the environment';
+            this.skip();
+          }
+        });
+
+        it('signs requests correctly', async function () {
+          await testSigning(credentials);
+        });
+      });
+
+      describe('when using session credentials', function () {
+        beforeEach(async function () {
+          if (!('sessionToken' in credentials) || !credentials.sessionToken) {
+            this.skipReason = 'session credentials not found in the environment';
+            this.skip();
+          }
+        });
+
+        it('signs requests correctly', async function () {
+          await testSigning(credentials);
+        });
       });
     });
   });
