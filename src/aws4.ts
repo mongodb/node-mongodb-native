@@ -42,9 +42,6 @@ const convertHeaderValue = (value: string | number) => {
 /**
  * This method implements AWS Signature 4 logic for a very specific request format.
  * The signing logic is described here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-create-signed-request.html
- * @param options
- * @param credentials
- * @returns
  */
 export function aws4Sign(options: Options, credentials: AWSCredentials): SignedHeaders {
   /**

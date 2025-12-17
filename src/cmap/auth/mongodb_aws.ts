@@ -63,13 +63,10 @@ export class MongoDBAWS extends AuthProvider {
     // Allow the user to specify an AWS session token for authentication with temporary credentials.
     const sessionToken = credentials.mechanismProperties.AWS_SESSION_TOKEN;
 
-    // If all three defined, include sessionToken, else include username and pass, else no credentials
-    const awsCredentials =
-      accessKeyId && secretAccessKey && sessionToken
-        ? { accessKeyId, secretAccessKey, sessionToken }
-        : accessKeyId && secretAccessKey
-          ? { accessKeyId, secretAccessKey }
-          : undefined;
+    // If all three defined, include sessionToken, else only include username and pass
+    const awsCredentials = sessionToken
+      ? { accessKeyId, secretAccessKey, sessionToken }
+      : { accessKeyId, secretAccessKey };
 
     const db = credentials.source;
     const nonce = await randomBytes(32);
