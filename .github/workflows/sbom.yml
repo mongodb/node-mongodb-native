@@ -78,38 +78,13 @@ jobs:
              echo "Changes detected in sbom.json"
           fi
 
-      - name: Create Pull Request
-        if: steps.git_status.outputs.HAS_CHANGES == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'chore: update SBOM after dependency changes'
-          add-paths: |
-            sbom.json
-          branch: auto-update-sbom-${{ github.run_id }}
-          delete-branch: true
-          title: 'chore: Update SBOM'
-          body: |
-            ## Automated SBOM Update
-            
-            This PR was automatically generated because package files changed.
-            
-            ### Environment
-            - Node.js version: ${{ steps.versions.outputs.node-version }}
-            
-            ### Changes
-            - Updated `sbom.json` to reflect current dependencies
-            
-            ### Verification
-            The SBOM was generated using CycloneDX NPM.
-
-            ### Triggered by
-            - Commit: ${{ github.sha }}
-            - Workflow run: ${{ github.run_id }}
-            
-            ---
-            _This PR was created automatically by the [SBOM workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})_
-          labels: |
-            sbom
-            automated
-            dependencies
+      - name: "Commit SBOM changes"
+        if: steps.sbom_status.outputs.HAS_CHANGES == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ${{ env.SBOM_FILE }}
+          git commit -m "chore(deps): Update SBOM after dependency changes"
+          git push
+          echo "📦 SBOM updated and committed" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
