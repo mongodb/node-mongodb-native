@@ -34,6 +34,7 @@ import {
   type TopologyOptions
 } from '../../src/index';
 import { RunCommandOperation } from '../../src/operations/run_command';
+import { DeprioritizedServers } from '../../src/sdam/server_selection';
 import { type Topology } from '../../src/sdam/topology';
 import { TimeoutContext } from '../../src/timeout';
 import { isHello, ns, setDifference } from '../../src/utils';
@@ -383,7 +384,13 @@ describe('MongoErrors', () => {
       );
       return replSet
         .connect()
-        .then(topology => topology.selectServer('primary', { timeoutContext }))
+        .then(topology =>
+          topology.selectServer('primary', {
+            timeoutContext,
+            deprioritizedServers: new DeprioritizedServers(),
+            operationName: 'test operation'
+          })
+        )
         .then(server => server.command(op, timeoutContext))
         .then(
           () => expect.fail('expected command to fail'),
@@ -426,7 +433,11 @@ describe('MongoErrors', () => {
           Object.assign({}, RAW_USER_WRITE_CONCERN_CMD),
           {}
         );
-        const server = await topology.selectServer('primary', { timeoutContext });
+        const server = await topology.selectServer('primary', {
+          timeoutContext,
+          deprioritizedServers: new DeprioritizedServers(),
+          operationName: 'test operation'
+        });
         try {
           await server.command(op, timeoutContext);
         } catch (err) {
