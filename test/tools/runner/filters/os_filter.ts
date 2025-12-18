@@ -1,4 +1,4 @@
-import * as process from 'node:process';
+import * as os from 'os';
 
 import { Filter } from './filter';
 
@@ -19,7 +19,7 @@ export class OSFilter extends Filter {
   constructor() {
     super();
     // Get environmental variables that are known
-    this.platform = process.platform;
+    this.platform = os.platform();
   }
 
   filter(test: { metadata?: MongoDBMetadataUI }) {

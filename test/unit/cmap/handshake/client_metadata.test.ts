@@ -153,7 +153,7 @@ describe('client metadata module', () => {
           },
           os: {
             type: os.type(),
-            name: process.platform,
+            name: os.platform(),
             architecture: os.arch(),
             version: os.release()
           },
@@ -179,7 +179,7 @@ describe('client metadata module', () => {
           },
           os: {
             type: os.type(),
-            name: process.platform,
+            name: os.platform(),
             architecture: os.arch(),
             version: os.release()
           },
@@ -203,7 +203,7 @@ describe('client metadata module', () => {
           },
           os: {
             type: os.type(),
-            name: process.platform,
+            name: os.platform(),
             architecture: os.arch(),
             version: os.release()
           },
@@ -229,7 +229,7 @@ describe('client metadata module', () => {
           },
           os: {
             type: os.type(),
-            name: process.platform,
+            name: os.platform(),
             architecture: os.arch(),
             version: os.release()
           },
@@ -248,7 +248,7 @@ describe('client metadata module', () => {
           },
           os: {
             type: os.type(),
-            name: process.platform,
+            name: os.platform(),
             architecture: os.arch(),
             version: os.release()
           },

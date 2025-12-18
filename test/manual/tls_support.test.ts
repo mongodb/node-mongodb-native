@@ -4,6 +4,7 @@ import * as tls from 'node:tls';
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
+import * as os from 'os';
 import * as sinon from 'sinon';
 
 import { MongoClient, type MongoClientOptions, MongoServerSelectionError } from '../../src';
@@ -36,7 +37,7 @@ describe('TLS Support', function () {
   beforeEach(function () {
     if (
       this.currentTest?.title === 'should connect with tls via url options' &&
-      process.platform === 'win32'
+      os.platform() === 'win32'
     ) {
       this.currentTest.skipReason = 'TODO(NODE-5803): Un-skip Windows TLS tests via URL';
       return this.skip();
