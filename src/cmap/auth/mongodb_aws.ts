@@ -106,7 +106,7 @@ export class MongoDBAWS extends AuthProvider {
     }
 
     const body = 'Action=GetCallerIdentity&Version=2011-06-15';
-    const signed = aws4Sign(
+    const signed = await aws4Sign(
       {
         method: 'POST',
         host,

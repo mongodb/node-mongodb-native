@@ -31,8 +31,8 @@ describe('Verify AWS4 signature generation', () => {
     date
   };
 
-  it('should generate correct credentials for permanent credentials', () => {
-    const signed = aws4Sign(request, awsCredentials);
+  it('should generate correct credentials for permanent credentials', async () => {
+    const signed = await aws4Sign(request, awsCredentials);
 
     expect(signed.headers['X-Amz-Date']).to.exist;
     expect(signed.headers['X-Amz-Date']).to.equal('20251215T123456Z');
@@ -51,8 +51,8 @@ describe('Verify AWS4 signature generation', () => {
     // expect(oldSigned.headers['Authorization']).to.equal(signed.headers['Authorization']);
   });
 
-  it('should generate correct credentials for session credentials', () => {
-    const signed = aws4Sign(request, awsSessionCredentials);
+  it('should generate correct credentials for session credentials', async () => {
+    const signed = await aws4Sign(request, awsSessionCredentials);
 
     expect(signed.headers['X-Amz-Date']).to.exist;
     expect(signed.headers['X-Amz-Date']).to.equal('20251215T123456Z');

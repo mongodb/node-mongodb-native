@@ -260,7 +260,7 @@ describe('MONGODB-AWS', function () {
           'X-MongoDB-Server-Nonce': 'fakenonce',
           'X-MongoDB-GS2-CB-Flag': 'n'
         };
-        const signed = aws4Sign(
+        const signed = await aws4Sign(
           {
             method: 'POST',
             host,
