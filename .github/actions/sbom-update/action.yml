@@ -5,23 +5,87 @@ inputs:
     description: "Output filename for the SBOM"
     required: false
     default: "sbom.json"
-
+outputs:
+  HAS_CHANGES:
+    description: "Whether the SBOM has meaningful changes compared to the existing version"
+    value: ${{ steps.check_changes.outputs.HAS_CHANGES }}
 runs:
   using: composite
   steps:
     - name: Generate SBOM
+      id: generate-sbom
       shell: bash
-      working-directory: ${{ inputs.working-directory }}
       run: |
         echo "Generating SBOM for 'node' project..."
-        npx @cyclonedx/cyclonedx-npm --package-lock-only --omit dev --output-file sbom.json --output-format json --spec-version 1.5
+        npx @cyclonedx/cyclonedx-npm --package-lock-only --output-file sbom-new.json --output-format json --spec-version 1.5
 
-    - name: Validate SBOM
+    - name: Validate SBOM presence
       shell: bash
       run: |
-        if [ ! -f "${{ inputs.output-file }}" ]; then
+        if [ ! -f "sbom-new.json" ]; then
           echo "Error: SBOM file not found"
           exit 1
         fi
-        
+        echo "SBOM file generated: sbom-new.json"
+
+    - name: Download CycloneDX CLI
+      shell: bash
+      run: |
+        curl -L -s -o /tmp/cyclonedx "https://github.com/CycloneDX/cyclonedx-cli/releases/download/v0.29.1/cyclonedx-linux-x64"
+        chmod +x /tmp/cyclonedx
+
+    - name: Validate SBOM
+      shell: bash
+      run: /tmp/cyclonedx validate --input-file sbom-new.json --fail-on-errors
+
+    - name: Check for SBOM changes
+      id: check_changes
+      if: steps.generate-sbom.outcome == 'success'
+      shell: bash
+      env:
+        SBOM_FILE: ${{ inputs.output-file }}
+      run: |
+        JQ_NORMALIZER='del(.serialNumber) | del(.metadata.timestamp) | walk(if type == "object" and .timestamp then .timestamp = "TIMESTAMP_NORMALIZED" else . end)'
+
+        if [ -f "$SBOM_FILE" ]; then
+          echo "Comparing new SBOM with existing $SBOM_FILE..."
+
+          # First try cyclonedx diff for component-level comparison
+          DIFF_OUTPUT=$(/tmp/cyclonedx diff "$SBOM_FILE" sbom-new.json --component-versions 2>/dev/null || true)
+
+          if echo "$DIFF_OUTPUT" | grep -q "^None$"; then
+            echo "No component changes detected via cyclonedx diff"
+
+            # Double-check with jq normalization (excludes metadata like timestamps)
+            if diff -q \
+               <(cat "$SBOM_FILE" | jq -r "$JQ_NORMALIZER") \
+               <(cat sbom-new.json | jq -r "$JQ_NORMALIZER") > /dev/null 2>&1; then
+              echo "HAS_CHANGES=false" >> $GITHUB_OUTPUT
+              echo "No meaningful changes detected in SBOM"
+              rm sbom-new.json
+            else
+              echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
+              echo "Changes detected in SBOM (non-component changes)"
+              mv sbom-new.json "$SBOM_FILE"
+            fi
+          else
+            echo "Component changes detected:"
+            echo "$DIFF_OUTPUT"
+            echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
+            mv sbom-new.json "$SBOM_FILE"
+          fi
+        else
+          echo "No existing $SBOM_FILE found, creating initial version"
+          echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
+          mv sbom-new.json "$SBOM_FILE"
+        fi
+      continue-on-error: true
+
+    - name: Final SBOM validation
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.output-file }}" ]; then
+          echo "Error: Final SBOM file not found at ${{ inputs.output-file }}"
+          exit 1
+        fi
         echo "SBOM file validated: ${{ inputs.output-file }}"

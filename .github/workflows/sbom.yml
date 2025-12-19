@@ -1,5 +1,4 @@
 name: Post-Merge SBOM Update
-
 on:
   push:
     branches: 
@@ -8,8 +7,10 @@ on:
       - 'package.json'
       - 'package-lock.json'
   workflow_dispatch:
+
 env:
   SBOM_FILE: "sbom.json"
+
 permissions:
   contents: write
   pull-requests: write
@@ -24,10 +25,10 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - name: Checkout repository (Base Branch)
+      - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.base.ref || github.ref }}
+          ref: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Node and dependencies
@@ -50,41 +51,18 @@ jobs:
         uses: ./.github/actions/setup-sbom
 
       - name: Generate SBOM
+        id: generate_sbom
         uses: ./.github/actions/sbom-update
         with:
-          output-file: ${SBOM_FILE}
+          output-file: ${{ env.SBOM_FILE }}
 
-      - name: Check for Changes in sbom.json
-        id: git_status
-        run: |
-          # Filter to remove/normalize serialNumber and timestamp fields
-          JQ_NORMALIZER='del(.serialNumber) | del(.metadata.timestamp) | walk(if type == "object" and .timestamp then .timestamp = "TIMESTAMP_NORMALIZED" else . end)'
-          
-          # Check if the base file exists in Git (to prevent errors on first commit)
-          if ! git show HEAD:$SBOM_FILE > /dev/null 2>&1; then
-              echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
-              exit 0
-          fi
-          
-          # Compare the normalized committed version vs. the normalized current version
-          if diff -q \
-             <(git show HEAD:$SBOM_FILE | jq -r "$JQ_NORMALIZER") \
-             <(cat $SBOM_FILE | jq -r "$JQ_NORMALIZER"); then
-             
-             echo "HAS_CHANGES=false" >> $GITHUB_OUTPUT
-             echo "No changes detected in sbom.json"
-          else
-             echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
-             echo "Changes detected in sbom.json"
-          fi
-
-      - name: "Commit SBOM changes"
-        if: steps.sbom_status.outputs.HAS_CHANGES == 'true'
+      - name: Commit SBOM changes
+        if: steps.generate_sbom.outputs.HAS_CHANGES == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add ${{ env.SBOM_FILE }}
           git commit -m "chore(deps): Update SBOM after dependency changes"
           git push
-          echo "📦 SBOM updated and committed" >> $GITHUB_STEP_SUMMARY
+          echo "SBOM updated and committed" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
