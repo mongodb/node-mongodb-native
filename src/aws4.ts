@@ -25,15 +25,21 @@ export type SignedHeaders = {
 };
 
 const getHash = async (str: string): Promise<string> => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
+  const data = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(str));
+  BSON.onDemand.ByteUtils.encodeUTF8Into(data, str, 0);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashHex = BSON.onDemand.ByteUtils.toHex(new Uint8Array(hashBuffer));
   return hashHex;
 };
 const getHmacBuffer = async (key: string | Uint8Array, str: string): Promise<Uint8Array> => {
-  const encoder = new TextEncoder();
-  const keyData = typeof key === 'string' ? encoder.encode(key) : key;
+  let keyData: Uint8Array;
+  if (typeof key === 'string') {
+    keyData = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(key));
+    BSON.onDemand.ByteUtils.encodeUTF8Into(keyData, key, 0);
+  } else {
+    keyData = key;
+  }
+
   const importedKey = await crypto.subtle.importKey(
     'raw',
     keyData,
@@ -41,7 +47,9 @@ const getHmacBuffer = async (key: string | Uint8Array, str: string): Promise<Uin
     false,
     ['sign']
   );
-  const signature = await crypto.subtle.sign('HMAC', importedKey, encoder.encode(str));
+  const strData = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(str));
+  BSON.onDemand.ByteUtils.encodeUTF8Into(strData, str, 0);
+  const signature = await crypto.subtle.sign('HMAC', importedKey, strData);
   const digest = new Uint8Array(signature);
   return digest;
 };
