@@ -1,3 +1,4 @@
+import { BSON } from './bson';
 import { type AWSCredentials } from './deps';
 
 export type Options = {
@@ -23,14 +24,11 @@ export type SignedHeaders = {
   };
 };
 
-const crypto = globalThis.crypto;
-
 const getHash = async (str: string): Promise<string> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(str);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = BSON.onDemand.ByteUtils.toHex(new Uint8Array(hashBuffer));
   return hashHex;
 };
 const getHmacBuffer = async (key: string | Uint8Array, str: string): Promise<Uint8Array> => {
@@ -49,8 +47,7 @@ const getHmacBuffer = async (key: string | Uint8Array, str: string): Promise<Uin
 };
 const getHmacString = async (key: Uint8Array, str: string): Promise<string> => {
   const hmacBuffer = await getHmacBuffer(key, str);
-  const hashArray = Array.from(hmacBuffer);
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = BSON.onDemand.ByteUtils.toHex(hmacBuffer);
   return hashHex;
 };
 
