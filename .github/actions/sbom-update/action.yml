@@ -17,7 +17,7 @@ runs:
       shell: bash
       run: |
         echo "Generating SBOM for 'node' project..."
-        npx @cyclonedx/cyclonedx-npm --package-lock-only --output-file sbom-new.json --output-format json --spec-version 1.5
+        npx @cyclonedx/cyclonedx-npm --omit dev --package-lock-only --output-file sbom-new.json --output-format json --spec-version 1.5
 
     - name: Validate SBOM presence
       shell: bash
