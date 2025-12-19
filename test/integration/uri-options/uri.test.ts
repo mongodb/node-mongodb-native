@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as os from 'os';
 import * as sinon from 'sinon';
 
 import { Topology } from '../../../src/sdam/topology';
@@ -45,7 +46,7 @@ describe('URI', function () {
     metadata: { requires: { topology: 'single' } },
 
     test: async function () {
-      if (process.platform === 'win32') {
+      if (os.platform() === 'win32') {
         return;
       }
 
