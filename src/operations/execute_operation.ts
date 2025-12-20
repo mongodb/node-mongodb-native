@@ -37,7 +37,7 @@ import {
   supportsRetryableWrites
 } from '../utils';
 import { AggregateOperation } from './aggregate';
-import { AbstractOperation, Aspect, RetryContext } from './operation';
+import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -254,17 +254,17 @@ async function executeOperationWithRetries<
     2 // backoff rate
   );
 
-  const retryContext =
-    operation.retryContext ??
-    new RetryContext(willRetry ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1);
+  let maxAttempts =
+    (operation.maxAttempts ?? willRetry) ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
+
   for (
     let attempt = 0;
-    attempt < retryContext.maxAttempts;
+    attempt < maxAttempts;
     attempt++,
-      retryContext.maxAttempts =
+      maxAttempts =
         willRetry && previousOperationError?.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
           ? 6
-          : retryContext.maxAttempts
+          : maxAttempts
   ) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
