@@ -45,10 +45,6 @@ export interface OperationOptions extends BSONSerializeOptions {
   timeoutMS?: number;
 }
 
-export class RetryContext {
-  constructor(public maxAttempts: number) {}
-}
-
 /**
  * This class acts as a parent class for any operation and is responsible for setting this.options,
  * as well as setting and getting a session.
@@ -70,7 +66,7 @@ export abstract class AbstractOperation<TResult = any> {
   /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
 
-  retryContext?: RetryContext;
+  maxAttempts?: number;
 
   private _session: ClientSession | undefined;
 

@@ -25,7 +25,7 @@ import {
 import type { MongoClient, MongoOptions } from './mongo_client';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
-import { RetryContext } from './operations/operation';
+import { RetryAttemptContext } from './operations/operation';
 import { RunCommandOperation } from './operations/run_command';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
@@ -494,14 +494,14 @@ export class ClientSession
       command.recoveryToken = this.transaction.recoveryToken;
     }
 
-    const retryContext = new RetryContext(5);
+    const retryContext = new RetryAttemptContext(5);
 
     const operation = new RunCommandOperation(new MongoDBNamespace('admin'), command, {
       session: this,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
-    operation.retryContext = retryContext;
+    operation.attempts = retryContext;
 
     const timeoutContext =
       this.timeoutContext ??
@@ -531,7 +531,7 @@ export class ClientSession
             readPreference: ReadPreference.primary,
             bypassPinningCheck: true
           });
-          op.retryContext = retryContext;
+          op.attempts = retryContext;
           await executeOperation(this.client, op, timeoutContext);
           return;
         } catch (retryCommitError) {
