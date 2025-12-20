@@ -37,7 +37,7 @@ import {
   supportsRetryableWrites
 } from '../utils';
 import { AggregateOperation } from './aggregate';
-import { AbstractOperation, Aspect } from './operation';
+import { AbstractOperation, Aspect, RetryContext } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -254,18 +254,9 @@ async function executeOperationWithRetries<
     2 // backoff rate
   );
 
-  let maxAttempts =
-    (operation.maxAttempts ?? willRetry) ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
+  const retryContext = new RetryContext(willRetry, timeoutContext.csotEnabled() ? Infinity : 2);
 
-  for (
-    let attempt = 0;
-    attempt < maxAttempts;
-    attempt++,
-      maxAttempts =
-        willRetry && previousOperationError?.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
-          ? 6
-          : maxAttempts
-  ) {
+  for (; retryContext.shouldRetry(); retryContext.recordFailure(previousOperationError)) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
         throw new MongoServerError({
@@ -294,7 +285,6 @@ async function executeOperationWithRetries<
 
         // if the delay would exhaust the CSOT timeout, short-circuit.
         if (timeoutContext.csotEnabled() && delayMS > timeoutContext.remainingTimeMS) {
-          // TODO: is this the right error to throw?
           throw new MongoOperationTimeoutError(
             `MongoDB SystemOverload exponential backoff would exceed timeoutMS deadline: remaining CSOT deadline=${timeoutContext.remainingTimeMS}, backoff delayMS=${delayMS}`,
             {
@@ -337,17 +327,15 @@ async function executeOperationWithRetries<
     operation.server = server;
 
     try {
-      const isRetry = attempt > 0;
-
       // If attempt > 0 and we are command batching we need to reset the batch.
-      if (isRetry && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
+      if (retryContext.isRetry && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
         operation.resetBatch();
       }
 
       try {
         const result = await server.command(operation, timeoutContext);
         topology.tokenBucket.deposit(
-          isRetry
+          retryContext.isRetry
             ? // on successful retry, deposit the retry cost + the refresh rate.
               TOKEN_REFRESH_RATE + RETRY_COST
             : // otherwise, just deposit the refresh rate.
