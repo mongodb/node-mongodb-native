@@ -874,7 +874,7 @@ describe('Aggregation', function () {
   it(
     'should perform aggregations with a write stage on secondary when readPreference is secondary',
     {
-      metadata: { requires: { topology: 'replicaset', mongodb: ">=5.0" } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=5.0' } },
       async test() {
         const databaseName = this.configuration.db;
         const client = this.configuration.newClient(this.configuration.writeConcernMax(), {

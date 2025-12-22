@@ -295,7 +295,7 @@ describe('server selection', function () {
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
-        const selector = secondaryWritableServerSelector();
+        const selector = secondaryWritableServerSelector(0);
         const servers = selector(
           topologyDescription,
           Array.from(serverDescriptions.values()),
@@ -401,7 +401,7 @@ describe('server selection', function () {
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
-        const selector = secondaryWritableServerSelector();
+        const selector = secondaryWritableServerSelector(0);
         const servers = selector(
           topologyDescription,
           Array.from(serverDescriptions.values()),
@@ -507,7 +507,7 @@ describe('server selection', function () {
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
-        const selector = secondaryWritableServerSelector();
+        const selector = secondaryWritableServerSelector(0);
         const servers = selector(
           topologyDescription,
           Array.from(serverDescriptions.values()),
@@ -564,9 +564,7 @@ describe('server selection', function () {
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
-        const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
-        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
-        const selector = secondaryWritableServerSelector();
+        const selector = secondaryWritableServerSelector(0);
         const servers = selector(
           topologyDescription,
           Array.from(serverDescriptions.values()),
@@ -589,9 +587,7 @@ describe('server selection', function () {
           MIN_SECONDARY_WRITE_WIRE_VERSION,
           { localThresholdMS: 5 }
         );
-        const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
-        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
-        const selector = secondaryWritableServerSelector();
+        const selector = secondaryWritableServerSelector(0);
         const servers = selector(
           topologyDescription,
           Array.from(serverDescriptions.values()),
