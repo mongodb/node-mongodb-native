@@ -7,8 +7,8 @@ import { ReadPreference } from '../../../src/read_preference';
 import { TopologyType } from '../../../src/sdam/common';
 import { ServerDescription } from '../../../src/sdam/server_description';
 import {
+  DeprioritizedServers,
   MIN_SECONDARY_WRITE_WIRE_VERSION,
-  readPreferenceServerSelector,
   sameServerSelector,
   secondaryWritableServerSelector
 } from '../../../src/sdam/server_selection';
@@ -28,16 +28,7 @@ describe('server selection', function () {
     secondary: true,
     ok: 1
   });
-  const secondaryTwo = new ServerDescription('127.0.0.1:27024', {
-    setName: 'test',
-    secondary: true,
-    ok: 1
-  });
   const mongos = new ServerDescription('127.0.0.1:27019', {
-    msg: 'isdbgrid',
-    ok: 1
-  });
-  const mongosTwo = new ServerDescription('127.0.0.1:27023', {
     msg: 'isdbgrid',
     ok: 1
   });
@@ -48,93 +39,6 @@ describe('server selection', function () {
   });
   const unknown = new ServerDescription('127.0.0.1:27022', {
     ok: 0
-  });
-
-  describe('#readPreferenceServerSelector', function () {
-    let selector;
-    let servers;
-
-    context('when the topology is sharded', function () {
-      const topologyDescription = new TopologyDescription(
-        TopologyType.Sharded,
-        new Map(),
-        'test',
-        MIN_SECONDARY_WRITE_WIRE_VERSION,
-        new ObjectId(),
-        MIN_SECONDARY_WRITE_WIRE_VERSION
-      );
-
-      beforeEach(function () {
-        selector = readPreferenceServerSelector(ReadPreference.secondaryPreferred);
-      });
-
-      context('when there are deprioritized servers', function () {
-        context('when there are other servers', function () {
-          beforeEach(function () {
-            servers = selector(topologyDescription, [mongos], [mongosTwo]);
-          });
-
-          it('returns a server from the other servers', function () {
-            expect(servers).to.deep.equal([mongos]);
-          });
-        });
-
-        context('when there are no other servers', function () {
-          beforeEach(function () {
-            servers = selector(topologyDescription, [], [mongosTwo]);
-          });
-
-          it('returns a server from the deprioritized servers', function () {
-            expect(servers).to.deep.equal([mongosTwo]);
-          });
-        });
-      });
-
-      context('when there are no deprioritised servers', function () {
-        beforeEach(function () {
-          servers = selector(topologyDescription, [mongos]);
-        });
-
-        it('returns a server from the other servers', function () {
-          expect(servers).to.deep.equal([mongos]);
-        });
-      });
-    });
-
-    context('when the topology is not sharded', function () {
-      const topologyDescription = new TopologyDescription(
-        TopologyType.ReplicaSetWithPrimary,
-        new Map(),
-        'test',
-        MIN_SECONDARY_WRITE_WIRE_VERSION,
-        new ObjectId(),
-        MIN_SECONDARY_WRITE_WIRE_VERSION
-      );
-
-      beforeEach(function () {
-        selector = readPreferenceServerSelector(ReadPreference.secondary);
-      });
-
-      context('when there are deprioritized servers', function () {
-        beforeEach(function () {
-          servers = selector(topologyDescription, [secondaryTwo], [secondary]);
-        });
-
-        it('selects from all server lists', function () {
-          expect(servers).to.contain.oneOf([secondary, secondaryTwo]);
-        });
-      });
-
-      context('when there are no deprioritised servers', function () {
-        beforeEach(function () {
-          servers = selector(topologyDescription, [secondary], []);
-        });
-
-        it('selects from all non-deprioritised servers', function () {
-          expect(servers).to.deep.equal([secondary]);
-        });
-      });
-    });
   });
 
   describe('#sameServerSelector', function () {
@@ -211,7 +115,11 @@ describe('server selection', function () {
             MIN_SECONDARY_WRITE_WIRE_VERSION,
             ReadPreference.secondary
           );
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('uses the provided read preference', function () {
             expect(servers).to.deep.equal([secondary]);
@@ -220,7 +128,11 @@ describe('server selection', function () {
 
         context('when a read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a primary', function () {
             expect(servers).to.deep.equal([primary]);
@@ -243,7 +155,11 @@ describe('server selection', function () {
             MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
             ReadPreference.secondary
           );
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a primary', function () {
             expect(servers).to.deep.equal([primary]);
@@ -252,11 +168,36 @@ describe('server selection', function () {
 
         context('when read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION - 1);
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a primary', function () {
             expect(servers).to.deep.equal([primary]);
           });
+        });
+      });
+
+      context('when a common wire version is not provided', function () {
+        const topologyDescription = new TopologyDescription(
+          TopologyType.ReplicaSetWithPrimary,
+          serverDescriptions,
+          'test',
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
+          new ObjectId(),
+          MIN_SECONDARY_WRITE_WIRE_VERSION
+        );
+        const selector = secondaryWritableServerSelector(undefined, ReadPreference.secondary);
+        const servers = selector(
+          topologyDescription,
+          Array.from(serverDescriptions.values()),
+          new DeprioritizedServers()
+        );
+
+        it('selects a primary', function () {
+          expect(servers).to.deep.equal([primary]);
         });
       });
     });
@@ -280,7 +221,11 @@ describe('server selection', function () {
             MIN_SECONDARY_WRITE_WIRE_VERSION,
             ReadPreference.secondary
           );
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a mongos', function () {
             expect(servers).to.deep.equal([mongos]);
@@ -289,7 +234,11 @@ describe('server selection', function () {
 
         context('when a read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a mongos', function () {
             expect(servers).to.deep.equal([mongos]);
@@ -312,7 +261,11 @@ describe('server selection', function () {
             MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
             ReadPreference.secondary
           );
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a mongos', function () {
             expect(servers).to.deep.equal([mongos]);
@@ -321,11 +274,36 @@ describe('server selection', function () {
 
         context('when read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION - 1);
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a mongos', function () {
             expect(servers).to.deep.equal([mongos]);
           });
+        });
+      });
+
+      context('when a common wire version is not provided', function () {
+        const topologyDescription = new TopologyDescription(
+          TopologyType.Sharded,
+          serverDescriptions,
+          'test',
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
+          new ObjectId(),
+          MIN_SECONDARY_WRITE_WIRE_VERSION
+        );
+        const selector = secondaryWritableServerSelector();
+        const servers = selector(
+          topologyDescription,
+          Array.from(serverDescriptions.values()),
+          new DeprioritizedServers()
+        );
+
+        it('selects a mongos', function () {
+          expect(servers).to.deep.equal([mongos]);
         });
       });
     });
@@ -349,7 +327,11 @@ describe('server selection', function () {
             MIN_SECONDARY_WRITE_WIRE_VERSION,
             ReadPreference.secondary
           );
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a load balancer', function () {
             expect(servers).to.deep.equal([loadBalancer]);
@@ -358,7 +340,11 @@ describe('server selection', function () {
 
         context('when a read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a load balancer', function () {
             expect(servers).to.deep.equal([loadBalancer]);
@@ -381,7 +367,11 @@ describe('server selection', function () {
             MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
             ReadPreference.secondary
           );
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a load balancer', function () {
             expect(servers).to.deep.equal([loadBalancer]);
@@ -390,11 +380,36 @@ describe('server selection', function () {
 
         context('when read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION - 1);
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a load balancer', function () {
             expect(servers).to.deep.equal([loadBalancer]);
           });
+        });
+      });
+
+      context('when a common wire version is not provided', function () {
+        const topologyDescription = new TopologyDescription(
+          TopologyType.LoadBalanced,
+          serverDescriptions,
+          'test',
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
+          new ObjectId(),
+          MIN_SECONDARY_WRITE_WIRE_VERSION
+        );
+        const selector = secondaryWritableServerSelector();
+        const servers = selector(
+          topologyDescription,
+          Array.from(serverDescriptions.values()),
+          new DeprioritizedServers()
+        );
+
+        it('selects a load balancer', function () {
+          expect(servers).to.deep.equal([loadBalancer]);
         });
       });
     });
@@ -418,7 +433,11 @@ describe('server selection', function () {
             MIN_SECONDARY_WRITE_WIRE_VERSION,
             ReadPreference.secondary
           );
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a standalone', function () {
             expect(servers).to.deep.equal([single]);
@@ -427,7 +446,11 @@ describe('server selection', function () {
 
         context('when a read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a standalone', function () {
             expect(servers).to.deep.equal([single]);
@@ -450,7 +473,11 @@ describe('server selection', function () {
             MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
             ReadPreference.secondary
           );
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a standalone', function () {
             expect(servers).to.deep.equal([single]);
@@ -459,11 +486,36 @@ describe('server selection', function () {
 
         context('when read preference is not provided', function () {
           const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION - 1);
-          const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+          const servers = selector(
+            topologyDescription,
+            Array.from(serverDescriptions.values()),
+            new DeprioritizedServers()
+          );
 
           it('selects a standalone', function () {
             expect(servers).to.deep.equal([single]);
           });
+        });
+      });
+
+      context('when a common wire version is not provided', function () {
+        const topologyDescription = new TopologyDescription(
+          TopologyType.Single,
+          serverDescriptions,
+          'test',
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
+          new ObjectId(),
+          MIN_SECONDARY_WRITE_WIRE_VERSION
+        );
+        const selector = secondaryWritableServerSelector();
+        const servers = selector(
+          topologyDescription,
+          Array.from(serverDescriptions.values()),
+          new DeprioritizedServers()
+        );
+
+        it('selects a standalone', function () {
+          expect(servers).to.deep.equal([single]);
         });
       });
     });
@@ -514,6 +566,12 @@ describe('server selection', function () {
         );
         const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
         const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+        const selector = secondaryWritableServerSelector();
+        const servers = selector(
+          topologyDescription,
+          Array.from(serverDescriptions.values()),
+          new DeprioritizedServers()
+        );
         expect(servers).to.have.lengthOf(2);
         const selectedAddresses = new Set(servers.map(({ address }) => address));
         expect(selectedAddresses.has(serverDescription1.address)).to.be.true;
@@ -533,6 +591,12 @@ describe('server selection', function () {
         );
         const selector = secondaryWritableServerSelector(MIN_SECONDARY_WRITE_WIRE_VERSION);
         const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+        const selector = secondaryWritableServerSelector();
+        const servers = selector(
+          topologyDescription,
+          Array.from(serverDescriptions.values()),
+          new DeprioritizedServers()
+        );
         expect(servers).to.have.lengthOf(1);
         const selectedAddresses = new Set(servers.map(({ address }) => address));
         expect(selectedAddresses.has(serverDescription1.address)).to.be.true;
