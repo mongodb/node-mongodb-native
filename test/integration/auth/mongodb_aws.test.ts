@@ -17,9 +17,9 @@ import {
   MongoMissingDependencyError,
   MongoServerError
 } from '../../../src';
-import { aws4Sign } from '../../../src/aws4';
 import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import { AWSSDKCredentialProvider } from '../../../src/cmap/auth/aws_temporary_credentials';
+import { aws4Sign } from '../../../src/cmap/auth/aws4';
 import { MongoDBAWS } from '../../../src/cmap/auth/mongodb_aws';
 import { Connection } from '../../../src/cmap/connection';
 import { setDifference } from '../../../src/utils';
@@ -268,7 +268,8 @@ describe('MONGODB-AWS', function () {
             region: 'us-east-1',
             service: 'sts',
             headers: headers,
-            body
+            body,
+            date: new Date()
           },
           creds
         );

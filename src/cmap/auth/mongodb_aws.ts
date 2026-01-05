@@ -1,4 +1,3 @@
-import { aws4Sign } from '../../aws4';
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
 import {
@@ -13,6 +12,7 @@ import {
   AWSSDKCredentialProvider,
   type AWSTempCredentials
 } from './aws_temporary_credentials';
+import { aws4Sign } from './aws4';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
 
@@ -119,7 +119,8 @@ export class MongoDBAWS extends AuthProvider {
           'X-MongoDB-GS2-CB-Flag': 'n'
         },
         path: '/',
-        body
+        body,
+        date: new Date()
       },
       awsCredentials
     );

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { aws4Sign, type Options } from '../../src/aws4';
+import { aws4Sign, type Options } from '../../src/cmap/auth/aws4';
 
 describe('Verify AWS4 signature generation', () => {
   const date = new Date('2025-12-15T12:34:56Z');

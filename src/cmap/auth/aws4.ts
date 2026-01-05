@@ -1,5 +1,5 @@
-import { BSON } from './bson';
-import { type AWSCredentials } from './deps';
+import { BSON } from '../../bson';
+import { type AWSCredentials } from '../../deps';
 
 export type Options = {
   path: '/';
@@ -14,7 +14,7 @@ export type Options = {
   };
   service: string;
   region: string;
-  date?: Date;
+  date: Date;
 };
 
 export type SignedHeaders = {
@@ -24,6 +24,12 @@ export type SignedHeaders = {
   };
 };
 
+/**
+ * Calculates the SHA-256 hash of a string.
+ *
+ * @param str - String to hash.
+ * @returns Hexadecimal representation of the hash.
+ */
 const getHash = async (str: string): Promise<string> => {
   const data = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(str));
   BSON.onDemand.ByteUtils.encodeUTF8Into(data, str, 0);
@@ -31,6 +37,13 @@ const getHash = async (str: string): Promise<string> => {
   const hashHex = BSON.onDemand.ByteUtils.toHex(new Uint8Array(hashBuffer));
   return hashHex;
 };
+
+/**
+ * Calculates the HMAC-SHA256 of a string using the provided key.
+ * @param key - Key to use for HMAC calculation. Can be a string or Uint8Array.
+ * @param str - String to calculate HMAC for.
+ * @returns Uint8Array containing the HMAC-SHA256 digest.
+ */
 const getHmacBuffer = async (key: string | Uint8Array, str: string): Promise<Uint8Array> => {
   let keyData: Uint8Array;
   if (typeof key === 'string') {
@@ -53,12 +66,16 @@ const getHmacBuffer = async (key: string | Uint8Array, str: string): Promise<Uin
   const digest = new Uint8Array(signature);
   return digest;
 };
-const getHmacString = async (key: Uint8Array, str: string): Promise<string> => {
-  const hmacBuffer = await getHmacBuffer(key, str);
-  const hashHex = BSON.onDemand.ByteUtils.toHex(hmacBuffer);
-  return hashHex;
-};
 
+/**
+ * Converts header values according to AWS requirements,
+ * From https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-create-signed-request.html#create-canonical-request
+ * For values, you must:
+    - trim any leading or trailing spaces.
+    - convert sequential spaces to a single space.
+ * @param value - Header value to convert.
+ * @returns - Converted header value.
+ */
 const convertHeaderValue = (value: string | number) => {
   return value.toString().trim().replace(/\s+/g, ' ');
 };
@@ -91,8 +108,8 @@ export async function aws4Sign(
 
   // 1: Create a canonical request
 
-  // Date – The date and time used to sign the request. If not provided, use the current date.
-  const date = options.date || new Date();
+  // Date – The date and time used to sign the request.
+  const date = options.date;
   // RequestDateTime – The date and time used in the credential scope. This value is the current UTC time in ISO 8601 format (for example, 20130524T000000Z).
   const requestDateTime = date.toISOString().replace(/[:-]|\.\d{3}/g, '');
   // RequestDate – The date used in the credential scope. This value is the current UTC date in YYYYMMDD format (for example, 20130524).
@@ -164,7 +181,8 @@ export async function aws4Sign(
   const signingKey = await getHmacBuffer(dateRegionServiceKey, 'aws4_request');
 
   // 5. Calculate the signature
-  const signature = await getHmacString(signingKey, stringToSign);
+  const signatureBuffer = await getHmacBuffer(signingKey, stringToSign);
+  const signature = BSON.onDemand.ByteUtils.toHex(signatureBuffer);
 
   // 6. Add the signature to the request
   // Calculate the Authorization header
