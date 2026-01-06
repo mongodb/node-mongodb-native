@@ -260,7 +260,7 @@ describe('MONGODB-AWS', function () {
           'X-MongoDB-Server-Nonce': 'fakenonce',
           'X-MongoDB-GS2-CB-Flag': 'n'
         };
-        const signed = await aws4Sign(
+        const signedHeaders = await aws4Sign(
           {
             method: 'POST',
             host,
@@ -274,8 +274,8 @@ describe('MONGODB-AWS', function () {
           creds
         );
 
-        const authorization = signed.headers.Authorization;
-        const xAmzDate = signed.headers['X-Amz-Date'];
+        const authorization = signedHeaders.Authorization;
+        const xAmzDate = signedHeaders['X-Amz-Date'];
 
         const fetchHeaders = new Headers();
         for (const [key, value] of Object.entries(headers)) {
