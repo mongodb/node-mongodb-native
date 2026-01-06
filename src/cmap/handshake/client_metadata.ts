@@ -157,8 +157,8 @@ export async function makeClientMetadata(
 
   // Note: order matters, os.type is last so it will be removed last if we're at maxSize
   const osInfo = new Map()
-    .set('name', process.platform)
-    .set('architecture', process.arch)
+    .set('name', os.platform())
+    .set('architecture', os.arch())
     .set('version', os.release())
     .set('type', os.type());
 

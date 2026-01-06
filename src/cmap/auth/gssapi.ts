@@ -1,4 +1,5 @@
 import * as dns from 'dns';
+import * as os from 'os';
 
 import { getKerberos, type Kerberos, type KerberosClient } from '../../deps';
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
@@ -97,7 +98,7 @@ async function makeKerberosClient(authContext: AuthContext): Promise<KerberosCli
   }
 
   const spnHost = mechanismProperties.SERVICE_HOST ?? host;
-  let spn = `${serviceName}${process.platform === 'win32' ? '/' : '@'}${spnHost}`;
+  let spn = `${serviceName}${os.platform() === 'win32' ? '/' : '@'}${spnHost}`;
   if ('SERVICE_REALM' in mechanismProperties) {
     spn = `${spn}@${mechanismProperties.SERVICE_REALM}`;
   }
