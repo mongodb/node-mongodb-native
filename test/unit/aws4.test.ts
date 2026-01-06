@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { aws4Sign, type Options } from '../../src/cmap/auth/aws4';
+import { aws4Sign, type AwsSigv4Options } from '../../src/cmap/auth/aws4';
 
 describe('Verify AWS4 signature generation', () => {
   const date = new Date('2025-12-15T12:34:56Z');
@@ -15,7 +15,7 @@ describe('Verify AWS4 signature generation', () => {
   };
   const host = 'sts.amazonaws.com';
   const body = 'Action=GetCallerIdentity&Version=2011-06-15';
-  const request: Options = {
+  const request: AwsSigv4Options = {
     method: 'POST',
     host,
     path: '/',
@@ -32,12 +32,12 @@ describe('Verify AWS4 signature generation', () => {
   };
 
   it('should generate correct credentials for permanent credentials', async () => {
-    const signed = await aws4Sign(request, awsCredentials);
+    const headers = await aws4Sign(request, awsCredentials);
 
-    expect(signed.headers['X-Amz-Date']).to.exist;
-    expect(signed.headers['X-Amz-Date']).to.equal('20251215T123456Z');
-    expect(signed.headers['Authorization']).to.exist;
-    expect(signed.headers['Authorization']).to.equal(
+    expect(headers['X-Amz-Date']).to.exist;
+    expect(headers['X-Amz-Date']).to.equal('20251215T123456Z');
+    expect(headers['Authorization']).to.exist;
+    expect(headers['Authorization']).to.equal(
       'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20251215/us-east-1/sts/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce, Signature=48a66f9fc76829002a7a7ac5b92e4089395d9b88ea7d417ab146949b90eeab08'
     );
 
@@ -52,12 +52,12 @@ describe('Verify AWS4 signature generation', () => {
   });
 
   it('should generate correct credentials for session credentials', async () => {
-    const signed = await aws4Sign(request, awsSessionCredentials);
+    const headers = await aws4Sign(request, awsSessionCredentials);
 
-    expect(signed.headers['X-Amz-Date']).to.exist;
-    expect(signed.headers['X-Amz-Date']).to.equal('20251215T123456Z');
-    expect(signed.headers['Authorization']).to.exist;
-    expect(signed.headers['Authorization']).to.equal(
+    expect(headers['X-Amz-Date']).to.exist;
+    expect(headers['X-Amz-Date']).to.equal('20251215T123456Z');
+    expect(headers['Authorization']).to.exist;
+    expect(headers['Authorization']).to.equal(
       'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20251215/us-east-1/sts/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-amz-security-token;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce, Signature=bbcb06e2feb8651dced329789743ba283f92ef1302d34a7398cb1d35808a1a66'
     );
 

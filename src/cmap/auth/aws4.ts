@@ -18,10 +18,8 @@ export type AwsSigv4Options = {
 };
 
 export type SignedHeaders = {
-  headers: {
-    Authorization: string;
-    'X-Amz-Date': string;
-  };
+  Authorization: string;
+  'X-Amz-Date': string;
 };
 
 /**
@@ -44,7 +42,7 @@ const getHash = async (str: string): Promise<string> => {
  * @param str - String to calculate HMAC for.
  * @returns Uint8Array containing the HMAC-SHA256 digest.
  */
-const getHmacBuffer = async (key: string | Uint8Array, str: string): Promise<Uint8Array> => {
+const getHmacSha256 = async (key: string | Uint8Array, str: string): Promise<Uint8Array> => {
   let keyData: Uint8Array;
   if (typeof key === 'string') {
     keyData = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(key));
@@ -85,7 +83,7 @@ const convertHeaderValue = (value: string | number) => {
  * The signing logic is described here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_sigv-create-signed-request.html
  */
 export async function aws4Sign(
-  options: Options,
+  options: AwsSigv4Options,
   credentials: AWSCredentials
 ): Promise<SignedHeaders> {
   /**
@@ -175,13 +173,13 @@ export async function aws4Sign(
 
   // 4. Derive a signing key
   // To derive a signing key for SigV4, perform a succession of keyed hash operations (HMAC) on the request date, Region, and service, with your AWS secret access key as the key for the initial hashing operation.
-  const dateKey = await getHmacBuffer('AWS4' + credentials.secretAccessKey, requestDate);
-  const dateRegionKey = await getHmacBuffer(dateKey, options.region);
-  const dateRegionServiceKey = await getHmacBuffer(dateRegionKey, options.service);
-  const signingKey = await getHmacBuffer(dateRegionServiceKey, 'aws4_request');
+  const dateKey = await getHmacSha256('AWS4' + credentials.secretAccessKey, requestDate);
+  const dateRegionKey = await getHmacSha256(dateKey, options.region);
+  const dateRegionServiceKey = await getHmacSha256(dateRegionKey, options.service);
+  const signingKey = await getHmacSha256(dateRegionServiceKey, 'aws4_request');
 
   // 5. Calculate the signature
-  const signatureBuffer = await getHmacBuffer(signingKey, stringToSign);
+  const signatureBuffer = await getHmacSha256(signingKey, stringToSign);
   const signature = BSON.onDemand.ByteUtils.toHex(signatureBuffer);
 
   // 6. Add the signature to the request
@@ -194,9 +192,7 @@ export async function aws4Sign(
 
   // Return the calculated headers
   return {
-    headers: {
-      Authorization: authorizationHeader,
-      'X-Amz-Date': requestDateTime
-    }
+    Authorization: authorizationHeader,
+    'X-Amz-Date': requestDateTime
   };
 }

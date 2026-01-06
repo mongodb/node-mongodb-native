@@ -106,7 +106,7 @@ export class MongoDBAWS extends AuthProvider {
     }
 
     const body = 'Action=GetCallerIdentity&Version=2011-06-15';
-    const signed = await aws4Sign(
+    const headers = await aws4Sign(
       {
         method: 'POST',
         host,
@@ -126,8 +126,8 @@ export class MongoDBAWS extends AuthProvider {
     );
 
     const payload: AWSSaslContinuePayload = {
-      a: signed.headers.Authorization,
-      d: signed.headers['X-Amz-Date']
+      a: headers.Authorization,
+      d: headers['X-Amz-Date']
     };
 
     if (sessionToken) {
