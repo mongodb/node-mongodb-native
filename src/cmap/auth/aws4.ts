@@ -1,7 +1,7 @@
 import { BSON } from '../../bson';
 import { type AWSCredentials } from '../../deps';
 
-export type Options = {
+export type AwsSigv4Options = {
   path: '/';
   body: string;
   host: string;
