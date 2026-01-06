@@ -1425,7 +1425,8 @@ tasks:
       - func: assume secrets manager role
       - func: run ldap tests
   - name: test-socks5
-    tags: []
+    tags:
+      - socks5
     commands:
       - command: expansions.update
         type: setup
@@ -1451,7 +1452,8 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: run socks5 tests
   - name: test-socks5-tls
-    tags: []
+    tags:
+      - socks5-tls
     commands:
       - command: expansions.update
         type: setup
@@ -1502,6 +1504,7 @@ tasks:
   - name: test-tls-support-latest
     tags:
       - tls-support
+      - tls-support-latest
     commands:
       - command: expansions.update
         type: setup
@@ -1517,6 +1520,7 @@ tasks:
   - name: test-tls-support-8.0
     tags:
       - tls-support
+      - tls-support-8.0
     commands:
       - command: expansions.update
         type: setup
@@ -1532,6 +1536,7 @@ tasks:
   - name: test-tls-support-7.0
     tags:
       - tls-support
+      - tls-support-7.0
     commands:
       - command: expansions.update
         type: setup
@@ -1547,6 +1552,7 @@ tasks:
   - name: test-tls-support-6.0
     tags:
       - tls-support
+      - tls-support-6.0
     commands:
       - command: expansions.update
         type: setup
@@ -1562,6 +1568,7 @@ tasks:
   - name: test-tls-support-5.0
     tags:
       - tls-support
+      - tls-support-5.0
     commands:
       - command: expansions.update
         type: setup
@@ -1577,6 +1584,7 @@ tasks:
   - name: test-tls-support-4.4
     tags:
       - tls-support
+      - tls-support-4.4
     commands:
       - command: expansions.update
         type: setup
@@ -1592,6 +1600,7 @@ tasks:
   - name: test-tls-support-4.2
     tags:
       - tls-support
+      - tls-support-4.2
     commands:
       - command: expansions.update
         type: setup
@@ -3102,16 +3111,6 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-      # TODO(NODE-7356) - Unskip latest Windows NODE test builds
-      # - test-latest-replica_set
-      # - test-latest-server
-      # - test-latest-server-v1-api
-      # - test-latest-sharded_cluster
-      # - test-snappy-compression
-      # - test-socks5
-      # - test-socks5-tls
-      # - test-tls-support-latest
-      # - test-zstd-compression
   - name: windows-vsCurrent-large-Node22
     display_name: Windows Node22
     run_on: windows-vsCurrent-large
@@ -3147,16 +3146,6 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-      # TODO(NODE-7356) - Unskip latest Windows NODE test builds
-      # - test-latest-replica_set
-      # - test-latest-server
-      # - test-latest-server-v1-api
-      # - test-latest-sharded_cluster
-      # - test-snappy-compression
-      # - test-socks5
-      # - test-socks5-tls
-      # - test-tls-support-latest
-      # - test-zstd-compression
   - name: windows-vsCurrent-large-Node24
     display_name: Windows Node24
     run_on: windows-vsCurrent-large
@@ -3192,16 +3181,6 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-      # TODO(NODE-7356) - Unskip latest Windows NODE test builds
-      # - test-latest-replica_set
-      # - test-latest-server
-      # - test-latest-server-v1-api
-      # - test-latest-sharded_cluster
-      # - test-snappy-compression
-      # - test-socks5
-      # - test-socks5-tls
-      # - test-tls-support-latest
-      # - test-zstd-compression
   - name: rhel8-node20.19.0-test-csfle-mongocryptd
     display_name: rhel 8 Node20.19.0 test mongocryptd
     run_on: rhel80-large
