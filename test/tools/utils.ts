@@ -164,9 +164,9 @@ export const sleep = promisify(setTimeout);
 
 /**
  * If you are using sinon fake timers, it can end up blocking queued IO from running
- * awaiting a nextTick call will allow the event loop to process Networking/FS callbacks
+ * awaiting a setTimeout call will allow the event loop to process Networking/FS callbacks
  */
-export const processTick = () => new Promise(resolve => process.nextTick(resolve));
+export const processTick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 export function getIndicesOfAuthInUrl(connectionString: string | string[]) {
   const doubleSlashIndex = connectionString.indexOf('//');
@@ -285,7 +285,12 @@ export function topologyWithPlaceholderClient(
   options: Partial<TopologyOptions>
 ): Topology {
   return new Topology(
-    new MongoClient('mongodb://iLoveJavaScript'),
+    new MongoClient(
+      'mongodb://iLoveJavaScript',
+      options.serverSelectionTimeoutMS
+        ? { serverSelectionTimeoutMS: options.serverSelectionTimeoutMS }
+        : {}
+    ),
     seeds,
     options as TopologyOptions
   );

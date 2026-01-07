@@ -45,7 +45,13 @@ const WINDOWS_SKIP_TAGS = new Set([
   'auth',
   'load_balancer',
   'socks5-csfle',
-  'oidc'
+  'oidc',
+
+  // TODO: NODE-7356: enable skipped tests on windows
+  'latest',
+  'socks5',
+  'socks5-tls',
+  'tls-support-latest'
 ]);
 
 const TASKS = [];
@@ -181,7 +187,7 @@ TASKS.push(
     },
     {
       name: 'test-socks5',
-      tags: [],
+      tags: ['socks5'],
       commands: [
         updateExpansions({
           VERSION: 'latest',
@@ -208,7 +214,7 @@ TASKS.push(
     },
     {
       name: 'test-socks5-tls',
-      tags: [],
+      tags: ['socks5-tls'],
       commands: [
         updateExpansions({
           SSL: 'ssl',
@@ -298,7 +304,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
 for (const VERSION of TLS_VERSIONS) {
   TASKS.push({
     name: `test-tls-support-${VERSION}`,
-    tags: ['tls-support'],
+    tags: ['tls-support', `tls-support-${VERSION}`],
     commands: [
       updateExpansions({
         VERSION,

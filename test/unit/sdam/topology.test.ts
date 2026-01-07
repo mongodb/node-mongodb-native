@@ -446,11 +446,9 @@ describe('Topology (unit)', function () {
 
   describe('selectServer()', function () {
     it('should schedule monitoring if no suitable server is found', async function () {
-      const topology = topologyWithPlaceholderClient(
-        'someserver:27019',
-        {},
-        { serverSelectionTimeoutMS: 10 }
-      );
+      const topology = topologyWithPlaceholderClient('someserver:27019', {
+        serverSelectionTimeoutMS: 10
+      });
       const requestCheck = sinon.stub(Server.prototype, 'requestCheck');
 
       sinon.stub(Server.prototype, 'connect').callsFake(function () {

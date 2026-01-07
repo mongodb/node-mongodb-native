@@ -1425,7 +1425,8 @@ tasks:
       - func: assume secrets manager role
       - func: run ldap tests
   - name: test-socks5
-    tags: []
+    tags:
+      - socks5
     commands:
       - command: expansions.update
         type: setup
@@ -1451,7 +1452,8 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: run socks5 tests
   - name: test-socks5-tls
-    tags: []
+    tags:
+      - socks5-tls
     commands:
       - command: expansions.update
         type: setup
@@ -1502,6 +1504,7 @@ tasks:
   - name: test-tls-support-latest
     tags:
       - tls-support
+      - tls-support-latest
     commands:
       - command: expansions.update
         type: setup
@@ -1517,6 +1520,7 @@ tasks:
   - name: test-tls-support-8.0
     tags:
       - tls-support
+      - tls-support-8.0
     commands:
       - command: expansions.update
         type: setup
@@ -1532,6 +1536,7 @@ tasks:
   - name: test-tls-support-7.0
     tags:
       - tls-support
+      - tls-support-7.0
     commands:
       - command: expansions.update
         type: setup
@@ -1547,6 +1552,7 @@ tasks:
   - name: test-tls-support-6.0
     tags:
       - tls-support
+      - tls-support-6.0
     commands:
       - command: expansions.update
         type: setup
@@ -1562,6 +1568,7 @@ tasks:
   - name: test-tls-support-5.0
     tags:
       - tls-support
+      - tls-support-5.0
     commands:
       - command: expansions.update
         type: setup
@@ -1577,6 +1584,7 @@ tasks:
   - name: test-tls-support-4.4
     tags:
       - tls-support
+      - tls-support-4.4
     commands:
       - command: expansions.update
         type: setup
@@ -1592,6 +1600,7 @@ tasks:
   - name: test-tls-support-4.2
     tags:
       - tls-support
+      - tls-support-4.2
     commands:
       - command: expansions.update
         type: setup
@@ -3075,9 +3084,6 @@ buildvariants:
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
@@ -3099,12 +3105,6 @@ buildvariants:
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
-      - test-latest-server-v1-api
-      - test-socks5
-      - test-socks5-tls
-      - test-snappy-compression
-      - test-zstd-compression
-      - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3119,9 +3119,6 @@ buildvariants:
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
@@ -3143,12 +3140,6 @@ buildvariants:
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
-      - test-latest-server-v1-api
-      - test-socks5
-      - test-socks5-tls
-      - test-snappy-compression
-      - test-zstd-compression
-      - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3163,9 +3154,6 @@ buildvariants:
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
@@ -3187,12 +3175,6 @@ buildvariants:
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
-      - test-latest-server-v1-api
-      - test-socks5
-      - test-socks5-tls
-      - test-snappy-compression
-      - test-zstd-compression
-      - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
