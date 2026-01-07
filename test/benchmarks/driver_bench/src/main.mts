@@ -5,8 +5,9 @@ import events from 'node:events';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import process from 'node:process';
 import util from 'node:util';
+
+import process from 'process';
 
 import {
   type Metric,
@@ -114,8 +115,8 @@ for (const [suite, benchmarks] of Object.entries(tests)) {
 
 const metricInfoFilterByName =
   (testName: string) =>
-    ({ info: { test_name } }: MetricInfo) =>
-      test_name === testName;
+  ({ info: { test_name } }: MetricInfo) =>
+    test_name === testName;
 
 const isMBsMetric = ({ name }: Metric) => name === 'megabytes_per_second';
 
