@@ -130,10 +130,7 @@ export async function aws4Sign(
     'x-mongodb-gs2-cb-flag': convertHeaderValue(options.headers['X-MongoDB-GS2-CB-Flag']),
     'x-mongodb-server-nonce': convertHeaderValue(options.headers['X-MongoDB-Server-Nonce'])
   });
-  // If session token is provided, include it in the headers
-  if ('sessionToken' in credentials && credentials.sessionToken) {
-    headers.append('x-amz-security-token', convertHeaderValue(credentials.sessionToken));
-  }
+
   // Canonical headers are lowercased and sorted.
   const canonicalHeaders = Array.from(headers.entries())
     .map(([key, value]) => `${key.toLowerCase()}:${value}`)
