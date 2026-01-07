@@ -89,8 +89,8 @@
           }
         },
         {
-          "object": "client",
           "name": "listDatabases",
+          "object": "client",
           "arguments": {
             "filter": {}
           },
@@ -193,8 +193,8 @@
           }
         },
         {
-          "object": "client",
           "name": "listDatabaseNames",
+          "object": "client",
           "expectError": {
             "isError": true,
             "isClientError": false
@@ -294,8 +294,8 @@
           }
         },
         {
-          "object": "client",
           "name": "createChangeStream",
+          "object": "client",
           "arguments": {
             "pipeline": []
           },
@@ -403,8 +403,8 @@
           }
         },
         {
-          "object": "client",
           "name": "clientBulkWrite",
+          "object": "client",
           "arguments": {
             "models": [
               {
@@ -517,8 +517,8 @@
           }
         },
         {
-          "object": "database",
           "name": "aggregate",
+          "object": "database",
           "arguments": {
             "pipeline": [
               {
@@ -628,8 +628,8 @@
           }
         },
         {
-          "object": "database",
           "name": "listCollections",
+          "object": "database",
           "arguments": {
             "filter": {}
           },
@@ -732,8 +732,8 @@
           }
         },
         {
-          "object": "database",
           "name": "listCollectionNames",
+          "object": "database",
           "arguments": {
             "filter": {}
           },
@@ -836,8 +836,8 @@
           }
         },
         {
-          "object": "database",
           "name": "runCommand",
+          "object": "database",
           "arguments": {
             "command": {
               "ping": 1
@@ -943,8 +943,8 @@
           }
         },
         {
-          "object": "database",
           "name": "createChangeStream",
+          "object": "database",
           "arguments": {
             "pipeline": []
           },
@@ -1047,8 +1047,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "aggregate",
+          "object": "collection",
           "arguments": {
             "pipeline": []
           },
@@ -1151,8 +1151,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "countDocuments",
+          "object": "collection",
           "arguments": {
             "filter": {}
           },
@@ -1255,8 +1255,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "estimatedDocumentCount",
+          "object": "collection",
           "expectError": {
             "isError": true,
             "isClientError": false
@@ -1356,8 +1356,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "distinct",
+          "object": "collection",
           "arguments": {
             "fieldName": "x",
             "filter": {}
@@ -1461,8 +1461,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "find",
+          "object": "collection",
           "arguments": {
             "filter": {}
           },
@@ -1565,8 +1565,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "findOne",
+          "object": "collection",
           "arguments": {
             "filter": {}
           },
@@ -1669,8 +1669,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "listIndexes",
+          "object": "collection",
           "expectError": {
             "isError": true,
             "isClientError": false
@@ -1770,8 +1770,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "listIndexNames",
+          "object": "collection",
           "expectError": {
             "isError": true,
             "isClientError": false
@@ -1871,8 +1871,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "createChangeStream",
+          "object": "collection",
           "arguments": {
             "pipeline": []
           },
@@ -1975,8 +1975,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
             "document": {
               "_id": 2,
@@ -2082,8 +2082,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "insertMany",
+          "object": "collection",
           "arguments": {
             "documents": [
               {
@@ -2191,8 +2191,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "deleteOne",
+          "object": "collection",
           "arguments": {
             "filter": {}
           },
@@ -2295,8 +2295,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "deleteMany",
+          "object": "collection",
           "arguments": {
             "filter": {}
           },
@@ -2399,8 +2399,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "replaceOne",
+          "object": "collection",
           "arguments": {
             "filter": {},
             "replacement": {
@@ -2506,8 +2506,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "updateOne",
+          "object": "collection",
           "arguments": {
             "filter": {},
             "update": {
@@ -2615,8 +2615,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "updateMany",
+          "object": "collection",
           "arguments": {
             "filter": {},
             "update": {
@@ -2724,8 +2724,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "findOneAndDelete",
+          "object": "collection",
           "arguments": {
             "filter": {}
           },
@@ -2828,8 +2828,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "findOneAndReplace",
+          "object": "collection",
           "arguments": {
             "filter": {},
             "replacement": {
@@ -2935,8 +2935,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "findOneAndUpdate",
+          "object": "collection",
           "arguments": {
             "filter": {},
             "update": {
@@ -3044,8 +3044,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "bulkWrite",
+          "object": "collection",
           "arguments": {
             "requests": [
               {
@@ -3157,8 +3157,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "createIndex",
+          "object": "collection",
           "arguments": {
             "keys": {
               "x": 11
@@ -3264,8 +3264,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "dropIndex",
+          "object": "collection",
           "arguments": {
             "name": "x_11"
           },
@@ -3368,8 +3368,8 @@
           }
         },
         {
-          "object": "collection",
           "name": "dropIndexes",
+          "object": "collection",
           "expectError": {
             "isError": true,
             "isClientError": false

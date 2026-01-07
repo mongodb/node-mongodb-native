@@ -5,42 +5,35 @@ description: tests that operations respect overload backoff retry loop
 schemaVersion: '1.3'
 
 runOnRequirements:
-  -
-    minServerVersion: '4.4' # failCommand
+  - minServerVersion: '4.4' # failCommand
     topologies: [replicaset, sharded, load-balanced]
 
 createEntities:
-  -
-    client:
+  - client:
       id: &client client
       useMultipleMongoses: false
       observeEvents: [commandStartedEvent, commandSucceededEvent, commandFailedEvent]
 
-  -
-    client:
+  - client:
       id: &internal_client internal_client
       useMultipleMongoses: false
 
-  -
-    database:
+  - database:
       id: &internal_db internal_db
       client: *internal_client
       databaseName: &database_name retryable-writes-tests
 
-  -
-    collection:
+  - collection:
       id: &internal_collection retryable-writes-tests
       database: *internal_db
       collectionName: &collection_name coll
 
-  -
-    database:
+  - database:
       id: &database database
       client: *client
       databaseName: *database_name
       
-  -
-    collection:
+  - collection:
       id: &collection collection
       database: *database
       collectionName: *collection_name
@@ -53,13 +46,9 @@ initialData:
 _yamlAnchors:
   bulWriteInsertNamespace: &client_bulk_write_ns retryable-writes-tests.coll
 
-tests:
-
-  -
-    description: 'client.listDatabases retries using operation loop'
-    operations:      
-
-
+tests: 
+  - description: 'client.listDatabases retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -72,9 +61,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: listDatabases
         object: *client
-        name: listDatabases
         arguments:
           filter: {}
 
@@ -98,11 +86,8 @@ tests:
           - commandSucceededEvent:
               commandName: listDatabases
 
-  -
-    description: 'client.listDatabaseNames retries using operation loop'
-    operations:      
-
-
+  - description: 'client.listDatabaseNames retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -115,9 +100,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: listDatabaseNames
         object: *client
-        name: listDatabaseNames
 
     expectEvents:
       - client: *client
@@ -139,11 +123,8 @@ tests:
           - commandSucceededEvent:
               commandName: listDatabases
 
-  -
-    description: 'client.createChangeStream retries using operation loop'
-    operations:      
-
-
+  - description: 'client.createChangeStream retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -156,9 +137,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: createChangeStream
         object: *client
-        name: createChangeStream
         arguments:
           pipeline: []
 
@@ -182,13 +162,10 @@ tests:
           - commandSucceededEvent:
               commandName: aggregate
 
-  -
-    description: 'client.clientBulkWrite retries using operation loop'
+  - description: 'client.clientBulkWrite retries using operation loop'
     runOnRequirements:
       - minServerVersion: '8.0' # client bulk write added to server in 8.0
-    operations:      
-
-
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -201,9 +178,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: clientBulkWrite
         object: *client
-        name: clientBulkWrite
         arguments:
           models:
           - insertOne:
@@ -230,11 +206,8 @@ tests:
           - commandSucceededEvent:
               commandName: bulkWrite
 
-  -
-    description: 'database.aggregate retries using operation loop'
-    operations:      
-
-
+  - description: 'database.aggregate retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -247,9 +220,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: aggregate
         object: *database
-        name: aggregate
         arguments:
           pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
 
@@ -273,11 +245,8 @@ tests:
           - commandSucceededEvent:
               commandName: aggregate
 
-  -
-    description: 'database.listCollections retries using operation loop'
-    operations:      
-
-
+  - description: 'database.listCollections retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -290,9 +259,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: listCollections
         object: *database
-        name: listCollections
         arguments:
           filter: {}
 
@@ -316,11 +284,8 @@ tests:
           - commandSucceededEvent:
               commandName: listCollections
 
-  -
-    description: 'database.listCollectionNames retries using operation loop'
-    operations:      
-
-
+  - description: 'database.listCollectionNames retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -333,9 +298,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: listCollectionNames
         object: *database
-        name: listCollectionNames
         arguments:
           filter: {}
 
@@ -359,11 +323,8 @@ tests:
           - commandSucceededEvent:
               commandName: listCollections
 
-  -
-    description: 'database.runCommand retries using operation loop'
-    operations:      
-
-
+  - description: 'database.runCommand retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -376,9 +337,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: runCommand
         object: *database
-        name: runCommand
         arguments:
           command: { ping: 1 }
           commandName: ping
@@ -403,11 +363,8 @@ tests:
           - commandSucceededEvent:
               commandName: ping
 
-  -
-    description: 'database.createChangeStream retries using operation loop'
-    operations:      
-
-
+  - description: 'database.createChangeStream retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -420,9 +377,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: createChangeStream
         object: *database
-        name: createChangeStream
         arguments:
           pipeline: []
 
@@ -446,11 +402,8 @@ tests:
           - commandSucceededEvent:
               commandName: aggregate
 
-  -
-    description: 'collection.aggregate retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.aggregate retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -463,9 +416,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: aggregate
         object: *collection
-        name: aggregate
         arguments:
           pipeline: []
 
@@ -489,11 +441,8 @@ tests:
           - commandSucceededEvent:
               commandName: aggregate
 
-  -
-    description: 'collection.countDocuments retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.countDocuments retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -506,9 +455,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: countDocuments
         object: *collection
-        name: countDocuments
         arguments:
           filter: {}
 
@@ -532,11 +480,8 @@ tests:
           - commandSucceededEvent:
               commandName: aggregate
 
-  -
-    description: 'collection.estimatedDocumentCount retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.estimatedDocumentCount retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -549,9 +494,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: estimatedDocumentCount
         object: *collection
-        name: estimatedDocumentCount
 
     expectEvents:
       - client: *client
@@ -573,11 +517,8 @@ tests:
           - commandSucceededEvent:
               commandName: count
 
-  -
-    description: 'collection.distinct retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.distinct retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -590,9 +531,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: distinct
         object: *collection
-        name: distinct
         arguments:
           fieldName: x
           filter: {}
@@ -617,11 +557,8 @@ tests:
           - commandSucceededEvent:
               commandName: distinct
 
-  -
-    description: 'collection.find retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.find retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -634,9 +571,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: find
         object: *collection
-        name: find
         arguments:
           filter: {}
 
@@ -660,11 +596,8 @@ tests:
           - commandSucceededEvent:
               commandName: find
 
-  -
-    description: 'collection.findOne retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.findOne retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -677,9 +610,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: findOne
         object: *collection
-        name: findOne
         arguments:
           filter: {}
 
@@ -703,11 +635,8 @@ tests:
           - commandSucceededEvent:
               commandName: find
 
-  -
-    description: 'collection.listIndexes retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.listIndexes retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -720,9 +649,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: listIndexes
         object: *collection
-        name: listIndexes
 
     expectEvents:
       - client: *client
@@ -744,11 +672,8 @@ tests:
           - commandSucceededEvent:
               commandName: listIndexes
 
-  -
-    description: 'collection.listIndexNames retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.listIndexNames retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -761,9 +686,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: listIndexNames
         object: *collection
-        name: listIndexNames
 
     expectEvents:
       - client: *client
@@ -785,11 +709,8 @@ tests:
           - commandSucceededEvent:
               commandName: listIndexes
 
-  -
-    description: 'collection.createChangeStream retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.createChangeStream retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -802,9 +723,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: createChangeStream
         object: *collection
-        name: createChangeStream
         arguments:
           pipeline: []
 
@@ -828,11 +748,8 @@ tests:
           - commandSucceededEvent:
               commandName: aggregate
 
-  -
-    description: 'collection.insertOne retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.insertOne retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -845,9 +762,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: insertOne
         object: *collection
-        name: insertOne
         arguments:
           document: { _id: 2, x: 22 }
 
@@ -871,11 +787,8 @@ tests:
           - commandSucceededEvent:
               commandName: insert
 
-  -
-    description: 'collection.insertMany retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.insertMany retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -888,9 +801,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: insertMany
         object: *collection
-        name: insertMany
         arguments:
           documents:
             - { _id: 2, x: 22 }
@@ -915,11 +827,8 @@ tests:
           - commandSucceededEvent:
               commandName: insert
 
-  -
-    description: 'collection.deleteOne retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.deleteOne retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -932,9 +841,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: deleteOne
         object: *collection
-        name: deleteOne
         arguments:
           filter: {}
 
@@ -958,11 +866,8 @@ tests:
           - commandSucceededEvent:
               commandName: delete
 
-  -
-    description: 'collection.deleteMany retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.deleteMany retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -975,9 +880,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: deleteMany
         object: *collection
-        name: deleteMany
         arguments:
           filter: {}
 
@@ -1001,11 +905,8 @@ tests:
           - commandSucceededEvent:
               commandName: delete
 
-  -
-    description: 'collection.replaceOne retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.replaceOne retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1018,9 +919,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: replaceOne
         object: *collection
-        name: replaceOne
         arguments:
           filter: {}
           replacement: { x: 22 }
@@ -1045,11 +945,8 @@ tests:
           - commandSucceededEvent:
               commandName: update
 
-  -
-    description: 'collection.updateOne retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.updateOne retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1062,9 +959,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: updateOne
         object: *collection
-        name: updateOne
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
@@ -1089,11 +985,8 @@ tests:
           - commandSucceededEvent:
               commandName: update
 
-  -
-    description: 'collection.updateMany retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.updateMany retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1106,9 +999,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: updateMany
         object: *collection
-        name: updateMany
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
@@ -1133,11 +1025,8 @@ tests:
           - commandSucceededEvent:
               commandName: update
 
-  -
-    description: 'collection.findOneAndDelete retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.findOneAndDelete retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1150,9 +1039,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: findOneAndDelete
         object: *collection
-        name: findOneAndDelete
         arguments:
           filter: {}
 
@@ -1176,11 +1064,8 @@ tests:
           - commandSucceededEvent:
               commandName: findAndModify
 
-  -
-    description: 'collection.findOneAndReplace retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.findOneAndReplace retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1193,9 +1078,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: findOneAndReplace
         object: *collection
-        name: findOneAndReplace
         arguments:
           filter: {}
           replacement: { x: 22 }
@@ -1220,11 +1104,8 @@ tests:
           - commandSucceededEvent:
               commandName: findAndModify
 
-  -
-    description: 'collection.findOneAndUpdate retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.findOneAndUpdate retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1237,9 +1118,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: findOneAndUpdate
         object: *collection
-        name: findOneAndUpdate
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
@@ -1264,11 +1144,8 @@ tests:
           - commandSucceededEvent:
               commandName: findAndModify
 
-  -
-    description: 'collection.bulkWrite retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.bulkWrite retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1281,9 +1158,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: bulkWrite
         object: *collection
-        name: bulkWrite
         arguments:
           requests:
             - insertOne:
@@ -1309,11 +1185,8 @@ tests:
           - commandSucceededEvent:
               commandName: insert
 
-  -
-    description: 'collection.createIndex retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.createIndex retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1326,9 +1199,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: createIndex
         object: *collection
-        name: createIndex
         arguments:
           keys: { x: 11 }
           name: "x_11"
@@ -1353,17 +1225,13 @@ tests:
           - commandSucceededEvent:
               commandName: createIndexes
 
-  -
-    description: 'collection.dropIndex retries using operation loop'
+  - description: 'collection.dropIndex retries using operation loop'
     operations:
-      -
+      - name: createIndex
         object: *internal_collection
-        name: createIndex
         arguments:
           keys: { x: 11 }
-          name: "x_11"      
-
-
+          name: "x_11"
       - name: failPoint
         object: testRunner
         arguments:
@@ -1376,9 +1244,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: dropIndex
         object: *collection
-        name: dropIndex
         arguments:
           name: "x_11"
 
@@ -1402,11 +1269,8 @@ tests:
           - commandSucceededEvent:
               commandName: dropIndexes
 
-  -
-    description: 'collection.dropIndexes retries using operation loop'
-    operations:      
-
-
+  - description: 'collection.dropIndexes retries using operation loop'
+    operations:
       - name: failPoint
         object: testRunner
         arguments:
@@ -1419,9 +1283,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: dropIndexes
         object: *collection
-        name: dropIndexes
 
     expectEvents:
       - client: *client

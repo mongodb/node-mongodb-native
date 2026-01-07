@@ -5,42 +5,35 @@ description: tests that operations respect overload backoff retry loop
 schemaVersion: '1.3'
 
 runOnRequirements:
-  -
-    minServerVersion: '4.4' # failCommand
+  - minServerVersion: '4.4' # failCommand
     topologies: [replicaset, sharded, load-balanced]
 
 createEntities:
-  -
-    client:
+  - client:
       id: &client client
       useMultipleMongoses: false
       observeEvents: [commandStartedEvent, commandSucceededEvent, commandFailedEvent]
 
-  -
-    client:
+  - client:
       id: &internal_client internal_client
       useMultipleMongoses: false
 
-  -
-    database:
+  - database:
       id: &internal_db internal_db
       client: *internal_client
       databaseName: &database_name retryable-writes-tests
 
-  -
-    collection:
+  - collection:
       id: &internal_collection retryable-writes-tests
       database: *internal_db
       collectionName: &collection_name coll
 
-  -
-    database:
+  - database:
       id: &database database
       client: *client
       databaseName: *database_name
       
-  -
-    collection:
+  - collection:
       id: &collection collection
       database: *database
       collectionName: *collection_name
@@ -53,25 +46,18 @@ initialData:
 _yamlAnchors:
   bulWriteInsertNamespace: &client_bulk_write_ns retryable-writes-tests.coll
 
-tests:
-{% for operation in operations %}
-  -
-    description: '{{operation.object}}.{{operation.operation_name}} retries using operation loop'
-    {%- if ((operation.operation_name == 'clientBulkWrite')) %}
+tests: {% for operation in operations %}
+  - description: '{{operation.object}}.{{operation.operation_name}} retries using operation loop' {%- if ((operation.operation_name == 'clientBulkWrite')) %}
     runOnRequirements:
       - minServerVersion: '8.0' # client bulk write added to server in 8.0
     {%- endif %}
-    operations:
-        {%- if operation.operation_name == "dropIndex" %}
-      -
+    operations:  {%- if operation.operation_name == "dropIndex" %}
+      - name: createIndex
         object: *internal_collection
-        name: createIndex
         arguments:
           keys: { x: 11 }
           name: "x_11"
-        {%- endif %}      
-
-
+        {%- endif %}
       - name: failPoint
         object: testRunner
         arguments:
@@ -84,9 +70,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
+      - name: {{operation.operation_name}}
         object: *{{operation.object}}
-        name: {{operation.operation_name}}
         {%- if operation.arguments|length > 0 %}
         arguments:
           {%- for arg in operation.arguments %}
