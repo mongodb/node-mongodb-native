@@ -58,7 +58,7 @@ describe('Verify AWS4 signature generation', () => {
     expect(headers['X-Amz-Date']).to.equal('20251215T123456Z');
     expect(headers['Authorization']).to.exist;
     expect(headers['Authorization']).to.equal(
-      'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20251215/us-east-1/sts/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-amz-security-token;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce, Signature=bbcb06e2feb8651dced329789743ba283f92ef1302d34a7398cb1d35808a1a66'
+      'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20251215/us-east-1/sts/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce, Signature=7bfe0c6c8c0aa9f853eb10c5822ab42446ad87789e5b6e47a6fbd7a9bffc834a'
     );
 
     // Uncomment the following lines if you want to compare with the old aws4 library.
