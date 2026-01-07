@@ -254,7 +254,10 @@ async function executeOperationWithRetries<
     2 // backoff rate
   );
 
-  const retryContext = new RetryContext(willRetry, timeoutContext.csotEnabled() ? Infinity : 2);
+  const retryContext = new RetryContext(
+    willRetry,
+    willRetry ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1
+  );
 
   for (; retryContext.shouldRetry(); retryContext.recordFailure(previousOperationError)) {
     if (previousOperationError) {
@@ -266,14 +269,18 @@ async function executeOperationWithRetries<
         });
       }
 
+      // TODO: think about whether or not willRetry checks are necessary here.
       const isRetryable =
         // bulk write commands are retryable if all operations in the batch are retryable
-        (operation.hasAspect(Aspect.COMMAND_BATCHING) && operation.canRetryWrite) ||
+        (willRetryWrite &&
+          operation.hasAspect(Aspect.COMMAND_BATCHING) &&
+          operation.canRetryWrite) ||
         // if we have a retryable read or write operation, we can retry
         (hasWriteAspect && willRetryWrite && isRetryableWriteError(previousOperationError)) ||
         (hasReadAspect && willRetryRead && isRetryableReadError(previousOperationError)) ||
         // if we have a retryable, system overloaded error, we can retry
-        (previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
+        (willRetry &&
+          previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
           previousOperationError.hasErrorLabel(MongoErrorLabel.RetryableError));
 
       if (!isRetryable) {

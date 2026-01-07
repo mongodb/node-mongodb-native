@@ -1,6 +1,7 @@
-import { type Connection, type MongoError, MongoErrorLabel } from '..';
+import { type Connection, type MongoError } from '..';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
 import { type MongoDBResponse } from '../cmap/wire_protocol/responses';
+import { MongoErrorLabel } from '../error';
 import { type Abortable } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server, ServerCommandOptions } from '../sdam/server';
