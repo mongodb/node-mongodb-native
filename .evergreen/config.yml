@@ -2682,27 +2682,6 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - oidc-auth-test-k8s-latest-gke
-  - name: testk8soidc_task_group_aks
-    setup_group:
-      - func: fetch source
-      - func: assume secrets manager role
-      - command: subprocess.exec
-        params:
-          binary: bash
-          add_expansions_to_env: true
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/setup.sh
-    teardown_group:
-      - func: upload coverage report
-      - command: subprocess.exec
-        params:
-          binary: bash
-          args:
-            - ${DRIVERS_TOOLS}/.evergreen/auth_oidc/k8s/teardown.sh
-    setup_group_can_fail_task: true
-    setup_group_timeout_secs: 1800
-    tasks:
-      - oidc-auth-test-k8s-latest-aks
   - name: testtestoidc_task_group
     setup_group:
       - func: fetch source
