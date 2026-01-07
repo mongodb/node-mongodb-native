@@ -1,6 +1,5 @@
-import * as process from 'node:process';
-
 import * as fs from 'fs';
+import * as process from 'process';
 
 import { MongoAWSError } from '../../../error';
 import type { OIDCCallbackFunction, OIDCResponse } from '../mongodb_oidc';

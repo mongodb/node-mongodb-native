@@ -1,6 +1,5 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
 import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';

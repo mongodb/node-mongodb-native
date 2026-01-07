@@ -1,10 +1,9 @@
-import * as process from 'node:process';
-
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
+import * as process from 'process';
 import { clearTimeout, setTimeout } from 'timers';
 
 import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';

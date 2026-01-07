@@ -1,9 +1,8 @@
-import * as process from 'node:process';
-
 import { UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
+import * as process from 'process';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
 import * as tls from 'tls';

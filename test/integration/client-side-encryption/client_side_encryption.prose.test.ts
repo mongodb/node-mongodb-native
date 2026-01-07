@@ -1,9 +1,8 @@
-import * as process from 'node:process';
-
 import { BSON, EJSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as process from 'process';
 import { satisfies } from 'semver';
 
 import {

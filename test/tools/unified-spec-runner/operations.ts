@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import * as process from 'node:process';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { AssertionError, expect } from 'chai';
+import * as process from 'process';
 
 import {
   type ChangeStream,

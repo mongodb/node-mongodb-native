@@ -1,8 +1,8 @@
 import { type EventEmitter, once } from 'node:events';
-import * as process from 'node:process';
 import { setTimeout } from 'node:timers';
 
 import { expect } from 'chai';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import {

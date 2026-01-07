@@ -53,7 +53,7 @@
       },
       {
         "name": "process",
-        "message": "Use `import * as process from 'node:process';` instead"
+        "message": "Use `import * as process from 'process';` instead"
       }
     ],
     "prettier/prettier": "error",
@@ -99,6 +99,10 @@
           {
             "name": "..",
             "message": "Please import directly from the relevant file instead."
+          },
+          {
+            "name": "node:*",
+            "message": "Don't use `node:*`; use bare Node core module names instead."
           }
         ]
       }
@@ -271,7 +275,8 @@
           {
             "patterns": [
               "**/../lib/**",
-              "mongodb-mock-server"
+              "mongodb-mock-server",
+              "node:*"
             ],
             "paths": [
               {

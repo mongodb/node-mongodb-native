@@ -1,5 +1,4 @@
-import * as process from 'node:process';
-
+import * as process from 'process';
 import { inspect } from 'util';
 
 import {

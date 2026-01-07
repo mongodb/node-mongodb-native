@@ -1,9 +1,8 @@
-import * as process from 'node:process';
-
 import { BSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import * as net from 'net';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';

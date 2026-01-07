@@ -3,10 +3,10 @@ import { on, once } from 'node:events';
 import { openSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import * as process from 'node:process';
 import { inspect } from 'node:util';
 
 import { AssertionError, expect } from 'chai';
+import * as process from 'process';
 import type * as timers from 'timers';
 
 import type * as mongodb from '../../../src';

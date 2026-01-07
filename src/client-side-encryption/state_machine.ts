@@ -1,8 +1,7 @@
-import * as process from 'node:process';
-
 import * as fs from 'fs/promises';
 import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
+import * as process from 'process';
 import * as tls from 'tls';
 
 import {

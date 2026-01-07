@@ -1,8 +1,7 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
 import * as http from 'http';
 import { performance } from 'perf_hooks';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import {

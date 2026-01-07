@@ -1,9 +1,8 @@
-import * as process from 'node:process';
-
 import * as BSON from 'bson';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as path from 'path';
+import * as process from 'process';
 
 import { type CommandStartedEvent, type MongoClient, type MongoClientOptions } from '../../../src';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';

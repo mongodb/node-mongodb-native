@@ -1,4 +1,4 @@
-import * as process from 'node:process';
+import * as process from 'process';
 
 import { runUnifiedSuite } from '../tools/unified-spec-runner/runner';
 

@@ -1,8 +1,7 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
 import { once } from 'events';
 import * as net from 'net';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import {

@@ -1,6 +1,5 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
+import * as process from 'process';
 import { lt } from 'semver';
 import { Readable } from 'stream';
 import { clearTimeout, setTimeout as setTimeoutCb } from 'timers';

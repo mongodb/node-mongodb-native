@@ -2,7 +2,7 @@
 import * as url from 'node:url';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import * as process from 'node:process';
+import * as process from 'process';
 import * as child_process from 'node:child_process';
 import * as util from 'node:util';
 import { output } from './util.mjs';

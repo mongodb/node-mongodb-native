@@ -1,6 +1,5 @@
-import * as process from 'node:process';
-
 import * as path from 'path';
+import * as process from 'process';
 
 import { loadSpecTests } from '../../spec/index';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';

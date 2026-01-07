@@ -1,8 +1,8 @@
 import { strictEqual } from 'node:assert';
 import { on, once } from 'node:events';
-import * as process from 'node:process';
 
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { Binary, type Collection, type Db, type MongoClient, MongoServerError } from '../../../src';
 import { sleep } from '../../tools/utils';

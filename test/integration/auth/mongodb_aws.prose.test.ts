@@ -1,6 +1,5 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { type MongoClient, MongoServerError } from '../../../src';
 import { AWSSDKCredentialProvider } from '../../../src/cmap/auth/aws_temporary_credentials';

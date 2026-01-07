@@ -1,7 +1,6 @@
-import * as process from 'node:process';
-
 import { AssertionError, expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
+import * as process from 'process';
 import { coerce, gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 

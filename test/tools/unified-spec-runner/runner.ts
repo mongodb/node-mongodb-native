@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import * as process from 'node:process';
-
 import { AssertionError, expect } from 'chai';
+import * as process from 'process';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
 import {

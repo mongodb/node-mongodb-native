@@ -5,7 +5,7 @@ require('source-map-support').install({
   hookRequire: true
 });
 
-import * as process from 'node:process';
+import * as process from 'process';
 import * as os from 'os';
 
 import { MongoClient } from '../../../../src';

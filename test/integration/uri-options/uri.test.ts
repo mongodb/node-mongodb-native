@@ -1,7 +1,6 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
 import * as os from 'os';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import { Topology } from '../../../src/sdam/topology';

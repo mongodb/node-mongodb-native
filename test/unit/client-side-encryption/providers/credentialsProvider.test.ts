@@ -1,7 +1,6 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
 import * as http from 'http';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import { MongoCryptAzureKMSRequestError } from '../../../../src/client-side-encryption/errors';

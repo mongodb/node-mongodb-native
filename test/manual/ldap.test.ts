@@ -1,6 +1,5 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { MongoClient } from '../../src';
 

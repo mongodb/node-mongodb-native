@@ -1,7 +1,7 @@
 const chalk = require('chalk');
 const { List } = require('../../../src/utils');
 const { createHistogram } = require('perf_hooks');
-import * as process from 'node:process';
+const { process } = require('process');
 
 const iterations = 100;
 const defaultItemsSize = 100000;

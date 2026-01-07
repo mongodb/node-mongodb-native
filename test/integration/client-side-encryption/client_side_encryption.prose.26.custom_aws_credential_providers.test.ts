@@ -1,6 +1,5 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { Binary, MongoClient } from '../../../src';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';

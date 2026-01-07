@@ -3,11 +3,11 @@ import { on, once } from 'node:events';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
-import * as process from 'node:process';
 
 import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
+import * as process from 'process';
 import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';

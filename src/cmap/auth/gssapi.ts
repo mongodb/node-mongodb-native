@@ -1,5 +1,3 @@
-import * as process from 'node:process';
-
 import * as dns from 'dns';
 import * as os from 'os';
 

@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
-import * as process from 'node:process';
 
 import * as path from 'path';
+import * as process from 'process';
 
 import type { EntitiesMap } from './entities';
 import { trace } from './runner';

@@ -1,7 +1,6 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
+import * as process from 'process';
 
 import { MongoClient, MongoParseError } from '../../src';
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';

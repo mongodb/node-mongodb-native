@@ -1,6 +1,5 @@
-import * as process from 'node:process';
-
 import { expect } from 'chai';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import { type ClientMetadata, type DriverInfo, Int32, MongoClient } from '../../../src';

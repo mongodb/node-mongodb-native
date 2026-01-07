@@ -1,7 +1,7 @@
 import * as assert from 'node:assert/strict';
-import * as process from 'node:process';
 
 import { MongoClient } from 'mongodb';
+import * as process from 'process';
 
 // Creates the client that is cached for all requests, subscribes to
 // relevant events, and forces the connection pool to get populated.
