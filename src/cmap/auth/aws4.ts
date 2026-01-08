@@ -28,9 +28,8 @@ export type SignedHeaders = {
  * @param str - String to hash.
  * @returns Hexadecimal representation of the hash.
  */
-const getHash = async (str: string): Promise<string> => {
-  const data = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(str));
-  BSON.onDemand.ByteUtils.encodeUTF8Into(data, str, 0);
+const getHexSha256 = async (str: string): Promise<string> => {
+  const data = stringToBuffer(str);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashHex = BSON.onDemand.ByteUtils.toHex(new Uint8Array(hashBuffer));
   return hashHex;
@@ -45,8 +44,7 @@ const getHash = async (str: string): Promise<string> => {
 const getHmacSha256 = async (key: string | Uint8Array, str: string): Promise<Uint8Array> => {
   let keyData: Uint8Array;
   if (typeof key === 'string') {
-    keyData = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(key));
-    BSON.onDemand.ByteUtils.encodeUTF8Into(keyData, key, 0);
+    keyData = stringToBuffer(key);
   } else {
     keyData = key;
   }
@@ -58,8 +56,7 @@ const getHmacSha256 = async (key: string | Uint8Array, str: string): Promise<Uin
     false,
     ['sign']
   );
-  const strData = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(str));
-  BSON.onDemand.ByteUtils.encodeUTF8Into(strData, str, 0);
+  const strData = stringToBuffer(str);
   const signature = await crypto.subtle.sign('HMAC', importedKey, strData);
   const digest = new Uint8Array(signature);
   return digest;
@@ -77,6 +74,17 @@ const getHmacSha256 = async (key: string | Uint8Array, str: string): Promise<Uin
 const convertHeaderValue = (value: string | number) => {
   return value.toString().trim().replace(/\s+/g, ' ');
 };
+
+/**
+ * Returns a Uint8Array representation of a string, encoded in UTF-8.
+ * @param str - String to convert.
+ * @returns Uint8Array containing the UTF-8 encoded string.
+ */
+function stringToBuffer(str: string): Uint8Array {
+  const data = new Uint8Array(BSON.onDemand.ByteUtils.utf8ByteLength(str));
+  BSON.onDemand.ByteUtils.encodeUTF8Into(data, str, 0);
+  return data;
+}
 
 /**
  * This method implements AWS Signature 4 logic for a very specific request format.
@@ -141,7 +149,7 @@ export async function aws4Sign(
   const signedHeaders = canonicalHeaderNames.sort().join(';');
 
   // HashedPayload – A string created using the payload in the body of the HTTP request as input to a hash function. This string uses lowercase hexadecimal characters.
-  const hashedPayload = await getHash(options.body);
+  const hashedPayload = await getHexSha256(options.body);
 
   // CanonicalRequest – A string that includes the above elements, separated by newline characters.
   const canonicalRequest = [
@@ -155,7 +163,7 @@ export async function aws4Sign(
 
   // 2. Create a hash of the canonical request
   // HashedCanonicalRequest – A string created by using the canonical request as input to a hash function.
-  const hashedCanonicalRequest = await getHash(canonicalRequest);
+  const hashedCanonicalRequest = await getHexSha256(canonicalRequest);
 
   // 3. Create a string to sign
   // Algorithm – The algorithm used to create the hash of the canonical request. For SigV4, use AWS4-HMAC-SHA256.
