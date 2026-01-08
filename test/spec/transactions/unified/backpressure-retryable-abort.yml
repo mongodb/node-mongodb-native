@@ -1,0 +1,213 @@
+description: backpressure-retryable-abort
+schemaVersion: "1.3"
+runOnRequirements:
+  - minServerVersion: "4.4"
+    topologies:
+      - replicaset
+      - sharded
+      - load-balanced
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+tests:
+  - description: abortTransaction retries if backpressure labels are added
+    operations:
+      - object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 2
+            data:
+              failCommands:
+                - abortTransaction
+              errorLabels:
+                - RetryableError
+                - SystemOverloadedError
+              errorCode: 112
+      - object: *session0
+        name: startTransaction
+      - object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document:
+            _id: 1
+        expectResult:
+          $$unsetOrMatches:
+            insertedId:
+              $$unsetOrMatches: 1
+      - object: *session0
+        name: abortTransaction
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: test
+                documents:
+                  - _id: 1
+                ordered: true
+                readConcern:
+                  $$exists: false
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
+                startTransaction: true
+                autocommit: false
+                writeConcern:
+                  $$exists: false
+              commandName: insert
+              databaseName: *database_name
+          - commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
+                startTransaction:
+                  $$exists: false
+                autocommit: false
+                writeConcern:
+                  $$exists: false
+              commandName: abortTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
+                startTransaction:
+                  $$exists: false
+                autocommit: false
+                writeConcern:
+                  $$exists: false
+              commandName: abortTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
+                startTransaction:
+                  $$exists: false
+                autocommit: false
+                writeConcern:
+                  $$exists: false
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  - description: abortTransaction is retried maxAttempts=5 times if backpressure labels are added
+    operations:
+      - object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: alwaysOn
+            data:
+              failCommands:
+                - abortTransaction
+              errorLabels:
+                - RetryableError
+                - SystemOverloadedError
+              errorCode: 112
+      - object: *session0
+        name: startTransaction
+      - object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document:
+            _id: 1
+        expectResult:
+          $$unsetOrMatches:
+            insertedId:
+              $$unsetOrMatches: 1
+      - object: *session0
+        name: abortTransaction
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: test
+                documents:
+                  - _id: 1
+                ordered: true
+                readConcern:
+                  $$exists: false
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
+                startTransaction: true
+                autocommit: false
+                writeConcern:
+                  $$exists: false
+              commandName: insert
+              databaseName: *database_name
+          - commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
+                startTransaction:
+                  $$exists: false
+                autocommit: false
+                writeConcern:
+                  $$exists: false
+              commandName: abortTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              commandName: abortTransaction
+          - commandStartedEvent:
+              commandName: abortTransaction
+          - commandStartedEvent:
+              commandName: abortTransaction
+          - commandStartedEvent:
+              commandName: abortTransaction
+          - commandStartedEvent:
+              commandName: abortTransaction
+    outcome:
+      - collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
