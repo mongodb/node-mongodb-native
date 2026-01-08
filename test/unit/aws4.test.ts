@@ -1,4 +1,6 @@
+import * as aws4sign from 'aws4';
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 import { aws4Sign, type AwsSigv4Options } from '../../src/cmap/auth/aws4';
 
@@ -31,9 +33,18 @@ describe('Verify AWS4 signature generation', () => {
     date
   };
 
+  beforeEach(() => {
+    sinon.stub(aws4sign.RequestSigner.prototype, 'getDateTime').returns('20251215T123456Z');
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
   it('should generate correct credentials for permanent credentials', async () => {
     const headers = await aws4Sign(request, awsCredentials);
 
+    // Verify generated headers
     expect(headers['X-Amz-Date']).to.exist;
     expect(headers['X-Amz-Date']).to.equal('20251215T123456Z');
     expect(headers['Authorization']).to.exist;
@@ -41,33 +52,30 @@ describe('Verify AWS4 signature generation', () => {
       'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20251215/us-east-1/sts/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce, Signature=48a66f9fc76829002a7a7ac5b92e4089395d9b88ea7d417ab146949b90eeab08'
     );
 
-    // Uncomment the following lines if you want to compare with the old aws4 library.
-    // Remember to import aws4 at the top of the file, like this: import * as aws4sign from 'aws4';
-
-    // const oldSigned = aws4sign.sign(request, awsCredentials);
-    // expect(oldSigned.headers['X-Amz-Date']).to.exist;
-    // expect(oldSigned.headers['X-Amz-Date']).to.equal(signed.headers['X-Amz-Date']);
-    // expect(oldSigned.headers['Authorization']).to.exist;
-    // expect(oldSigned.headers['Authorization']).to.equal(signed.headers['Authorization']);
+    // Verify against aws4 library
+    const oldSigned = aws4sign.sign(request, awsCredentials);
+    expect(oldSigned.headers['X-Amz-Date']).to.exist;
+    expect(oldSigned.headers['X-Amz-Date']).to.equal(headers['X-Amz-Date']);
+    expect(oldSigned.headers['Authorization']).to.exist;
+    expect(oldSigned.headers['Authorization']).to.equal(headers['Authorization']);
   });
 
   it('should generate correct credentials for session credentials', async () => {
     const headers = await aws4Sign(request, awsSessionCredentials);
 
+    // Verify generated headers
     expect(headers['X-Amz-Date']).to.exist;
     expect(headers['X-Amz-Date']).to.equal('20251215T123456Z');
     expect(headers['Authorization']).to.exist;
     expect(headers['Authorization']).to.equal(
-      'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20251215/us-east-1/sts/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce, Signature=7bfe0c6c8c0aa9f853eb10c5822ab42446ad87789e5b6e47a6fbd7a9bffc834a'
+      'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20251215/us-east-1/sts/aws4_request, SignedHeaders=content-length;content-type;host;x-amz-date;x-amz-security-token;x-mongodb-gs2-cb-flag;x-mongodb-server-nonce, Signature=bbcb06e2feb8651dced329789743ba283f92ef1302d34a7398cb1d35808a1a66'
     );
 
-    // Uncomment the following lines if you want to compare with the old aws4 library.
-    // Remember to import aws4 at the top of the file, like this: import * as aws4sign from 'aws4';
-
-    // const oldSigned = aws4sign.sign(request, awsSessionCredentials);
-    // expect(oldSigned.headers['X-Amz-Date']).to.exist;
-    // expect(oldSigned.headers['X-Amz-Date']).to.equal(signed.headers['X-Amz-Date']);
-    // expect(oldSigned.headers['Authorization']).to.exist;
-    // expect(oldSigned.headers['Authorization']).to.equal(signed.headers['Authorization']);
+    // Verify against aws4 library
+    const oldSigned = aws4sign.sign(request, awsSessionCredentials);
+    expect(oldSigned.headers['X-Amz-Date']).to.exist;
+    expect(oldSigned.headers['X-Amz-Date']).to.equal(headers['X-Amz-Date']);
+    expect(oldSigned.headers['Authorization']).to.exist;
+    expect(oldSigned.headers['Authorization']).to.equal(headers['Authorization']);
   });
 });
