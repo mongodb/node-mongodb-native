@@ -38,6 +38,7 @@ import {
 } from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect, RetryContext } from './operation';
+import { RunCommandOperation } from './run_command';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -269,6 +270,10 @@ async function executeOperationWithRetries<
         });
       }
 
+      const canRetryBackpressureError =
+        (operation.hasAspect(Aspect.WRITE_OPERATION) && topology.s.options.retryWrites) ||
+        (operation.hasAspect(Aspect.READ_OPERATION) && topology.s.options.retryReads) ||
+        (operation instanceof RunCommandOperation && topology.s.options.retryReads);
       // TODO: think about whether or not willRetry checks are necessary here.
       const isRetryable =
         // bulk write commands are retryable if all operations in the batch are retryable
@@ -279,7 +284,7 @@ async function executeOperationWithRetries<
         (hasWriteAspect && willRetryWrite && isRetryableWriteError(previousOperationError)) ||
         (hasReadAspect && willRetryRead && isRetryableReadError(previousOperationError)) ||
         // if we have a retryable, system overloaded error, we can retry
-        (willRetry &&
+        (canRetryBackpressureError &&
           previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
           previousOperationError.hasErrorLabel(MongoErrorLabel.RetryableError));
 
