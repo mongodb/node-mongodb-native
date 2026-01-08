@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
 import { once } from 'events';
+import * as process from 'process';
 import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 

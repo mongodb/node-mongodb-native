@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
+const process = require('node:process');
 
 const expect = chai.expect;
 const { EJSON } = require('bson');

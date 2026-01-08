@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/token_machine_workflow';
 

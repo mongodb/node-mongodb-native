@@ -1,5 +1,6 @@
 import { BSONRegExp, Code, Double, EJSON, Int32, MaxKey, MinKey, ObjectId } from 'bson';
 import { expect } from 'chai';
+import * as process from 'process';
 import * as sinon from 'sinon';
 import { Readable, Writable } from 'stream';
 import { inspect } from 'util';

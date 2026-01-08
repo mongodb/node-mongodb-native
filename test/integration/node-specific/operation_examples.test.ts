@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { Code, type MongoClient, ProfilingLevel, ReturnDocument } from '../../../src';
 import { enumToString } from '../../../src/utils';

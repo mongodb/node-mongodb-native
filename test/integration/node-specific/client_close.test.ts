@@ -1,6 +1,7 @@
 import * as events from 'node:events';
 
 import { expect } from 'chai';
+import * as process from 'process';
 
 import {
   type Collection,

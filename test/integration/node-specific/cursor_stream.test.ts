@@ -2,6 +2,7 @@ import { strictEqual } from 'node:assert';
 import { on, once } from 'node:events';
 
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { Binary, type Collection, type Db, type MongoClient, MongoServerError } from '../../../src';
 import { sleep } from '../../tools/utils';
