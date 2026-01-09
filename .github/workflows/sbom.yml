@@ -1,0 +1,68 @@
+name: Post-Merge SBOM Update
+on:
+  push:
+    branches: 
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+env:
+  SBOM_FILE: "sbom.json"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sbom:
+    name: Generate SBOM and Create PR
+    runs-on: ubuntu-latest
+    
+    concurrency:
+      group: sbom-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Node and dependencies
+        uses: mongodb-labs/drivers-github-tools/node/setup@v3
+        with:
+          ignore_install_scripts: false
+
+      - name: Load version and package info
+        uses: mongodb-labs/drivers-github-tools/node/get_version_info@v3
+        with:
+          npm_package_name: mongodb
+
+      - name: Generate/Update package-lock.json
+        run: |
+          echo "Resolving dependencies and generating package-lock.json..."
+          npm install --package-lock-only
+          echo "package-lock.json generated with resolved versions"
+
+      - name: Setup SBOM environment
+        uses: ./.github/actions/setup-sbom
+
+      - name: Generate SBOM
+        id: generate_sbom
+        uses: ./.github/actions/sbom-update
+        with:
+          output-file: ${{ env.SBOM_FILE }}
+
+      - name: Commit SBOM changes
+        if: steps.generate_sbom.outputs.HAS_CHANGES == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ${{ env.SBOM_FILE }}
+          git commit -m "chore(deps): Update SBOM after dependency changes"
+          git push
+          echo "SBOM updated and committed" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
