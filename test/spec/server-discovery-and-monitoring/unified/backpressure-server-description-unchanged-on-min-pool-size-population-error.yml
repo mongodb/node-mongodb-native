@@ -12,6 +12,20 @@ createEntities:
 tests:
   - description: the server description is not changed on handshake error during minPoolSize population
     operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: setupClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              skip: 1
+            data:
+              failCommands:
+                - hello
+                - isMaster
+              appName: authErrorTest
+              closeConnection: true
       - name: createEntities
         object: testRunner
         arguments:
@@ -27,20 +41,6 @@ tests:
                   maxConnecting: 1
                   serverMonitoringMode: poll
                   heartbeatFrequencyMS: 1000000
-      - name: failPoint
-        object: testRunner
-        arguments:
-          client: setupClient
-          failPoint:
-            configureFailPoint: failCommand
-            mode:
-              skip: 1
-            data:
-              failCommands:
-                - hello
-                - isMaster
-              appName: authErrorTest
-              closeConnection: true
       - name: waitForEvent
         object: testRunner
         arguments:
