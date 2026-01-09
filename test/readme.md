@@ -39,6 +39,7 @@ about the types of tests and how to run them.
       - [Deployed Lambda Tests](#deployed-lambda-tests)
     - [Kerberos Tests](#kerberos-tests)
     - [AWS Authentication tests](#aws-authentication-tests)
+      - [AWS Profile](#aws-profile)
     - [Container Tests](#container-tests)
   - [GCP](#gcp)
   - [Azure](#azure)
@@ -646,6 +647,33 @@ Choose your AWS authentication credential type and export the `AWS_CREDENTIAL_TY
 | session-creds       | Similar to env-creds, but the credentials are temporary and include a session token             |
 
 1. Run the `bash .evergreen/run-mongodb-aws-tests.sh`.
+
+An example of performing the above is [`etc/run-aws-integ-tests.sh`](etc/run-aws-integ-tests.sh).
+
+#### AWS Profile
+
+Setup an AWS_PROFILE locally to be able to use AWS and to run AWS tests locally.
+
+1. Get SSO sign-in info from AWS
+   1. Navigate to https://corp.mongodb.com/app/UserHome
+   2. Open AWS
+   3. Choose `Drivers` account
+   4. Choose `drivers-test-secrets-role`
+   5. Click `Access Keys`
+   6. Copy down `SSO start URL` and `SSO Region`
+2. Sign in locally
+   1. Run `aws configure sso-session`
+   2. Pick a name, like `drivers-test-secrets-session`
+   3. Specify `SSO start URL` and `SSO Region` from earlier steps
+3. Add a profile
+   1. Add the following profile to `~/.aws/config`
+
+   ```ini
+   [profile drivers-test-secrets-role-857654397073]
+   sso_session = drivers-test-secrets-session
+   sso_account_id = 857654397073
+   sso_role_name = drivers-test-secrets-role
+   ```
 
 ### Container Tests
 
