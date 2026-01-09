@@ -81,6 +81,7 @@
     "@types/whatwg-url": "^13.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
     "@typescript-eslint/parser": "^8.31.1",
+    "aws4": "^1.13.2",
     "chai": "^4.4.1",
     "chai-subset": "^1.6.0",
     "chalk": "^4.1.2",
