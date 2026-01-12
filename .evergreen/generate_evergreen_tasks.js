@@ -46,12 +46,6 @@ const WINDOWS_SKIP_TAGS = new Set([
   'load_balancer',
   'socks5-csfle',
   'oidc',
-
-  // TODO: NODE-7356: enable skipped tests on windows
-  'latest',
-  'socks5',
-  'socks5-tls',
-  'tls-support-latest'
 ]);
 
 const TASKS = [];
