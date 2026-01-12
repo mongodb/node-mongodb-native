@@ -45,7 +45,7 @@ const WINDOWS_SKIP_TAGS = new Set([
   'auth',
   'load_balancer',
   'socks5-csfle',
-  'oidc',
+  'oidc'
 ]);
 
 const TASKS = [];
