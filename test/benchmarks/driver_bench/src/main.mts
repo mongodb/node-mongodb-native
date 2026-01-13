@@ -7,6 +7,8 @@ import os from 'node:os';
 import path from 'node:path';
 import util from 'node:util';
 
+import process from 'process';
+
 import {
   type Metric,
   type MetricInfo,

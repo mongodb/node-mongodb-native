@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { once } from 'events';
 import * as net from 'net';
 import { type AddressInfo } from 'net';
+import * as process from 'process';
 import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';

@@ -1,4 +1,5 @@
 import { get } from 'http';
+import * as process from 'process';
 
 import { Filter } from './filter';
 

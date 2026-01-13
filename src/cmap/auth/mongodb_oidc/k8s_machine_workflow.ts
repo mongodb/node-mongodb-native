@@ -1,4 +1,5 @@
 import { readFile } from 'fs/promises';
+import * as process from 'process';
 
 import type { OIDCCallbackFunction, OIDCResponse } from '../mongodb_oidc';
 

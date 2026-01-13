@@ -4,6 +4,7 @@ import { EJSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as process from 'process';
 
 import { type MongoClient, WriteConcern } from '../../../src';
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';

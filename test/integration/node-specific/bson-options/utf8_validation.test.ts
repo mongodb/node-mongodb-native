@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as net from 'net';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import { type Collection, type MongoClient, MongoServerError } from '../../../../src';

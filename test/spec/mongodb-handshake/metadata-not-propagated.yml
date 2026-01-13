@@ -5,6 +5,7 @@ runOnRequirements:
 createEntities:
   - client:
       id: &client client
+      useMultipleMongoses: false
       observeEvents:
         - commandSucceededEvent
         - commandFailedEvent

@@ -1,4 +1,5 @@
-/* eslint no-unused-vars: 0 */
+/* eslint no-unused-vars: 0 no-restricted-globals: 0 */
+
 'use strict';
 
 const { setTimeout } = require('timers');
