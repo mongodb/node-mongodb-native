@@ -55,12 +55,7 @@ export type AnyOptions = Document;
 
 export const ByteUtils = {
   toLocalBufferType(this: void, buffer: Buffer | Uint8Array): Buffer {
-    if (BSONByteUtils.isUint8Array(buffer)) {
-      // eslint-disable-next-line no-restricted-globals
-      return Buffer.from(buffer as Uint8Array);
-    } else {
-      return buffer as Buffer;
-    }
+    return BSONByteUtils.toLocalBufferType(buffer) as Buffer;
   },
 
   equals(this: void, seqA: Uint8Array, seqB: Uint8Array) {
