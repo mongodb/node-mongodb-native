@@ -40,7 +40,7 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
-const encodeUTF8Into = BSON.onDemand.ByteUtils.encodeUTF8Into;
+const encodeUTF8Into = BSON.ByteUtils.encodeUTF8Into;
 
 /** @internal */
 export type WriteProtocolMessageType = OpQueryRequest | OpMsgRequest;

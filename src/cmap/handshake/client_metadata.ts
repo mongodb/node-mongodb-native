@@ -114,7 +114,7 @@ export async function makeClientMetadata(
   // Add app name first, it must be sent
   if (appName.length > 0) {
     const name =
-      BSON.onDemand.ByteUtils.utf8ByteLength(appName) <= 128
+      BSON.ByteUtils.utf8ByteLength(appName) <= 128
         ? appName
         : toUTF8(fromUTF8(appName), 0, 128, false);
     metadataDocument.ifItFitsItSits('application', { name });

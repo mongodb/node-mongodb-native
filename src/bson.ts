@@ -38,32 +38,32 @@ export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSON
   return Array.isArray(res) ? res : [...res];
 }
 
-export const getInt32LE = BSON.onDemand.NumberUtils.getInt32LE;
-export const getFloat64LE = BSON.onDemand.NumberUtils.getFloat64LE;
-export const getBigInt64LE = BSON.onDemand.NumberUtils.getBigInt64LE;
-export const toUTF8 = BSON.onDemand.ByteUtils.toUTF8;
+export const getInt32LE = BSON.NumberUtils.getInt32LE;
+export const getFloat64LE = BSON.NumberUtils.getFloat64LE;
+export const getBigInt64LE = BSON.NumberUtils.getBigInt64LE;
+export const toUTF8 = BSON.ByteUtils.toUTF8;
 
 // BSON wrappers
 
 // writeInt32LE, same order of arguments as Buffer.writeInt32LE
 export const writeInt32LE = (destination: Uint8Array, value: number, offset: number) =>
-  BSON.onDemand.NumberUtils.setInt32LE(destination, offset, value);
+  BSON.NumberUtils.setInt32LE(destination, offset, value);
 
 // various wrappers that consume and return local buffer types
 
 export const fromUTF8 = (text: string) =>
-  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.fromUTF8(text));
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromUTF8(text));
 export const fromBase64 = (b64: string) =>
-  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.fromBase64(b64));
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromBase64(b64));
 export const fromNumberArray = (array: number[]) =>
-  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.fromNumberArray(array));
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromNumberArray(array));
 export const concatBuffers = (list: Uint8Array[]) => {
-  return ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.concat(list));
+  return ByteUtils.toLocalBufferType(BSON.ByteUtils.concat(list));
 };
 export const allocateBuffer = (size: number) =>
-  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.allocate(size));
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.allocate(size));
 export const allocateUnsafeBuffer = (size: number) =>
-  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.allocateUnsafe(size));
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.allocateUnsafe(size));
 
 // validates buffer inputs, used for read operations
 const validateBufferInputs = (buffer: Uint8Array, offset: number, length: number) => {
