@@ -40,12 +40,21 @@ tests:
             - client:
                 id: &client client
                 observeEvents:
-                  - connectionCreatedEvent
+                  - poolReadyEvent
                   - poolClearedEvent
                   - connectionClosedEvent
                 uriOptions:
                   appname: authErrorTest
                   minPoolSize: 1
+
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolReadyEvent: {}
+          count: 1
+      
       - name: waitForEvent
         object: testRunner
         arguments:
@@ -53,6 +62,7 @@ tests:
           event:
             poolClearedEvent: {}
           count: 1
+
       - name: waitForEvent
         object: testRunner
         arguments:
@@ -60,16 +70,24 @@ tests:
           event:
             connectionClosedEvent: {}
           count: 1
-    expectEvents:
-      - client: *client
-        eventType: cmap
-        events:
-          - connectionCreatedEvent: {}
-          - poolClearedEvent: {}
-          - connectionClosedEvent: {}
 
   - description: Pool is not cleared on handshake error during minPoolSize population
     operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *setupClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              skip: 1 # skip one to let monitoring thread to move pool to ready state
+            data:
+              failCommands:
+                - hello
+                - isMaster
+              appName: authErrorTest
+              closeConnection: true
+        
       - name: createEntities
         object: testRunner
         arguments:
@@ -77,11 +95,9 @@ tests:
             - client:
                 id: &client client
                 observeEvents:
-                  - topologyDescriptionChangedEvent
-                  - connectionCreatedEvent
+                  - poolReadyEvent
                   - poolClearedEvent
                   - connectionClosedEvent
-                  - connectionReadyEvent
                 uriOptions:
                   appname: authErrorTest
                   minPoolSize: 5
@@ -96,27 +112,8 @@ tests:
         arguments:
           client: *client
           event:
-            topologyDescriptionChangedEvent:
-              previousDescription:
-                type: "Unknown"
-              newDescription:
-                type: "Single"          
+            poolReadyEvent: {}
           count: 1
-
-      - name: failPoint
-        object: testRunner
-        arguments:
-          client: *setupClient
-          failPoint:
-            configureFailPoint: failCommand
-            mode:
-              times: 1
-            data:
-              failCommands:
-                - hello
-                - isMaster
-              appName: authErrorTest
-              closeConnection: true
 
       - name: waitForEvent
         object: testRunner
@@ -125,11 +122,11 @@ tests:
           event:
             connectionClosedEvent: {}
           count: 1
-    expectEvents:
-      - client: *client
-        eventType: cmap
-        events:
-          - connectionCreatedEvent: {}
-          - connectionReadyEvent: {}
-          - connectionCreatedEvent: {}
-          - connectionClosedEvent: {}
+
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolClearedEvent: {}
+          count: 0

@@ -1,6 +1,7 @@
 import * as chai from 'chai';
 import { promises as dns } from 'dns';
 import * as os from 'os';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import { MongoClient } from '../../src';

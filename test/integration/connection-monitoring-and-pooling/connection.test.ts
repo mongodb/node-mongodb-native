@@ -2,6 +2,7 @@ import { type EventEmitter, once } from 'node:events';
 import { setTimeout } from 'node:timers';
 
 import { expect } from 'chai';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import {

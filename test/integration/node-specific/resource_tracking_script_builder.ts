@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import { inspect } from 'node:util';
 
 import { AssertionError, expect } from 'chai';
+import * as process from 'process';
 import type * as timers from 'timers';
 
 import type * as mongodb from '../../../src';

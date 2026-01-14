@@ -1,5 +1,6 @@
 // begin lambda connection
 const { MongoClient } = require('mongodb');
+const process = require('node:process');
 
 // Get the URI for the cluster and use AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 // from the environment, then set the appropriate auth options. Note that MongoClient

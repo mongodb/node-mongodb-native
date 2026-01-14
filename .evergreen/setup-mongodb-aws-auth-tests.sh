@@ -22,7 +22,5 @@ cd $DRIVERS_TOOLS/.evergreen/auth_aws
 
 cd $BEFORE
 
-npm install --no-save aws4
-
 # revert to show test output
 set -x

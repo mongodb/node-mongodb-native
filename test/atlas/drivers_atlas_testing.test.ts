@@ -1,3 +1,5 @@
+import * as process from 'process';
+
 import { runUnifiedSuite } from '../tools/unified-spec-runner/runner';
 
 describe('Node Driver Atlas Testing', function () {

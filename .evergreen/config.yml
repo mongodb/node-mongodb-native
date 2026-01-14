@@ -3076,14 +3076,17 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-vsCurrent-large-iron
+  - name: windows-2022-latest-large-iron
     display_name: Windows Node20.19.0
-    run_on: windows-vsCurrent-large
+    run_on: windows-2022-latest-large
     expansions:
       NODE_LTS_VERSION: 20.19.0
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
@@ -3105,20 +3108,29 @@ buildvariants:
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
+      - test-latest-server-v1-api
+      - test-socks5
+      - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-compression
+      - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-vsCurrent-large-Node22
+  - name: windows-2022-latest-large-Node22
     display_name: Windows Node22
-    run_on: windows-vsCurrent-large
+    run_on: windows-2022-latest-large
     expansions:
       NODE_LTS_VERSION: 22
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
@@ -3140,20 +3152,29 @@ buildvariants:
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
+      - test-latest-server-v1-api
+      - test-socks5
+      - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-compression
+      - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-vsCurrent-large-Node24
+  - name: windows-2022-latest-large-Node24
     display_name: Windows Node24
-    run_on: windows-vsCurrent-large
+    run_on: windows-2022-latest-large
     expansions:
       NODE_LTS_VERSION: 24
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
@@ -3175,6 +3196,12 @@ buildvariants:
       - test-4.2-server
       - test-4.2-replica_set
       - test-4.2-sharded_cluster
+      - test-latest-server-v1-api
+      - test-socks5
+      - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-compression
+      - test-tls-support-latest
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0

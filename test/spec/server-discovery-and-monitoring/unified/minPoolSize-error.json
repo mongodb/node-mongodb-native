@@ -3,7 +3,7 @@
   "schemaVersion": "1.4",
   "runOnRequirements": [
     {
-      "minServerVersion": "4.9",
+      "minServerVersion": "4.4.7",
       "serverless": "forbid",
       "topologies": [
         "single"
@@ -27,7 +27,7 @@
   ],
   "tests": [
     {
-      "description": "Network error on minPoolSize background creation",
+      "description": "Server error on minPoolSize background creation",
       "operations": [
         {
           "name": "failPoint",
@@ -45,7 +45,7 @@
                   "isMaster"
                 ],
                 "appName": "SDAMminPoolSizeError",
-                "closeConnection": true
+                "errorCode": 91
               }
             }
           }
@@ -68,6 +68,7 @@
                     "heartbeatFrequencyMS": 10000,
                     "appname": "SDAMminPoolSizeError",
                     "minPoolSize": 10,
+                    "serverMonitoringMode": "poll",
                     "serverSelectionTimeoutMS": 1000
                   }
                 }

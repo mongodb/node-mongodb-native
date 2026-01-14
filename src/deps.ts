@@ -203,66 +203,6 @@ export function getSocks(): SocksLib | { kModuleError: MongoMissingDependencyErr
   }
 }
 
-interface AWS4 {
-  /**
-   * Created these inline types to better assert future usage of this API
-   * @param options - options for request
-   * @param credentials - AWS credential details, sessionToken should be omitted entirely if its false-y
-   */
-  sign(
-    this: void,
-    options: {
-      path: '/';
-      body: string;
-      host: string;
-      method: 'POST';
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded';
-        'Content-Length': number;
-        'X-MongoDB-Server-Nonce': string;
-        'X-MongoDB-GS2-CB-Flag': 'n';
-      };
-      service: string;
-      region: string;
-    },
-    credentials:
-      | {
-          accessKeyId: string;
-          secretAccessKey: string;
-          sessionToken: string;
-        }
-      | {
-          accessKeyId: string;
-          secretAccessKey: string;
-        }
-      | undefined
-  ): {
-    headers: {
-      Authorization: string;
-      'X-Amz-Date': string;
-    };
-  };
-}
-
-export const aws4: AWS4 | { kModuleError: MongoMissingDependencyError } = loadAws4();
-
-function loadAws4() {
-  let aws4: AWS4 | { kModuleError: MongoMissingDependencyError };
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    aws4 = require('aws4');
-  } catch (error) {
-    aws4 = makeErrorModule(
-      new MongoMissingDependencyError(
-        'Optional module `aws4` not found. Please install it to enable AWS authentication',
-        { cause: error, dependencyName: 'aws4' }
-      )
-    );
-  }
-
-  return aws4;
-}
-
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
 export function getMongoDBClientEncryption():
   | typeof import('mongodb-client-encryption')
