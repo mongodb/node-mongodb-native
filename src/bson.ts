@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports */
-import { BSON, type DeserializeOptions, type SerializeOptions } from 'bson';
+import { BSON, ByteUtils, type DeserializeOptions, type SerializeOptions } from 'bson';
 
 export {
   Binary,
@@ -8,6 +8,7 @@ export {
   BSONRegExp,
   BSONSymbol,
   BSONType,
+  ByteUtils,
   calculateObjectSize,
   Code,
   DBRef,
@@ -32,13 +33,6 @@ export {
 /** @internal */
 export type BSONElement = BSON.OnDemand['BSONElement'];
 
-/** @internal */
-export function toLocalBufferType(this: void, buffer: Buffer | Uint8Array): Buffer {
-  return Buffer.isBuffer(buffer)
-    ? buffer
-    : Buffer.from(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-}
-
 export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSONElement[] {
   const res = BSON.onDemand.parseToElements(bytes, offset);
   return Array.isArray(res) ? res : [...res];
@@ -48,22 +42,30 @@ export const getInt32LE = BSON.onDemand.NumberUtils.getInt32LE;
 export const getFloat64LE = BSON.onDemand.NumberUtils.getFloat64LE;
 export const getBigInt64LE = BSON.onDemand.NumberUtils.getBigInt64LE;
 export const toUTF8 = BSON.onDemand.ByteUtils.toUTF8;
-export const writeInt32LE = BSON.onDemand.NumberUtils.setInt32LE;
 
-export const fromUTF8 = (text: string) => toLocalBufferType(BSON.onDemand.ByteUtils.fromUTF8(text));
+// BSON wrappers
 
-export const concatBuffers = (list: Buffer[] | Uint8Array[]) => {
-  return toLocalBufferType(BSON.onDemand.ByteUtils.concat(list));
+// writeInt32LE, same order of arguments as Buffer.writeInt32LE
+export const writeInt32LE = (destination: Uint8Array, value: number, offset: number) =>
+  BSON.onDemand.NumberUtils.setInt32LE(destination, offset, value);
+
+// various wrappers that consume and return local buffer types
+
+export const fromUTF8 = (text: string) =>
+  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.fromUTF8(text));
+export const fromBase64 = (b64: string) =>
+  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.fromBase64(b64));
+export const fromNumberArray = (array: number[]) =>
+  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.fromNumberArray(array));
+export const concatBuffers = (list: Uint8Array[]) => {
+  return ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.concat(list));
 };
 export const allocateBuffer = (size: number) =>
-  toLocalBufferType(BSON.onDemand.ByteUtils.allocate(size));
+  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.allocate(size));
 export const allocateUnsafeBuffer = (size: number) =>
-  toLocalBufferType(BSON.onDemand.ByteUtils.allocateUnsafe(size));
+  ByteUtils.toLocalBufferType(BSON.onDemand.ByteUtils.allocateUnsafe(size));
 
-export const utf8ByteLength = BSON.onDemand.ByteUtils.utf8ByteLength;
-export const toBase64 = BSON.onDemand.ByteUtils.toBase64;
-export const encodeUTF8Into = BSON.onDemand.ByteUtils.encodeUTF8Into;
-
+// validates buffer inputs, used for read operations
 const validateBufferInputs = (buffer: Uint8Array, offset: number, length: number) => {
   if (offset < 0 || offset + length > buffer.length) {
     throw new RangeError(

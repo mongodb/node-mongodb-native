@@ -1,6 +1,7 @@
 import * as BSON from 'bson';
 import { expect } from 'chai';
 
+import { ByteUtils, readInt32LE } from '../../../src/bson';
 import { DocumentSequence, OpMsgRequest, OpReply } from '../../../src/cmap/commands';
 
 describe('commands', function () {
@@ -41,12 +42,12 @@ describe('commands', function () {
 
           it('sets the length of the document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(buffers[3].readInt32LE(1)).to.equal(25);
+            expect(readInt32LE(buffers[3], 1)).to.equal(25);
           });
 
           it('sets the name of the first field to be replaced', function () {
             // Bytes starting at index 5 is the field name.
-            expect(buffers[3].toString('utf8', 5, 10)).to.equal('field');
+            expect(ByteUtils.toUTF8(buffers[3], 5, 10, true)).to.equal('field');
           });
         });
 
@@ -81,12 +82,12 @@ describe('commands', function () {
 
           it('sets the length of the first document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(buffers[3].readInt32LE(1)).to.equal(28);
+            expect(readInt32LE(buffers[3], 1)).to.equal(28);
           });
 
           it('sets the name of the first field to be replaced', function () {
             // Bytes starting at index 5 is the field name.
-            expect(buffers[3].toString('utf8', 5, 13)).to.equal('fieldOne');
+            expect(ByteUtils.toUTF8(buffers[3], 5, 13, true)).to.equal('fieldOne');
           });
 
           it('sets the document sequence sections second type to 1', function () {
@@ -96,12 +97,12 @@ describe('commands', function () {
 
           it('sets the length of the second document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(buffers[3].readInt32LE(30)).to.equal(28);
+            expect(readInt32LE(buffers[3], 30)).to.equal(28);
           });
 
           it('sets the name of the second field to be replaced', function () {
             // Bytes starting at index 33 is the field name.
-            expect(buffers[3].toString('utf8', 34, 42)).to.equal('fieldTwo');
+            expect(ByteUtils.toUTF8(buffers[3], 34, 42, true)).to.equal('fieldTwo');
           });
         });
       });

@@ -3,11 +3,11 @@ import {
   allocateUnsafeBuffer,
   BSON,
   type BSONSerializeOptions,
+  ByteUtils,
   concatBuffers,
   type Document,
   type Long,
   readInt32LE,
-  utf8ByteLength,
   writeInt32LE
 } from '../bson';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
@@ -195,7 +195,7 @@ export class OpQueryRequest {
     const header = allocateBuffer(
       4 * 4 + // Header
         4 + // Flags
-        utf8ByteLength(this.ns) +
+        ByteUtils.utf8ByteLength(this.ns) +
         1 + // namespace
         4 + // numberToSkip
         4 // numberToReturn
@@ -300,8 +300,8 @@ export interface MessageHeader {
 /** @internal */
 export class OpReply {
   parsed: boolean;
-  raw: Buffer;
-  data: Buffer;
+  raw: Uint8Array;
+  data: Uint8Array;
   opts: BSONSerializeOptions;
   length: number;
   requestId: number;
@@ -328,9 +328,9 @@ export class OpReply {
   moreToCome = false;
 
   constructor(
-    message: Buffer,
+    message: Uint8Array,
     msgHeader: MessageHeader,
-    msgBody: Buffer,
+    msgBody: Uint8Array,
     opts?: BSONSerializeOptions
   ) {
     this.parsed = false;
@@ -443,7 +443,7 @@ export class DocumentSequence {
   documents: Document[];
   serializedDocumentsLength: number;
   private chunks: Uint8Array[];
-  private header: Buffer;
+  private header: Uint8Array;
 
   /**
    * Create a new document sequence for the provided field.
@@ -483,7 +483,9 @@ export class DocumentSequence {
     // Push the document raw bson.
     this.chunks.push(buffer);
     // Write the new length.
-    this.header?.writeInt32LE(4 + this.field.length + 1 + this.serializedDocumentsLength, 1);
+    if (this.header) {
+      writeInt32LE(this.header, 4 + this.field.length + 1 + this.serializedDocumentsLength, 1);
+    }
     return this.serializedDocumentsLength + this.header.length;
   }
 
@@ -541,8 +543,8 @@ export class OpMsgRequest {
       typeof options.exhaustAllowed === 'boolean' ? options.exhaustAllowed : false;
   }
 
-  toBin(): Buffer[] {
-    const buffers: Buffer[] = [];
+  toBin(): Uint8Array[] {
+    const buffers: Uint8Array[] = [];
     let flags = 0;
 
     if (this.checksumPresent) {
@@ -568,11 +570,11 @@ export class OpMsgRequest {
     const command = this.command;
     totalLength += this.makeSections(buffers, command);
 
-    writeInt32LE(header, 0, totalLength); // messageLength
-    writeInt32LE(header, 4, this.requestId); // requestID
-    writeInt32LE(header, 8, 0); // responseTo
-    writeInt32LE(header, 12, OP_MSG); // opCode
-    writeInt32LE(header, 16, flags); // flags
+    writeInt32LE(header, totalLength, 0); // messageLength
+    writeInt32LE(header, this.requestId, 4); // requestID
+    writeInt32LE(header, 0, 8); // responseTo
+    writeInt32LE(header, OP_MSG, 12); // opCode
+    writeInt32LE(header, flags, 16); // flags
     return buffers;
   }
 
@@ -640,8 +642,8 @@ export class OpMsgRequest {
 /** @internal */
 export class OpMsgResponse {
   parsed: boolean;
-  raw: Buffer;
-  data: Buffer;
+  raw: Uint8Array;
+  data: Uint8Array;
   opts: BSONSerializeOptions;
   length: number;
   requestId: number;
@@ -662,9 +664,9 @@ export class OpMsgResponse {
   sections: Uint8Array[] = [];
 
   constructor(
-    message: Buffer,
+    message: Uint8Array,
     msgHeader: MessageHeader,
-    msgBody: Buffer,
+    msgBody: Uint8Array,
     opts?: BSONSerializeOptions
   ) {
     this.parsed = false;
@@ -768,7 +770,7 @@ export class OpCompressedRequest {
     return !uncompressibleCommands.has(commandName);
   }
 
-  async toBin(): Promise<Buffer[]> {
+  async toBin(): Promise<Uint8Array[]> {
     const concatenatedOriginalCommandBuffer = concatBuffers(this.command.toBin());
     // otherwise, compress the message
     const messageToBeCompressed = concatenatedOriginalCommandBuffer.slice(MESSAGE_HEADER_SIZE);
@@ -782,18 +784,17 @@ export class OpCompressedRequest {
     const msgHeader = allocateBuffer(MESSAGE_HEADER_SIZE);
     writeInt32LE(
       msgHeader,
-      0,
-      MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length
+      MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length,
+      0
     ); // messageLength
-    writeInt32LE(msgHeader, 4, this.command.requestId); // requestID
-    writeInt32LE(msgHeader, 8, 0); // responseTo (zero)
-    writeInt32LE(msgHeader, 12, OP_COMPRESSED); // opCode
-
+    writeInt32LE(msgHeader, this.command.requestId, 4); // requestID
+    writeInt32LE(msgHeader, 0, 8); // responseTo (zero)
+    writeInt32LE(msgHeader, OP_COMPRESSED, 12); // opCode
     // Create the compression details of OP_COMPRESSED
     const compressionDetails = allocateBuffer(COMPRESSION_DETAILS_SIZE);
-    writeInt32LE(compressionDetails, 0, originalCommandOpCode); // originalOpcode
-    writeInt32LE(compressionDetails, 4, messageToBeCompressed.length); // Size of the uncompressed compressedMessage, excluding the MsgHeader
-    writeInt32LE(compressionDetails, 8, Compressor[this.options.agreedCompressor]); // compressorID
+    writeInt32LE(compressionDetails, originalCommandOpCode, 0); // originalOpcode
+    writeInt32LE(compressionDetails, messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
+    writeInt32LE(compressionDetails, Compressor[this.options.agreedCompressor], 8); // compressorID
     return [msgHeader, compressionDetails, compressedMessage];
   }
 }

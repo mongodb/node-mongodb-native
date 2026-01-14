@@ -1,4 +1,4 @@
-import { Binary } from '../../bson';
+import { Binary, fromUTF8 } from '../../bson';
 import { MongoMissingCredentialsError } from '../../error';
 import { ns } from '../../utils';
 import { type AuthContext, AuthProvider } from './auth_provider';
@@ -12,7 +12,7 @@ export class Plain extends AuthProvider {
 
     const { username, password } = credentials;
 
-    const payload = new Binary(Buffer.from(`\x00${username}\x00${password}`));
+    const payload = new Binary(fromUTF8(`\x00${username}\x00${password}`));
     const command = {
       saslStart: 1,
       mechanism: 'PLAIN',

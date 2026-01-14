@@ -9,12 +9,12 @@ import { clearTimeout, setTimeout } from 'timers';
 import {
   allocateBuffer,
   allocateUnsafeBuffer,
+  ByteUtils as BSONByteUtils,
   deserialize,
   type Document,
   getInt32LE,
   ObjectId,
-  resolveBSONOptions,
-  toLocalBufferType
+  resolveBSONOptions
 } from './bson';
 import type { Connection } from './cmap/connection';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
@@ -54,7 +54,14 @@ export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 export type AnyOptions = Document;
 
 export const ByteUtils = {
-  toLocalBufferType: toLocalBufferType,
+  toLocalBufferType(this: void, buffer: Buffer | Uint8Array): Buffer {
+    if (BSONByteUtils.isUint8Array(buffer)) {
+      // eslint-disable-next-line no-restricted-globals
+      return Buffer.from(buffer as Uint8Array);
+    } else {
+      return buffer as Buffer;
+    }
+  },
 
   equals(this: void, seqA: Uint8Array, seqB: Uint8Array) {
     return ByteUtils.toLocalBufferType(seqA).equals(seqB);
@@ -323,7 +330,7 @@ export function* makeCounter(seed = 0): Generator<number> {
  * Synchronously Generate a UUIDv4
  * @internal
  */
-export function uuidV4(): Buffer {
+export function uuidV4(): Uint8Array {
   const result = crypto.randomBytes(16);
   result[6] = (result[6] & 0x0f) | 0x40;
   result[8] = (result[8] & 0x3f) | 0x80;
@@ -798,7 +805,7 @@ export class List<T = unknown> {
  * @internal
  */
 export class BufferPool {
-  private buffers: List<Buffer>;
+  private buffers: List<Uint8Array>;
   private totalByteLength: number;
 
   constructor() {
@@ -811,7 +818,7 @@ export class BufferPool {
   }
 
   /** Adds a buffer to the internal buffer pool list */
-  append(buffer: Buffer): void {
+  append(buffer: Uint8Array): void {
     this.buffers.push(buffer);
     this.totalByteLength += buffer.length;
   }
@@ -842,7 +849,7 @@ export class BufferPool {
   }
 
   /** Reads the requested number of bytes, optionally consuming them */
-  read(size: number): Buffer {
+  read(size: number): Uint8Array {
     if (typeof size !== 'number' || size < 0) {
       throw new MongoInvalidArgumentError('Argument "size" must be a non-negative number');
     }
@@ -1245,8 +1252,8 @@ export function squashError(_error: unknown) {
 }
 
 export const randomBytes = (size: number) => {
-  return new Promise<Buffer>((resolve, reject) => {
-    crypto.randomBytes(size, (error: Error | null, buf: Buffer) => {
+  return new Promise<Uint8Array>((resolve, reject) => {
+    crypto.randomBytes(size, (error: Error | null, buf: Uint8Array) => {
       if (error) return reject(error);
       resolve(buf);
     });
@@ -1336,10 +1343,10 @@ export function decorateDecryptionResult(
 ): void {
   if (isTopLevelDecorateCall) {
     // The original value could have been either a JS object or a BSON buffer
-    if (Buffer.isBuffer(original)) {
-      original = deserialize(original);
+    if (BSONByteUtils.isUint8Array(original)) {
+      original = deserialize(ByteUtils.toLocalBufferType(original as Uint8Array));
     }
-    if (Buffer.isBuffer(decrypted)) {
+    if (BSONByteUtils.isUint8Array(decrypted)) {
       throw new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');
     }
   }

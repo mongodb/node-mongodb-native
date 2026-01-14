@@ -206,7 +206,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private lastUseTime: number;
   private clusterTime: Document | null = null;
   private error: Error | null = null;
-  private dataEvents: AsyncGenerator<Buffer, void, void> | null = null;
+  private dataEvents: AsyncGenerator<Uint8Array, void, void> | null = null;
 
   private readonly socketTimeoutMS: number;
   private readonly monitorCommands: boolean;
@@ -796,7 +796,7 @@ export class SizedMessageTransform extends Transform {
     this.connection = connection;
   }
 
-  override _transform(chunk: Buffer, encoding: unknown, callback: TransformCallback): void {
+  override _transform(chunk: Uint8Array, encoding: unknown, callback: TransformCallback): void {
     if (this.connection.delayedTimeoutId != null) {
       clearTimeout(this.connection.delayedTimeoutId);
       this.connection.delayedTimeoutId = null;

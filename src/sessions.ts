@@ -1,6 +1,13 @@
 import { setTimeout } from 'timers/promises';
 
-import { allocateUnsafeBuffer, Binary, type Document, Long, type Timestamp } from './bson';
+import {
+  allocateUnsafeBuffer,
+  Binary,
+  ByteUtils,
+  type Document,
+  Long,
+  type Timestamp
+} from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
 import { type MongoDBResponse } from './cmap/wire_protocol/responses';
@@ -37,7 +44,6 @@ import {
   TxnState
 } from './transactions';
 import {
-  ByteUtils,
   calculateDurationInMs,
   commandSupportsReadConcern,
   isPromiseLike,

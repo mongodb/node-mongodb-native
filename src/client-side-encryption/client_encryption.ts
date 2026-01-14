@@ -6,6 +6,7 @@ import type {
 
 import {
   type Binary,
+  ByteUtils,
   deserialize,
   type Document,
   type Int32,
@@ -141,11 +142,15 @@ export class ClientEncryption {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
     }
 
+    let kmsProviders;
+    if (!ByteUtils.isUint8Array(this._kmsProviders)) {
+      kmsProviders = serialize(this._kmsProviders);
+    } else {
+      kmsProviders = this._kmsProviders as any as Uint8Array;
+    }
     const mongoCryptOptions: MongoCryptOptions = {
       ...options,
-      kmsProviders: !Buffer.isBuffer(this._kmsProviders)
-        ? (serialize(this._kmsProviders) as Buffer)
-        : this._kmsProviders,
+      kmsProviders,
       errorWrapper: defaultErrorWrapper
     };
 

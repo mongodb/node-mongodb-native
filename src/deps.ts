@@ -50,12 +50,12 @@ type ZStandardLib = {
    * Compress using zstd.
    * @param buf - Buffer to be compressed.
    */
-  compress(buf: Buffer, level?: number): Promise<Buffer>;
+  compress(buf: Uint8Array, level?: number): Promise<Uint8Array>;
 
   /**
    * Decompress using zstd.
    */
-  decompress(buf: Buffer): Promise<Buffer>;
+  decompress(buf: Uint8Array): Promise<Uint8Array>;
 };
 
 export type ZStandard = ZStandardLib | { kModuleError: MongoMissingDependencyError };
@@ -144,13 +144,13 @@ export type SnappyLib = {
    * In order to support both we must check the return value of the function
    * @param buf - Buffer to be compressed
    */
-  compress(buf: Buffer): Promise<Buffer>;
+  compress(buf: Uint8Array): Promise<Uint8Array>;
 
   /**
    * In order to support both we must check the return value of the function
    * @param buf - Buffer to be compressed
    */
-  uncompress(buf: Buffer, opt: { asBuffer: true }): Promise<Buffer>;
+  uncompress(buf: Uint8Array, opt: { asBuffer: true }): Promise<Uint8Array>;
 };
 
 export function getSnappy(): SnappyLib | { kModuleError: MongoMissingDependencyError } {
