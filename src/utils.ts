@@ -1339,7 +1339,7 @@ export function decorateDecryptionResult(
   if (isTopLevelDecorateCall) {
     // The original value could have been either a JS object or a BSON buffer
     if (BSONByteUtils.isUint8Array(original)) {
-      original = deserialize(ByteUtils.toLocalBufferType(original as Uint8Array));
+      original = deserialize(ByteUtils.toLocalBufferType(original));
     }
     if (BSONByteUtils.isUint8Array(decrypted)) {
       throw new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');

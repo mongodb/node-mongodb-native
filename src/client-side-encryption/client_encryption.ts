@@ -142,15 +142,11 @@ export class ClientEncryption {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
     }
 
-    let kmsProviders;
-    if (!ByteUtils.isUint8Array(this._kmsProviders)) {
-      kmsProviders = serialize(this._kmsProviders);
-    } else {
-      kmsProviders = this._kmsProviders as any as Uint8Array;
-    }
     const mongoCryptOptions: MongoCryptOptions = {
       ...options,
-      kmsProviders,
+      kmsProviders: !ByteUtils.isUint8Array(this._kmsProviders)
+        ? (serialize(this._kmsProviders) as Buffer)
+        : this._kmsProviders,
       errorWrapper: defaultErrorWrapper
     };
 

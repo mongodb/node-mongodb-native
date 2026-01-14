@@ -257,7 +257,7 @@ export class AutoEncrypter {
     };
     if (options.schemaMap) {
       if (ByteUtils.isUint8Array(options.schemaMap)) {
-        mongoCryptOptions.schemaMap = options.schemaMap as Uint8Array;
+        mongoCryptOptions.schemaMap = options.schemaMap;
       } else {
         mongoCryptOptions.schemaMap = serialize(options.schemaMap);
       }
@@ -265,14 +265,14 @@ export class AutoEncrypter {
 
     if (options.encryptedFieldsMap) {
       if (ByteUtils.isUint8Array(options.encryptedFieldsMap)) {
-        mongoCryptOptions.encryptedFieldsMap = options.encryptedFieldsMap as Uint8Array;
+        mongoCryptOptions.encryptedFieldsMap = options.encryptedFieldsMap;
       } else {
         mongoCryptOptions.encryptedFieldsMap = serialize(options.encryptedFieldsMap);
       }
     }
 
     if (ByteUtils.isUint8Array(this._kmsProviders)) {
-      mongoCryptOptions.kmsProviders = this._kmsProviders as any as Uint8Array;
+      mongoCryptOptions.kmsProviders = this._kmsProviders;
     } else {
       mongoCryptOptions.kmsProviders = serialize(this._kmsProviders);
     }
@@ -402,9 +402,7 @@ export class AutoEncrypter {
       return cmd;
     }
 
-    const commandBuffer: Uint8Array = ByteUtils.isUint8Array(cmd)
-      ? (cmd as Uint8Array)
-      : serialize(cmd, options);
+    const commandBuffer: Uint8Array = ByteUtils.isUint8Array(cmd) ? cmd : serialize(cmd, options);
     const context = this._mongocrypt.makeEncryptionContext(
       MongoDBCollectionNamespace.fromString(ns).db,
       commandBuffer
