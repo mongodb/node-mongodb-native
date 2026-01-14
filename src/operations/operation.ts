@@ -1,6 +1,7 @@
 import { type Connection, type MongoError } from '..';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
 import { type MongoDBResponse } from '../cmap/wire_protocol/responses';
+import { MongoErrorLabel } from '../error';
 import { type Abortable } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server, ServerCommandOptions } from '../sdam/server';
@@ -46,6 +47,42 @@ export interface OperationOptions extends BSONSerializeOptions {
 }
 
 /**
+ * @internal
+ */
+export class RetryContext {
+  private maxAttempts: number;
+  private willRetry: boolean;
+  private attempts: number = 0;
+
+  constructor(willRetry: boolean, maxAttempts: number) {
+    this.maxAttempts = maxAttempts;
+    this.willRetry = willRetry;
+  }
+
+  get isRetry() {
+    return this.attempts > 0;
+  }
+
+  shouldRetry() {
+    return this.attempts < this.maxAttempts;
+  }
+
+  recordFailure(error: MongoError) {
+    this.attempts++;
+
+    const isRetryableOverloadError =
+      error.hasErrorLabel(MongoErrorLabel.RetryableError) &&
+      error.hasErrorLabel(MongoErrorLabel.SystemOverloadedError);
+
+    if (!(this.willRetry || isRetryableOverloadError)) return;
+
+    this.maxAttempts = error.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+      ? 6
+      : this.maxAttempts;
+  }
+}
+
+/**
  * This class acts as a parent class for any operation and is responsible for setting this.options,
  * as well as setting and getting a session.
  * Additionally, this class implements `hasAspect`, which determines whether an operation has
@@ -65,6 +102,8 @@ export abstract class AbstractOperation<TResult = any> {
 
   /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
+
+  retryContext?: RetryContext;
 
   private _session: ClientSession | undefined;
 

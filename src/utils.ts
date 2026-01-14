@@ -1432,3 +1432,19 @@ export async function abortable<T>(
     abortListener?.[kDispose]();
   }
 }
+
+export class ExponentialBackoffProvider {
+  constructor(
+    public readonly maxBackoff: number,
+    public readonly baseBackoff: number,
+    public readonly backoffIncreaseRate: number,
+    public iteration = 0
+  ) {}
+
+  getNextBackoffDuration(): number {
+    return (
+      Math.random() *
+      Math.min(this.maxBackoff, this.baseBackoff * this.backoffIncreaseRate ** this.iteration)
+    );
+  }
+}
