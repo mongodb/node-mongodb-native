@@ -870,4 +870,73 @@ describe('Aggregation', function () {
         .finally(() => client.close());
     }
   });
+
+  it(
+    'should perform aggregations with a write stage on secondary when readPreference is secondary',
+    {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=5.0' } },
+      async test() {
+        const databaseName = this.configuration.db;
+        const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+          maxPoolSize: 1,
+          monitorCommands: true
+        });
+
+        const events = [];
+        client.on('commandStarted', filterForCommands(['hello', 'aggregate'], events));
+
+        // Discover primary to be able to check the actual server address
+        await client.db('admin').command({ hello: 1 });
+        const [helloEvent] = events;
+        const primaryAddress = helloEvent.address;
+
+        // Clear events
+        events.length = 0;
+
+        const src = client.db(databaseName).collection('read_pref_src');
+        const outMerge = client.db(databaseName).collection('read_pref_merge_out');
+        const outOut = client.db(databaseName).collection('read_pref_out_out');
+
+        await Promise.all([src.deleteMany({}), outMerge.deleteMany({}), outOut.deleteMany({})]);
+        await src.insertMany([{ a: 1 }, { a: 2 }]);
+        await Promise.all([
+          src
+            .aggregate(
+              [
+                {
+                  $merge: {
+                    into: 'read_pref_merge_out',
+                    whenMatched: 'replace',
+                    whenNotMatched: 'insert'
+                  }
+                }
+              ],
+              { readPreference: 'secondary' }
+            )
+            .toArray(),
+          src
+            .aggregate(
+              [
+                {
+                  $out: 'read_pref_out_out'
+                }
+              ],
+              { readPreference: 'secondary' }
+            )
+            .toArray()
+        ]);
+
+        expect(events).to.have.length(2);
+        events.forEach(event => {
+          expect(event).to.have.property('commandName', 'aggregate');
+          expect(event.address).to.not.equal(primaryAddress);
+          expect(event).to.have.deep.nested.property('command.$readPreference', {
+            mode: 'secondary'
+          });
+        });
+
+        await client.close();
+      }
+    }
+  );
 });

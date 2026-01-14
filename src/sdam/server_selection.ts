@@ -88,7 +88,7 @@ export function sameServerSelector(description?: ServerDescription): ServerSelec
  * server potentially for a write on a secondary.
  */
 export function secondaryWritableServerSelector(
-  wireVersion?: number,
+  wireVersion: number,
   readPreference?: ReadPreference
 ): ServerSelector {
   // If server version < 5.0, read preference always primary.
