@@ -6,7 +6,16 @@ import * as http from 'http';
 import * as process from 'process';
 import { clearTimeout, setTimeout } from 'timers';
 
-import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
+import {
+  allocateBuffer,
+  allocateUnsafeBuffer,
+  deserialize,
+  type Document,
+  getInt32LE,
+  ObjectId,
+  resolveBSONOptions,
+  toLocalBufferType
+} from './bson';
 import type { Connection } from './cmap/connection';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 import type { Collection } from './collection';
@@ -45,11 +54,7 @@ export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 export type AnyOptions = Document;
 
 export const ByteUtils = {
-  toLocalBufferType(this: void, buffer: Buffer | Uint8Array): Buffer {
-    return Buffer.isBuffer(buffer)
-      ? buffer
-      : Buffer.from(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  },
+  toLocalBufferType: toLocalBufferType,
 
   equals(this: void, seqA: Uint8Array, seqB: Uint8Array) {
     return ByteUtils.toLocalBufferType(seqA).equals(seqB);
@@ -821,13 +826,13 @@ export class BufferPool {
     }
     const firstBuffer = this.buffers.first();
     if (firstBuffer != null && firstBuffer.byteLength >= 4) {
-      return firstBuffer.readInt32LE(0);
+      return getInt32LE(firstBuffer, 0);
     }
 
     // Unlikely case: an int32 is split across buffers.
     // Use read and put the returned buffer back on top
     const top4Bytes = this.read(4);
-    const value = top4Bytes.readInt32LE(0);
+    const value = getInt32LE(top4Bytes, 0);
 
     // Put it back.
     this.totalByteLength += 4;
@@ -844,12 +849,12 @@ export class BufferPool {
 
     // oversized request returns empty buffer
     if (size > this.totalByteLength) {
-      return Buffer.alloc(0);
+      return allocateBuffer(0);
     }
 
     // We know we have enough, we just don't know how it is spread across chunks
     // TODO(NODE-4732): alloc API should change based on raw option
-    const result = Buffer.allocUnsafe(size);
+    const result = allocateUnsafeBuffer(size);
 
     for (let bytesRead = 0; bytesRead < size; ) {
       const buffer = this.buffers.shift();
@@ -869,7 +874,7 @@ export class BufferPool {
       }
     }
 
-    return result;
+    return ByteUtils.toLocalBufferType(result);
   }
 }
 

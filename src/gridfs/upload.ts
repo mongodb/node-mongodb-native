@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { type Document, ObjectId } from '../bson';
+import { allocateBuffer, type Document, ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 import {
@@ -122,7 +122,7 @@ export class GridFSBucketWriteStream extends Writable {
     this.id = options.id ? options.id : new ObjectId();
     // properly inherit the default chunksize from parent
     this.chunkSizeBytes = options.chunkSizeBytes || this.bucket.s.options.chunkSizeBytes;
-    this.bufToStore = Buffer.alloc(this.chunkSizeBytes);
+    this.bufToStore = allocateBuffer(this.chunkSizeBytes);
     this.length = 0;
     this.n = 0;
     this.pos = 0;
@@ -495,7 +495,7 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void
 
   // Create a new buffer to make sure the buffer isn't bigger than it needs
   // to be.
-  const remnant = Buffer.alloc(stream.pos);
+  const remnant = allocateBuffer(stream.pos);
   stream.bufToStore.copy(remnant, 0, 0, stream.pos);
   const doc = createChunkDoc(stream.id, stream.n, remnant);
 

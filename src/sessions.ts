@@ -1,6 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
-import { Binary, type Document, Long, type Timestamp } from './bson';
+import { allocateUnsafeBuffer, Binary, type Document, Long, type Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
 import { type MongoDBResponse } from './cmap/wire_protocol/responses';
@@ -1018,7 +1018,7 @@ export class ServerSession {
   /** @internal */
   constructor(cloned?: ServerSession | null) {
     if (cloned != null) {
-      const idBytes = Buffer.allocUnsafe(16);
+      const idBytes = allocateUnsafeBuffer(16);
       idBytes.set(cloned.id.id.buffer);
       this.id = { id: new Binary(idBytes, cloned.id.id.sub_type) };
       this.lastUse = cloned.lastUse;

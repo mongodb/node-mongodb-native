@@ -1,5 +1,6 @@
 import * as zlib from 'zlib';
 
+import { concatBuffers, readInt32LE } from '../../bson';
 import { LEGACY_HELLO_COMMAND } from '../../constants';
 import { getSnappy, getZstdLibrary, type SnappyLib, type ZStandard } from '../../deps';
 import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
@@ -168,7 +169,7 @@ export async function compressCommand(
           zlibCompressionLevel: description.zlibCompressionLevel ?? 0
         });
   const data = await finalCommand.toBin();
-  return Buffer.concat(data);
+  return concatBuffers(data);
 }
 
 /**
@@ -180,10 +181,10 @@ export async function compressCommand(
  */
 export async function decompressResponse(message: Buffer): Promise<OpMsgResponse | OpReply> {
   const messageHeader: MessageHeader = {
-    length: message.readInt32LE(0),
-    requestId: message.readInt32LE(4),
-    responseTo: message.readInt32LE(8),
-    opCode: message.readInt32LE(12)
+    length: readInt32LE(message, 0),
+    requestId: readInt32LE(message, 4),
+    responseTo: readInt32LE(message, 8),
+    opCode: readInt32LE(message, 12)
   };
 
   if (messageHeader.opCode !== OP_COMPRESSED) {
@@ -195,8 +196,8 @@ export async function decompressResponse(message: Buffer): Promise<OpMsgResponse
   const header: MessageHeader = {
     ...messageHeader,
     fromCompressed: true,
-    opCode: message.readInt32LE(MESSAGE_HEADER_SIZE),
-    length: message.readInt32LE(MESSAGE_HEADER_SIZE + 4)
+    opCode: readInt32LE(message, MESSAGE_HEADER_SIZE),
+    length: readInt32LE(message, MESSAGE_HEADER_SIZE + 4)
   };
   const compressorID = message[MESSAGE_HEADER_SIZE + 8];
   const compressedBuffer = message.slice(MESSAGE_HEADER_SIZE + 9);

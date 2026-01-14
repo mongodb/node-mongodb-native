@@ -1,7 +1,14 @@
 import { saslprep } from '@mongodb-js/saslprep';
 import * as crypto from 'crypto';
 
-import { Binary, type Document } from '../../bson';
+import {
+  allocateBuffer,
+  Binary,
+  concatBuffers,
+  type Document,
+  fromUTF8,
+  toBase64
+} from '../../bson';
 import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
@@ -68,11 +75,11 @@ function cleanUsername(username: string) {
 function clientFirstMessageBare(username: string, nonce: Buffer) {
   // NOTE: This is done b/c Javascript uses UTF-16, but the server is hashing in UTF-8.
   // Since the username is not sasl-prep-d, we need to do this here.
-  return Buffer.concat([
-    Buffer.from('n=', 'utf8'),
-    Buffer.from(username, 'utf8'),
-    Buffer.from(',r=', 'utf8'),
-    Buffer.from(nonce.toString('base64'), 'utf8')
+  return concatBuffers([
+    fromUTF8('n='),
+    fromUTF8(username),
+    fromUTF8(',r='),
+    fromUTF8(toBase64(nonce))
   ]);
 }
 
@@ -91,7 +98,7 @@ function makeFirstMessage(
     saslStart: 1,
     mechanism,
     payload: new Binary(
-      Buffer.concat([Buffer.from('n,,', 'utf8'), clientFirstMessageBare(username, nonce)])
+      concatBuffers([Buffer.from('n,,', 'utf8'), clientFirstMessageBare(username, nonce)])
     ),
     autoAuthorize: 1,
     options: { skipEmptyExchange: true }
@@ -199,7 +206,7 @@ async function continueScramConversation(
   const retrySaslContinueCmd = {
     saslContinue: 1,
     conversationId: r.conversationId,
-    payload: Buffer.alloc(0)
+    payload: allocateBuffer(0)
   };
 
   await connection.command(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined);

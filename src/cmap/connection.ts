@@ -2,7 +2,9 @@ import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
 import {
+  BSON,
   type BSONSerializeOptions,
+  concatBuffers,
   deserialize,
   type DeserializeOptions,
   type Document,
@@ -174,7 +176,7 @@ function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
     return HostAddress.fromHostPort(remoteAddress, remotePort).toString();
   }
 
-  return uuidV4().toString('hex');
+  return BSON.onDemand.ByteUtils.toHex(uuidV4());
 }
 
 /** @internal */
@@ -204,7 +206,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private lastUseTime: number;
   private clusterTime: Document | null = null;
   private error: Error | null = null;
-  private dataEvents: AsyncGenerator<Buffer, void, void> | null = null;
+  private dataEvents: AsyncGenerator<Uint8Array, void, void> | null = null;
 
   private readonly socketTimeoutMS: number;
   private readonly monitorCommands: boolean;
@@ -696,7 +698,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             zlibCompressionLevel: options.zlibCompressionLevel ?? 0
           });
 
-    const buffer = Buffer.concat(await finalCommand.toBin());
+    const buffer = concatBuffers(await finalCommand.toBin());
 
     if (options.timeoutContext?.csotEnabled()) {
       if (
@@ -794,7 +796,7 @@ export class SizedMessageTransform extends Transform {
     this.connection = connection;
   }
 
-  override _transform(chunk: Buffer, encoding: unknown, callback: TransformCallback): void {
+  override _transform(chunk: Uint8Array, encoding: unknown, callback: TransformCallback): void {
     if (this.connection.delayedTimeoutId != null) {
       clearTimeout(this.connection.delayedTimeoutId);
       this.connection.delayedTimeoutId = null;
