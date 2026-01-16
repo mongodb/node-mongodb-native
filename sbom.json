@@ -1,51 +1,553 @@
 {
-  "metadata": {
-    "timestamp": "2024-05-01T19:10:42.500672+00:00",
-    "tools": [
-      {
-        "externalReferences": [
-          {
-            "type": "build-system",
-            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/actions"
-          },
-          {
-            "type": "distribution",
-            "url": "https://pypi.org/project/cyclonedx-python-lib/"
-          },
-          {
-            "type": "documentation",
-            "url": "https://cyclonedx-python-library.readthedocs.io/"
-          },
-          {
-            "type": "issue-tracker",
-            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/issues"
-          },
-          {
-            "type": "license",
-            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/blob/main/LICENSE"
-          },
-          {
-            "type": "release-notes",
-            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/blob/main/CHANGELOG.md"
-          },
-          {
-            "type": "vcs",
-            "url": "https://github.com/CycloneDX/cyclonedx-python-lib"
-          },
-          {
-            "type": "website",
-            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/#readme"
-          }
-        ],
-        "name": "cyclonedx-python-lib",
-        "vendor": "CycloneDX",
-        "version": "6.4.4"
-      }
-    ]
-  },
-  "serialNumber": "urn:uuid:3781f04d-8667-4c43-96e4-bec88e9e4278",
-  "version": 1,
   "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
   "bomFormat": "CycloneDX",
-  "specVersion": "1.5"
+  "specVersion": "1.5",
+  "version": 1,
+  "serialNumber": "urn:uuid:df23c75b-32aa-4738-9b37-e7ab15c7c89d",
+  "metadata": {
+    "timestamp": "2026-01-16T02:22:01.975Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "npm",
+          "version": "11.7.0"
+        },
+        {
+          "type": "application",
+          "name": "cyclonedx-npm",
+          "group": "@cyclonedx",
+          "version": "4.1.2",
+          "author": "Jan Kowalleck",
+          "description": "Create CycloneDX Software Bill of Materials (SBOM) from NPM projects.",
+          "licenses": [
+            {
+              "license": {
+                "id": "Apache-2.0"
+              }
+            }
+          ],
+          "externalReferences": [
+            {
+              "url": "git+https://github.com/CycloneDX/cyclonedx-node-npm.git",
+              "type": "vcs",
+              "comment": "as detected from PackageJson property \"repository.url\""
+            },
+            {
+              "url": "https://github.com/CycloneDX/cyclonedx-node-npm#readme",
+              "type": "website",
+              "comment": "as detected from PackageJson property \"homepage\""
+            },
+            {
+              "url": "https://github.com/CycloneDX/cyclonedx-node-npm/issues",
+              "type": "issue-tracker",
+              "comment": "as detected from PackageJson property \"bugs.url\""
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "name": "cyclonedx-library",
+          "group": "@cyclonedx",
+          "version": "9.4.1",
+          "author": "Jan Kowalleck",
+          "description": "Core functionality of CycloneDX for JavaScript (Node.js or WebBrowser).",
+          "licenses": [
+            {
+              "license": {
+                "id": "Apache-2.0"
+              }
+            }
+          ],
+          "externalReferences": [
+            {
+              "url": "git+https://github.com/CycloneDX/cyclonedx-javascript-library.git",
+              "type": "vcs",
+              "comment": "as detected from PackageJson property \"repository.url\""
+            },
+            {
+              "url": "https://github.com/CycloneDX/cyclonedx-javascript-library#readme",
+              "type": "website",
+              "comment": "as detected from PackageJson property \"homepage\""
+            },
+            {
+              "url": "https://github.com/CycloneDX/cyclonedx-javascript-library/issues",
+              "type": "issue-tracker",
+              "comment": "as detected from PackageJson property \"bugs.url\""
+            }
+          ]
+        }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "name": "mongodb",
+      "version": "7.0.0",
+      "bom-ref": "mongodb@7.0.0",
+      "author": "The MongoDB NodeJS Team",
+      "description": "The official MongoDB driver for Node.js",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "purl": "pkg:npm/mongodb@7.0.0?vcs_url=git%2Bssh%3A%2F%2Fgit%40github.com%2Fmongodb%2Fnode-mongodb-native.git",
+      "externalReferences": [
+        {
+          "url": "git+ssh://git@github.com/mongodb/node-mongodb-native.git",
+          "type": "vcs",
+          "comment": "as detected from PackageJson property \"repository.url\""
+        },
+        {
+          "url": "https://github.com/mongodb/node-mongodb-native",
+          "type": "website",
+          "comment": "as detected from PackageJson property \"homepage\""
+        },
+        {
+          "url": "https://jira.mongodb.org/projects/NODE/issues/",
+          "type": "issue-tracker",
+          "comment": "as detected from PackageJson property \"bugs.url\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": ""
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "saslprep",
+      "group": "@mongodb-js",
+      "version": "1.3.2",
+      "bom-ref": "mongodb@7.0.0|@mongodb-js/saslprep@1.3.2",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/%40mongodb-js/saslprep@1.3.2",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/@mongodb-js/saslprep/-/saslprep-1.3.2.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "4200390324aa076edc1935c11669e989f022ec7c6819479ecf0a3aa7d748d3732e0c1e8fa77df381c96a55bea854ade3e88f557ac834fa8a235b65f1079f521a"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@mongodb-js/saslprep"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "bson",
+      "version": "7.0.0",
+      "bom-ref": "mongodb@7.0.0|bson@7.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "purl": "pkg:npm/bson@7.0.0",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/bson/-/bson-7.0.0.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "2b073a5a1e254393a692aa8a85818a22e10b5e5f843d848239b544e9b5aca754ff70690e08137423cc05fd3e38062ba11f2362d6698a54f5e4eb4778d7167b93"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/bson"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "mongodb-connection-string-url",
+      "version": "7.0.0",
+      "bom-ref": "mongodb@7.0.0|mongodb-connection-string-url@7.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "purl": "pkg:npm/mongodb-connection-string-url@7.0.0",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/mongodb-connection-string-url/-/mongodb-connection-string-url-7.0.0.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "8ab8618d154b136d216e4465e33a4060b9c330cfb32199e9d080c1f5a900145519a7fdd774e7f0c1d75cef2e9c36f17658212d7d3611c186c87d86b6915634a2"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/mongodb-connection-string-url"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sparse-bitfield",
+      "version": "3.0.3",
+      "bom-ref": "mongodb@7.0.0|sparse-bitfield@3.0.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/sparse-bitfield@3.0.3",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/sparse-bitfield/-/sparse-bitfield-3.0.3.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "92fce18bbbea2937e48743d953ed83d8f225970db29aa24aba351cc8f31df58ef936fe273db189657361c6c81d41a6f606694372dd589df40282e12f1ebed5b1"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/sparse-bitfield"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "whatwg-url",
+      "group": "@types",
+      "version": "13.0.0",
+      "bom-ref": "mongodb@7.0.0|@types/whatwg-url@13.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/%40types/whatwg-url@13.0.0",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/@types/whatwg-url/-/whatwg-url-13.0.0.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "37c597a5b13a5a0ae2eca512beb99072aacc965299f6ec6461632dfa60921b035cd07b30f554135bb029a88e1736bc7afd268cd904090b330f0c45c4d39f2cf9"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@types/whatwg-url"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "whatwg-url",
+      "version": "14.2.0",
+      "bom-ref": "mongodb@7.0.0|whatwg-url@14.2.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/whatwg-url@14.2.0",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/whatwg-url/-/whatwg-url-14.2.0.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "0deef619d419ccd4d40410a1b17b9e4149cf283920ff9039ce9ee9143b90023e5416810da62002534c250afce90069d3923fbe8a1a4ac0ac987b09ff5cd51b2b"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/whatwg-url"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "memory-pager",
+      "version": "1.5.0",
+      "bom-ref": "mongodb@7.0.0|memory-pager@1.5.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/memory-pager@1.5.0",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/memory-pager/-/memory-pager-1.5.0.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "652e01a78aff6687aaebe34b2693fed19ce6d2947cc21b463dfd5713128b24101ccc63274a2dc8b75e0e88d092b6342333a354d689234064b180464df1e0582a"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/memory-pager"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "webidl-conversions",
+      "group": "@types",
+      "version": "7.0.3",
+      "bom-ref": "mongodb@7.0.0|@types/webidl-conversions@7.0.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/%40types/webidl-conversions@7.0.3",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/@types/webidl-conversions/-/webidl-conversions-7.0.3.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "0a2249bdc46d220cda7470985f0edda849cc3518e11999582b4e4c8fd3b292da95f2e553f1f0f6045381ed2d6ec011372a3d99fb85323e6170fc8c60c3f2c094"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@types/webidl-conversions"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "tr46",
+      "version": "5.1.1",
+      "bom-ref": "mongodb@7.0.0|tr46@5.1.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/tr46@5.1.1",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/tr46/-/tr46-5.1.1.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "85d1796608d3aa0027b4a924958c34474dcc1b6c7f6d2cd3b64c66211c3fb13355f185ec089d6d7cb017db7961c611c99447f709108e086196c37bc8dc66923f"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/tr46"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "webidl-conversions",
+      "version": "7.0.0",
+      "bom-ref": "mongodb@7.0.0|webidl-conversions@7.0.0",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:npm/webidl-conversions@7.0.0",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-7.0.0.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "57075d06e903ceeef5a1f7c0411f7be6e9c1206a9f299a4cfbc657eb24a4f27621568a39098699cb3b77601bd8b51b4ef9aa0696ac4f83f07cecd19567f7eeea"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/webidl-conversions"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "punycode",
+      "version": "2.3.1",
+      "bom-ref": "mongodb@7.0.0|punycode@2.3.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "purl": "pkg:npm/punycode@2.3.1",
+      "externalReferences": [
+        {
+          "url": "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "bd8b7b503d54f5683ad77f2c84bb4b3af740bbef03b02fe2945b44547707fb0c9d712a4d136d007d239db9fe8c91115a84be4563b5f5a14ee7295645b5fabc16"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/punycode"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "mongodb@7.0.0",
+      "dependsOn": [
+        "mongodb@7.0.0|@mongodb-js/saslprep@1.3.2",
+        "mongodb@7.0.0|bson@7.0.0",
+        "mongodb@7.0.0|mongodb-connection-string-url@7.0.0"
+      ]
+    },
+    {
+      "ref": "mongodb@7.0.0|@mongodb-js/saslprep@1.3.2",
+      "dependsOn": [
+        "mongodb@7.0.0|sparse-bitfield@3.0.3"
+      ]
+    },
+    {
+      "ref": "mongodb@7.0.0|bson@7.0.0"
+    },
+    {
+      "ref": "mongodb@7.0.0|mongodb-connection-string-url@7.0.0",
+      "dependsOn": [
+        "mongodb@7.0.0|@types/whatwg-url@13.0.0",
+        "mongodb@7.0.0|whatwg-url@14.2.0"
+      ]
+    },
+    {
+      "ref": "mongodb@7.0.0|sparse-bitfield@3.0.3",
+      "dependsOn": [
+        "mongodb@7.0.0|memory-pager@1.5.0"
+      ]
+    },
+    {
+      "ref": "mongodb@7.0.0|@types/whatwg-url@13.0.0",
+      "dependsOn": [
+        "mongodb@7.0.0|@types/webidl-conversions@7.0.3"
+      ]
+    },
+    {
+      "ref": "mongodb@7.0.0|whatwg-url@14.2.0",
+      "dependsOn": [
+        "mongodb@7.0.0|tr46@5.1.1",
+        "mongodb@7.0.0|webidl-conversions@7.0.0"
+      ]
+    },
+    {
+      "ref": "mongodb@7.0.0|memory-pager@1.5.0"
+    },
+    {
+      "ref": "mongodb@7.0.0|@types/webidl-conversions@7.0.3"
+    },
+    {
+      "ref": "mongodb@7.0.0|tr46@5.1.1",
+      "dependsOn": [
+        "mongodb@7.0.0|punycode@2.3.1"
+      ]
+    },
+    {
+      "ref": "mongodb@7.0.0|webidl-conversions@7.0.0"
+    },
+    {
+      "ref": "mongodb@7.0.0|punycode@2.3.1"
+    }
+  ]
 }
