@@ -48,7 +48,7 @@ import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_conc
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
-import { readPreferenceServerSelector } from './sdam/server_selection';
+import { DeprioritizedServers, readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, type TopologyEvents } from './sdam/topology';
 import { ClientSession, type ClientSessionOptions, ServerSessionPool } from './sessions';
@@ -789,7 +789,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       // to avoid the server selection timeout.
       const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
       const serverDescriptions = Array.from(topologyDescription.servers.values());
-      const servers = selector(topologyDescription, serverDescriptions);
+      const servers = selector(topologyDescription, serverDescriptions, new DeprioritizedServers());
       if (servers.length !== 0) {
         const endSessions = Array.from(client.s.sessionPool.sessions, ({ id }) => id);
         if (endSessions.length !== 0) {

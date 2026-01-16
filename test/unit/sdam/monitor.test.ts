@@ -3,6 +3,7 @@ import * as net from 'node:net';
 
 import { Long, ObjectId } from 'bson';
 import { expect } from 'chai';
+import * as process from 'process';
 import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';

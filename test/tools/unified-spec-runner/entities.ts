@@ -1,5 +1,6 @@
 import { AssertionError, expect } from 'chai';
 import { EventEmitter } from 'events';
+import * as process from 'process';
 import { setImmediate } from 'timers';
 
 import {

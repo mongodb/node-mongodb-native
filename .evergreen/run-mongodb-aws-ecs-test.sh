@@ -13,6 +13,3 @@ source ./.evergreen/prepare-shell.sh # should not run git clone
 
 # load node.js
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
-
-# run the tests
-npm install aws4

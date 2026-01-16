@@ -394,7 +394,6 @@ export class Db {
         toCollection,
         resolveOptions(undefined, {
           ...options,
-          new_collection: true,
           readPreference: ReadPreference.primary
         })
       ) as TODO_NODE_3286

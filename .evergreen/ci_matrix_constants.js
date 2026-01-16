@@ -15,7 +15,7 @@ const LB_VERSIONS = MONGODB_VERSIONS.slice(0, MONGODB_VERSIONS.indexOf('5.0') + 
 LB_VERSIONS.reverse();
 
 const DEFAULT_OS = 'rhel80-large';
-const WINDOWS_OS = 'windows-vsCurrent-large';
+const WINDOWS_OS = 'windows-2022-latest-large';
 const MACOS_OS = 'macos-14-arm64';
 const UBUNTU_OS = 'ubuntu1804-large';
 const UBUNTU_20_OS = 'ubuntu2004-small';

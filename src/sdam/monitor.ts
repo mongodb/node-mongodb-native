@@ -14,8 +14,8 @@ import {
   type EventEmitterWithState,
   makeStateMachine,
   noop,
-  now,
-  ns
+  ns,
+  processTimeMS
 } from '../utils';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
@@ -326,7 +326,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       );
       // We have not actually sent an outgoing handshake, but when we get the next response we
       // want the duration to reflect the time since we last heard from the server
-      start = now();
+      start = processTimeMS();
     } else {
       monitor.rttPinger?.close();
       monitor.rttPinger = undefined;
@@ -360,7 +360,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     }
 
     // Record new start time before sending handshake
-    start = now();
+    start = processTimeMS();
 
     if (isAwaitable) {
       awaited = true;
@@ -383,7 +383,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     const socket = await makeSocket(monitor.connectOptions);
     const connection = makeConnection(monitor.connectOptions, socket);
     // The start time is after socket creation but before the handshake
-    start = now();
+    start = processTimeMS();
     try {
       await performInitialHandshake(connection, monitor.connectOptions);
       return connection;
@@ -426,7 +426,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 function monitorServer(monitor: Monitor) {
   return (callback: Callback) => {
     if (monitor.s.state === STATE_MONITORING) {
-      process.nextTick(callback);
+      queueMicrotask(callback);
       return;
     }
     stateTransition(monitor, STATE_MONITORING);
@@ -532,7 +532,7 @@ export class RTTPinger {
   }
 
   private measureRoundTripTime() {
-    const start = now();
+    const start = processTimeMS();
 
     if (this.closed) {
       return;
@@ -607,7 +607,7 @@ export class MonitorInterval {
   }
 
   wake() {
-    const currentTime = now();
+    const currentTime = processTimeMS();
     const timeSinceLastCall = currentTime - this.lastExecutionEnded;
 
     // TODO(NODE-4674): Add error handling and logging to the monitor
@@ -651,7 +651,7 @@ export class MonitorInterval {
   }
 
   toJSON() {
-    const currentTime = now();
+    const currentTime = processTimeMS();
     const timeSinceLastCall = currentTime - this.lastExecutionEnded;
     return {
       timerId: this.timerId != null ? 'set' : 'cleared',
@@ -684,7 +684,7 @@ export class MonitorInterval {
     this.isExecutionInProgress = true;
 
     this.fn(() => {
-      this.lastExecutionEnded = now();
+      this.lastExecutionEnded = processTimeMS();
       this.isExecutionInProgress = false;
       this._reschedule(this.heartbeatFrequencyMS);
     });

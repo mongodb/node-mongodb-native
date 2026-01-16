@@ -1,12 +1,14 @@
-/* eslint no-unused-vars: 0 */
+/* eslint no-unused-vars: 0 no-restricted-globals: 0 */
+
 'use strict';
 
 const { setTimeout } = require('timers');
 const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
+const os = require('os');
 
 // TODO: NODE-3819: Unskip flaky MacOS/Windows tests.
-const maybeDescribe = process.platform !== 'linux' ? describe.skip : describe;
+const maybeDescribe = os.platform() !== 'linux' ? describe.skip : describe;
 maybeDescribe('examples(change-stream):', function () {
   let client;
   let db;

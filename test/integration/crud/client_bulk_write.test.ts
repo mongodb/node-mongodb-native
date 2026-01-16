@@ -9,7 +9,7 @@ import {
   MongoOperationTimeoutError
 } from '../../../src';
 import { TimeoutContext } from '../../../src/timeout';
-import { now } from '../../../src/utils';
+import { processTimeMS } from '../../../src/utils';
 import {
   clearFailPoint,
   configureFailPoint,
@@ -102,7 +102,7 @@ describe('Client Bulk Write', function () {
       });
 
       it('timeoutMS is used as the timeout for the bulk write', metadata, async function () {
-        const start = now();
+        const start = processTimeMS();
         const timeoutError = await client
           .bulkWrite([
             {
@@ -112,7 +112,7 @@ describe('Client Bulk Write', function () {
             }
           ])
           .catch(e => e);
-        const end = now();
+        const end = processTimeMS();
         expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(300 - 100, 300 + 100);
       });
@@ -132,7 +132,7 @@ describe('Client Bulk Write', function () {
       });
 
       it('timeoutMS is used as the timeout for the bulk write', metadata, async function () {
-        const start = now();
+        const start = processTimeMS();
         const timeoutError = await client
           .bulkWrite(
             [
@@ -145,7 +145,7 @@ describe('Client Bulk Write', function () {
             { timeoutMS: 300 }
           )
           .catch(e => e);
-        const end = now();
+        const end = processTimeMS();
         expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(300 - 100, 300 + 100);
       });
@@ -165,7 +165,7 @@ describe('Client Bulk Write', function () {
       });
 
       it('bulk write options take precedence over the client options', metadata, async function () {
-        const start = now();
+        const start = processTimeMS();
         const timeoutError = await client
           .bulkWrite(
             [
@@ -178,7 +178,7 @@ describe('Client Bulk Write', function () {
             { timeoutMS: 300 }
           )
           .catch(e => e);
-        const end = now();
+        const end = processTimeMS();
         expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
         expect(end - start).to.be.within(300 - 100, 300 + 100);
       });
@@ -217,7 +217,7 @@ describe('Client Bulk Write', function () {
         });
 
         it('a single batch bulk write does not take longer than timeoutMS', async function () {
-          const start = now();
+          const start = processTimeMS();
           let end;
           const timeoutError = client
             .bulkWrite(
@@ -232,7 +232,7 @@ describe('Client Bulk Write', function () {
             )
             .catch(e => e)
             .then(e => {
-              end = now();
+              end = processTimeMS();
               return e;
             });
 
@@ -252,7 +252,7 @@ describe('Client Bulk Write', function () {
           },
           async function () {
             const models = await makeMultiBatchWrite(this.configuration);
-            const start = now();
+            const start = processTimeMS();
             let end;
             const timeoutError = client
               .bulkWrite(models, {
@@ -262,7 +262,7 @@ describe('Client Bulk Write', function () {
               })
               .catch(e => e)
               .then(r => {
-                end = now();
+                end = processTimeMS();
                 return r;
               });
 
@@ -300,7 +300,7 @@ describe('Client Bulk Write', function () {
         });
 
         it('the operation times out', metadata, async function () {
-          const start = now();
+          const start = processTimeMS();
           const timeoutError = await client
             .bulkWrite(
               [
@@ -313,7 +313,7 @@ describe('Client Bulk Write', function () {
               { timeoutMS: 300 }
             )
             .catch(e => e);
-          const end = now();
+          const end = processTimeMS();
           expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
           expect(end - start).to.be.within(300 - 100, 300 + 100);
         });
@@ -346,7 +346,7 @@ describe('Client Bulk Write', function () {
           async function () {
             const timeoutMS = 1500;
             const models = await makeMultiResponseBatchModelArray(this.configuration);
-            const start = now();
+            const start = processTimeMS();
             const timeoutError = await client
               .bulkWrite(models, {
                 verboseResults: true,
@@ -354,7 +354,7 @@ describe('Client Bulk Write', function () {
               })
               .catch(e => e);
 
-            const end = now();
+            const end = processTimeMS();
             expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
 
             // DRIVERS-3005 - killCursors causes cursor cleanup to extend past timeoutMS.
@@ -435,14 +435,14 @@ describe('Client Bulk Write', function () {
           },
           async function () {
             const models = await makeMultiBatchWrite(this.configuration);
-            const start = now();
+            const start = processTimeMS();
             const timeoutError = await client
               .bulkWrite(models, {
                 timeoutMS: 2000
               })
               .catch(e => e);
 
-            const end = now();
+            const end = processTimeMS();
             expect(timeoutError).to.be.instanceOf(MongoOperationTimeoutError);
             expect(end - start).to.be.within(2000 - 100, 2000 + 100);
             expect(commands.length, 'Test must execute two batches.').to.equal(2);

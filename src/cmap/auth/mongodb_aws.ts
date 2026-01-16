@@ -1,6 +1,5 @@
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { aws4 } from '../../deps';
 import {
   MongoCompatibilityError,
   MongoMissingCredentialsError,
@@ -13,6 +12,7 @@ import {
   AWSSDKCredentialProvider,
   type AWSTempCredentials
 } from './aws_temporary_credentials';
+import { aws4Sign } from './aws4';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
 
@@ -45,11 +45,6 @@ export class MongoDBAWS extends AuthProvider {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
-    if ('kModuleError' in aws4) {
-      throw aws4['kModuleError'];
-    }
-    const { sign } = aws4;
-
     if (maxWireVersion(connection) < 9) {
       throw new MongoCompatibilityError(
         'MONGODB-AWS authentication requires MongoDB version 4.4 or later'
@@ -68,13 +63,10 @@ export class MongoDBAWS extends AuthProvider {
     // Allow the user to specify an AWS session token for authentication with temporary credentials.
     const sessionToken = credentials.mechanismProperties.AWS_SESSION_TOKEN;
 
-    // If all three defined, include sessionToken, else include username and pass, else no credentials
-    const awsCredentials =
-      accessKeyId && secretAccessKey && sessionToken
-        ? { accessKeyId, secretAccessKey, sessionToken }
-        : accessKeyId && secretAccessKey
-          ? { accessKeyId, secretAccessKey }
-          : undefined;
+    // If all three defined, include sessionToken, else only include username and pass
+    const awsCredentials = sessionToken
+      ? { accessKeyId, secretAccessKey, sessionToken }
+      : { accessKeyId, secretAccessKey };
 
     const db = credentials.source;
     const nonce = await randomBytes(32);
@@ -114,7 +106,7 @@ export class MongoDBAWS extends AuthProvider {
     }
 
     const body = 'Action=GetCallerIdentity&Version=2011-06-15';
-    const options = sign(
+    const headers = await aws4Sign(
       {
         method: 'POST',
         host,
@@ -127,14 +119,15 @@ export class MongoDBAWS extends AuthProvider {
           'X-MongoDB-GS2-CB-Flag': 'n'
         },
         path: '/',
-        body
+        body,
+        date: new Date()
       },
       awsCredentials
     );
 
     const payload: AWSSaslContinuePayload = {
-      a: options.headers.Authorization,
-      d: options.headers['X-Amz-Date']
+      a: headers.Authorization,
+      d: headers['X-Amz-Date']
     };
 
     if (sessionToken) {

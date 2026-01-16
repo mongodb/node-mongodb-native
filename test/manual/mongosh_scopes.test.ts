@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as process from 'process';
 
 const expectedMongoshScopes = [
   '@mongosh/arg-parser',

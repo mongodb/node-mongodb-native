@@ -7,6 +7,8 @@ import os from 'node:os';
 import path from 'node:path';
 import util from 'node:util';
 
+import process from 'process';
+
 import {
   type Metric,
   type MetricInfo,
@@ -71,7 +73,7 @@ const systemInfo = () =>
     `\n- cpu: ${platform.name}`,
     `- cores: ${platform.cores}`,
     `- arch: ${os.arch()}`,
-    `- os: ${process.platform} (${os.release()})`,
+    `- os: ${os.platform()} (${os.release()})`,
     `- ram: ${platform.ram}`,
     `- node: ${process.version}`,
     `- running ${total} benchmarks`,

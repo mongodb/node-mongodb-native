@@ -4,8 +4,8 @@ description: minPoolSize-error
 schemaVersion: "1.4"
 
 runOnRequirements:
-    # failCommand appName requirements
-  - minServerVersion: "4.9"
+  # Require SERVER-49336 for failCommand + appName on the initial handshake.
+  - minServerVersion: "4.4.7"
     serverless: forbid
     topologies:
       - single
@@ -21,7 +21,7 @@ initialData: &initialData
     documents: []
 
 tests:
-  - description: Network error on minPoolSize background creation
+  - description: Server error on minPoolSize background creation
     operations:
       # Configure the initial monitor handshake to succeed but the
       # first or second background minPoolSize establishments to fail.
@@ -38,7 +38,7 @@ tests:
                 - hello
                 - isMaster
               appName: SDAMminPoolSizeError
-              closeConnection: true
+              errorCode: 91
       - name: createEntities
         object: testRunner
         arguments:
@@ -54,6 +54,7 @@ tests:
                   heartbeatFrequencyMS: 10000
                   appname: SDAMminPoolSizeError
                   minPoolSize: 10
+                  serverMonitoringMode: poll
                   serverSelectionTimeoutMS: 1000
             - database:
                 id: &database database

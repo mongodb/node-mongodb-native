@@ -56,7 +56,7 @@
                 "client": {
                   "id": "client",
                   "observeEvents": [
-                    "connectionCreatedEvent",
+                    "poolReadyEvent",
                     "poolClearedEvent",
                     "connectionClosedEvent"
                   ],
@@ -75,6 +75,17 @@
           "arguments": {
             "client": "client",
             "event": {
+              "poolReadyEvent": {}
+            },
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
               "poolClearedEvent": {}
             },
             "count": 1
@@ -91,28 +102,32 @@
             "count": 1
           }
         }
-      ],
-      "expectEvents": [
-        {
-          "client": "client",
-          "eventType": "cmap",
-          "events": [
-            {
-              "connectionCreatedEvent": {}
-            },
-            {
-              "poolClearedEvent": {}
-            },
-            {
-              "connectionClosedEvent": {}
-            }
-          ]
-        }
       ]
     },
     {
-      "description": "Pool is cleared on handshake error during minPoolSize population",
+      "description": "Pool is not cleared on handshake error during minPoolSize population",
       "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "setupClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "skip": 1
+              },
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "isMaster"
+                ],
+                "appName": "authErrorTest",
+                "closeConnection": true
+              }
+            }
+          }
+        },
         {
           "name": "createEntities",
           "object": "testRunner",
@@ -122,11 +137,9 @@
                 "client": {
                   "id": "client",
                   "observeEvents": [
-                    "topologyDescriptionChangedEvent",
-                    "connectionCreatedEvent",
+                    "poolReadyEvent",
                     "poolClearedEvent",
-                    "connectionClosedEvent",
-                    "connectionReadyEvent"
+                    "connectionClosedEvent"
                   ],
                   "uriOptions": {
                     "appname": "authErrorTest",
@@ -146,46 +159,7 @@
           "arguments": {
             "client": "client",
             "event": {
-              "topologyDescriptionChangedEvent": {
-                "previousDescription": {
-                  "type": "Unknown"
-                },
-                "newDescription": {
-                  "type": "Single"
-                }
-              }
-            },
-            "count": 1
-          }
-        },
-        {
-          "name": "failPoint",
-          "object": "testRunner",
-          "arguments": {
-            "client": "setupClient",
-            "failPoint": {
-              "configureFailPoint": "failCommand",
-              "mode": {
-                "times": 1
-              },
-              "data": {
-                "failCommands": [
-                  "hello",
-                  "isMaster"
-                ],
-                "appName": "authErrorTest",
-                "closeConnection": true
-              }
-            }
-          }
-        },
-        {
-          "name": "waitForEvent",
-          "object": "testRunner",
-          "arguments": {
-            "client": "client",
-            "event": {
-              "poolClearedEvent": {}
+              "poolReadyEvent": {}
             },
             "count": 1
           }
@@ -200,29 +174,17 @@
             },
             "count": 1
           }
-        }
-      ],
-      "expectEvents": [
+        },
         {
-          "client": "client",
-          "eventType": "cmap",
-          "events": [
-            {
-              "connectionCreatedEvent": {}
-            },
-            {
-              "connectionReadyEvent": {}
-            },
-            {
-              "connectionCreatedEvent": {}
-            },
-            {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
               "poolClearedEvent": {}
             },
-            {
-              "connectionClosedEvent": {}
-            }
-          ]
+            "count": 0
+          }
         }
       ]
     }

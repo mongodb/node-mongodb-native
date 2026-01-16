@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as process from 'process';
 
 describe('compression configuration tests', function () {
   describe('process.env.COMPRESSOR is set', function () {

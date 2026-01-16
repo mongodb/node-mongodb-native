@@ -11,7 +11,12 @@ import { Aspect, defineAspects } from './operation';
 export interface RenameOptions extends Omit<CommandOperationOptions, 'rawData'> {
   /** Drop the target name collection if it previously exists. */
   dropTarget?: boolean;
-  /** Unclear */
+  /**
+   * @deprecated
+   *
+   * This option has been dead code since at least Node driver version 4.x. It will
+   * be removed in a future major release.
+   */
   new_collection?: boolean;
 }
 

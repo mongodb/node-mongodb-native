@@ -7,6 +7,7 @@ import * as path from 'node:path';
 import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
+import * as process from 'process';
 import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
@@ -21,7 +22,7 @@ import {
 } from '../../src';
 import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
 import { Topology } from '../../src/sdam/topology';
-import { now } from '../../src/utils';
+import { processTimeMS } from '../../src/utils';
 import { type TestConfiguration } from './runner/config';
 
 export function ensureCalledWith(stub: any, args: any[]) {
@@ -164,9 +165,9 @@ export const sleep = promisify(setTimeout);
 
 /**
  * If you are using sinon fake timers, it can end up blocking queued IO from running
- * awaiting a nextTick call will allow the event loop to process Networking/FS callbacks
+ * awaiting a setTimeout call will allow the event loop to process Networking/FS callbacks
  */
-export const processTick = () => new Promise(resolve => process.nextTick(resolve));
+export const processTick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 export function getIndicesOfAuthInUrl(connectionString: string | string[]) {
   const doubleSlashIndex = connectionString.indexOf('//');
@@ -285,7 +286,12 @@ export function topologyWithPlaceholderClient(
   options: Partial<TopologyOptions>
 ): Topology {
   return new Topology(
-    new MongoClient('mongodb://iLoveJavaScript'),
+    new MongoClient(
+      'mongodb://iLoveJavaScript',
+      options.serverSelectionTimeoutMS
+        ? { serverSelectionTimeoutMS: options.serverSelectionTimeoutMS }
+        : {}
+    ),
     seeds,
     options as TopologyOptions
   );
@@ -483,9 +489,9 @@ export async function measureDuration<T>(f: () => Promise<T>): Promise<{
   duration: number;
   result: T | Error;
 }> {
-  const start = now();
+  const start = processTimeMS();
   const result = await f().catch(e => e);
-  const end = now();
+  const end = processTimeMS();
   return {
     duration: end - start,
     result

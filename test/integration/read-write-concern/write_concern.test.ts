@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { on, once } from 'events';
+import * as process from 'process';
 import * as sinon from 'sinon';
 
 import {

@@ -11,7 +11,7 @@ failPoint:
   mode: { times: 50 }
   data:
     failCommands: ["isMaster","hello"]
-    closeConnection: true
+    errorCode: 91
     appName: "poolCreateMinSizeErrorTest"
 poolOptions:
   minPoolSize: 1

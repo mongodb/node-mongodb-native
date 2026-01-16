@@ -99,7 +99,9 @@ export const MongoErrorLabel = Object.freeze({
   ResetPool: 'ResetPool',
   PoolRequestedRetry: 'PoolRequestedRetry',
   InterruptInUseConnections: 'InterruptInUseConnections',
-  NoWritesPerformed: 'NoWritesPerformed'
+  NoWritesPerformed: 'NoWritesPerformed',
+  RetryableError: 'RetryableError',
+  SystemOverloadedError: 'SystemOverloadedError'
 } as const);
 
 /** @public */
@@ -1528,13 +1530,7 @@ export function isNodeShuttingDownError(err: MongoError): boolean {
  *
  * @see https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.md#not-writable-primary-and-node-is-recovering
  */
-export function isSDAMUnrecoverableError(error: MongoError): boolean {
-  // NOTE: null check is here for a strictly pre-CMAP world, a timeout or
-  //       close event are considered unrecoverable
-  if (error instanceof MongoParseError || error == null) {
-    return true;
-  }
-
+export function isStateChangeError(error: MongoError): boolean {
   return isRecoveringError(error) || isNotWritablePrimaryError(error);
 }
 

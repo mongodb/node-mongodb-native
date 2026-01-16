@@ -1,5 +1,6 @@
 // begin lambda connection
 const { MongoClient } = require('mongodb');
+const process = require('node:process');
 
 // MongoClient now auto-connects so no need to store the connect()
 // promise anywhere and reference it.

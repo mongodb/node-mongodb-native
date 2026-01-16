@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as process from 'process';
 
 import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
 import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
@@ -157,7 +158,7 @@ describe('Connect Tests', function () {
         const cancellationToken = new CancellationToken();
         // Make sure the cancel listener is added before emitting cancel
         cancellationToken.addListener('newListener', () => {
-          process.nextTick(() => {
+          queueMicrotask(() => {
             cancellationToken.emit('cancel');
           });
         });

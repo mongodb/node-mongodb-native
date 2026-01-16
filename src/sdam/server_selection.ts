@@ -1,4 +1,4 @@
-import { MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { ReadPreference } from '../read_preference';
 import { ServerType, TopologyType } from './common';
 import type { ServerDescription, TagSet } from './server_description';
@@ -15,8 +15,36 @@ export const MIN_SECONDARY_WRITE_WIRE_VERSION = 13;
 export type ServerSelector = (
   topologyDescription: TopologyDescription,
   servers: ServerDescription[],
-  deprioritized?: ServerDescription[]
+  deprioritized: DeprioritizedServers
 ) => ServerDescription[];
+
+/** @internal */
+export class DeprioritizedServers {
+  private deprioritized: Set<string> = new Set();
+
+  constructor(descriptions?: Iterable<ServerDescription>) {
+    for (const description of descriptions ?? []) {
+      this.add(description);
+    }
+  }
+
+  add({ address }: ServerDescription) {
+    this.deprioritized.add(address);
+  }
+
+  has({ address }: ServerDescription): boolean {
+    return this.deprioritized.has(address);
+  }
+}
+
+function filterDeprioritized(
+  candidates: ServerDescription[],
+  deprioritized: DeprioritizedServers
+): ServerDescription[] {
+  const filtered = candidates.filter(candidate => !deprioritized.has(candidate));
+
+  return filtered.length ? filtered : candidates;
+}
 
 /**
  * Returns a server selector that selects for writable servers
@@ -24,12 +52,15 @@ export type ServerSelector = (
 export function writableServerSelector(): ServerSelector {
   return function writableServer(
     topologyDescription: TopologyDescription,
-    servers: ServerDescription[]
+    servers: ServerDescription[],
+    deprioritized: DeprioritizedServers
   ): ServerDescription[] {
-    return latencyWindowReducer(
-      topologyDescription,
-      servers.filter((s: ServerDescription) => s.isWritable)
+    const eligibleServers = filterDeprioritized(
+      servers.filter(({ isWritable }) => isWritable),
+      deprioritized
     );
+
+    return latencyWindowReducer(topologyDescription, eligibleServers);
   };
 }
 
@@ -39,8 +70,9 @@ export function writableServerSelector(): ServerSelector {
  */
 export function sameServerSelector(description?: ServerDescription): ServerSelector {
   return function sameServerSelector(
-    topologyDescription: TopologyDescription,
-    servers: ServerDescription[]
+    _topologyDescription: TopologyDescription,
+    servers: ServerDescription[],
+    _deprioritized: DeprioritizedServers
   ): ServerDescription[] {
     if (!description) return [];
     // Filter the servers to match the provided description only if
@@ -113,7 +145,7 @@ function maxStalenessReducer(
       primaryFilter
     )[0];
 
-    return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
+    return servers.filter((server: ServerDescription) => {
       const stalenessMS =
         server.lastUpdateTime -
         server.lastWriteDate -
@@ -122,12 +154,8 @@ function maxStalenessReducer(
 
       const staleness = stalenessMS / 1000;
       const maxStalenessSeconds = readPreference.maxStalenessSeconds ?? 0;
-      if (staleness <= maxStalenessSeconds) {
-        result.push(server);
-      }
-
-      return result;
-    }, []);
+      return staleness <= maxStalenessSeconds;
+    });
   }
 
   if (topologyDescription.type === TopologyType.ReplicaSetNoPrimary) {
@@ -139,40 +167,38 @@ function maxStalenessReducer(
       s.lastWriteDate > max.lastWriteDate ? s : max
     );
 
-    return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
+    return servers.filter((server: ServerDescription) => {
       const stalenessMS =
         sMax.lastWriteDate - server.lastWriteDate + topologyDescription.heartbeatFrequencyMS;
 
       const staleness = stalenessMS / 1000;
       const maxStalenessSeconds = readPreference.maxStalenessSeconds ?? 0;
-      if (staleness <= maxStalenessSeconds) {
-        result.push(server);
-      }
-
-      return result;
-    }, []);
+      return staleness <= maxStalenessSeconds;
+    });
   }
 
   return servers;
 }
 
 /**
- * Determines whether a server's tags match a given set of tags
+ * Determines whether a server's tags match a given set of tags.
+ *
+ * A tagset matches the server's tags if every k-v pair in the tagset
+ * is also in the server's tagset.
+ *
+ * Note that this does not requires that every k-v pair in the server's tagset is also
+ * in the client's tagset.  The server's tagset is required only to be a superset of the
+ * client's tags.
+ *
+ * @see https://github.com/mongodb/specifications/blob/master/source/server-selection/server-selection.md#tag_sets
  *
  * @param tagSet - The requested tag set to match
  * @param serverTags - The server's tags
  */
 function tagSetMatch(tagSet: TagSet, serverTags: TagSet) {
-  const keys = Object.keys(tagSet);
-  const serverTagKeys = Object.keys(serverTags);
-  for (let i = 0; i < keys.length; ++i) {
-    const key = keys[i];
-    if (serverTagKeys.indexOf(key) === -1 || serverTags[key] !== tagSet[key]) {
-      return false;
-    }
-  }
-
-  return true;
+  return Object.entries(tagSet).every(
+    ([key, value]) => serverTags[key] != null && serverTags[key] === value
+  );
 }
 
 /**
@@ -183,24 +209,17 @@ function tagSetMatch(tagSet: TagSet, serverTags: TagSet) {
  * @returns The list of servers matching the requested tags
  */
 function tagSetReducer(
-  readPreference: ReadPreference,
+  { tags }: ReadPreference,
   servers: ServerDescription[]
 ): ServerDescription[] {
-  if (
-    readPreference.tags == null ||
-    (Array.isArray(readPreference.tags) && readPreference.tags.length === 0)
-  ) {
+  if (tags == null || tags.length === 0) {
+    // empty tag sets match all servers
     return servers;
   }
 
-  for (let i = 0; i < readPreference.tags.length; ++i) {
-    const tagSet = readPreference.tags[i];
-    const serversMatchingTagset = servers.reduce(
-      (matched: ServerDescription[], server: ServerDescription) => {
-        if (tagSetMatch(tagSet, server.tags)) matched.push(server);
-        return matched;
-      },
-      []
+  for (const tagSet of tags) {
+    const serversMatchingTagset = servers.filter((s: ServerDescription) =>
+      tagSetMatch(tagSet, s.tags)
     );
 
     if (serversMatchingTagset.length) {
@@ -231,10 +250,7 @@ function latencyWindowReducer(
   );
 
   const high = low + topologyDescription.localThresholdMS;
-  return servers.reduce((result: ServerDescription[], server: ServerDescription) => {
-    if (server.roundTripTime <= high && server.roundTripTime >= low) result.push(server);
-    return result;
-  }, []);
+  return servers.filter(server => server.roundTripTime <= high && server.roundTripTime >= low);
 }
 
 // filters
@@ -258,6 +274,107 @@ function loadBalancerFilter(server: ServerDescription): boolean {
   return server.type === ServerType.LoadBalancer;
 }
 
+function isDeprioritizedFactory(
+  deprioritized: DeprioritizedServers
+): (server: ServerDescription) => boolean {
+  return server =>
+    // if any deprioritized servers equal the server, here we are.
+    !deprioritized.has(server);
+}
+
+function secondarySelector(
+  readPreference: ReadPreference,
+  topologyDescription: TopologyDescription,
+  servers: ServerDescription[],
+  deprioritized: DeprioritizedServers
+) {
+  const mode = readPreference.mode;
+  switch (mode) {
+    case 'primary':
+      // Note: no need to filter for deprioritized servers.  A replica set has only one primary; that means that
+      // we are in one of two scenarios:
+      // 1. deprioritized servers is empty - return the primary.
+      // 2. deprioritized servers contains the primary - return the primary.
+      return servers.filter(primaryFilter);
+    case 'primaryPreferred': {
+      const primary = servers.filter(primaryFilter);
+
+      // If there is a primary and it is not deprioritized, use the primary.  Otherwise,
+      // check for secondaries.
+      const eligiblePrimary = primary.filter(isDeprioritizedFactory(deprioritized));
+      if (eligiblePrimary.length) {
+        return eligiblePrimary;
+      }
+
+      // If we make it here, we either have:
+      // 1. a deprioritized primary
+      // 2. no eligible primary
+      // secondaries take precedence of deprioritized primaries.
+      const secondaries = tagSetReducer(
+        readPreference,
+        maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))
+      );
+
+      const eligibleSecondaries = secondaries.filter(isDeprioritizedFactory(deprioritized));
+      if (eligibleSecondaries.length) {
+        return latencyWindowReducer(topologyDescription, eligibleSecondaries);
+      }
+
+      // if we make it here, we have no primaries or secondaries that not deprioritized.
+      // prefer the primary (which may not exist, if the topology has no primary).
+      // otherwise, return the secondaries (which also may not exist, but there is nothing else to check here).
+      return primary.length ? primary : latencyWindowReducer(topologyDescription, secondaries);
+    }
+    case 'nearest': {
+      const eligible = filterDeprioritized(
+        tagSetReducer(
+          readPreference,
+          maxStalenessReducer(readPreference, topologyDescription, servers.filter(nearestFilter))
+        ),
+        deprioritized
+      );
+      return latencyWindowReducer(topologyDescription, eligible);
+    }
+    case 'secondary':
+    case 'secondaryPreferred': {
+      const secondaries = tagSetReducer(
+        readPreference,
+        maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))
+      );
+      const eligibleSecondaries = secondaries.filter(isDeprioritizedFactory(deprioritized));
+
+      if (eligibleSecondaries.length) {
+        return latencyWindowReducer(topologyDescription, eligibleSecondaries);
+      }
+
+      // we have no eligible secondaries, try for a primary if we can.
+      if (mode === ReadPreference.SECONDARY_PREFERRED) {
+        const primary = servers.filter(primaryFilter);
+
+        // unlike readPreference=primary, here we do filter for deprioritized servers.
+        // if the primary is deprioritized, deprioritized secondaries take precedence.
+        const eligiblePrimary = primary.filter(isDeprioritizedFactory(deprioritized));
+        if (eligiblePrimary.length) return eligiblePrimary;
+
+        // we have no eligible primary nor secondaries that have not been deprioritized
+        return secondaries.length
+          ? latencyWindowReducer(topologyDescription, secondaries)
+          : primary;
+      }
+
+      // return all secondaries in the latency window.
+      return latencyWindowReducer(topologyDescription, secondaries);
+    }
+
+    default: {
+      const _exhaustiveCheck: never = mode;
+      throw new MongoRuntimeError(
+        `unexpected readPreference=${mode} (should never happen).  Please report a bug in the Node driver Jira project.`
+      );
+    }
+  }
+}
+
 /**
  * Returns a function which selects servers based on a provided read preference
  *
@@ -271,53 +388,28 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
   return function readPreferenceServers(
     topologyDescription: TopologyDescription,
     servers: ServerDescription[],
-    deprioritized: ServerDescription[] = []
+    deprioritized: DeprioritizedServers
   ): ServerDescription[] {
-    if (topologyDescription.type === TopologyType.LoadBalanced) {
-      return servers.filter(loadBalancerFilter);
-    }
-
-    if (topologyDescription.type === TopologyType.Unknown) {
-      return [];
-    }
-
-    if (topologyDescription.type === TopologyType.Single) {
-      return latencyWindowReducer(topologyDescription, servers.filter(knownFilter));
-    }
-
-    if (topologyDescription.type === TopologyType.Sharded) {
-      const filtered = servers.filter(server => {
-        return !deprioritized.includes(server);
-      });
-      const selectable = filtered.length > 0 ? filtered : deprioritized;
-      return latencyWindowReducer(topologyDescription, selectable.filter(knownFilter));
-    }
-
-    const mode = readPreference.mode;
-    if (mode === ReadPreference.PRIMARY) {
-      return servers.filter(primaryFilter);
-    }
-
-    if (mode === ReadPreference.PRIMARY_PREFERRED) {
-      const result = servers.filter(primaryFilter);
-      if (result.length) {
-        return result;
+    switch (topologyDescription.type) {
+      case 'Single':
+        return latencyWindowReducer(topologyDescription, servers.filter(knownFilter));
+      case 'ReplicaSetNoPrimary':
+      case 'ReplicaSetWithPrimary':
+        return secondarySelector(readPreference, topologyDescription, servers, deprioritized);
+      case 'Sharded': {
+        const selectable = filterDeprioritized(servers, deprioritized);
+        return latencyWindowReducer(topologyDescription, selectable.filter(knownFilter));
+      }
+      case 'Unknown':
+        return [];
+      case 'LoadBalanced':
+        return servers.filter(loadBalancerFilter);
+      default: {
+        const _exhaustiveCheck: never = topologyDescription.type;
+        throw new MongoRuntimeError(
+          `unexpected topology type: ${topologyDescription.type} (this should never happen).  Please file a bug in the Node driver Jira project.`
+        );
       }
     }
-
-    const filter = mode === ReadPreference.NEAREST ? nearestFilter : secondaryFilter;
-    const selectedServers = latencyWindowReducer(
-      topologyDescription,
-      tagSetReducer(
-        readPreference,
-        maxStalenessReducer(readPreference, topologyDescription, servers.filter(filter))
-      )
-    );
-
-    if (mode === ReadPreference.SECONDARY_PREFERRED && selectedServers.length === 0) {
-      return servers.filter(primaryFilter);
-    }
-
-    return selectedServers;
   };
 }

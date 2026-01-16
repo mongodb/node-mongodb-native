@@ -1,0 +1,48 @@
+{
+  "topology_description": {
+    "type": "Sharded",
+    "servers": [
+      {
+        "address": "g:27017",
+        "avg_rtt_ms": 5,
+        "type": "Mongos"
+      },
+      {
+        "address": "h:27017",
+        "avg_rtt_ms": 5,
+        "type": "Mongos"
+      }
+    ]
+  },
+  "operation": "read",
+  "read_preference": {
+    "mode": "PrimaryPreferred",
+    "tag_sets": [
+      {
+        "data_center": "nyc"
+      }
+    ]
+  },
+  "deprioritized_servers": [
+    {
+      "address": "g:27017",
+      "avg_rtt_ms": 5,
+      "type": "Mongos"
+    }
+  ],
+  "suitable_servers": [
+    {
+      "address": "h:27017",
+      "avg_rtt_ms": 5,
+      "type": "Mongos"
+    }
+  ],
+  "in_latency_window": [
+    {
+      "address": "h:27017",
+      "avg_rtt_ms": 5,
+      "type": "Mongos"
+    }
+  ]
+}
+

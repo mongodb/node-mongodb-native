@@ -1,3 +1,5 @@
+import * as process from 'process';
+
 import { Filter } from './filter';
 
 /**

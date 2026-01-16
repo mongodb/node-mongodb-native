@@ -3,8 +3,8 @@ import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
+import * as process from 'process';
 import { clearTimeout, setTimeout } from 'timers';
-import { promisify } from 'util';
 
 import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
@@ -435,10 +435,13 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
   };
 }
 
-/** @internal */
-export function now(): number {
-  const hrtime = process.hrtime();
-  return Math.floor(hrtime[0] * 1000 + hrtime[1] / 1000000);
+/**
+ * This function returns the number of milliseconds since an arbitrary point in time.
+ * This function should only be used to measure time intervals.
+ * @internal
+ * */
+export function processTimeMS(): number {
+  return Math.floor(performance.now());
 }
 
 /** @internal */
@@ -447,7 +450,7 @@ export function calculateDurationInMs(started: number | undefined): number {
     return -1;
   }
 
-  const elapsed = now() - started;
+  const elapsed = processTimeMS() - started;
   return elapsed < 0 ? 0 : elapsed;
 }
 
@@ -1236,7 +1239,14 @@ export function squashError(_error: unknown) {
   return;
 }
 
-export const randomBytes = promisify(crypto.randomBytes);
+export const randomBytes = (size: number) => {
+  return new Promise<Buffer>((resolve, reject) => {
+    crypto.randomBytes(size, (error: Error | null, buf: Buffer) => {
+      if (error) return reject(error);
+      resolve(buf);
+    });
+  });
+};
 
 /**
  * Replicates the events.once helper.

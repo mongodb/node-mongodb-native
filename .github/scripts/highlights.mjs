@@ -1,5 +1,5 @@
 // @ts-check
-import * as process from 'node:process';
+import * as process from 'process';
 import { output } from './util.mjs';
 
 const {

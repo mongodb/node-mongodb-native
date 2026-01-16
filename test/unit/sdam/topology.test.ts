@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { once } from 'events';
 import * as net from 'net';
 import { type AddressInfo } from 'net';
+import * as process from 'process';
 import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
@@ -446,11 +447,9 @@ describe('Topology (unit)', function () {
 
   describe('selectServer()', function () {
     it('should schedule monitoring if no suitable server is found', async function () {
-      const topology = topologyWithPlaceholderClient(
-        'someserver:27019',
-        {},
-        { serverSelectionTimeoutMS: 10 }
-      );
+      const topology = topologyWithPlaceholderClient('someserver:27019', {
+        serverSelectionTimeoutMS: 10
+      });
       const requestCheck = sinon.stub(Server.prototype, 'requestCheck');
 
       sinon.stub(Server.prototype, 'connect').callsFake(function () {

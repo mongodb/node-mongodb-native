@@ -2,7 +2,7 @@
 import * as url from 'node:url';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import * as process from 'node:process';
+import * as process from 'process';
 import * as semver from 'semver';
 import { getCurrentHistorySection, output } from './util.mjs';
 
@@ -50,7 +50,7 @@ const releaseNotesPath = path.join(process.cwd(), 'release_notes.md');
 await fs.writeFile(
   releaseNotesPath,
   `:seedling: A new release!\n---\n${releaseNotes}\n---\n`,
-  { encoding:'utf8' }
+  { encoding: 'utf8' }
 );
 
 await output('release_notes_path', releaseNotesPath)

@@ -181,7 +181,7 @@ TASKS.push(
     },
     {
       name: 'test-socks5',
-      tags: [],
+      tags: ['socks5'],
       commands: [
         updateExpansions({
           VERSION: 'latest',
@@ -208,7 +208,7 @@ TASKS.push(
     },
     {
       name: 'test-socks5-tls',
-      tags: [],
+      tags: ['socks5-tls'],
       commands: [
         updateExpansions({
           SSL: 'ssl',
@@ -298,7 +298,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
 for (const VERSION of TLS_VERSIONS) {
   TASKS.push({
     name: `test-tls-support-${VERSION}`,
-    tags: ['tls-support'],
+    tags: ['tls-support', `tls-support-${VERSION}`],
     commands: [
       updateExpansions({
         VERSION,
@@ -532,7 +532,8 @@ function* makeTypescriptTasks() {
     };
   }
 
-  yield makeCheckTypesTask('next');
+  // TODO(NODE-7233): unskip ts@next tests once we adopt Typescript 6.0.
+  // yield makeCheckTypesTask('next');
   yield makeCheckTypesTask('current');
   yield makeCheckTypesTask('5.6');
 

@@ -47,8 +47,8 @@ import {
   maxWireVersion,
   type MongoDBNamespace,
   noop,
-  now,
   once,
+  processTimeMS,
   squashError,
   uuidV4
 } from '../utils';
@@ -241,7 +241,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this.description = new StreamDescription(this.address, options);
     this.generation = options.generation;
-    this.lastUseTime = now();
+    this.lastUseTime = processTimeMS();
 
     this.messageStream = this.socket
       .on('error', this.onSocketError.bind(this))
@@ -299,7 +299,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   public markAvailable(): void {
-    this.lastUseTime = now();
+    this.lastUseTime = processTimeMS();
   }
 
   private onSocketError(cause: Error) {
@@ -510,7 +510,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const message = this.prepareCommand(ns.db, command, options);
     let started = 0;
     if (this.shouldEmitAndLogCommand) {
-      started = now();
+      started = processTimeMS();
       this.emitAndLogCommand(
         this.monitorCommands,
         Connection.COMMAND_STARTED,

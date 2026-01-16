@@ -4,6 +4,7 @@ import * as types from 'node:util/types';
 import { expect } from 'chai';
 import { type Context } from 'mocha';
 import ConnectionString from 'mongodb-connection-string-url';
+import * as process from 'process';
 import * as qs from 'querystring';
 import * as url from 'url';
 

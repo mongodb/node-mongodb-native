@@ -45,7 +45,7 @@ import {
   List,
   makeStateMachine,
   noop,
-  now,
+  processTimeMS,
   promiseWithResolvers,
   shuffle
 } from '../utils';
@@ -70,7 +70,11 @@ import {
 import type { ServerMonitoringMode } from './monitor';
 import { Server, type ServerEvents, type ServerOptions } from './server';
 import { compareTopologyVersion, ServerDescription } from './server_description';
-import { readPreferenceServerSelector, type ServerSelector } from './server_selection';
+import {
+  DeprioritizedServers,
+  readPreferenceServerSelector,
+  type ServerSelector
+} from './server_selection';
 import {
   ServerSelectionFailedEvent,
   ServerSelectionStartedEvent,
@@ -105,7 +109,7 @@ export interface ServerSelectionRequest {
   cancelled: boolean;
   operationName: string;
   waitingLogged: boolean;
-  previousServer?: ServerDescription;
+  deprioritizedServers: DeprioritizedServers;
 }
 
 /** @internal */
@@ -169,7 +173,9 @@ export interface SelectServerOptions {
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
   operationName: string;
-  previousServer?: ServerDescription;
+
+  /** @internal */
+  deprioritizedServers: DeprioritizedServers;
   /**
    * @internal
    * TODO(NODE-6496): Make this required by making ChangeStream use LegacyTimeoutContext
@@ -455,7 +461,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const selectServerOptions = {
       operationName: 'handshake',
       ...options,
-      timeoutContext
+      timeoutContext,
+      deprioritizedServers: new DeprioritizedServers()
     };
 
     try {
@@ -602,10 +609,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       resolve,
       reject,
       cancelled: false,
-      startTime: now(),
+      startTime: processTimeMS(),
       operationName: options.operationName,
       waitingLogged: false,
-      previousServer: options.previousServer
+      deprioritizedServers: options.deprioritizedServers
     };
 
     const abortListener = addAbortListener(options.signal, function () {
@@ -957,13 +964,9 @@ function processWaitQueue(topology: Topology) {
     let selectedDescriptions;
     try {
       const serverSelector = waitQueueMember.serverSelector;
-      const previousServer = waitQueueMember.previousServer;
+      const deprioritizedServers = waitQueueMember.deprioritizedServers;
       selectedDescriptions = serverSelector
-        ? serverSelector(
-            topology.description,
-            serverDescriptions,
-            previousServer ? [previousServer] : []
-          )
+        ? serverSelector(topology.description, serverDescriptions, deprioritizedServers)
         : serverDescriptions;
     } catch (selectorError) {
       if (
@@ -1001,7 +1004,8 @@ function processWaitQueue(topology: Topology) {
               waitQueueMember.serverSelector,
               topology.description,
               topology.s.serverSelectionTimeoutMS !== 0
-                ? topology.s.serverSelectionTimeoutMS - (now() - waitQueueMember.startTime)
+                ? topology.s.serverSelectionTimeoutMS -
+                  (processTimeMS() - waitQueueMember.startTime)
                 : -1,
               waitQueueMember.operationName
             )
@@ -1075,7 +1079,7 @@ function processWaitQueue(topology: Topology) {
   if (topology.waitQueue.length > 0) {
     // ensure all server monitors attempt monitoring soon
     for (const [, server] of topology.s.servers) {
-      process.nextTick(function scheduleServerCheck() {
+      queueMicrotask(function scheduleServerCheck() {
         return server.requestCheck();
       });
     }

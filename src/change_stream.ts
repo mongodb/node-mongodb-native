@@ -18,6 +18,7 @@ import { MongoClient } from './mongo_client';
 import { type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { OperationParent } from './operations/command';
+import { DeprioritizedServers } from './sdam/server_selection';
 import type { ServerSessionId } from './sessions';
 import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
 import { type AnyOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
@@ -1073,7 +1074,8 @@ export class ChangeStream<
     try {
       await topology.selectServer(this.cursor.readPreference, {
         operationName: 'reconnect topology in change stream',
-        timeoutContext: this.timeoutContext
+        timeoutContext: this.timeoutContext,
+        deprioritizedServers: new DeprioritizedServers()
       });
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
     } catch {

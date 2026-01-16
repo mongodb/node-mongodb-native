@@ -107,8 +107,18 @@ describe('Sessions Prose Tests', () => {
       expect(allResults).to.have.lengthOf(operations.length);
       expect(events).to.have.lengthOf(operations.length);
 
-      // This is a guarantee in node, unless you are performing a transaction (which is not being done in this test)
-      expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex')))).to.have.lengthOf(1);
+      // Previous version of this test was too strict: we were expecting that only one session be used for this scenario.
+      // That was possible at the time because the operations were simple enough and the server fast enough that the operations would complete serially.
+      //
+      // However, with a more complex operation bulkWrite (like `Array.from({ length: 100_000 }).map(() => ({ insertOne: { document: { a: 1 } } })),`),
+      // it's entirely possible and expected that bulkWrite would introduce a second session due to the time it takes to process all the inserts.
+      //
+      // The important bit of the test is that the number of sessions is less than the number of concurrent operations, so now instead of expecting exactly 1 session,
+      // we just expect less than operations.length - 1 sessions.
+      //
+      const uniqueSessionIds = new Set(events.map(ev => ev.command.lsid.id.toString('hex')));
+      const expectedMaxSessions = operations.length - 1;
+      expect(uniqueSessionIds).to.have.length.lessThan(expectedMaxSessions);
     });
   });
 

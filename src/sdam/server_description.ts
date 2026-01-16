@@ -1,6 +1,12 @@
 import { type Document, Long, type ObjectId } from '../bson';
 import { type MongoError, MongoRuntimeError } from '../error';
-import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
+import {
+  arrayStrictEqual,
+  compareObjectId,
+  errorStrictEqual,
+  HostAddress,
+  processTimeMS
+} from '../utils';
 import { type ClusterTime, ServerType } from './common';
 
 const WRITABLE_SERVER_TYPES = new Set<ServerType>([
@@ -110,7 +116,7 @@ export class ServerDescription {
     this.maxWireVersion = hello?.maxWireVersion ?? 0;
     this.roundTripTime = options?.roundTripTime ?? -1;
     this.minRoundTripTime = options?.minRoundTripTime ?? 0;
-    this.lastUpdateTime = now();
+    this.lastUpdateTime = processTimeMS();
     this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? 0;
     // NOTE: This actually builds the stack string instead of holding onto the getter and all its
     // associated references. This is done to prevent a memory leak.
