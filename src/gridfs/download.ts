@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 
-import type { Document, ObjectId } from '../bson';
+import { ByteUtils, type Document, type ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { FindCursor } from '../cursor/find_cursor';
@@ -248,7 +248,7 @@ function doRead(stream: GridFSBucketReadStream): void {
       );
     }
 
-    let buf = Buffer.isBuffer(doc.data) ? doc.data : doc.data.buffer;
+    let buf = ByteUtils.isUint8Array(doc.data) ? doc.data : doc.data.buffer;
 
     if (buf.byteLength !== expectedLength) {
       if (bytesRemaining <= 0) {

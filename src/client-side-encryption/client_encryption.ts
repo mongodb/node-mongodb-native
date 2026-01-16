@@ -6,6 +6,7 @@ import type {
 
 import {
   type Binary,
+  ByteUtils,
   deserialize,
   type Document,
   type Int32,
@@ -143,7 +144,7 @@ export class ClientEncryption {
 
     const mongoCryptOptions: MongoCryptOptions = {
       ...options,
-      kmsProviders: !Buffer.isBuffer(this._kmsProviders)
+      kmsProviders: !ByteUtils.isUint8Array(this._kmsProviders)
         ? (serialize(this._kmsProviders) as Buffer)
         : this._kmsProviders,
       errorWrapper: defaultErrorWrapper

@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports */
-import { BSON, type DeserializeOptions, type SerializeOptions } from 'bson';
+import { BSON, ByteUtils, type DeserializeOptions, type SerializeOptions } from 'bson';
 
 export {
   Binary,
@@ -8,6 +8,7 @@ export {
   BSONRegExp,
   BSONSymbol,
   BSONType,
+  ByteUtils,
   calculateObjectSize,
   Code,
   DBRef,
@@ -37,10 +38,46 @@ export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSON
   return Array.isArray(res) ? res : [...res];
 }
 
-export const getInt32LE = BSON.onDemand.NumberUtils.getInt32LE;
-export const getFloat64LE = BSON.onDemand.NumberUtils.getFloat64LE;
-export const getBigInt64LE = BSON.onDemand.NumberUtils.getBigInt64LE;
-export const toUTF8 = BSON.onDemand.ByteUtils.toUTF8;
+export const getInt32LE = BSON.NumberUtils.getInt32LE;
+export const getFloat64LE = BSON.NumberUtils.getFloat64LE;
+export const getBigInt64LE = BSON.NumberUtils.getBigInt64LE;
+export const toUTF8 = BSON.ByteUtils.toUTF8;
+
+// BSON wrappers
+
+// writeInt32LE, same order of arguments as Buffer.writeInt32LE
+export const writeInt32LE = (destination: Uint8Array, value: number, offset: number) =>
+  BSON.NumberUtils.setInt32LE(destination, offset, value);
+
+// various wrappers that consume and return local buffer types
+
+export const fromUTF8 = (text: string) =>
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromUTF8(text));
+export const fromBase64 = (b64: string) =>
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromBase64(b64));
+export const fromNumberArray = (array: number[]) =>
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromNumberArray(array));
+export const concatBuffers = (list: Uint8Array[]) => {
+  return ByteUtils.toLocalBufferType(BSON.ByteUtils.concat(list));
+};
+export const allocateBuffer = (size: number) =>
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.allocate(size));
+export const allocateUnsafeBuffer = (size: number) =>
+  ByteUtils.toLocalBufferType(BSON.ByteUtils.allocateUnsafe(size));
+
+// validates buffer inputs, used for read operations
+const validateBufferInputs = (buffer: Uint8Array, offset: number, length: number) => {
+  if (offset < 0 || offset + length > buffer.length) {
+    throw new RangeError(
+      `Attempt to access memory outside buffer bounds: buffer length: ${buffer.length}, offset: ${offset}, length: ${length}`
+    );
+  }
+};
+
+export const readInt32LE = (buffer: Uint8Array, offset: number): number => {
+  validateBufferInputs(buffer, offset, 4);
+  return getInt32LE(buffer, offset);
+};
 
 /**
  * BSON Serialization options.

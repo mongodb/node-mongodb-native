@@ -19,6 +19,7 @@ import {
   TopologyType,
   type WriteConcernSettings
 } from '../../../src';
+import { ByteUtils } from '../../../src/bson';
 import { type CompressorName } from '../../../src/cmap/wire_protocol/compression';
 import { HostAddress } from '../../../src/utils';
 import { getEnvironmentalOptions } from '../utils';
@@ -493,7 +494,7 @@ export class TestConfiguration {
                   // @ts-expect-error: toExtendedJSON internal on double but not on long
                   return { number: new Double(value).toExtendedJSON() };
               }
-              if (Buffer.isBuffer(value))
+              if (ByteUtils.isUint8Array(value))
                 return { [value.constructor.name]: Buffer.prototype.base64Slice.call(value) };
               if (value === undefined) return { undefined: 'key was set but equal to undefined' };
               return value;
