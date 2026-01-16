@@ -13,7 +13,6 @@ env:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   sbom:
@@ -35,20 +34,6 @@ jobs:
         uses: mongodb-labs/drivers-github-tools/node/setup@v3
         with:
           ignore_install_scripts: false
-
-      - name: Load version and package info
-        uses: mongodb-labs/drivers-github-tools/node/get_version_info@v3
-        with:
-          npm_package_name: mongodb
-
-      - name: Generate/Update package-lock.json
-        run: |
-          echo "Resolving dependencies and generating package-lock.json..."
-          npm install --package-lock-only
-          echo "package-lock.json generated with resolved versions"
-
-      - name: Setup SBOM environment
-        uses: ./.github/actions/setup-sbom
 
       - name: Generate SBOM
         id: generate_sbom
