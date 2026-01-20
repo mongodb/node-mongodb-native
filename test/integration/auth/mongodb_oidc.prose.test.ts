@@ -768,10 +768,12 @@ describe('OIDC Auth Spec Tests', function () {
     const uriSingle = process.env.MONGODB_URI_SINGLE;
     const uriMulti = process.env.MONGODB_URI_MULTI;
 
-    if (!isCallbackTest) {
-      this.skipReason = 'OIDC human prose tests require a Test OIDC environment.';
-      this.skip();
-    }
+    beforeEach(function () {
+      if (!isCallbackTest) {
+        this.skipReason = 'OIDC human prose tests require a Test OIDC environment.';
+        this.skip();
+      }
+    });
 
     describe('1. OIDC Human Callback Authentication', function () {
       let client: MongoClient;
