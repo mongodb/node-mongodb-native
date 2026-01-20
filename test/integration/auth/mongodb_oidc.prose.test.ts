@@ -75,6 +75,13 @@ const getClient = (extraOptions: MongoClientOptions = {}, callbackSpy?: OIDCCall
 };
 
 describe('OIDC Auth Spec Tests', function () {
+  beforeEach(function () {
+    if (!process.env.ENVIRONMENT) {
+      this.skipReason = 'OIDC prose tests require a Test OIDC environment.';
+      this.skip();
+    }
+  });
+
   describe('Machine Authentication Flow Prose Tests', function () {
     const uriSingle = process.env.MONGODB_URI_SINGLE;
 
