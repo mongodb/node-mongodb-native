@@ -754,8 +754,8 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('successfully authenticates', async function () {
-          const error = await collection.findOne({}, { session }).catch(error => error);
-          expect(error).to.not.exist;
+          const result = await collection.findOne({}, { session });
+          expect(result).to.exist;
           if (isCallbackTest) {
             expect(callbackSpy).to.have.been.calledTwice;
           }
