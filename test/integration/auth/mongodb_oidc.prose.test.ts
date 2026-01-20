@@ -325,8 +325,7 @@ describe('OIDC Auth Spec Tests', function () {
           if (isCallbackTest) {
             expect(callbackSpy).to.have.been.calledOnce;
           }
-          const nextError = await collection.findOne().catch(nextError => nextError);
-          expect(nextError).to.not.exist;
+          await collection.findOne();
           if (isCallbackTest) {
             expect(callbackSpy).to.have.been.calledOnce;
           }
@@ -405,8 +404,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('successfully authenticates', async function () {
-          const error = await collection.findOne().catch(error => error);
-          expect(error).to.not.exist;
+          await collection.findOne();
           if (isCallbackTest) {
             expect(callbackSpy).to.have.been.calledTwice;
           }
@@ -461,8 +459,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('successfully authenticates', async function () {
-          const error = await collection.findOne().catch(error => error);
-          expect(error).to.not.exist;
+          await collection.findOne();
           if (isCallbackTest) {
             expect(callbackSpy).to.have.been.calledTwice;
           }
@@ -519,11 +516,11 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          await utilClient.db().admin().command({
+          await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off'
           });
-          await utilClient.close();
+          await utilClient?.close();
         });
 
         it('does not successfully authenticate', async function () {
@@ -584,11 +581,11 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          await utilClient.db().admin().command({
+          await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off'
           });
-          await utilClient.close();
+          await utilClient?.close();
         });
 
         it('does not successfully authenticate', async function () {
@@ -636,9 +633,10 @@ describe('OIDC Auth Spec Tests', function () {
             }
           });
 
-          const provider = client.s.authProviders.getOrCreateProvider('MONGODB-OIDC', {
-            OIDC_CALLBACK: callbackSpy
-          }) as MongoDBOIDC;
+          const provider = client.s.authProviders.getOrCreateProvider(
+            'MONGODB-OIDC',
+            getProviderLookupProperties(callbackSpy)
+          ) as MongoDBOIDC;
           const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
             encoding: 'utf8'
           });
@@ -648,11 +646,11 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          await utilClient.db().admin().command({
+          await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off'
           });
-          await utilClient.close();
+          await utilClient?.close();
         });
 
         it('successfully authenticates', async function () {
