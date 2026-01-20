@@ -63,7 +63,7 @@ const getClientOptions = (callbackSpy?: OIDCCallbackFunction) => {
 
 const getClient = (extraOptions: MongoClientOptions = {}, callbackSpy?: OIDCCallbackFunction) => {
   const options = getClientOptions(callbackSpy);
-  const mergedOptions = { options, ...extraOptions };
+  const mergedOptions = extraOptions ? { ...options, ...extraOptions } : options;
   return new MongoClient(URI_SINGLE, mergedOptions);
 };
 
