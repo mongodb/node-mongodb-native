@@ -633,15 +633,17 @@ describe('OIDC Auth Spec Tests', function () {
             }
           });
 
-          const provider = client.s.authProviders.getOrCreateProvider(
-            'MONGODB-OIDC',
-            getProviderLookupProperties(callbackSpy)
-          ) as MongoDBOIDC;
-          const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
-            encoding: 'utf8'
-          });
+          if (isCallbackTest) {
+            const provider = client.s.authProviders.getOrCreateProvider(
+              'MONGODB-OIDC',
+              getProviderLookupProperties(callbackSpy)
+            ) as MongoDBOIDC;
+            const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
+              encoding: 'utf8'
+            });
+            provider.workflow.cache.put({ accessToken: token });
+          }
 
-          provider.workflow.cache.put({ accessToken: token });
           collection = client.db('test').collection('test');
         });
 
@@ -655,7 +657,9 @@ describe('OIDC Auth Spec Tests', function () {
 
         it('successfully authenticates', async function () {
           await collection.insertOne({ name: 'test' });
-          expect(callbackSpy).to.not.have.been.called;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.not.have.been.called;
+          }
           expect(saslStarts).to.be.empty;
 
           await utilClient
