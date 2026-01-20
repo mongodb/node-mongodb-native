@@ -14,7 +14,6 @@ import {
   type OIDCResponse
 } from '../../../src';
 import { type MongoDBOIDC, type OIDCCallbackFunction } from '../../../src/cmap/auth/mongodb_oidc';
-import { getEnvironmentData } from 'node:worker_threads';
 
 const createCallback = (tokenFile = 'test_user1', expiresInSeconds?: number, extraFields?: any) => {
   return async (params: OIDCCallbackParams) => {
@@ -67,7 +66,7 @@ const getProviderLookupProperties = (callbackSpy?: OIDCCallbackFunction) => {
     return { OIDC_CALLBACK: callbackSpy };
   }
   return { ENVIRONMENT: process.env.ENVIRONMENT };
-}
+};
 
 const getClient = (extraOptions: MongoClientOptions = {}, callbackSpy?: OIDCCallbackFunction) => {
   const options = getClientOptions(callbackSpy);
