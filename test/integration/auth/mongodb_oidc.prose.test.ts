@@ -294,7 +294,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Close the client.
         beforeEach(async function () {
           client = getClient({}, callbackSpy);
-          utilClient = getClient({}, callbackSpy);
+          utilClient = getClient({}, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -379,7 +379,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Close the client.
         beforeEach(async function () {
           client = getClient({}, callbackSpy);
-          utilClient = getClient({}, callbackSpy);
+          utilClient = getClient({}, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -435,7 +435,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Close the client.
         beforeEach(async function () {
           client = getClient({ promoteValues: false }, callbackSpy);
-          utilClient = getClient({ promoteValues: false }, callbackSpy);
+          utilClient = getClient({ promoteValues: false }, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -628,7 +628,7 @@ describe('OIDC Auth Spec Tests', function () {
         // - Assert there were `SaslStart` commands executed.
         // - Close the client.
         beforeEach(async function () {
-          utilClient = getClient({}, callbackSpy);
+          utilClient = getClient({}, createCallback());
           client = getClient({ monitorCommands: true }, callbackSpy);
           client.on('commandStarted', event => {
             if (event.commandName === 'saslStart') {
@@ -706,7 +706,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Close the session and the client.
         beforeEach(async function () {
           client = getClient({}, callbackSpy);
-          utilClient = getClient({}, callbackSpy);
+          utilClient = getClient({}, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
