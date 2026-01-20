@@ -9,10 +9,11 @@ import {
   type ClientSession,
   type Collection,
   MongoClient,
+  type MongoClientOptions,
   type OIDCCallbackParams,
   type OIDCResponse
 } from '../../../src';
-import { type MongoDBOIDC } from '../../../src/cmap/auth/mongodb_oidc';
+import { type MongoDBOIDC, type OIDCCallbackFunction } from '../../../src/cmap/auth/mongodb_oidc';
 
 const createCallback = (tokenFile = 'test_user1', expiresInSeconds?: number, extraFields?: any) => {
   return async (params: OIDCCallbackParams) => {
@@ -38,14 +39,35 @@ const generateResult = (token: string, expiresInSeconds?: number, extraFields?: 
   return response;
 };
 
-describe('OIDC Auth Spec Tests', function () {
-  beforeEach(function () {
-    if (process.env.ENVIRONMENT !== 'test') {
-      this.skipReason = 'GCP OIDC prose tests require a Test OIDC environment.';
-      this.skip();
-    }
-  });
+const DEFAULT_URI = 'mongodb://127.0.0.1:27017';
+const URI_SINGLE = process.env.MONGODB_URI_SINGLE ?? DEFAULT_URI;
+const isCallbackTest = process.env.ENVIRONMENT === 'test';
 
+const getClientOptions = (callbackSpy?: OIDCCallbackFunction) => {
+  const options: MongoClientOptions = {};
+  options.retryReads = false;
+  if (process.env.AZUREOIDC_RESOURCE) {
+    options.authMechanismProperties = { TOKEN_RESOURCE: process.env.AZUREOIDC_RESOURCE };
+  }
+  if (process.env.AZUREOIDC_USERNAME) {
+    options.auth = { username: process.env.AZUREOIDC_USERNAME, password: undefined };
+  }
+  if (process.env.GCPOIDC_AUDIENCE) {
+    options.authMechanismProperties = { TOKEN_RESOURCE: process.env.GCPOIDC_AUDIENCE };
+  }
+  if (isCallbackTest && callbackSpy) {
+    options.authMechanismProperties = { OIDC_CALLBACK: callbackSpy };
+  }
+  return options;
+};
+
+const getClient = (extraOptions: MongoClientOptions = {}, callbackSpy?: OIDCCallbackFunction) => {
+  const options = getClientOptions(callbackSpy);
+  const mergedOptions = { options, ...extraOptions };
+  return new MongoClient(URI_SINGLE, mergedOptions);
+};
+
+describe('OIDC Auth Spec Tests', function () {
   describe('Machine Authentication Flow Prose Tests', function () {
     const uriSingle = process.env.MONGODB_URI_SINGLE;
 
@@ -61,21 +83,19 @@ describe('OIDC Auth Spec Tests', function () {
         const callbackSpy = sinon.spy(createCallback('test_machine'));
         // Create an OIDC configured client.
         // Perform a find operation that succeeds.
-        // Assert that the callback was called 1 time.
+        // `[callback-only]` Assert that the callback was called 1 time.
         // Close the client.
         beforeEach(function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           collection = client.db('test').collection('test');
         });
 
         it('successfully authenticates', async function () {
-          await collection.findOne();
-          expect(callbackSpy).to.have.been.calledOnce;
+          const error = await collection.findOne().catch(error => error);
+          expect(error).to.not.exist;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledOnce;
+          }
         });
       });
 
@@ -83,30 +103,35 @@ describe('OIDC Auth Spec Tests', function () {
         const callbackSpy = sinon.spy(createCallback());
         // Create an OIDC configured client.
         // Start 10 threads and run 100 find operations in each thread that all succeed.
-        // Assert that the callback was called 1 time.
+        // `[callback-only]` Assert that the callback was called 1 time.
         // Close the client.
         beforeEach(function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           collection = client.db('test').collection('test');
         });
 
         it('only calls the callback once', async function () {
           for (let i = 0; i < 100; i++) {
-            await collection.findOne();
+            const error = await collection.findOne().catch(error => error);
+            expect(error).to.not.exist;
           }
-          expect(callbackSpy).to.have.been.calledOnce;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledOnce;
+          }
         });
       });
     });
 
-    describe('2. OIDC Callback Validation', function () {
+    describe('2. `[callback-only]` OIDC Callback Validation', function () {
       let client: MongoClient;
       let collection: Collection;
+
+      beforeEach(function () {
+        if (!isCallbackTest) {
+          this.skipReason = 'Callback validation tests only run in test environment';
+          this.skip();
+        }
+      });
 
       afterEach(async function () {
         await client?.close();
@@ -119,12 +144,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Assert that the OIDC callback was called with the appropriate inputs, including the timeout parameter if possible.
         // Close the client.
         beforeEach(function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           collection = client.db('test').collection('test');
         });
 
@@ -141,12 +161,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Perform a find operation that fails.
         // Close the client.
         beforeEach(function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           collection = client.db('test').collection('test');
         });
 
@@ -164,12 +179,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Perform a find operation that fails.
         // Close the client.
         beforeEach(function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           collection = client.db('test').collection('test');
         });
 
@@ -185,13 +195,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Assert it returns a client configuration error.
         it('fails validation', async function () {
           try {
-            client = new MongoClient(uriSingle, {
-              authMechanismProperties: {
-                OIDC_CALLBACK: callbackSpy,
-                ENVIRONMENT: 'test'
-              },
-              retryReads: false
-            });
+            client = getClient({}, callbackSpy);
           } catch (error) {
             expect(error).to.exist;
           }
@@ -212,15 +216,10 @@ describe('OIDC Auth Spec Tests', function () {
         // Create an OIDC configured client.
         // Poison the Client Cache with an invalid access token.
         // Perform a find operation that succeeds.
-        // Assert that the callback was called 1 time.
+        // `[callback-only]` Assert that the callback was called 1 time.
         // Close the client.
         beforeEach(function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           const provider = client.s.authProviders.getOrCreateProvider('MONGODB-OIDC', {
             OIDC_CALLBACK: callbackSpy
           }) as MongoDBOIDC;
@@ -229,12 +228,15 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('successfully authenticates', async function () {
-          await collection.findOne();
-          expect(callbackSpy).to.have.been.calledOnce;
+          const error = await collection.findOne().catch(error => error);
+          expect(error).to.not.exist;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledOnce;
+          }
         });
       });
 
-      describe('3.2 Authentication failures without cached tokens return an error', function () {
+      describe('3.2 `[callback-only]` Authentication failures without cached tokens return an error', function () {
         const callbackSpy = sinon.spy(() => {
           return { accessToken: 'bad' };
         });
@@ -243,12 +245,11 @@ describe('OIDC Auth Spec Tests', function () {
         // Assert that the callback was called 1 time.
         // Close the client.
         beforeEach(function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          if (!isCallbackTest) {
+            this.skipReason = 'Callback validation tests only run in test environment';
+            this.skip();
+          }
+          client = getClient({}, callbackSpy);
           const provider = client.s.authProviders.getOrCreateProvider('MONGODB-OIDC', {
             OIDC_CALLBACK: callbackSpy
           }) as MongoDBOIDC;
@@ -281,17 +282,12 @@ describe('OIDC Auth Spec Tests', function () {
         //   }
         // }
         // Perform a find operation that fails.
-        // Assert that the callback has been called once.
+        // `[callback-only]` Assert that the callback has been called once.
         // Perform a find operation that succeeds.
-        // Assert that the callback has been called once.
+        // `[callback-only]` Assert that the callback has been called once.
         // Close the client.
         beforeEach(async function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: createCallback()
@@ -325,9 +321,14 @@ describe('OIDC Auth Spec Tests', function () {
         it('successfully authenticates the second time', async function () {
           const error = await collection.findOne().catch(error => error);
           expect(error).to.exist;
-          expect(callbackSpy).to.have.been.calledOnce;
-          await collection.findOne();
-          expect(callbackSpy).to.have.been.calledOnce;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledOnce;
+          }
+          const nextError = await collection.findOne().catch(nextError => nextError);
+          expect(nextError).to.not.exist;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledOnce;
+          }
         });
       });
     });
@@ -373,15 +374,10 @@ describe('OIDC Auth Spec Tests', function () {
         //   }
         // }
         // Perform a find operation that succeeds.
-        // Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
+        // `[callback-only]` Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
         // Close the client.
         beforeEach(async function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: createCallback()
@@ -413,8 +409,11 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('successfully authenticates', async function () {
-          await collection.findOne();
-          expect(callbackSpy).to.have.been.calledTwice;
+          const error = await collection.findOne().catch(error => error);
+          expect(error).to.not.exist;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledTwice;
+          }
         });
       });
 
@@ -436,16 +435,10 @@ describe('OIDC Auth Spec Tests', function () {
         //   }
         // }
         // Perform a find operation that succeeds.
-        // Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
+        // `[callback-only]` Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
         // Close the client.
         beforeEach(async function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false,
-            promoteValues: false
-          });
+          client = getClient({ promoteValues: false }, callbackSpy);
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: createCallback()
@@ -477,12 +470,15 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('successfully authenticates', async function () {
-          await collection.findOne();
-          expect(callbackSpy).to.have.been.calledTwice;
+          const error = await collection.findOne().catch(error => error);
+          expect(error).to.not.exist;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledTwice;
+          }
         });
       });
 
-      describe('4.2 Read Commands Fail If Reauthentication Fails', function () {
+      describe('4.2 `[callback-only]` Read Commands Fail If Reauthentication Fails', function () {
         let utilClient: MongoClient;
         const callbackSpy = sinon.spy(createBadCallback());
         // Create a MongoClient whose OIDC callback returns one good token and then bad tokens after the first call.
@@ -504,12 +500,11 @@ describe('OIDC Auth Spec Tests', function () {
         // Assert that the callback was called 2 times.
         // Close the client.
         beforeEach(async function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          if (!isCallbackTest) {
+            this.skipReason = 'Callback validation tests only run in test environment';
+            this.skip();
+          }
+          client = getClient({}, callbackSpy);
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: createCallback()
@@ -547,7 +542,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
       });
 
-      describe('4.3 Write Commands Fail If Reauthentication Fails', function () {
+      describe('4.3 `[callback-only]` Write Commands Fail If Reauthentication Fails', function () {
         let utilClient: MongoClient;
         const callbackSpy = sinon.spy(createBadCallback());
         // Create a MongoClient whose OIDC callback returns one good token and then bad tokens after the first call.
@@ -569,12 +564,11 @@ describe('OIDC Auth Spec Tests', function () {
         // Assert that the callback was called 2 times.
         // Close the client.
         beforeEach(async function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          if (!isCallbackTest) {
+            this.skipReason = 'Callback validation tests only run in test environment';
+            this.skip();
+          }
+          client = getClient({}, callbackSpy);
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: createCallback()
@@ -619,6 +613,7 @@ describe('OIDC Auth Spec Tests', function () {
         const saslStarts = [];
         // - Create an OIDC configured client.
         // - Populate the *Client Cache* with a valid access token to enforce Speculative Authentication.
+        //    - This may be done by authenticating a temporary OIDC configured client and copying the cached token.
         // - Perform an `insert` operation that succeeds.
         // - Assert that the callback was not called.
         // - Assert there were no `SaslStart` commands executed.
@@ -638,7 +633,7 @@ describe('OIDC Auth Spec Tests', function () {
         // }
         // ```
         // - Perform an `insert` operation that succeeds.
-        // - Assert that the callback was called once.
+        // - `[callback-only]` Assert that the callback was called once.
         // - Assert there were `SaslStart` commands executed.
         // - Close the client.
         beforeEach(async function () {
@@ -649,13 +644,7 @@ describe('OIDC Auth Spec Tests', function () {
             retryReads: false
           });
 
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false,
-            monitorCommands: true
-          });
+          client = getClient({ monitorCommands: true }, callbackSpy);
           client.on('commandStarted', event => {
             if (event.commandName === 'saslStart') {
               saslStarts.push(event);
@@ -701,7 +690,9 @@ describe('OIDC Auth Spec Tests', function () {
             });
 
           await collection.insertOne({ name: 'test' });
-          expect(callbackSpy).to.have.been.calledOnce;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledOnce;
+          }
           expect(saslStarts.length).to.equal(1);
         });
       });
@@ -726,15 +717,10 @@ describe('OIDC Auth Spec Tests', function () {
         // }
         // Start a new session.
         // In the started session perform a find operation that succeeds.
-        // Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
+        // `[callback-only]` Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
         // Close the session and the client.
         beforeEach(async function () {
-          client = new MongoClient(uriSingle, {
-            authMechanismProperties: {
-              OIDC_CALLBACK: callbackSpy
-            },
-            retryReads: false
-          });
+          client = getClient({}, callbackSpy);
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: createCallback()
@@ -768,8 +754,11 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         it('successfully authenticates', async function () {
-          await collection.findOne({}, { session });
-          expect(callbackSpy).to.have.been.calledTwice;
+          const error = await collection.findOne({}, { session }).catch(error => error);
+          expect(error).to.not.exist;
+          if (isCallbackTest) {
+            expect(callbackSpy).to.have.been.calledTwice;
+          }
         });
       });
     });
@@ -778,6 +767,11 @@ describe('OIDC Auth Spec Tests', function () {
   describe('Human Authentication Flow Prose Tests', function () {
     const uriSingle = process.env.MONGODB_URI_SINGLE;
     const uriMulti = process.env.MONGODB_URI_MULTI;
+
+    if (!isCallbackTest) {
+      this.skipReason = 'OIDC human prose tests require a Test OIDC environment.';
+      this.skip();
+    }
 
     describe('1. OIDC Human Callback Authentication', function () {
       let client: MongoClient;
