@@ -455,7 +455,7 @@ function doWrite(
     spaceRemaining -= numToCopy;
     let doc: GridFSChunk;
     if (spaceRemaining === 0) {
-      doc = createChunkDoc(stream.id, stream.n, stream.bufToStore);
+      doc = createChunkDoc(stream.id, stream.n, new Uint8Array(stream.bufToStore));
 
       const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
       if (remainingTimeMS != null && remainingTimeMS <= 0) {
