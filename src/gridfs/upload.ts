@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { allocateBuffer, ByteUtils, type Document, fromUTF8, ObjectId } from '../bson';
+import { allocateBuffer, ByteUtils, copyBuffer, type Document, fromUTF8, ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 import {
@@ -426,7 +426,11 @@ function doWrite(
 
   // Input is small enough to fit in our buffer
   if (stream.pos + inputBuf.length < stream.chunkSizeBytes) {
-    inputBuf.set(stream.bufToStore, stream.pos);
+    copyBuffer({
+      source: inputBuf,
+      target: stream.bufToStore,
+      targetStart: stream.pos
+    });
     stream.pos += inputBuf.length;
     queueMicrotask(callback);
     return;
@@ -440,7 +444,13 @@ function doWrite(
   let outstandingRequests = 0;
   while (inputBufRemaining > 0) {
     const inputBufPos = inputBuf.length - inputBufRemaining;
-    inputBuf.set(stream.bufToStore.subarray(inputBufPos, inputBufPos + numToCopy), stream.pos);
+    copyBuffer({
+      source: inputBuf,
+      target: stream.bufToStore,
+      targetStart: stream.pos,
+      sourceStart: inputBufPos,
+      sourceEnd: inputBufPos + numToCopy
+    });
     stream.pos += numToCopy;
     spaceRemaining -= numToCopy;
     let doc: GridFSChunk;
@@ -499,7 +509,13 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void
   // Create a new buffer to make sure the buffer isn't bigger than it needs
   // to be.
   const remnant = allocateBuffer(stream.pos);
-  remnant.set(stream.bufToStore.subarray(0, stream.pos), 0);
+  copyBuffer({
+    source: stream.bufToStore,
+    target: remnant,
+    targetStart: 0,
+    sourceStart: 0,
+    sourceEnd: stream.pos
+  });
   const doc = createChunkDoc(stream.id, stream.n, remnant);
 
   // If the stream was aborted, do not write remnant

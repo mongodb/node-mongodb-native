@@ -65,6 +65,23 @@ export const allocateBuffer = (size: number) =>
   ByteUtils.toLocalBufferType(BSON.ByteUtils.allocate(size));
 export const allocateUnsafeBuffer = (size: number) =>
   ByteUtils.toLocalBufferType(BSON.ByteUtils.allocateUnsafe(size));
+export const copyBuffer = (input: {
+  source: Uint8Array;
+  target: Uint8Array;
+  targetStart?: number;
+  sourceStart?: number;
+  sourceEnd?: number;
+}): number => {
+  const { source, target, targetStart = 0, sourceStart = 0, sourceEnd } = input;
+  const sourceEndActual = sourceEnd ?? source.length;
+  const srcSlice = source.subarray(sourceStart, sourceEndActual);
+  const maxLen = Math.min(srcSlice.length, target.length - targetStart);
+  if (maxLen <= 0) {
+    return 0;
+  }
+  target.set(srcSlice.subarray(0, maxLen), targetStart);
+  return maxLen;
+};
 
 // validates buffer inputs, used for read operations
 const validateBufferInputs = (buffer: Uint8Array, offset: number, length: number) => {
