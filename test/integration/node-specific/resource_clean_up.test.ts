@@ -2,8 +2,9 @@ import * as v8 from 'node:v8';
 
 import { expect } from 'chai';
 
-import { sleep } from '../../tools/utils';
+import { getEnvironmentalOptions, sleep } from '../../tools/utils';
 import { runScriptAndReturnHeapInfo } from './resource_tracking_script_builder';
+import { isTLSEnabled } from '../../tools/runner/filters/tls_filter';
 
 /**
  * This 5MB range is selected arbitrarily and should likely be raised if failures are seen intermittently.
@@ -34,7 +35,11 @@ describe('Driver Resources', () => {
 
   context('on MongoClient.close()', () => {
     before('create leak reproduction script', async function () {
-      if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
+      if (
+        globalThis.AbortController == null ||
+        typeof this.configuration.serverApi === 'string' ||
+        isTLSEnabled
+      ) {
         return;
       }
       const res = await runScriptAndReturnHeapInfo(
@@ -56,21 +61,25 @@ describe('Driver Resources', () => {
     });
 
     describe('ending memory usage', () => {
-      it(`is within ${MB_PERMITTED_OFFSET}MB of starting amount`, async () => {
-        // Why check the lower bound? No reason, but it would be very surprising if we managed to free MB_PERMITTED_OFFSET MB of memory
-        // I expect us to **never** be below the lower bound, but I'd want to know if it happened
-        expect(
-          endingMemoryUsed,
-          `script started with ${startingMemoryUsed}MB heap but ended with ${endingMemoryUsed}MB heap used`
-        ).to.be.within(
-          startingMemoryUsed - MB_PERMITTED_OFFSET,
-          startingMemoryUsed + MB_PERMITTED_OFFSET
-        );
-      });
+      it(
+        `is within ${MB_PERMITTED_OFFSET}MB of starting amount`,
+        { requires: { tls: 'disabled' } },
+        async () => {
+          // Why check the lower bound? No reason, but it would be very surprising if we managed to free MB_PERMITTED_OFFSET MB of memory
+          // I expect us to **never** be below the lower bound, but I'd want to know if it happened
+          expect(
+            endingMemoryUsed,
+            `script started with ${startingMemoryUsed}MB heap but ended with ${endingMemoryUsed}MB heap used`
+          ).to.be.within(
+            startingMemoryUsed - MB_PERMITTED_OFFSET,
+            startingMemoryUsed + MB_PERMITTED_OFFSET
+          );
+        }
+      );
     });
 
     describe('ending heap snapshot', () => {
-      it('has 0 MongoClients in memory', async () => {
+      it('has 0 MongoClients in memory', { requires: { tls: 'disabled' } }, async () => {
         // lengthOf crashes chai b/c it tries to print out a gigantic diff
         expect(
           clientsInMemory,

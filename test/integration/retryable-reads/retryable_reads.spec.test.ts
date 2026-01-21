@@ -2,6 +2,7 @@ import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
+import { isTLSEnabled } from '../../tools/runner/filters/tls_filter';
 
 const UNIMPLEMENTED_APIS = [
   'listIndexNames',
@@ -25,6 +26,9 @@ describe('Retryable Reads (unified)', function () {
         return `TODO(NODE-6832): fix flaky retryable reads tests`;
       }
     }
+
+    if (isTLSEnabled) return 'TODO(NODE-XXXX): ...';
+
     return false;
   });
 });

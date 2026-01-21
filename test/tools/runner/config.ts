@@ -220,7 +220,7 @@ export class TestConfiguration {
     return uri.indexOf('MONGODB-OIDC') > -1 && uri.indexOf(`ENVIRONMENT:${env}`) > -1;
   }
 
-  newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
+  protected buildClientOptions(serverOptions?: MongoClientOptions): MongoClientOptions {
     const baseOptions: MongoClientOptions = this.compressor
       ? {
           compressors: this.compressor
@@ -233,16 +233,18 @@ export class TestConfiguration {
       serverOptions = this.setupLogging(serverOptions);
     }
 
+    return serverOptions;
+  }
+
+  newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
+    serverOptions = this.buildClientOptions(serverOptions);
+
     // Support MongoClient constructor form (url, options) for `newClient`.
     if (typeof urlOrQueryOptions === 'string') {
-      if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
-        throw new Error(`Cannot use options to specify host/port, must be in ${urlOrQueryOptions}`);
-      }
-
       return new MongoClient(urlOrQueryOptions, serverOptions);
     }
 
-    const queryOptions = urlOrQueryOptions || {};
+    const queryOptions = urlOrQueryOptions ?? {};
 
     // Fall back.
     let dbHost = queryOptions.host || this.options.host;

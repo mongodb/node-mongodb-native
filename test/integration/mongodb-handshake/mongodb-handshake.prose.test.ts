@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { type ClientMetadata, type DriverInfo, Int32, MongoClient } from '../../../src';
+import { type ClientMetadata, type DriverInfo, Int32, type MongoClient } from '../../../src';
 import { Connection } from '../../../src/cmap/connection';
 import { getFAASEnv, isDriverInfoEqual } from '../../../src/cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
@@ -397,7 +397,7 @@ describe('Client Metadata Update Prose Tests', function () {
         // 4. Save intercepted `client` document as `updatedClientMetadata`.
         // 5. Wait 5ms for the connection to become idle.
         beforeEach(async function () {
-          client = new MongoClient(this.configuration.url(), {
+          client = this.configuration.newClient(this.configuration.url(), {
             maxIdleTimeMS: 1,
             serverApi: this.configuration.serverApi
           });
@@ -488,10 +488,13 @@ describe('Client Metadata Update Prose Tests', function () {
       // 1. Create a `MongoClient` instance with:
       //     - `maxIdleTimeMS` set to `1ms`
 
-      client = new MongoClient(this.configuration.url(), {
-        maxIdleTimeMS: 1,
-        serverApi: this.configuration.serverApi
-      });
+      client = this.configuration.newClient(
+        {},
+        {
+          maxIdleTimeMS: 1,
+          serverApi: this.configuration.serverApi
+        }
+      );
       // 2. Append the following `DriverInfoOptions` to the `MongoClient` metadata:
       //   | Field    | Value            |
       //   | -------- | ---------------- |
@@ -592,7 +595,7 @@ describe('Client Metadata Update Prose Tests', function () {
       //     | name     | library          |
       //     | version  | 1.2              |
       //     | platform | Library Platform |
-      client = new MongoClient(this.configuration.url(), {
+      client = this.configuration.newClient(this.configuration.url(), {
         maxIdleTimeMS: 1,
         serverApi: this.configuration.serverApi,
         driverInfo: { name: 'library', version: '1.2', platform: 'Library Platform' }
@@ -663,7 +666,7 @@ describe('Client Metadata Update Prose Tests', function () {
       //     | version  | 1.2              |
       //     | platform | Library Platform |
 
-      client = new MongoClient(this.configuration.url(), {
+      client = this.configuration.newClient(this.configuration.url(), {
         maxIdleTimeMS: 1,
         driverInfo: {
           name: 'library',
@@ -793,7 +796,7 @@ describe('Client Metadata Update Prose Tests', function () {
         it('does not appended duplicate metadata', async function () {
           // 1. Create a `MongoClient` instance with:
           // - `maxIdleTimeMS` set to `1ms`
-          client = new MongoClient(this.configuration.url(), {
+          client = this.configuration.newClient(this.configuration.url(), {
             maxIdleTimeMS: 1,
             serverApi: this.configuration.serverApi
           });
@@ -897,7 +900,7 @@ describe('Client Metadata Update Prose Tests', function () {
           // 1. Create a `MongoClient` instance with:
           //   - `maxIdleTimeMS` set to `1ms`
           //   - `driverInfo` set to the `DriverInfoOptions` from the selected test case from the initial metadata section.
-          client = new MongoClient(this.configuration.url(), {
+          client = this.configuration.newClient(this.configuration.url(), {
             maxIdleTimeMS: 1,
             serverApi: this.configuration.serverApi,
             driverInfo: metadata.initial

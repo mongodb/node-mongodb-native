@@ -24,6 +24,7 @@ import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
 import { Topology } from '../../src/sdam/topology';
 import { processTimeMS } from '../../src/utils';
 import { type TestConfiguration } from './runner/config';
+import { isTLSEnabled } from './runner/filters/tls_filter';
 
 export function ensureCalledWith(stub: any, args: any[]) {
   args.forEach((m: any) => expect(stub).to.have.been.calledWith(m));
@@ -111,14 +112,38 @@ export function getEncryptExtraOptions(): MongoClientOptions['autoEncryption']['
   return {};
 }
 
-export function getEnvironmentalOptions() {
+export function getTLSOptions() {
+  if (!isTLSEnabled) return {};
+
+  const requiredTLSEnv = ['TLS_KEY_FILE', 'TLS_CA_FILE', 'TLS_CRL_FILE'];
+  const missingVariables = requiredTLSEnv.filter(key => process.env[key] == null);
+
+  if (missingVariables.length)
+    throw new Error(
+      `TLS requires the following additional environment variables: ${missingVariables.join(',')}`
+    );
+
+  const { TLS_KEY_FILE: tlsCertificateKeyFile, TLS_CA_FILE: tlsCAFile } = process.env;
+
+  return {
+    tlsCertificateKeyFile,
+    tlsCAFile,
+    tls: true
+  };
+}
+
+export function getEnvironmentalOptions(): MongoClientOptions {
   const options = {};
   if (process.env.MONGODB_API_VERSION) {
     Object.assign(options, {
       serverApi: { version: process.env.MONGODB_API_VERSION }
     });
   }
-  return options;
+
+  return {
+    ...options,
+    ...getTLSOptions()
+  };
 }
 
 /**

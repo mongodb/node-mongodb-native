@@ -832,6 +832,8 @@ describe('Aggregation', function () {
       const coll1 = client.db(databaseName).collection('coll1');
       const coll2 = client.db(databaseName).collection('coll2');
 
+      await client.connect();
+
       await Promise.all([coll1.deleteMany({}), coll2.deleteMany({})])
         .then(() => {
           const docs = Array.from({ length: 10 }).map(() => ({ a: 1 }));

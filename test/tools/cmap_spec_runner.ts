@@ -5,6 +5,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { inspect } from 'util';
 
 import {
+  MongoClientOptions,
   type Connection,
   type ConnectionPoolOptions,
   type HostAddress,
@@ -16,7 +17,7 @@ import { CMAP_EVENTS } from '../../src/constants';
 import { TimeoutContext } from '../../src/timeout';
 import { shuffle } from '../../src/utils';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
-import { type FailCommandFailPoint, sleep } from './utils';
+import { type FailCommandFailPoint, getTLSOptions, sleep } from './utils';
 
 type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
@@ -509,7 +510,7 @@ export function runCmapTestSuite(
           const selectedHostUri = hosts[0];
           hostAddress = serverDescriptionMap.get(selectedHostUri).hostAddress;
 
-          const clientOptions: { appName?: string } = {};
+          const clientOptions: Pick<MongoClientOptions, 'appName'> = {};
           if (test.poolOptions?.appName) {
             clientOptions.appName = test.poolOptions.appName;
           }
@@ -520,6 +521,7 @@ export function runCmapTestSuite(
             clientOptions
           );
           await client.connect();
+
           if (test.failPoint) {
             await client.db('admin').command(test.failPoint);
           }
@@ -530,12 +532,18 @@ export function runCmapTestSuite(
             throw new Error('Failed to retrieve server for test');
           }
 
-          threadContext = new ThreadContext(
-            server,
-            hostAddress,
-            this.configuration.isLoadBalanced ? { loadBalanced: true } : {},
-            { injectPoolStats: !!options?.injectPoolStats }
-          );
+          const poolOptions = {
+            ...(this.configuration.isLoadBalanced ? { loadBalanced: true } : {}),
+            ...getTLSOptions()
+          };
+
+          delete poolOptions.tls;
+
+          console.error({ poolOptions });
+
+          threadContext = new ThreadContext(server, hostAddress, poolOptions, {
+            injectPoolStats: !!options?.injectPoolStats
+          });
         } finally {
           await utilClient.close();
         }
@@ -554,9 +562,17 @@ export function runCmapTestSuite(
         await client.close();
       });
 
-      it(test.description, async function () {
-        await runCmapTest(test, threadContext);
-      });
+      it(
+        test.description,
+        {
+          requires: {
+            tls: 'disabled'
+          }
+        },
+        async function () {
+          await runCmapTest(test, threadContext);
+        }
+      );
     });
   }
 }
