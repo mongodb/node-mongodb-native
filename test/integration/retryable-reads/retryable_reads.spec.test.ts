@@ -1,8 +1,8 @@
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
-import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 import { isTLSEnabled } from '../../tools/runner/filters/tls_filter';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const UNIMPLEMENTED_APIS = [
   'listIndexNames',

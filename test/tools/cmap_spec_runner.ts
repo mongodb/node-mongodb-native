@@ -5,11 +5,11 @@ import { clearTimeout, setTimeout } from 'timers';
 import { inspect } from 'util';
 
 import {
-  MongoClientOptions,
   type Connection,
   type ConnectionPoolOptions,
   type HostAddress,
   type MongoClient,
+  type MongoClientOptions,
   type Server
 } from '../../src';
 import { ConnectionPool } from '../../src/cmap/connection_pool';

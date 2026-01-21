@@ -2,9 +2,9 @@ import * as v8 from 'node:v8';
 
 import { expect } from 'chai';
 
-import { getEnvironmentalOptions, sleep } from '../../tools/utils';
-import { runScriptAndReturnHeapInfo } from './resource_tracking_script_builder';
 import { isTLSEnabled } from '../../tools/runner/filters/tls_filter';
+import { sleep } from '../../tools/utils';
+import { runScriptAndReturnHeapInfo } from './resource_tracking_script_builder';
 
 /**
  * This 5MB range is selected arbitrarily and should likely be raised if failures are seen intermittently.
