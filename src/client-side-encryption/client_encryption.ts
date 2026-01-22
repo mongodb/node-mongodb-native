@@ -144,9 +144,7 @@ export class ClientEncryption {
 
     const mongoCryptOptions: MongoCryptOptions = {
       ...options,
-      kmsProviders: !ByteUtils.isUint8Array(this._kmsProviders)
-        ? (serialize(this._kmsProviders) as Buffer)
-        : this._kmsProviders,
+      kmsProviders: serialize(this._kmsProviders),
       errorWrapper: defaultErrorWrapper
     };
 

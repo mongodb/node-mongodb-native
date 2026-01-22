@@ -417,10 +417,7 @@ function doWrite(
     return;
   }
 
-  const chunkString = chunk as string;
-  const inputBuf = chunkString
-    ? fromUTF8(chunkString)
-    : ByteUtils.toLocalBufferType(chunk as Uint8Array);
+  const inputBuf = typeof chunk === 'string' ? fromUTF8(chunk) : ByteUtils.toLocalBufferType(chunk);
 
   stream.length += inputBuf.length;
 

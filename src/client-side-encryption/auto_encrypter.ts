@@ -402,7 +402,7 @@ export class AutoEncrypter {
       return cmd;
     }
 
-    const commandBuffer: Uint8Array = ByteUtils.isUint8Array(cmd) ? cmd : serialize(cmd, options);
+    const commandBuffer: Uint8Array = serialize(cmd, options);
     const context = this._mongocrypt.makeEncryptionContext(
       MongoDBCollectionNamespace.fromString(ns).db,
       commandBuffer
