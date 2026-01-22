@@ -28,7 +28,6 @@ SSL=${SSL:-nossl}
 if [ "$SSL" != "nossl" ]; then
     export TLS_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
     export TLS_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
-    export TLS_CRL_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/crl.pem"
 fi
 
 # run tests

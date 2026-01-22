@@ -115,11 +115,11 @@ export function getEncryptExtraOptions(): MongoClientOptions['autoEncryption']['
 
 export function getTLSOptions(): Pick<
   MongoClientOptions,
-  'tls' | 'tlsCertificateKeyFile' | 'tlsCAFile' | 'tlsCRLFile'
+  'tls' | 'tlsCertificateKeyFile' | 'tlsCAFile'
 > {
   if (!isTLSEnabled) return {};
 
-  const requiredTLSEnv = ['TLS_KEY_FILE', 'TLS_CA_FILE', 'TLS_CRL_FILE'];
+  const requiredTLSEnv = ['TLS_KEY_FILE', 'TLS_CA_FILE'];
   const missingVariables = requiredTLSEnv.filter(key => process.env[key] == null);
 
   if (missingVariables.length)
@@ -127,24 +127,17 @@ export function getTLSOptions(): Pick<
       `TLS requires the following additional environment variables: ${missingVariables.join(',')}`
     );
 
-  const {
-    TLS_KEY_FILE: tlsCertificateKeyFile,
-    TLS_CA_FILE: tlsCAFile,
-    TLS_CRL_FILE: tlsCRLFile
-  } = process.env;
+  const { TLS_KEY_FILE: tlsCertificateKeyFile, TLS_CA_FILE: tlsCAFile } = process.env;
 
   return {
     tlsCertificateKeyFile,
     tlsCAFile,
-    tlsCRLFile,
     tls: true
   };
 }
 
-export function getEnvironmentalOptions(): Pick<
-  MongoClientOptions,
-  'tls' | 'tlsCertificateKeyFile' | 'tlsCAFile' | 'tlsCRLFile' | 'serverApi'
-> {
+export function getEnvironmentalOptions(): ReturnType<typeof getTLSOptions> &
+  Pick<MongoClientOptions, 'serverApi'> {
   const options: ReturnType<typeof getEnvironmentalOptions> = {};
 
   if (process.env.MONGODB_API_VERSION) {
