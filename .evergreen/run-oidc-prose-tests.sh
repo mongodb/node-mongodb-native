@@ -15,20 +15,11 @@ if [ -z "${MONGODB_URI_SINGLE}" ]; then
   exit 1
 fi
 
-if [ "$ENVIRONMENT" = "azure" ]; then
-  npm run check:oidc-azure
-elif [ "$ENVIRONMENT" = "gcp" ]; then
-  npm run check:oidc-gcp
-elif [ "$ENVIRONMENT" = "test" ]; then
+if [ "$ENVIRONMENT" = "test" ]; then
   if [ -z "${OIDC_TOKEN_FILE}" ]; then
     echo "Must specify OIDC_TOKEN_FILE"
     exit 1
   fi
-  npm run check:oidc-test
-else
-  if [ -z "${K8S_VARIANT}" ]; then
-    echo "Must specify K8S_VARIANT"
-    exit 1
-  fi
-  npm run check:oidc-k8s
 fi
+
+npm run check:oidc-test
