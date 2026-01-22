@@ -27,7 +27,7 @@ describe('Retryable Reads (unified)', function () {
       }
     }
 
-    if (isTLSEnabled) return 'TODO(NODE-XXXX): ...';
+    if (isTLSEnabled) return 'TODO(NODE-7408): fix these tests when TLS is enabled';
 
     return false;
   });

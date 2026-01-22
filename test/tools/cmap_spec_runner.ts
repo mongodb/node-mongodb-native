@@ -532,14 +532,7 @@ export function runCmapTestSuite(
             throw new Error('Failed to retrieve server for test');
           }
 
-          const poolOptions = {
-            ...(this.configuration.isLoadBalanced ? { loadBalanced: true } : {}),
-            ...getTLSOptions()
-          };
-
-          delete poolOptions.tls;
-
-          console.error({ poolOptions });
+          const poolOptions = this.configuration.isLoadBalanced ? { loadBalanced: true } : {};
 
           threadContext = new ThreadContext(server, hostAddress, poolOptions, {
             injectPoolStats: !!options?.injectPoolStats
@@ -566,6 +559,7 @@ export function runCmapTestSuite(
         test.description,
         {
           requires: {
+            // TODO(NODE-7408): fix these tests when TLS is enabled
             tls: 'disabled'
           }
         },

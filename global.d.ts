@@ -120,7 +120,7 @@ declare global {
        * beforeEach(() => {
        *   if ('some condition') {
        *     this.currentTest.skipReason = 'requires <run condition> to run';
-       *     this;
+       *     this.skip();
        *   }
        * });
        * ```

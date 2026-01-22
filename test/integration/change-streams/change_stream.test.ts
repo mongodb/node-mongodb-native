@@ -1273,7 +1273,7 @@ describe('Change Streams', function () {
         'changeStream should close if cursor id for initial aggregate is Long.ZERO',
         {
           requires: {
-            predicate: () => (process.env.SSL === 'ssl' ? 'test requries no TLS' : true)
+            tls: 'disabled'
           }
         },
         async function () {
