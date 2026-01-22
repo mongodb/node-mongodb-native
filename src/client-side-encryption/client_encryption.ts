@@ -6,7 +6,6 @@ import type {
 
 import {
   type Binary,
-  ByteUtils,
   deserialize,
   type Document,
   type Int32,
