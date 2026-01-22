@@ -18,7 +18,7 @@ import {
   type HostAddress,
   MongoClient,
   type MongoClientOptions,
-  ServerApiVersion,
+  type ServerApiVersion,
   type TopologyOptions
 } from '../../src';
 import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
