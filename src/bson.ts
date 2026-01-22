@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports */
-import { BSON, ByteUtils, type DeserializeOptions, type SerializeOptions } from 'bson';
+import { BSON, type DeserializeOptions, type SerializeOptions } from 'bson';
 
 export {
   Binary,
@@ -43,28 +43,19 @@ export const getInt32LE = BSON.NumberUtils.getInt32LE;
 export const getFloat64LE = BSON.NumberUtils.getFloat64LE;
 export const getBigInt64LE = BSON.NumberUtils.getBigInt64LE;
 export const toUTF8 = BSON.ByteUtils.toUTF8;
-
-// BSON wrappers
+export const fromUTF8 = BSON.ByteUtils.fromUTF8;
+export const fromBase64 = BSON.ByteUtils.fromBase64;
+export const fromNumberArray = BSON.ByteUtils.fromNumberArray;
+export const concatBuffers = BSON.ByteUtils.concat;
+export const allocateBuffer = BSON.ByteUtils.allocate;
+export const allocateUnsafeBuffer = BSON.ByteUtils.allocateUnsafe;
 
 // writeInt32LE, same order of arguments as Buffer.writeInt32LE
 export const writeInt32LE = (destination: Uint8Array, value: number, offset: number) =>
   BSON.NumberUtils.setInt32LE(destination, offset, value);
 
-// various wrappers that consume and return local buffer types
-
-export const fromUTF8 = (text: string) =>
-  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromUTF8(text));
-export const fromBase64 = (b64: string) =>
-  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromBase64(b64));
-export const fromNumberArray = (array: number[]) =>
-  ByteUtils.toLocalBufferType(BSON.ByteUtils.fromNumberArray(array));
-export const concatBuffers = (list: Uint8Array[]) => {
-  return ByteUtils.toLocalBufferType(BSON.ByteUtils.concat(list));
-};
-export const allocateBuffer = (size: number) =>
-  ByteUtils.toLocalBufferType(BSON.ByteUtils.allocate(size));
-export const allocateUnsafeBuffer = (size: number) =>
-  ByteUtils.toLocalBufferType(BSON.ByteUtils.allocateUnsafe(size));
+// copyBuffer: copies from source buffer to target buffer, returns number of bytes copied
+// inputs are explicitly named to avoid confusion
 export const copyBuffer = (input: {
   source: Uint8Array;
   target: Uint8Array;
@@ -92,6 +83,8 @@ const validateBufferInputs = (buffer: Uint8Array, offset: number, length: number
   }
 };
 
+// readInt32LE, reads a 32-bit integer from buffer at given offset
+// throws if offset is out of bounds
 export const readInt32LE = (buffer: Uint8Array, offset: number): number => {
   validateBufferInputs(buffer, offset, 4);
   return getInt32LE(buffer, offset);
