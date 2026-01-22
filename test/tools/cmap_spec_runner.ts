@@ -17,7 +17,7 @@ import { CMAP_EVENTS } from '../../src/constants';
 import { TimeoutContext } from '../../src/timeout';
 import { shuffle } from '../../src/utils';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
-import { type FailCommandFailPoint, getTLSOptions, sleep } from './utils';
+import { type FailCommandFailPoint, sleep } from './utils';
 
 type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
