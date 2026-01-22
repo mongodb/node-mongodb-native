@@ -166,7 +166,7 @@ export async function performGSSAPICanonicalizeHostName(
 
     try {
       // Perform a reverse ptr lookup on the ip address.
-      const results = await dns.promises.resolvePtr(address);
+      const results = await dns.promises.resolve(address, 'PTR');
       // If the ptr did not error but had no results, return the host.
       return results.length > 0 ? results[0] : host;
     } catch {
@@ -185,7 +185,7 @@ export async function performGSSAPICanonicalizeHostName(
 export async function resolveCname(host: string): Promise<string> {
   // Attempt to resolve the host name
   try {
-    const results = await dns.promises.resolveCname(host);
+    const results = await dns.promises.resolve(host, 'CNAME');
     // Get the first resolved host id
     return results.length > 0 ? results[0] : host;
   } catch {

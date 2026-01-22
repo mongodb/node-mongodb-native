@@ -23,7 +23,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
       beforeEach(async function () {
         // this fn stubs DNS resolution to always pass - so we are only checking pre-DNS validation
 
-        sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+        sinon.stub(dns.promises, 'resolve').callsFake(async () => {
           return [
             {
               name: 'resolved.mongo.localhost',
