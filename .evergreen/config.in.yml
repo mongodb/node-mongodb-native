@@ -1253,4 +1253,4 @@ buildvariants:
     display_name: Runtime Independence Test
     run_on: ubuntu2204-small
     tasks:
-      - .alpine-fle
+      - .runtime-independence

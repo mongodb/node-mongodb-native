@@ -651,7 +651,7 @@ SINGLETON_TASKS.push({
 
 SINGLETON_TASKS.push({
   name: 'test-runtime-independence',
-  tags: ['runtime-independence-tests'],
+  tags: ['runtime-independence'],
   commands: [
     updateExpansions({
       NODE_LTS_VERSION: LATEST_LTS,

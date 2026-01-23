@@ -2036,7 +2036,7 @@ tasks:
       - func: build and test alpine FLE
   - name: test-runtime-independence
     tags:
-      - runtime-independence-tests
+      - runtime-independence
     commands:
       - command: expansions.update
         type: setup
@@ -2889,7 +2889,7 @@ buildvariants:
     display_name: Runtime Independence Test
     run_on: ubuntu2204-small
     tasks:
-      - .alpine-fle
+      - .runtime-independence
   - name: rhel80-large-iron
     display_name: rhel8 Node20.19.0
     run_on: rhel80-large
