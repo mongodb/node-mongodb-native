@@ -49,6 +49,8 @@ if (!configFile.error) {
     // inline source map for stack traces
     inlineSourceMap: true
   };
+} else {
+  throw new Error('tsconfig is missing');
 }
 
 const moduleCache = new Map();
