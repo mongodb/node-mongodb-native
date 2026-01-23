@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as process from 'process';
 
-import { BSON, type Document, Int32 } from '../../bson';
+import { BSON, type Document, Int32, NumberUtils } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { DriverInfo, MongoOptions } from '../../mongo_client';
 import { fileIsAccessible } from '../../utils';
@@ -336,17 +336,18 @@ declare const Bun: { (): void; version?: string } | undefined;
  * with a future change to these global objects.
  */
 function getRuntimeInfo(): string {
+  const endianness = NumberUtils.isBigEndian ? 'BE' : 'LE';
   if ('Deno' in globalThis) {
     const version = typeof Deno?.version?.deno === 'string' ? Deno?.version?.deno : '0.0.0-unknown';
 
-    return `Deno v${version}, ${os.endianness()}`;
+    return `Deno v${version}, ${endianness}`;
   }
 
   if ('Bun' in globalThis) {
     const version = typeof Bun?.version === 'string' ? Bun?.version : '0.0.0-unknown';
 
-    return `Bun v${version}, ${os.endianness()}`;
+    return `Bun v${version}, ${endianness}`;
   }
 
-  return `Node.js ${process.version}, ${os.endianness()}`;
+  return `Node.js ${process.version}, ${endianness}`;
 }

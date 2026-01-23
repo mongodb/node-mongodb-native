@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@mongodb-js/saslprep": "^1.3.0",
-    "bson": "^7.0.0",
+    "bson": "^7.1.1",
     "mongodb-connection-string-url": "^7.0.0"
   },
   "peerDependencies": {
@@ -147,9 +147,6 @@
     "check:aws": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_aws.test.ts test/integration/auth/mongodb_aws.prose.test.ts",
     "check:oidc-auth": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/auth.spec.test.ts",
     "check:oidc-test": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_oidc.prose.test.ts",
-    "check:oidc-azure": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_oidc_azure.prose.05.test.ts",
-    "check:oidc-gcp": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_oidc_gcp.prose.06.test.ts",
-    "check:oidc-k8s": "nyc mocha --config test/mocha_mongodb.js test/integration/auth/mongodb_oidc_k8s.prose.07.test.ts",
     "check:kerberos": "nyc mocha --config test/manual/mocharc.js test/manual/kerberos.test.ts",
     "check:tls": "nyc mocha --config test/manual/mocharc.js test/manual/tls_support.test.ts",
     "check:ldap": "nyc mocha --config test/manual/mocharc.js test/manual/ldap.test.ts",

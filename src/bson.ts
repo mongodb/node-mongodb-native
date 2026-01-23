@@ -22,6 +22,7 @@ export {
   Long,
   MaxKey,
   MinKey,
+  NumberUtils,
   ObjectId,
   type ObjectIdLike,
   serialize,
