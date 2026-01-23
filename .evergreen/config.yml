@@ -2022,18 +2022,19 @@ tasks:
       - func: assume secrets manager role
       - func: build and test alpine FLE
   - name: test-runtime-independence
-    tags: []
+    tags:
+      - runtime-independency-tests
     commands:
       - command: expansions.update
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: 20.19.0}
-            - {key: VERSION, value: '7.0'}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: run tests
+      - func: run runtime independence tests
   - name: test-latest-server-noauth
     tags:
       - latest
