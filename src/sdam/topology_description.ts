@@ -192,7 +192,7 @@ export class TopologyDescription {
 
     // update common wire version
     if (serverDescription.maxWireVersion !== 0) {
-      if (commonWireVersion == null) {
+      if (commonWireVersion === 0) {
         commonWireVersion = serverDescription.maxWireVersion;
       } else {
         commonWireVersion = Math.min(commonWireVersion, serverDescription.maxWireVersion);
