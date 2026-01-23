@@ -290,7 +290,7 @@
           "error",
           {
             "name": "Buffer",
-            "message": "Use Uin8Array instead"
+            "message": "Use Uint8Array instead"
           }
         ]
       }
