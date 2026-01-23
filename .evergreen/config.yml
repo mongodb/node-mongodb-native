@@ -2021,7 +2021,7 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: build and test alpine FLE
-  - name: test-runtime-independence
+  - name: test-runtime-independency
     tags:
       - runtime-independency-tests
     commands:
@@ -2034,7 +2034,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: run runtime independence tests
+      - func: run runtime independency tests
   - name: test-latest-server-noauth
     tags:
       - latest

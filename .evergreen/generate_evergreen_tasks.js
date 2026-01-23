@@ -650,7 +650,7 @@ SINGLETON_TASKS.push({
 });
 
 SINGLETON_TASKS.push({
-  name: 'test-runtime-independence',
+  name: 'test-runtime-independency',
   tags: ['runtime-independency-tests'],
   commands: [
     updateExpansions({
@@ -660,7 +660,7 @@ SINGLETON_TASKS.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'run runtime independence tests' }
+    { func: 'run runtime independency tests' }
   ]
 });
 

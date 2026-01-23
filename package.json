@@ -157,7 +157,7 @@
     "check:csfle": "nyc mocha --config test/mocha_mongodb.js test/integration/client-side-encryption",
     "check:snappy": "nyc mocha test/unit/assorted/snappy.test.js",
     "check:x509": "nyc mocha test/manual/x509_auth.test.ts",
-    "check:runtime-independence": "ts-node test/tools/runner/vm_runner.ts test/integration/change-streams/change_stream.test.ts",
+    "check:runtime-independency": "ts-node test/tools/runner/vm_runner.ts test/integration/change-streams/change_stream.test.ts",
     "fix:eslint": "npm run check:eslint -- --fix",
     "prepare": "node etc/prepare.js",
     "preview:docs": "ts-node etc/docs/preview.ts",
