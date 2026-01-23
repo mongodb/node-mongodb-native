@@ -113,7 +113,7 @@ functions:
         args:
           - .evergreen/run-tests.sh
 
-  "run runtime independency tests":
+  "run runtime independence tests":
     - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
@@ -123,7 +123,7 @@ functions:
         timeout_secs: 300
         binary: bash
         args:
-          - .evergreen/run-runtime-independency-tests.sh
+          - .evergreen/run-runtime-independence-tests.sh
 
   "perf send":
     - command: s3.put
@@ -1246,6 +1246,11 @@ ignore:
 buildvariants:
   - name: Alpine FLE Tests
     display_name: Alpine FLE Test
+    run_on: ubuntu2204-small
+    tasks:
+      - .alpine-fle
+  - name: Runtime Independence Test
+    display_name: Runtime Independence Test
     run_on: ubuntu2204-small
     tasks:
       - .alpine-fle

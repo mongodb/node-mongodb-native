@@ -650,8 +650,8 @@ SINGLETON_TASKS.push({
 });
 
 SINGLETON_TASKS.push({
-  name: 'test-runtime-independency',
-  tags: ['runtime-independency-tests'],
+  name: 'test-runtime-independence',
+  tags: ['runtime-independence-tests'],
   commands: [
     updateExpansions({
       NODE_LTS_VERSION: LATEST_LTS,
@@ -660,7 +660,7 @@ SINGLETON_TASKS.push({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    { func: 'run runtime independency tests' }
+    { func: 'run runtime independence tests' }
   ]
 });
 

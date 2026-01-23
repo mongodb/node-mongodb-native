@@ -25,4 +25,4 @@ export AUTH=$AUTH
 export MONGODB_API_VERSION=${MONGODB_API_VERSION}
 export MONGODB_URI=${MONGODB_URI}
 
-npm run check:runtime-independency
+npm run check:runtime-independence
