@@ -10,24 +10,21 @@ runOnRequirements:
     topologies: [replicaset, sharded, load-balanced]
 
 createEntities:
-  -
-    client:
+  - client:
       id: &client client
       useMultipleMongoses: false
       observeEvents: [commandStartedEvent, commandSucceededEvent, commandFailedEvent]
 
-  -
-    client:
+  - client:
       id: &fail_point_client fail_point_client
       useMultipleMongoses: false
 
-  -
-    database:
+  - database:
       id: &database database
       client: *client
       databaseName: &database_name retryable-writes-tests
-  -
-    collection:
+
+  - collection:
       id: &collection collection
       database: *database
       collectionName: &collection_name coll
@@ -36,22 +33,18 @@ _yamlAnchors:
   bulkWriteInsertNamespace: &client_bulk_write_ns retryable-writes-tests.coll
 
 initialData:
-  -
-    collectionName: *collection_name
+  - collectionName: *collection_name
     databaseName: *database_name
     documents:
       - { _id: 1, x: 11 }
       - { _id: 2, x: 22 }
 
-tests:
-{% for operation in operations %}
-  -
-    description: '{{operation.object}}.{{operation.operation_name}} retries at most maxAttempts=5 times'
+tests: {% for operation in operations %}
+  - description: '{{operation.object}}.{{operation.operation_name}} retries at most maxAttempts=5 times'
     {%- if ((operation.operation_name == 'clientBulkWrite')) %}
     runOnRequirements:
       - minServerVersion: '8.0' # client bulk write added to server in 8.0
     {%- endif %}
-    
     operations:
       - name: failPoint
         object: testRunner
@@ -65,10 +58,8 @@ tests:
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
       
-      -
-        object: *{{operation.object}}
-        name: {{operation.operation_name}}
-        {%- if operation.arguments|length > 0 %}
+      - name: {{operation.operation_name}}
+        object: *{{operation.object}}  {%- if operation.arguments|length > 0 %}
         arguments:
           {%- for arg in operation.arguments %}
           {{arg}}
@@ -107,5 +98,4 @@ tests:
               commandName: {{operation.command_name}}
           - commandFailedEvent:
               commandName: {{operation.command_name}}
-
 {% endfor -%}
