@@ -66,6 +66,7 @@ const sandbox = vm.createContext({
   URL: global.URL,
   URLSearchParams: global.URLSearchParams,
   queueMicrotask: queueMicrotask,
+  performance: global.performance,
 
   process: process,
   Buffer: Buffer,

@@ -88,6 +88,19 @@ functions:
         binary: bash
         args:
           - .evergreen/run-tests.sh
+  run runtime independency tests:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
+    - command: subprocess.exec
+      type: test
+      params:
+        add_expansions_to_env: true
+        working_dir: src
+        timeout_secs: 300
+        binary: bash
+        args:
+          - .evergreen/run-runtime-independency-tests.sh
   perf send:
     - command: s3.put
       params:
