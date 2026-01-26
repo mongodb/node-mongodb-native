@@ -2,7 +2,7 @@
 set -euxo pipefail # Exit on error, undefined variable, and fail on pipe errors
 
 # NOTE: This script assumes that you've created an AWS SSO session already, as outlined in
-# ./test/readme.md, section `AWS Profile`,  and you have an AWS profile
+# ../test/readme.md, section `AWS Profile`,  and you have an AWS profile
 # named `drivers-test-secrets-role-857654397073` in your AWS config.
 
 # Choose credential type: env-creds or session-creds
