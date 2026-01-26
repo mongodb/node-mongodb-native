@@ -1717,7 +1717,7 @@ describe('Change Streams', function () {
         });
       });
 
-      context.only('when set to false', () => {
+      context('when set to false', () => {
         it('converts Long values to native numbers', {
           metadata: { requires: { topology: '!single' } },
           test: async function () {
