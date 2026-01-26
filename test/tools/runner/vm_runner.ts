@@ -120,7 +120,7 @@ function loadInSandbox(filepath: string) {
   }
 
   // js-bson is allowed to use Buffer, only ./src/ is not
-  const isSourceFile = realPath.includes('/src/') || !realPath.includes('node_modules');
+  const isSourceFile = realPath.includes('/src/') && !realPath.includes('node_modules');
   const isTestFile = realPath.includes('.test.ts') || realPath.includes('.test.js');
 
   let localBuffer = Buffer;
