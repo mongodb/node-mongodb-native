@@ -9,7 +9,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import {
   allocateBuffer,
   allocateUnsafeBuffer,
-  ByteUtils as BSONByteUtils,
+  ByteUtils,
   deserialize,
   type Document,
   getInt32LE,
@@ -52,24 +52,6 @@ import { WriteConcern } from './write_concern';
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 
 export type AnyOptions = Document;
-
-export const ByteUtils = {
-  toLocalBufferType(this: void, buffer: Buffer | Uint8Array): Buffer {
-    return BSONByteUtils.toLocalBufferType(buffer) as Buffer;
-  },
-
-  equals(this: void, seqA: Uint8Array, seqB: Uint8Array) {
-    return ByteUtils.toLocalBufferType(seqA).equals(seqB);
-  },
-
-  compare(this: void, seqA: Uint8Array, seqB: Uint8Array) {
-    return ByteUtils.toLocalBufferType(seqA).compare(seqB);
-  },
-
-  toBase64(this: void, uint8array: Uint8Array) {
-    return ByteUtils.toLocalBufferType(uint8array).toString('base64');
-  }
-};
 
 /**
  * Returns true if value is a Uint8Array or a Buffer
@@ -1338,10 +1320,10 @@ export function decorateDecryptionResult(
 ): void {
   if (isTopLevelDecorateCall) {
     // The original value could have been either a JS object or a BSON buffer
-    if (BSONByteUtils.isUint8Array(original)) {
+    if (ByteUtils.isUint8Array(original)) {
       original = deserialize(original);
     }
-    if (BSONByteUtils.isUint8Array(decrypted)) {
+    if (ByteUtils.isUint8Array(decrypted)) {
       throw new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');
     }
   }

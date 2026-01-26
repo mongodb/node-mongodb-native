@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers';
 
-import { ObjectId } from 'bson';
+import { ByteUtils, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
@@ -10,7 +10,6 @@ import { decorateWithExplain, Explain } from '../../src/explain';
 import {
   abortable,
   BufferPool,
-  ByteUtils,
   checkParentDomainMatch,
   compareObjectId,
   hasAtomicOperators,
