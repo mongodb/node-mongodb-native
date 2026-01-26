@@ -27,6 +27,8 @@ about the types of tests and how to run them.
   - [Running Benchmarks](#running-benchmarks)
     - [Configuration](#configuration)
   - [Secrets](#secrets)
+    - [CSFLE](#csfle)
+    - [AWS Profile](#aws-profile)
   - [Testing with Special Environments](#testing-with-special-environments)
     - [Load Balanced](#load-balanced)
     - [Client-Side Field-Level Encryption (CSFLE)](#client-side-field-level-encryption-csfle)
@@ -39,7 +41,7 @@ about the types of tests and how to run them.
       - [Deployed Lambda Tests](#deployed-lambda-tests)
     - [Kerberos Tests](#kerberos-tests)
     - [AWS Authentication tests](#aws-authentication-tests)
-      - [AWS Profile](#aws-profile)
+      - [Running AWS tests](#running-aws-tests)
     - [Container Tests](#container-tests)
   - [GCP](#gcp)
   - [Azure](#azure)
@@ -369,6 +371,8 @@ Local use of secrets manager requires:
 
 (see instructions in the secrets handling readme).
 
+### CSFLE
+
 Here's an example usage of the tooling in drivers-evergreen-tools that configures credentials for CSFLE:
 
 ```bash
@@ -382,6 +386,33 @@ source secrets-export.sh
 
 > [!IMPORTANT]
 > Make sure `secrets-export.sh` is in the .gitignore of any Github repo you might be using these tools in to avoid leaking credentials.  This is already done for this repo.
+
+### AWS Profile
+
+These instructions will help you locally configure profile-based AWS credentials.
+
+Setup an AWS_PROFILE locally to be able to use AWS and to run AWS tests locally.
+
+1. Get SSO sign-in info from AWS
+   1. Navigate to https://corp.mongodb.com/app/UserHome
+   2. Open AWS
+   3. Choose `Drivers` account
+   4. Choose `drivers-test-secrets-role`
+   5. Click `Access Keys`
+   6. Copy down `SSO start URL` and `SSO Region`
+2. Sign in locally
+   1. Run `aws configure sso-session`
+   2. Pick a name, like `drivers-test-secrets-session`
+   3. Specify `SSO start URL` and `SSO Region` from earlier steps
+3. Add a profile
+   1. Add the following profile to `~/.aws/config`
+
+   ```ini
+   [profile drivers-test-secrets-role-857654397073]
+   sso_session = drivers-test-secrets-session
+   sso_account_id = 857654397073
+   sso_role_name = drivers-test-secrets-role
+   ```
 
 ## Testing with Special Environments
 
@@ -650,30 +681,31 @@ Choose your AWS authentication credential type and export the `AWS_CREDENTIAL_TY
 
 An example of performing the above is [`etc/run-aws-integ-tests.sh`](etc/run-aws-integ-tests.sh).
 
-#### AWS Profile
+#### Running AWS tests
 
-Setup an AWS_PROFILE locally to be able to use AWS and to run AWS tests locally.
+Once you have the AWS Profile configured locally (see section "AWS Profile" for more info), you can run tests like this:
 
-1. Get SSO sign-in info from AWS
-   1. Navigate to https://corp.mongodb.com/app/UserHome
-   2. Open AWS
-   3. Choose `Drivers` account
-   4. Choose `drivers-test-secrets-role`
-   5. Click `Access Keys`
-   6. Copy down `SSO start URL` and `SSO Region`
-2. Sign in locally
-   1. Run `aws configure sso-session`
-   2. Pick a name, like `drivers-test-secrets-session`
-   3. Specify `SSO start URL` and `SSO Region` from earlier steps
-3. Add a profile
-   1. Add the following profile to `~/.aws/config`
+```sh
+export AWS_CREDENTIAL_TYPE="session-creds" # session-creds || env-creds
+export VERSION="latest"
+export NODE_LTS_VERSION="24"
+export AUTH="auth"
+export ORCHESTRATION_FILE="auth-aws.json"
+export TOPOLOGY="server"
+export NODE_DRIVER="$DRIVERS_TOOLS/.."
+export AWS_PROFILE="drivers-test-secrets-role-857654397073"
 
-   ```ini
-   [profile drivers-test-secrets-role-857654397073]
-   sso_session = drivers-test-secrets-session
-   sso_account_id = 857654397073
-   sso_role_name = drivers-test-secrets-role
-   ```
+# Login with AWS Profile
+aws sso login --sso-session drivers-test-secrets-session
+
+# Install dependencies
+bash ${NODE_DRIVER}/.evergreen/install-dependencies.sh
+
+# Orchestration
+bash ${NODE_DRIVER}/.evergreen/run-orchestration.sh
+
+bash ${NODE_DRIVER}/.evergreen/run-mongodb-aws-test.sh
+```
 
 ### Container Tests
 
