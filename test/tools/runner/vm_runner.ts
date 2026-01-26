@@ -69,7 +69,6 @@ const sandbox = vm.createContext({
   performance: global.performance,
 
   process: process,
-  Buffer: Buffer,
 
   context: global.context,
   describe: global.describe,
@@ -114,10 +113,30 @@ function loadInSandbox(filepath: string) {
   }
 
   // clientmetadata requires package.json to fetch driver's version
-  if (realPath.endsWith('.json')) {
+  if (realPath.endsWith('package.json')) {
     const jsonContent = JSON.parse(fs.readFileSync(realPath, 'utf8'));
     moduleCache.set(realPath, jsonContent);
     return jsonContent;
+  }
+
+  // js-bson is allowed to use Buffer, only ./src/ is not
+  const isSourceFile = realPath.includes('/src/') || !realPath.includes('node_modules');
+  const isTestFile = realPath.includes('.test.ts') || realPath.includes('.test.js');
+
+  let localBuffer = Buffer;
+  if (isSourceFile && !isTestFile) {
+    localBuffer = new Proxy(Buffer, {
+      get() {
+        throw new Error(
+          `Forbidden: 'Buffer' usage is not allowed in source files. Use Uint8Array instead. File: ${realPath}`
+        );
+      },
+      construct() {
+        throw new Error(
+          `Forbidden: 'Buffer' usage is not allowed in source files. Use Uint8Array instead. File: ${realPath}`
+        );
+      }
+    }) as any;
   }
 
   const content = fs.readFileSync(realPath, 'utf8');
@@ -142,28 +161,29 @@ function loadInSandbox(filepath: string) {
   moduleCache.set(realPath, localModule.exports);
 
   try {
-    const wrapper = `(function(exports, require, module, __filename, __dirname) {
+    const wrapper = `(function(exports, require, module, __filename, __dirname, Buffer) {
       ${executableCode}
     })`;
     const script = new vm.Script(wrapper, { filename: realPath });
     const fn = script.runInContext(sandbox);
 
-    fn(localModule.exports, localRequire, localModule, filename, dirname);
+    fn(localModule.exports, localRequire, localModule, filename, dirname, localBuffer);
 
     const result = localModule.exports;
-    if (realPath.includes('src/error.ts')) {
-      for (const [key, value] of Object.entries(result)) {
-        if (typeof value === 'function' && value.name?.startsWith('Mongo')) {
-          (sandbox as any)[key] = value;
 
+    const isBSON = realPath.includes('node_modules/bson');
+    const isError = realPath.includes('src/error.ts');
+
+    if (isBSON || isError) {
+      for (const [key, value] of Object.entries(result)) {
+        if (typeof value === 'function' && value.name) {
           // force instanceof to work across contexts by defining custom `instanceof` function
           Object.defineProperty(value, Symbol.hasInstance, {
-            value: (instance: any) => {
-              return (
-                instance && (instance.constructor.name === value.name || instance instanceof value)
-              );
-            }
+            value: (i: any) => i && (i.constructor.name === value.name || i instanceof value)
           });
+
+          // also inject into global for easier access in tests
+          (sandbox as any)[key] = value;
         }
       }
     }
@@ -173,7 +193,7 @@ function loadInSandbox(filepath: string) {
     return result;
   } catch (err: any) {
     moduleCache.delete(realPath);
-    console.error(`Error running ${realPath} in sandbox:`, err.stack);
+    console.error(`Error running ${realPath} in sandbox:`, err);
     throw err;
   }
 }
