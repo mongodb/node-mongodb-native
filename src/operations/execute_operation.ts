@@ -38,6 +38,7 @@ import {
 } from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
+import { RunCommandOperation } from './run_command';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -256,15 +257,15 @@ async function executeOperationWithRetries<
 
   let maxAttempts =
     (operation.maxAttempts ?? willRetry) ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
+  const shouldRetry = operation.hasAspect(Aspect.READ_OPERATION) && topology.s.options.retryReads || (operation.hasAspect(Aspect.WRITE_OPERATION) || operation instanceof RunCommandOperation) && topology.s.options.retryWrites;
 
   for (
     let attempt = 0;
     attempt < maxAttempts;
     attempt++,
-      maxAttempts =
-        willRetry && previousOperationError?.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
-          ? 6
-          : maxAttempts
+    maxAttempts = shouldRetry && previousOperationError?.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+      ? 6
+      : maxAttempts
   ) {
     if (previousOperationError) {
       if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
@@ -349,9 +350,9 @@ async function executeOperationWithRetries<
         topology.tokenBucket.deposit(
           isRetry
             ? // on successful retry, deposit the retry cost + the refresh rate.
-              TOKEN_REFRESH_RATE + RETRY_COST
+            TOKEN_REFRESH_RATE + RETRY_COST
             : // otherwise, just deposit the refresh rate.
-              TOKEN_REFRESH_RATE
+            TOKEN_REFRESH_RATE
         );
         return operation.handleOk(result);
       } catch (error) {

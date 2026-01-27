@@ -25,7 +25,6 @@ import {
 import type { MongoClient, MongoOptions } from './mongo_client';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
-import { RetryAttemptContext } from './operations/operation';
 import { RunCommandOperation } from './operations/run_command';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
@@ -105,8 +104,7 @@ export interface EndSessionOptions {
  */
 export class ClientSession
   extends TypedEventEmitter<ClientSessionEvents>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /** @internal */
   client: MongoClient;
   /** @internal */
@@ -494,23 +492,22 @@ export class ClientSession
       command.recoveryToken = this.transaction.recoveryToken;
     }
 
-    const retryContext = new RetryAttemptContext(5);
 
     const operation = new RunCommandOperation(new MongoDBNamespace('admin'), command, {
       session: this,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
-    operation.attempts = retryContext;
+    operation.maxAttempts = 5;
 
     const timeoutContext =
       this.timeoutContext ??
       (typeof timeoutMS === 'number'
         ? TimeoutContext.create({
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS,
-            timeoutMS
-          })
+          serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+          socketTimeoutMS: this.clientOptions.socketTimeoutMS,
+          timeoutMS
+        })
         : null);
 
     try {
@@ -531,7 +528,7 @@ export class ClientSession
             readPreference: ReadPreference.primary,
             bypassPinningCheck: true
           });
-          op.attempts = retryContext;
+          op.maxAttempts = operation.maxAttempts;
           await executeOperation(this.client, op, timeoutContext);
           return;
         } catch (retryCommitError) {
@@ -612,10 +609,10 @@ export class ClientSession
     const timeoutContext =
       timeoutMS != null
         ? TimeoutContext.create({
-            timeoutMS,
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS
-          })
+          timeoutMS,
+          serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+          socketTimeoutMS: this.clientOptions.socketTimeoutMS
+        })
         : null;
 
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
@@ -728,10 +725,10 @@ export class ClientSession
     this.timeoutContext =
       timeoutMS != null
         ? TimeoutContext.create({
-            timeoutMS,
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS
-          })
+          timeoutMS,
+          serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+          socketTimeoutMS: this.clientOptions.socketTimeoutMS
+        })
         : null;
 
     // 1. Record the current monotonic time, which will be used to enforce the 120-second timeout before later retry attempts.
