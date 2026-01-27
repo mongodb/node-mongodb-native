@@ -126,7 +126,14 @@ function loadInSandbox(filepath: string) {
   let localBuffer = Buffer;
   if (isSourceFile && !isTestFile) {
     localBuffer = new Proxy(Buffer, {
-      get() {
+      get(target, prop, receiver) {
+        if (
+          typeof prop === 'symbol' ||
+          ['prototype', 'constructor', 'name', 'inspect'].includes(prop as string)
+        ) {
+          return Reflect.get(target, prop, receiver);
+        }
+
         throw new Error(
           `Forbidden: 'Buffer' usage is not allowed in source files. Use Uint8Array instead. File: ${realPath}`
         );
@@ -179,7 +186,15 @@ function loadInSandbox(filepath: string) {
         if (typeof value === 'function' && value.name) {
           // force instanceof to work across contexts by defining custom `instanceof` function
           Object.defineProperty(value, Symbol.hasInstance, {
-            value: (i: any) => i && (i.constructor.name === value.name || i instanceof value)
+            value: (i: any) => {
+              if (!i) return false;
+              // use isPrototypeOf to avoid triggering the 'instanceof' trap recursively
+              return (
+                i.constructor.name === value.name ||
+                Object.prototype.isPrototypeOf.call(value.prototype, i)
+              );
+            },
+            configurable: true
           });
 
           // also inject into global for easier access in tests
