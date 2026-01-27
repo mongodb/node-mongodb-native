@@ -246,9 +246,7 @@ async function executeOperationWithRetries<
     session.incrementTransactionNumber();
   }
 
-  let previousOperationError: MongoError | undefined;
   const deprioritizedServers = new DeprioritizedServers();
-
   const backoffDelayProvider = new ExponentialBackoffProvider(
     10_000, // MAX_BACKOFF
     100, // base backoff
@@ -257,93 +255,21 @@ async function executeOperationWithRetries<
 
   let maxAttempts =
     (operation.maxAttempts ?? willRetry) ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
+
   const shouldRetry = operation.hasAspect(Aspect.READ_OPERATION) && topology.s.options.retryReads || (operation.hasAspect(Aspect.WRITE_OPERATION) || operation instanceof RunCommandOperation) && topology.s.options.retryWrites;
+
+  let error: MongoError | null = null;
 
   for (
     let attempt = 0;
     attempt < maxAttempts;
-    attempt++,
-    maxAttempts = shouldRetry && previousOperationError?.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
-      ? 6
-      : maxAttempts
+    attempt++
   ) {
-    if (previousOperationError) {
-      if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
-        throw new MongoServerError({
-          message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-          errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-          originalError: previousOperationError
-        });
-      }
-
-      const isRetryable =
-        // bulk write commands are retryable if all operations in the batch are retryable
-        (operation.hasAspect(Aspect.COMMAND_BATCHING) && operation.canRetryWrite) ||
-        // if we have a retryable read or write operation, we can retry
-        (hasWriteAspect && willRetryWrite && isRetryableWriteError(previousOperationError)) ||
-        (hasReadAspect && willRetryRead && isRetryableReadError(previousOperationError)) ||
-        // if we have a retryable, system overloaded error, we can retry
-        (previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
-          previousOperationError.hasErrorLabel(MongoErrorLabel.RetryableError));
-
-      if (!isRetryable) {
-        throw previousOperationError;
-      }
-
-      if (previousOperationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
-        const delayMS = backoffDelayProvider.getNextBackoffDuration();
-
-        // if the delay would exhaust the CSOT timeout, short-circuit.
-        if (timeoutContext.csotEnabled() && delayMS > timeoutContext.remainingTimeMS) {
-          // TODO: is this the right error to throw?
-          throw new MongoOperationTimeoutError(
-            `MongoDB SystemOverload exponential backoff would exceed timeoutMS deadline: remaining CSOT deadline=${timeoutContext.remainingTimeMS}, backoff delayMS=${delayMS}`,
-            {
-              cause: previousOperationError
-            }
-          );
-        }
-
-        if (!topology.tokenBucket.consume(RETRY_COST)) {
-          throw previousOperationError;
-        }
-
-        await setTimeout(delayMS);
-      }
-
-      if (
-        previousOperationError instanceof MongoNetworkError &&
-        operation.hasAspect(Aspect.CURSOR_CREATING) &&
-        session != null &&
-        session.isPinned &&
-        !session.inTransaction()
-      ) {
-        session.unpin({ force: true, forceClear: true });
-      }
-
-      server = await topology.selectServer(selector, {
-        session,
-        operationName: operation.commandName,
-        deprioritizedServers,
-        signal: operation.options.signal
-      });
-
-      if (hasWriteAspect && !supportsRetryableWrites(server)) {
-        throw new MongoUnexpectedServerResponseError(
-          'Selected server does not support retryable writes'
-        );
-      }
-    }
 
     operation.server = server;
 
     try {
       const isRetry = attempt > 0;
-
-      // If attempt > 0 and we are command batching we need to reset the batch.
-      if (isRetry && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
-        operation.resetBatch();
-      }
 
       try {
         const result = await server.command(operation, timeoutContext);
@@ -359,6 +285,7 @@ async function executeOperationWithRetries<
         return operation.handleError(error);
       }
     } catch (operationError) {
+      // Should never happen but if it does - propragate the error.
       if (!(operationError instanceof MongoError)) throw operationError;
 
       if (!operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
@@ -366,19 +293,99 @@ async function executeOperationWithRetries<
         topology.tokenBucket.deposit(RETRY_COST);
       }
 
-      if (
-        previousOperationError != null &&
-        operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
-      ) {
-        throw previousOperationError;
+      if (error == null) {
+        error = operationError;
+      } else {
+        if (!operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)) {
+          error = operationError;
+        }
       }
-      deprioritizedServers.add(server.description);
-      previousOperationError = operationError;
+
+      if (hasWriteAspect && operationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
+        throw new MongoServerError({
+          message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+          errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+          originalError: operationError
+        });
+      }
+
+      // prepare for retry
+      const isRetryable =
+        // bulk write commands are retryable if all operations in the batch are retryable
+        (operation.hasAspect(Aspect.COMMAND_BATCHING) && operation.canRetryWrite) ||
+        // if we have a retryable read or write operation, we can retry
+        (!operation.hasAspect(Aspect.COMMAND_BATCHING) && hasWriteAspect && willRetryWrite && isRetryableWriteError(operationError)) ||
+        (hasReadAspect && willRetryRead && isRetryableReadError(operationError)) ||
+        // if we have a retryable, system overloaded error, we can retry
+        (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
+          operationError.hasErrorLabel(MongoErrorLabel.RetryableError));
+
+      if (!isRetryable) throw error;
+
+      maxAttempts = shouldRetry && operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+        ? 6
+        : maxAttempts
+      if (attempt >= maxAttempts) {
+        throw error;
+      }
+
+      // safe to retry - reset timeout context, apply backoff if necessary and re-run server selection
 
       // Reset timeouts
       timeoutContext.clear();
+
+      if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
+        const delayMS = backoffDelayProvider.getNextBackoffDuration();
+
+        // if the delay would exhaust the CSOT timeout, short-circuit.
+        if (timeoutContext.csotEnabled() && delayMS > timeoutContext.remainingTimeMS) {
+          // TODO: is this the right error to throw?
+          throw new MongoOperationTimeoutError(
+            `MongoDB SystemOverload exponential backoff would exceed timeoutMS deadline: remaining CSOT deadline=${timeoutContext.remainingTimeMS}, backoff delayMS=${delayMS}`,
+            {
+              cause: error
+            }
+          );
+        }
+
+        if (!topology.tokenBucket.consume(RETRY_COST)) {
+          throw error;
+        }
+
+        await setTimeout(delayMS);
+      }
+
+      if (
+        operationError instanceof MongoNetworkError &&
+        operation.hasAspect(Aspect.CURSOR_CREATING) &&
+        session != null &&
+        session.isPinned &&
+        !session.inTransaction()
+      ) {
+        session.unpin({ force: true, forceClear: true });
+      }
+
+      deprioritizedServers.add(server.description);
+
+      server = await topology.selectServer(selector, {
+        session,
+        operationName: operation.commandName,
+        deprioritizedServers,
+        signal: operation.options.signal
+      });
+
+      if (hasWriteAspect && !supportsRetryableWrites(server)) {
+        throw new MongoUnexpectedServerResponseError(
+          'Selected server does not support retryable writes'
+        );
+      }
+
+      // If attempt > 0 and we are command batching we need to reset the batch.
+      if (operation.hasAspect(Aspect.COMMAND_BATCHING)) {
+        operation.resetBatch();
+      }
     }
   }
 
-  throw previousOperationError ?? new MongoRuntimeError('ahh');
+  throw error ?? new MongoRuntimeError('ahh');
 }
