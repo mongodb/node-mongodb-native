@@ -72,7 +72,7 @@ describe('Connection Pool', function () {
       });
     });
 
-    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', topology: 'single' } };
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4' } };
 
     describe('ConnectionCheckedInEvent', metadata, function () {
       let client: MongoClient;
@@ -89,13 +89,13 @@ describe('Connection Pool', function () {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
           data: {
-            failCommands: ['insert'],
+            failCommands: ['find'],
             blockConnection: true,
             blockTimeMS: 500
           }
         });
 
-        client = this.configuration.newClient();
+        client = this.configuration.newClient({}, { readPreference: 'secondaryPreferred' });
         await client.connect();
         await Promise.all(Array.from({ length: 100 }, () => client.db().command({ ping: 1 })));
       });
@@ -120,37 +120,37 @@ describe('Connection Pool', function () {
               .on('connectionCheckedIn', pushToClientEvents)
               .on('connectionClosed', pushToClientEvents);
 
-            const inserts = Promise.allSettled([
-              client.db('test').collection('test').insertOne({ a: 1 }),
-              client.db('test').collection('test').insertOne({ a: 1 }),
-              client.db('test').collection('test').insertOne({ a: 1 })
+            const finds = Promise.allSettled([
+              client.db('test').collection('test').findOne({ a: 1 }),
+              client.db('test').collection('test').findOne({ a: 1 }),
+              client.db('test').collection('test').findOne({ a: 1 })
             ]);
 
-            // wait until all pings are pending on the server
+            // wait until all finds are pending on the server
             while (allClientEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
               await sleep(1);
             }
 
-            const insertConnectionIds = allClientEvents
+            const findConnectionIds = allClientEvents
               .filter(e => e.name === 'connectionCheckedOut')
               .map(({ address, connectionId }) => `${address} + ${connectionId}`);
 
             await client.close();
 
-            const insertCheckInAndCloses = allClientEvents
+            const findCheckInAndCloses = allClientEvents
               .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
               .filter(({ address, connectionId }) =>
-                insertConnectionIds.includes(`${address} + ${connectionId}`)
+                findConnectionIds.includes(`${address} + ${connectionId}`)
               );
 
-            expect(insertCheckInAndCloses).to.have.lengthOf(6);
+            expect(findCheckInAndCloses).to.have.lengthOf(6);
 
             // check that each check-in is followed by a close (not proceeded by one)
-            expect(insertCheckInAndCloses.map(e => e.name)).to.deep.equal(
+            expect(findCheckInAndCloses.map(e => e.name)).to.deep.equal(
               Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat(1)
             );
 
-            await inserts;
+            await finds;
           }
         );
       });
