@@ -22,7 +22,7 @@ import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { Topology } from '../../../src/sdam/topology';
 import { HostAddress, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
-import { processTick, sleep } from '../../tools/utils';
+import { processTick, runtime, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
 const commonConnectOptions = {
@@ -49,7 +49,10 @@ describe('Connection', function () {
           ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata([], {})
+          metadata: makeClientMetadata([], {
+            runtime
+          }),
+          runtime
         };
 
         let conn;
@@ -71,7 +74,8 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata([], {})
+          runtime,
+          metadata: makeClientMetadata([], { runtime })
         };
 
         let conn;
@@ -102,7 +106,10 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata([], {})
+          runtime,
+          metadata: makeClientMetadata([], {
+            runtime
+          })
         };
 
         let conn;

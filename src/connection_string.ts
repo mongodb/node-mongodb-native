@@ -20,6 +20,7 @@ import {
 import { MongoLoggableComponent, MongoLogger, SeverityLevel } from './mongo_logger';
 import { ReadConcern, type ReadConcernLevel } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
+import { type Runtime } from './runtime_adapters';
 import { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import {
@@ -537,6 +538,13 @@ export function parseOptions(
       mongodbLogMaxDocumentLength: mongoOptions.mongodbLogMaxDocumentLength
     }
   );
+
+  const runtime: Runtime = {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    os: options.runtimeAdapters?.os ?? require('os')
+  };
+
+  mongoOptions.runtime = runtime;
 
   return mongoOptions;
 }
@@ -1060,6 +1068,9 @@ export const OPTIONS = {
   retryWrites: {
     default: true,
     type: 'boolean'
+  },
+  runtimeAdapters: {
+    type: 'record'
   },
   serializeFunctions: {
     type: 'boolean'

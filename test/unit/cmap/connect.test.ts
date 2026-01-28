@@ -15,6 +15,7 @@ import { CancellationToken } from '../../../src/mongo_types';
 import { HostAddress, isHello } from '../../../src/utils';
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
+import { runtime } from '../../tools/utils';
 
 const CONNECT_DEFAULTS = {
   id: 1,
@@ -210,7 +211,9 @@ describe('Connect Tests', function () {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              metadata: makeClientMetadata([], {})
+              metadata: makeClientMetadata([], {
+                runtime
+              })
             }
           };
         });
@@ -239,7 +242,10 @@ describe('Connect Tests', function () {
                   name: 's'.repeat(128)
                 }
               ],
-              { appName: longAppName }
+              {
+                appName: longAppName,
+                runtime
+              }
             );
             const longAuthContext = {
               connection: {},
@@ -267,7 +273,9 @@ describe('Connect Tests', function () {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              metadata: makeClientMetadata([], {})
+              metadata: makeClientMetadata([], {
+                runtime
+              })
             }
           };
         });
@@ -296,7 +304,10 @@ describe('Connect Tests', function () {
                   name: 's'.repeat(128)
                 }
               ],
-              { appName: longAppName }
+              {
+                appName: longAppName,
+                runtime
+              }
             );
             const longAuthContext = {
               connection: {},
