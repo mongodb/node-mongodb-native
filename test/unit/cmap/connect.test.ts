@@ -210,7 +210,9 @@ describe('Connect Tests', function () {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              metadata: makeClientMetadata([], {})
+              metadata: makeClientMetadata([], {
+                runtime: { os: require('os') }
+              })
             }
           };
         });
@@ -239,7 +241,9 @@ describe('Connect Tests', function () {
                   name: 's'.repeat(128)
                 }
               ],
-              { appName: longAppName }
+              {
+                appName: longAppName, runtime: { os: require('os') }
+              }
             );
             const longAuthContext = {
               connection: {},
@@ -267,7 +271,9 @@ describe('Connect Tests', function () {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              metadata: makeClientMetadata([], {})
+              metadata: makeClientMetadata([], {
+                runtime: { os: require('os') }
+              })
             }
           };
         });
@@ -296,7 +302,10 @@ describe('Connect Tests', function () {
                   name: 's'.repeat(128)
                 }
               ],
-              { appName: longAppName }
+              {
+                appName: longAppName,
+                runtime: { os: require('os') }
+              }
             );
             const longAuthContext = {
               connection: {},

@@ -46,6 +46,7 @@ import { EndSessionsOperation } from './operations/end_sessions';
 import { executeOperation } from './operations/execute_operation';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
+import { type Runtime, type RuntimeAdapters } from './runtime_adapters';
 import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import { DeprioritizedServers, readPreferenceServerSelector } from './sdam/server_selection';
@@ -318,6 +319,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   connectionType?: typeof Connection;
   /** @internal */
   __skipPingOnConnect?: boolean;
+  /** @experimental  */
+  runtimeAdapters?: RuntimeAdapters;
 }
 
 /** @public */
@@ -1032,39 +1035,39 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
  */
 export interface MongoOptions
   extends Required<
-      Pick<
-        MongoClientOptions,
-        | 'autoEncryption'
-        | 'connectTimeoutMS'
-        | 'directConnection'
-        | 'driverInfo'
-        | 'forceServerObjectId'
-        | 'minHeartbeatFrequencyMS'
-        | 'heartbeatFrequencyMS'
-        | 'localThresholdMS'
-        | 'maxConnecting'
-        | 'maxIdleTimeMS'
-        | 'maxPoolSize'
-        | 'minPoolSize'
-        | 'monitorCommands'
-        | 'noDelay'
-        | 'pkFactory'
-        | 'raw'
-        | 'replicaSet'
-        | 'retryReads'
-        | 'retryWrites'
-        | 'serverSelectionTimeoutMS'
-        | 'socketTimeoutMS'
-        | 'srvMaxHosts'
-        | 'srvServiceName'
-        | 'tlsAllowInvalidCertificates'
-        | 'tlsAllowInvalidHostnames'
-        | 'tlsInsecure'
-        | 'waitQueueTimeoutMS'
-        | 'zlibCompressionLevel'
-      >
-    >,
-    SupportedNodeConnectionOptions {
+    Pick<
+      MongoClientOptions,
+      | 'autoEncryption'
+      | 'connectTimeoutMS'
+      | 'directConnection'
+      | 'driverInfo'
+      | 'forceServerObjectId'
+      | 'minHeartbeatFrequencyMS'
+      | 'heartbeatFrequencyMS'
+      | 'localThresholdMS'
+      | 'maxConnecting'
+      | 'maxIdleTimeMS'
+      | 'maxPoolSize'
+      | 'minPoolSize'
+      | 'monitorCommands'
+      | 'noDelay'
+      | 'pkFactory'
+      | 'raw'
+      | 'replicaSet'
+      | 'retryReads'
+      | 'retryWrites'
+      | 'serverSelectionTimeoutMS'
+      | 'socketTimeoutMS'
+      | 'srvMaxHosts'
+      | 'srvServiceName'
+      | 'tlsAllowInvalidCertificates'
+      | 'tlsAllowInvalidHostnames'
+      | 'tlsInsecure'
+      | 'waitQueueTimeoutMS'
+      | 'zlibCompressionLevel'
+    >
+  >,
+  SupportedNodeConnectionOptions {
   appName?: string;
   hosts: HostAddress[];
   srvHost?: string;
@@ -1152,4 +1155,7 @@ export interface MongoOptions
   timeoutMS?: number;
   /** @internal */
   __skipPingOnConnect?: boolean;
+
+  /** @internal */
+  runtime: Runtime;
 }

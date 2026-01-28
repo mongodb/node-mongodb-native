@@ -1,4 +1,3 @@
-import * as os from 'os';
 import * as process from 'process';
 
 import { BSON, type Document, Int32, NumberUtils } from '../../bson';
@@ -96,7 +95,8 @@ export class LimitedSizeDocument {
   }
 }
 
-type MakeClientMetadataOptions = Pick<MongoOptions, 'appName'>;
+type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
+
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
@@ -107,7 +107,7 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName'>;
  */
 export async function makeClientMetadata(
   driverInfoList: DriverInfo[],
-  { appName = '' }: MakeClientMetadataOptions
+  { appName = '', runtime: { os } }: MakeClientMetadataOptions
 ): Promise<ClientMetadata> {
   const metadataDocument = new LimitedSizeDocument(512);
 
