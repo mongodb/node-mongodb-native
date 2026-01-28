@@ -88,6 +88,19 @@ functions:
         binary: bash
         args:
           - .evergreen/run-tests.sh
+  run runtime independence tests:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
+    - command: subprocess.exec
+      type: test
+      params:
+        add_expansions_to_env: true
+        working_dir: src
+        timeout_secs: 300
+        binary: bash
+        args:
+          - .evergreen/run-runtime-independence-tests.sh
   perf send:
     - command: s3.put
       params:
@@ -2045,6 +2058,20 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: build and test alpine FLE
+  - name: test-runtime-independence
+    tags:
+      - runtime-independence
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run runtime independence tests
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -3386,6 +3413,11 @@ buildvariants:
     run_on: ubuntu2204-small
     tasks:
       - .alpine-fle
+  - name: Runtime Independence Test
+    display_name: Runtime Independence Test
+    run_on: ubuntu2204-small
+    tasks:
+      - .runtime-independence
   - name: rhel80-large-iron
     display_name: rhel8 Node20.19.0
     run_on: rhel80-large
