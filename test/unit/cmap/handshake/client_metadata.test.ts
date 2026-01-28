@@ -12,6 +12,7 @@ import {
   makeClientMetadata
 } from '../../../../src/cmap/handshake/client_metadata';
 import { MongoInvalidArgumentError } from '../../../../src/error';
+import { runtime } from '../../../tools/utils';
 
 describe('client metadata module', () => {
   afterEach(() => sinon.restore());
