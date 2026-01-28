@@ -23,6 +23,12 @@
         "database": "database",
         "collectionName": "logging-tests-collection"
       }
+    },
+    {
+      "session": {
+        "id": "session",
+        "client": "client"
+      }
     }
   ],
   "initialData": [
@@ -182,6 +188,328 @@
                 "commandName": "find",
                 "failure": {
                   "$$exists": true
+                },
+                "requestId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "durationMS": {
+                  "$$type": [
+                    "double",
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "A successful commitTransaction command",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "replicaset",
+            "sharded"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session",
+            "document": {
+              "_id": 2,
+              "x": 22
+            }
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session"
+        }
+      ],
+      "expectLogMessages": [
+        {
+          "client": "client",
+          "messages": [
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "databaseName": "logging-tests",
+                "commandName": "insert",
+                "command": {
+                  "$$type": "string"
+                },
+                "requestId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command succeeded",
+                "databaseName": "logging-tests",
+                "commandName": "insert",
+                "reply": {
+                  "$$type": "string"
+                },
+                "requestId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "durationMS": {
+                  "$$type": [
+                    "double",
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "databaseName": "admin",
+                "commandName": "commitTransaction",
+                "command": {
+                  "$$type": "string"
+                },
+                "requestId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command succeeded",
+                "databaseName": "admin",
+                "commandName": "commitTransaction",
+                "reply": {
+                  "$$type": "string"
+                },
+                "requestId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "durationMS": {
+                  "$$type": [
+                    "double",
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "A successful abortTransaction command",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "replicaset",
+            "sharded"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session",
+            "document": {
+              "_id": 3,
+              "x": 33
+            }
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session"
+        }
+      ],
+      "expectLogMessages": [
+        {
+          "client": "client",
+          "messages": [
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "databaseName": "logging-tests",
+                "commandName": "insert",
+                "command": {
+                  "$$type": "string"
+                },
+                "requestId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command succeeded",
+                "databaseName": "logging-tests",
+                "commandName": "insert",
+                "reply": {
+                  "$$type": "string"
+                },
+                "requestId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "durationMS": {
+                  "$$type": [
+                    "double",
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "databaseName": "admin",
+                "commandName": "abortTransaction",
+                "command": {
+                  "$$type": "string"
+                },
+                "requestId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command succeeded",
+                "databaseName": "admin",
+                "commandName": "abortTransaction",
+                "reply": {
+                  "$$type": "string"
                 },
                 "requestId": {
                   "$$type": [
