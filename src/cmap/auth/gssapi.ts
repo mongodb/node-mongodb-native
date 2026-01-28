@@ -1,5 +1,4 @@
 import * as dns from 'dns';
-import * as os from 'os';
 
 import { getKerberos, type Kerberos, type KerberosClient } from '../../deps';
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
@@ -69,9 +68,13 @@ export class GSSAPI extends AuthProvider {
   }
 }
 
-async function makeKerberosClient(authContext: AuthContext): Promise<KerberosClient> {
-  const { hostAddress } = authContext.options;
-  const { credentials } = authContext;
+async function makeKerberosClient({
+  options: {
+    hostAddress,
+    runtime: { os }
+  },
+  credentials
+}: AuthContext): Promise<KerberosClient> {
   if (!hostAddress || typeof hostAddress.host !== 'string' || !credentials) {
     throw new MongoInvalidArgumentError(
       'Connection must have host and port and credentials defined.'

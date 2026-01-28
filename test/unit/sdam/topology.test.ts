@@ -29,6 +29,11 @@ import { TimeoutContext } from '../../../src/timeout';
 import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
+import { Runtime } from '../../../src';
+
+const runtime: Runtime = {
+  os: require('os')
+};
 
 describe('Topology (unit)', function () {
   let client, topology;
@@ -56,6 +61,7 @@ describe('Topology (unit)', function () {
     it('should correctly pass appname', async function () {
       const topology: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
         metadata: makeClientMetadata([], {
+          runtime,
           appName: 'My application name'
         })
       });
@@ -120,7 +126,7 @@ describe('Topology (unit)', function () {
       });
       const server = await topology.selectServer('primary', {
         timeoutContext: ctx,
-        operationName: 'none'
+        operationName: 'none',
       });
       const err = await server
         .command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx)

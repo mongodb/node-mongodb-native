@@ -35,6 +35,7 @@ import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type Abortable, type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
+import { type Runtime } from '../runtime_adapters';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import { type TimeoutContext, TimeoutError } from '../timeout';
@@ -118,8 +119,8 @@ export interface ProxyOptions {
 /** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
-    StreamDescriptionOptions,
-    ProxyOptions {
+  StreamDescriptionOptions,
+  ProxyOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -143,6 +144,8 @@ export interface ConnectionOptions
   metadata: Promise<ClientMetadata>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
+  /** @internal */
+  runtime: Runtime;
 }
 
 /** @public */
@@ -526,10 +529,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options.documentsReturnedIn == null || !options.raw
         ? options
         : {
-            ...options,
-            raw: false,
-            fieldsAsRaw: { [options.documentsReturnedIn]: true }
-          };
+          ...options,
+          raw: false,
+          fieldsAsRaw: { [options.documentsReturnedIn]: true }
+        };
 
     /** MongoDBResponse instance or subclass */
     let document: MongoDBResponse | undefined = undefined;
@@ -692,9 +695,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
         ? command
         : new OpCompressedRequest(command, {
-            agreedCompressor: options.agreedCompressor ?? 'none',
-            zlibCompressionLevel: options.zlibCompressionLevel ?? 0
-          });
+          agreedCompressor: options.agreedCompressor ?? 'none',
+          zlibCompressionLevel: options.zlibCompressionLevel ?? 0
+        });
 
     const buffer = Buffer.concat(await finalCommand.toBin());
 

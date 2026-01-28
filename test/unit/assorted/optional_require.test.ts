@@ -41,7 +41,9 @@ describe('optionalRequire', function () {
       const gssapi = new GSSAPI();
 
       const error = await gssapi
-        .auth(new AuthContext(null, true, { hostAddress: new HostAddress('a'), credentials: true }))
+        .auth(new AuthContext(null, true, {
+          hostAddress: new HostAddress('a'), credentials: true, runtime: { os: require('os') }
+        }))
         .then(
           () => null,
           e => e
