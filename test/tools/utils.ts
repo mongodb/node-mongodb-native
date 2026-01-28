@@ -7,6 +7,7 @@ import * as path from 'node:path';
 import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
+import * as os from 'os';
 import * as process from 'process';
 import { Readable } from 'stream';
 import { setTimeout } from 'timers';
@@ -18,6 +19,7 @@ import {
   type HostAddress,
   MongoClient,
   type MongoClientOptions,
+  type Runtime,
   type ServerApiVersion,
   type TopologyOptions
 } from '../../src';
@@ -604,3 +606,7 @@ export function configureMongocryptdSpawnHooks(
     port
   };
 }
+
+export const runtime: Runtime = {
+  os
+};

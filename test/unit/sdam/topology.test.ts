@@ -28,12 +28,7 @@ import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { TimeoutContext } from '../../../src/timeout';
 import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
-import { topologyWithPlaceholderClient } from '../../tools/utils';
-import { Runtime } from '../../../src';
-
-const runtime: Runtime = {
-  os: require('os')
-};
+import { runtime, topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Topology (unit)', function () {
   let client, topology;
@@ -126,7 +121,7 @@ describe('Topology (unit)', function () {
       });
       const server = await topology.selectServer('primary', {
         timeoutContext: ctx,
-        operationName: 'none',
+        operationName: 'none'
       });
       const err = await server
         .command(new RunCursorCommandOperation(ns('admin.$cmd'), { ping: 1 }, {}), ctx)
