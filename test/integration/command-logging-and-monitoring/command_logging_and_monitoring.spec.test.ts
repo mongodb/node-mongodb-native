@@ -23,7 +23,7 @@ describe('Command Logging and Monitoring Spec', function () {
     );
   });
 
-  describe.only('Command Logging Spec', () => {
+  describe('Command Logging Spec', () => {
     const tests = loadSpecTests(path.join('command-logging-and-monitoring', 'logging'));
     runUnifiedSuite(tests, test => {
       if (
