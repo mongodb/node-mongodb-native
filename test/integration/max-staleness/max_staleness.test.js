@@ -46,7 +46,7 @@ describe('Max Staleness', function () {
   it('should correctly set maxStalenessSeconds on Mongos query on connect', {
     metadata: {
       requires: {
-        generators: true,
+        tls: 'disabled',
         topology: 'replicaset'
       }
     },
@@ -72,7 +72,7 @@ describe('Max Staleness', function () {
   it('should correctly set maxStalenessSeconds on Mongos query using db level readPreference', {
     metadata: {
       requires: {
-        generators: true,
+        tls: 'disabled',
         topology: 'replicaset'
       }
     },
@@ -102,7 +102,7 @@ describe('Max Staleness', function () {
     {
       metadata: {
         requires: {
-          generators: true,
+          tls: 'disabled',
           topology: 'replicaset'
         }
       },
@@ -135,7 +135,7 @@ describe('Max Staleness', function () {
   it('should correctly set maxStalenessSeconds on Mongos query using cursor level readPreference', {
     metadata: {
       requires: {
-        generators: true,
+        tls: 'disabled',
         topology: 'replicaset'
       }
     },

@@ -328,48 +328,52 @@ describe('Change Stream prose tests', function () {
     // Expected result:
     //   getResumeToken must return the postBatchResumeToken from the current command response.
     describe('for emptied batch on server', function () {
-      it('must return the postBatchResumeToken from the current command response', function () {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: true, cursor: { firstBatch: [] } };
-          })(),
-          getMore: (function* () {
-            yield { numDocuments: 1, postBatchResumeToken: true, cursor: { nextBatch: [{}] } };
-          })()
-        });
-
-        return manager
-          .ready()
-          .then(() => {
-            return manager.makeChangeStream().next();
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
-            const successes = manager.apm.succeeded.map(e => {
-              try {
-                // @ts-expect-error: e.reply is unknown
-                return e.reply.cursor;
-              } catch {
-                return {};
-              }
-            });
-
-            expect(successes).to.have.a.lengthOf(2);
-            expect(successes[0]).to.have.a.property('postBatchResumeToken');
-            expect(successes[1]).to.have.a.property('postBatchResumeToken');
-            expect(successes[1]).to.have.a.nested.property('nextBatch[0]._id');
-
-            expect(tokens).to.have.a.lengthOf(2);
-            expect(tokens[0]).to.deep.equal(successes[0].postBatchResumeToken);
-            expect(tokens[1])
-              .to.deep.equal(successes[1].postBatchResumeToken)
-              .and.to.not.deep.equal(successes[1].nextBatch[0]._id);
+      it(
+        'must return the postBatchResumeToken from the current command response',
+        { requires: { tls: 'disabled' } },
+        function () {
+          const manager = new MockServerManager(this.configuration, {
+            aggregate: (function* () {
+              yield { numDocuments: 0, postBatchResumeToken: true, cursor: { firstBatch: [] } };
+            })(),
+            getMore: (function* () {
+              yield { numDocuments: 1, postBatchResumeToken: true, cursor: { nextBatch: [{}] } };
+            })()
           });
-      });
+
+          return manager
+            .ready()
+            .then(() => {
+              return manager.makeChangeStream().next();
+            })
+            .then(
+              () => manager.teardown(),
+              err => manager.teardown(err)
+            )
+            .then(() => {
+              const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
+              const successes = manager.apm.succeeded.map(e => {
+                try {
+                  // @ts-expect-error: e.reply is unknown
+                  return e.reply.cursor;
+                } catch {
+                  return {};
+                }
+              });
+
+              expect(successes).to.have.a.lengthOf(2);
+              expect(successes[0]).to.have.a.property('postBatchResumeToken');
+              expect(successes[1]).to.have.a.property('postBatchResumeToken');
+              expect(successes[1]).to.have.a.nested.property('nextBatch[0]._id');
+
+              expect(tokens).to.have.a.lengthOf(2);
+              expect(tokens[0]).to.deep.equal(successes[0].postBatchResumeToken);
+              expect(tokens[1])
+                .to.deep.equal(successes[1].postBatchResumeToken)
+                .and.to.not.deep.equal(successes[1].nextBatch[0]._id);
+            });
+        }
+      );
     });
 
     // 13. For a ChangeStream under these conditions:
@@ -378,46 +382,50 @@ describe('Change Stream prose tests', function () {
     // Expected result:
     //   getResumeToken must return the _id of the previous document returned.
     describe('for non-empty batch iterated up to but not including the last element', function () {
-      it('must return the _id of the previous document returned', function () {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function* () {
-            yield { numDocuments: 2, postBatchResumeToken: true };
-          })(),
-          getMore: (function* () {
-            // fake getMore
-          })()
-        });
-
-        return manager
-          .ready()
-          .then(() => {
-            return manager.makeChangeStream().next();
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
-            const successes = manager.apm.succeeded.map(e => {
-              try {
-                // @ts-expect-error: e.reply is unknown
-                return e.reply.cursor;
-              } catch {
-                return {};
-              }
-            });
-
-            expect(successes).to.have.a.lengthOf(1);
-            expect(successes[0]).to.have.a.nested.property('firstBatch[0]._id');
-            expect(successes[0]).to.have.a.property('postBatchResumeToken');
-
-            expect(tokens).to.have.a.lengthOf(1);
-            expect(tokens[0])
-              .to.deep.equal(successes[0].firstBatch[0]._id)
-              .and.to.not.deep.equal(successes[0].postBatchResumeToken);
+      it(
+        'must return the _id of the previous document returned',
+        { requires: { tls: 'disabled' } },
+        function () {
+          const manager = new MockServerManager(this.configuration, {
+            aggregate: (function* () {
+              yield { numDocuments: 2, postBatchResumeToken: true };
+            })(),
+            getMore: (function* () {
+              // fake getMore
+            })()
           });
-      });
+
+          return manager
+            .ready()
+            .then(() => {
+              return manager.makeChangeStream().next();
+            })
+            .then(
+              () => manager.teardown(),
+              err => manager.teardown(err)
+            )
+            .then(() => {
+              const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
+              const successes = manager.apm.succeeded.map(e => {
+                try {
+                  // @ts-expect-error: e.reply is unknown
+                  return e.reply.cursor;
+                } catch {
+                  return {};
+                }
+              });
+
+              expect(successes).to.have.a.lengthOf(1);
+              expect(successes[0]).to.have.a.nested.property('firstBatch[0]._id');
+              expect(successes[0]).to.have.a.property('postBatchResumeToken');
+
+              expect(tokens).to.have.a.lengthOf(1);
+              expect(tokens[0])
+                .to.deep.equal(successes[0].firstBatch[0]._id)
+                .and.to.not.deep.equal(successes[0].postBatchResumeToken);
+            });
+        }
+      );
     });
 
     // 14. For a ChangeStream under these conditions:
@@ -429,113 +437,125 @@ describe('Change Stream prose tests', function () {
     //   getResumeToken must return resumeAfter from the initial aggregate if the option was specified.
     //   If neither the startAfter nor resumeAfter options were specified, the getResumeToken result must be empty.
     describe('for non-empty non-iterated batch where only the initial aggregate command has been executed', function () {
-      it('must return startAfter from the initial aggregate if the option was specified', function () {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-        const startAfter = manager.resumeToken();
-        const resumeAfter = manager.resumeToken();
-
-        return manager
-          .ready()
-          .then(() => {
-            return new Promise<void>(resolve => {
-              const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
-              changeStream.cursor.once('response', () => {
-                token = changeStream.resumeToken;
-                resolve();
-              });
-
-              changeStream.next().catch(() => {
-                // Note: this is expected to fail
-              });
-            });
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token).to.deep.equal(startAfter).and.to.not.deep.equal(resumeAfter);
+      it(
+        'must return startAfter from the initial aggregate if the option was specified',
+        { requires: { tls: 'disabled' } },
+        function () {
+          const manager = new MockServerManager(this.configuration, {
+            aggregate: (function* () {
+              yield { numDocuments: 0, postBatchResumeToken: false };
+            })(),
+            getMore: (function* () {
+              yield { numDocuments: 0, postBatchResumeToken: false };
+            })()
           });
-      });
+          let token;
+          const startAfter = manager.resumeToken();
+          const resumeAfter = manager.resumeToken();
 
-      it('must return resumeAfter from the initial aggregate if the option was specified', function () {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })()
-        });
-        let token;
-        const resumeAfter = manager.resumeToken();
+          return manager
+            .ready()
+            .then(() => {
+              return new Promise<void>(resolve => {
+                const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
+                changeStream.cursor.once('response', () => {
+                  token = changeStream.resumeToken;
+                  resolve();
+                });
 
-        return manager
-          .ready()
-          .then(() => {
-            return new Promise<void>(resolve => {
-              const changeStream = manager.makeChangeStream({ resumeAfter });
-              changeStream.cursor.once('response', () => {
-                token = changeStream.resumeToken;
-                resolve();
+                changeStream.next().catch(() => {
+                  // Note: this is expected to fail
+                });
               });
-
-              changeStream.next().catch(() => {
-                // Note: this is expected to fail
-              });
+            })
+            .then(
+              () => manager.teardown(),
+              err => manager.teardown(err)
+            )
+            .then(() => {
+              expect(token).to.deep.equal(startAfter).and.to.not.deep.equal(resumeAfter);
             });
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token).to.deep.equal(resumeAfter);
+        }
+      );
+
+      it(
+        'must return resumeAfter from the initial aggregate if the option was specified',
+        { requires: { tls: 'disabled' } },
+        function () {
+          const manager = new MockServerManager(this.configuration, {
+            aggregate: (function* () {
+              yield { numDocuments: 0, postBatchResumeToken: false };
+            })(),
+            getMore: (function* () {
+              yield { numDocuments: 0, postBatchResumeToken: false };
+            })()
           });
-      });
+          let token;
+          const resumeAfter = manager.resumeToken();
 
-      it('must be empty if neither the startAfter nor resumeAfter options were specified', function () {
-        const manager = new MockServerManager(this.configuration, {
-          aggregate: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })(),
-          getMore: (function* () {
-            yield { numDocuments: 0, postBatchResumeToken: false };
-          })()
-        });
-        let token;
+          return manager
+            .ready()
+            .then(() => {
+              return new Promise<void>(resolve => {
+                const changeStream = manager.makeChangeStream({ resumeAfter });
+                changeStream.cursor.once('response', () => {
+                  token = changeStream.resumeToken;
+                  resolve();
+                });
 
-        return manager
-          .ready()
-          .then(() => {
-            return new Promise<void>(resolve => {
-              const changeStream = manager.makeChangeStream();
-              changeStream.cursor.once('response', () => {
-                token = changeStream.resumeToken;
-                resolve();
+                changeStream.next().catch(() => {
+                  // Note: this is expected to fail
+                });
               });
-
-              changeStream.next().catch(() => {
-                // Note: this is expected to fail
-              });
+            })
+            .then(
+              () => manager.teardown(),
+              err => manager.teardown(err)
+            )
+            .then(() => {
+              expect(token).to.deep.equal(resumeAfter);
             });
-          })
-          .then(
-            () => manager.teardown(),
-            err => manager.teardown(err)
-          )
-          .then(() => {
-            expect(token).to.not.exist;
+        }
+      );
+
+      it(
+        'must be empty if neither the startAfter nor resumeAfter options were specified',
+        { requires: { tls: 'disabled' } },
+        function () {
+          const manager = new MockServerManager(this.configuration, {
+            aggregate: (function* () {
+              yield { numDocuments: 0, postBatchResumeToken: false };
+            })(),
+            getMore: (function* () {
+              yield { numDocuments: 0, postBatchResumeToken: false };
+            })()
           });
-      });
+          let token;
+
+          return manager
+            .ready()
+            .then(() => {
+              return new Promise<void>(resolve => {
+                const changeStream = manager.makeChangeStream();
+                changeStream.cursor.once('response', () => {
+                  token = changeStream.resumeToken;
+                  resolve();
+                });
+
+                changeStream.next().catch(() => {
+                  // Note: this is expected to fail
+                });
+              });
+            })
+            .then(
+              () => manager.teardown(),
+              err => manager.teardown(err)
+            )
+            .then(() => {
+              expect(token).to.not.exist;
+            });
+        }
+      );
     });
   });
 

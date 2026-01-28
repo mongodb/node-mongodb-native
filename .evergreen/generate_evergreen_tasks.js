@@ -64,20 +64,37 @@ function updateExpansions(expansions) {
   };
 }
 
-function makeTask({ mongoVersion, topology, tags = [], auth = 'auth', nodeLtsVersion }) {
-  const expansions = nodeLtsVersion
-    ? updateExpansions({
+function makeTask({
+  mongoVersion,
+  topology,
+  tags = [],
+  auth = 'auth',
+  ssl = 'nossl',
+  testCsfle,
+  nodeLtsVersion
+}) {
+  const baseExpansions = nodeLtsVersion
+    ? {
         VERSION: mongoVersion,
         TOPOLOGY: topology,
         AUTH: auth,
+        SSL: ssl,
         NODE_LTS_VERSION: nodeLtsVersion
-      })
-    : updateExpansions({ VERSION: mongoVersion, TOPOLOGY: topology, AUTH: auth });
+      }
+    : { VERSION: mongoVersion, TOPOLOGY: topology, SSL: ssl, AUTH: auth };
+
+  if (testCsfle) {
+    baseExpansions.CLIENT_ENCRYPTION = true;
+    baseExpansions.TEST_CSFLE = true;
+  }
+
+  const name = `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}${ssl === 'ssl' ? '-ssl' : ''}`;
+
   return {
-    name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
+    name,
     tags: [mongoVersion, topology, ...tags],
     commands: [
-      expansions,
+      updateExpansions(baseExpansions),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
       { func: 'run tests' }
@@ -469,6 +486,17 @@ const unitTestTasks = Array.from(
   })()
 );
 
+const tlsTests = generateVersionTopologyMatrix().map(({ mongoVersion, topology }) =>
+  makeTask({
+    mongoVersion,
+    topology,
+    ssl: 'ssl',
+    tags: ['ssl'],
+    nodeLtsVersion: LATEST_LTS,
+    testCsfle: true
+  })
+);
+
 // singleton build variant for linting
 SINGLETON_TASKS.push(
   ...[
@@ -776,6 +804,13 @@ BUILD_VARIANTS.push({
   tasks: ['.resource-management']
 });
 
+BUILD_VARIANTS.push({
+  name: 'TLS tests',
+  display_name: 'TLS smoke tests',
+  run_on: DEFAULT_OS,
+  tasks: ['.ssl']
+});
+
 // TODO(NODE-4897): Debug socks5 tests on node latest
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
@@ -791,7 +826,8 @@ fileData.tasks = [
   ...SINGLETON_TASKS,
   ...AUTH_DISABLED_TASKS,
   ...AWS_LAMBDA_HANDLER_TASKS,
-  ...MONGOCRYPTD_CSFLE_TASKS
+  ...MONGOCRYPTD_CSFLE_TASKS,
+  ...tlsTests
 ];
 
 fileData.buildvariants = [...(fileData.buildvariants ?? []), ...BUILD_VARIANTS];

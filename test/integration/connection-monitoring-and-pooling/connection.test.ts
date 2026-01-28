@@ -43,7 +43,7 @@ describe('Connection', function () {
 
   describe('Connection.command', function () {
     it('should execute a command against a server', {
-      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
+      metadata: { requires: { apiVersion: false, topology: '!load-balanced', tls: 'disabled' } },
       test: async function () {
         const connectOptions: ConnectionOptions = {
           ...commonConnectOptions,
@@ -64,7 +64,7 @@ describe('Connection', function () {
     });
 
     it('should emit command monitoring events', {
-      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
+      metadata: { requires: { apiVersion: false, topology: '!load-balanced', tls: 'disabled' } },
       test: async function () {
         const connectOptions: ConnectionOptions = {
           ...commonConnectOptions,
@@ -95,7 +95,7 @@ describe('Connection', function () {
     afterEach(() => sinon.restore());
 
     it('command monitoring event do not deserialize more than once', {
-      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
+      metadata: { requires: { apiVersion: false, topology: '!load-balanced', tls: 'disabled' } },
       test: async function () {
         const connectOptions: ConnectionOptions = {
           ...commonConnectOptions,

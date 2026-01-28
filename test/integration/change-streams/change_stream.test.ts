@@ -251,6 +251,7 @@ describe('Change Streams', function () {
 
     beforeEach(async function () {
       client = this.configuration.newClient();
+      await client.connect();
     });
 
     afterEach(async function () {
@@ -1267,46 +1268,54 @@ describe('Change Streams', function () {
         await mock.cleanup();
       });
 
-      it('changeStream should close if cursor id for initial aggregate is Long.ZERO', async function () {
-        mockServer.setMessageHandler(req => {
-          const doc = req.document;
-          if (isHello(doc)) {
-            return req.reply(mock.HELLO);
+      it(
+        'changeStream should close if cursor id for initial aggregate is Long.ZERO',
+        {
+          requires: {
+            tls: 'disabled'
           }
-          if (doc.aggregate) {
-            return req.reply({
-              ok: 1,
-              cursor: {
-                id: Long.ZERO,
-                firstBatch: []
-              }
-            });
-          }
-          if (doc.getMore) {
-            return req.reply({
-              ok: 1,
-              cursor: {
-                id: new Long(1407, 1407),
-                nextBatch: []
-              }
-            });
-          }
-          req.reply({ ok: 1 });
-        });
-        const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`, {
-          serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
-        });
-        await client.connect();
-        const collection = client.db('cs').collection('test');
-        const changeStream = collection.watch();
+        },
+        async function () {
+          mockServer.setMessageHandler(req => {
+            const doc = req.document;
+            if (isHello(doc)) {
+              return req.reply(mock.HELLO);
+            }
+            if (doc.aggregate) {
+              return req.reply({
+                ok: 1,
+                cursor: {
+                  id: Long.ZERO,
+                  firstBatch: []
+                }
+              });
+            }
+            if (doc.getMore) {
+              return req.reply({
+                ok: 1,
+                cursor: {
+                  id: new Long(1407, 1407),
+                  nextBatch: []
+                }
+              });
+            }
+            req.reply({ ok: 1 });
+          });
+          const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`, {
+            serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
+          });
+          await client.connect();
+          const collection = client.db('cs').collection('test');
+          const changeStream = collection.watch();
 
-        const err = await changeStream.next().catch(e => e);
-        expect(err).to.exist;
-        expect(err?.message).to.equal('ChangeStream is closed');
+          const err = await changeStream.next().catch(e => e);
+          expect(err).to.exist;
+          expect(err?.message).to.equal('ChangeStream is closed');
 
-        await changeStream.close();
-        await client.close();
-      });
+          await changeStream.close();
+          await client.close();
+        }
+      );
     });
   });
 
