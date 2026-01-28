@@ -1035,39 +1035,39 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
  */
 export interface MongoOptions
   extends Required<
-    Pick<
-      MongoClientOptions,
-      | 'autoEncryption'
-      | 'connectTimeoutMS'
-      | 'directConnection'
-      | 'driverInfo'
-      | 'forceServerObjectId'
-      | 'minHeartbeatFrequencyMS'
-      | 'heartbeatFrequencyMS'
-      | 'localThresholdMS'
-      | 'maxConnecting'
-      | 'maxIdleTimeMS'
-      | 'maxPoolSize'
-      | 'minPoolSize'
-      | 'monitorCommands'
-      | 'noDelay'
-      | 'pkFactory'
-      | 'raw'
-      | 'replicaSet'
-      | 'retryReads'
-      | 'retryWrites'
-      | 'serverSelectionTimeoutMS'
-      | 'socketTimeoutMS'
-      | 'srvMaxHosts'
-      | 'srvServiceName'
-      | 'tlsAllowInvalidCertificates'
-      | 'tlsAllowInvalidHostnames'
-      | 'tlsInsecure'
-      | 'waitQueueTimeoutMS'
-      | 'zlibCompressionLevel'
-    >
-  >,
-  SupportedNodeConnectionOptions {
+      Pick<
+        MongoClientOptions,
+        | 'autoEncryption'
+        | 'connectTimeoutMS'
+        | 'directConnection'
+        | 'driverInfo'
+        | 'forceServerObjectId'
+        | 'minHeartbeatFrequencyMS'
+        | 'heartbeatFrequencyMS'
+        | 'localThresholdMS'
+        | 'maxConnecting'
+        | 'maxIdleTimeMS'
+        | 'maxPoolSize'
+        | 'minPoolSize'
+        | 'monitorCommands'
+        | 'noDelay'
+        | 'pkFactory'
+        | 'raw'
+        | 'replicaSet'
+        | 'retryReads'
+        | 'retryWrites'
+        | 'serverSelectionTimeoutMS'
+        | 'socketTimeoutMS'
+        | 'srvMaxHosts'
+        | 'srvServiceName'
+        | 'tlsAllowInvalidCertificates'
+        | 'tlsAllowInvalidHostnames'
+        | 'tlsInsecure'
+        | 'waitQueueTimeoutMS'
+        | 'zlibCompressionLevel'
+      >
+    >,
+    SupportedNodeConnectionOptions {
   appName?: string;
   hosts: HostAddress[];
   srvHost?: string;

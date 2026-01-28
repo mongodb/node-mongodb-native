@@ -12,11 +12,6 @@ import {
   makeClientMetadata
 } from '../../../../src/cmap/handshake/client_metadata';
 import { MongoInvalidArgumentError } from '../../../../src/error';
-import { Runtime } from '../../../../src';
-
-const runtime: Runtime = {
-  os: require('os')
-};
 
 describe('client metadata module', () => {
   afterEach(() => sinon.restore());
@@ -169,7 +164,9 @@ describe('client metadata module', () => {
 
     context('when driverInfo.platform is provided', () => {
       it('throws an error if driverInfo.platform is too large', async () => {
-        const error = await makeClientMetadata([{ platform: 'a'.repeat(512) }], { runtime }).catch(e => e);
+        const error = await makeClientMetadata([{ platform: 'a'.repeat(512) }], { runtime }).catch(
+          e => e
+        );
         expect(error)
           .to.be.instanceOf(MongoInvalidArgumentError)
           .to.match(/platform/);
@@ -195,7 +192,9 @@ describe('client metadata module', () => {
 
     context('when driverInfo.name is provided', () => {
       it('throws an error if driverInfo.name is too large', async () => {
-        const error = await makeClientMetadata([{ name: 'a'.repeat(512) }], { runtime }).catch(e => e);
+        const error = await makeClientMetadata([{ name: 'a'.repeat(512) }], { runtime }).catch(
+          e => e
+        );
         expect(error).to.be.instanceOf(MongoInvalidArgumentError).to.match(/name/);
       });
 
@@ -219,7 +218,9 @@ describe('client metadata module', () => {
 
     context('when driverInfo.version is provided', () => {
       it('throws an error if driverInfo.version is too large', async () => {
-        const error = await makeClientMetadata([{ version: 'a'.repeat(512) }], { runtime }).catch(e => e);
+        const error = await makeClientMetadata([{ version: 'a'.repeat(512) }], { runtime }).catch(
+          e => e
+        );
         expect(error)
           .to.be.instanceOf(MongoInvalidArgumentError)
           .to.match(/version/);
@@ -540,7 +541,9 @@ describe('client metadata module', () => {
       });
 
       it('does not attach it to the metadata', async () => {
-        expect(await makeClientMetadata([], { runtime })).not.to.have.nested.property('aws.memory_mb');
+        expect(await makeClientMetadata([], { runtime })).not.to.have.nested.property(
+          'aws.memory_mb'
+        );
       });
     });
   });
