@@ -42,7 +42,6 @@ functions:
     - command: expansions.update
       params:
         file: src/expansion.yml
-        file: src/expansion.yml
   bootstrap mongo-orchestration:
     - command: subprocess.exec
       params:
@@ -653,25 +652,6 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/docker/alpine.sh
-  log state:
-    - command: shell.exec
-      params:
-        working_dir: "src"
-        shell: bash
-        script: |-
-          set -o errexit
-          set -o pipefail
-
-          echo "=== Driver state ==="
-          echo "Current commit:"
-          git rev-parse HEAD
-          echo
-          echo "Current branch / status:"
-          git status --short --branch || true
-          echo
-          echo "npm ls (full):"
-          npm ls
-          echo "=== end log state ==="
 tasks:
   - name: test-gcpkms-task
     commands:
@@ -915,6 +895,47 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
+  - name: test-bson-latest-server-7.0.0
+    tags:
+      - bson-compat
+      - driver-7.0.0
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: PACKAGE, value: https://github.com/mongodb/js-bson#HEAD}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: fetch source
+      - func: install package
+      - func: log state
+      - func: run unit tests
+  - name: log state
+    commands:
+      - command: shell.exec
+        params:
+          working_dir: src
+          shell: bash
+          script: |-
+            set -o errexit
+            set -o pipefail
+
+            echo "=== Driver state ==="
+            echo "Current commit:"
+            git rev-parse HEAD
+            echo
+            echo "Current branch / status:"
+            git status --short --branch || true
+            echo
+            echo "npm ls (full):"
+            npm ls
+            echo "=== end log state ==="
   - name: test-latest-server
     tags:
       - latest
@@ -3151,27 +3172,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
-  - name: test-bson-latest-server-7.0.0
-    tags:
-      - "bson-compat"
-      - "driver-7.0.0"
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - { key: VERSION, value: "7.0" }
-            - { key: TOPOLOGY, value: "replica_set" }
-            - { key: AUTH, value: "auth" }
-            - { key: SSL, value: "ssl" }
-            - { key: NODE_LTS_VERSION, value: '24'}
-            - { key: PACKAGE, value: "https://github.com/mongodb/js-bson#HEAD" }
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: fetch source
-      - func: install package
-      - func: log state
-      - func: run unit tests
 task_groups:
   - name: test_gcpkms_task_group
     setup_group_can_fail_task: true
@@ -3422,6 +3422,13 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - test-search-index-helpers
+  - name: BSON compatibility tests
+    display_name: BSON compatibility tests
+    run_on: rhel80-large
+    expansions:
+      source_rev: 2512137b5d94b238e7cf5ee753f867e8d1e2e0fc
+    tasks:
+      - test-bson-latest-server-7.0.0
 pre:
   - func: fetch source
   - func: fix absolute paths
@@ -3957,10 +3964,3 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - .ssl
-  - name: BSON compatibility tests
-    display_name: BSON compatibility tests
-    run_on: rhel80-large
-    expansions:
-      source_rev: 2512137b5d94b238e7cf5ee753f867e8d1e2e0fc
-    tasks:
-      - test-bson-latest-server-7.0.0
