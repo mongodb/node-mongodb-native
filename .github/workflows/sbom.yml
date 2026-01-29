@@ -6,8 +6,7 @@ on:
     paths:
       - 'package.json'
       - 'package-lock.json'
-    paths-ignore:
-      - 'sbom.json'    
+ 
   workflow_dispatch:
 
 permissions:
