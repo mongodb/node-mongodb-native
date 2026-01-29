@@ -17,6 +17,19 @@ functions:
       params:
         directory: src
         shallow_clone: true
+    - command: shell.exec
+      params:
+        working_dir: src
+        shell: bash
+        script: |
+          set -euxo pipefail
+          # Only override if source_rev is set (use | to default to empty)
+          if [ "${source_rev|}" != "" ]; then
+            git reset --hard HEAD
+            git clean -xfd
+            git fetch origin "${source_rev}"
+            git checkout "${source_rev}"
+          fi
     - command: subprocess.exec
       params:
         working_dir: src
@@ -29,38 +42,6 @@ functions:
     - command: expansions.update
       params:
         file: src/expansion.yml
-  fetch source 7.0.0:
-    - command: git.get_project
-      params:
-        directory: src
-        shallow_clone: true
-        script: |-
-          set -o errexit
-          set -o pipefail
-          git fetch origin 7.0.0 || git fetch origin v7.0.0 || true
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        binary: bash
-        env:
-          is_patch: ${is_patch}
-          project: ${project}
-        args:
-          - .evergreen/prepare-shell.sh
-    - command: expansions.update
-      params:
-        file: src/expansion.yml
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        binary: bash
-        env:
-          is_patch: ${is_patch}
-          project: ${project}
-        args:
-          - .evergreen/prepare-shell.sh
-    - command: expansions.update
-      params:
         file: src/expansion.yml
   bootstrap mongo-orchestration:
     - command: subprocess.exec
@@ -3179,22 +3160,18 @@ tasks:
         type: setup
         params:
           updates:
-            # These VERSION/TOPOLOGY/AUTH/SSL expansions are used by bootstrap mongo-orchestration.
-            # Adjust to whatever topology you want for this compat test.
             - { key: VERSION, value: "7.0" }
             - { key: TOPOLOGY, value: "replica_set" }
             - { key: AUTH, value: "auth" }
             - { key: SSL, value: "ssl" }
             - { key: NODE_LTS_VERSION, value: '24'}
-            # This is for the install package helper:
             - { key: PACKAGE, value: "https://github.com/mongodb/js-bson#HEAD" }
-      - func: fetch source 7.0.0
       - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: fetch source
       - func: install package
       - func: log state
-      - func: bootstrap mongo-orchestration
       - func: run unit tests
-      - func: run tests
 task_groups:
   - name: test_gcpkms_task_group
     setup_group_can_fail_task: true
@@ -3983,5 +3960,7 @@ buildvariants:
   - name: BSON compatibility tests
     display_name: BSON compatibility tests
     run_on: rhel80-large
+    expansions:
+      source_rev: 2512137b5d94b238e7cf5ee753f867e8d1e2e0fc
     tasks:
       - test-bson-latest-server-7.0.0
