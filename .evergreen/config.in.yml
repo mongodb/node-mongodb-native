@@ -989,10 +989,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: fetch source
       - func: install package
-      - func: log state
+      - func: log-state
       - func: run unit tests
 
-  - name: log state
+  - name: log-state
     commands:
       - command: shell.exec
         params:
