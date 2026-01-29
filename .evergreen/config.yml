@@ -652,6 +652,25 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/docker/alpine.sh
+  log state:
+    - command: shell.exec
+      params:
+        working_dir: src
+        shell: bash
+        script: |-
+          set -o errexit
+          set -o pipefail
+
+          echo "=== Driver state ==="
+          echo "Current commit:"
+          git rev-parse HEAD
+          echo
+          echo "Current branch / status:"
+          git status --short --branch || true
+          echo
+          echo "npm ls (full):"
+          npm ls
+          echo "=== end log state ==="
 tasks:
   - name: test-gcpkms-task
     commands:
@@ -895,26 +914,6 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
-  - name: log-state
-    commands:
-      - command: shell.exec
-        params:
-          working_dir: src
-          shell: bash
-          script: |-
-            set -o errexit
-            set -o pipefail
-
-            echo "=== Driver state ==="
-            echo "Current commit:"
-            git rev-parse HEAD
-            echo
-            echo "Current branch / status:"
-            git status --short --branch || true
-            echo
-            echo "npm ls (full):"
-            npm ls
-            echo "=== end log state ==="
   - name: test-bson-latest-server-7.0.0
     tags:
       - bson-compat
@@ -934,7 +933,7 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: fetch source
       - func: install package
-      - func: log-state
+      - func: log state
       - func: run unit tests
   - name: test-latest-server
     tags:
@@ -3447,6 +3446,13 @@ buildvariants:
     run_on: ubuntu2204-small
     tasks:
       - .alpine-fle
+  - name: BSON compatibility tests
+    display_name: BSON compatibility tests
+    run_on: rhel80-large
+    expansions:
+      source_rev: 2512137b5d94b238e7cf5ee753f867e8d1e2e0fc
+    tasks:
+      - test-bson-latest-server-7.0.0
   - name: rhel80-large-iron
     display_name: rhel8 Node20.19.0
     run_on: rhel80-large
