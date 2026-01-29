@@ -1273,14 +1273,6 @@ task_groups:
     tasks:
       - test-search-index-helpers
 
-  - name: BSON compatibility tests
-    display_name: BSON compatibility tests
-    run_on: rhel80-large
-    expansions:
-      source_rev: 2512137b5d94b238e7cf5ee753f867e8d1e2e0fc
-    tasks:
-      - test-bson-latest-server-7.0.0
-
 pre:
   - func: "fetch source"
   - func: "fix absolute paths"
