@@ -895,6 +895,26 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
+  - name: log-state
+    commands:
+      - command: shell.exec
+        params:
+          working_dir: src
+          shell: bash
+          script: |-
+            set -o errexit
+            set -o pipefail
+
+            echo "=== Driver state ==="
+            echo "Current commit:"
+            git rev-parse HEAD
+            echo
+            echo "Current branch / status:"
+            git status --short --branch || true
+            echo
+            echo "npm ls (full):"
+            npm ls
+            echo "=== end log state ==="
   - name: test-bson-latest-server-7.0.0
     tags:
       - bson-compat
@@ -916,26 +936,6 @@ tasks:
       - func: install package
       - func: log-state
       - func: run unit tests
-  - name: log-state
-    commands:
-      - command: shell.exec
-        params:
-          working_dir: src
-          shell: bash
-          script: |-
-            set -o errexit
-            set -o pipefail
-
-            echo "=== Driver state ==="
-            echo "Current commit:"
-            git rev-parse HEAD
-            echo
-            echo "Current branch / status:"
-            git status --short --branch || true
-            echo
-            echo "npm ls (full):"
-            npm ls
-            echo "=== end log state ==="
   - name: test-latest-server
     tags:
       - latest
