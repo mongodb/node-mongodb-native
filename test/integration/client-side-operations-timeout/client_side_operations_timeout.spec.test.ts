@@ -24,7 +24,7 @@ const skippedTests = {
   'apply remaining timeoutMS if less than maxAwaitTimeMS': 'TODO(NODE-7360)'
 };
 
-describe('CSOT spec tests', function () {
+describe.only('CSOT spec tests', function () {
   const specs = loadSpecTests('client-side-operations-timeout');
   for (const spec of specs) {
     for (const test of spec.tests) {
