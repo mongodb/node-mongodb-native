@@ -9,7 +9,7 @@ import { addAbortListener, kDispose, List, promiseWithResolvers } from '../../ut
  * An object holding references to a promise's resolve and reject functions.
  */
 type PendingPromises = Omit<
-  ReturnType<typeof promiseWithResolvers<IteratorResult<Buffer>>>,
+  ReturnType<typeof promiseWithResolvers<IteratorResult<Uint8Array>>>,
   'promise'
 >;
 
@@ -32,7 +32,7 @@ export function onData(
    * value from the event in this list. Next time they call .next()
    * we pull the first value out of this list and resolve a promise with it.
    */
-  const unconsumedEvents = new List<Buffer>();
+  const unconsumedEvents = new List<Uint8Array>();
   /**
    * When there has not yet been an event, a new promise will be created
    * and implicitly stored in this list. When an event occurs we take the first
@@ -49,7 +49,7 @@ export function onData(
   /** Set to true only after event listeners have been removed. */
   let finished = false;
 
-  const iterator: AsyncGenerator<Buffer> & AsyncDisposable = {
+  const iterator: AsyncGenerator<Uint8Array> & AsyncDisposable = {
     next() {
       // First, we consume all unread events
       const value = unconsumedEvents.shift();
@@ -71,7 +71,7 @@ export function onData(
       if (finished) return closeHandler();
 
       // Wait until an event happens
-      const { promise, resolve, reject } = promiseWithResolvers<IteratorResult<Buffer>>();
+      const { promise, resolve, reject } = promiseWithResolvers<IteratorResult<Uint8Array>>();
       unconsumedPromises.push({ resolve, reject });
       return promise;
     },
@@ -107,7 +107,7 @@ export function onData(
 
   return iterator;
 
-  function eventHandler(value: Buffer) {
+  function eventHandler(value: Uint8Array) {
     const promise = unconsumedPromises.shift();
     if (promise != null) promise.resolve({ value, done: false });
     else unconsumedEvents.push(value);

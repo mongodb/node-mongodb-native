@@ -5,7 +5,7 @@ import {
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { ByteUtils, maxWireVersion, ns, randomBytes } from '../../utils';
+import { maxWireVersion, ns, randomBytes } from '../../utils';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import {
   type AWSCredentialProvider,
@@ -92,7 +92,7 @@ export class MongoDBAWS extends AuthProvider {
       throw new MongoRuntimeError(`Invalid server nonce length ${serverNonce.length}, expected 64`);
     }
 
-    if (!ByteUtils.equals(serverNonce.subarray(0, nonce.byteLength), nonce)) {
+    if (!BSON.ByteUtils.equals(serverNonce.subarray(0, nonce.byteLength), nonce)) {
       // throw because the serverNonce's leading 32 bytes must equal the client nonce's 32 bytes
       // https://github.com/mongodb/specifications/blob/master/source/auth/auth.md#conversation-5
 
@@ -115,7 +115,7 @@ export class MongoDBAWS extends AuthProvider {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Content-Length': body.length,
-          'X-MongoDB-Server-Nonce': ByteUtils.toBase64(serverNonce),
+          'X-MongoDB-Server-Nonce': BSON.ByteUtils.toBase64(serverNonce),
           'X-MongoDB-GS2-CB-Flag': 'n'
         },
         path: '/',
