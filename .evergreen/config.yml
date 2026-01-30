@@ -17,19 +17,6 @@ functions:
       params:
         directory: src
         shallow_clone: true
-    - command: shell.exec
-      params:
-        working_dir: src
-        shell: bash
-        script: |
-          set -euxo pipefail
-          # Only override if source_rev is set (use | to default to empty)
-          if [ "${source_rev|}" != "" ]; then
-            git reset --hard HEAD
-            git clean -xfd
-            git fetch origin "${source_rev}"
-            git checkout "${source_rev}"
-          fi
     - command: subprocess.exec
       params:
         working_dir: src
@@ -42,6 +29,17 @@ functions:
     - command: expansions.update
       params:
         file: src/expansion.yml
+  switch source:
+    - command: shell.exec
+      params:
+        working_dir: src
+        shell: bash
+        script: |
+          set -euxo pipefail
+          git reset --hard HEAD
+          git clean -xfd
+          git fetch origin "${SOURCE_REV}"
+          git checkout "${SOURCE_REV}"
   bootstrap mongo-orchestration:
     - command: subprocess.exec
       params:
@@ -914,21 +912,89 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
-  - name: test-bson-latest-server-7.0.0
+  - name: test-bson-latest-server-7.0.0-unit-tests
     commands:
       - command: expansions.update
         type: setup
         params:
           updates:
             - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '24'}
-            - {key: PACKAGE, value: https://github.com/mongodb/js-bson#HEAD}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: fetch source
+      - func: switch source
+        vars:
+          SOURCE_REV: refs/tags/v7.0.0
       - func: install package
+        vars:
+          PACKAGE: https://github.com/mongodb/js-bson#HEAD
       - func: log state
       - func: run unit tests
+  - name: test-bson-latest-server-7.0.0-server-tests
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
+            - {key: CLIENT_ENCRYPTION, value: 'false'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: switch source
+        vars:
+          SOURCE_REV: refs/tags/v7.0.0
+      - func: install package
+        vars:
+          PACKAGE: https://github.com/mongodb/js-bson#HEAD
+      - func: log state
+      - func: run tests
+  - name: test-bson-latest-server-7.0.0-replica_set-tests
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
+            - {key: CLIENT_ENCRYPTION, value: 'false'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: switch source
+        vars:
+          SOURCE_REV: refs/tags/v7.0.0
+      - func: install package
+        vars:
+          PACKAGE: https://github.com/mongodb/js-bson#HEAD
+      - func: log state
+      - func: run tests
+  - name: test-bson-latest-server-7.0.0-sharded_cluster-tests
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
+            - {key: CLIENT_ENCRYPTION, value: 'false'}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: switch source
+        vars:
+          SOURCE_REV: refs/tags/v7.0.0
+      - func: install package
+        vars:
+          PACKAGE: https://github.com/mongodb/js-bson#HEAD
+      - func: log state
+      - func: run tests
   - name: test-latest-server
     tags:
       - latest
@@ -3436,10 +3502,11 @@ buildvariants:
   - name: BSON compatibility tests
     display_name: BSON compatibility tests
     run_on: rhel80-large
-    expansions:
-      source_rev: refs/tags/v7.0.0
     tasks:
-      - test-bson-latest-server-7.0.0
+      - test-bson-latest-server-7.0.0-unit-tests
+      - test-bson-latest-server-7.0.0-server-tests
+      - test-bson-latest-server-7.0.0-replica_set-tests
+      - test-bson-latest-server-7.0.0-sharded_cluster-tests
   - name: rhel80-large-iron
     display_name: rhel8 Node20.19.0
     run_on: rhel80-large
