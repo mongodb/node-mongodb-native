@@ -17,10 +17,15 @@ describe('Collection', function () {
     let client: MongoClient;
     let db: Db;
 
-    beforeEach(function () {
-      client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
+    beforeEach(async function () {
+      client = configuration.newClient(
+        {},
+        {
+          ...this.configuration.writeConcernMax(),
+          maxPoolSize: 1
+        }
+      );
+      await client.connect();
       db = client.db(configuration.db);
     });
 
@@ -79,9 +84,9 @@ describe('Collection', function () {
       expect(found2).to.be.true;
     });
 
-    it('should permit insert of dot and dollar keys if requested', function () {
+    it('should permit insert of dot and dollar keys if requested', async function () {
       const collection = db.collection('test_invalid_key_names');
-      return Promise.all([
+      await Promise.all([
         collection.insertOne({ hel$lo: 0 }, { checkKeys: false }),
         collection.insertOne({ hello: { $hello: 0 } }, { checkKeys: false }), // embedded document can have a leading dollar
         collection.insertOne({ 'hel.lo': 0 }, { checkKeys: false }),
