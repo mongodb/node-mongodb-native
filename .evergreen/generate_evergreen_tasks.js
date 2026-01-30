@@ -677,6 +677,21 @@ SINGLETON_TASKS.push({
   ]
 });
 
+SINGLETON_TASKS.push({
+  name: 'test-runtime-independence',
+  tags: ['runtime-independence'],
+  commands: [
+    updateExpansions({
+      NODE_LTS_VERSION: LATEST_LTS,
+      VERSION: 'latest',
+      TOPOLOGY: 'replica_set'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run runtime independence tests' }
+  ]
+});
+
 function addPerformanceTasks() {
   const makePerfTask = (name, MONGODB_CLIENT_OPTIONS) => ({
     name,
