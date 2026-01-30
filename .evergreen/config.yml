@@ -3503,10 +3503,10 @@ buildvariants:
     display_name: BSON compatibility tests
     run_on: rhel80-large
     tasks:
-      - test-bson-latest-server-7.0.0-unit-tests
-      - test-bson-latest-server-7.0.0-server-tests
-      - test-bson-latest-server-7.0.0-replica_set-tests
-      - test-bson-latest-server-7.0.0-sharded_cluster-tests
+      - test-bson-latest-driver-7.0.0-unit-tests
+      - test-bson-latest-driver-7.0.0-server-tests
+      - test-bson-latest-driver-7.0.0-replica_set-tests
+      - test-bson-latest-driver-7.0.0-sharded_cluster-tests
   - name: rhel80-large-iron
     display_name: rhel8 Node20.19.0
     run_on: rhel80-large
