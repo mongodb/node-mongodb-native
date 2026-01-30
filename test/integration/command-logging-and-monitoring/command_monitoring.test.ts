@@ -557,7 +557,7 @@ describe('Command Monitoring', function () {
 
   it('should correctly decorate the apm result for listCollections with cursorId', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
-    test: function () {
+    test: async function () {
       const started = [];
       const succeeded = [];
       const client = this.configuration.newClient(
@@ -565,6 +565,7 @@ describe('Command Monitoring', function () {
         { maxPoolSize: 1, monitorCommands: true }
       );
 
+      await client.connect();
       const desiredEvents = ['listCollections'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));

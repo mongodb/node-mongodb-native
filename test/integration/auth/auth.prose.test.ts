@@ -15,7 +15,8 @@ function makeConnectionString(config, username, password) {
 const metadata: MongoDBMetadataUI = {
   requires: {
     predicate: () =>
-      process.env.LOAD_BALANCER ? 'TODO(NODE-5631): fix tests to run in load balancer mode.' : true
+      process.env.LOAD_BALANCER ? 'TODO(NODE-5631): fix tests to run in load balancer mode.' : true,
+    tls: 'disabled'
   }
 };
 

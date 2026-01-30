@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 
 import { MongoClient } from '../../../src';
 
-const metadata: MongoDBMetadataUI = { requires: { topology: '!single' } };
+const metadata: MongoDBMetadataUI = { requires: { topology: '!single', tls: 'disabled' } };
 
 // This serves as a placeholder for _whatever_ node.js may throw. We only rely upon `.code`
 class DNSTimeoutError extends Error {

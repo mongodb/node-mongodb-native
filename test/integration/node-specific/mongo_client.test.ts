@@ -126,8 +126,7 @@ describe('class MongoClient', function () {
 
         beforeEach(async function () {
           spy = sinon.spy(net, 'createConnection');
-          const uri = this.configuration.url();
-          client = new MongoClient(uri, options);
+          client = this.configuration.newClient({}, options);
           await client.connect();
         });
 
@@ -137,7 +136,7 @@ describe('class MongoClient', function () {
         });
 
         it('passes through the option', {
-          metadata: { requires: { apiVersion: false } },
+          metadata: { requires: { apiVersion: false, tls: 'disabled' } },
           test: function () {
             expect(spy).to.have.been.calledWith(
               sinon.match({
@@ -156,8 +155,7 @@ describe('class MongoClient', function () {
 
         beforeEach(async function () {
           spy = sinon.spy(net, 'createConnection');
-          const uri = this.configuration.url();
-          client = new MongoClient(uri, options);
+          client = this.configuration.newClient({}, options);
           await client.connect();
         });
 
@@ -167,7 +165,7 @@ describe('class MongoClient', function () {
         });
 
         it('passes through the option', {
-          metadata: { requires: { apiVersion: false } },
+          metadata: { requires: { apiVersion: false, tls: 'disabled' } },
           test: function () {
             expect(spy).to.have.been.calledWith(
               sinon.match({
@@ -186,8 +184,7 @@ describe('class MongoClient', function () {
 
         beforeEach(async function () {
           spy = sinon.spy(net, 'createConnection');
-          const uri = this.configuration.url();
-          client = new MongoClient(uri, options);
+          client = this.configuration.newClient({}, options);
           await client.connect();
         });
 
@@ -197,7 +194,7 @@ describe('class MongoClient', function () {
         });
 
         it('the Node.js runtime sets the option to 0', {
-          metadata: { requires: { apiVersion: false } },
+          metadata: { requires: { apiVersion: false, tls: 'disabled' } },
           test: function () {
             expect(spy).to.have.been.calledWith(
               sinon.match({
@@ -228,7 +225,7 @@ describe('class MongoClient', function () {
         });
 
         it('throws an error', {
-          metadata: { requires: { apiVersion: false } },
+          metadata: { requires: { apiVersion: false, tls: 'disabled' } },
           test: async function () {
             const error = await client.connect().catch(error => error);
             expect(error.message).to.include(
@@ -254,7 +251,7 @@ describe('class MongoClient', function () {
         spy.restore();
       });
 
-      it('sets keepalive to 120000', function () {
+      it('sets keepalive to 120000', { requires: { tls: 'disabled' } }, function () {
         expect(spy).to.have.been.calledWith(
           sinon.match({
             keepAlive: true,
@@ -279,13 +276,19 @@ describe('class MongoClient', function () {
         spy.restore();
       });
 
-      it('sets noDelay to true', function () {
-        expect(spy).to.have.been.calledWith(
-          sinon.match({
-            noDelay: true
-          })
-        );
-      });
+      it(
+        'sets noDelay to true',
+        {
+          requires: { tls: 'disabled' }
+        },
+        function () {
+          expect(spy).to.have.been.calledWith(
+            sinon.match({
+              noDelay: true
+            })
+          );
+        }
+      );
     });
 
     context('when noDelay is provided', function () {
@@ -295,8 +298,7 @@ describe('class MongoClient', function () {
       beforeEach(async function () {
         const options = { noDelay: false };
         spy = sinon.spy(net, 'createConnection');
-        const uri = this.configuration.url();
-        client = new MongoClient(uri, options);
+        client = this.configuration.newClient({}, options);
         await client.connect();
       });
 
@@ -306,7 +308,7 @@ describe('class MongoClient', function () {
       });
 
       it('sets noDelay', {
-        metadata: { requires: { apiVersion: false } },
+        metadata: { requires: { apiVersion: false, tls: 'disabled' } },
         test: function () {
           expect(spy).to.have.been.calledWith(
             sinon.match({
@@ -463,26 +465,32 @@ describe('class MongoClient', function () {
   it('must respect a finite connectTimeoutMS for the streaming protocol', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.4' } },
     test: async function () {
-      client = this.configuration.newClient({
-        connectTimeoutMS: 10,
-        heartbeatFrequencyMS: 500
-      });
+      client = this.configuration.newClient(
+        {},
+        {
+          connectTimeoutMS: 2000,
+          heartbeatFrequencyMS: 500
+        }
+      );
 
       const spy = sinon.spy(Connection.prototype, 'command');
 
       await client.connect();
 
       const options = spy.getCall(0).args[2];
-      expect(options).property('socketTimeoutMS').to.equal(10);
+      expect(options).property('socketTimeoutMS').to.equal(2000);
     }
   });
 
   context('explict #connect()', () => {
     let client: MongoClient;
     beforeEach(function () {
-      client = this.configuration.newClient(this.configuration.url(), {
-        monitorCommands: true
-      });
+      client = this.configuration.newClient(
+        {},
+        {
+          monitorCommands: true
+        }
+      );
     });
 
     afterEach(async function () {
@@ -519,9 +527,12 @@ describe('class MongoClient', function () {
   context('implicit #connect()', () => {
     let client: MongoClient;
     beforeEach(function () {
-      client = this.configuration.newClient(this.configuration.url(), {
-        monitorCommands: true
-      });
+      client = this.configuration.newClient(
+        {},
+        {
+          monitorCommands: true
+        }
+      );
     });
 
     afterEach(async function () {
@@ -1034,7 +1045,7 @@ describe('class MongoClient', function () {
       });
 
       it('sets the provided options', {
-        metadata: { requires: { topology: ['single'] } },
+        metadata: { requires: { topology: ['single'], tls: 'disabled' } },
         test: async function () {
           await client.connect();
           expect(netSpy).to.have.been.calledWith(
@@ -1053,7 +1064,7 @@ describe('class MongoClient', function () {
       });
 
       it('sets the default options', {
-        metadata: { requires: { topology: ['single'] } },
+        metadata: { requires: { topology: ['single'], tls: 'disabled' } },
         test: async function () {
           await client.connect();
           expect(netSpy).to.have.been.calledWith(

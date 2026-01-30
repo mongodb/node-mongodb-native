@@ -20,8 +20,10 @@ declare global {
       idmsMockServer?: true;
       nodejs?: string;
       predicate?: (test?: Mocha.Test) => true | string;
-      crypt_shared?: 'enabled' | 'disabled',
+      crypt_shared?: 'enabled' | 'disabled';
       libmongocrypt?: string;
+
+      tls?: 'enabled' | 'disabled';
     };
 
     sessions?: {

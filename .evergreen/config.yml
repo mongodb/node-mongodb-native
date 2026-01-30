@@ -893,6 +893,7 @@ tasks:
           updates:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -908,6 +909,7 @@ tasks:
           updates:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -923,6 +925,7 @@ tasks:
           updates:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -938,6 +941,7 @@ tasks:
           updates:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -953,6 +957,7 @@ tasks:
           updates:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -968,6 +973,7 @@ tasks:
           updates:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -983,6 +989,7 @@ tasks:
           updates:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -998,6 +1005,7 @@ tasks:
           updates:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1013,6 +1021,7 @@ tasks:
           updates:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1028,6 +1037,7 @@ tasks:
           updates:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1043,6 +1053,7 @@ tasks:
           updates:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1058,6 +1069,7 @@ tasks:
           updates:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1073,6 +1085,7 @@ tasks:
           updates:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1088,6 +1101,7 @@ tasks:
           updates:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1103,6 +1117,7 @@ tasks:
           updates:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1118,6 +1133,7 @@ tasks:
           updates:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1133,6 +1149,7 @@ tasks:
           updates:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1148,6 +1165,7 @@ tasks:
           updates:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1163,6 +1181,7 @@ tasks:
           updates:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1178,6 +1197,7 @@ tasks:
           updates:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1193,6 +1213,7 @@ tasks:
           updates:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1208,6 +1229,7 @@ tasks:
           updates:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1223,6 +1245,7 @@ tasks:
           updates:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -1238,6 +1261,7 @@ tasks:
           updates:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2034,6 +2058,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2051,6 +2076,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2068,6 +2094,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2085,6 +2112,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2102,6 +2130,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2119,6 +2148,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2136,6 +2166,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2153,6 +2184,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2170,6 +2202,7 @@ tasks:
             - {key: VERSION, value: '8.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2187,6 +2220,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2204,6 +2238,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2221,6 +2256,7 @@ tasks:
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2238,6 +2274,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2255,6 +2292,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2272,6 +2310,7 @@ tasks:
             - {key: VERSION, value: '6.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2289,6 +2328,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2306,6 +2346,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2323,6 +2364,7 @@ tasks:
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2340,6 +2382,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2357,6 +2400,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2374,6 +2418,7 @@ tasks:
             - {key: VERSION, value: '4.4'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2391,6 +2436,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2408,6 +2454,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: replica_set}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2425,6 +2472,7 @@ tasks:
             - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2587,6 +2635,486 @@ tasks:
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-latest-server-ssl
+    tags:
+      - latest
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-latest-replica_set-ssl
+    tags:
+      - latest
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-latest-sharded_cluster-ssl
+    tags:
+      - latest
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-rapid-server-ssl
+    tags:
+      - rapid
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-rapid-replica_set-ssl
+    tags:
+      - rapid
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-rapid-sharded_cluster-ssl
+    tags:
+      - rapid
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-8.0-server-ssl
+    tags:
+      - '8.0'
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-8.0-replica_set-ssl
+    tags:
+      - '8.0'
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-8.0-sharded_cluster-ssl
+    tags:
+      - '8.0'
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '8.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-7.0-server-ssl
+    tags:
+      - '7.0'
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-7.0-replica_set-ssl
+    tags:
+      - '7.0'
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-7.0-sharded_cluster-ssl
+    tags:
+      - '7.0'
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-6.0-server-ssl
+    tags:
+      - '6.0'
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-6.0-replica_set-ssl
+    tags:
+      - '6.0'
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-6.0-sharded_cluster-ssl
+    tags:
+      - '6.0'
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-5.0-server-ssl
+    tags:
+      - '5.0'
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-5.0-replica_set-ssl
+    tags:
+      - '5.0'
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-5.0-sharded_cluster-ssl
+    tags:
+      - '5.0'
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-4.4-server-ssl
+    tags:
+      - '4.4'
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-4.4-replica_set-ssl
+    tags:
+      - '4.4'
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-4.4-sharded_cluster-ssl
+    tags:
+      - '4.4'
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-4.2-server-ssl
+    tags:
+      - '4.2'
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-4.2-replica_set-ssl
+    tags:
+      - '4.2'
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-4.2-sharded_cluster-ssl
+    tags:
+      - '4.2'
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
@@ -3370,3 +3898,8 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - .resource-management
+  - name: TLS tests
+    display_name: TLS smoke tests
+    run_on: rhel80-large
+    tasks:
+      - .ssl

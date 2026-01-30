@@ -639,6 +639,8 @@ describe('CSOT spec prose tests', function () {
         this.configuration.url({ useMultipleMongoses: false }),
         { timeoutMS: 150 }
       );
+
+      await client.connect();
     });
 
     afterEach(async function () {

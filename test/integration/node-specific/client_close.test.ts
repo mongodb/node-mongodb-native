@@ -536,7 +536,7 @@ describe('MongoClient.close() Integration', () => {
           expect(client.s.sessionPool.sessions).to.have.length.greaterThan(0);
         });
 
-        it('does not execute endSessions', async function () {
+        it('does not execute endSessions', { requires: { tls: 'disabled' } }, async function () {
           await client.close();
 
           expect(commands).to.deep.equal([]);
