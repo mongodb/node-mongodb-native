@@ -912,7 +912,7 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
-  - name: test-bson-latest-server-7.0.0-unit-tests
+  - name: test-bson-latest-driver-7.0.0-unit-tests
     commands:
       - command: expansions.update
         type: setup
@@ -929,7 +929,7 @@ tasks:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
       - func: log state
       - func: run unit tests
-  - name: test-bson-latest-server-7.0.0-server-tests
+  - name: test-bson-latest-driver-7.0.0-server-tests
     commands:
       - command: expansions.update
         type: setup
@@ -951,7 +951,7 @@ tasks:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
       - func: log state
       - func: run tests
-  - name: test-bson-latest-server-7.0.0-replica_set-tests
+  - name: test-bson-latest-driver-7.0.0-replica_set-tests
     commands:
       - command: expansions.update
         type: setup
@@ -973,7 +973,7 @@ tasks:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
       - func: log state
       - func: run tests
-  - name: test-bson-latest-server-7.0.0-sharded_cluster-tests
+  - name: test-bson-latest-driver-7.0.0-sharded_cluster-tests
     commands:
       - command: expansions.update
         type: setup
