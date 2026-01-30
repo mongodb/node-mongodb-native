@@ -1,0 +1,26 @@
+name: Generate SBOM
+description: Generates CycloneDX SBOM using cdxgen
+
+inputs:
+  output-file:
+    description: "Output filename for the SBOM"
+    required: false
+    default: "sbom.json"
+
+outputs:
+  HAS_CHANGES:
+    description: "Whether the SBOM has meaningful changes compared to the existing version"
+    value: ${{ steps.generate.outputs.HAS_CHANGES }}
+
+runs:
+  using: composite
+  steps:
+    - name: Generate SBOM
+      id: generate
+      shell: bash
+      env:
+        SBOM_OUTPUT_FILE: ${{ inputs.output-file }}
+      run: |
+        SCRIPT_DIR="${{ github.action_path }}"
+        chmod +x "${SCRIPT_DIR}/generate-sbom.sh"
+        "${SCRIPT_DIR}/generate-sbom.sh" "$SBOM_OUTPUT_FILE"
