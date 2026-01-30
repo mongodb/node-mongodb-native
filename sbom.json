@@ -3,9 +3,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:f428b4eb-158b-4368-8087-f7b282019103",
+  "serialNumber": "urn:uuid:2a8890c5-546f-4418-b9a3-82c6bb8f7ec3",
   "metadata": {
-    "timestamp": "2026-01-26T04:23:55.104Z",
+    "timestamp": "2026-01-30T16:56:57.699Z",
     "tools": {
       "components": [
         {
@@ -157,8 +157,8 @@
     {
       "type": "library",
       "name": "bson",
-      "version": "7.0.0",
-      "bom-ref": "mongodb@7.0.0|bson@7.0.0",
+      "version": "7.1.1",
+      "bom-ref": "mongodb@7.0.0|bson@7.1.1",
       "licenses": [
         {
           "license": {
@@ -166,15 +166,15 @@
           }
         }
       ],
-      "purl": "pkg:npm/bson@7.0.0",
+      "purl": "pkg:npm/bson@7.1.1",
       "externalReferences": [
         {
-          "url": "https://registry.npmjs.org/bson/-/bson-7.0.0.tgz",
+          "url": "https://registry.npmjs.org/bson/-/bson-7.1.1.tgz",
           "type": "distribution",
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "2b073a5a1e254393a692aa8a85818a22e10b5e5f843d848239b544e9b5aca754ff70690e08137423cc05fd3e38062ba11f2362d6698a54f5e4eb4778d7167b93"
+              "content": "4ed260041f90c8e9568eb6ccfbc6d1807f3854cff1ac38f2045812806adf645e31bedea06c40ed72cc26dbb4e7f45f535ac8d0c9bc53f1bf15a423ffa092b80f"
             }
           ],
           "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
@@ -492,7 +492,7 @@
       "ref": "mongodb@7.0.0",
       "dependsOn": [
         "mongodb@7.0.0|@mongodb-js/saslprep@1.3.2",
-        "mongodb@7.0.0|bson@7.0.0",
+        "mongodb@7.0.0|bson@7.1.1",
         "mongodb@7.0.0|mongodb-connection-string-url@7.0.0"
       ]
     },
@@ -503,7 +503,7 @@
       ]
     },
     {
-      "ref": "mongodb@7.0.0|bson@7.0.0"
+      "ref": "mongodb@7.0.0|bson@7.1.1"
     },
     {
       "ref": "mongodb@7.0.0|mongodb-connection-string-url@7.0.0",
