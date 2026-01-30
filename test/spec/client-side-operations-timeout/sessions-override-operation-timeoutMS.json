@@ -245,11 +245,12 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 1
+                "times": 2
               },
               "data": {
                 "failCommands": [
-                  "insert"
+                  "insert",
+                  "abortTransaction"
                 ],
                 "blockConnection": true,
                 "blockTimeMS": 600
