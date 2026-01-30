@@ -562,6 +562,7 @@ export type {
   ReadPreferenceLikeOptions,
   ReadPreferenceOptions
 } from './read_preference';
+export type { OsAdapter, Runtime, RuntimeAdapters } from './runtime_adapters';
 export type { ClusterTime } from './sdam/common';
 export type {
   Monitor,

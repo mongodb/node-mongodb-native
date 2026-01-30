@@ -35,6 +35,7 @@ import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type Abortable, type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
+import { type Runtime } from '../runtime_adapters';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import { type TimeoutContext, TimeoutError } from '../timeout';
@@ -143,6 +144,8 @@ export interface ConnectionOptions
   metadata: Promise<ClientMetadata>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
+  /** @internal */
+  runtime: Runtime;
 }
 
 /** @public */
