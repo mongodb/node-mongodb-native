@@ -915,18 +915,12 @@ tasks:
           args:
             - .evergreen/run-search-index-management-tests.sh
   - name: test-bson-latest-server-7.0.0
-    tags:
-      - bson-compat
-      - driver-7.0.0
     commands:
       - command: expansions.update
         type: setup
         params:
           updates:
-            - {key: VERSION, value: '7.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: auth}
-            - {key: SSL, value: ssl}
+            - {key: VERSION, value: latest}
             - {key: NODE_LTS_VERSION, value: '24'}
             - {key: PACKAGE, value: https://github.com/mongodb/js-bson#HEAD}
       - func: install dependencies
