@@ -59,7 +59,6 @@ functions:
         script: |
           set -euxo pipefail
           git reset --hard HEAD
-          git clean -xfd
           git fetch origin "${SOURCE_REV}"
           git checkout "${SOURCE_REV}"
 
@@ -1014,7 +1013,7 @@ tasks:
           updates:
             - { key: VERSION, value: latest }
             - { key: TOPOLOGY, value: server }
-            - { key: AUTH, value: noauth }
+            - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
@@ -1037,7 +1036,7 @@ tasks:
           updates:
             - { key: VERSION, value: latest }
             - { key: TOPOLOGY, value: replica_set }
-            - { key: AUTH, value: noauth }
+            - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
@@ -1060,7 +1059,7 @@ tasks:
           updates:
             - { key: VERSION, value: latest }
             - { key: TOPOLOGY, value: sharded_cluster }
-            - { key: AUTH, value: noauth }
+            - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
