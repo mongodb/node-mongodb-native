@@ -7,7 +7,6 @@ import * as path from 'node:path';
 import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
-import * as os from 'os';
 import * as process from 'process';
 import { Readable } from 'stream';
 import { setTimeout } from 'timers';
@@ -24,6 +23,7 @@ import {
   type TopologyOptions
 } from '../../src';
 import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
+import { resolveRuntimeAdapters } from '../../src/runtime_adapters';
 import { Topology } from '../../src/sdam/topology';
 import { processTimeMS } from '../../src/utils';
 import { type TestConfiguration } from './runner/config';
@@ -607,6 +607,7 @@ export function configureMongocryptdSpawnHooks(
   };
 }
 
-export const runtime: Runtime = {
-  os
-};
+/**
+ * A `Runtime` that resolves to entirely Nodejs modules, useful when tests must provide a default `runtime` object to an API.
+ */
+export const runtime: Runtime = resolveRuntimeAdapters({});

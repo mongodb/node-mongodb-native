@@ -319,7 +319,11 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   connectionType?: typeof Connection;
   /** @internal */
   __skipPingOnConnect?: boolean;
-  /** @experimental  */
+  /**
+   * @experimental
+   *
+   * If provided, any adapters provided will be used in place of the corresponding Node.js module.
+   */
   runtimeAdapters?: RuntimeAdapters;
 }
 
