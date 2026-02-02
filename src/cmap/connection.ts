@@ -4,7 +4,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import {
   BSON,
   type BSONSerializeOptions,
-  concatBuffers,
+  ByteUtils,
   deserialize,
   type DeserializeOptions,
   type Document,
@@ -698,7 +698,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             zlibCompressionLevel: options.zlibCompressionLevel ?? 0
           });
 
-    const buffer = concatBuffers(await finalCommand.toBin());
+    const buffer = ByteUtils.concat(await finalCommand.toBin());
 
     if (options.timeoutContext?.csotEnabled()) {
       if (

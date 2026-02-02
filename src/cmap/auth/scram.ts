@@ -1,16 +1,7 @@
 import { saslprep } from '@mongodb-js/saslprep';
 import * as crypto from 'crypto';
 
-import {
-  allocateBuffer,
-  Binary,
-  ByteUtils,
-  concatBuffers,
-  type Document,
-  fromBase64,
-  fromNumberArray,
-  fromUTF8
-} from '../../bson';
+import { Binary, ByteUtils, type Document } from '../../bson';
 import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
@@ -77,11 +68,11 @@ function cleanUsername(username: string) {
 function clientFirstMessageBare(username: string, nonce: Uint8Array) {
   // NOTE: This is done b/c Javascript uses UTF-16, but the server is hashing in UTF-8.
   // Since the username is not sasl-prep-d, we need to do this here.
-  return concatBuffers([
-    fromUTF8('n='),
-    fromUTF8(username),
-    fromUTF8(',r='),
-    fromUTF8(ByteUtils.toBase64(nonce))
+  return ByteUtils.concat([
+    ByteUtils.fromUTF8('n='),
+    ByteUtils.fromUTF8(username),
+    ByteUtils.fromUTF8(',r='),
+    ByteUtils.fromUTF8(ByteUtils.toBase64(nonce))
   ]);
 }
 
@@ -99,7 +90,9 @@ function makeFirstMessage(
   return {
     saslStart: 1,
     mechanism,
-    payload: new Binary(concatBuffers([fromUTF8('n,,'), clientFirstMessageBare(username, nonce)])),
+    payload: new Binary(
+      ByteUtils.concat([ByteUtils.fromUTF8('n,,'), clientFirstMessageBare(username, nonce)])
+    ),
     autoAuthorize: 1,
     options: { skipEmptyExchange: true }
   };
@@ -164,7 +157,12 @@ async function continueScramConversation(
 
   // Set up start of proof
   const withoutProof = `c=biws,r=${rnonce}`;
-  const saltedPassword = HI(processedPassword, fromBase64(salt), iterations, cryptoMethod);
+  const saltedPassword = HI(
+    processedPassword,
+    ByteUtils.fromBase64(salt),
+    iterations,
+    cryptoMethod
+  );
 
   const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
   const serverKey = HMAC(cryptoMethod, saltedPassword, 'Server Key');
@@ -183,13 +181,13 @@ async function continueScramConversation(
   const saslContinueCmd = {
     saslContinue: 1,
     conversationId: response.conversationId,
-    payload: new Binary(fromUTF8(clientFinal))
+    payload: new Binary(ByteUtils.fromUTF8(clientFinal))
   };
 
   const r = await connection.command(ns(`${db}.$cmd`), saslContinueCmd, undefined);
   const parsedResponse = parsePayload(r.payload);
 
-  if (!compareDigest(fromBase64(parsedResponse.v), serverSignature)) {
+  if (!compareDigest(ByteUtils.fromBase64(parsedResponse.v), serverSignature)) {
     throw new MongoRuntimeError('Server returned an invalid signature');
   }
 
@@ -201,7 +199,7 @@ async function continueScramConversation(
   const retrySaslContinueCmd = {
     saslContinue: 1,
     conversationId: r.conversationId,
-    payload: allocateBuffer(0)
+    payload: ByteUtils.allocate(0)
   };
 
   await connection.command(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined);
@@ -255,7 +253,7 @@ function xor(a: Uint8Array, b: Uint8Array) {
     res.push(a[i] ^ b[i]);
   }
 
-  return ByteUtils.toBase64(fromNumberArray(res));
+  return ByteUtils.toBase64(ByteUtils.fromNumberArray(res));
 }
 
 function H(method: CryptoMethod, text: Uint8Array): Uint8Array {

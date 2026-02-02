@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as process from 'process';
 
-import { BSON, type Document, fromUTF8, Int32, toUTF8 } from '../../bson';
+import { BSON, ByteUtils, type Document, Int32 } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { DriverInfo, MongoOptions } from '../../mongo_client';
 import { fileIsAccessible } from '../../utils';
@@ -116,7 +116,7 @@ export async function makeClientMetadata(
     const name =
       BSON.ByteUtils.utf8ByteLength(appName) <= 128
         ? appName
-        : toUTF8(fromUTF8(appName), 0, 128, false);
+        : ByteUtils.toUTF8(ByteUtils.fromUTF8(appName), 0, 128, false);
     metadataDocument.ifItFitsItSits('application', { name });
   }
 

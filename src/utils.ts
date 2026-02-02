@@ -7,12 +7,10 @@ import * as process from 'process';
 import { clearTimeout, setTimeout } from 'timers';
 
 import {
-  allocateBuffer,
-  allocateUnsafeBuffer,
   ByteUtils,
   deserialize,
   type Document,
-  getInt32LE,
+  NumberUtils,
   ObjectId,
   resolveBSONOptions
 } from './bson';
@@ -810,13 +808,13 @@ export class BufferPool {
     }
     const firstBuffer = this.buffers.first();
     if (firstBuffer != null && firstBuffer.byteLength >= 4) {
-      return getInt32LE(firstBuffer, 0);
+      return NumberUtils.getInt32LE(firstBuffer, 0);
     }
 
     // Unlikely case: an int32 is split across buffers.
     // Use read and put the returned buffer back on top
     const top4Bytes = this.read(4);
-    const value = getInt32LE(top4Bytes, 0);
+    const value = NumberUtils.getInt32LE(top4Bytes, 0);
 
     // Put it back.
     this.totalByteLength += 4;
@@ -833,12 +831,12 @@ export class BufferPool {
 
     // oversized request returns empty buffer
     if (size > this.totalByteLength) {
-      return allocateBuffer(0);
+      return ByteUtils.allocate(0);
     }
 
     // We know we have enough, we just don't know how it is spread across chunks
     // TODO(NODE-4732): alloc API should change based on raw option
-    const result = allocateUnsafeBuffer(size);
+    const result = ByteUtils.allocateUnsafe(size);
 
     for (let bytesRead = 0; bytesRead < size; ) {
       const buffer = this.buffers.shift();

@@ -1,10 +1,7 @@
 import {
-  allocateBuffer,
-  allocateUnsafeBuffer,
   BSON,
   type BSONSerializeOptions,
   ByteUtils,
-  concatBuffers,
   type Document,
   type Long,
   readInt32LE,
@@ -192,7 +189,7 @@ export class OpQueryRequest {
     if (this.batchSize !== this.numberToReturn) this.numberToReturn = this.batchSize;
 
     // Allocate write protocol header buffer
-    const header = allocateBuffer(
+    const header = ByteUtils.allocate(
       4 * 4 + // Header
         4 + // Flags
         ByteUtils.utf8ByteLength(this.ns) +
@@ -456,7 +453,7 @@ export class DocumentSequence {
     this.serializedDocumentsLength = 0;
     // Document sequences starts with type 1 at the first byte.
     // Field strings must always be UTF-8.
-    const buffer = allocateUnsafeBuffer(1 + 4 + this.field.length + 1);
+    const buffer = ByteUtils.allocateUnsafe(1 + 4 + this.field.length + 1);
     buffer[0] = 1;
     // Third part is the field name at offset 5 with trailing null byte.
     encodeUTF8Into(buffer, `${this.field}\0`, 5);
@@ -494,7 +491,7 @@ export class DocumentSequence {
    * @returns The section bytes.
    */
   toBin(): Uint8Array {
-    return concatBuffers(this.chunks);
+    return ByteUtils.concat(this.chunks);
   }
 }
 
@@ -559,7 +556,7 @@ export class OpMsgRequest {
       flags |= OPTS_EXHAUST_ALLOWED;
     }
 
-    const header = allocateBuffer(
+    const header = ByteUtils.allocate(
       4 * 4 + // Header
         4 // Flags
     );
@@ -583,7 +580,7 @@ export class OpMsgRequest {
    */
   makeSections(buffers: Uint8Array[], document: Document): number {
     const sequencesBuffer = this.extractDocumentSequences(document);
-    const payloadTypeBuffer = allocateUnsafeBuffer(1);
+    const payloadTypeBuffer = ByteUtils.allocateUnsafe(1);
     payloadTypeBuffer[0] = 0;
 
     const documentBuffer = this.serializeBson(document);
@@ -618,11 +615,11 @@ export class OpMsgRequest {
       }
     }
     if (chunks.length > 0) {
-      return concatBuffers(chunks);
+      return ByteUtils.concat(chunks);
     }
     // If we have no document sequences we return an empty buffer for nothing to add
     // to the payload.
-    return allocateBuffer(0);
+    return ByteUtils.allocate(0);
   }
 
   serializeBson(document: Document): Uint8Array {
@@ -771,7 +768,7 @@ export class OpCompressedRequest {
   }
 
   async toBin(): Promise<Uint8Array[]> {
-    const concatenatedOriginalCommandBuffer = concatBuffers(this.command.toBin());
+    const concatenatedOriginalCommandBuffer = ByteUtils.concat(this.command.toBin());
     // otherwise, compress the message
     const messageToBeCompressed = concatenatedOriginalCommandBuffer.slice(MESSAGE_HEADER_SIZE);
 
@@ -781,7 +778,7 @@ export class OpCompressedRequest {
     // Compress the message body
     const compressedMessage = await compress(this.options, messageToBeCompressed);
     // Create the msgHeader of OP_COMPRESSED
-    const msgHeader = allocateBuffer(MESSAGE_HEADER_SIZE);
+    const msgHeader = ByteUtils.allocate(MESSAGE_HEADER_SIZE);
     writeInt32LE(
       msgHeader,
       MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length,
@@ -791,7 +788,7 @@ export class OpCompressedRequest {
     writeInt32LE(msgHeader, 0, 8); // responseTo (zero)
     writeInt32LE(msgHeader, OP_COMPRESSED, 12); // opCode
     // Create the compression details of OP_COMPRESSED
-    const compressionDetails = allocateBuffer(COMPRESSION_DETAILS_SIZE);
+    const compressionDetails = ByteUtils.allocate(COMPRESSION_DETAILS_SIZE);
     writeInt32LE(compressionDetails, originalCommandOpCode, 0); // originalOpcode
     writeInt32LE(compressionDetails, messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
     writeInt32LE(compressionDetails, Compressor[this.options.agreedCompressor], 8); // compressorID

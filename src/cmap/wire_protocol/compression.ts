@@ -1,6 +1,6 @@
 import * as zlib from 'zlib';
 
-import { concatBuffers, readInt32LE } from '../../bson';
+import { ByteUtils, readInt32LE } from '../../bson';
 import { LEGACY_HELLO_COMMAND } from '../../constants';
 import { getSnappy, getZstdLibrary, type SnappyLib, type ZStandard } from '../../deps';
 import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
@@ -172,7 +172,7 @@ export async function compressCommand(
           zlibCompressionLevel: description.zlibCompressionLevel ?? 0
         });
   const data = await finalCommand.toBin();
-  return concatBuffers(data);
+  return ByteUtils.concat(data);
 }
 
 /**
