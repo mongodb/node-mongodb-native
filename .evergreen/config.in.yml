@@ -61,6 +61,7 @@ functions:
           git reset --hard HEAD
           git fetch origin "${SOURCE_REV}"
           git checkout "${SOURCE_REV}"
+          npm i
 
   "bootstrap mongo-orchestration":
     - command: subprocess.exec
