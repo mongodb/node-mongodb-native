@@ -1,0 +1,51 @@
+name: Post-Merge SBOM Update
+on:
+  push:
+    branches: 
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+ 
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sbom:
+    name: Generate SBOM and Create PR
+    runs-on: ubuntu-latest
+    
+    concurrency:
+      group: sbom-update
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Node and dependencies
+        uses: mongodb-labs/drivers-github-tools/node/setup@v3
+        with:
+          ignore_install_scripts: false
+
+      - name: Generate SBOM
+        id: generate_sbom
+        uses: ./.github/actions/sbom-update
+        with:
+          output-file: sbom.json
+
+      - name: Commit SBOM changes
+        if: steps.generate_sbom.outputs.HAS_CHANGES == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sbom.json
+          git commit -m "chore(deps): Update SBOM after dependency changes"
+          git push
+          echo "SBOM updated and committed" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true

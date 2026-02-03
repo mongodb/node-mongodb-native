@@ -679,10 +679,37 @@ needs to be tested.
 3. For additional Node.js options (like HTTP debug), add them to `K8S_TEST_CMD` in `.evergreen/run-oidc-tests-k8s.sh`
 4. Create an evergreen patch and schedule only the `oidc-auth-test-k8s-latest-aks` variant.
 
+### Running tests with TLS
+
+We tests TLS in two suites in CI:
+
+- For each node version and platform, we run a small test suite that confirms TLS works.
+- We run the full test suite on Linux, on latest Nodejs and on all topologies, to confirm that our full test suite works with TLS enabled.
+
+Setting up a local environment is the same for both suites.
+
+First, configure a server with TLS enabled by following the steps in [Runing the Tests Locally](#Running-the-Tests-Locally) with the environment 
+variable `SSL=SSL` set.
+
+Then, in addition to setting the `MONGODB_URI` environment varialbe, set the following environment variables:
+
+```bash
+export SSL='ssl' # enable TLS
+
+# TLS certificates
+export TLS_KEY_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/client.pem"
+export TLS_CA_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/ca.pem"
+export TLS_CRL_FILE="$DRIVERS_TOOLS/.evergreen/x509gen/crl.pem"
+```
+
+Then run the TLS tests:
+
+- If running the integration test suite, run `npm run check:test`
+- If running the manual TLS tests, run `npm run check:tls`
+
 
 ### TODO Special Env Sections
 
-- TLS
 - LDAP
 - Snappy (maybe in general, how to test optional dependencies)
 - Atlas connectivity

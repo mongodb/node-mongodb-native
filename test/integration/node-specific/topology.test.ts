@@ -4,7 +4,7 @@ import { MongoClient, type MongoClientOptions, type Topology } from '../../../sr
 
 describe('Topology', function () {
   it('should correctly track states of a topology', {
-    metadata: { requires: { apiVersion: false, topology: '!load-balanced' } }, // apiVersion not supported by newTopology()
+    metadata: { requires: { apiVersion: false, topology: '!load-balanced', tls: 'disabled' } }, // apiVersion not supported by newTopology()
     test: async function () {
       class WrappedClient extends MongoClient {
         _topology: Topology | undefined = undefined;

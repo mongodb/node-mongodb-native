@@ -1,6 +1,7 @@
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
+import { isTLSEnabled } from '../../tools/runner/filters/tls_filter';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const UNIMPLEMENTED_APIS = [
@@ -25,6 +26,9 @@ describe('Retryable Reads (unified)', function () {
         return `TODO(NODE-6832): fix flaky retryable reads tests`;
       }
     }
+
+    if (isTLSEnabled) return 'TODO(NODE-7408): fix these tests when TLS is enabled';
+
     return false;
   });
 });

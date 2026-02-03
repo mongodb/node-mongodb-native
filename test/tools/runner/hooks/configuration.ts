@@ -28,6 +28,7 @@ import { type Context } from 'mocha';
 import { flakyTests } from '../flaky';
 import { CryptSharedFilter } from '../filters/crypt_shared_filter';
 import { LibmongocryptVersionFilter } from '../filters/libmongocrypt_version_filter';
+import { TLSFilter } from '../filters/tls_filter';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -68,7 +69,8 @@ async function initializeFilters(client): Promise<Record<string, any>> {
       new MongoDBTopologyFilter(),
       new MongoDBVersionFilter(),
       new NodeVersionFilter(),
-      new OSFilter()
+      new OSFilter(),
+      new TLSFilter()
     ]
   };
 
@@ -119,10 +121,9 @@ const testConfigBeforeHook = async function () {
     return;
   }
 
-  const client = new MongoClient(
-    loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
-    getEnvironmentalOptions()
-  );
+  const options = getEnvironmentalOptions();
+
+  const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, options);
 
   await client.db('test').command({ ping: 1 });
 

@@ -132,9 +132,9 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 1 }
+            mode: { times: 2 }
             data:
-              failCommands: ["insert"]
+              failCommands: ["insert", "abortTransaction"]
               blockConnection: true
               blockTimeMS: 600
       - name: withTransaction

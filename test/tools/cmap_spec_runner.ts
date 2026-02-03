@@ -9,6 +9,7 @@ import {
   type ConnectionPoolOptions,
   type HostAddress,
   type MongoClient,
+  type MongoClientOptions,
   type Server
 } from '../../src';
 import { ConnectionPool } from '../../src/cmap/connection_pool';
@@ -509,7 +510,7 @@ export function runCmapTestSuite(
           const selectedHostUri = hosts[0];
           hostAddress = serverDescriptionMap.get(selectedHostUri).hostAddress;
 
-          const clientOptions: { appName?: string } = {};
+          const clientOptions: Pick<MongoClientOptions, 'appName'> = {};
           if (test.poolOptions?.appName) {
             clientOptions.appName = test.poolOptions.appName;
           }
@@ -520,6 +521,7 @@ export function runCmapTestSuite(
             clientOptions
           );
           await client.connect();
+
           if (test.failPoint) {
             await client.db('admin').command(test.failPoint);
           }
@@ -530,12 +532,11 @@ export function runCmapTestSuite(
             throw new Error('Failed to retrieve server for test');
           }
 
-          threadContext = new ThreadContext(
-            server,
-            hostAddress,
-            this.configuration.isLoadBalanced ? { loadBalanced: true } : {},
-            { injectPoolStats: !!options?.injectPoolStats }
-          );
+          const poolOptions = this.configuration.isLoadBalanced ? { loadBalanced: true } : {};
+
+          threadContext = new ThreadContext(server, hostAddress, poolOptions, {
+            injectPoolStats: !!options?.injectPoolStats
+          });
         } finally {
           await utilClient.close();
         }
@@ -554,9 +555,18 @@ export function runCmapTestSuite(
         await client.close();
       });
 
-      it(test.description, async function () {
-        await runCmapTest(test, threadContext);
-      });
+      it(
+        test.description,
+        {
+          requires: {
+            // TODO(NODE-7408): fix these tests when TLS is enabled
+            tls: 'disabled'
+          }
+        },
+        async function () {
+          await runCmapTest(test, threadContext);
+        }
+      );
     });
   }
 }
