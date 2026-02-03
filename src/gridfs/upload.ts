@@ -438,7 +438,7 @@ function doWrite(
   let outstandingRequests = 0;
   while (inputBufRemaining > 0) {
     const inputBufPos = inputBuf.length - inputBufRemaining;
-    ByteUtils.copy(inputBuf, stream.bufToStore, stream.pos, inputBufPos, +numToCopy);
+    ByteUtils.copy(inputBuf, stream.bufToStore, stream.pos, inputBufPos, inputBufPos + numToCopy);
     stream.pos += numToCopy;
     spaceRemaining -= numToCopy;
     let doc: GridFSChunk;

@@ -791,7 +791,7 @@ export class OpCompressedRequest {
     const compressionDetails = ByteUtils.allocate(COMPRESSION_DETAILS_SIZE);
     writeInt32LE(compressionDetails, originalCommandOpCode, 0); // originalOpcode
     writeInt32LE(compressionDetails, messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
-    writeInt32LE(compressionDetails, Compressor[this.options.agreedCompressor], 8); // compressorID
+    compressionDetails[8] = Compressor[this.options.agreedCompressor]; // compressorID
     return [msgHeader, compressionDetails, compressedMessage];
   }
 }
