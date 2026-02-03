@@ -66,6 +66,8 @@ export abstract class AbstractOperation<TResult = any> {
   /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
 
+  maxAttempts?: number;
+
   private _session: ClientSession | undefined;
 
   static aspects?: Set<symbol>;

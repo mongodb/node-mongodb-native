@@ -104,8 +104,7 @@ export interface EndSessionOptions {
  */
 export class ClientSession
   extends TypedEventEmitter<ClientSessionEvents>
-  implements AsyncDisposable
-{
+  implements AsyncDisposable {
   /** @internal */
   client: MongoClient;
   /** @internal */
@@ -468,7 +467,11 @@ export class ClientSession
       } else {
         const wcKeys = Object.keys(wc);
         if (wcKeys.length > 2 || (!wcKeys.includes('wtimeoutMS') && !wcKeys.includes('wTimeoutMS')))
-          // if the write concern was specified with wTimeoutMS, then we set both wtimeoutMS and wTimeoutMS, guaranteeing at least two keys, so if we have more than two keys, then we can automatically assume that we should add the write concern to the command. If it has 2 or fewer keys, we need to check that those keys aren't the wtimeoutMS or wTimeoutMS options before we add the write concern to the command
+          // if the write concern was specified with wTimeoutMS, then we set both wtimeoutMS
+          // and wTimeoutMS, guaranteeing at least two keys, so if we have more than two keys,
+          // then we can automatically assume that we should add the write concern to the command.
+          // If it has 2 or fewer keys, we need to check that those keys aren't the wtimeoutMS
+          // or wTimeoutMS options before we add the write concern to the command
           WriteConcern.apply(command, { ...wc, wtimeoutMS: undefined });
       }
     }
@@ -489,20 +492,22 @@ export class ClientSession
       command.recoveryToken = this.transaction.recoveryToken;
     }
 
+
     const operation = new RunCommandOperation(new MongoDBNamespace('admin'), command, {
       session: this,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
+    operation.maxAttempts = 5;
 
     const timeoutContext =
       this.timeoutContext ??
       (typeof timeoutMS === 'number'
         ? TimeoutContext.create({
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS,
-            timeoutMS
-          })
+          serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+          socketTimeoutMS: this.clientOptions.socketTimeoutMS,
+          timeoutMS
+        })
         : null);
 
     try {
@@ -518,15 +523,13 @@ export class ClientSession
         this.unpin({ force: true });
 
         try {
-          await executeOperation(
-            this.client,
-            new RunCommandOperation(new MongoDBNamespace('admin'), command, {
-              session: this,
-              readPreference: ReadPreference.primary,
-              bypassPinningCheck: true
-            }),
-            timeoutContext
-          );
+          const op = new RunCommandOperation(new MongoDBNamespace('admin'), command, {
+            session: this,
+            readPreference: ReadPreference.primary,
+            bypassPinningCheck: true
+          });
+          op.maxAttempts = operation.maxAttempts;
+          await executeOperation(this.client, op, timeoutContext);
           return;
         } catch (retryCommitError) {
           // If the retry failed, we process that error instead of the original
@@ -606,10 +609,10 @@ export class ClientSession
     const timeoutContext =
       timeoutMS != null
         ? TimeoutContext.create({
-            timeoutMS,
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS
-          })
+          timeoutMS,
+          serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+          socketTimeoutMS: this.clientOptions.socketTimeoutMS
+        })
         : null;
 
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
@@ -722,10 +725,10 @@ export class ClientSession
     this.timeoutContext =
       timeoutMS != null
         ? TimeoutContext.create({
-            timeoutMS,
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS
-          })
+          timeoutMS,
+          serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
+          socketTimeoutMS: this.clientOptions.socketTimeoutMS
+        })
         : null;
 
     // 1. Record the current monotonic time, which will be used to enforce the 120-second timeout before later retry attempts.
@@ -1013,6 +1016,11 @@ export class ServerSession {
   id: ServerSessionId;
   lastUse: number;
   txnNumber: number;
+
+  /*
+   * Indicates that a network error has been encountered while using this session.
+   * Once a session is marked as dirty, it is always dirty.
+   */
   isDirty: boolean;
 
   /** @internal */
@@ -1106,15 +1114,14 @@ export class ServerSessionPool {
    * @param session - The session to release to the pool
    */
   release(session: ServerSession): void {
-    const sessionTimeoutMinutes = this.client.topology?.logicalSessionTimeoutMinutes ?? 10;
+    if (this.client.topology?.loadBalanced) {
+      if (session.isDirty) return;
 
-    if (this.client.topology?.loadBalanced && !sessionTimeoutMinutes) {
       this.sessions.unshift(session);
-    }
-
-    if (!sessionTimeoutMinutes) {
       return;
     }
+
+    const sessionTimeoutMinutes = this.client.topology?.logicalSessionTimeoutMinutes ?? 10;
 
     this.sessions.prune(session => session.hasTimedOut(sessionTimeoutMinutes));
 
@@ -1203,9 +1210,9 @@ export function applySession(
   command.autocommit = false;
 
   if (session.transaction.state === TxnState.STARTING_TRANSACTION) {
-    session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
     command.startTransaction = true;
 
+    // TODO: read concern only applied if it is not the same as the server's default
     const readConcern =
       session.transaction.options.readConcern || session?.clientOptions?.readConcern;
     if (readConcern) {
@@ -1239,6 +1246,19 @@ export function updateSessionFromResponse(session: ClientSession, document: Mong
     const atClusterTime = document.atClusterTime;
     if (atClusterTime) {
       session.snapshotTime = atClusterTime;
+    }
+  }
+
+  if (session.transaction.state === TxnState.STARTING_TRANSACTION) {
+    if (document.ok === 1) {
+      session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
+    } else {
+      const error = new MongoServerError(document.toObject());
+      const isBackpressureError = error.hasErrorLabel(MongoErrorLabel.RetryableError);
+
+      if (!isBackpressureError) {
+        session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
+      }
     }
   }
 }

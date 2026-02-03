@@ -37,68 +37,68 @@ describe('Handshake Prose Tests', function () {
     expectedProvider: string | undefined;
     env: EnvironmentVariables;
   }> = [
-    {
-      context: '1. Valid AWS',
-      expectedProvider: 'aws.lambda',
-      env: [
-        ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
-        ['AWS_REGION', 'us-east-2'],
-        ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '1024']
-      ]
-    },
-    {
-      context: '2. Valid Azure',
-      expectedProvider: 'azure.func',
-      env: [['FUNCTIONS_WORKER_RUNTIME', 'node']]
-    },
-    {
-      context: '3. Valid GCP',
-      expectedProvider: 'gcp.func',
-      env: [
-        ['K_SERVICE', 'servicename'],
-        ['FUNCTION_MEMORY_MB', '1024'],
-        ['FUNCTION_TIMEOUT_SEC', '60'],
-        ['FUNCTION_REGION', 'us-central1']
-      ]
-    },
-    {
-      context: '4. Valid Vercel',
-      expectedProvider: 'vercel',
-      env: [
-        ['VERCEL', '1'],
-        ['VERCEL_REGION', 'cdg1']
-      ]
-    },
-    {
-      expectedProvider: undefined,
-      context: '5. Invalid - multiple providers',
-      env: [
-        ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
-        ['FUNCTIONS_WORKER_RUNTIME', 'node']
-      ]
-    },
-    {
-      expectedProvider: 'aws.lambda',
-      context: '6. Invalid - long string',
-      env: [
-        ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
-        ['AWS_REGION', 'a'.repeat(1024)]
-      ]
-    },
-    {
-      expectedProvider: 'aws.lambda',
-      context: '7. Invalid - wrong types',
-      env: [
-        ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
-        ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', 'big']
-      ]
-    },
-    {
-      expectedProvider: undefined,
-      context: '8. Invalid - AWS_EXECUTION_ENV does not start with "AWS_Lambda_"',
-      env: [['AWS_EXECUTION_ENV', 'EC2']]
-    }
-  ];
+      {
+        context: '1. Valid AWS',
+        expectedProvider: 'aws.lambda',
+        env: [
+          ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
+          ['AWS_REGION', 'us-east-2'],
+          ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '1024']
+        ]
+      },
+      {
+        context: '2. Valid Azure',
+        expectedProvider: 'azure.func',
+        env: [['FUNCTIONS_WORKER_RUNTIME', 'node']]
+      },
+      {
+        context: '3. Valid GCP',
+        expectedProvider: 'gcp.func',
+        env: [
+          ['K_SERVICE', 'servicename'],
+          ['FUNCTION_MEMORY_MB', '1024'],
+          ['FUNCTION_TIMEOUT_SEC', '60'],
+          ['FUNCTION_REGION', 'us-central1']
+        ]
+      },
+      {
+        context: '4. Valid Vercel',
+        expectedProvider: 'vercel',
+        env: [
+          ['VERCEL', '1'],
+          ['VERCEL_REGION', 'cdg1']
+        ]
+      },
+      {
+        expectedProvider: undefined,
+        context: '5. Invalid - multiple providers',
+        env: [
+          ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
+          ['FUNCTIONS_WORKER_RUNTIME', 'node']
+        ]
+      },
+      {
+        expectedProvider: 'aws.lambda',
+        context: '6. Invalid - long string',
+        env: [
+          ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
+          ['AWS_REGION', 'a'.repeat(1024)]
+        ]
+      },
+      {
+        expectedProvider: 'aws.lambda',
+        context: '7. Invalid - wrong types',
+        env: [
+          ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
+          ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', 'big']
+        ]
+      },
+      {
+        expectedProvider: undefined,
+        context: '8. Invalid - AWS_EXECUTION_ENV does not start with "AWS_Lambda_"',
+        env: [['AWS_EXECUTION_ENV', 'EC2']]
+      }
+    ];
 
   for (const { context: name, env, expectedProvider } of tests) {
     context(name, function () {
@@ -461,10 +461,10 @@ describe('Client Metadata Update Prose Tests', function () {
           const expected = isDriverInfoEqual(driverInfo, originalDriverInfo)
             ? originalDriverInfo
             : {
-                name: `library|${driverInfo.name}`,
-                platform: `Library Platform|${driverInfo.platform}`,
-                version: `1.2|${driverInfo.version}`
-              };
+              name: `library|${driverInfo.name}`,
+              platform: `Library Platform|${driverInfo.platform}`,
+              version: `1.2|${driverInfo.version}`
+            };
 
           expect(actual).to.deep.equal(expected);
 
@@ -753,43 +753,43 @@ describe('Client Metadata Update Prose Tests', function () {
       initial: DriverInfo;
       appended: DriverInfo;
     }> = [
-      {
-        initial: {
-          name: undefined,
-          version: '1.2',
-          platform: 'Library Platform'
+        {
+          initial: {
+            name: undefined,
+            version: '1.2',
+            platform: 'Library Platform'
+          },
+          appended: {
+            name: '',
+            version: '1.2',
+            platform: 'Library Platform'
+          }
         },
-        appended: {
-          name: '',
-          version: '1.2',
-          platform: 'Library Platform'
-        }
-      },
-      {
-        initial: {
-          name: 'library',
-          version: undefined,
-          platform: 'Library Platform'
+        {
+          initial: {
+            name: 'library',
+            version: undefined,
+            platform: 'Library Platform'
+          },
+          appended: {
+            name: 'library',
+            version: '',
+            platform: 'Library Platform'
+          }
         },
-        appended: {
-          name: 'library',
-          version: '',
-          platform: 'Library Platform'
+        {
+          initial: {
+            name: 'library',
+            version: '1.2',
+            platform: undefined
+          },
+          appended: {
+            name: 'library',
+            version: '1.2',
+            platform: ''
+          }
         }
-      },
-      {
-        initial: {
-          name: 'library',
-          version: '1.2',
-          platform: undefined
-        },
-        appended: {
-          name: 'library',
-          version: '1.2',
-          platform: ''
-        }
-      }
-    ];
+      ];
 
     for (const [metadata, index] of driverInfos.map((infos, i) => [infos, i] as const)) {
       describe(`Test ${index + 1}`, function () {
@@ -856,43 +856,43 @@ describe('Client Metadata Update Prose Tests', function () {
       initial: DriverInfo;
       appended: DriverInfo;
     }> = [
-      {
-        initial: {
-          name: undefined,
-          version: '1.2',
-          platform: 'Library Platform'
+        {
+          initial: {
+            name: undefined,
+            version: '1.2',
+            platform: 'Library Platform'
+          },
+          appended: {
+            name: '',
+            version: '1.2',
+            platform: 'Library Platform'
+          }
         },
-        appended: {
-          name: '',
-          version: '1.2',
-          platform: 'Library Platform'
-        }
-      },
-      {
-        initial: {
-          name: 'library',
-          version: undefined,
-          platform: 'Library Platform'
+        {
+          initial: {
+            name: 'library',
+            version: undefined,
+            platform: 'Library Platform'
+          },
+          appended: {
+            name: 'library',
+            version: '',
+            platform: 'Library Platform'
+          }
         },
-        appended: {
-          name: 'library',
-          version: '',
-          platform: 'Library Platform'
+        {
+          initial: {
+            name: 'library',
+            version: '1.2',
+            platform: undefined
+          },
+          appended: {
+            name: 'library',
+            version: '1.2',
+            platform: ''
+          }
         }
-      },
-      {
-        initial: {
-          name: 'library',
-          version: '1.2',
-          platform: undefined
-        },
-        appended: {
-          name: 'library',
-          version: '1.2',
-          platform: ''
-        }
-      }
-    ];
+      ];
 
     for (const [metadata, index] of driverInfos.map((infos, i) => [infos, i] as const)) {
       describe(`Test ${index + 1}`, function () {
@@ -941,5 +941,40 @@ describe('Client Metadata Update Prose Tests', function () {
         });
       });
     }
+  });
+});
+
+// TODO: add prose test descriptions here to align the test with the spec.
+describe('Backpressure Metadata', function () {
+  let client: MongoClient;
+  let spy: sinon.SinonSpy<Parameters<typeof Connection.prototype.command>>;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+    spy = sinon.spy(Connection.prototype, 'command');
+    await client.connect();
+
+    // run an operation to force a connection establishment,
+    // if we're testing noauth load balanced mode.
+    await client.db('foo').collection('bar').insertOne({ name: 'bumpy' });
+  });
+
+  afterEach(async function () {
+    sinon.restore();
+    await client?.close();
+  });
+
+  it('includes backpressure in the handshake document', function () {
+    const isHello = (cmd: Document): cmd is HandshakeDocument =>
+      `hello` in cmd || LEGACY_HELLO_COMMAND in cmd;
+
+    const hellos = spy.args.map(([_ns, command, _options]) => command).filter(isHello);
+
+    expect(hellos.length).to.be.greaterThan(0);
+
+    expect(
+      hellos.every(hello => hello.backpressure === true),
+      `some handshake documents did not specify backpressure: true`
+    );
   });
 });

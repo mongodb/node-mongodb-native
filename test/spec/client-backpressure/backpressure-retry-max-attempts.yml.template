@@ -1,0 +1,101 @@
+# Tests in this file are generated from backpressure-retry-max-attempts.yml.template.
+
+description: tests that operations retry at most maxAttempts=5 times
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.4' # failCommand
+    topologies: [replicaset, sharded, load-balanced]
+
+createEntities:
+  - client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents: [commandStartedEvent, commandSucceededEvent, commandFailedEvent]
+
+  - client:
+      id: &fail_point_client fail_point_client
+      useMultipleMongoses: false
+
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &database_name retryable-writes-tests
+
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collection_name coll
+
+_yamlAnchors:
+  bulkWriteInsertNamespace: &client_bulk_write_ns retryable-writes-tests.coll
+
+initialData:
+  - collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests: {% for operation in operations %}
+  - description: '{{operation.object}}.{{operation.operation_name}} retries at most maxAttempts=5 times'
+    {%- if ((operation.operation_name == 'clientBulkWrite')) %}
+    runOnRequirements:
+      - minServerVersion: '8.0' # client bulk write added to server in 8.0
+    {%- endif %}
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *fail_point_client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: alwaysOn
+            data:
+              failCommands: [{{operation.command_name}}]
+              errorLabels: [RetryableError, SystemOverloadedError]
+              errorCode: 2
+      
+      - name: {{operation.operation_name}}
+        object: *{{operation.object}}  {%- if operation.arguments|length > 0 %}
+        arguments:
+          {%- for arg in operation.arguments %}
+          {{arg}}
+          {%- endfor -%}
+        {%- endif %}
+        expectError: 
+          isError: true
+          isClientError: false
+
+    expectEvents:
+      - client: *client
+        events:
+          # we expect 6 pairs of command started and succeeded events: 
+          #   1 initial attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+          - commandStartedEvent:
+              commandName: {{operation.command_name}}
+          - commandFailedEvent:
+              commandName: {{operation.command_name}}
+{% endfor -%}
