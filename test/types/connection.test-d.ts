@@ -1,8 +1,6 @@
 import { expectError, expectType } from 'tsd';
 
-import { type Connection, type Document } from '../mongodb';
-import { MongoDBResponse, ns } from '../mongodb';
-
+import { type Connection, type Document, MongoDBResponse, ns } from '../mongodb';
 declare const connection: Connection;
 
 expectType<Document>(await connection.command(ns('a'), { cmd: 1 }));

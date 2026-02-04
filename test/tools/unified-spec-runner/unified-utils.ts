@@ -7,13 +7,14 @@ import { isDeepStrictEqual } from 'util';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   type AutoEncryptionOptions,
+  ClientEncryption,
   type CollectionOptions,
   type DbOptions,
   type Document,
+  getMongoDBClientEncryption,
   type MongoClient,
   ReturnDocument
 } from '../../mongodb';
-import { ClientEncryption, getMongoDBClientEncryption } from '../../mongodb';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
 import { MalformedOperationError } from './operations';

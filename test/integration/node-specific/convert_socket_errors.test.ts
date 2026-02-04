@@ -3,8 +3,14 @@ import { Duplex } from 'node:stream';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { type Collection, type Document, type MongoClient, MongoNetworkError } from '../../mongodb';
-import { Connection, ns } from '../../mongodb';
+import {
+  type Collection,
+  Connection,
+  type Document,
+  type MongoClient,
+  MongoNetworkError,
+  ns
+} from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 

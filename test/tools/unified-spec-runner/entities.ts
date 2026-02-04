@@ -35,19 +35,21 @@ import {
   type MongoCredentials,
   ReadConcern,
   ReadPreference,
+  SENSITIVE_COMMANDS,
   type ServerClosedEvent,
   type ServerDescriptionChangedEvent,
   type ServerHeartbeatFailedEvent,
   type ServerHeartbeatStartedEvent,
   type ServerHeartbeatSucceededEvent,
   type ServerOpeningEvent,
+  Timeout,
+  TimeoutError,
   type TopologyClosedEvent,
   type TopologyDescription,
   type TopologyDescriptionChangedEvent,
   type TopologyOpeningEvent,
   WriteConcern
 } from '../../mongodb';
-import { SENSITIVE_COMMANDS, Timeout, TimeoutError } from '../../mongodb';
 import { getEncryptExtraOptions, getEnvironmentalOptions } from '../../tools/utils';
 import { AlpineTestConfiguration, type TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';

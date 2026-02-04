@@ -5,9 +5,13 @@ import {
   kmsCredentialsPresent,
   missingKeys
 } from '../../csfle-kms-providers';
-import { Collection, type Db, MongoServerError } from '../../mongodb';
-import { ClientEncryption, MongoCryptCreateEncryptedCollectionError } from '../../mongodb';
-
+import {
+  ClientEncryption,
+  Collection,
+  type Db,
+  MongoCryptCreateEncryptedCollectionError,
+  MongoServerError
+} from '../../mongodb';
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,

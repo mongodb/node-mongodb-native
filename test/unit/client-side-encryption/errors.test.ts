@@ -5,10 +5,9 @@ import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError,
   MongoCryptError,
-  MongoCryptInvalidArgumentError
+  MongoCryptInvalidArgumentError,
+  MongoError
 } from '../../mongodb';
-import { MongoError } from '../../mongodb';
-
 describe('MongoCryptError', function () {
   const errors = [
     new MongoCryptAzureKMSRequestError(''),

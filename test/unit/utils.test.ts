@@ -9,22 +9,20 @@ import {
   BufferPool,
   checkParentDomainMatch,
   compareObjectId,
+  decorateWithExplain,
+  Explain,
   hasAtomicOperators,
   HostAddress,
   hostMatchesWildcards,
   isHello,
   isUint8Array,
+  LEGACY_HELLO_COMMAND,
   List,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
-  shuffle
-} from '../mongodb';
-import {
-  decorateWithExplain,
-  Explain,
-  LEGACY_HELLO_COMMAND,
   MongoInvalidArgumentError,
-  MongoRuntimeError
+  MongoRuntimeError,
+  shuffle
 } from '../mongodb';
 import { sleep } from '../tools/utils';
 

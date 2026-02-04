@@ -1,15 +1,16 @@
 import { expect } from 'chai';
 import * as process from 'process';
 
-import { type ClientMetadata, makeClientMetadata } from '../../mongodb';
 import {
   CancellationToken,
+  type ClientMetadata,
   connect,
   type Connection,
   type ConnectionOptions,
   HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,
+  makeClientMetadata,
   MongoClientAuthProviders,
   MongoCredentials,
   MongoNetworkError,

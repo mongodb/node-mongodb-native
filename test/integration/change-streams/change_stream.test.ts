@@ -11,9 +11,6 @@ import {
   type ChangeStream,
   type ChangeStreamDocument,
   type ChangeStreamOptions,
-  type ResumeToken
-} from '../../mongodb';
-import {
   type Collection,
   type CommandStartedEvent,
   type Db,
@@ -23,7 +20,8 @@ import {
   MongoChangeStreamError,
   type MongoClient,
   MongoServerError,
-  ReadPreference
+  ReadPreference,
+  type ResumeToken
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';

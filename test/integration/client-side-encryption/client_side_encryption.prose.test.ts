@@ -7,13 +7,14 @@ import { satisfies } from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
+  ClientEncryption,
+  LEGACY_HELLO_COMMAND,
   MongoClient,
   MongoCryptError,
   MongoRuntimeError,
   MongoServerError,
   MongoServerSelectionError
 } from '../../mongodb';
-import { ClientEncryption, LEGACY_HELLO_COMMAND } from '../../mongodb';
 import { AlpineTestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { APMEventCollector, dropCollection } from '../shared';

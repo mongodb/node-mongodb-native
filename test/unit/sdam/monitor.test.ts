@@ -10,11 +10,6 @@ import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
 import {
-  type ServerHeartbeatFailedEvent,
-  type ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent
-} from '../../mongodb';
-import {
   isHello,
   LEGACY_HELLO_COMMAND,
   MongoClient,
@@ -22,6 +17,9 @@ import {
   MonitorInterval,
   RTTSampler,
   ServerDescription,
+  type ServerHeartbeatFailedEvent,
+  type ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent,
   ServerType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';

@@ -15,7 +15,7 @@ import {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY
-} from '../../mongodb/constants';
+} from '../../mongodb';
 import { type EntitiesMap, type UnifiedMongoClient } from './entities';
 import { type ClientEntity } from './schema';
 

@@ -10,18 +10,16 @@ import {
   AggregationCursor,
   Code,
   type Collection,
+  Connection,
+  ConnectionPool,
   type Db,
   FindCursor,
   ListCollectionsCursor,
   type Log,
   type MongoClient,
   MongoServerError,
-  ReadPreference
-} from '../../mongodb';
-import {
-  Connection,
-  ConnectionPool,
   promiseWithResolvers,
+  ReadPreference,
   setDifference,
   StateMachine
 } from '../../mongodb';

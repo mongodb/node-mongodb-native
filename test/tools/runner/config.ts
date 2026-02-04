@@ -10,7 +10,9 @@ import * as url from 'url';
 
 import {
   type AuthMechanism,
+  type CompressorName,
   Double,
+  HostAddress,
   Long,
   MongoClient,
   type MongoClientOptions,
@@ -19,7 +21,6 @@ import {
   TopologyType,
   type WriteConcernSettings
 } from '../../mongodb';
-import { type CompressorName, HostAddress } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
 import { flakyTests } from './flaky';

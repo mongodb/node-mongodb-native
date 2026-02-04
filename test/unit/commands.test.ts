@@ -1,9 +1,17 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { compress, Compressor, uncompressibleCommands } from '../mongodb';
-import { OP_MSG, OP_QUERY, OpCompressedRequest, OpMsgRequest, OpQueryRequest } from '../mongodb';
-import * as compression from '../mongodb';
+import * as compression from '../../src/cmap/wire_protocol/compression';
+import {
+  compress,
+  Compressor,
+  OP_MSG,
+  OP_QUERY,
+  OpCompressedRequest,
+  OpMsgRequest,
+  OpQueryRequest,
+  uncompressibleCommands
+} from '../mongodb';
 
 describe('class OpCompressedRequest', () => {
   context('canCompress()', () => {

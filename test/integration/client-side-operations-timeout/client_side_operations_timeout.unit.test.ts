@@ -10,11 +10,13 @@ import { setTimeout } from 'timers';
 import { TLSSocket } from 'tls';
 import { promisify } from 'util';
 
-import { type MongoClient, MongoOperationTimeoutError, ObjectId } from '../../mongodb';
 import {
   Connection,
   ConnectionPool,
   CSOTTimeoutContext,
+  type MongoClient,
+  MongoOperationTimeoutError,
+  ObjectId,
   StateMachine,
   Timeout,
   TimeoutContext,

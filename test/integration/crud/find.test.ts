@@ -3,13 +3,13 @@ import * as sinon from 'sinon';
 
 import {
   Code,
+  CursorResponse,
   Long,
   type MongoClient,
   MongoServerError,
   ObjectId,
   ReturnDocument
 } from '../../mongodb';
-import { CursorResponse } from '../../mongodb';
 import { assert as test, filterForCommands } from '../shared';
 
 describe('Find', function () {

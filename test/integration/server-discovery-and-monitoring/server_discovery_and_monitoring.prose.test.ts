@@ -4,13 +4,11 @@ import { once } from 'events';
 import {
   CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_READY,
-  SERVER_HEARTBEAT_FAILED,
-  SERVER_HEARTBEAT_SUCCEEDED
-} from '../../mongodb';
-import {
   type ConnectionCheckOutFailedEvent,
   type ConnectionPoolClearedEvent,
-  type MongoClient
+  type MongoClient,
+  SERVER_HEARTBEAT_FAILED,
+  SERVER_HEARTBEAT_SUCCEEDED
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 

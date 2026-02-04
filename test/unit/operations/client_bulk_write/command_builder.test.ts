@@ -8,18 +8,16 @@ import {
   buildReplaceOneOperation,
   buildUpdateManyOperation,
   buildUpdateOneOperation,
-  ClientBulkWriteCommandBuilder
-} from '../../../mongodb';
-import {
+  ClientBulkWriteCommandBuilder,
   type ClientDeleteManyModel,
   type ClientDeleteOneModel,
   type ClientInsertOneModel,
   type ClientReplaceOneModel,
   type ClientUpdateManyModel,
-  type ClientUpdateOneModel
+  type ClientUpdateOneModel,
+  DEFAULT_PK_FACTORY,
+  DocumentSequence
 } from '../../../mongodb';
-import { DEFAULT_PK_FACTORY, DocumentSequence } from '../../../mongodb';
-
 describe('ClientBulkWriteCommandBuilder', function () {
   describe('#buildBatch', function () {
     context('when custom options are provided', function () {

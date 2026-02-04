@@ -9,7 +9,7 @@ import {
 } from '../../mongodb';
 import type { PropExists } from '../utility_types';
 
-type MongoDBImport = typeof import('../../mongodb');
+type MongoDBImport = typeof import('../../../src');
 
 const mongodb: MongoDBImport = null as unknown as MongoDBImport;
 

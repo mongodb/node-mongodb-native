@@ -6,9 +6,10 @@ import {
   type Connection,
   type ConnectionPool,
   type MongoClient,
-  MongoOperationTimeoutError
+  MongoOperationTimeoutError,
+  processTimeMS,
+  TimeoutContext
 } from '../../mongodb';
-import { processTimeMS, TimeoutContext } from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,

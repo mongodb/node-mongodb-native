@@ -10,13 +10,13 @@ import {
   type CommandStartedEvent,
   type CommandSucceededEvent,
   type Document,
+  LEGACY_HELLO_COMMAND,
   Long,
   type MongoClient,
   MongoNetworkError,
   ObjectId,
   Timestamp
 } from '../../mongodb';
-import { LEGACY_HELLO_COMMAND } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 

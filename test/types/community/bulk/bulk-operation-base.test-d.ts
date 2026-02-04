@@ -1,7 +1,9 @@
 import { expectType } from 'tsd';
 
 import {
+  Batch,
   type BatchType,
+  BulkOperationBase,
   type BulkWriteOptions,
   type BulkWriteResult,
   type DeleteStatement,
@@ -9,8 +11,6 @@ import {
   MongoClient,
   type UpdateStatement
 } from '../../../mongodb';
-import { Batch, BulkOperationBase } from '../../../mongodb';
-
 const client = new MongoClient('');
 const db = client.db('test');
 const collection = db.collection('test');

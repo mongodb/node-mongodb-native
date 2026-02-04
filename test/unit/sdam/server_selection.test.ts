@@ -5,12 +5,10 @@ import * as sinon from 'sinon';
 import {
   DeprioritizedServers,
   MIN_SECONDARY_WRITE_WIRE_VERSION,
-  sameServerSelector,
-  secondaryWritableServerSelector
-} from '../../mongodb';
-import {
   MongoLogger,
   ReadPreference,
+  sameServerSelector,
+  secondaryWritableServerSelector,
   ServerDescription,
   ServerSelectionEvent,
   TopologyDescription,

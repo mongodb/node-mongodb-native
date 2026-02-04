@@ -4,8 +4,12 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 import * as process from 'process';
 
-import { type CommandStartedEvent, type MongoClient, type MongoClientOptions } from '../../mongodb';
-import { ClientEncryption } from '../../mongodb';
+import {
+  ClientEncryption,
+  type CommandStartedEvent,
+  type MongoClient,
+  type MongoClientOptions
+} from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { dropCollection } from '../shared';

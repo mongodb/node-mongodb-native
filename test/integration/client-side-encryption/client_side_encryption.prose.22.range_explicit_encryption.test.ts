@@ -4,9 +4,15 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { Decimal128, type Document, Double, Long, type MongoClient } from '../../mongodb';
-import { ClientEncryption, MongoCryptError } from '../../mongodb';
-
+import {
+  ClientEncryption,
+  Decimal128,
+  type Document,
+  Double,
+  Long,
+  type MongoClient,
+  MongoCryptError
+} from '../../mongodb';
 const getKmsProviders = () => {
   const result = getCSFLEKMSProviders();
 

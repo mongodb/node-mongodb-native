@@ -1,24 +1,22 @@
 import { expect } from 'chai';
 import { once } from 'events';
 import * as net from 'net';
-import { type AddressInfo } from 'net';
 import * as process from 'process';
 import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
 import {
-  LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
-  MongoServerSelectionError
-} from '../../mongodb';
-import { RunCommandOperation, RunCursorCommandOperation } from '../../mongodb';
-import {
   ConnectionPool,
   isHello,
+  LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   makeClientMetadata,
   MongoClient,
+  MongoServerSelectionError,
   ns,
   ReadPreference,
+  RunCommandOperation,
+  RunCursorCommandOperation,
   Server,
   SrvPoller,
   SrvPollingEvent,

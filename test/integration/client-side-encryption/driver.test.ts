@@ -10,17 +10,15 @@ import * as tls from 'tls';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   BSON,
+  ClientEncryption,
   type Collection,
   type CommandStartedEvent,
+  Connection,
+  CSOTTimeoutContext,
   type MongoClient,
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError,
-  MongoOperationTimeoutError
-} from '../../mongodb';
-import {
-  ClientEncryption,
-  Connection,
-  CSOTTimeoutContext,
+  MongoOperationTimeoutError,
   resolveTimeoutOptions,
   StateMachine,
   TimeoutContext

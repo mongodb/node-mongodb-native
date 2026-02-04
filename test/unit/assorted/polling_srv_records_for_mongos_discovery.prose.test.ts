@@ -5,7 +5,6 @@ import * as process from 'process';
 import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 
-import type { Topology, TopologyOptions } from '../../mongodb';
 import {
   HostAddress,
   isHello,
@@ -13,6 +12,8 @@ import {
   SrvPoller,
   type SrvPollerOptions,
   SrvPollingEvent,
+  type Topology,
+  type TopologyOptions,
   TopologyType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';

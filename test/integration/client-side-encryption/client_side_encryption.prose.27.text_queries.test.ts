@@ -5,9 +5,7 @@ import { type Binary, type Document, EJSON } from 'bson';
 import { expect } from 'chai';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { ClientEncryption, type MongoClient } from '../../mongodb';
-import { MongoDBCollectionNamespace } from '../../mongodb';
-
+import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',

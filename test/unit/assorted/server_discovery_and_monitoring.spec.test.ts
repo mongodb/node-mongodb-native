@@ -5,45 +5,39 @@ import * as path from 'path';
 import * as sinon from 'sinon';
 
 import {
+  Connection,
+  ConnectionPool,
   HEARTBEAT_EVENTS,
+  isRecord,
   LEGACY_HELLO_COMMAND,
-  SERVER_CLOSED,
-  SERVER_DESCRIPTION_CHANGED,
-  SERVER_OPENING,
-  TOPOLOGY_CLOSED,
-  TOPOLOGY_DESCRIPTION_CHANGED,
-  TOPOLOGY_OPENING
-} from '../../mongodb';
-import {
+  MongoClient,
   MongoCompatibilityError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoServerError
-} from '../../mongodb';
-import {
+  MongoServerError,
+  ns,
+  RunCommandOperation,
+  Server,
+  SERVER_CLOSED,
+  SERVER_DESCRIPTION_CHANGED,
+  SERVER_OPENING,
   ServerClosedEvent,
+  ServerDescription,
   ServerDescriptionChangedEvent,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
   ServerOpeningEvent,
-  TopologyClosedEvent,
-  TopologyDescriptionChangedEvent,
-  TopologyOpeningEvent
-} from '../../mongodb';
-import {
-  Connection,
-  ConnectionPool,
-  isRecord,
-  MongoClient,
-  ns,
-  RunCommandOperation,
-  Server,
-  ServerDescription,
   squashError,
   TimeoutContext,
   Topology,
+  TOPOLOGY_CLOSED,
+  TOPOLOGY_DESCRIPTION_CHANGED,
+  TOPOLOGY_OPENING,
+  TopologyClosedEvent,
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent,
   type TopologyVersion
 } from '../../mongodb';
 import { ejson, fakeServer } from '../../tools/utils';

@@ -8,14 +8,16 @@ import {
   type Collection,
   type CommandStartedEvent,
   type CommandSucceededEvent,
+  Connection,
   Db,
   MongoClient,
   MongoNetworkError,
   MongoNotConnectedError,
   MongoServerSelectionError,
-  ReadPreference
+  ReadPreference,
+  ServerDescription,
+  Topology
 } from '../../mongodb';
-import { Connection, ServerDescription, Topology } from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 

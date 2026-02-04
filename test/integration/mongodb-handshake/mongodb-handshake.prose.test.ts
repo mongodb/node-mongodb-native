@@ -2,8 +2,16 @@ import { expect } from 'chai';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { type ClientMetadata, type DriverInfo, Int32, type MongoClient } from '../../mongodb';
-import { Connection, getFAASEnv, isDriverInfoEqual, LEGACY_HELLO_COMMAND } from '../../mongodb';
+import {
+  type ClientMetadata,
+  Connection,
+  type DriverInfo,
+  getFAASEnv,
+  Int32,
+  isDriverInfoEqual,
+  LEGACY_HELLO_COMMAND,
+  type MongoClient
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 type EnvironmentVariables = Array<[string, string]>;

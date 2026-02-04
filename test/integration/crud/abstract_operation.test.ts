@@ -1,39 +1,29 @@
 import { expect } from 'chai';
 
-import { DeleteManyOperation, DeleteOneOperation, DeleteOperation } from '../../mongodb';
-import {
-  FindAndModifyOperation,
-  FindOneAndDeleteOperation,
-  FindOneAndReplaceOperation,
-  FindOneAndUpdateOperation
-} from '../../mongodb';
-import { CreateIndexesOperation, DropIndexOperation, ListIndexesOperation } from '../../mongodb';
-import {
-  ReplaceOneOperation,
-  UpdateManyOperation,
-  UpdateOneOperation,
-  UpdateOperation
-} from '../../mongodb';
 import {
   type AbstractOperation,
   type Admin,
-  type Collection,
-  type Db,
-  Long,
-  type MongoClient,
-  type Server
-} from '../../mongodb';
-import {
   AggregateOperation,
+  type Collection,
   CountOperation,
   CreateCollectionOperation,
+  CreateIndexesOperation,
   CreateSearchIndexesOperation,
+  type Db,
   DbStatsOperation,
+  DeleteManyOperation,
+  DeleteOneOperation,
+  DeleteOperation,
   DistinctOperation,
   DropCollectionOperation,
   DropDatabaseOperation,
+  DropIndexOperation,
   DropSearchIndexOperation,
   EstimatedDocumentCountOperation,
+  FindAndModifyOperation,
+  FindOneAndDeleteOperation,
+  FindOneAndReplaceOperation,
+  FindOneAndUpdateOperation,
   FindOperation,
   GetMoreOperation,
   InsertOneOperation,
@@ -41,13 +31,21 @@ import {
   KillCursorsOperation,
   ListCollectionsOperation,
   ListDatabasesOperation,
+  ListIndexesOperation,
+  Long,
+  type MongoClient,
   MongoDBNamespace,
   ProfilingLevelOperation,
   RemoveUserOperation,
   RenameOperation,
+  ReplaceOneOperation,
   RunCommandOperation,
+  type Server,
   SetProfilingLevelOperation,
   TimeoutContext,
+  UpdateManyOperation,
+  UpdateOneOperation,
+  UpdateOperation,
   UpdateSearchIndexOperation,
   ValidateCollectionOperation
 } from '../../mongodb';

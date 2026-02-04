@@ -4,7 +4,6 @@ import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 
-import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
 import * as process from 'process';
@@ -20,9 +19,12 @@ import {
   type MongoClientOptions,
   type Runtime,
   type ServerApiVersion,
-  type TopologyOptions
-} from '../../src';
-import { OP_MSG, processTimeMS, Topology, resolveRuntimeAdapters } from '../mongodb';
+  type TopologyOptions,
+  OP_MSG,
+  processTimeMS,
+  Topology,
+  resolveRuntimeAdapters
+} from '../mongodb';
 import { type TestConfiguration } from './runner/config';
 import { isTLSEnabled } from './runner/filters/tls_filter';
 

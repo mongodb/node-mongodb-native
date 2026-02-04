@@ -19,11 +19,11 @@ import {
   type MongoClient,
   MongoInvalidArgumentError,
   MongoServerError,
+  noop,
   ObjectId,
   ReturnDocument,
   Timestamp
 } from '../../mongodb';
-import { noop } from '../../mongodb';
 import { assert as test, setupDatabase } from '../shared';
 
 describe('crud - insert', function () {

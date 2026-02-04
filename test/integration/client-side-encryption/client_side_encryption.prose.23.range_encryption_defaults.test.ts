@@ -1,9 +1,7 @@
 import { expect } from 'chai';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { type Binary, Int32, Long } from '../../mongodb';
-import { ClientEncryption } from '../../mongodb';
-
+import { type Binary, ClientEncryption, Int32, Long } from '../../mongodb';
 const metaData: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.1.0',

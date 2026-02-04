@@ -3,11 +3,11 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {
+  ClientEncryption,
+  MongoClient,
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError
 } from '../../mongodb';
-import { ClientEncryption, MongoClient } from '../../mongodb';
-
 class MockClient {
   options: any;
   s: { options: any };

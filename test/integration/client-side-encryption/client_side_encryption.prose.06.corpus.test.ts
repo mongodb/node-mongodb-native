@@ -7,8 +7,7 @@ import * as path from 'path';
 import * as process from 'process';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { type MongoClient, WriteConcern } from '../../mongodb';
-import { ClientEncryption } from '../../mongodb';
+import { ClientEncryption, type MongoClient, WriteConcern } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 describe('Client Side Encryption Prose Corpus Test', function () {

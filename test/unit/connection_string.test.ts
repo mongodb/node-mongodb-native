@@ -5,26 +5,23 @@ import * as sinon from 'sinon';
 import { inspect } from 'util';
 
 import {
-  MongoAPIError,
-  MongoDriverError,
-  MongoInvalidArgumentError,
-  MongoParseError,
-  MongoRuntimeError
-} from '../mongodb';
-import {
   AUTH_MECHS_AUTH_SRC_EXTERNAL,
   AuthMechanism,
   COSMOS_DB_MSG,
   DEFAULT_ALLOWED_HOSTS,
   DOCUMENT_DB_MSG,
   type Log,
+  MongoAPIError,
   MongoClient,
   MongoCredentials,
+  MongoDriverError,
+  MongoInvalidArgumentError,
   type MongoOptions,
+  MongoParseError,
+  MongoRuntimeError,
   parseOptions,
   resolveSRVRecord
 } from '../mongodb';
-
 describe('Connection String', function () {
   context('when serverMonitoringMode is set', function () {
     context('when it is valid', function () {

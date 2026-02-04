@@ -5,13 +5,11 @@ import { once } from 'events';
 import * as sinon from 'sinon';
 
 import {
+  type Connection,
   MongoError,
   MongoErrorLabel,
   MongoNetworkError,
-  MongoNetworkTimeoutError
-} from '../../mongodb';
-import {
-  type Connection,
+  MongoNetworkTimeoutError,
   Server,
   ServerDescription,
   ServerType,

@@ -7,9 +7,12 @@ import * as os from 'os';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { MongoClient, type MongoClientOptions, MongoServerSelectionError } from '../mongodb';
-import { LEGACY_HELLO_COMMAND } from '../mongodb';
-
+import {
+  LEGACY_HELLO_COMMAND,
+  MongoClient,
+  type MongoClientOptions,
+  MongoServerSelectionError
+} from '../mongodb';
 const REQUIRED_ENV = ['MONGODB_URI', 'TLS_KEY_FILE', 'TLS_CA_FILE', 'TLS_CRL_FILE'];
 
 describe('TLS Support', function () {

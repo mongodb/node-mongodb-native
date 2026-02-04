@@ -5,12 +5,13 @@ import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
 import {
   type MongoClient,
+  MONGODB_ERROR_CODES,
   MongoParseError,
   MongoServerError,
+  ns,
   ReadPreference,
   TopologyType
 } from '../../mongodb';
-import { MONGODB_ERROR_CODES, ns } from '../../mongodb';
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';

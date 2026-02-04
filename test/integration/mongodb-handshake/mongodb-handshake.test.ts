@@ -1,11 +1,15 @@
 import { expect } from 'chai';
-import type Sinon from 'sinon';
-// eslint-disable-next-line no-duplicate-imports
 import * as sinon from 'sinon';
 
-import { MongoServerError, MongoServerSelectionError, ServerApiVersion } from '../../mongodb';
-import { Connection, LEGACY_HELLO_COMMAND, OpMsgRequest, OpQueryRequest } from '../../mongodb';
-
+import {
+  Connection,
+  LEGACY_HELLO_COMMAND,
+  MongoServerError,
+  MongoServerSelectionError,
+  OpMsgRequest,
+  OpQueryRequest,
+  ServerApiVersion
+} from '../../mongodb';
 describe('MongoDB Handshake', () => {
   let client;
 

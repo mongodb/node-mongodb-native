@@ -1,9 +1,7 @@
 import { expect } from 'chai';
 import { env } from 'process';
 
-import { Binary } from '../../mongodb';
-import { ClientEncryption, MongoCryptAzureKMSRequestError } from '../../mongodb';
-
+import { Binary, ClientEncryption, MongoCryptAzureKMSRequestError } from '../../mongodb';
 const dataKeyOptions = {
   masterKey: {
     keyVaultEndpoint: 'https://drivers-2411-keyvault.vault.azure.net/',

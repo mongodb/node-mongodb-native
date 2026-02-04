@@ -1,9 +1,13 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { type Collection, type MongoClient, MongoWriteConcernError } from '../../mongodb';
-import { PoolClearedError, Server } from '../../mongodb';
-
+import {
+  type Collection,
+  type MongoClient,
+  MongoWriteConcernError,
+  PoolClearedError,
+  Server
+} from '../../mongodb';
 describe('Non Server Retryable Writes', function () {
   let client: MongoClient;
   let collection: Collection<{ _id: 1 }>;

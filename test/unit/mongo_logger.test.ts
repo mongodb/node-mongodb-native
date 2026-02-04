@@ -19,9 +19,7 @@ import {
   CONNECTION_POOL_CLOSED,
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
-  CONNECTION_READY
-} from '../mongodb';
-import {
+  CONNECTION_READY,
   createStdioLogger,
   DEFAULT_MAX_DOCUMENT_LENGTH,
   type Log,

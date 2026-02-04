@@ -17,18 +17,20 @@ import {
   type CommandFailedEvent,
   type CommandStartedEvent,
   type CommandSucceededEvent,
+  Connection,
   CursorTimeoutMode,
   type Db,
   type FindCursor,
   GridFSBucket,
+  LEGACY_HELLO_COMMAND,
   type MongoClient,
   MongoInvalidArgumentError,
   MongoOperationTimeoutError,
   MongoServerError,
   ObjectId,
+  promiseWithResolvers,
   TopologyType
 } from '../../mongodb';
-import { Connection, LEGACY_HELLO_COMMAND, promiseWithResolvers } from '../../mongodb';
 import { type FailCommandFailPoint, type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
 
 const metadata = { requires: { mongodb: '>=4.4' } };

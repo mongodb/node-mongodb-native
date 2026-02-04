@@ -5,10 +5,10 @@ import {
   type ConnectionPoolClearedEvent,
   type FindCursor,
   type MongoClient,
+  MONGODB_ERROR_CODES,
   MongoServerError,
   ReadPreference
 } from '../../mongodb';
-import { MONGODB_ERROR_CODES } from '../../mongodb';
 import { type FailCommandFailPoint } from '../../tools/utils';
 
 describe('Connections Survive Primary Step Down - prose', function () {

@@ -3,14 +3,18 @@ import * as http from 'http';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { isEmptyCredentials, type KMSProviders, refreshKMSCredentials } from '../../../mongodb';
-import { fetchAzureKMSToken, tokenCache } from '../../../mongodb';
+// Intentionally import from src, because we need to stub the `get()` function.
+import * as utils from '../../../../src/utils';
 import {
   AWSSDKCredentialProvider,
+  fetchAzureKMSToken,
+  isEmptyCredentials,
+  type KMSProviders,
   MongoCryptAzureKMSRequestError,
-  MongoNetworkTimeoutError
+  MongoNetworkTimeoutError,
+  refreshKMSCredentials,
+  tokenCache
 } from '../../../mongodb';
-import * as utils from '../../../mongodb';
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;

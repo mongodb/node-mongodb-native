@@ -3,10 +3,13 @@ import { expect } from 'chai';
 import {
   AbstractCursor,
   type AbstractCursorOptions,
-  type InitialCursorResponse
+  type ClientSession,
+  CursorResponse,
+  type InitialCursorResponse,
+  MongoClient,
+  ns,
+  type Server
 } from '../../mongodb';
-import { type ClientSession, CursorResponse, MongoClient, ns, type Server } from '../../mongodb';
-
 /** Minimal do nothing cursor to focus on testing the base cursor behavior */
 class ConcreteCursor extends AbstractCursor {
   constructor(client: MongoClient, options: AbstractCursorOptions = {}) {

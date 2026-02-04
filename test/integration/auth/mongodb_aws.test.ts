@@ -5,26 +5,23 @@ import * as process from 'process';
 import * as sinon from 'sinon';
 
 import {
+  aws4Sign,
   type AWSCredentials,
+  AWSSDKCredentialProvider,
   type CommandOptions,
+  Connection,
   type Document,
   MongoAWSError,
   type MongoClient,
+  MongoDBAWS,
   type MongoDBNamespace,
   type MongoDBResponseConstructor,
   MongoMissingCredentialsError,
   MongoMissingDependencyError,
-  MongoServerError
-} from '../../mongodb';
-import {
-  aws4Sign,
-  AWSSDKCredentialProvider,
-  Connection,
-  MongoDBAWS,
+  MongoServerError,
   refreshKMSCredentials,
   setDifference
 } from '../../mongodb';
-
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 
 describe('MONGODB-AWS', function () {

@@ -3,19 +3,19 @@ import { expect } from 'chai';
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { basename, extname, join } from 'path';
 
-import { ReadPreference, type ReadPreferenceMode, type ReadPreferenceOptions } from '../../mongodb';
 import {
   DeprioritizedServers,
+  ReadPreference,
+  type ReadPreferenceMode,
+  type ReadPreferenceOptions,
   readPreferenceServerSelector,
-  type ServerSelector,
-  writableServerSelector
-} from '../../mongodb';
-import {
   type ServerDescription,
+  type ServerSelector,
   type ServerType,
   type TagSet,
   TopologyDescription,
-  type TopologyType
+  type TopologyType,
+  writableServerSelector
 } from '../../mongodb';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';
 

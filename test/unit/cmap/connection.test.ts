@@ -6,20 +6,18 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
 
 import {
-  HostAddress,
-  isHello,
-  MongoDBCollectionNamespace,
-  MongoDBNamespace,
-  ns,
-  promiseWithResolvers
-} from '../../mongodb';
-import {
   connect,
   Connection,
   CryptoConnection,
+  HostAddress,
+  isHello,
   MongoClientAuthProviders,
+  MongoDBCollectionNamespace,
+  MongoDBNamespace,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
+  ns,
+  promiseWithResolvers,
   SizedMessageTransform
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';

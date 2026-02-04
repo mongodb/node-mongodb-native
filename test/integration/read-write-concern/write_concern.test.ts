@@ -8,9 +8,10 @@ import {
   type CommandStartedEvent,
   type CommandSucceededEvent,
   type Db,
-  MongoClient
+  LEGACY_HELLO_COMMAND,
+  MongoClient,
+  OpMsgRequest
 } from '../../mongodb';
-import { LEGACY_HELLO_COMMAND, OpMsgRequest } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { filterForCommands } from '../shared';
 

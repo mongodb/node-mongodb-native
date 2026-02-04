@@ -17,13 +17,13 @@ import {
   MongoError,
   ReadConcern,
   ReadPreference,
+  SERVER_DESCRIPTION_CHANGED,
   ServerType,
   type TopologyDescription,
   type TopologyType,
   type TransactionOptions,
   WriteConcern
 } from '../../mongodb';
-import { SERVER_DESCRIPTION_CHANGED } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 import { type TestConfiguration } from '../runner/config';
 import { EntitiesMap } from './entities';

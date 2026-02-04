@@ -7,21 +7,19 @@ import * as sinon from 'sinon';
 
 import {
   Binary,
-  type ConnectionOptions,
-  MongoClient,
-  MongoClientAuthProviders,
-  type MongoClientOptions,
-  MongoServerError,
-  ServerHeartbeatStartedEvent
-} from '../../mongodb';
-import {
   connect,
   Connection,
+  type ConnectionOptions,
   HostAddress,
   LEGACY_HELLO_COMMAND,
   makeClientMetadata,
+  MongoClient,
+  MongoClientAuthProviders,
+  type MongoClientOptions,
   MongoDBResponse,
+  MongoServerError,
   ns,
+  ServerHeartbeatStartedEvent,
   Topology
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
