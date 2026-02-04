@@ -631,13 +631,13 @@ describe('Connection String', function () {
 
       const mockRecord: string[][] = [[txtRecord]];
 
-      // first call is for stubbing resolveSrv
-      // second call is for stubbing resolveTxt
-      sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+      // first call is for stubbing resolve
+      // second call is for stubbing resolve
+      sinon.stub(dns.promises, 'resolve').callsFake(async () => {
         return mockAddress;
       });
 
-      sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
+      sinon.stub(dns.promises, 'resolve').callsFake(async () => {
         return mockRecord;
       });
     }
