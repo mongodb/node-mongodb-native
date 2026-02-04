@@ -55,13 +55,6 @@ export const readInt32LE = (buffer: Uint8Array, offset: number): number => {
   return NumberUtils.getInt32LE(buffer, offset);
 };
 
-// readUint32LE, reads a 32-bit unsigned integer from buffer at given offset
-// throws if offset is out of bounds
-export const readUint32LE = (buffer: Uint8Array, offset: number): number => {
-  validateBufferInputs(buffer, offset, 4);
-  return NumberUtils.getUint32LE(buffer, offset);
-};
-
 /**
  * BSON Serialization options.
  * @public
