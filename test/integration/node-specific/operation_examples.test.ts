@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import * as process from 'process';
 
-import { Code, type MongoClient, ProfilingLevel, ReturnDocument } from '../../../src';
-import { enumToString } from '../../../src/utils';
+import { Code, type MongoClient, ProfilingLevel, ReturnDocument } from '../../mongodb';
+import { enumToString } from '../../mongodb';
 import { sleep as delay } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 

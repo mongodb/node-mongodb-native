@@ -8,8 +8,8 @@ import {
   type Document,
   MongoClient,
   type UpdateStatement
-} from '../../../../src';
-import { Batch, BulkOperationBase } from '../../../../src/bulk/common';
+} from '../../../mongodb';
+import { Batch, BulkOperationBase } from '../../../mongodb';
 
 const client = new MongoClient('');
 const db = client.db('test');

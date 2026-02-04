@@ -22,8 +22,8 @@ import {
   type TopologyType,
   type TransactionOptions,
   WriteConcern
-} from '../../../src';
-import { SERVER_DESCRIPTION_CHANGED } from '../../../src/constants';
+} from '../../mongodb';
+import { SERVER_DESCRIPTION_CHANGED } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 import { type TestConfiguration } from '../runner/config';
 import { EntitiesMap } from './entities';

@@ -4,9 +4,6 @@ import { ByteUtils, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { LEGACY_HELLO_COMMAND } from '../../src/constants';
-import { MongoInvalidArgumentError, MongoRuntimeError } from '../../src/error';
-import { decorateWithExplain, Explain } from '../../src/explain';
 import {
   abortable,
   BufferPool,
@@ -21,7 +18,14 @@ import {
   MongoDBCollectionNamespace,
   MongoDBNamespace,
   shuffle
-} from '../../src/utils';
+} from '../mongodb';
+import {
+  decorateWithExplain,
+  Explain,
+  LEGACY_HELLO_COMMAND,
+  MongoInvalidArgumentError,
+  MongoRuntimeError
+} from '../mongodb';
 import { sleep } from '../tools/utils';
 
 describe('driver utils', function () {

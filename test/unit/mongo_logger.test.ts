@@ -20,7 +20,7 @@ import {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY
-} from '../../src/constants';
+} from '../mongodb';
 import {
   createStdioLogger,
   DEFAULT_MAX_DOCUMENT_LENGTH,
@@ -32,7 +32,7 @@ import {
   parseSeverityFromString,
   SeverityLevel,
   stringifyWithMaxLen
-} from '../../src/mongo_logger';
+} from '../mongodb';
 import { sleep } from '../tools/utils';
 
 class BufferingStream extends Writable {

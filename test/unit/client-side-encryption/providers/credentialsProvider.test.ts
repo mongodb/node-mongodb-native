@@ -3,19 +3,14 @@ import * as http from 'http';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { MongoCryptAzureKMSRequestError } from '../../../../src/client-side-encryption/errors';
+import { isEmptyCredentials, type KMSProviders, refreshKMSCredentials } from '../../../mongodb';
+import { fetchAzureKMSToken, tokenCache } from '../../../mongodb';
 import {
-  isEmptyCredentials,
-  type KMSProviders,
-  refreshKMSCredentials
-} from '../../../../src/client-side-encryption/providers';
-import {
-  fetchAzureKMSToken,
-  tokenCache
-} from '../../../../src/client-side-encryption/providers/azure';
-import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
-import { MongoNetworkTimeoutError } from '../../../../src/error';
-import * as utils from '../../../../src/utils';
+  AWSSDKCredentialProvider,
+  MongoCryptAzureKMSRequestError,
+  MongoNetworkTimeoutError
+} from '../../../mongodb';
+import * as utils from '../../../mongodb';
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;

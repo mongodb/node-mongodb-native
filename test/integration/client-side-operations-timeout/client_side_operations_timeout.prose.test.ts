@@ -18,8 +18,8 @@ import {
   MongoOperationTimeoutError,
   MongoServerSelectionError,
   ObjectId
-} from '../../../src';
-import { processTimeMS, squashError } from '../../../src/utils';
+} from '../../mongodb';
+import { processTimeMS, squashError } from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,

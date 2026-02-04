@@ -14,10 +14,8 @@ import {
   MongoNotConnectedError,
   MongoServerSelectionError,
   ReadPreference
-} from '../../../src';
-import { Connection } from '../../../src/cmap/connection';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
+} from '../../mongodb';
+import { Connection, ServerDescription, Topology } from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 

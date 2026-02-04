@@ -6,8 +6,8 @@ import {
   MongoAPIError,
   type MongoClient,
   type WithId
-} from '../../../../src';
-import { BSONError, type Document, Long } from '../../../../src/bson';
+} from '../../../mongodb';
+import { BSONError, type Document, Long } from '../../../mongodb';
 
 describe('useBigInt64 option', function () {
   let client: MongoClient;

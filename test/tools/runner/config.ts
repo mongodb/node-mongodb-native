@@ -18,9 +18,8 @@ import {
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
-} from '../../../src';
-import { type CompressorName } from '../../../src/cmap/wire_protocol/compression';
-import { HostAddress } from '../../../src/utils';
+} from '../../mongodb';
+import { type CompressorName, HostAddress } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
 import { flakyTests } from './flaky';

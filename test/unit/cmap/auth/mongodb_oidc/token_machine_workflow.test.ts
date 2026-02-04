@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as process from 'process';
 
-import { tokenMachineCallback } from '../../../../../src/cmap/auth/mongodb_oidc/token_machine_workflow';
+import { tokenMachineCallback } from '../../../../mongodb';
 
 describe('Token machine workflow', function () {
   describe('#callback', function () {

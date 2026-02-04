@@ -6,10 +6,8 @@ import {
   MongoAPIError,
   type MongoClient,
   MongoCursorExhaustedError
-} from '../../../src';
-import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
-import { TimeoutContext } from '../../../src/timeout';
-import { promiseWithResolvers } from '../../../src/utils';
+} from '../../mongodb';
+import { CursorTimeoutContext, promiseWithResolvers, TimeoutContext } from '../../mongodb';
 import { filterForCommands } from '../shared';
 
 describe('Find Cursor', function () {

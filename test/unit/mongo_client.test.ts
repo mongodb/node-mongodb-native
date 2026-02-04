@@ -6,14 +6,23 @@ import * as sinon from 'sinon';
 import { Writable } from 'stream';
 import { inspect } from 'util';
 
-import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
-import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
-import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from '../../src/error';
-import { MongoClient, type MongoClientOptions, ServerApiVersion } from '../../src/mongo_client';
-import { MongoLoggableComponent, MongoLogger, SeverityLevel } from '../../src/mongo_logger';
-import { ReadConcern } from '../../src/read_concern';
-import { ReadPreference } from '../../src/read_preference';
-import { WriteConcern } from '../../src/write_concern';
+import {
+  MongoAPIError,
+  MongoClient,
+  type MongoClientOptions,
+  MongoCredentials,
+  MongoInvalidArgumentError,
+  MongoLoggableComponent,
+  MongoLogger,
+  MongoParseError,
+  parseOptions,
+  ReadConcern,
+  ReadPreference,
+  resolveSRVRecord,
+  ServerApiVersion,
+  SeverityLevel,
+  WriteConcern
+} from '../mongodb';
 
 describe('MongoClient', function () {
   it('programmatic options should override URI options', function () {

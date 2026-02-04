@@ -1,13 +1,12 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, MongoServerError } from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { MongoCryptCreateEncryptedCollectionError } from '../../../src/client-side-encryption/errors';
 import {
   getCSFLEKMSProviders,
   kmsCredentialsPresent,
   missingKeys
 } from '../../csfle-kms-providers';
+import { Collection, type Db, MongoServerError } from '../../mongodb';
+import { ClientEncryption, MongoCryptCreateEncryptedCollectionError } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
   requires: {

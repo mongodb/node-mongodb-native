@@ -1,15 +1,11 @@
 import { expect } from 'chai';
 
-import { CursorResponse } from '../../../src/cmap/wire_protocol/responses';
 import {
   AbstractCursor,
   type AbstractCursorOptions,
   type InitialCursorResponse
-} from '../../../src/cursor/abstract_cursor';
-import { MongoClient } from '../../../src/mongo_client';
-import { type Server } from '../../../src/sdam/server';
-import { type ClientSession } from '../../../src/sessions';
-import { ns } from '../../../src/utils';
+} from '../../mongodb';
+import { type ClientSession, CursorResponse, MongoClient, ns, type Server } from '../../mongodb';
 
 /** Minimal do nothing cursor to focus on testing the base cursor behavior */
 class ConcreteCursor extends AbstractCursor {

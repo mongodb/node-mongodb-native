@@ -1,8 +1,6 @@
 import { expect } from 'chai';
 
-import { TopologyType } from '../../../src/sdam/common';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { TopologyDescription } from '../../../src/sdam/topology_description';
+import { ServerDescription, TopologyDescription, TopologyType } from '../../mongodb';
 
 describe('TopologyDescription', function () {
   describe('#constructor', function () {

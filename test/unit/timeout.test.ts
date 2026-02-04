@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 
-import { MongoInvalidArgumentError, MongoRuntimeError } from '../../src/error';
 import {
   CSOTTimeoutContext,
   LegacyTimeoutContext,
   Timeout,
   TimeoutContext,
   TimeoutError
-} from '../../src/timeout';
+} from '../mongodb';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../mongodb';
 
 describe('Timeout', function () {
   let timeout: Timeout;

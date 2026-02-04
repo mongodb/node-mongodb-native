@@ -10,7 +10,7 @@ import type {
   TagSet,
   TopologyType,
   W
-} from '../../../src';
+} from '../../mongodb';
 import { type TestConfiguration } from '../runner/config';
 import { type UnifiedThread } from './entities';
 

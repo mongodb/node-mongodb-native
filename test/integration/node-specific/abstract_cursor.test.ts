@@ -13,9 +13,8 @@ import {
   type MongoClient,
   MongoCursorExhaustedError,
   MongoOperationTimeoutError
-} from '../../../src';
-import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
-import { CSOTTimeoutContext, TimeoutContext } from '../../../src/timeout';
+} from '../../mongodb';
+import { CSOTTimeoutContext, CursorTimeoutContext, TimeoutContext } from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 

@@ -27,10 +27,8 @@ import {
   MongoServerError,
   ObjectId,
   TopologyType
-} from '../../../src';
-import { Connection } from '../../../src/cmap/connection';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { promiseWithResolvers } from '../../../src/utils';
+} from '../../mongodb';
+import { Connection, LEGACY_HELLO_COMMAND, promiseWithResolvers } from '../../mongodb';
 import { type FailCommandFailPoint, type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
 
 const metadata = { requires: { mongodb: '>=4.4' } };

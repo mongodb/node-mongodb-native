@@ -4,6 +4,7 @@ import * as process from 'process';
 import { coerce, gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   type AutoEncryptionOptions,
   type CollectionOptions,
@@ -11,10 +12,8 @@ import {
   type Document,
   type MongoClient,
   ReturnDocument
-} from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { getMongoDBClientEncryption } from '../../../src/deps';
-import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+} from '../../mongodb';
+import { ClientEncryption, getMongoDBClientEncryption } from '../../mongodb';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
 import { MalformedOperationError } from './operations';

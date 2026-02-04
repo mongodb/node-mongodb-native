@@ -2,10 +2,8 @@ import { expect } from 'chai';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { type ClientMetadata, type DriverInfo, Int32, type MongoClient } from '../../../src';
-import { Connection } from '../../../src/cmap/connection';
-import { getFAASEnv, isDriverInfoEqual } from '../../../src/cmap/handshake/client_metadata';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { type ClientMetadata, type DriverInfo, Int32, type MongoClient } from '../../mongodb';
+import { Connection, getFAASEnv, isDriverInfoEqual, LEGACY_HELLO_COMMAND } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 type EnvironmentVariables = Array<[string, string]>;

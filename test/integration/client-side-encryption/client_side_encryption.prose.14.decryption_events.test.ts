@@ -7,8 +7,8 @@ import {
   type CommandSucceededEvent,
   type MongoClient,
   MongoNetworkError
-} from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+} from '../../mongodb';
+import { ClientEncryption } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {

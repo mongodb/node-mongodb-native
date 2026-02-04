@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-import { type MongoClient, type MongoClientOptions, TopologyType } from '../../../src';
-import { getTopology } from '../../../src/utils';
+import { type MongoClient, type MongoClientOptions, TopologyType } from '../../mongodb';
+import { getTopology } from '../../mongodb';
 
 describe('TopologyDescription (integration tests)', function () {
   let client: MongoClient;

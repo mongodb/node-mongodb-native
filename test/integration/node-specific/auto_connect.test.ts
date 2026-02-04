@@ -11,8 +11,8 @@ import {
   MongoNotConnectedError,
   ProfilingLevel,
   TopologyType
-} from '../../../src';
-import { Topology } from '../../../src/sdam/topology';
+} from '../../mongodb';
+import { Topology } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('When executing an operation for the first time', () => {

@@ -15,13 +15,15 @@ import {
   MongoMissingCredentialsError,
   MongoMissingDependencyError,
   MongoServerError
-} from '../../../src';
-import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
-import { AWSSDKCredentialProvider } from '../../../src/cmap/auth/aws_temporary_credentials';
-import { aws4Sign } from '../../../src/cmap/auth/aws4';
-import { MongoDBAWS } from '../../../src/cmap/auth/mongodb_aws';
-import { Connection } from '../../../src/cmap/connection';
-import { setDifference } from '../../../src/utils';
+} from '../../mongodb';
+import {
+  aws4Sign,
+  AWSSDKCredentialProvider,
+  Connection,
+  MongoDBAWS,
+  refreshKMSCredentials,
+  setDifference
+} from '../../mongodb';
 
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 

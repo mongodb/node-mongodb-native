@@ -22,10 +22,7 @@ import {
   type ServerApiVersion,
   type TopologyOptions
 } from '../../src';
-import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
-import { resolveRuntimeAdapters } from '../../src/runtime_adapters';
-import { Topology } from '../../src/sdam/topology';
-import { processTimeMS } from '../../src/utils';
+import { OP_MSG, processTimeMS, Topology, resolveRuntimeAdapters } from '../mongodb';
 import { type TestConfiguration } from './runner/config';
 import { isTLSEnabled } from './runner/filters/tls_filter';
 

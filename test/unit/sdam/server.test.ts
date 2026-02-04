@@ -4,16 +4,19 @@ import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
 
-import { type Connection } from '../../../src/cmap/connection';
 import {
   MongoError,
   MongoErrorLabel,
   MongoNetworkError,
   MongoNetworkTimeoutError
-} from '../../../src/error';
-import { ServerType, TopologyType } from '../../../src/sdam/common';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription } from '../../../src/sdam/server_description';
+} from '../../mongodb';
+import {
+  type Connection,
+  Server,
+  ServerDescription,
+  ServerType,
+  TopologyType
+} from '../../mongodb';
 import { sleep, topologyWithPlaceholderClient } from '../../tools/utils';
 
 const handledErrors = [

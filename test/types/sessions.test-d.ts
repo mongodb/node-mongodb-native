@@ -9,7 +9,7 @@ import {
   ReadConcern,
   ReadConcernLevel,
   type Timestamp
-} from '../../src';
+} from '../mongodb';
 
 // test mapped cursor types
 const client = new MongoClient('');

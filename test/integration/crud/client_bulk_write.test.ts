@@ -7,9 +7,8 @@ import {
   type ConnectionPool,
   type MongoClient,
   MongoOperationTimeoutError
-} from '../../../src';
-import { TimeoutContext } from '../../../src/timeout';
-import { processTimeMS } from '../../../src/utils';
+} from '../../mongodb';
+import { processTimeMS, TimeoutContext } from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,

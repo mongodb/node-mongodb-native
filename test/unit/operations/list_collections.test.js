@@ -1,8 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { StreamDescription } = require('../../../src/cmap/stream_description');
-const { ListCollectionsOperation } = require('../../../src/operations/list_collections');
+const { StreamDescription, ListCollectionsOperation } = require('../../mongodb');
 
 describe('ListCollectionsOperation', function () {
   const db = 'test';

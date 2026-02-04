@@ -7,6 +7,7 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
 import * as tls from 'tls';
 
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   BSON,
   type Collection,
@@ -15,13 +16,15 @@ import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError,
   MongoOperationTimeoutError
-} from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { Connection } from '../../../src/cmap/connection';
-import { CSOTTimeoutContext, TimeoutContext } from '../../../src/timeout';
-import { resolveTimeoutOptions } from '../../../src/utils';
-import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+} from '../../mongodb';
+import {
+  ClientEncryption,
+  Connection,
+  CSOTTimeoutContext,
+  resolveTimeoutOptions,
+  StateMachine,
+  TimeoutContext
+} from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,

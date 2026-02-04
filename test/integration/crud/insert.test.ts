@@ -22,8 +22,8 @@ import {
   ObjectId,
   ReturnDocument,
   Timestamp
-} from '../../../src';
-import { noop } from '../../../src/utils';
+} from '../../mongodb';
+import { noop } from '../../mongodb';
 import { assert as test, setupDatabase } from '../shared';
 
 describe('crud - insert', function () {

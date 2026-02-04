@@ -3,9 +3,8 @@ import * as net from 'net';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { type Collection, type MongoClient, MongoServerError } from '../../../../src';
-import { BSONError, deserialize } from '../../../../src/bson';
-import { OpMsgResponse } from '../../../../src/cmap/commands';
+import { type Collection, type MongoClient, MongoServerError } from '../../../mongodb';
+import { BSONError, deserialize, OpMsgResponse } from '../../../mongodb';
 
 describe('class MongoDBResponse', () => {
   let client;

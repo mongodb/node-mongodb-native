@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-import { type Collection, type CommandStartedEvent, type MongoClient } from '../../../src';
-import { HostAddress } from '../../../src/utils';
+import { type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
+import { HostAddress } from '../../mongodb';
 import { waitUntilPoolsFilled } from '../../tools/utils';
 
 const failPoint = {

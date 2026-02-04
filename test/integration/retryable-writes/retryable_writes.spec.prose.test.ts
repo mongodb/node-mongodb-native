@@ -10,8 +10,8 @@ import {
   MongoError,
   MongoServerError,
   MongoWriteConcernError
-} from '../../../src';
-import { Server } from '../../../src/sdam/server';
+} from '../../mongodb';
+import { Server } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('Retryable Writes Spec Prose', () => {

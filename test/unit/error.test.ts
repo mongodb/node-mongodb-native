@@ -1,12 +1,11 @@
 import { expect } from 'chai';
 import { setTimeout } from 'timers';
 
+import * as importsFromErrorSrc from '../../src/error';
 import {
   PoolClosedError as MongoPoolClosedError,
   WaitQueueTimeoutError as MongoWaitQueueTimeoutError
-} from '../../src/cmap/errors';
-// Exception to the import from mongodb rule we're unit testing our public Errors API
-import * as importsFromErrorSrc from '../../src/error';
+} from '../mongodb';
 import {
   isResumableError,
   isRetryableReadError,
@@ -16,8 +15,7 @@ import {
   MONGODB_ERROR_CODES,
   needsRetryableWriteLabel,
   NODE_IS_RECOVERING_ERROR_MESSAGE
-} from '../../src/error';
-import * as importsFromEntryPoint from '../../src/index';
+} from '../mongodb';
 import {
   MongoDriverError,
   MongoError,
@@ -32,12 +30,18 @@ import {
   MongoWriteConcernError,
   type TopologyDescription,
   type TopologyOptions
-} from '../../src/index';
-import { RunCommandOperation } from '../../src/operations/run_command';
-import { DeprioritizedServers } from '../../src/sdam/server_selection';
-import { type Topology } from '../../src/sdam/topology';
-import { TimeoutContext } from '../../src/timeout';
-import { isHello, ns, setDifference } from '../../src/utils';
+} from '../mongodb';
+// Exception to the import from mongodb rule we're unit testing our public Errors API
+import {
+  DeprioritizedServers,
+  isHello,
+  ns,
+  RunCommandOperation,
+  setDifference,
+  TimeoutContext,
+  type Topology
+} from '../mongodb';
+import * as importsFromEntryPoint from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../tools/utils';

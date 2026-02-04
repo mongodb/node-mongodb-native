@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as sinon from 'sinon';
 
+import { ClientEncryption, type DataKey } from '../../mongodb';
 import {
   Binary,
   type Collection,
@@ -10,13 +11,8 @@ import {
   type MongoClient,
   MongoCryptError,
   UUID
-} from '../../../src';
-import {
-  ClientEncryption,
-  type DataKey
-} from '../../../src/client-side-encryption/client_encryption';
-import { MongoCryptInvalidArgumentError } from '../../../src/client-side-encryption/errors';
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
+} from '../../mongodb';
+import { MongoCryptInvalidArgumentError, StateMachine } from '../../mongodb';
 
 function readHttpResponse(path) {
   let data = readFileSync(path, 'utf8').toString();

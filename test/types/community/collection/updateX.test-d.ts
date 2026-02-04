@@ -19,7 +19,7 @@ import {
   type StrictUpdateFilter,
   type Timestamp,
   type UpdateFilter
-} from '../../../../src';
+} from '../../../mongodb';
 
 // MatchKeysAndValues - for basic mapping keys to their values, restricts that key types must be the same but optional, and permit dot array notation
 expectAssignable<MatchKeysAndValues<{ a: number; b: string; c: { d: boolean } }>>({

@@ -9,17 +9,21 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { MongoClient } from '../../../src/mongo_client';
-import { ServerType } from '../../../src/sdam/common';
 import {
   type ServerHeartbeatFailedEvent,
   type ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent
-} from '../../../src/sdam/events';
-import { Monitor, MonitorInterval, RTTSampler } from '../../../src/sdam/monitor';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { isHello } from '../../../src/utils';
+} from '../../mongodb';
+import {
+  isHello,
+  LEGACY_HELLO_COMMAND,
+  MongoClient,
+  Monitor,
+  MonitorInterval,
+  RTTSampler,
+  ServerDescription,
+  ServerType
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';

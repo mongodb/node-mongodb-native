@@ -3,10 +3,9 @@ import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
-import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { MongoCryptError } from '../../../src/client-side-encryption/errors';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+import { Decimal128, type Document, Double, Long, type MongoClient } from '../../mongodb';
+import { ClientEncryption, MongoCryptError } from '../../mongodb';
 
 const getKmsProviders = () => {
   const result = getCSFLEKMSProviders();

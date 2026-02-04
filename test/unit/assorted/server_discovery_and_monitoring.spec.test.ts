@@ -4,8 +4,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
 
-import { Connection } from '../../../src/cmap/connection';
-import { ConnectionPool } from '../../../src/cmap/connection_pool';
 import {
   HEARTBEAT_EVENTS,
   LEGACY_HELLO_COMMAND,
@@ -15,16 +13,14 @@ import {
   TOPOLOGY_CLOSED,
   TOPOLOGY_DESCRIPTION_CHANGED,
   TOPOLOGY_OPENING
-} from '../../../src/constants';
+} from '../../mongodb';
 import {
   MongoCompatibilityError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerError
-} from '../../../src/error';
-import { MongoClient } from '../../../src/mongo_client';
-import { RunCommandOperation } from '../../../src/operations/run_command';
+} from '../../mongodb';
 import {
   ServerClosedEvent,
   ServerDescriptionChangedEvent,
@@ -35,12 +31,21 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent
-} from '../../../src/sdam/events';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription, type TopologyVersion } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
-import { TimeoutContext } from '../../../src/timeout';
-import { isRecord, ns, squashError } from '../../../src/utils';
+} from '../../mongodb';
+import {
+  Connection,
+  ConnectionPool,
+  isRecord,
+  MongoClient,
+  ns,
+  RunCommandOperation,
+  Server,
+  ServerDescription,
+  squashError,
+  TimeoutContext,
+  Topology,
+  type TopologyVersion
+} from '../../mongodb';
 import { ejson, fakeServer } from '../../tools/utils';
 
 const SDAM_EVENT_CLASSES = {

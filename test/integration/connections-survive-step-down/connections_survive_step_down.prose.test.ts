@@ -7,8 +7,8 @@ import {
   type MongoClient,
   MongoServerError,
   ReadPreference
-} from '../../../src';
-import { MONGODB_ERROR_CODES } from '../../../src/error';
+} from '../../mongodb';
+import { MONGODB_ERROR_CODES } from '../../mongodb';
 import { type FailCommandFailPoint } from '../../tools/utils';
 
 describe('Connections Survive Primary Step Down - prose', function () {

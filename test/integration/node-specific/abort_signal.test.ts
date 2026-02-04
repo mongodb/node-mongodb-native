@@ -17,11 +17,14 @@ import {
   type MongoClient,
   MongoServerError,
   ReadPreference
-} from '../../../src';
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { Connection } from '../../../src/cmap/connection';
-import { ConnectionPool } from '../../../src/cmap/connection_pool';
-import { promiseWithResolvers, setDifference } from '../../../src/utils';
+} from '../../mongodb';
+import {
+  Connection,
+  ConnectionPool,
+  promiseWithResolvers,
+  setDifference,
+  StateMachine
+} from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,

@@ -12,8 +12,8 @@ import {
   type MongoClientOptions,
   type OIDCCallbackParams,
   type OIDCResponse
-} from '../../../src';
-import { type MongoDBOIDC, type OIDCCallbackFunction } from '../../../src/cmap/auth/mongodb_oidc';
+} from '../../mongodb';
+import { type MongoDBOIDC, type OIDCCallbackFunction } from '../../mongodb';
 
 const createCallback = (tokenFile = 'test_user1', expiresInSeconds?: number, extraFields?: any) => {
   return async (params: OIDCCallbackParams) => {

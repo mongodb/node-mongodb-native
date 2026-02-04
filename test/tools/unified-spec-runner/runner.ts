@@ -9,9 +9,8 @@ import {
   MongoServerError,
   ReadPreference,
   TopologyType
-} from '../../../src';
-import { MONGODB_ERROR_CODES } from '../../../src/error';
-import { ns } from '../../../src/utils';
+} from '../../mongodb';
+import { MONGODB_ERROR_CODES, ns } from '../../mongodb';
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';

@@ -1,8 +1,3 @@
-/**
- * Auto-generated file that exports everything from src/
- * Generated on: 2026-02-03T22:38:18.484Z
- */
-
 export * from '../src/admin';
 export * from '../src/bson';
 export * from '../src/bulk/common';
@@ -19,8 +14,8 @@ export * from '../src/client-side-encryption/providers/gcp';
 export * from '../src/client-side-encryption/providers/index';
 export * from '../src/client-side-encryption/state_machine';
 export * from '../src/cmap/auth/auth_provider';
-export * from '../src/cmap/auth/aws4';
 export * from '../src/cmap/auth/aws_temporary_credentials';
+export * from '../src/cmap/auth/aws4';
 export * from '../src/cmap/auth/gssapi';
 export * from '../src/cmap/auth/mongo_credentials';
 export * from '../src/cmap/auth/mongodb_aws';
@@ -133,3 +128,4 @@ export * from '../src/timeout';
 export * from '../src/transactions';
 export * from '../src/utils';
 export * from '../src/write_concern';
+export * from '../src/runtime_adapters';

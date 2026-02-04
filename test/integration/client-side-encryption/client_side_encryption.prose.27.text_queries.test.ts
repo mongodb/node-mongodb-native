@@ -4,9 +4,9 @@ import { join } from 'node:path';
 import { type Binary, type Document, EJSON } from 'bson';
 import { expect } from 'chai';
 
-import { ClientEncryption, type MongoClient } from '../../../src';
-import { MongoDBCollectionNamespace } from '../../../src/utils';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+import { ClientEncryption, type MongoClient } from '../../mongodb';
+import { MongoDBCollectionNamespace } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
   requires: {

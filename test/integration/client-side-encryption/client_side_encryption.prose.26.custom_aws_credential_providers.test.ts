@@ -1,9 +1,8 @@
 import { expect } from 'chai';
 import * as process from 'process';
 
-import { Binary, MongoClient } from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { AWSSDKCredentialProvider } from '../../../src/cmap/auth/aws_temporary_credentials';
+import { Binary, MongoClient } from '../../mongodb';
+import { AWSSDKCredentialProvider, ClientEncryption } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {

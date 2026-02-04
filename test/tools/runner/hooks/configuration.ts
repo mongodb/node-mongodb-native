@@ -8,7 +8,7 @@ require('source-map-support').install({
 import * as process from 'process';
 import * as os from 'os';
 
-import { MongoClient } from '../../../../src';
+import { MongoClient } from '../../../mongodb';
 import { AlpineTestConfiguration, AstrolabeTestConfiguration, TestConfiguration } from '../config';
 import { getEnvironmentalOptions } from '../../utils';
 import * as mock from '../../mongodb-mock/index';

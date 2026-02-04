@@ -2,12 +2,11 @@ import { Binary } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError
-} from '../../../src/client-side-encryption/errors';
-import { MongoClient } from '../../../src/mongo_client';
+} from '../../mongodb';
+import { ClientEncryption, MongoClient } from '../../mongodb';
 
 class MockClient {
   options: any;

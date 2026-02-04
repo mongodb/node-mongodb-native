@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { env } from 'process';
 
-import { Binary } from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { Binary } from '../../mongodb';
+import { ClientEncryption } from '../../mongodb';
 
 const dataKeyOptions = {
   masterKey: {

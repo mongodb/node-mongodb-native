@@ -12,15 +12,19 @@ import {
   type ChangeStreamDocument,
   type ChangeStreamOptions,
   type ResumeToken
-} from '../../../src/change_stream';
-import { type CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
-import { type Collection } from '../../../src/collection';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { type Db } from '../../../src/db';
-import { MongoAPIError, MongoChangeStreamError, MongoServerError } from '../../../src/error';
-import { type MongoClient } from '../../../src/mongo_client';
-import { ReadPreference } from '../../../src/read_preference';
-import { isHello } from '../../../src/utils';
+} from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  type Db,
+  isHello,
+  LEGACY_HELLO_COMMAND,
+  MongoAPIError,
+  MongoChangeStreamError,
+  type MongoClient,
+  MongoServerError,
+  ReadPreference
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 import { type FailCommandFailPoint, sleep } from '../../tools/utils';

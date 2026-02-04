@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-import { type Document } from '../../../src';
-import { DEFAULT_MAX_DOCUMENT_LENGTH } from '../../../src/mongo_logger';
+import { type Document } from '../../mongodb';
+import { DEFAULT_MAX_DOCUMENT_LENGTH } from '../../mongodb';
 
 describe('Command Logging and Monitoring Prose Tests', function () {
   const ELLIPSES_LENGTH = 3;

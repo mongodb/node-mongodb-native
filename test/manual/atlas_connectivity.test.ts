@@ -1,7 +1,7 @@
 import * as process from 'process';
 
-import { MongoClient } from '../../src';
-import { LEGACY_HELLO_COMMAND } from '../../src/constants';
+import { MongoClient } from '../mongodb';
+import { LEGACY_HELLO_COMMAND } from '../mongodb';
 
 /**
  * ATLAS_CONNECTIVITY env variable is JSON

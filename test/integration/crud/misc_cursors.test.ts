@@ -1,11 +1,13 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { MongoClientClosedError } from '../../../src/error';
-import { type MongoClient } from '../../../src/mongo_client';
-import { ReadPreference } from '../../../src/read_preference';
-import { ServerType } from '../../../src/sdam/common';
-import { formatSort } from '../../../src/sort';
+import {
+  formatSort,
+  type MongoClient,
+  MongoClientClosedError,
+  ReadPreference,
+  ServerType
+} from '../../mongodb';
 import { runLater, sleep } from '../../tools/utils';
 import { assert as test, filterForCommands, setupDatabase } from '../shared';
 

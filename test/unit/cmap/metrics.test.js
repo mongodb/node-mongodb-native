@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { ConnectionPoolMetrics } = require('../../../src/cmap/metrics');
+const { ConnectionPoolMetrics } = require('../../mongodb');
 
 describe('ConnectionPoolMetrics', function () {
   describe('#constructor', function () {

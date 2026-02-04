@@ -1,10 +1,14 @@
 import { expect } from 'chai';
 
-import { type CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
-import { type Collection } from '../../../src/collection';
-import { MongoInvalidArgumentError, MongoNetworkError } from '../../../src/error';
-import { type MongoClient } from '../../../src/mongo_client';
-import { ClientSession, type ServerSessionPool } from '../../../src/sessions';
+import {
+  ClientSession,
+  type Collection,
+  type CommandStartedEvent,
+  type MongoClient,
+  MongoInvalidArgumentError,
+  MongoNetworkError,
+  type ServerSessionPool
+} from '../../mongodb';
 import { type FailCommandFailPoint } from '../../tools/utils';
 
 describe('Transactions', function () {

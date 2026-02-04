@@ -2,18 +2,20 @@ import { ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { MongoLogger } from '../../../src/mongo_logger';
-import { ReadPreference } from '../../../src/read_preference';
-import { TopologyType } from '../../../src/sdam/common';
-import { ServerDescription } from '../../../src/sdam/server_description';
 import {
   DeprioritizedServers,
   MIN_SECONDARY_WRITE_WIRE_VERSION,
   sameServerSelector,
   secondaryWritableServerSelector
-} from '../../../src/sdam/server_selection';
-import { ServerSelectionEvent } from '../../../src/sdam/server_selection_events';
-import { TopologyDescription } from '../../../src/sdam/topology_description';
+} from '../../mongodb';
+import {
+  MongoLogger,
+  ReadPreference,
+  ServerDescription,
+  ServerSelectionEvent,
+  TopologyDescription,
+  TopologyType
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 

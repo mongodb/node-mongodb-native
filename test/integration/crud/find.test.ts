@@ -8,8 +8,8 @@ import {
   MongoServerError,
   ObjectId,
   ReturnDocument
-} from '../../../src';
-import { CursorResponse } from '../../../src/cmap/wire_protocol/responses';
+} from '../../mongodb';
+import { CursorResponse } from '../../mongodb';
 import { assert as test, filterForCommands } from '../shared';
 
 describe('Find', function () {

@@ -5,16 +5,15 @@ import * as path from 'path';
 import * as process from 'process';
 import { satisfies } from 'semver';
 
+import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import {
   MongoClient,
   MongoCryptError,
   MongoRuntimeError,
   MongoServerError,
   MongoServerSelectionError
-} from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+} from '../../mongodb';
+import { ClientEncryption, LEGACY_HELLO_COMMAND } from '../../mongodb';
 import { AlpineTestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { APMEventCollector, dropCollection } from '../shared';

@@ -7,26 +7,27 @@ import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
-import { ConnectionPool } from '../../../src/cmap/connection_pool';
-import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
 import {
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   MongoServerSelectionError
-} from '../../../src/error';
-import { MongoClient } from '../../../src/mongo_client';
+} from '../../mongodb';
+import { RunCommandOperation, RunCursorCommandOperation } from '../../mongodb';
 import {
-  RunCommandOperation,
-  RunCursorCommandOperation
-} from '../../../src/operations/run_command';
-import { ReadPreference } from '../../../src/read_preference';
-import { TopologyType } from '../../../src/sdam/common';
-import { TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
-import { Server } from '../../../src/sdam/server';
-import { SrvPoller, SrvPollingEvent } from '../../../src/sdam/srv_polling';
-import { Topology } from '../../../src/sdam/topology';
-import { TopologyDescription } from '../../../src/sdam/topology_description';
-import { TimeoutContext } from '../../../src/timeout';
-import { isHello, ns } from '../../../src/utils';
+  ConnectionPool,
+  isHello,
+  makeClientMetadata,
+  MongoClient,
+  ns,
+  ReadPreference,
+  Server,
+  SrvPoller,
+  SrvPollingEvent,
+  TimeoutContext,
+  Topology,
+  TopologyDescription,
+  TopologyDescriptionChangedEvent,
+  TopologyType
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { runtime, topologyWithPlaceholderClient } from '../../tools/utils';
 

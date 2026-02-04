@@ -11,11 +11,8 @@ import {
   type MongoClient,
   type MongoClientOptions,
   type Server
-} from '../../src';
-import { ConnectionPool } from '../../src/cmap/connection_pool';
-import { CMAP_EVENTS } from '../../src/constants';
-import { TimeoutContext } from '../../src/timeout';
-import { shuffle } from '../../src/utils';
+} from '../mongodb';
+import { CMAP_EVENTS, ConnectionPool, shuffle, TimeoutContext } from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { type FailCommandFailPoint, sleep } from './utils';
 

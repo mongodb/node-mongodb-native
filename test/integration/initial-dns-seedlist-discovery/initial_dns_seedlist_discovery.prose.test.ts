@@ -2,11 +2,7 @@ import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
 
-import { ConnectionPool } from '../../../src/cmap/connection_pool';
-import { MongoAPIError } from '../../../src/error';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
+import { ConnectionPool, MongoAPIError, Server, ServerDescription, Topology } from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
