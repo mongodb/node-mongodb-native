@@ -2,7 +2,6 @@ import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 
 import {
-  BSON,
   type BSONSerializeOptions,
   ByteUtils,
   deserialize,
