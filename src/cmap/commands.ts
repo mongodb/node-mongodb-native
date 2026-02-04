@@ -4,8 +4,8 @@ import {
   ByteUtils,
   type Document,
   type Long,
-  readInt32LE,
-  writeInt32LE
+  NumberUtils,
+  readInt32LE
 } from '../bson';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { type ReadPreference } from '../read_preference';
@@ -481,7 +481,11 @@ export class DocumentSequence {
     this.chunks.push(buffer);
     // Write the new length.
     if (this.header) {
-      writeInt32LE(this.header, 4 + this.field.length + 1 + this.serializedDocumentsLength, 1);
+      NumberUtils.setInt32LE(
+        this.header,
+        1,
+        4 + this.field.length + 1 + this.serializedDocumentsLength
+      );
     }
     return this.serializedDocumentsLength + this.header.length;
   }
@@ -567,11 +571,11 @@ export class OpMsgRequest {
     const command = this.command;
     totalLength += this.makeSections(buffers, command);
 
-    writeInt32LE(header, totalLength, 0); // messageLength
-    writeInt32LE(header, this.requestId, 4); // requestID
-    writeInt32LE(header, 0, 8); // responseTo
-    writeInt32LE(header, OP_MSG, 12); // opCode
-    writeInt32LE(header, flags, 16); // flags
+    NumberUtils.setInt32LE(header, 0, totalLength); // messageLength
+    NumberUtils.setInt32LE(header, 4, this.requestId); // requestID
+    NumberUtils.setInt32LE(header, 8, 0); // responseTo
+    NumberUtils.setInt32LE(header, 12, OP_MSG); // opCode
+    NumberUtils.setInt32LE(header, flags, 16); // flags
     return buffers;
   }
 
@@ -779,18 +783,18 @@ export class OpCompressedRequest {
     const compressedMessage = await compress(this.options, messageToBeCompressed);
     // Create the msgHeader of OP_COMPRESSED
     const msgHeader = ByteUtils.allocate(MESSAGE_HEADER_SIZE);
-    writeInt32LE(
+    NumberUtils.setInt32LE(
       msgHeader,
-      MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length,
-      0
+      0,
+      MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length
     ); // messageLength
-    writeInt32LE(msgHeader, this.command.requestId, 4); // requestID
-    writeInt32LE(msgHeader, 0, 8); // responseTo (zero)
-    writeInt32LE(msgHeader, OP_COMPRESSED, 12); // opCode
+    NumberUtils.setInt32LE(msgHeader, 4, this.command.requestId); // requestID
+    NumberUtils.setInt32LE(msgHeader, 8, 0); // responseTo (zero)
+    NumberUtils.setInt32LE(msgHeader, 12, OP_COMPRESSED); // opCode
     // Create the compression details of OP_COMPRESSED
     const compressionDetails = ByteUtils.allocate(COMPRESSION_DETAILS_SIZE);
-    writeInt32LE(compressionDetails, originalCommandOpCode, 0); // originalOpcode
-    writeInt32LE(compressionDetails, messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
+    NumberUtils.setInt32LE(compressionDetails, 0, originalCommandOpCode); // originalOpcode
+    NumberUtils.setInt32LE(compressionDetails, 4, messageToBeCompressed.length); // Size of the uncompressed compressedMessage, excluding the MsgHeader
     compressionDetails[8] = Compressor[this.options.agreedCompressor]; // compressorID
     return [msgHeader, compressionDetails, compressedMessage];
   }
