@@ -1,4 +1,4 @@
-import { BSON } from '../../bson';
+import { ByteUtils } from '../../bson';
 import { type AWSCredentials } from '../../deps';
 
 export type AwsSigv4Options = {
@@ -31,7 +31,7 @@ export type SignedHeaders = {
 const getHexSha256 = async (str: string): Promise<string> => {
   const data = stringToBuffer(str);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashHex = BSON.ByteUtils.toHex(new Uint8Array(hashBuffer));
+  const hashHex = ByteUtils.toHex(new Uint8Array(hashBuffer));
   return hashHex;
 };
 
@@ -81,8 +81,8 @@ const convertHeaderValue = (value: string | number) => {
  * @returns Uint8Array containing the UTF-8 encoded string.
  */
 function stringToBuffer(str: string): Uint8Array {
-  const data = new Uint8Array(BSON.ByteUtils.utf8ByteLength(str));
-  BSON.ByteUtils.encodeUTF8Into(data, str, 0);
+  const data = new Uint8Array(ByteUtils.utf8ByteLength(str));
+  ByteUtils.encodeUTF8Into(data, str, 0);
   return data;
 }
 
@@ -189,7 +189,7 @@ export async function aws4Sign(
 
   // 5. Calculate the signature
   const signatureBuffer = await getHmacSha256(signingKey, stringToSign);
-  const signature = BSON.ByteUtils.toHex(signatureBuffer);
+  const signature = ByteUtils.toHex(signatureBuffer);
 
   // 6. Add the signature to the request
   // Calculate the Authorization header

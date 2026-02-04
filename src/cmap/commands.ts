@@ -5,7 +5,8 @@ import {
   type Document,
   type Long,
   NumberUtils,
-  readInt32LE
+  readInt32LE,
+  readUint32LE
 } from '../bson';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { type ReadPreference } from '../read_preference';
@@ -37,7 +38,7 @@ const QUERY_FAILURE = 2;
 const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
-const encodeUTF8Into = BSON.ByteUtils.encodeUTF8Into;
+const encodeUTF8Into = ByteUtils.encodeUTF8Into;
 
 /** @internal */
 export type WriteProtocolMessageType = OpQueryRequest | OpMsgRequest;
@@ -715,7 +716,7 @@ export class OpMsgResponse {
     while (this.index < this.data.length) {
       const payloadType = this.data[this.index++];
       if (payloadType === 0) {
-        const bsonSize = readInt32LE(this.data, this.index);
+        const bsonSize = readUint32LE(this.data, this.index);
         const bin = this.data.subarray(this.index, this.index + bsonSize);
 
         this.sections.push(bin);

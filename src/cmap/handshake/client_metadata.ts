@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as process from 'process';
 
-import { BSON, ByteUtils, type Document, Int32 } from '../../bson';
+import { BSON, ByteUtils, type Document, Int32, NumberUtils } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { DriverInfo, MongoOptions } from '../../mongo_client';
 import { fileIsAccessible } from '../../utils';
@@ -114,7 +114,7 @@ export async function makeClientMetadata(
   // Add app name first, it must be sent
   if (appName.length > 0) {
     const name =
-      BSON.ByteUtils.utf8ByteLength(appName) <= 128
+      ByteUtils.utf8ByteLength(appName) <= 128
         ? appName
         : ByteUtils.toUTF8(ByteUtils.fromUTF8(appName), 0, 128, false);
     metadataDocument.ifItFitsItSits('application', { name });
@@ -336,7 +336,7 @@ declare const Bun: { (): void; version?: string } | undefined;
  * with a future change to these global objects.
  */
 function getRuntimeInfo(): string {
-  const endianness = BSON.NumberUtils.isBigEndian ? 'BE' : 'LE';
+  const endianness = NumberUtils.isBigEndian ? 'BE' : 'LE';
   if ('Deno' in globalThis) {
     const version = typeof Deno?.version?.deno === 'string' ? Deno?.version?.deno : '0.0.0-unknown';
 

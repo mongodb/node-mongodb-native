@@ -176,7 +176,7 @@ function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
     return HostAddress.fromHostPort(remoteAddress, remotePort).toString();
   }
 
-  return BSON.ByteUtils.toHex(uuidV4());
+  return ByteUtils.toHex(uuidV4());
 }
 
 /** @internal */
