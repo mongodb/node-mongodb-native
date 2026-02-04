@@ -576,7 +576,7 @@ export class OpMsgRequest {
     NumberUtils.setInt32LE(header, 4, this.requestId); // requestID
     NumberUtils.setInt32LE(header, 8, 0); // responseTo
     NumberUtils.setInt32LE(header, 12, OP_MSG); // opCode
-    NumberUtils.setInt32LE(header, flags, 16); // flags
+    NumberUtils.setInt32LE(header, 16, flags); // flags
     return buffers;
   }
 
