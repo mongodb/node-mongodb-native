@@ -28,7 +28,7 @@ import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { TimeoutContext } from '../../../src/timeout';
 import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
-import { topologyWithPlaceholderClient } from '../../tools/utils';
+import { runtime, topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Topology (unit)', function () {
   let client, topology;
@@ -56,6 +56,7 @@ describe('Topology (unit)', function () {
     it('should correctly pass appname', async function () {
       const topology: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
         metadata: makeClientMetadata([], {
+          runtime,
           appName: 'My application name'
         })
       });

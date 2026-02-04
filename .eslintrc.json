@@ -276,7 +276,8 @@
             "patterns": [
               "**/../lib/**",
               "mongodb-mock-server",
-              "node:*"
+              "node:*",
+              "os"
             ],
             "paths": [
               {

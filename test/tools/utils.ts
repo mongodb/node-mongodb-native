@@ -18,10 +18,12 @@ import {
   type HostAddress,
   MongoClient,
   type MongoClientOptions,
+  type Runtime,
   type ServerApiVersion,
   type TopologyOptions
 } from '../../src';
 import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
+import { resolveRuntimeAdapters } from '../../src/runtime_adapters';
 import { Topology } from '../../src/sdam/topology';
 import { processTimeMS } from '../../src/utils';
 import { type TestConfiguration } from './runner/config';
@@ -604,3 +606,8 @@ export function configureMongocryptdSpawnHooks(
     port
   };
 }
+
+/**
+ * A `Runtime` that resolves to entirely Nodejs modules, useful when tests must provide a default `runtime` object to an API.
+ */
+export const runtime: Runtime = resolveRuntimeAdapters({});
