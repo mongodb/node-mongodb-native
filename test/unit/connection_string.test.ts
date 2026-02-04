@@ -633,11 +633,12 @@ describe('Connection String', function () {
 
       // first call is for stubbing resolve
       // second call is for stubbing resolve
-      sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+      const stub = sinon.stub(dns.promises, 'resolve');
+      stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
         return mockAddress;
       });
 
-      sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+      stub.withArgs(sinon.match.any, 'TXT').callsFake(async () => {
         return mockRecord;
       });
     }
