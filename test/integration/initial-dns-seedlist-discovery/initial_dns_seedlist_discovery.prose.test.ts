@@ -23,7 +23,8 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
       beforeEach(async function () {
         // this fn stubs DNS resolution to always pass - so we are only checking pre-DNS validation
 
-        sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+        const stub = sinon.stub(dns.promises, 'resolve');
+        stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
           return [
             {
               name: 'resolved.mongo.localhost',
@@ -34,7 +35,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
           ];
         });
 
-        sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+        stub.withArgs(sinon.match.any, 'TXT').callsFake(async () => {
           throw { code: 'ENODATA' };
         });
 
@@ -84,9 +85,11 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
          *  - the SRV mongodb+srv://blogs.mongodb.com resolving to blogs.evil.com
          * Remember, the domain of an SRV with one or two . separated parts is the SRVs entire hostname.
          */
+        let stub;
 
         beforeEach(async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub = sinon.stub(dns.promises, 'resolve');
+          stub.withArgs(sinon.match.any, 'TXT').callsFake(async () => {
             throw { code: 'ENODATA' };
           });
         });
@@ -96,7 +99,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         });
 
         it('an SRV with one domain level causes a runtime error', async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
             return [
               {
                 name: 'localhost.mongodb',
@@ -115,7 +118,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         });
 
         it('an SRV with two domain levels causes a runtime error', async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
             return [
               {
                 name: 'test_1.evil.local', // this string only ends with part of the domain, not all of it!
@@ -134,7 +137,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         });
 
         it('an SRV with three or more domain levels causes a runtime error', async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
             return [
               {
                 name: 'blogs.evil.com',
@@ -166,8 +169,11 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
     context(
       'when given a host from DNS resolution that is identical to the original SRVs hostname',
       function () {
+        let stub;
+
         beforeEach(async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub = sinon.stub(dns.promises, 'resolve');
+          stub.withArgs(sinon.match.any, 'TXT').callsFake(async () => {
             throw { code: 'ENODATA' };
           });
         });
@@ -177,7 +183,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         });
 
         it('an SRV with one domain level causes a runtime error', async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
             return [
               {
                 name: 'localhost',
@@ -198,7 +204,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         });
 
         it('an SRV with two domain levels causes a runtime error', async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
             return [
               {
                 name: 'mongo.local',
@@ -233,8 +239,11 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
     context(
       'when given a returned address that does NOT share the domain name of the SRV record because its missing a `.`',
       function () {
+        let stub;
+
         beforeEach(async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub = sinon.stub(dns.promises, 'resolve');
+          stub.withArgs(sinon.match.any, 'TXT').callsFake(async () => {
             throw { code: 'ENODATA' };
           });
         });
@@ -244,7 +253,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         });
 
         it('an SRV with one domain level causes a runtime error', async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
             return [
               {
                 name: 'test_1.cluster_1localhost',
@@ -263,7 +272,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         });
 
         it('an SRV with two domain levels causes a runtime error', async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
             return [
               {
                 name: 'test_1.my_hostmongo.local',
@@ -282,7 +291,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         });
 
         it('an SRV with three domain levels causes a runtime error', async function () {
-          sinon.stub(dns.promises, 'resolve').callsFake(async () => {
+          stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
             return [
               {
                 name: 'cluster.testmongodb.com',
