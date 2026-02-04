@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as process from 'process';
 
-import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/token_machine_workflow';
+import { tokenMachineCallback } from '../../../../../src/cmap/auth/mongodb_oidc/token_machine_workflow';
 
 describe('Token machine workflow', function () {
   describe('#callback', function () {
@@ -20,7 +20,7 @@ describe('Token machine workflow', function () {
       });
 
       it('throws an error', async function () {
-        const error = await callback().catch(error => error);
+        const error = await tokenMachineCallback().catch(error => error);
         expect(error.message).to.include('OIDC_TOKEN_FILE');
       });
     });

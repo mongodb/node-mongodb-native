@@ -17,7 +17,7 @@ const AWS_FILENAME = 'AWS_WEB_IDENTITY_TOKEN_FILE';
  * @param params - The OIDC callback parameters.
  * @returns The OIDC response.
  */
-export const callback: OIDCCallbackFunction = async (): Promise<OIDCResponse> => {
+export const k8sCallback: OIDCCallbackFunction = async (): Promise<OIDCResponse> => {
   let filename: string;
   if (process.env[AZURE_FILENAME]) {
     filename = process.env[AZURE_FILENAME];

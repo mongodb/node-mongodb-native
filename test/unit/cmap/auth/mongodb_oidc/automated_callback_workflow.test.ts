@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import { MongoCredentials } from '../../../../../src/cmap/auth/mongo_credentials';
 import { AutomatedCallbackWorkflow } from '../../../../../src/cmap/auth/mongodb_oidc/automated_callback_workflow';
 import { CallbackWorkflow } from '../../../../../src/cmap/auth/mongodb_oidc/callback_workflow';
-import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
+import { gcpCallback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
 import { TokenCache } from '../../../../../src/cmap/auth/mongodb_oidc/token_cache';
 import { Connection } from '../../../../../src/cmap/connection';
 
@@ -20,7 +20,7 @@ describe('AutomatedCallbackWorkflow', function () {
         const connection = sandbox.createStubInstance(Connection);
         const credentials = sandbox.createStubInstance(MongoCredentials);
         sandbox.stub(CallbackWorkflow.prototype, 'finishAuthentication').resolves();
-        const workflow = new AutomatedCallbackWorkflow(cache, callback);
+        const workflow = new AutomatedCallbackWorkflow(cache, gcpCallback);
 
         beforeEach(function () {
           cache.put({ accessToken: 'test', expiresInSeconds: 7200 });

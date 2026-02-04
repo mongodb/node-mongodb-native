@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { OIDC_VERSION, type OIDCCallbackParams } from '../../../../../src/cmap/auth/mongodb_oidc';
-import { callback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
+import { gcpCallback } from '../../../../../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
 
 describe('GCP machine workflow', function () {
   describe('#callback', function () {
@@ -13,7 +13,7 @@ describe('GCP machine workflow', function () {
       };
 
       it('throws an error', async function () {
-        const error = await callback(params).catch(error => error);
+        const error = await gcpCallback(params).catch(error => error);
         expect(error.message).to.include('TOKEN_RESOURCE');
       });
     });
