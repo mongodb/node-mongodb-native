@@ -3968,11 +3968,6 @@ buildvariants:
       - testk8soidc_task_group_eks
       - testk8soidc_task_group_gke
       - testk8soidc_task_group_aks
-  - name: rhel8-test-atlas
-    display_name: Atlas Cluster Tests
-    run_on: rhel80-large
-    tasks:
-      - test_atlas_task_group
   - name: rhel8-no-auth-tests
     display_name: No Auth Tests
     run_on: rhel80-large
