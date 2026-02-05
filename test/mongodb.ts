@@ -1,3 +1,6 @@
+// As the centralized import for all src code for tests, we intentionally import from `src` in this file.
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+
 export * from '../src/admin';
 export * from '../src/bson';
 export * from '../src/bulk/common';
@@ -111,6 +114,7 @@ export * from '../src/operations/update';
 export * from '../src/operations/validate_collection';
 export * from '../src/read_concern';
 export * from '../src/read_preference';
+export * from '../src/runtime_adapters';
 export * from '../src/sdam/common';
 export * from '../src/sdam/events';
 export * from '../src/sdam/monitor';
@@ -127,4 +131,3 @@ export * from '../src/timeout';
 export * from '../src/transactions';
 export * from '../src/utils';
 export * from '../src/write_concern';
-export * from '../src/runtime_adapters';

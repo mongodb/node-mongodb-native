@@ -6,14 +6,13 @@ import * as sinon from 'sinon';
 import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
-import { runtime } from '../../../tools/utils';
-
 import {
   getFAASEnv,
   LimitedSizeDocument,
   makeClientMetadata,
   MongoInvalidArgumentError
 } from '../../../mongodb';
+import { runtime } from '../../../tools/utils';
 describe('client metadata module', () => {
   afterEach(() => sinon.restore());
 

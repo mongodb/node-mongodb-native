@@ -1,7 +1,11 @@
 import { expect } from 'chai';
 import { setTimeout } from 'timers';
 
+// Exception to the import from mongodb rule we're unit testing our public Errors API
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as importsFromErrorSrc from '../../src/error';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as importsFromEntryPoint from '../../src/index';
 import {
   DeprioritizedServers,
   isHello,
@@ -25,22 +29,20 @@ import {
   needsRetryableWriteLabel,
   NODE_IS_RECOVERING_ERROR_MESSAGE,
   ns,
-  PoolClosedError,
+  PoolClosedError as MongoPoolClosedError,
   RunCommandOperation,
   setDifference,
   TimeoutContext,
   type Topology,
   type TopologyDescription,
   type TopologyOptions,
-  WaitQueueTimeoutError
+  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
 } from '../mongodb';
-// Exception to the import from mongodb rule we're unit testing our public Errors API
-import * as importsFromEntryPoint from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../tools/utils';
 
-describe.skip('MongoErrors', () => {
+describe('MongoErrors', () => {
   let errorClassesFromEntryPoint = Object.fromEntries(
     Object.entries(importsFromEntryPoint).filter(
       ([key, value]) => key.endsWith('Error') && value.toString().startsWith('class')
@@ -48,8 +50,8 @@ describe.skip('MongoErrors', () => {
   ) as any;
   errorClassesFromEntryPoint = {
     ...errorClassesFromEntryPoint,
-    PoolClosedError,
-    WaitQueueTimeoutError
+    MongoPoolClosedError,
+    MongoWaitQueueTimeoutError
   };
 
   const errorClassesFromErrorSrc = Object.fromEntries(

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as compression from '../../src/cmap/wire_protocol/compression';
 import {
   compress,

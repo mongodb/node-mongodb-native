@@ -4,6 +4,7 @@ import * as process from 'process';
 import * as sinon from 'sinon';
 
 // Intentionally import from src, because we need to stub the `get()` function.
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as utils from '../../../../src/utils';
 import {
   AWSSDKCredentialProvider,

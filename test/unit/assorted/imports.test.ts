@@ -15,7 +15,7 @@ function* walk(root) {
   }
 }
 
-describe.skip('importing mongodb driver', () => {
+describe('importing mongodb driver', () => {
   const sourceFiles = walk(path.resolve(__dirname, '../../../src'));
 
   for (const sourceFile of sourceFiles) {

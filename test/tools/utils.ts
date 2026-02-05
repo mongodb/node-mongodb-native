@@ -17,13 +17,13 @@ import {
   type HostAddress,
   MongoClient,
   type MongoClientOptions,
-  type Runtime,
-  type ServerApiVersion,
-  type TopologyOptions,
   OP_MSG,
   processTimeMS,
+  resolveRuntimeAdapters,
+  type Runtime,
+  type ServerApiVersion,
   Topology,
-  resolveRuntimeAdapters
+  type TopologyOptions
 } from '../mongodb';
 import { type TestConfiguration } from './runner/config';
 import { isTLSEnabled } from './runner/filters/tls_filter';
