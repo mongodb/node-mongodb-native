@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports */
-import { BSON, type DeserializeOptions, type SerializeOptions } from 'bson';
+import { BSON, type DeserializeOptions, NumberUtils, type SerializeOptions } from 'bson';
 
 export {
   Binary,
@@ -8,6 +8,7 @@ export {
   BSONRegExp,
   BSONSymbol,
   BSONType,
+  ByteUtils,
   calculateObjectSize,
   Code,
   DBRef,
@@ -38,10 +39,32 @@ export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSON
   return Array.isArray(res) ? res : [...res];
 }
 
-export const getInt32LE = BSON.onDemand.NumberUtils.getInt32LE;
-export const getFloat64LE = BSON.onDemand.NumberUtils.getFloat64LE;
-export const getBigInt64LE = BSON.onDemand.NumberUtils.getBigInt64LE;
-export const toUTF8 = BSON.onDemand.ByteUtils.toUTF8;
+// validates buffer inputs, used for read operations
+const validateBufferInputs = (buffer: Uint8Array, offset: number, length: number) => {
+  if (offset < 0 || offset + length > buffer.length) {
+    throw new RangeError(
+      `Attempt to access memory outside buffer bounds: buffer length: ${buffer.length}, offset: ${offset}, length: ${length}`
+    );
+  }
+};
+
+// readInt32LE, reads a 32-bit integer from buffer at given offset
+// throws if offset is out of bounds
+export const readInt32LE = (buffer: Uint8Array, offset: number): number => {
+  validateBufferInputs(buffer, offset, 4);
+  return NumberUtils.getInt32LE(buffer, offset);
+};
+
+export const setUint32LE = (destination: Uint8Array, offset: number, value: number): 4 => {
+  destination[offset] = value;
+  value >>>= 8;
+  destination[offset + 1] = value;
+  value >>>= 8;
+  destination[offset + 2] = value;
+  value >>>= 8;
+  destination[offset + 3] = value;
+  return 4;
+};
 
 /**
  * BSON Serialization options.

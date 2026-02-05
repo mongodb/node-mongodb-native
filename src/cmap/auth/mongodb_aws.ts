@@ -1,11 +1,11 @@
-import type { Binary, BSONSerializeOptions } from '../../bson';
+import { type Binary, type BSONSerializeOptions, ByteUtils } from '../../bson';
 import * as BSON from '../../bson';
 import {
   MongoCompatibilityError,
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { ByteUtils, maxWireVersion, ns, randomBytes } from '../../utils';
+import { maxWireVersion, ns, randomBytes } from '../../utils';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import {
   type AWSCredentialProvider,

@@ -286,6 +286,13 @@
               }
             ]
           }
+        ],
+        "no-restricted-globals": [
+          "error",
+          {
+            "name": "Buffer",
+            "message": "Use Uint8Array instead"
+          }
         ]
       }
     },

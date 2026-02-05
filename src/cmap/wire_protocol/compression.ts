@@ -1,5 +1,6 @@
 import * as zlib from 'zlib';
 
+import { ByteUtils, readInt32LE } from '../../bson';
 import { LEGACY_HELLO_COMMAND } from '../../constants';
 import { getSnappy, getZstdLibrary, type SnappyLib, type ZStandard } from '../../deps';
 import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
@@ -43,7 +44,7 @@ export const uncompressibleCommands = new Set([
 const ZSTD_COMPRESSION_LEVEL = 3;
 
 const zlibInflate = (buf: zlib.InputType) => {
-  return new Promise<Buffer>((resolve, reject) => {
+  return new Promise<Uint8Array>((resolve, reject) => {
     zlib.inflate(buf, (error, result) => {
       if (error) return reject(error);
       resolve(result);
@@ -52,7 +53,7 @@ const zlibInflate = (buf: zlib.InputType) => {
 };
 
 const zlibDeflate = (buf: zlib.InputType, options: zlib.ZlibOptions) => {
-  return new Promise<Buffer>((resolve, reject) => {
+  return new Promise<Uint8Array>((resolve, reject) => {
     zlib.deflate(buf, options, (error, result) => {
       if (error) return reject(error);
       resolve(result);
@@ -76,8 +77,8 @@ function loadSnappy() {
 // Facilitate compressing a message using an agreed compressor
 export async function compress(
   options: OpCompressesRequestOptions,
-  dataToBeCompressed: Buffer
-): Promise<Buffer> {
+  dataToBeCompressed: Uint8Array
+): Promise<Uint8Array> {
   const zlibOptions = {} as zlib.ZlibOptions;
   switch (options.agreedCompressor) {
     case 'snappy': {
@@ -106,7 +107,10 @@ export async function compress(
 }
 
 // Decompress a message using the given compressor
-export async function decompress(compressorID: number, compressedData: Buffer): Promise<Buffer> {
+export async function decompress(
+  compressorID: number,
+  compressedData: Uint8Array
+): Promise<Uint8Array> {
   if (
     compressorID !== Compressor.snappy &&
     compressorID !== Compressor.zstd &&
@@ -159,7 +163,7 @@ const MESSAGE_HEADER_SIZE = 16;
 export async function compressCommand(
   command: WriteProtocolMessageType,
   description: { agreedCompressor?: CompressorName; zlibCompressionLevel?: number }
-): Promise<Buffer> {
+): Promise<Uint8Array> {
   const finalCommand =
     description.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
       ? command
@@ -168,7 +172,7 @@ export async function compressCommand(
           zlibCompressionLevel: description.zlibCompressionLevel ?? 0
         });
   const data = await finalCommand.toBin();
-  return Buffer.concat(data);
+  return ByteUtils.concat(data);
 }
 
 /**
@@ -178,12 +182,12 @@ export async function compressCommand(
  *
  * This method does not parse the response's BSON.
  */
-export async function decompressResponse(message: Buffer): Promise<OpMsgResponse | OpReply> {
+export async function decompressResponse(message: Uint8Array): Promise<OpMsgResponse | OpReply> {
   const messageHeader: MessageHeader = {
-    length: message.readInt32LE(0),
-    requestId: message.readInt32LE(4),
-    responseTo: message.readInt32LE(8),
-    opCode: message.readInt32LE(12)
+    length: readInt32LE(message, 0),
+    requestId: readInt32LE(message, 4),
+    responseTo: readInt32LE(message, 8),
+    opCode: readInt32LE(message, 12)
   };
 
   if (messageHeader.opCode !== OP_COMPRESSED) {
@@ -195,8 +199,8 @@ export async function decompressResponse(message: Buffer): Promise<OpMsgResponse
   const header: MessageHeader = {
     ...messageHeader,
     fromCompressed: true,
-    opCode: message.readInt32LE(MESSAGE_HEADER_SIZE),
-    length: message.readInt32LE(MESSAGE_HEADER_SIZE + 4)
+    opCode: readInt32LE(message, MESSAGE_HEADER_SIZE),
+    length: readInt32LE(message, MESSAGE_HEADER_SIZE + 4)
   };
   const compressorID = message[MESSAGE_HEADER_SIZE + 8];
   const compressedBuffer = message.slice(MESSAGE_HEADER_SIZE + 9);
