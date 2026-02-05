@@ -766,12 +766,13 @@ BUILD_VARIANTS.push({
   ]
 });
 
-BUILD_VARIANTS.push({
-  name: 'rhel8-test-atlas',
-  display_name: 'Atlas Cluster Tests',
-  run_on: DEFAULT_OS,
-  tasks: ['test_atlas_task_group']
-});
+// TODO(NODE-7425): fix aws lambda test setup
+// BUILD_VARIANTS.push({
+//   name: 'rhel8-test-atlas',
+//   display_name: 'Atlas Cluster Tests',
+//   run_on: DEFAULT_OS,
+//   tasks: ['test_atlas_task_group']
+// });
 
 BUILD_VARIANTS.push({
   name: 'rhel8-no-auth-tests',
