@@ -277,7 +277,8 @@
               "**/../lib/**",
               "mongodb-mock-server",
               "node:*",
-              "os"
+              "os",
+              "crypto"
             ],
             "paths": [
               {

@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
@@ -306,7 +305,7 @@ export function* makeCounter(seed = 0): Generator<number> {
  * @internal
  */
 export function uuidV4(): Uint8Array {
-  const result = crypto.randomBytes(16);
+  const result = crypto.getRandomValues(new Uint8Array(16));
   result[6] = (result[6] & 0x0f) | 0x40;
   result[8] = (result[8] & 0x3f) | 0x80;
   return result;
@@ -1226,13 +1225,8 @@ export function squashError(_error: unknown) {
   return;
 }
 
-export const randomBytes = (size: number) => {
-  return new Promise<Uint8Array>((resolve, reject) => {
-    crypto.randomBytes(size, (error: Error | null, buf: Uint8Array) => {
-      if (error) return reject(error);
-      resolve(buf);
-    });
-  });
+export const randomBytes = (size: number): Promise<Uint8Array> => {
+  return Promise.resolve(crypto.getRandomValues(new Uint8Array(size)));
 };
 
 /**
