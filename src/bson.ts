@@ -55,6 +55,17 @@ export const readInt32LE = (buffer: Uint8Array, offset: number): number => {
   return NumberUtils.getInt32LE(buffer, offset);
 };
 
+export const setUint32LE = (destination: Uint8Array, offset: number, value: number): 4 => {
+  destination[offset] = value;
+  value >>>= 8;
+  destination[offset + 1] = value;
+  value >>>= 8;
+  destination[offset + 2] = value;
+  value >>>= 8;
+  destination[offset + 3] = value;
+  return 4;
+};
+
 /**
  * BSON Serialization options.
  * @public

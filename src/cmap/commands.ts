@@ -5,7 +5,8 @@ import {
   type Document,
   type Long,
   NumberUtils,
-  readInt32LE
+  readInt32LE,
+  setUint32LE
 } from '../bson';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { type ReadPreference } from '../read_preference';
@@ -577,8 +578,7 @@ export class OpMsgRequest {
     NumberUtils.setInt32LE(header, 12, OP_MSG); // opCode
     // The OP_MSG spec calls out that flags is uint32:
     // https://github.com/mongodb/specifications/blob/master/source/message/OP_MSG.md#op_msg-1
-    // Flags are limited to only 16 bits, so it does not matter that we are using setInt32LE method.
-    NumberUtils.setInt32LE(header, 16, flags); // flags
+    setUint32LE(header, 16, flags); // flags
     return buffers;
   }
 
@@ -719,7 +719,8 @@ export class OpMsgResponse {
       const payloadType = this.data[this.index++];
       if (payloadType === 0) {
         // BSON spec specifies that this is a 32-bit signed integer: https://bsonspec.org/spec.html#:~:text=%3A%3A%3D-,int32,-e_list%20unsigned_byte(0
-        // Max BSON size is 16MB, which is well below 32-bit signed or unsigned limits, so we are choosing to read the value as Uint32
+        // While allowing negative sizes seems odd, in practice we never expect a negative size. Also, the server's 16mb limit for BSON documents leaves plenty
+        // of room in an int32 to store a document of the max BSON size that the server supports
         const bsonSize = readInt32LE(this.data, this.index);
         const bin = this.data.subarray(this.index, this.index + bsonSize);
 
