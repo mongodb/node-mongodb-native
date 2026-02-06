@@ -23,6 +23,7 @@ describe('DNS timeout errors', () => {
 
   beforeEach(async function () {
     client = new MongoClient(CONNECTION_STRING, { serverSelectionTimeoutMS: 2000, tls: false });
+    stub = sinon.stub(dns.promises, 'resolve').callThrough();
   });
 
   afterEach(async function () {
@@ -38,8 +39,6 @@ describe('DNS timeout errors', () => {
 
   describe('when SRV record look up times out', () => {
     beforeEach(() => {
-      stub = sinon.stub(dns.promises, 'resolve').callThrough();
-
       stub
         .withArgs(sinon.match.string, 'SRV')
         .onFirstCall()
@@ -50,14 +49,12 @@ describe('DNS timeout errors', () => {
 
     it('retries timeout error', metadata, async () => {
       await client.connect();
-      expect(stub).to.have.been.calledTwice;
+      expect(stub.withArgs(sinon.match.string, 'SRV')).to.have.been.calledTwice;
     });
   });
 
   describe('when TXT record look up times out', () => {
     beforeEach(() => {
-      stub = sinon.stub(dns.promises, 'resolve').callThrough();
-
       stub
         .withArgs(sinon.match.string, 'TXT')
         .onFirstCall()
@@ -68,14 +65,12 @@ describe('DNS timeout errors', () => {
 
     it('retries timeout error', metadata, async () => {
       await client.connect();
-      expect(stub).to.have.been.calledTwice;
+      expect(stub.withArgs(sinon.match.string, 'TXT')).to.have.been.calledTwice;
     });
   });
 
   describe('when SRV record look up times out twice', () => {
     beforeEach(() => {
-      stub = sinon.stub(dns.promises, 'resolve').callThrough();
-
       stub
         .withArgs(sinon.match.string, 'SRV')
         .onFirstCall()
@@ -87,14 +82,12 @@ describe('DNS timeout errors', () => {
     it('throws timeout error', metadata, async () => {
       const error = await client.connect().catch(error => error);
       expect(error).to.be.instanceOf(DNSTimeoutError);
-      expect(stub).to.have.been.calledTwice;
+      expect(stub.withArgs(sinon.match.string, 'SRV')).to.have.been.calledTwice;
     });
   });
 
   describe('when TXT record look up times out twice', () => {
     beforeEach(() => {
-      stub = sinon.stub(dns.promises, 'resolve').callThrough();
-
       stub
         .withArgs(sinon.match.string, 'TXT')
         .onFirstCall()
@@ -106,14 +99,12 @@ describe('DNS timeout errors', () => {
     it('throws timeout error', metadata, async () => {
       const error = await client.connect().catch(error => error);
       expect(error).to.be.instanceOf(DNSTimeoutError);
-      expect(stub).to.have.been.calledTwice;
+      expect(stub.withArgs(sinon.match.string, 'TXT')).to.have.been.calledTwice;
     });
   });
 
   describe('when SRV record look up throws a non-timeout error', () => {
     beforeEach(() => {
-      stub = sinon.stub(dns.promises, 'resolve').callThrough();
-
       stub
         .withArgs(sinon.match.string, 'SRV')
         .onFirstCall()
@@ -125,14 +116,12 @@ describe('DNS timeout errors', () => {
     it('throws that error', metadata, async () => {
       const error = await client.connect().catch(error => error);
       expect(error).to.be.instanceOf(DNSSomethingError);
-      expect(stub).to.have.been.calledOnce;
+      expect(stub.withArgs(sinon.match.string, 'TXT')).to.have.been.calledOnce;
     });
   });
 
   describe('when TXT record look up throws a non-timeout error', () => {
     beforeEach(() => {
-      stub = sinon.stub(dns.promises, 'resolve').callThrough();
-
       stub
         .withArgs(sinon.match.string, 'TXT')
         .onFirstCall()
@@ -144,7 +133,7 @@ describe('DNS timeout errors', () => {
     it('throws that error', metadata, async () => {
       const error = await client.connect().catch(error => error);
       expect(error).to.be.instanceOf(DNSSomethingError);
-      expect(stub).to.have.been.calledOnce;
+      expect(stub.withArgs(sinon.match.string, 'TXT')).to.have.been.calledOnce;
     });
   });
 });

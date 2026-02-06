@@ -32,8 +32,8 @@ describe('GSSAPI', () => {
           });
           expect(host).to.equal(hostName);
           expect(dns.lookup).to.not.be.called;
-          expect(dns.resolve.withArgs(sinon.match.any, 'PTR')).to.not.be.called;
-          expect(dns.resolve.withArgs(sinon.match.any, 'CNAME')).to.not.be.called;
+          expect(dns.resolve.withArgs(sinon.match.string, 'PTR')).to.not.be.called;
+          expect(dns.resolve.withArgs(sinon.match.string, 'CNAME')).to.not.be.called;
         });
       });
     }
@@ -43,7 +43,7 @@ describe('GSSAPI', () => {
 
       beforeEach(() => {
         resolveSpy.restore();
-        sinon.stub(dns, 'resolve').withArgs(sinon.match.any, 'CNAME').resolves([resolved]);
+        sinon.stub(dns, 'resolve').withArgs(sinon.match.string, 'CNAME').resolves([resolved]);
       });
 
       it('performs a cname lookup', async () => {
@@ -52,7 +52,7 @@ describe('GSSAPI', () => {
         });
         expect(host).to.equal(resolved);
         expect(dns.lookup).to.not.be.called;
-        expect(dns.resolve.withArgs(sinon.match.any, 'PTR')).to.not.be.called;
+        expect(dns.resolve.withArgs(sinon.match.string, 'PTR')).to.not.be.called;
         expect(dns.resolve).to.be.calledOnceWith(hostName, 'CNAME');
       });
     });
@@ -73,7 +73,7 @@ describe('GSSAPI', () => {
                 lookupSpy.restore();
                 resolveSpy.restore();
                 sinon.stub(dns, 'lookup').resolves(lookedUp);
-                sinon.stub(dns, 'resolve').withArgs(sinon.match.any, 'PTR').resolves([resolved]);
+                sinon.stub(dns, 'resolve').withArgs(sinon.match.string, 'PTR').resolves([resolved]);
               });
 
               it('uses the reverse lookup host', async () => {
@@ -96,7 +96,7 @@ describe('GSSAPI', () => {
                 sinon.stub(dns, 'lookup').resolves(lookedUp);
                 sinon
                   .stub(dns, 'resolve')
-                  .withArgs(sinon.match.any, 'PTR')
+                  .withArgs(sinon.match.string, 'PTR')
                   .resolves([resolved, 'example.com']);
               });
 
@@ -107,7 +107,7 @@ describe('GSSAPI', () => {
                 expect(host).to.equal(resolved);
                 expect(dns.lookup).to.be.calledOnceWith(hostName);
                 expect(dns.resolve).to.be.calledOnceWith(lookedUp.address, 'PTR');
-                expect(dns.resolve).to.not.be.calledOnceWith(sinon.match.any, 'CNAME');
+                expect(dns.resolve).to.not.be.calledOnceWith(sinon.match.string, 'CNAME');
               });
             });
           });
@@ -120,8 +120,8 @@ describe('GSSAPI', () => {
               resolveSpy.restore();
               sinon.stub(dns, 'lookup').resolves(lookedUp);
               const stub = sinon.stub(dns, 'resolve');
-              stub.withArgs(sinon.match.any, 'PTR').rejects(new Error('failed'));
-              stub.withArgs(sinon.match.any, 'CNAME').resolves([cname]);
+              stub.withArgs(sinon.match.string, 'PTR').rejects(new Error('failed'));
+              stub.withArgs(sinon.match.string, 'CNAME').resolves([cname]);
             });
 
             it('falls back to a cname lookup', async () => {
@@ -141,7 +141,7 @@ describe('GSSAPI', () => {
               lookupSpy.restore();
               resolveSpy.restore();
               sinon.stub(dns, 'lookup').resolves(lookedUp);
-              sinon.stub(dns, 'resolve').withArgs(sinon.match.any, 'PTR').resolves([]);
+              sinon.stub(dns, 'resolve').withArgs(sinon.match.string, 'PTR').resolves([]);
             });
 
             it('uses the provided host', async () => {
@@ -151,7 +151,7 @@ describe('GSSAPI', () => {
               expect(host).to.equal(hostName);
               expect(dns.lookup).to.be.calledOnceWith(hostName);
               expect(dns.resolve).to.be.calledOnceWith(lookedUp.address, 'PTR');
-              expect(dns.resolve).to.not.be.calledWith(sinon.match.any, 'CNAME');
+              expect(dns.resolve).to.not.be.calledWith(sinon.match.string, 'CNAME');
             });
           });
         });
@@ -169,8 +169,8 @@ describe('GSSAPI', () => {
 
             expect(error.message).to.equal('failed');
             expect(dns.lookup).to.be.calledOnceWith(hostName);
-            expect(dns.resolve).to.not.be.calledWith(sinon.match.any, 'PTR');
-            expect(dns.resolve).to.not.be.calledWith(sinon.match.any, 'CNAME');
+            expect(dns.resolve).to.not.be.calledWith(sinon.match.string, 'PTR');
+            expect(dns.resolve).to.not.be.calledWith(sinon.match.string, 'CNAME');
           });
         });
       });
@@ -183,7 +183,10 @@ describe('GSSAPI', () => {
 
       beforeEach(() => {
         resolveSpy.restore();
-        sinon.stub(dns, 'resolve').withArgs(sinon.match.any, 'CNAME').rejects(new Error('failed'));
+        sinon
+          .stub(dns, 'resolve')
+          .withArgs(sinon.match.string, 'CNAME')
+          .rejects(new Error('failed'));
       });
 
       it('falls back to the provided host name', async () => {
@@ -200,7 +203,7 @@ describe('GSSAPI', () => {
 
         beforeEach(() => {
           resolveSpy.restore();
-          sinon.stub(dns, 'resolve').withArgs(sinon.match.any, 'CNAME').resolves([resolved]);
+          sinon.stub(dns, 'resolve').withArgs(sinon.match.string, 'CNAME').resolves([resolved]);
         });
 
         it('uses the result', async () => {
@@ -218,7 +221,7 @@ describe('GSSAPI', () => {
           resolveSpy.restore();
           sinon
             .stub(dns, 'resolve')
-            .withArgs(sinon.match.any, 'CNAME')
+            .withArgs(sinon.match.string, 'CNAME')
             .resolves([resolved, hostName]);
         });
 
@@ -235,7 +238,7 @@ describe('GSSAPI', () => {
 
       beforeEach(() => {
         resolveSpy.restore();
-        sinon.stub(dns, 'resolve').withArgs(sinon.match.any, 'CNAME').resolves([]);
+        sinon.stub(dns, 'resolve').withArgs(sinon.match.string, 'CNAME').resolves([]);
       });
 
       it('falls back to using the provided host', async () => {
