@@ -1,5 +1,4 @@
 import { saslprep } from '@mongodb-js/saslprep';
-import * as crypto from 'crypto';
 
 import { Binary, ByteUtils, type Document } from '../../bson';
 import {
@@ -157,27 +156,27 @@ async function continueScramConversation(
 
   // Set up start of proof
   const withoutProof = `c=biws,r=${rnonce}`;
-  const saltedPassword = HI(
+  const saltedPassword = await HI(
     processedPassword,
     ByteUtils.fromBase64(salt),
     iterations,
     cryptoMethod
   );
 
-  const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
-  const serverKey = HMAC(cryptoMethod, saltedPassword, 'Server Key');
-  const storedKey = H(cryptoMethod, clientKey);
+  const clientKey = await HMAC(cryptoMethod, saltedPassword, 'Client Key');
+  const serverKey = await HMAC(cryptoMethod, saltedPassword, 'Server Key');
+  const storedKey = await H(cryptoMethod, clientKey);
   const authMessage = [
     clientFirstMessageBare(username, nonce),
     payload.toString('utf8'),
     withoutProof
   ].join(',');
 
-  const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
+  const clientSignature = await HMAC(cryptoMethod, storedKey, authMessage);
   const clientProof = `p=${xor(clientKey, clientSignature)}`;
   const clientFinal = [withoutProof, clientProof].join(',');
 
-  const serverSignature = HMAC(cryptoMethod, serverKey, authMessage);
+  const serverSignature = await HMAC(cryptoMethod, serverKey, authMessage);
   const saslContinueCmd = {
     saslContinue: 1,
     conversationId: response.conversationId,
@@ -187,7 +186,7 @@ async function continueScramConversation(
   const r = await connection.command(ns(`${db}.$cmd`), saslContinueCmd, undefined);
   const parsedResponse = parsePayload(r.payload);
 
-  if (!compareDigest(ByteUtils.fromBase64(parsedResponse.v), serverSignature)) {
+  if (!(await compareDigest(ByteUtils.fromBase64(parsedResponse.v), serverSignature))) {
     throw new MongoRuntimeError('Server returned an invalid signature');
   }
 
@@ -229,19 +228,29 @@ function passwordDigest(username: string, password: string) {
     throw new MongoInvalidArgumentError('Password cannot be empty');
   }
 
-  let md5: crypto.Hash;
+  let nodeCrypto;
   try {
-    md5 = crypto.createHash('md5');
+    // TODO: NODE-7424 - remove dependency on 'crypto' for SCRAM-SHA-1 authentication
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    nodeCrypto = require('crypto');
+  } catch (e) {
+    throw new MongoRuntimeError('global crypto is required for SCRAM-SHA-1 authentication', {
+      cause: e
+    });
+  }
+
+  try {
+    const md5 = nodeCrypto.createHash('md5');
+    md5.update(`${username}:mongo:${password}`, 'utf8');
+    return md5.digest('hex');
   } catch (err) {
-    if (crypto.getFips()) {
+    if (nodeCrypto.getFips()) {
       // This error is (slightly) more helpful than what comes from OpenSSL directly, e.g.
       // 'Error: error:060800C8:digital envelope routines:EVP_DigestInit_ex:disabled for FIPS'
       throw new Error('Auth mechanism SCRAM-SHA-1 is not supported in FIPS mode');
     }
     throw err;
   }
-  md5.update(`${username}:mongo:${password}`, 'utf8');
-  return md5.digest('hex');
 }
 
 // XOR two buffers
@@ -256,12 +265,28 @@ function xor(a: Uint8Array, b: Uint8Array) {
   return ByteUtils.toBase64(ByteUtils.fromNumberArray(res));
 }
 
-function H(method: CryptoMethod, text: Uint8Array): Uint8Array {
-  return crypto.createHash(method).update(text).digest();
+async function H(method: CryptoMethod, text: Uint8Array): Promise<Uint8Array> {
+  const buffer = await crypto.subtle.digest(method === 'sha256' ? 'SHA-256' : 'SHA-1', text);
+  return new Uint8Array(buffer);
 }
 
-function HMAC(method: CryptoMethod, key: Uint8Array, text: Uint8Array | string): Uint8Array {
-  return crypto.createHmac(method, key).update(text).digest();
+async function HMAC(
+  method: CryptoMethod,
+  key: Uint8Array,
+  text: Uint8Array | string
+): Promise<Uint8Array> {
+  const keyBuffer = ByteUtils.toLocalBufferType(key);
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyBuffer,
+    { name: 'HMAC', hash: { name: method === 'sha256' ? 'SHA-256' : 'SHA-1' } },
+    false,
+    ['sign', 'verify']
+  );
+  const textData: Uint8Array = typeof text === 'string' ? new TextEncoder().encode(text) : text;
+  const textBuffer = ByteUtils.toLocalBufferType(textData);
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, textBuffer);
+  return new Uint8Array(signature);
 }
 
 interface HICache {
@@ -280,21 +305,32 @@ const hiLengthMap = {
   sha1: 20
 };
 
-function HI(data: string, salt: Uint8Array, iterations: number, cryptoMethod: CryptoMethod) {
+async function HI(data: string, salt: Uint8Array, iterations: number, cryptoMethod: CryptoMethod) {
   // omit the work if already generated
   const key = [data, ByteUtils.toBase64(salt), iterations].join('_');
   if (_hiCache[key] != null) {
     return _hiCache[key];
   }
 
-  // generate the salt
-  const saltedData = crypto.pbkdf2Sync(
-    data,
-    salt,
-    iterations,
-    hiLengthMap[cryptoMethod],
-    cryptoMethod
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(data),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits']
   );
+  const params = {
+    name: 'PBKDF2',
+    salt: salt,
+    iterations: iterations,
+    hash: { name: cryptoMethod === 'sha256' ? 'SHA-256' : 'SHA-1' }
+  };
+  const derivedBits = await crypto.subtle.deriveBits(
+    params,
+    keyMaterial,
+    hiLengthMap[cryptoMethod] * 8
+  );
+  const saltedData = new Uint8Array(derivedBits);
 
   // cache a copy to speed up the next lookup, but prevent unbounded cache growth
   if (_hiCacheCount >= 200) {
@@ -306,21 +342,25 @@ function HI(data: string, salt: Uint8Array, iterations: number, cryptoMethod: Cr
   return saltedData;
 }
 
-function compareDigest(lhs: Uint8Array, rhs: Uint8Array) {
+async function compareDigest(lhs: Uint8Array, rhs: Uint8Array) {
   if (lhs.length !== rhs.length) {
     return false;
   }
 
-  if (typeof crypto.timingSafeEqual === 'function') {
-    return crypto.timingSafeEqual(lhs, rhs);
-  }
+  // Compare values using a time-constant algorithm to prevent against timing attacks
+  // The approach is called "Double HMAC Verification".  The basic idea is:
+  // 1. Generate a random key
+  // 2. HMAC the random key with both values
+  // 3. Compare the HMACs using an equality check
 
-  let result = 0;
-  for (let i = 0; i < lhs.length; i++) {
-    result |= lhs[i] ^ rhs[i];
-  }
+  const randomKey = crypto.getRandomValues(new Uint8Array(32));
+  const lhsHMAC = await HMAC('sha256', randomKey, lhs);
+  const rhsHMAC = await HMAC('sha256', randomKey, rhs);
+  const lhsHex = ByteUtils.toHex(lhsHMAC);
+  const rhsHex = ByteUtils.toHex(rhsHMAC);
+  const areEqual = lhsHex === rhsHex;
 
-  return result === 0;
+  return areEqual;
 }
 
 export class ScramSHA1 extends ScramSHA {
