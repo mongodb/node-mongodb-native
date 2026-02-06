@@ -186,7 +186,7 @@ async function continueScramConversation(
   const r = await connection.command(ns(`${db}.$cmd`), saslContinueCmd, undefined);
   const parsedResponse = parsePayload(r.payload);
 
-  if (!compareDigest(ByteUtils.fromBase64(parsedResponse.v), serverSignature)) {
+  if (!(await compareDigest(ByteUtils.fromBase64(parsedResponse.v), serverSignature))) {
     throw new MongoRuntimeError('Server returned an invalid signature');
   }
 
@@ -342,17 +342,25 @@ async function HI(data: string, salt: Uint8Array, iterations: number, cryptoMeth
   return saltedData;
 }
 
-function compareDigest(lhs: Uint8Array, rhs: Uint8Array) {
+async function compareDigest(lhs: Uint8Array, rhs: Uint8Array) {
   if (lhs.length !== rhs.length) {
     return false;
   }
 
-  let result = 0;
-  for (let i = 0; i < lhs.length; i++) {
-    result |= lhs[i] ^ rhs[i];
-  }
+  // Compare values using a time-constant algorithm to prevent against timing attacks
+  // The approach is called "Double HMAC Verification".  The basic idea is:
+  // 1. Generate a random key
+  // 2. HMAC the random key with both values
+  // 3. Compare the HMACs using an equality check
 
-  return result === 0;
+  const randomKey = crypto.getRandomValues(new Uint8Array(32));
+  const lhsHMAC = await HMAC('sha256', randomKey, lhs);
+  const rhsHMAC = await HMAC('sha256', randomKey, rhs);
+  const lhsHex = ByteUtils.toHex(lhsHMAC);
+  const rhsHex = ByteUtils.toHex(rhsHMAC);
+  const areEqual = lhsHex === rhsHex;
+
+  return areEqual;
 }
 
 export class ScramSHA1 extends ScramSHA {
