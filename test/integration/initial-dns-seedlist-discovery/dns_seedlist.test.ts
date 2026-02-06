@@ -31,23 +31,21 @@ describe('DNS timeout errors', () => {
     await client.close();
   });
 
-  const restoreDNS = api => async args => {
-    sinon.restore();
-    return await dns.promises.resolve(args, api);
+  const restoreDNS = rrtype => async hostname => {
+    stub.restore();
+    return await dns.promises.resolve(hostname, rrtype);
   };
 
   describe('when SRV record look up times out', () => {
     beforeEach(() => {
-      stub = sinon
-        .stub(dns.promises, 'resolve')
+      stub = sinon.stub(dns.promises, 'resolve').callThrough();
+
+      stub
+        .withArgs(sinon.match.string, 'SRV')
         .onFirstCall()
         .rejects(new DNSTimeoutError())
         .onSecondCall()
         .callsFake(restoreDNS('SRV'));
-    });
-
-    afterEach(async function () {
-      sinon.restore();
     });
 
     it('retries timeout error', metadata, async () => {
@@ -58,16 +56,14 @@ describe('DNS timeout errors', () => {
 
   describe('when TXT record look up times out', () => {
     beforeEach(() => {
-      stub = sinon
-        .stub(dns.promises, 'resolve')
+      stub = sinon.stub(dns.promises, 'resolve').callThrough();
+
+      stub
+        .withArgs(sinon.match.string, 'TXT')
         .onFirstCall()
         .rejects(new DNSTimeoutError())
         .onSecondCall()
         .callsFake(restoreDNS('TXT'));
-    });
-
-    afterEach(async function () {
-      sinon.restore();
     });
 
     it('retries timeout error', metadata, async () => {
@@ -78,16 +74,14 @@ describe('DNS timeout errors', () => {
 
   describe('when SRV record look up times out twice', () => {
     beforeEach(() => {
-      stub = sinon
-        .stub(dns.promises, 'resolve')
+      stub = sinon.stub(dns.promises, 'resolve').callThrough();
+
+      stub
+        .withArgs(sinon.match.string, 'SRV')
         .onFirstCall()
         .rejects(new DNSTimeoutError())
         .onSecondCall()
         .rejects(new DNSTimeoutError());
-    });
-
-    afterEach(async function () {
-      sinon.restore();
     });
 
     it('throws timeout error', metadata, async () => {
@@ -99,16 +93,14 @@ describe('DNS timeout errors', () => {
 
   describe('when TXT record look up times out twice', () => {
     beforeEach(() => {
-      stub = sinon
-        .stub(dns.promises, 'resolve')
+      stub = sinon.stub(dns.promises, 'resolve').callThrough();
+
+      stub
+        .withArgs(sinon.match.string, 'TXT')
         .onFirstCall()
         .rejects(new DNSTimeoutError())
         .onSecondCall()
         .rejects(new DNSTimeoutError());
-    });
-
-    afterEach(async function () {
-      sinon.restore();
     });
 
     it('throws timeout error', metadata, async () => {
@@ -120,16 +112,14 @@ describe('DNS timeout errors', () => {
 
   describe('when SRV record look up throws a non-timeout error', () => {
     beforeEach(() => {
-      stub = sinon
-        .stub(dns.promises, 'resolve')
+      stub = sinon.stub(dns.promises, 'resolve').callThrough();
+
+      stub
+        .withArgs(sinon.match.string, 'SRV')
         .onFirstCall()
         .rejects(new DNSSomethingError())
         .onSecondCall()
         .callsFake(restoreDNS('SRV'));
-    });
-
-    afterEach(async function () {
-      sinon.restore();
     });
 
     it('throws that error', metadata, async () => {
@@ -141,16 +131,14 @@ describe('DNS timeout errors', () => {
 
   describe('when TXT record look up throws a non-timeout error', () => {
     beforeEach(() => {
-      stub = sinon
-        .stub(dns.promises, 'resolve')
+      stub = sinon.stub(dns.promises, 'resolve').callThrough();
+
+      stub
+        .withArgs(sinon.match.string, 'TXT')
         .onFirstCall()
         .rejects(new DNSSomethingError())
         .onSecondCall()
         .callsFake(restoreDNS('TXT'));
-    });
-
-    afterEach(async function () {
-      sinon.restore();
     });
 
     it('throws that error', metadata, async () => {

@@ -41,17 +41,17 @@ const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSe
 const LB_DIRECT_CONNECTION_ERROR =
   'loadBalanced option not supported when directConnection is provided';
 
-function retryDNSTimeoutFor(api: 'SRV'): (a: string) => Promise<dns.SrvRecord[]>;
-function retryDNSTimeoutFor(api: 'TXT'): (a: string) => Promise<string[][]>;
+function retryDNSTimeoutFor(rrtype: 'SRV'): (a: string) => Promise<dns.SrvRecord[]>;
+function retryDNSTimeoutFor(rrtype: 'TXT'): (a: string) => Promise<string[][]>;
 function retryDNSTimeoutFor(
-  api: 'SRV' | 'TXT'
+  rrtype: 'SRV' | 'TXT'
 ): (a: string) => Promise<dns.SrvRecord[] | string[][]> {
   return async function dnsReqRetryTimeout(lookupAddress: string) {
     try {
-      return (await dns.promises.resolve(lookupAddress, api)) as dns.SrvRecord[] | string[][];
+      return (await dns.promises.resolve(lookupAddress, rrtype)) as dns.SrvRecord[] | string[][];
     } catch (firstDNSError) {
       if (firstDNSError.code === dns.TIMEOUT) {
-        return (await dns.promises.resolve(lookupAddress, api)) as dns.SrvRecord[] | string[][];
+        return (await dns.promises.resolve(lookupAddress, rrtype)) as dns.SrvRecord[] | string[][];
       } else {
         throw firstDNSError;
       }
