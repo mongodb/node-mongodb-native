@@ -282,7 +282,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       initialRecords ??= mockRecords;
       // first call is for the driver initial connection
       // second call will check the poller
-      resolveSrvStub = sinon.stub(dns.promises, 'resolveSrv').callsFake(async address => {
+      resolveSrvStub = sinon.stub(dns.promises, 'resolve').callsFake(async address => {
         expect(address).to.equal(`_${srvServiceName}._tcp.test.mock.test.build.10gen.cc`);
         if (initialDNSLookup) {
           initialDNSLookup = false;
