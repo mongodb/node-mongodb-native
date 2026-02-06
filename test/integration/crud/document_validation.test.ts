@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../../src';
+import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../mongodb';
 import { setupDatabase } from '../shared';
 
 describe('Document Validation', function () {

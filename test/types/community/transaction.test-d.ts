@@ -1,6 +1,6 @@
 import { expectType } from 'tsd';
 
-import { type ClientSession, type InsertOneResult, MongoClient, ReadConcern } from '../../../src';
+import { type ClientSession, type InsertOneResult, MongoClient, ReadConcern } from '../../mongodb';
 
 // TODO(NODE-3345): Improve these tests to use expect assertions more
 

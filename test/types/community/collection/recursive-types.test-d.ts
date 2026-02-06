@@ -1,6 +1,6 @@
 import { expectAssignable, expectError, expectNotAssignable, expectNotType } from 'tsd';
 
-import type { Collection, StrictFilter, StrictUpdateFilter, UpdateFilter } from '../../../../src';
+import type { Collection, StrictFilter, StrictUpdateFilter, UpdateFilter } from '../../../mongodb';
 
 /**
  * mutually recursive types are not supported and will not get type safety

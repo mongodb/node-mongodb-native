@@ -5,17 +5,17 @@ import { clearTimeout, setTimeout } from 'timers';
 import { inspect } from 'util';
 
 import {
+  CMAP_EVENTS,
   type Connection,
+  ConnectionPool,
   type ConnectionPoolOptions,
   type HostAddress,
   type MongoClient,
   type MongoClientOptions,
-  type Server
-} from '../../src';
-import { ConnectionPool } from '../../src/cmap/connection_pool';
-import { CMAP_EVENTS } from '../../src/constants';
-import { TimeoutContext } from '../../src/timeout';
-import { shuffle } from '../../src/utils';
+  type Server,
+  shuffle,
+  TimeoutContext
+} from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { type FailCommandFailPoint, sleep } from './utils';
 

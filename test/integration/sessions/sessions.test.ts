@@ -2,11 +2,11 @@ import { expect } from 'chai';
 
 import {
   type CommandStartedEvent,
-  type CommandSucceededEvent
-} from '../../../src/cmap/command_monitoring_events';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { MongoServerError } from '../../../src/error';
-import { type MongoClient } from '../../../src/mongo_client';
+  type CommandSucceededEvent,
+  LEGACY_HELLO_COMMAND,
+  type MongoClient,
+  MongoServerError
+} from '../../mongodb';
 import type { TestConfiguration } from '../../tools/runner/config';
 import { setupDatabase } from '../shared';
 

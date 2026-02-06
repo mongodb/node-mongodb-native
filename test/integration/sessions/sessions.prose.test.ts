@@ -1,10 +1,13 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { type CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
-import { type Collection } from '../../../src/collection';
-import { MongoDriverError, MongoInvalidArgumentError } from '../../../src/error';
-import { MongoClient } from '../../../src/mongo_client';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  MongoClient,
+  MongoDriverError,
+  MongoInvalidArgumentError
+} from '../../mongodb';
 import { configureMongocryptdSpawnHooks, sleep } from '../../tools/utils';
 
 describe('Sessions Prose Tests', () => {

@@ -18,7 +18,7 @@ import {
   ServerApiVersion,
   ServerType,
   TopologyType
-} from '../../src';
+} from '../mongodb';
 
 const num: number = Math.random();
 

@@ -3,9 +3,12 @@ import { setTimeout } from 'node:timers/promises';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { type MongoClient, type ServerHeartbeatSucceededEvent } from '../../../src';
-import { Connection } from '../../../src/cmap/connection';
-import { promiseWithResolvers } from '../../../src/utils';
+import {
+  Connection,
+  type MongoClient,
+  promiseWithResolvers,
+  type ServerHeartbeatSucceededEvent
+} from '../../mongodb';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 

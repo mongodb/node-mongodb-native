@@ -1,13 +1,12 @@
 import { Long, ObjectId } from 'bson';
 import { expect } from 'chai';
 
-import { MongoRuntimeError } from '../../../src/error';
 import {
   compareTopologyVersion,
+  MongoRuntimeError,
   ServerDescription,
   type TopologyVersion
-} from '../../../src/sdam/server_description';
-
+} from '../../mongodb';
 describe('ServerDescription', function () {
   describe('constructor()', () => {
     it('should throw if given a null address', () => {

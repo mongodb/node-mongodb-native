@@ -1,7 +1,7 @@
 'use strict';
 
 const { Double, Long } = require('bson');
-const { StreamDescription } = require('../../../src/cmap/stream_description');
+const { StreamDescription } = require('../../mongodb');
 const { expect } = require('chai');
 
 describe('StreamDescription - unit/cmap', function () {

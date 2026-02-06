@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const { List } = require('../../../src/utils');
+const { List } = require('../../mongodb');
 const { createHistogram } = require('perf_hooks');
 const { process } = require('process');
 

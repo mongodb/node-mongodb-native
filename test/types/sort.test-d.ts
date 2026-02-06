@@ -6,7 +6,7 @@ import {
   type MongoClient,
   ObjectId,
   type Sort
-} from '../../src';
+} from '../mongodb';
 
 const sortFieldName: Sort = 'a';
 const sortFieldNameObject: Sort = { a: 1, b: -1 };

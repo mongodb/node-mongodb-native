@@ -10,7 +10,7 @@ import type {
   KMSProviders,
   RangeOptions
 } from '../..';
-import { Binary, type ClientEncryptionDataKeyProvider } from '../../src';
+import { Binary, type ClientEncryptionDataKeyProvider } from '../mongodb';
 
 type RequiredCreateEncryptedCollectionSettings = Parameters<
   ClientEncryption['createEncryptedCollection']

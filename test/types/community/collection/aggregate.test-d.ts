@@ -1,6 +1,6 @@
 import { expectNotType, expectType } from 'tsd';
 
-import { type AggregationCursor, type Document, MongoClient } from '../../../../src';
+import { type AggregationCursor, type Document, MongoClient } from '../../../mongodb';
 
 // collection.aggregate tests
 const client = new MongoClient('');

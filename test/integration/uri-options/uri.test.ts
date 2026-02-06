@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { Topology } from '../../../src/sdam/topology';
+import { Topology } from '../../mongodb';
 
 describe('URI', function () {
   let client;
