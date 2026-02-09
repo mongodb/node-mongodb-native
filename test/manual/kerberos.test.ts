@@ -16,7 +16,7 @@ async function verifyKerberosAuthentication(client) {
   expect(docs).to.have.nested.property('[0].kerberos', true);
 }
 
-describe.only('Kerberos', function () {
+describe('Kerberos', function () {
   let resolveStub;
   let lookupStub;
   let client;
