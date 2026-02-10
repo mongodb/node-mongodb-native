@@ -9,4 +9,7 @@ source .evergreen/setup-mongodb-aws-auth-tests.sh
 # load node.js environment
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
+# clear AWS_PROFILE, so it doesn't interfere with env-creds
+unset AWS_PROFILE
+
 npm run check:aws
