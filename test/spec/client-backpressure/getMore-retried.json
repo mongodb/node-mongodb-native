@@ -1,0 +1,291 @@
+{
+  "description": "getMore-retried-backpressure",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandFailedEvent",
+          "commandSucceededEvent"
+        ]
+      }
+    },
+    {
+      "client": {
+        "id": "failPointClient"
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll",
+        "database": "db",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "default",
+      "collectionName": "default",
+      "documents": [
+        {
+          "a": 1
+        },
+        {
+          "a": 2
+        },
+        {
+          "a": 3
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "getMores are retried",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 3
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorLabels": [
+                  "RetryableError",
+                  "SystemOverloadedError"
+                ],
+                "errorCode": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "coll",
+          "arguments": {
+            "batchSize": 2,
+            "filter": {},
+            "sort": {
+              "a": 1
+            }
+          },
+          "expectResult": [
+            {
+              "a": 1
+            },
+            {
+              "a": 2
+            },
+            {
+              "a": 3
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "getMore"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "getMores are retried maxAttempts=5 times",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "alwaysOn",
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorLabels": [
+                  "RetryableError",
+                  "SystemOverloadedError"
+                ],
+                "errorCode": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "batchSize": 2,
+            "filter": {}
+          },
+          "object": "coll",
+          "expectError": {
+            "isError": true,
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "killCursors"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "killCursors"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
