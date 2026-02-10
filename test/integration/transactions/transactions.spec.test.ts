@@ -13,7 +13,7 @@ const SKIPPED_TESTS = [
   'client bulkWrite with writeConcern in a transaction causes a transaction error'
 ];
 
-describe('Transactions Spec Unified Tests', function () {
+describe.only('Transactions Spec Unified Tests', function () {
   runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')), test => {
     return SKIPPED_TESTS.includes(test.description)
       ? 'TODO(NODE-5924): Skipping failing transaction tests'

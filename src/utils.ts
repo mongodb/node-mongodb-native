@@ -1419,3 +1419,23 @@ export async function abortable<T>(
     abortListener?.[kDispose]();
   }
 }
+
+// Note for Sergey: overkill, I know - but sometimes you gotta over-engineer a bit for fun and revert before opening for review ¯\_(ツ)_/¯
+// feel free to remove this class. Or leave it. If you keep it, we should use this for the convenient transactions' API as well.
+export class ExponentialBackoffProvider {
+  constructor(
+    public readonly maxBackoff: number,
+    public readonly baseBackoff: number,
+    public readonly backoffIncreaseRate: number,
+    public iteration = 0
+  ) {}
+
+  getNextBackoffDuration(): number {
+    const iteration = this.iteration;
+    this.iteration += 1;
+    return (
+      Math.random() *
+      Math.min(this.maxBackoff, this.baseBackoff * this.backoffIncreaseRate ** iteration)
+    );
+  }
+}
