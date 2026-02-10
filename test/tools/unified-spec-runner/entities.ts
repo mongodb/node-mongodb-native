@@ -265,6 +265,17 @@ export class UnifiedMongoClient extends MongoClient {
       };
     }
 
+    // Test descriptions use `appName` and `appname` interchangeably
+    if (
+      description.uriOptions &&
+      (description.uriOptions.appName != null || description.uriOptions.appname != null)
+    ) {
+      options.appName = description.uriOptions.appName ?? description.uriOptions.appname;
+    } else {
+      const appNameNonce = new Date().getTime().toString();
+      options.appName = `unified-spec-runner-${appNameNonce}`;
+    }
+
     super(uri, options);
     this.observedEventEmitter.on('error', () => null);
     this.logCollector = logCollector;
