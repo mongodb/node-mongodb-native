@@ -5,9 +5,9 @@ import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AutomatedCallbackWorkflow } from './mongodb_oidc/automated_callback_workflow';
-import { callback as azureCallback } from './mongodb_oidc/azure_machine_workflow';
-import { gcpCallback as gcpCallback } from './mongodb_oidc/gcp_machine_workflow';
-import { k8sCallback as k8sCallback } from './mongodb_oidc/k8s_machine_workflow';
+import { azureCallback } from './mongodb_oidc/azure_machine_workflow';
+import { gcpCallback } from './mongodb_oidc/gcp_machine_workflow';
+import { k8sCallback } from './mongodb_oidc/k8s_machine_workflow';
 import { TokenCache } from './mongodb_oidc/token_cache';
 import { tokenMachineCallback as testCallback } from './mongodb_oidc/token_machine_workflow';
 

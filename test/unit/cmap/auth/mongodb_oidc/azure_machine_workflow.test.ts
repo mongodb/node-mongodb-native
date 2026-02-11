@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { callback, OIDC_VERSION, type OIDCCallbackParams } from '../../../../mongodb';
+import { azureCallback, OIDC_VERSION, type OIDCCallbackParams } from '../../../../mongodb';
 
 describe('Azure machine workflow', function () {
   describe('#callback', function () {
@@ -12,7 +12,7 @@ describe('Azure machine workflow', function () {
       };
 
       it('throws an error', async function () {
-        const error = await callback(params).catch(error => error);
+        const error = await azureCallback(params).catch(error => error);
         expect(error.message).to.include('TOKEN_RESOURCE');
       });
     });
