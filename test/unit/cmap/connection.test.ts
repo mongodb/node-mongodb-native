@@ -5,18 +5,21 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers/promises';
 
-import { connect } from '../../../src/cmap/connect';
-import { Connection, CryptoConnection, SizedMessageTransform } from '../../../src/cmap/connection';
-import { MongoNetworkTimeoutError, MongoRuntimeError } from '../../../src/error';
-import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
 import {
+  connect,
+  Connection,
+  CryptoConnection,
   HostAddress,
   isHello,
+  MongoClientAuthProviders,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
+  MongoNetworkTimeoutError,
+  MongoRuntimeError,
   ns,
-  promiseWithResolvers
-} from '../../../src/utils';
+  promiseWithResolvers,
+  SizedMessageTransform
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 
 const connectionOptionsDefaults = {

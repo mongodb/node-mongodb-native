@@ -2,8 +2,7 @@
 
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
-const { isHello } = require('../../../src/utils');
-const { MongoClient } = require('../../../src/mongo_client');
+const { isHello, MongoClient } = require('../../mongodb');
 
 describe('Client (unit)', function () {
   let server, client;

@@ -9,11 +9,10 @@ import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
   getFAASEnv,
   LimitedSizeDocument,
-  makeClientMetadata
-} from '../../../../src/cmap/handshake/client_metadata';
-import { MongoInvalidArgumentError } from '../../../../src/error';
+  makeClientMetadata,
+  MongoInvalidArgumentError
+} from '../../../mongodb';
 import { runtime } from '../../../tools/utils';
-
 describe('client metadata module', () => {
   afterEach(() => sinon.restore());
 

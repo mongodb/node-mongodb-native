@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Double, Int32, Long } from '../../../../src';
+import { Double, Int32, Long } from '../../../mongodb';
 import { assert as test, setupDatabase } from '../../shared';
 
 describe('Promote Values', function () {

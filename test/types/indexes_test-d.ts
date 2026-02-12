@@ -5,7 +5,7 @@ import {
   type IndexDescriptionInfo,
   type IndexInformationOptions,
   MongoClient
-} from '../../src';
+} from '../mongodb';
 
 const client = new MongoClient('');
 const db = client.db('test');

@@ -15,7 +15,7 @@ import {
   type UpdateFilter,
   type UUID,
   type WithoutId
-} from '../../src';
+} from '../mongodb';
 
 declare const client: MongoClient;
 type Book = { title: string; released: Date };

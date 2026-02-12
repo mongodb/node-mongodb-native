@@ -2,10 +2,16 @@ import { BSON, Long } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { MongoRuntimeError } from '../../src/error';
-import { MongoClient } from '../../src/mongo_client';
-import { applySession, ClientSession, ServerSession, ServerSessionPool } from '../../src/sessions';
-import { isHello, processTimeMS } from '../../src/utils';
+import {
+  applySession,
+  ClientSession,
+  isHello,
+  MongoClient,
+  MongoRuntimeError,
+  processTimeMS,
+  ServerSession,
+  ServerSessionPool
+} from '../mongodb';
 import { genClusterTime } from '../tools/common';
 import * as mock from '../tools/mongodb-mock/index';
 

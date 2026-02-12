@@ -20,7 +20,7 @@ import {
   type WithId,
   type WriteConcern,
   type WriteConcernSettings
-} from '../../src';
+} from '../mongodb';
 
 // We wish to keep these APIs but continue to ensure they are marked as deprecated.
 expectDeprecated(Collection.prototype.count);

@@ -6,7 +6,7 @@ import type {
   ListCollectionsOptions,
   ListIndexesOptions,
   WriteConcern
-} from '../../src';
+} from '../mongodb';
 
 expectNotAssignable<FindOptions>({ writeConcern: { w: 0 } });
 expectNotAssignable<ListCollectionsOptions>({ writeConcern: { w: 0 } });

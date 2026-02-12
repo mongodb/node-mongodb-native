@@ -8,14 +8,16 @@ import * as sinon from 'sinon';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import * as tls from 'tls';
 
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { Collection } from '../../../src/collection';
-import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
-import { Db } from '../../../src/db';
-import { MongoClient } from '../../../src/mongo_client';
-import { type FindOptions } from '../../../src/operations/find';
-import { CSOTTimeoutContext } from '../../../src/timeout';
-import { squashError } from '../../../src/utils';
+import {
+  Collection,
+  CSOTTimeoutContext,
+  CursorTimeoutContext,
+  Db,
+  type FindOptions,
+  MongoClient,
+  squashError,
+  StateMachine
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('StateMachine', function () {

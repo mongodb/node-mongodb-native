@@ -1,4 +1,4 @@
-import type { Double, Int32 } from '../../src';
+import type { Double, Int32 } from '../mongodb';
 
 export type MediaType = 'movie' | 'tv' | 'web series';
 

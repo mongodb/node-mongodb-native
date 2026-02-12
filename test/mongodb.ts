@@ -1,26 +1,5 @@
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function printExports() {
-  function* walk(root: string): Generator<string> {
-    const directoryContents = fs.readdirSync(root);
-    for (const filepath of directoryContents) {
-      const fullPath = path.join(root, filepath);
-      const stat = fs.statSync(fullPath);
-      if (stat.isDirectory()) {
-        yield* walk(fullPath);
-      } else if (stat.isFile()) {
-        yield fullPath;
-      }
-    }
-  }
-  const driverSourceFiles = Array.from(walk(path.resolve(__dirname, '..', 'src')));
-
-  for (const srcFile of driverSourceFiles) {
-    console.log(`export * from '${path.relative(__dirname, srcFile)}';`);
-  }
-}
+// As the centralized import for all src code for tests, we intentionally import from `src` in this file.
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 
 export * from '../src/admin';
 export * from '../src/bson';
@@ -39,6 +18,7 @@ export * from '../src/client-side-encryption/providers/index';
 export * from '../src/client-side-encryption/state_machine';
 export * from '../src/cmap/auth/auth_provider';
 export * from '../src/cmap/auth/aws_temporary_credentials';
+export * from '../src/cmap/auth/aws4';
 export * from '../src/cmap/auth/gssapi';
 export * from '../src/cmap/auth/mongo_credentials';
 export * from '../src/cmap/auth/mongodb_aws';
@@ -46,6 +26,12 @@ export * from '../src/cmap/auth/mongodb_oidc';
 export * from '../src/cmap/auth/mongodb_oidc/automated_callback_workflow';
 export * from '../src/cmap/auth/mongodb_oidc/azure_machine_workflow';
 export * from '../src/cmap/auth/mongodb_oidc/callback_workflow';
+export * from '../src/cmap/auth/mongodb_oidc/command_builders';
+export * from '../src/cmap/auth/mongodb_oidc/gcp_machine_workflow';
+export * from '../src/cmap/auth/mongodb_oidc/human_callback_workflow';
+export * from '../src/cmap/auth/mongodb_oidc/k8s_machine_workflow';
+export * from '../src/cmap/auth/mongodb_oidc/token_cache';
+export * from '../src/cmap/auth/mongodb_oidc/token_machine_workflow';
 export * from '../src/cmap/auth/plain';
 export * from '../src/cmap/auth/providers';
 export * from '../src/cmap/auth/scram';
@@ -62,6 +48,7 @@ export * from '../src/cmap/metrics';
 export * from '../src/cmap/stream_description';
 export * from '../src/cmap/wire_protocol/compression';
 export * from '../src/cmap/wire_protocol/constants';
+export * from '../src/cmap/wire_protocol/on_data';
 export * from '../src/cmap/wire_protocol/on_demand/document';
 export * from '../src/cmap/wire_protocol/responses';
 export * from '../src/cmap/wire_protocol/shared';
@@ -74,6 +61,12 @@ export * from '../src/cursor/change_stream_cursor';
 export * from '../src/cursor/find_cursor';
 export * from '../src/cursor/list_collections_cursor';
 export * from '../src/cursor/list_indexes_cursor';
+export * from '../src/cursor/client_bulk_write_cursor';
+export * from '../src/cursor/explainable_cursor';
+export * from '../src/cursor/find_cursor';
+export * from '../src/cursor/list_collections_cursor';
+export * from '../src/cursor/list_indexes_cursor';
+export * from '../src/cursor/list_search_indexes_cursor';
 export * from '../src/cursor/run_command_cursor';
 export * from '../src/db';
 export * from '../src/deps';
@@ -89,6 +82,14 @@ export * from '../src/mongo_types';
 export * from '../src/operations/aggregate';
 export * from '../src/operations/client_bulk_write/command_builder';
 export * from '../src/operations/client_bulk_write/common';
+export * from '../src/mongo_client_auth_providers';
+export * from '../src/mongo_logger';
+export * from '../src/mongo_types';
+export * from '../src/operations/aggregate';
+export * from '../src/operations/client_bulk_write/client_bulk_write';
+export * from '../src/operations/client_bulk_write/command_builder';
+export * from '../src/operations/client_bulk_write/common';
+export * from '../src/operations/client_bulk_write/executor';
 export * from '../src/operations/client_bulk_write/results_merger';
 export * from '../src/operations/command';
 export * from '../src/operations/count';
@@ -96,6 +97,7 @@ export * from '../src/operations/create_collection';
 export * from '../src/operations/delete';
 export * from '../src/operations/distinct';
 export * from '../src/operations/drop';
+export * from '../src/operations/end_sessions';
 export * from '../src/operations/estimated_document_count';
 export * from '../src/operations/execute_operation';
 export * from '../src/operations/find';
@@ -120,12 +122,14 @@ export * from '../src/operations/update';
 export * from '../src/operations/validate_collection';
 export * from '../src/read_concern';
 export * from '../src/read_preference';
+export * from '../src/runtime_adapters';
 export * from '../src/sdam/common';
 export * from '../src/sdam/events';
 export * from '../src/sdam/monitor';
 export * from '../src/sdam/server';
 export * from '../src/sdam/server_description';
 export * from '../src/sdam/server_selection';
+export * from '../src/sdam/server_selection_events';
 export * from '../src/sdam/srv_polling';
 export * from '../src/sdam/topology';
 export * from '../src/sdam/topology_description';

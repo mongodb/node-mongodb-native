@@ -11,7 +11,7 @@ import {
   type MongoClient,
   MongoDriverError,
   MongoInvalidArgumentError
-} from '../../../src';
+} from '../../mongodb';
 import { assert as test } from '../shared';
 
 const MAX_BSON_SIZE = 16777216;
@@ -863,7 +863,7 @@ describe('Bulk', function () {
       try {
         batch.insert({ string: hugeString });
         test.ok(false);
-      } catch (err) {} // eslint-disable-line
+      } catch (err) { } // eslint-disable-line
     }
   });
 

@@ -3,19 +3,19 @@ import * as http from 'http';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { MongoCryptAzureKMSRequestError } from '../../../../src/client-side-encryption/errors';
+// Intentionally import from src, because we need to stub the `get()` function.
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as utils from '../../../../src/utils';
 import {
+  AWSSDKCredentialProvider,
+  fetchAzureKMSToken,
   isEmptyCredentials,
   type KMSProviders,
-  refreshKMSCredentials
-} from '../../../../src/client-side-encryption/providers';
-import {
-  fetchAzureKMSToken,
+  MongoCryptAzureKMSRequestError,
+  MongoNetworkTimeoutError,
+  refreshKMSCredentials,
   tokenCache
-} from '../../../../src/client-side-encryption/providers/azure';
-import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
-import { MongoNetworkTimeoutError } from '../../../../src/error';
-import * as utils from '../../../../src/utils';
+} from '../../../mongodb';
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;

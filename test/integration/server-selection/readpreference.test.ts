@@ -1,7 +1,11 @@
 import { expect } from 'chai';
 
-import { type CommandStartedEvent, type MongoClient, ReadPreference } from '../../../src';
-import { Topology } from '../../../src/sdam/topology';
+import {
+  type CommandStartedEvent,
+  type MongoClient,
+  ReadPreference,
+  Topology
+} from '../../mongodb';
 import { assert as test, filterForCommands, setupDatabase } from '../shared';
 
 describe('ReadPreference', function () {

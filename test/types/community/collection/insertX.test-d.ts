@@ -1,6 +1,6 @@
 import { expectError, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
-import { MongoClient, ObjectId, type OptionalId } from '../../../../src';
+import { MongoClient, ObjectId, type OptionalId } from '../../../mongodb';
 import type { PropExists } from '../../utility_types';
 
 // test collection.insertX functions

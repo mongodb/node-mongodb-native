@@ -35,20 +35,21 @@ import {
   type MongoCredentials,
   ReadConcern,
   ReadPreference,
+  SENSITIVE_COMMANDS,
   type ServerClosedEvent,
   type ServerDescriptionChangedEvent,
   type ServerHeartbeatFailedEvent,
   type ServerHeartbeatStartedEvent,
   type ServerHeartbeatSucceededEvent,
   type ServerOpeningEvent,
+  Timeout,
+  TimeoutError,
   type TopologyClosedEvent,
   type TopologyDescription,
   type TopologyDescriptionChangedEvent,
   type TopologyOpeningEvent,
   WriteConcern
-} from '../../../src';
-import { SENSITIVE_COMMANDS } from '../../../src/cmap/command_monitoring_events';
-import { Timeout, TimeoutError } from '../../../src/timeout';
+} from '../../mongodb';
 import { getEncryptExtraOptions, getEnvironmentalOptions } from '../../tools/utils';
 import { AlpineTestConfiguration, type TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';

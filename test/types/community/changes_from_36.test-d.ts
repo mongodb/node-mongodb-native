@@ -6,7 +6,7 @@ import {
   type MongoClientOptions,
   type ReadPreference,
   type ReadPreferenceMode
-} from '../../../src';
+} from '../../mongodb';
 import type { PropExists } from '../utility_types';
 
 type MongoDBImport = typeof import('../../../src');

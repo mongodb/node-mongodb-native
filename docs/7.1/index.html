@@ -1,0 +1,297 @@
+<!DOCTYPE html><html class="default" lang="en"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>mongodb</title><meta name="description" content="Documentation for mongodb"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-search"></use></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div><div class="field"><div id="tsd-toolbar-links"></div></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">mongodb</a></div><div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h2>mongodb</h2></div><div class="tsd-panel tsd-typography"><a id="md:mongodb-nodejs-driver" class="tsd-anchor"></a><h1 class="tsd-anchor-link">MongoDB Node.js Driver<a href="#md:mongodb-nodejs-driver" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1><p>The official <a href="https://www.mongodb.com/" target="_blank" class="external">MongoDB</a> driver for Node.js.</p>
+<p><strong>Upgrading to version 7? Take a look at our <a href="https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md" target="_blank" class="external">upgrade guide here</a>!</strong></p>
+<a id="md:quick-links" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Quick Links<a href="#md:quick-links" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><table>
+<thead>
+<tr>
+<th>Site</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Documentation</td>
+<td><a href="https://www.mongodb.com/docs/drivers/node" target="_blank" class="external">www.mongodb.com/docs/drivers/node</a></td>
+</tr>
+<tr>
+<td>API Docs</td>
+<td><a href="https://mongodb.github.io/node-mongodb-native" target="_blank" class="external">mongodb.github.io/node-mongodb-native</a></td>
+</tr>
+<tr>
+<td><code>npm</code> package</td>
+<td><a href="https://www.npmjs.com/package/mongodb" target="_blank" class="external">www.npmjs.com/package/mongodb</a></td>
+</tr>
+<tr>
+<td>MongoDB</td>
+<td><a href="https://www.mongodb.com" target="_blank" class="external">www.mongodb.com</a></td>
+</tr>
+<tr>
+<td>MongoDB University</td>
+<td><a href="https://learn.mongodb.com/catalog?labels=%5B%22Language%22%5D&amp;values=%5B%22Node.js%22%5D" target="_blank" class="external">learn.mongodb.com</a></td>
+</tr>
+<tr>
+<td>MongoDB Developer Center</td>
+<td><a href="https://www.mongodb.com/developer/languages/javascript/" target="_blank" class="external">www.mongodb.com/developer</a></td>
+</tr>
+<tr>
+<td>Stack Overflow</td>
+<td><a href="https://stackoverflow.com/search?q=%28%5Btypescript%5D+or+%5Bjavascript%5D+or+%5Bnode.js%5D%29+and+%5Bmongodb%5D" target="_blank" class="external">stackoverflow.com</a></td>
+</tr>
+<tr>
+<td>Source Code</td>
+<td><a href="https://github.com/mongodb/node-mongodb-native" target="_blank" class="external">github.com/mongodb/node-mongodb-native</a></td>
+</tr>
+<tr>
+<td>Upgrade to v7</td>
+<td><a href="https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_7.0.0.md" target="_blank" class="external">etc/notes/CHANGES_7.0.0.md</a></td>
+</tr>
+<tr>
+<td>Contributing</td>
+<td><a href="https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md" target="_blank" class="external">CONTRIBUTING.md</a></td>
+</tr>
+<tr>
+<td>Changelog</td>
+<td><a href="https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md" target="_blank" class="external">HISTORY.md</a></td>
+</tr>
+</tbody>
+</table>
+<a id="md:release-integrity" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Release Integrity<a href="#md:release-integrity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Releases are created automatically and signed using the <a href="https://pgp.mongodb.com/node-driver.asc" target="_blank" class="external">Node team's GPG key</a>. This applies to the git tag as well as all release packages provided as part of a GitHub release. To verify the provided packages, download the key and import it using gpg:</p>
+<pre><code class="shell"><span class="hl-0">gpg</span><span class="hl-1"> </span><span class="hl-2">--import</span><span class="hl-1"> </span><span class="hl-3">node-driver.asc</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The GitHub release contains a detached signature file for the NPM package (named
+<code>mongodb-X.Y.Z.tgz.sig</code>).</p>
+<p>The following command returns the link npm package.</p>
+<pre><code class="shell"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-3">view</span><span class="hl-1"> </span><span class="hl-3">mongodb@vX.Y.Z</span><span class="hl-1"> </span><span class="hl-3">dist.tarball</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Using the result of the above command, a <code>curl</code> command can return the official npm package for the release.</p>
+<p>To verify the integrity of the downloaded package, run the following command:</p>
+<pre><code class="shell"><span class="hl-0">gpg</span><span class="hl-1"> </span><span class="hl-2">--verify</span><span class="hl-1"> </span><span class="hl-3">mongodb-X.Y.Z.tgz.sig</span><span class="hl-1"> </span><span class="hl-3">mongodb-X.Y.Z.tgz</span>
+</code><button type="button">Copy</button></pre>
+
+<blockquote>
+<p>[!Note]
+No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.</p>
+</blockquote>
+<p>The MongoDB Node.js driver follows <a href="https://semver.org/" target="_blank" class="external">semantic versioning</a> for its releases.</p>
+<a id="md:bugs--feature-requests" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Bugs / Feature Requests<a href="#md:bugs--feature-requests" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Think you’ve found a bug? Want to see a new feature in <code>node-mongodb-native</code>? Please open a
+case in our issue management tool, JIRA:</p>
+<ul>
+<li>Create an account and login <a href="https://jira.mongodb.org" target="_blank" class="external">jira.mongodb.org</a>.</li>
+<li>Navigate to the NODE project <a href="https://jira.mongodb.org/browse/NODE" target="_blank" class="external">jira.mongodb.org/browse/NODE</a>.</li>
+<li>Click <strong>Create Issue</strong> - Please provide as much information as possible about the issue type and how to reproduce it.</li>
+</ul>
+<p>Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the
+Core Server (i.e. SERVER) project are <strong>public</strong>.</p>
+<a id="md:support--feedback" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Support / Feedback<a href="#md:support--feedback" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>For issues with, questions about, or feedback for the Node.js driver, please look into our <a href="https://www.mongodb.com/docs/manual/support" target="_blank" class="external">support channels</a>. Please do not email any of the driver developers directly with issues or questions - you're more likely to get an answer on the <a href="https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver" target="_blank" class="external">MongoDB Community Forums</a>.</p>
+<a id="md:change-log" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Change Log<a href="#md:change-log" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Change history can be found in <a href="https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md" target="_blank" class="external"><code>HISTORY.md</code></a>.</p>
+<a id="md:compatibility" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Compatibility<a href="#md:compatibility" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>The driver currently supports 4.2+ servers.</p>
+<p>For exhaustive server and runtime version compatibility matrices, please refer to the following links:</p>
+<ul>
+<li><a href="https://www.mongodb.com/docs/drivers/node/current/compatibility/#mongodb-compatibility" target="_blank" class="external">MongoDB</a></li>
+<li><a href="https://www.mongodb.com/docs/drivers/node/current/compatibility/#language-compatibility" target="_blank" class="external">NodeJS</a></li>
+</ul>
+<a id="md:component-support-matrix" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Component Support Matrix<a href="#md:component-support-matrix" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>The following table describes add-on component version compatibility for the Node.js driver. Only packages with versions in these supported ranges are stable when used in combination.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th><code>mongodb@3.x</code></th>
+<th><code>mongodb@4.x</code></th>
+<th><code>mongodb@5.x</code></th>
+<th><code>mongodb@&lt;6.12</code></th>
+<th><code>mongodb@&gt;=6.12</code></th>
+<th><code>mongodb@7.x</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://www.npmjs.com/package/bson" target="_blank" class="external">bson</a></td>
+<td>^1.0.0</td>
+<td>^4.0.0</td>
+<td>^5.0.0</td>
+<td>^6.0.0</td>
+<td>^6.0.0</td>
+<td>^7.0.0</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/bson-ext" target="_blank" class="external">bson-ext</a></td>
+<td>^1.0.0 || ^2.0.0</td>
+<td>^4.0.0</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/kerberos" target="_blank" class="external">kerberos</a></td>
+<td>^1.0.0</td>
+<td>^1.0.0 || ^2.0.0</td>
+<td>^1.0.0 || ^2.0.0</td>
+<td>^2.0.1</td>
+<td>^2.0.1</td>
+<td>^7.0.0</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/mongodb-client-encryption" target="_blank" class="external">mongodb-client-encryption</a></td>
+<td>^1.0.0</td>
+<td>^1.0.0 || ^2.0.0</td>
+<td>^2.3.0</td>
+<td>^6.0.0</td>
+<td>^6.0.0</td>
+<td>^7.0.0</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/mongodb-legacy" target="_blank" class="external">mongodb-legacy</a></td>
+<td>N/A</td>
+<td>^4.0.0</td>
+<td>^5.0.0</td>
+<td>^6.0.0</td>
+<td>^6.0.0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/@mongodb-js/zstd" target="_blank" class="external">@mongodb-js/zstd</a></td>
+<td>N/A</td>
+<td>^1.0.0</td>
+<td>^1.0.0</td>
+<td>^1.1.0</td>
+<td>^1.1.0 || ^2.0.0</td>
+<td>^7.0.0</td>
+</tr>
+</tbody>
+</table>
+<a id="md:typescript-version" class="tsd-anchor"></a><h4 class="tsd-anchor-link">Typescript Version<a href="#md:typescript-version" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4><p>We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against <code>typescript@5.6.0</code>.
+This is the lowest typescript version guaranteed to work with our driver: older versions may or may not work - use at your own risk.
+Since typescript <a href="https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes" target="_blank" class="external">does not restrict breaking changes to major versions</a>, we consider this support best effort.
+If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our <a href="https://jira.mongodb.org/browse/NODE" target="_blank" class="external">JIRA</a>.</p>
+<p>Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version. Currently, our Typescript targets es2023.</p>
+<a id="md:installation" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Installation<a href="#md:installation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The recommended way to get started using the Node.js driver is by using the <code>npm</code> (Node Package Manager) to install the dependency in your project.</p>
+<p>After you've created your own project using <code>npm init</code>, you can run:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-3">install</span><span class="hl-1"> </span><span class="hl-3">mongodb</span>
+</code><button type="button">Copy</button></pre>
+
+<p>This will download the MongoDB driver and add a dependency entry in your <code>package.json</code> file.</p>
+<p>If you are a Typescript user, you will need the Node.js type definitions to use the driver's definitions:</p>
+<pre><code class="sh"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-3">install</span><span class="hl-1"> </span><span class="hl-2">-D</span><span class="hl-1"> </span><span class="hl-3">@types/node</span>
+</code><button type="button">Copy</button></pre>
+
+<a id="md:driver-extensions" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Driver Extensions<a href="#md:driver-extensions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The MongoDB driver can optionally be enhanced by the following feature packages:</p>
+<p>Maintained by MongoDB:</p>
+<ul>
+<li>Zstd network compression - <a href="https://github.com/mongodb-js/zstd" target="_blank" class="external">@mongodb-js/zstd</a></li>
+<li>MongoDB field level and queryable encryption - <a href="https://github.com/mongodb/libmongocrypt#readme" target="_blank" class="external">mongodb-client-encryption</a></li>
+<li>GSSAPI / SSPI / Kerberos authentication - <a href="https://github.com/mongodb-js/kerberos" target="_blank" class="external">kerberos</a></li>
+</ul>
+<p>Some of these packages include native C++ extensions.
+Consult the <a href="https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/native-extensions.md" target="_blank" class="external">trouble shooting guide here</a> if you run into compilation issues.</p>
+<p>Third party:</p>
+<ul>
+<li>Snappy network compression - <a href="https://github.com/Brooooooklyn/snappy" target="_blank" class="external">snappy</a></li>
+<li>AWS authentication - <a href="https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers" target="_blank" class="external">@aws-sdk/credential-providers</a></li>
+</ul>
+<a id="md:quick-start" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Quick Start<a href="#md:quick-start" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the <a href="https://www.mongodb.com/docs/drivers/node/" target="_blank" class="external">official documentation</a>.</p>
+<a id="md:create-the-packagejson-file" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Create the <code>package.json</code> file<a href="#md:create-the-packagejson-file" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>First, create a directory where your application will live.</p>
+<pre><code class="bash"><span class="hl-0">mkdir</span><span class="hl-1"> </span><span class="hl-3">myProject</span><br/><span class="hl-0">cd</span><span class="hl-1"> </span><span class="hl-3">myProject</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Enter the following command and answer the questions to create the initial structure for your new project:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-3">init</span><span class="hl-1"> </span><span class="hl-2">-y</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Next, install the driver as a dependency.</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-3">install</span><span class="hl-1"> </span><span class="hl-3">mongodb</span>
+</code><button type="button">Copy</button></pre>
+
+<a id="md:start-a-mongodb-server" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Start a MongoDB Server<a href="#md:start-a-mongodb-server" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>For complete MongoDB installation instructions, see <a href="https://www.mongodb.com/docs/manual/installation/" target="_blank" class="external">the manual</a>.</p>
+<ol>
+<li>Download the right MongoDB version from <a href="https://www.mongodb.org/downloads" target="_blank" class="external">MongoDB</a></li>
+<li>Create a database directory (in this case under <strong>/data</strong>).</li>
+<li>Install and start a <code>mongod</code> process.</li>
+</ol>
+<pre><code class="bash"><span class="hl-0">mongod</span><span class="hl-1"> </span><span class="hl-2">--dbpath=/data</span>
+</code><button type="button">Copy</button></pre>
+
+<p>You should see the <strong>mongod</strong> process start up and print some status information.</p>
+<a id="md:connect-to-mongodb" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Connect to MongoDB<a href="#md:connect-to-mongodb" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Create a new <strong>app.js</strong> file and add the following code to try out some basic CRUD
+operations using the MongoDB driver.</p>
+<p>Add code to connect to the server and the database <strong>myProject</strong>:</p>
+<blockquote>
+<p><strong>NOTE:</strong> Resolving DNS Connection issues</p>
+<p>Node.js 18 changed the default DNS resolution ordering from always prioritizing IPv4 to the ordering
+returned by the DNS provider. In some environments, this can result in <code>localhost</code> resolving to
+an IPv6 address instead of IPv4 and a consequent failure to connect to the server.</p>
+<p>This can be resolved by:</p>
+<ul>
+<li>specifying the IP address family using the MongoClient <code>family</code> option (<code>MongoClient(&lt;uri&gt;, { family: 4 } )</code>)</li>
+<li>launching mongod or mongos with the ipv6 flag enabled (<a href="https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6" target="_blank" class="external">--ipv6 mongod option documentation</a>)</li>
+<li>using a host of <code>127.0.0.1</code> in place of localhost</li>
+<li>specifying the DNS resolution ordering with the <code>--dns-resolution-order</code> Node.js command line argument (e.g. <code>node --dns-resolution-order=ipv4first</code>)</li>
+</ul>
+</blockquote>
+<pre><code class="js"><span class="hl-2">const</span><span class="hl-1"> { </span><span class="hl-4">MongoClient</span><span class="hl-1"> } = </span><span class="hl-0">require</span><span class="hl-1">(</span><span class="hl-3">&#39;mongodb&#39;</span><span class="hl-1">);</span><br/><span class="hl-5">// or as an es module:</span><br/><span class="hl-5">// import { MongoClient } from &#39;mongodb&#39;</span><br/><br/><span class="hl-5">// Connection URL</span><br/><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">url</span><span class="hl-1"> = </span><span class="hl-3">&#39;mongodb://localhost:27017&#39;</span><span class="hl-1">;</span><br/><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">client</span><span class="hl-1"> = </span><span class="hl-2">new</span><span class="hl-1"> </span><span class="hl-0">MongoClient</span><span class="hl-1">(</span><span class="hl-6">url</span><span class="hl-1">);</span><br/><br/><span class="hl-5">// Database Name</span><br/><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">dbName</span><span class="hl-1"> = </span><span class="hl-3">&#39;myProject&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-2">async</span><span class="hl-1"> </span><span class="hl-2">function</span><span class="hl-1"> </span><span class="hl-0">main</span><span class="hl-1">() {</span><br/><span class="hl-1">  </span><span class="hl-5">// Use connect method to connect to the server</span><br/><span class="hl-1">  </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">connect</span><span class="hl-1">();</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Connected successfully to server&#39;</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">db</span><span class="hl-1"> = </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">db</span><span class="hl-1">(</span><span class="hl-6">dbName</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">collection</span><span class="hl-1"> = </span><span class="hl-6">db</span><span class="hl-1">.</span><span class="hl-0">collection</span><span class="hl-1">(</span><span class="hl-3">&#39;documents&#39;</span><span class="hl-1">);</span><br/><br/><span class="hl-1">  </span><span class="hl-5">// the following code examples can be pasted here...</span><br/><br/><span class="hl-1">  </span><span class="hl-7">return</span><span class="hl-1"> </span><span class="hl-3">&#39;done.&#39;</span><span class="hl-1">;</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-0">main</span><span class="hl-1">()</span><br/><span class="hl-1">  .</span><span class="hl-0">then</span><span class="hl-1">(</span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-6">log</span><span class="hl-1">)</span><br/><span class="hl-1">  .</span><span class="hl-0">catch</span><span class="hl-1">(</span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-6">error</span><span class="hl-1">)</span><br/><span class="hl-1">  .</span><span class="hl-0">finally</span><span class="hl-1">(() </span><span class="hl-2">=&gt;</span><span class="hl-1"> </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">close</span><span class="hl-1">());</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Run your app from the command line with:</p>
+<pre><code class="bash"><span class="hl-0">node</span><span class="hl-1"> </span><span class="hl-3">app.js</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The application should print <strong>Connected successfully to server</strong> to the console.</p>
+<a id="md:insert-a-document" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Insert a Document<a href="#md:insert-a-document" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Add to <strong>app.js</strong> the following function which uses the <strong>insertMany</strong>
+method to add three documents to the <strong>documents</strong> collection.</p>
+<pre><code class="js"><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">insertResult</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">insertMany</span><span class="hl-1">([{ </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> }, { </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">2</span><span class="hl-1"> }, { </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">3</span><span class="hl-1"> }]);</span><br/><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Inserted documents =&gt;&#39;</span><span class="hl-1">, </span><span class="hl-6">insertResult</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The <strong>insertMany</strong> command returns an object with information about the insert operations.</p>
+<a id="md:find-all-documents" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Find All Documents<a href="#md:find-all-documents" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Add a query that returns all the documents.</p>
+<pre><code class="js"><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">findResult</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">find</span><span class="hl-1">({}).</span><span class="hl-0">toArray</span><span class="hl-1">();</span><br/><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Found documents =&gt;&#39;</span><span class="hl-1">, </span><span class="hl-6">findResult</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>This query returns all the documents in the <strong>documents</strong> collection.
+If you add this below the insertMany example, you'll see the documents you've inserted.</p>
+<a id="md:find-documents-with-a-query-filter" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Find Documents with a Query Filter<a href="#md:find-documents-with-a-query-filter" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Add a query filter to find only documents which meet the query criteria.</p>
+<pre><code class="js"><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">filteredDocs</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">find</span><span class="hl-1">({ </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">3</span><span class="hl-1"> }).</span><span class="hl-0">toArray</span><span class="hl-1">();</span><br/><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Found documents filtered by { a: 3 } =&gt;&#39;</span><span class="hl-1">, </span><span class="hl-6">filteredDocs</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Only the documents which match <code>'a' : 3</code> should be returned.</p>
+<a id="md:update-a-document" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Update a document<a href="#md:update-a-document" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>The following operation updates a document in the <strong>documents</strong> collection.</p>
+<pre><code class="js"><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">updateResult</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">updateOne</span><span class="hl-1">({ </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">3</span><span class="hl-1"> }, { </span><span class="hl-6">$set:</span><span class="hl-1"> { </span><span class="hl-6">b:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> } });</span><br/><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Updated documents =&gt;&#39;</span><span class="hl-1">, </span><span class="hl-6">updateResult</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The method updates the first document where the field <strong>a</strong> is equal to <strong>3</strong> by adding a new field <strong>b</strong> to the document set to <strong>1</strong>. <code>updateResult</code> contains information about whether there was a matching document to update or not.</p>
+<a id="md:remove-a-document" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Remove a document<a href="#md:remove-a-document" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Remove the document where the field <strong>a</strong> is equal to <strong>3</strong>.</p>
+<pre><code class="js"><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">deleteResult</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">deleteMany</span><span class="hl-1">({ </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">3</span><span class="hl-1"> });</span><br/><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-3">&#39;Deleted documents =&gt;&#39;</span><span class="hl-1">, </span><span class="hl-6">deleteResult</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<a id="md:index-a-collection" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Index a Collection<a href="#md:index-a-collection" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p><a href="https://www.mongodb.com/docs/manual/indexes/" target="_blank" class="external">Indexes</a> can improve your application's
+performance. The following function creates an index on the <strong>a</strong> field in the
+<strong>documents</strong> collection.</p>
+<pre><code class="js"><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">indexName</span><span class="hl-1"> = </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">createIndex</span><span class="hl-1">({ </span><span class="hl-6">a:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> });</span><br/><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-3">&#39;index name =&#39;</span><span class="hl-1">, </span><span class="hl-6">indexName</span><span class="hl-1">);</span>
+</code><button type="button">Copy</button></pre>
+
+<p>For more detailed information, see the <a href="https://www.mongodb.com/docs/manual/applications/indexes/" target="_blank" class="external">indexing strategies page</a>.</p>
+<a id="md:error-handling" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Error Handling<a href="#md:error-handling" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>If you need to filter certain errors from our driver, we have a helpful tree of errors described in <a href="https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/errors.md" target="_blank" class="external">etc/notes/errors.md</a>.</p>
+<p>It is our recommendation to use <code>instanceof</code> checks on errors and to avoid relying on parsing <code>error.message</code> and <code>error.name</code> strings in your code.
+We guarantee <code>instanceof</code> checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.</p>
+<p>Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
+This means <code>instanceof</code> will always be able to accurately capture the errors that our driver throws.</p>
+<pre><code class="typescript"><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">client</span><span class="hl-1"> = </span><span class="hl-2">new</span><span class="hl-1"> </span><span class="hl-0">MongoClient</span><span class="hl-1">(</span><span class="hl-6">url</span><span class="hl-1">);</span><br/><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">connect</span><span class="hl-1">();</span><br/><span class="hl-2">const</span><span class="hl-1"> </span><span class="hl-4">collection</span><span class="hl-1"> = </span><span class="hl-6">client</span><span class="hl-1">.</span><span class="hl-0">db</span><span class="hl-1">().</span><span class="hl-0">collection</span><span class="hl-1">(</span><span class="hl-3">&#39;collection&#39;</span><span class="hl-1">);</span><br/><br/><span class="hl-7">try</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">insertOne</span><span class="hl-1">({ </span><span class="hl-6">_id:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> });</span><br/><span class="hl-1">  </span><span class="hl-7">await</span><span class="hl-1"> </span><span class="hl-6">collection</span><span class="hl-1">.</span><span class="hl-0">insertOne</span><span class="hl-1">({ </span><span class="hl-6">_id:</span><span class="hl-1"> </span><span class="hl-8">1</span><span class="hl-1"> }); </span><span class="hl-5">// duplicate key error</span><br/><span class="hl-1">} </span><span class="hl-7">catch</span><span class="hl-1"> (</span><span class="hl-6">error</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-7">if</span><span class="hl-1"> (</span><span class="hl-6">error</span><span class="hl-1"> </span><span class="hl-2">instanceof</span><span class="hl-1"> </span><span class="hl-9">MongoServerError</span><span class="hl-1">) {</span><br/><span class="hl-1">    </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-3">`Error worth logging: </span><span class="hl-2">${</span><span class="hl-6">error</span><span class="hl-2">}</span><span class="hl-3">`</span><span class="hl-1">); </span><span class="hl-5">// special case for some reason</span><br/><span class="hl-1">  }</span><br/><span class="hl-1">  </span><span class="hl-7">throw</span><span class="hl-1"> </span><span class="hl-6">error</span><span class="hl-1">; </span><span class="hl-5">// still want to crash</span><br/><span class="hl-1">}</span>
+</code><button type="button">Copy</button></pre>
+
+<a id="md:nightly-releases" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Nightly releases<a href="#md:nightly-releases" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>If you need to test with a change from the latest <code>main</code> branch, our <code>mongodb</code> npm package has nightly versions released under the <code>nightly</code> tag.</p>
+<pre><code class="sh"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-3">install</span><span class="hl-1"> </span><span class="hl-3">mongodb@nightly</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Nightly versions are published regardless of testing outcome.
+This means there could be semantic breakages or partially implemented features.
+The nightly build is not suitable for production use.</p>
+<a id="md:next-steps" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Next Steps<a href="#md:next-steps" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
+<li><a href="https://www.mongodb.com/docs/manual/" target="_blank" class="external">MongoDB Documentation</a></li>
+<li><a href="https://www.mongodb.com/docs/drivers/node/" target="_blank" class="external">MongoDB Node Driver Documentation</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/core/data-modeling-introduction/" target="_blank" class="external">Read about Schemas</a></li>
+<li><a href="https://github.com/mongodb/node-mongodb-native" target="_blank" class="external">Star us on GitHub</a></li>
+</ul>
+<a id="md:license" class="tsd-anchor"></a><h2 class="tsd-anchor-link">License<a href="#md:license" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p><a href="media/LICENSE.md">Apache 2.0</a></p>
+<p>© 2012-present MongoDB <a href="https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTORS.md" target="_blank" class="external">Contributors</a> <br>
+© 2009-2012 Christian Amor Kvalheim</p>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-alpha" name="alpha"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Alpha</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-beta" name="beta"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Beta</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#md:mongodb-nodejs-driver"><span>MongoDB <wbr/>Node.js <wbr/>Driver</span></a><ul><li><a href="#md:quick-links"><span>Quick <wbr/>Links</span></a></li><li><ul><li><a href="#md:release-integrity"><span>Release <wbr/>Integrity</span></a></li><li><a href="#md:bugs--feature-requests"><span>Bugs / <wbr/>Feature <wbr/>Requests</span></a></li><li><a href="#md:support--feedback"><span>Support / <wbr/>Feedback</span></a></li><li><a href="#md:change-log"><span>Change <wbr/>Log</span></a></li><li><a href="#md:compatibility"><span>Compatibility</span></a></li><li><ul><li><a href="#md:component-support-matrix"><span>Component <wbr/>Support <wbr/>Matrix</span></a></li><li><a href="#md:typescript-version"><span>Typescript <wbr/>Version</span></a></li></ul></li></ul></li><li><a href="#md:installation"><span>Installation</span></a></li><li><a href="#md:driver-extensions"><span>Driver <wbr/>Extensions</span></a></li><li><a href="#md:quick-start"><span>Quick <wbr/>Start</span></a></li><li><ul><li><a href="#md:create-the-packagejson-file"><span>Create the package.json file</span></a></li><li><a href="#md:start-a-mongodb-server"><span>Start a <wbr/>MongoDB <wbr/>Server</span></a></li><li><a href="#md:connect-to-mongodb"><span>Connect to <wbr/>MongoDB</span></a></li><li><a href="#md:insert-a-document"><span>Insert a <wbr/>Document</span></a></li><li><a href="#md:find-all-documents"><span>Find <wbr/>All <wbr/>Documents</span></a></li><li><a href="#md:find-documents-with-a-query-filter"><span>Find <wbr/>Documents with a <wbr/>Query <wbr/>Filter</span></a></li><li><a href="#md:update-a-document"><span>Update a document</span></a></li><li><a href="#md:remove-a-document"><span>Remove a document</span></a></li><li><a href="#md:index-a-collection"><span>Index a <wbr/>Collection</span></a></li></ul></li><li><a href="#md:error-handling"><span>Error <wbr/>Handling</span></a></li><li><a href="#md:nightly-releases"><span>Nightly releases</span></a></li><li><a href="#md:next-steps"><span>Next <wbr/>Steps</span></a></li><li><a href="#md:license"><span>License</span></a></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="assets/icons.svg#icon-1"></use></svg><span>mongodb</span></a><ul class="tsd-small-nested-navigation" id="tsd-nav-container" data-base="."><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>

@@ -21,7 +21,7 @@ export class AuthContext {
   /** A response from an initial auth attempt, only some mechanisms use this (e.g, SCRAM) */
   response?: Document;
   /** A random nonce generated for use in an authentication conversation */
-  nonce?: Buffer;
+  nonce?: Uint8Array;
 
   constructor(
     connection: Connection,

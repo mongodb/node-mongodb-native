@@ -6,7 +6,7 @@ import {
   type Document,
   MongoClient,
   ObjectId
-} from '../../../../src';
+} from '../../../mongodb';
 
 // TODO(NODE-3347): Improve these tests to use more expect assertions
 

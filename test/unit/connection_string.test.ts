@@ -4,20 +4,24 @@ import * as process from 'process';
 import * as sinon from 'sinon';
 import { inspect } from 'util';
 
-import { DEFAULT_ALLOWED_HOSTS, MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
-import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
-import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
 import {
+  AUTH_MECHS_AUTH_SRC_EXTERNAL,
+  AuthMechanism,
+  COSMOS_DB_MSG,
+  DEFAULT_ALLOWED_HOSTS,
+  DOCUMENT_DB_MSG,
+  type Log,
   MongoAPIError,
+  MongoClient,
+  MongoCredentials,
   MongoDriverError,
   MongoInvalidArgumentError,
+  type MongoOptions,
   MongoParseError,
-  MongoRuntimeError
-} from '../../src/error';
-import { MongoClient, type MongoOptions } from '../../src/mongo_client';
-import { type Log } from '../../src/mongo_logger';
-import { COSMOS_DB_MSG, DOCUMENT_DB_MSG } from '../../src/utils';
-
+  MongoRuntimeError,
+  parseOptions,
+  resolveSRVRecord
+} from '../mongodb';
 describe('Connection String', function () {
   context('when serverMonitoringMode is set', function () {
     context('when it is valid', function () {

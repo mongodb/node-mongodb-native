@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type MongoClient, ObjectId } from '../../../../src';
+import { type MongoClient, ObjectId } from '../../../mongodb';
 import { assert as test, setupDatabase } from '../../shared';
 
 describe('Ignore Undefined', function () {

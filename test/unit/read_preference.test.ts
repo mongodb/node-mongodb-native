@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { ReadPreference } from '../../src/read_preference';
+import { ReadPreference } from '../mongodb';
 
 describe('class ReadPreference', function () {
   const maxStalenessSeconds = 1234;

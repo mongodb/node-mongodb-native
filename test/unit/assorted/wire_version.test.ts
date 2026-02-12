@@ -1,11 +1,12 @@
 import { expect } from 'chai';
 
-import { MongoClient, MongoServerSelectionError } from '../../../src';
 import {
+  isHello,
   MAX_SUPPORTED_WIRE_VERSION,
-  MIN_SUPPORTED_WIRE_VERSION
-} from '../../../src/cmap/wire_protocol/constants';
-import { isHello } from '../../../src/utils';
+  MIN_SUPPORTED_WIRE_VERSION,
+  MongoClient,
+  MongoServerSelectionError
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 
 const minCompatErrMsg = `minimum wire version ${
