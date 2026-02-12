@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type MongoClient } from '../../../src';
+import { type MongoClient } from '../../mongodb';
 
 describe('stats', function () {
   let client: MongoClient;

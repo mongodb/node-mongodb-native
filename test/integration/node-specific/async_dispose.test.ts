@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { type MongoClient } from '../../../src';
+import { type MongoClient } from '../../mongodb';
 
 describe('Symbol.asyncDispose implementation tests', function () {
   let client: MongoClient;

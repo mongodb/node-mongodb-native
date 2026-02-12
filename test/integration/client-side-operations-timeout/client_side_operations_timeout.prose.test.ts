@@ -17,9 +17,10 @@ import {
   MongoClient,
   MongoOperationTimeoutError,
   MongoServerSelectionError,
-  ObjectId
-} from '../../../src';
-import { processTimeMS, squashError } from '../../../src/utils';
+  ObjectId,
+  processTimeMS,
+  squashError
+} from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,

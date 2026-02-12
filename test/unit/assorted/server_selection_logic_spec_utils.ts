@@ -4,19 +4,19 @@ import { readdirSync, readFileSync, statSync } from 'fs';
 import { basename, extname, join } from 'path';
 
 import {
+  DeprioritizedServers,
   ReadPreference,
   type ReadPreferenceMode,
-  type ReadPreferenceOptions
-} from '../../../src/read_preference';
-import { type ServerType, type TopologyType } from '../../../src/sdam/common';
-import { type ServerDescription, type TagSet } from '../../../src/sdam/server_description';
-import {
-  DeprioritizedServers,
+  type ReadPreferenceOptions,
   readPreferenceServerSelector,
+  type ServerDescription,
   type ServerSelector,
+  type ServerType,
+  type TagSet,
+  TopologyDescription,
+  type TopologyType,
   writableServerSelector
-} from '../../../src/sdam/server_selection';
-import { TopologyDescription } from '../../../src/sdam/topology_description';
+} from '../../mongodb';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';
 
 interface ServerSelectionLogicTestServer {

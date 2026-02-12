@@ -1,6 +1,6 @@
 import * as process from 'process';
 
-import { getAwsCredentialProvider, getGcpMetadata } from '../../../src/deps';
+import { getAwsCredentialProvider, getGcpMetadata } from '../../mongodb';
 
 // Data Key Stuff
 export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;

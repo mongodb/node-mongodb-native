@@ -9,7 +9,7 @@ import { AssertionError, expect } from 'chai';
 import * as process from 'process';
 import type * as timers from 'timers';
 
-import type * as mongodb from '../../../src';
+import type * as mongodb from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { type sleep } from '../../tools/utils';
 

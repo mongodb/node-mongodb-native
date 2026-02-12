@@ -1,12 +1,11 @@
 import { expect } from 'chai';
 
-import { type Document } from '../../../src';
-import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
 import {
   type AzureKMSRequestOptions,
-  fetchAzureKMSToken
-} from '../../../src/client-side-encryption/providers/azure';
-
+  type Document,
+  fetchAzureKMSToken,
+  MongoCryptAzureKMSRequestError
+} from '../../mongodb';
 const BASE_URL = new URL(`http://127.0.0.1:8080/metadata/identity/oauth2/token`);
 class KMSRequestOptions implements AzureKMSRequestOptions {
   url: URL = BASE_URL;

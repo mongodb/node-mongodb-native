@@ -4,20 +4,17 @@ import * as sinon from 'sinon';
 
 import {
   Binary,
+  ClientEncryption,
   type Collection,
+  type DataKey,
   Int32,
   Long,
   type MongoClient,
   MongoCryptError,
+  MongoCryptInvalidArgumentError,
+  StateMachine,
   UUID
-} from '../../../src';
-import {
-  ClientEncryption,
-  type DataKey
-} from '../../../src/client-side-encryption/client_encryption';
-import { MongoCryptInvalidArgumentError } from '../../../src/client-side-encryption/errors';
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-
+} from '../../mongodb';
 function readHttpResponse(path) {
   let data = readFileSync(path, 'utf8').toString();
   data = data.split('\n').join('\r\n');

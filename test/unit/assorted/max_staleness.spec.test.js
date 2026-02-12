@@ -2,7 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const { executeServerSelectionTest } = require('./server_selection_spec_helper');
-const { Server } = require('../../../src/sdam/server');
+const { Server } = require('../../mongodb');
 
 const { EJSON } = require('bson');
 

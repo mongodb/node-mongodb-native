@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
+import * as mongodb from '../../src';
 // Exception to the import from mongodb rule we're unit testing our public API
-import * as mongodb from '../../src/index';
-import { setDifference } from '../../src/utils';
+import { setDifference } from '../mongodb';
 
 const EXPECTED_EXPORTS = [
   'AbstractCursor',

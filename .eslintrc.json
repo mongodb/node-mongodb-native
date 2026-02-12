@@ -186,6 +186,7 @@
           {
             "patterns": [
               "**/../lib/**",
+              "**/../src/**",
               "mongodb-mock-server"
             ]
           }
@@ -224,7 +225,8 @@
           {
             "patterns": [
               "**/../lib/**",
-              "mongodb-mock-server"
+              "mongodb-mock-server",
+              "**/../src/**"
             ]
           }
         ]
@@ -330,6 +332,15 @@
             "prefer": "type-imports",
             "disallowTypeAnnotations": false,
             "fixStyle": "separate-type-imports"
+          }
+        ],
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              "**/../lib/**",
+              "**/../src/**"
+            ]
           }
         ]
       }

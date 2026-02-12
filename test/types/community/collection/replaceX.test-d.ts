@@ -1,6 +1,6 @@
 import { expectError } from 'tsd';
 
-import { MongoClient, ObjectId } from '../../../../src';
+import { MongoClient, ObjectId } from '../../../mongodb';
 
 // test collection.replaceX functions
 const client = new MongoClient('');

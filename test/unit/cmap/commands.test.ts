@@ -1,7 +1,7 @@
 import * as BSON from 'bson';
 import { expect } from 'chai';
 
-import { DocumentSequence, OpMsgRequest, OpReply } from '../../../src/cmap/commands';
+import { DocumentSequence, OpMsgRequest, OpReply } from '../../mongodb';
 
 describe('commands', function () {
   describe('OpMsgRequest', function () {

@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoInvalidArgumentError, MongoServerError } from '../../../src/error';
-import { type MongoClient } from '../../../src/mongo_client';
+import { type MongoClient, MongoInvalidArgumentError, MongoServerError } from '../../mongodb';
 import { filterForCommands } from '../shared';
 
 describe('Aggregation', function () {

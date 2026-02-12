@@ -1,9 +1,12 @@
 import { expect } from 'chai';
 
-import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
-import { MongoNetworkError, MongoRuntimeError } from '../../../src/error';
-import { MongoClient } from '../../../src/mongo_client';
-import { isHello } from '../../../src/utils';
+import {
+  isHello,
+  MongoClient,
+  MongoCredentials,
+  MongoNetworkError,
+  MongoRuntimeError
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 
 describe('SCRAM Iterations Tests', function () {

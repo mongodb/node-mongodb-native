@@ -10,11 +10,11 @@ import {
   type Collection,
   MongoClient,
   type MongoClientOptions,
+  type MongoDBOIDC,
+  type OIDCCallbackFunction,
   type OIDCCallbackParams,
   type OIDCResponse
-} from '../../../src';
-import { type MongoDBOIDC, type OIDCCallbackFunction } from '../../../src/cmap/auth/mongodb_oidc';
-
+} from '../../mongodb';
 const createCallback = (tokenFile = 'test_user1', expiresInSeconds?: number, extraFields?: any) => {
   return async (params: OIDCCallbackParams) => {
     const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, tokenFile), {

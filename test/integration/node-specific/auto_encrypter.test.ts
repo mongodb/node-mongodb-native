@@ -7,10 +7,9 @@ import {
   type MongoClient,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
+  StateMachine,
   type UUID
-} from '../../../src';
-import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-
+} from '../../mongodb';
 describe('mongocryptd auto spawn', function () {
   let client: MongoClient;
   const kmsProviders: KMSProviders = {

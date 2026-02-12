@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import { expectType } from 'tsd';
 
-import type { GridFSBucket, GridFSBucketWriteStream } from '../../src';
+import type { GridFSBucket, GridFSBucketWriteStream } from '../mongodb';
 
 (function test(bucket: GridFSBucket) {
   const readable = new Readable();

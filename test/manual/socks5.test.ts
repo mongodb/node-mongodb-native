@@ -2,9 +2,7 @@ import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
 import * as process from 'process';
 
-import { MongoClient, MongoParseError } from '../../src';
-import { LEGACY_HELLO_COMMAND } from '../../src/constants';
-
+import { LEGACY_HELLO_COMMAND, MongoClient, MongoParseError } from '../mongodb';
 /**
  * The SOCKS5_CONFIG environment variable is either a JSON 4-tuple
  * [host, port, username, password] or just [host, port].

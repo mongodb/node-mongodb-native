@@ -3,12 +3,12 @@ import { expect } from 'chai';
 import {
   Binary,
   BSON,
+  ClientEncryption,
   type CommandFailedEvent,
   type CommandSucceededEvent,
   type MongoClient,
   MongoNetworkError
-} from '../../../src';
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+} from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {

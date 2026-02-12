@@ -1,7 +1,7 @@
 import { join, resolve } from 'path';
 import * as sinon from 'sinon';
 
-import { Server } from '../../../src/sdam/server';
+import { Server } from '../../mongodb';
 import {
   loadLatencyWindowTests,
   runServerSelectionLatencyWindowTest

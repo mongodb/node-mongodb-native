@@ -1,6 +1,6 @@
 import * as semver from 'semver';
 
-import { type MongoClient } from '../../../../src';
+import { type MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
 
 /**

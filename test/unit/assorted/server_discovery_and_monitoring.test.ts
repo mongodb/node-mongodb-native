@@ -2,12 +2,14 @@ import { ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { MongoClient } from '../../../src/mongo_client';
-import { type TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
-import { type TopologyDescription } from '../../../src/sdam/topology_description';
+import {
+  MongoClient,
+  Server,
+  ServerDescription,
+  Topology,
+  type TopologyDescription,
+  type TopologyDescriptionChangedEvent
+} from '../../mongodb';
 import { fakeServer } from '../../tools/utils';
 
 describe('Server Discovery and Monitoring', function () {

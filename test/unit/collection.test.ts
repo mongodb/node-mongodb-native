@@ -1,8 +1,7 @@
 import { Long } from 'bson';
 import { expect } from 'chai';
 
-import { MongoClient } from '../../src/mongo_client';
-import { isHello } from '../../src/utils';
+import { isHello, MongoClient } from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {

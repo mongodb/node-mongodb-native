@@ -1,4 +1,4 @@
-import { type AutoEncrypter, MongoClient } from '../../../../src';
+import { type AutoEncrypter, MongoClient } from '../../../mongodb';
 import { getEncryptExtraOptions } from '../../utils';
 import { Filter } from './filter';
 

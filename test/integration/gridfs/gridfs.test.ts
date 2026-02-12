@@ -8,7 +8,7 @@ import {
   GridFSBucket,
   type MongoClient,
   ObjectId
-} from '../../../src';
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('GridFS', () => {
