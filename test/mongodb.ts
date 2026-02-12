@@ -58,6 +58,9 @@ export * from '../src/constants';
 export * from '../src/cursor/abstract_cursor';
 export * from '../src/cursor/aggregation_cursor';
 export * from '../src/cursor/change_stream_cursor';
+export * from '../src/cursor/find_cursor';
+export * from '../src/cursor/list_collections_cursor';
+export * from '../src/cursor/list_indexes_cursor';
 export * from '../src/cursor/client_bulk_write_cursor';
 export * from '../src/cursor/explainable_cursor';
 export * from '../src/cursor/find_cursor';
@@ -74,6 +77,11 @@ export * from '../src/gridfs/download';
 export * from '../src/gridfs/index';
 export * from '../src/gridfs/upload';
 export * from '../src/mongo_client';
+export * from '../src/mongo_logger';
+export * from '../src/mongo_types';
+export * from '../src/operations/aggregate';
+export * from '../src/operations/client_bulk_write/command_builder';
+export * from '../src/operations/client_bulk_write/common';
 export * from '../src/mongo_client_auth_providers';
 export * from '../src/mongo_logger';
 export * from '../src/mongo_types';
@@ -131,3 +139,6 @@ export * from '../src/timeout';
 export * from '../src/transactions';
 export * from '../src/utils';
 export * from '../src/write_concern';
+
+// Must be last for precedence
+export * from '../src/index';

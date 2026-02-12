@@ -3,27 +3,37 @@ import { finished } from 'node:stream/promises';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  Collection,
-  CommandFailedEvent,
-  type CommandStartedEvent,
-  CommandSucceededEvent,
-  type Db,
-  MongoBulkWriteError,
-  type MongoClient,
-  MongoServerError,
-  ObjectId,
-  ReturnDocument
-} from '../../mongodb';
+import { loadContextifiedMongoDBModule } from '../../tools/runner/vm_context_helper';
 import { type FailCommandFailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
 
+// Load MongoDB module in VM context
+const mongodb = loadContextifiedMongoDBModule();
+
+// Extract the exports we need from the contextified module
+const {
+  Collection,
+  CommandFailedEvent,
+  CommandSucceededEvent,
+  MongoBulkWriteError,
+  MongoClient,
+  MongoServerError,
+  ObjectId,
+  ReturnDocument
+} = mongodb;
+
+type MongoClient = typeof mongodb.MongoClient.prototype;
+type Db = typeof mongodb.Db.prototype;
+type CommandStartedEvent = typeof mongodb.CommandStartedEvent.prototype;
+
 const DB_NAME = 'crud_api_tests';
 
-describe('CRUD API', function () {
+describe.only('CRUD API', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
+    this.configuration.mongodb = mongodb;
+
     client = this.configuration.newClient();
 
     client.s.options.dbName = DB_NAME; // setup the default db
@@ -817,6 +827,7 @@ describe('CRUD API', function () {
     let collection: Collection;
 
     beforeEach(async function () {
+      this.configuration.mongodb = mongodb;
       client = this.configuration.newClient({ monitorCommands: true });
       events = [];
       client.on('commandStarted', commandStarted =>
