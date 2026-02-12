@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0](https://github.com/mongodb/node-mongodb-native/compare/v7.1.0...v7.2.0) (2026-02-12)
+
+
+### Features
+
+* **NODE-7315:** Use BSON ByteUtils instead of Nodejs Buffer ([#4840](https://github.com/mongodb/node-mongodb-native/issues/4840)) ([1add538](https://github.com/mongodb/node-mongodb-native/commit/1add53872ea8e394959754375bf35af5632fbf0e))
+* **NODE-7385:** add experimental `os` runtime adapter  ([#4851](https://github.com/mongodb/node-mongodb-native/issues/4851)) ([d2ad07f](https://github.com/mongodb/node-mongodb-native/commit/d2ad07f20903d86334da81222a6df9717f76faaa))
+
 ## [7.1.0](https://github.com/mongodb/node-mongodb-native/compare/v7.0.0...v7.1.0) (2026-02-02)
 
 
