@@ -586,6 +586,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.throwIfAborted();
       }
     } catch (error) {
+      // Note for Sergey: when retrying a command with `startTransaction`, the spec says drivers must only mark the transaction
+      // as in progress _after_ the server responds, regardless of the command's outcome.
+      // Server errors are thrown from the try-block above _after_ updateSessionFromResponse is called. So, server errors already correctly update the
+      // session's state.
+      // Network errors, however, are thrown from the try-block from `sendWire()`, and as such bypass the call to `updateSessionFromResponse` above. So, we have to
+      // handle updating sessions for non-server errors here.
+      if (options.session != null && !(error instanceof MongoServerError)) {
+        updateSessionFromResponse(options.session, MongoDBResponse.empty);
+      }
       if (this.shouldEmitAndLogCommand) {
         this.emitAndLogCommand(
           this.monitorCommands,

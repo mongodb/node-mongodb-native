@@ -132,6 +132,7 @@ const EXPECTED_EXPORTS = [
   'SeverityLevel',
   'SrvPollingEvent',
   'Timestamp',
+  'TokenBucket',
   'TopologyClosedEvent',
   'TopologyDescriptionChangedEvent',
   'TopologyOpeningEvent',

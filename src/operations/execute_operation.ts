@@ -1,3 +1,5 @@
+import { setTimeout } from 'timers/promises';
+
 import { MIN_SUPPORTED_SNAPSHOT_READS_WIRE_VERSION } from '../cmap/wire_protocol/constants';
 import {
   isRetryableReadError,
@@ -10,6 +12,7 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNotConnectedError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
@@ -26,9 +29,16 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { abortable, maxWireVersion, supportsRetryableWrites } from '../utils';
+import { RETRY_COST, TOKEN_REFRESH_RATE } from '../token_bucket';
+import {
+  abortable,
+  ExponentialBackoffProvider,
+  maxWireVersion,
+  supportsRetryableWrites
+} from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
+import { RunCommandOperation } from './run_command';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -50,7 +60,7 @@ type ResultTypeFromOperation<TOperation extends AbstractOperation> = ReturnType<
  * The expectation is that this function:
  * - Connects the MongoClient if it has not already been connected, see {@link autoConnect}
  * - Creates a session if none is provided and cleans up the session it creates
- * - Tries an operation and retries under certain conditions, see {@link tryOperation}
+ * - Tries an operation and retries under certain conditions, see {@link executeOperationWithRetries}
  *
  * @typeParam T - The operation's type
  * @typeParam TResult - The type of the operation's result, calculated from T
@@ -120,7 +130,7 @@ export async function executeOperation<
   });
 
   try {
-    return await tryOperation(operation, {
+    return await executeOperationWithRetries(operation, {
       topology,
       timeoutContext,
       session,
@@ -183,8 +193,12 @@ type RetryOptions = {
  * @typeParam TResult - The type of the operation's result, calculated from T
  *
  * @param operation - The operation to execute
- * */
-async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFromOperation<T>>(
+ */
+// Note for Sergey: The rename here could be reverted - I just thought this was more descriptive.
+async function executeOperationWithRetries<
+  T extends AbstractOperation,
+  TResult = ResultTypeFromOperation<T>
+>(
   operation: T,
   { topology, timeoutContext, session, readPreference }: RetryOptions
 ): Promise<TResult> {
@@ -233,33 +247,118 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
     session.incrementTransactionNumber();
   }
 
-  const maxTries = willRetry ? (timeoutContext.csotEnabled() ? Infinity : 2) : 1;
-  let previousOperationError: MongoError | undefined;
   const deprioritizedServers = new DeprioritizedServers();
+  const backoffDelayProvider = new ExponentialBackoffProvider(
+    10_000, // MAX_BACKOFF
+    100, // base backoff
+    2 // backoff rate
+  );
 
-  for (let tries = 0; tries < maxTries; tries++) {
-    if (previousOperationError) {
-      if (hasWriteAspect && previousOperationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
+  let maxAttempts =
+    typeof operation.maxAttempts === 'number'
+      ? operation.maxAttempts
+      : willRetry
+        ? timeoutContext.csotEnabled()
+          ? Infinity
+          : 2
+        : 1;
+
+  const shouldRetry =
+    (operation.hasAspect(Aspect.READ_OPERATION) && topology.s.options.retryReads) ||
+    ((operation.hasAspect(Aspect.WRITE_OPERATION) || operation instanceof RunCommandOperation) &&
+      topology.s.options.retryWrites);
+
+  let error: MongoError | null = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    operation.server = server;
+
+    try {
+      try {
+        const result = await server.command(operation, timeoutContext);
+        topology.tokenBucket.deposit(
+          attempt > 0
+            ? // on successful retry, deposit the retry cost + the refresh rate.
+              TOKEN_REFRESH_RATE + RETRY_COST
+            : // otherwise, just deposit the refresh rate.
+              TOKEN_REFRESH_RATE
+        );
+        return operation.handleOk(result);
+      } catch (error) {
+        return operation.handleError(error);
+      }
+
+      // Note for Sergey: This ended up being a larger refactor than I anticipated. But it made more sense to me to put the error handling
+      // that previously lived in the try-block into the catch-block.
+      // The primary motivator for this change was to make error tracking simpler. The post failure but pre-retry logic needs access to both the
+      // most recently encountered operation error _and_ the error we're storing to potentially throw, if we need to (because in some circumstances
+      // the error raised from here is _not_ the most recently encountered operation error). If we chose to keep the previously existing structure,
+      // this would force us to keep track of two errors outside of the for loop. By moving the pre-retry logic into the catch block, it gains
+      // access to `operationError`, and still only requires keeping track of one error outside the loop.
+    } catch (operationError) {
+      // Should never happen but if it does - propagate the error.
+      if (!(operationError instanceof MongoError)) throw operationError;
+
+      if (!operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
+        // if an operation fails with an error that does not contain the SystemOverloadError, deposit 1 token.
+        topology.tokenBucket.deposit(RETRY_COST);
+      }
+
+      if (error == null) {
+        error = operationError;
+      } else {
+        if (!operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)) {
+          error = operationError;
+        }
+      }
+
+      // Reset timeouts
+      timeoutContext.clear();
+
+      if (hasWriteAspect && operationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
         throw new MongoServerError({
           message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
           errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-          originalError: previousOperationError
+          originalError: operationError
         });
       }
 
-      if (operation.hasAspect(Aspect.COMMAND_BATCHING) && !operation.canRetryWrite) {
-        throw previousOperationError;
+      if (!canRetry(operation, operationError)) {
+        throw error;
       }
 
-      if (hasWriteAspect && !isRetryableWriteError(previousOperationError))
-        throw previousOperationError;
+      maxAttempts =
+        shouldRetry && operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+          ? 6
+          : maxAttempts;
 
-      if (hasReadAspect && !isRetryableReadError(previousOperationError)) {
-        throw previousOperationError;
+      if (attempt + 1 >= maxAttempts) {
+        throw error;
+      }
+
+      if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
+        if (!topology.tokenBucket.consume(RETRY_COST)) {
+          throw error;
+        }
+
+        const delayMS = backoffDelayProvider.getNextBackoffDuration();
+
+        // if the delay would exhaust the CSOT timeout, short-circuit.
+        if (timeoutContext.csotEnabled() && delayMS > timeoutContext.remainingTimeMS) {
+          // TODO: is this the right error to throw?
+          throw new MongoOperationTimeoutError(
+            `MongoDB SystemOverload exponential backoff would exceed timeoutMS deadline: remaining CSOT deadline=${timeoutContext.remainingTimeMS}, backoff delayMS=${delayMS}`,
+            {
+              cause: error
+            }
+          );
+        }
+
+        await setTimeout(delayMS);
       }
 
       if (
-        previousOperationError instanceof MongoNetworkError &&
+        operationError instanceof MongoNetworkError &&
         operation.hasAspect(Aspect.CURSOR_CREATING) &&
         session != null &&
         session.isPinned &&
@@ -268,6 +367,8 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
         session.unpin({ force: true, forceClear: true });
       }
 
+      deprioritizedServers.add(server.description);
+
       server = await topology.selectServer(selector, {
         session,
         operationName: operation.commandName,
@@ -275,45 +376,53 @@ async function tryOperation<T extends AbstractOperation, TResult = ResultTypeFro
         signal: operation.options.signal
       });
 
-      if (hasWriteAspect && !supportsRetryableWrites(server)) {
+      if (
+        hasWriteAspect &&
+        !supportsRetryableWrites(server) &&
+        !operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+      ) {
         throw new MongoUnexpectedServerResponseError(
           'Selected server does not support retryable writes'
         );
       }
-    }
 
-    operation.server = server;
-
-    try {
-      // If tries > 0 and we are command batching we need to reset the batch.
-      if (tries > 0 && operation.hasAspect(Aspect.COMMAND_BATCHING)) {
+      // Batched operations must reset the batch before retry,
+      // otherwise building a command will build the _next_ batch, not the current batch.
+      if (operation.hasAspect(Aspect.COMMAND_BATCHING)) {
         operation.resetBatch();
       }
-
-      try {
-        const result = await server.command(operation, timeoutContext);
-        return operation.handleOk(result);
-      } catch (error) {
-        return operation.handleError(error);
-      }
-    } catch (operationError) {
-      if (!(operationError instanceof MongoError)) throw operationError;
-      if (
-        previousOperationError != null &&
-        operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
-      ) {
-        throw previousOperationError;
-      }
-      deprioritizedServers.add(server.description);
-      previousOperationError = operationError;
-
-      // Reset timeouts
-      timeoutContext.clear();
     }
   }
 
   throw (
-    previousOperationError ??
-    new MongoRuntimeError('Tried to propagate retryability error, but no error was found.')
+    error ??
+    new MongoRuntimeError(
+      'Should never happen: operation execution loop terminated but no error was recorded.'
+    )
   );
+
+  function canRetry(operation: AbstractOperation, error: MongoError) {
+    // always retryable
+    if (
+      error.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
+      error.hasErrorLabel(MongoErrorLabel.RetryableError)
+    ) {
+      return true;
+    }
+
+    // run command is only retryable if we get retryable overload errors
+    if (operation instanceof RunCommandOperation) {
+      return false;
+    }
+
+    // batch operations are only retryable if the batch is retryable
+    if (operation.hasAspect(Aspect.COMMAND_BATCHING)) {
+      return operation.canRetryWrite;
+    }
+
+    return (
+      (hasWriteAspect && willRetryWrite && isRetryableWriteError(error)) ||
+      (hasReadAspect && willRetryRead && isRetryableReadError(error))
+    );
+  }
 }
