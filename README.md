@@ -101,6 +101,16 @@ If you run into any unexpected compiler failures against our supported TypeScrip
 
 Additionally, our Typescript types are compatible with the ECMAScript standard for our minimum supported Node version. Currently, our Typescript targets es2023.
 
+#### Running in Custom Runtimes
+
+We are working on removing NodeJS as a dependency of the driver, so that in the future it will be possible to use the drive in non-Node environments.
+This work is currently in progress, and if you're curious, this is [our first runtime adapter commit](https://github.com/mongodb/node-mongodb-native/commit/d2ad07f20903d86334da81222a6df9717f76faaa).
+
+Some things to keep in mind if you are using a non-Node runtime:
+
+1. Users of Webpack/Vite may need to prevent `crypto` polyfill injection.
+2. Auth mechanism `SCRAM-SHA-1` has a hard dependency on NodeJS and is not supported in FIPS mode.
+
 ## Installation
 
 The recommended way to get started using the Node.js driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
