@@ -116,7 +116,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     let srvRecords;
 
     try {
-      srvRecords = await dns.promises.resolveSrv(this.srvAddress);
+      srvRecords = await dns.promises.resolve(this.srvAddress, 'SRV');
     } catch {
       this.failure();
       return;
