@@ -41,20 +41,24 @@ const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSe
 const LB_DIRECT_CONNECTION_ERROR =
   'loadBalanced option not supported when directConnection is provided';
 
-function retryDNSTimeoutFor(rrtype: 'SRV'): (a: string) => Promise<dns.SrvRecord[]>;
-function retryDNSTimeoutFor(rrtype: 'TXT'): (a: string) => Promise<string[][]>;
-function retryDNSTimeoutFor(
-  rrtype: 'SRV' | 'TXT'
-): (a: string) => Promise<dns.SrvRecord[] | string[][]> {
+// connect the rrtype to the expected result
+interface DNSLookupMap {
+  SRV: dns.SrvRecord[];
+  TXT: string[][];
+}
+function retryDNSTimeoutFor<T extends keyof DNSLookupMap>(
+  rrtype: T
+): (lookupAddress: string) => Promise<DNSLookupMap[T]> {
   return async function dnsReqRetryTimeout(lookupAddress: string) {
+    const resolve = () => dns.promises.resolve(lookupAddress, rrtype) as Promise<DNSLookupMap[T]>;
+
     try {
-      return (await dns.promises.resolve(lookupAddress, rrtype)) as dns.SrvRecord[] | string[][];
+      return await resolve();
     } catch (firstDNSError) {
-      if (firstDNSError.code === dns.TIMEOUT) {
-        return (await dns.promises.resolve(lookupAddress, rrtype)) as dns.SrvRecord[] | string[][];
-      } else {
-        throw firstDNSError;
+      if (firstDNSError.code === 'ETIMEOUT') {
+        return await resolve();
       }
+      throw firstDNSError;
     }
   };
 }
