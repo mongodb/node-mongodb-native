@@ -116,7 +116,7 @@ describe('DNS timeout errors', () => {
     it('throws that error', metadata, async () => {
       const error = await client.connect().catch(error => error);
       expect(error).to.be.instanceOf(DNSSomethingError);
-      expect(stub.withArgs(sinon.match.string, 'TXT')).to.have.been.calledOnce;
+      expect(stub.withArgs(sinon.match.string, 'SRV')).to.have.been.calledOnce;
     });
   });
 
