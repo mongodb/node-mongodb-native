@@ -42,17 +42,21 @@ const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSe
 const LB_DIRECT_CONNECTION_ERROR =
   'loadBalanced option not supported when directConnection is provided';
 
-function retryDNSTimeoutFor(api: 'resolveSrv'): (a: string) => Promise<dns.SrvRecord[]>;
-function retryDNSTimeoutFor(api: 'resolveTxt'): (a: string) => Promise<string[][]>;
+function retryDNSTimeoutFor(rrtype: 'SRV'): (lookupAddress: string) => Promise<dns.SrvRecord[]>;
+function retryDNSTimeoutFor(rrtype: 'TXT'): (lookupAddress: string) => Promise<string[][]>;
 function retryDNSTimeoutFor(
-  api: 'resolveSrv' | 'resolveTxt'
-): (a: string) => Promise<dns.SrvRecord[] | string[][]> {
+  rrtype: 'SRV' | 'TXT'
+): (lookupAddress: string) => Promise<dns.SrvRecord[] | string[][]> {
+  const resolve =
+    rrtype === 'SRV'
+      ? (address: string) => dns.promises.resolve(address, 'SRV')
+      : (address: string) => dns.promises.resolve(address, 'TXT');
   return async function dnsReqRetryTimeout(lookupAddress: string) {
     try {
-      return await dns.promises[api](lookupAddress);
+      return await resolve(lookupAddress);
     } catch (firstDNSError) {
       if (firstDNSError.code === dns.TIMEOUT) {
-        return await dns.promises[api](lookupAddress);
+        return await resolve(lookupAddress);
       } else {
         throw firstDNSError;
       }
@@ -60,8 +64,8 @@ function retryDNSTimeoutFor(
   };
 }
 
-const resolveSrv = retryDNSTimeoutFor('resolveSrv');
-const resolveTxt = retryDNSTimeoutFor('resolveTxt');
+const resolveSrv = retryDNSTimeoutFor('SRV');
+const resolveTxt = retryDNSTimeoutFor('TXT');
 
 /**
  * Lookup a `mongodb+srv` connection string, combine the parts and reparse it as a normal

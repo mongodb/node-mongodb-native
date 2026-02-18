@@ -17,14 +17,13 @@ async function verifyKerberosAuthentication(client) {
 }
 
 describe('Kerberos', function () {
-  let resolvePtrSpy;
-  let resolveCnameSpy;
+  let resolveStub;
+  let lookupStub;
   let client;
 
   beforeEach(() => {
-    sinon.spy(dns, 'lookup');
-    resolvePtrSpy = sinon.spy(dns, 'resolvePtr');
-    resolveCnameSpy = sinon.spy(dns, 'resolveCname');
+    lookupStub = sinon.stub(dns, 'lookup').callThrough();
+    resolveStub = sinon.stub(dns, 'resolve').callThrough();
   });
 
   afterEach(function () {
@@ -65,7 +64,7 @@ describe('Kerberos', function () {
           `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forward&maxPoolSize=1`
         );
         await client.connect();
-        expect(dns.resolveCname).to.be.calledOnceWith(host);
+        expect(resolveStub.withArgs(sinon.match.any, 'CNAME')).to.be.calledOnceWith(host);
         await verifyKerberosAuthentication(client);
       });
     });
@@ -77,9 +76,10 @@ describe('Kerberos', function () {
             `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
           );
           await client.connect();
-          expect(dns.resolveCname).to.not.be.called;
+
+          expect(resolveStub.withArgs(sinon.match.any, 'CNAME')).to.not.be.called;
           // There are 2 calls to establish connection, however they use the callback form of dns.lookup
-          expect(dns.lookup).to.not.be.called;
+          expect(lookupStub).to.not.be.called;
           await verifyKerberosAuthentication(client);
         });
       });
@@ -88,28 +88,23 @@ describe('Kerberos', function () {
     for (const option of [true, 'forwardAndReverse']) {
       context(`when the value is ${option}`, function () {
         context('when the reverse lookup succeeds', function () {
-          beforeEach(function () {
-            resolvePtrSpy.restore();
-            sinon.stub(dns, 'resolvePtr').resolves([host]);
-          });
-
           it('authenticates with a forward dns lookup and a reverse ptr lookup', async function () {
             client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
             await client.connect();
+
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
-            expect(dns.lookup).to.be.calledOnce;
-            expect(dns.resolvePtr).to.be.calledOnce;
+            expect(lookupStub).to.be.calledOnce;
+            expect(resolveStub.withArgs(sinon.match.any, 'PTR')).to.be.calledOnce;
             await verifyKerberosAuthentication(client);
           });
         });
 
         context('when the reverse lookup is empty', function () {
           beforeEach(function () {
-            resolvePtrSpy.restore();
-            sinon.stub(dns, 'resolvePtr').resolves([]);
+            resolveStub.withArgs(sinon.match.string, 'PTR').resolves([]);
           });
 
           it('authenticates with a fallback cname lookup', async function () {
@@ -120,19 +115,18 @@ describe('Kerberos', function () {
             await client.connect();
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
-            expect(dns.lookup).to.be.calledOnce;
+            expect(lookupStub).to.be.calledOnce;
             // This fails.
-            expect(dns.resolvePtr).to.be.calledOnce;
+            expect(resolveStub.withArgs(sinon.match.string, 'PTR')).to.be.calledOnce;
             // Expect the fallback to the host name.
-            expect(dns.resolveCname).to.not.be.called;
+            expect(resolveStub.withArgs(sinon.match.string, 'CNAME')).to.not.be.called;
             await verifyKerberosAuthentication(client);
           });
         });
 
         context('when the reverse lookup fails', function () {
           beforeEach(function () {
-            resolvePtrSpy.restore();
-            sinon.stub(dns, 'resolvePtr').rejects(new Error('not found'));
+            resolveStub.withArgs(sinon.match.string, 'PTR').rejects(new Error('not found'));
           });
 
           it('authenticates with a fallback cname lookup', async function () {
@@ -143,19 +137,18 @@ describe('Kerberos', function () {
             await client.connect();
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
-            expect(dns.lookup).to.be.calledOnce;
+            expect(lookupStub).to.be.calledOnce;
             // This fails.
-            expect(dns.resolvePtr).to.be.calledOnce;
+            expect(resolveStub.withArgs(sinon.match.string, 'PTR')).to.be.calledOnce;
             // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnceWith(host);
+            expect(resolveStub.withArgs(sinon.match.string, 'CNAME')).to.be.calledOnceWith(host);
             await verifyKerberosAuthentication(client);
           });
         });
 
         context('when the cname lookup fails', function () {
           beforeEach(function () {
-            resolveCnameSpy.restore();
-            sinon.stub(dns, 'resolveCname').rejects(new Error('not found'));
+            resolveStub.withArgs(sinon.match.string, 'CNAME').rejects(new Error('not found'));
           });
 
           it('authenticates with a fallback host name', async function () {
@@ -165,19 +158,18 @@ describe('Kerberos', function () {
             await client.connect();
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
-            expect(dns.lookup).to.be.calledOnce;
+            expect(lookupStub).to.be.calledOnce;
             // This fails.
-            expect(dns.resolvePtr).to.be.calledOnce;
+            expect(resolveStub.withArgs(sinon.match.string, 'PTR')).to.be.calledOnce;
             // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnceWith(host);
+            expect(resolveStub.withArgs(sinon.match.string, 'CNAME')).to.be.calledOnceWith(host);
             await verifyKerberosAuthentication(client);
           });
         });
 
         context('when the cname lookup is empty', function () {
           beforeEach(function () {
-            resolveCnameSpy.restore();
-            sinon.stub(dns, 'resolveCname').resolves([]);
+            resolveStub.withArgs(sinon.match.string, 'CNAME').rejects([]);
           });
 
           it('authenticates with a fallback host name', async function () {
@@ -187,11 +179,11 @@ describe('Kerberos', function () {
             await client.connect();
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
-            expect(dns.lookup).to.be.calledOnce;
+            expect(lookupStub).to.be.calledOnce;
             // This fails.
-            expect(dns.resolvePtr).to.be.calledOnce;
+            expect(resolveStub.withArgs(sinon.match.string, 'PTR')).to.be.calledOnce;
             // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnceWith(host);
+            expect(resolveStub.withArgs(sinon.match.string, 'CNAME')).to.be.calledOnceWith(host);
             await verifyKerberosAuthentication(client);
           });
         });
