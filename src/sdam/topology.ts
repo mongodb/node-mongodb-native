@@ -594,7 +594,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         );
       }
 
-      if (!options.timeoutContext || options.timeoutContext?.clearServerSelectionTimeout) {
+      if (!options.timeoutContext || options.timeoutContext.clearServerSelectionTimeout) {
         timeout?.clear();
       }
 
@@ -668,7 +668,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       throw error;
     } finally {
       abortListener?.[kDispose]();
-      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
+      if (!options.timeoutContext || options.timeoutContext.clearServerSelectionTimeout) {
+        timeout?.clear();
+      }
     }
   }
   /**
