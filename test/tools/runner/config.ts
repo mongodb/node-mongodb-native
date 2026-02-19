@@ -17,10 +17,11 @@ import {
   MongoClient,
   type MongoClientOptions,
   ObjectId,
+  runNodelessTests,
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
 import { flakyTests } from './flaky';
@@ -114,32 +115,20 @@ export class TestConfiguration {
   filters: Record<string, Filter>;
   compressor: CompressorName | null;
 
-  // Optional: contextified MongoDB module exports for VM-based testing
-  private mongodb?: any;
-
   constructor(
     private uri: string,
-    private context: Record<string, any>,
-    mongodb?: any // Optional contextified mongodb module
+    private context: Record<string, any>
   ) {
-    this.mongodb = mongodb;
-
     const url = new ConnectionString(uri);
     const { hosts } = url;
-    const hostAddresses = hosts.map(
-      this.mongodb ? this.mongodb.HostAddress.fromString : HostAddress.fromString
-    );
+    const hostAddresses = hosts.map(HostAddress.fromString);
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
     this.cryptSharedVersion = context.cryptShared;
     this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
-    this.topologyType = this.isLoadBalanced
-      ? this.mongodb
-        ? this.mongodb.TopologyType.LoadBalanced
-        : TopologyType.LoadBalanced
-      : context.topologyType;
+    this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.buildInfo = context.buildInfo;
     this.serverApi = context.serverApi;
     this.isSrv = uri.indexOf('mongodb+srv') > -1;
@@ -232,7 +221,10 @@ export class TestConfiguration {
     return uri.indexOf('MONGODB-OIDC') > -1 && uri.indexOf(`ENVIRONMENT:${env}`) > -1;
   }
 
-  newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
+  newClient(
+    urlOrQueryOptions?: string | Record<string, any>,
+    serverOptions?: MongoClientOptions
+  ): MongoClient {
     const baseOptions: MongoClientOptions = this.compressor
       ? {
           compressors: this.compressor
@@ -240,10 +232,10 @@ export class TestConfiguration {
       : {};
 
     serverOptions = Object.assign(baseOptions, getEnvironmentalOptions(), serverOptions);
-
     // If using contextified mongodb, inject Node.js runtime adapters
-    if (this.mongodb) {
+    if (runNodelessTests) {
       serverOptions.runtimeAdapters = {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         os: require('os'),
         ...serverOptions.runtimeAdapters
       };
@@ -259,8 +251,8 @@ export class TestConfiguration {
         throw new Error(`Cannot use options to specify host/port, must be in ${urlOrQueryOptions}`);
       }
 
-      const ClientConstructor = this.mongodb ? this.mongodb.MongoClient : MongoClient;
-      return new ClientConstructor(urlOrQueryOptions, serverOptions);
+      const newClient: MongoClient = new MongoClient(urlOrQueryOptions, serverOptions);
+      return newClient;
     }
 
     const queryOptions = urlOrQueryOptions ?? {};
@@ -304,10 +296,7 @@ export class TestConfiguration {
       delete queryOptions.writeConcern;
     }
 
-    const LoadBalancedType = this.mongodb
-      ? this.mongodb.TopologyType.LoadBalanced
-      : TopologyType.LoadBalanced;
-    if (this.topologyType === LoadBalancedType) {
+    if (this.topologyType === TopologyType.LoadBalanced) {
       queryOptions.loadBalanced = true;
     }
 
@@ -341,8 +330,7 @@ export class TestConfiguration {
 
     const connectionString = url.format(urlOptions);
 
-    const ClientConstructor = this.mongodb ? this.mongodb.MongoClient : MongoClient;
-    return new ClientConstructor(connectionString, serverOptions);
+    return new MongoClient(connectionString, serverOptions);
   }
 
   /**
@@ -464,8 +452,7 @@ export class TestConfiguration {
   }
 
   writeConcernMax(): { writeConcern: WriteConcernSettings } {
-    const SingleType = this.mongodb ? this.mongodb.TopologyType.Single : TopologyType.Single;
-    if (this.topologyType !== SingleType) {
+    if (this.topologyType !== TopologyType.Single) {
       return { writeConcern: { w: 'majority', wtimeoutMS: 30000 } };
     }
 
@@ -477,7 +464,7 @@ export class TestConfiguration {
   }
 
   makeAtlasTestConfiguration(): AtlasTestConfiguration {
-    return new AtlasTestConfiguration(this.uri, this.context, this.mongodb);
+    return new AtlasTestConfiguration(this.uri, this.context);
   }
 
   loggingEnabled = false;
@@ -489,8 +476,7 @@ export class TestConfiguration {
   testsToEnableLogging = flakyTests;
 
   setupLogging(options: MongoClientOptions, id?: string) {
-    const ObjectIdConstructor = this.mongodb ? this.mongodb.ObjectId : ObjectId;
-    id ??= new ObjectIdConstructor().toString();
+    id ??= new ObjectId().toString();
     this.logs = [];
     const write = log => this.logs.push({ t: log.t, id, ...log });
     options.mongodbLogPath = { write };
@@ -505,9 +491,6 @@ export class TestConfiguration {
 
   afterEachLogging(ctx: Context) {
     if (this.loggingEnabled && ctx.currentTest.state === 'failed') {
-      const LongConstructor = this.mongodb ? this.mongodb.Long : Long;
-      const DoubleConstructor = this.mongodb ? this.mongodb.Double : Double;
-
       for (const log of this.logs) {
         console.error(
           JSON.stringify(
@@ -516,13 +499,12 @@ export class TestConfiguration {
               if (types.isMap(value)) return { Map: Array.from(value.entries()) };
               if (types.isSet(value)) return { Set: Array.from(value.values()) };
               if (types.isNativeError(value)) return { [value.name]: util.inspect(value) };
-              if (typeof value === 'bigint')
-                return { bigint: new LongConstructor(value).toExtendedJSON() };
+              if (typeof value === 'bigint') return { bigint: new Long(value).toExtendedJSON() };
               if (typeof value === 'symbol') return `Symbol(${value.description})`;
               if (typeof value === 'number') {
                 if (Number.isNaN(value) || !Number.isFinite(value) || Object.is(value, -0))
                   // @ts-expect-error: toExtendedJSON internal on double but not on long
-                  return { number: new DoubleConstructor(value).toExtendedJSON() };
+                  return { number: new Double(value).toExtendedJSON() };
               }
               if (Buffer.isBuffer(value))
                 return { [value.constructor.name]: Buffer.prototype.base64Slice.call(value) };
@@ -546,10 +528,8 @@ export class TestConfiguration {
  */
 export class AtlasTestConfiguration extends TestConfiguration {
   override newClient(): MongoClient {
-    const ClientConstructor = (this as any).mongodb
-      ? (this as any).mongodb.MongoClient
-      : MongoClient;
-    return new ClientConstructor(process.env.MONGODB_URI!);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return new MongoClient(process.env.MONGODB_URI!);
   }
 
   override url(): string {
@@ -563,10 +543,8 @@ export class AtlasTestConfiguration extends TestConfiguration {
  */
 export class AstrolabeTestConfiguration extends TestConfiguration {
   override newClient(): MongoClient {
-    const ClientConstructor = (this as any).mongodb
-      ? (this as any).mongodb.MongoClient
-      : MongoClient;
-    return new ClientConstructor(process.env.DRIVERS_ATLAS_TESTING_URI!);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return new MongoClient(process.env.DRIVERS_ATLAS_TESTING_URI!);
   }
 
   override url(): string {

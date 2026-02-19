@@ -32,6 +32,11 @@ export function ensureCalledWith(stub: any, args: any[]) {
   args.forEach((m: any) => expect(stub).to.have.been.calledWith(m));
 }
 
+export function ensureTypeByName(obj: any, typeName: string) {
+  const isType = obj != null && obj.constructor != null && obj.constructor.name === typeName;
+  return isType;
+}
+
 export class EventCollector {
   private _events: Record<string, any[]>;
   private _timeout: number;

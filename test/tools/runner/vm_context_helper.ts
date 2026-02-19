@@ -47,6 +47,7 @@ const sandbox = vm.createContext({
 
   // Global objects needed for runtime
   Buffer: Buffer,
+  Headers: global.Headers,
   Promise: Promise,
   Map: Map,
   Set: Set,
@@ -85,6 +86,7 @@ const sandbox = vm.createContext({
   Math: Math,
   JSON: JSON,
   Intl: global.Intl,
+  crypto: global.crypto,
 
   // Custom require that blocks core modules
   require: createRestrictedRequire(),
@@ -103,7 +105,7 @@ sandbox.globalThis = sandbox;
  * This allows us to control the globals that the driver has access to
  */
 export function loadContextifiedMongoDBModule() {
-  const bundlePath = path.join(__dirname, 'driver.bundle.js');
+  const bundlePath = path.join(__dirname, 'bundle/driver-bundle.js');
 
   if (!fs.existsSync(bundlePath)) {
     throw new Error(`Driver bundle not found at ${bundlePath}. Run 'npm run bundle:driver' first.`);

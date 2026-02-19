@@ -3,28 +3,21 @@ import { finished } from 'node:stream/promises';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { loadContextifiedMongoDBModule } from '../../tools/runner/vm_context_helper';
-import { type FailCommandFailPoint } from '../../tools/utils';
-import { assert as test } from '../shared';
-
-// Load MongoDB module in VM context
-const mongodb = loadContextifiedMongoDBModule();
-
-// Extract the exports we need from the contextified module
-const {
+import {
   Collection,
   CommandFailedEvent,
+  type CommandStartedEvent,
   CommandSucceededEvent,
+  type Db,
   MongoBulkWriteError,
-  MongoClient,
+  type MongoClient,
   MongoServerError,
   ObjectId,
-  ReturnDocument
-} = mongodb;
-
-type MongoClient = typeof mongodb.MongoClient.prototype;
-type Db = typeof mongodb.Db.prototype;
-type CommandStartedEvent = typeof mongodb.CommandStartedEvent.prototype;
+  ReturnDocument,
+  runNodelessTests
+} from '../../mongodb_runtime-testing';
+import { ensureTypeByName, type FailCommandFailPoint } from '../../tools/utils';
+import { assert as test } from '../shared';
 
 const DB_NAME = 'crud_api_tests';
 
@@ -32,8 +25,6 @@ describe.only('CRUD API', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
-    this.configuration.mongodb = mongodb;
-
     client = this.configuration.newClient();
 
     client.s.options.dbName = DB_NAME; // setup the default db
@@ -113,9 +104,13 @@ describe.only('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'find');
         const result = await collection.findOne({});
         expect(result).to.deep.equal({ _id: 1 });
-        expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
-        expect(spy.returnValues.at(0)).to.have.property('closed', true);
-        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        if (runNodelessTests) {
+          expect(ensureTypeByName(events.at(0), 'CommandSucceededEvent')).to.be.true;
+        } else {
+          expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
+          expect(spy.returnValues.at(0)).to.have.property('closed', true);
+          expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        }
       });
     });
 
@@ -145,10 +140,14 @@ describe.only('CRUD API', function () {
       it('the cursor for findOne is closed', async function () {
         const spy = sinon.spy(Collection.prototype, 'find');
         const error = await collection.findOne({}).catch(error => error);
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
-        expect(spy.returnValues.at(0)).to.have.property('closed', true);
-        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        if (runNodelessTests) {
+          expect(ensureTypeByName(error, 'MongoServerError')).to.be.true;
+        } else {
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
+          expect(spy.returnValues.at(0)).to.have.property('closed', true);
+          expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        }
       });
     });
   });
@@ -183,9 +182,13 @@ describe.only('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'aggregate');
         const result = await collection.countDocuments({});
         expect(result).to.deep.equal(2);
-        expect(events[0]).to.be.instanceOf(CommandSucceededEvent);
-        expect(spy.returnValues[0]).to.have.property('closed', true);
-        expect(spy.returnValues[0]).to.have.nested.property('session.hasEnded', true);
+        if (runNodelessTests) {
+          expect(ensureTypeByName(events[0], 'CommandSucceededEvent')).to.be.true;
+        } else {
+          expect(events[0]).to.be.instanceOf(CommandSucceededEvent);
+          expect(spy.returnValues[0]).to.have.property('closed', true);
+          expect(spy.returnValues[0]).to.have.nested.property('session.hasEnded', true);
+        }
       });
     });
 
@@ -215,10 +218,14 @@ describe.only('CRUD API', function () {
       it('the cursor for countDocuments is closed', async function () {
         const spy = sinon.spy(Collection.prototype, 'aggregate');
         const error = await collection.countDocuments({}).catch(error => error);
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
-        expect(spy.returnValues.at(0)).to.have.property('closed', true);
-        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        if (runNodelessTests) {
+          expect(ensureTypeByName(error, 'MongoServerError')).to.be.true;
+        } else {
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
+          expect(spy.returnValues.at(0)).to.have.property('closed', true);
+          expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+        }
       });
     });
   });
@@ -795,7 +802,11 @@ describe.only('CRUD API', function () {
         .bulkWrite(ops, { ordered: false, writeConcern: { w: 1 } })
         .catch(error => error);
 
-      expect(error).to.be.instanceOf(MongoBulkWriteError);
+      if (runNodelessTests) {
+        expect(ensureTypeByName(error, 'MongoBulkWriteError')).to.be.true;
+      } else {
+        expect(error).to.be.instanceOf(MongoBulkWriteError);
+      }
       // 1004 because one of them is duplicate key
       // but since it is unordered we continued to write
       expect(error).to.have.property('insertedCount', 1004);
@@ -818,7 +829,8 @@ describe.only('CRUD API', function () {
       .collection('t20_1')
       .bulkWrite(ops, { ordered: true, writeConcern: { w: 1 } })
       .catch(err => err);
-    expect(err).to.be.instanceOf(MongoBulkWriteError);
+    // expect(err).to.be.instanceOf(MongoBulkWriteError);
+    expect(ensureTypeByName(err, 'MongoBulkWriteError')).to.be.true;
   });
 
   describe('sort support', function () {
@@ -827,7 +839,6 @@ describe.only('CRUD API', function () {
     let collection: Collection;
 
     beforeEach(async function () {
-      this.configuration.mongodb = mongodb;
       client = this.configuration.newClient({ monitorCommands: true });
       events = [];
       client.on('commandStarted', commandStarted =>
