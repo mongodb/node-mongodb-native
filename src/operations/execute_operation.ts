@@ -342,8 +342,7 @@ async function executeOperationWithRetries<
         session,
         operationName: operation.commandName,
         deprioritizedServers,
-        signal: operation.options.signal,
-        timeoutContext
+        signal: operation.options.signal
       });
 
       if (
