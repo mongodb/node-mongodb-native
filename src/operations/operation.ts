@@ -66,13 +66,11 @@ export abstract class AbstractOperation<TResult = any> {
   /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
 
-  // Note for Sergey: sort of a hack, one that I planned to revisit before officially opening the PR for review.
-  // For every operation _except_ transactions, all backpressure retries occur inside one `executeOperation` call. `commitTransaction`, however,
-  // currently hard-codes two retry attempts, each with a `RunCommandOperation`. Neither retry attempt is retryable by itself.
-  // Because we use two separate RunCommand operations, it's possible to retry up to 2 * MAX_BACKPRESSURE_RETRIES times, if the server is overloaded.
-  // I hacked around it here by storing the max attempts for an operation on the operation, and sharing the value between both operations.
-  // I don't have a solid idea of a better way to do this right now though.
+  /** @internal Used by commitTransaction to share the retry budget across two executeOperatin calls. */
   maxAttempts?: number;
+
+  /** @internal Tracks how many attempts were made in the last executeOperation call. */
+  attemptsMade?: number;
 
   private _session: ClientSession | undefined;
 

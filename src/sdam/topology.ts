@@ -213,7 +213,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   hello?: Document;
   _type?: string;
 
-  // Note for Sergey: expect this to change, and instead be stored on the server class.
   tokenBucket = new TokenBucket(1000);
 
   client!: MongoClient;

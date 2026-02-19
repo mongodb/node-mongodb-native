@@ -26,7 +26,7 @@ export class TokenBucket {
  * @internal
  * The amount to deposit on successful operations, as defined in the backpressure specification.
  */
-export const TOKEN_REFRESH_RATE = 0.1;
+export const RETRY_TOKEN_RETURN_RATE = 0.1;
 /**
  * @internal
  * The initial size of the token bucket, as defined in the backpressure specification.

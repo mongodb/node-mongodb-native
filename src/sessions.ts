@@ -497,7 +497,7 @@ export class ClientSession
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
-    operation.maxAttempts = 5;
+    operation.maxAttempts = 6;
 
     const timeoutContext =
       this.timeoutContext ??
@@ -515,8 +515,12 @@ export class ClientSession
       return;
     } catch (firstCommitError) {
       this.commitAttempted = true;
-      // Backpressure exhausted all retries on the initial retry loop.
-      if (operation.maxAttempts === 5) throw firstCommitError;
+
+      const remainingAttempts = 6 - (operation.attemptsMade ?? 1);
+      if (remainingAttempts <= 0) {
+        throw firstCommitError;
+      }
+
       if (firstCommitError instanceof MongoError && isRetryableWriteError(firstCommitError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
@@ -529,7 +533,7 @@ export class ClientSession
             readPreference: ReadPreference.primary,
             bypassPinningCheck: true
           });
-          op.maxAttempts = operation.maxAttempts;
+          op.maxAttempts = remainingAttempts;
           await executeOperation(this.client, op, timeoutContext);
           return;
         } catch (retryCommitError) {

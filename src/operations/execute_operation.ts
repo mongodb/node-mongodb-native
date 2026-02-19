@@ -12,7 +12,6 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNotConnectedError,
-  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
@@ -29,13 +28,8 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { RETRY_COST, TOKEN_REFRESH_RATE } from '../token_bucket';
-import {
-  abortable,
-  ExponentialBackoffProvider,
-  maxWireVersion,
-  supportsRetryableWrites
-} from '../utils';
+import { RETRY_COST, RETRY_TOKEN_RETURN_RATE } from '../token_bucket';
+import { abortable, maxWireVersion, supportsRetryableWrites } from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
 import { RunCommandOperation } from './run_command';
@@ -194,7 +188,6 @@ type RetryOptions = {
  *
  * @param operation - The operation to execute
  */
-// Note for Sergey: The rename here could be reverted - I just thought this was more descriptive.
 async function executeOperationWithRetries<
   T extends AbstractOperation,
   TResult = ResultTypeFromOperation<T>
@@ -248,11 +241,6 @@ async function executeOperationWithRetries<
   }
 
   const deprioritizedServers = new DeprioritizedServers();
-  const backoffDelayProvider = new ExponentialBackoffProvider(
-    10_000, // MAX_BACKOFF
-    100, // base backoff
-    2 // backoff rate
-  );
 
   let maxAttempts =
     typeof operation.maxAttempts === 'number'
@@ -271,6 +259,7 @@ async function executeOperationWithRetries<
   let error: MongoError | null = null;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    operation.attemptsMade = attempt + 1;
     operation.server = server;
 
     try {
@@ -279,28 +268,20 @@ async function executeOperationWithRetries<
         topology.tokenBucket.deposit(
           attempt > 0
             ? // on successful retry, deposit the retry cost + the refresh rate.
-              TOKEN_REFRESH_RATE + RETRY_COST
+              RETRY_TOKEN_RETURN_RATE + RETRY_COST
             : // otherwise, just deposit the refresh rate.
-              TOKEN_REFRESH_RATE
+              RETRY_TOKEN_RETURN_RATE
         );
         return operation.handleOk(result);
       } catch (error) {
         return operation.handleError(error);
       }
-
-      // Note for Sergey: This ended up being a larger refactor than I anticipated. But it made more sense to me to put the error handling
-      // that previously lived in the try-block into the catch-block.
-      // The primary motivator for this change was to make error tracking simpler. The post failure but pre-retry logic needs access to both the
-      // most recently encountered operation error _and_ the error we're storing to potentially throw, if we need to (because in some circumstances
-      // the error raised from here is _not_ the most recently encountered operation error). If we chose to keep the previously existing structure,
-      // this would force us to keep track of two errors outside of the for loop. By moving the pre-retry logic into the catch block, it gains
-      // access to `operationError`, and still only requires keeping track of one error outside the loop.
     } catch (operationError) {
       // Should never happen but if it does - propagate the error.
       if (!(operationError instanceof MongoError)) throw operationError;
 
-      if (!operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
-        // if an operation fails with an error that does not contain the SystemOverloadError, deposit 1 token.
+      if (attempt > 0 && !operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
+        // if a retry attempt fails with a non-overload error, deposit 1 token.
         topology.tokenBucket.deposit(RETRY_COST);
       }
 
@@ -327,10 +308,9 @@ async function executeOperationWithRetries<
         throw error;
       }
 
-      maxAttempts =
-        shouldRetry && operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
-          ? 6
-          : maxAttempts;
+      if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
+        maxAttempts = Math.min(6, operation.maxAttempts ?? 6);
+      }
 
       if (attempt + 1 >= maxAttempts) {
         throw error;
@@ -341,17 +321,11 @@ async function executeOperationWithRetries<
           throw error;
         }
 
-        const delayMS = backoffDelayProvider.getNextBackoffDuration();
+        const delayMS = Math.random() * Math.min(10_000, 100 * 2 ** attempt);
 
         // if the delay would exhaust the CSOT timeout, short-circuit.
         if (timeoutContext.csotEnabled() && delayMS > timeoutContext.remainingTimeMS) {
-          // TODO: is this the right error to throw?
-          throw new MongoOperationTimeoutError(
-            `MongoDB SystemOverload exponential backoff would exceed timeoutMS deadline: remaining CSOT deadline=${timeoutContext.remainingTimeMS}, backoff delayMS=${delayMS}`,
-            {
-              cause: error
-            }
-          );
+          throw error;
         }
 
         await setTimeout(delayMS);
