@@ -593,7 +593,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
+
+      if (!options.timeoutContext || options.timeoutContext?.clearServerSelectionTimeout) {
+        timeout?.clear();
+      }
+
       return transaction.server;
     }
 
