@@ -87,7 +87,6 @@ export {
   MongoWriteConcernError,
   WriteConcernErrorResult
 } from './error';
-export { TokenBucket } from './token_bucket';
 export {
   AbstractCursor,
   // Actual driver classes exported

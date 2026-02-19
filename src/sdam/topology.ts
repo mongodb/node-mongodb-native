@@ -35,7 +35,7 @@ import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { Timeout, TimeoutContext, TimeoutError } from '../timeout';
-import { TokenBucket } from '../token_bucket';
+import { INITIAL_TOKEN_BUCKET_SIZE, TokenBucket } from '../token_bucket';
 import type { Transaction } from '../transactions';
 import {
   addAbortListener,
@@ -213,7 +213,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   hello?: Document;
   _type?: string;
 
-  tokenBucket = new TokenBucket(1000);
+  tokenBucket = new TokenBucket(INITIAL_TOKEN_BUCKET_SIZE);
 
   client!: MongoClient;
 

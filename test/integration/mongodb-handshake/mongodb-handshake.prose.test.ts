@@ -5,8 +5,10 @@ import * as sinon from 'sinon';
 import {
   type ClientMetadata,
   Connection,
+  type Document,
   type DriverInfo,
   getFAASEnv,
+  type HandshakeDocument,
   Int32,
   isDriverInfoEqual,
   LEGACY_HELLO_COMMAND,

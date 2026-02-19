@@ -251,11 +251,6 @@ async function executeOperationWithRetries<
           : 2
         : 1;
 
-  const shouldRetry =
-    (operation.hasAspect(Aspect.READ_OPERATION) && topology.s.options.retryReads) ||
-    ((operation.hasAspect(Aspect.WRITE_OPERATION) || operation instanceof RunCommandOperation) &&
-      topology.s.options.retryWrites);
-
   let error: MongoError | null = null;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {

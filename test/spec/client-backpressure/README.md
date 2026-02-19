@@ -50,8 +50,21 @@ Drivers should test that retries do not occur immediately when a SystemOverloade
     5. Execute step 3 again.
 
     6. Compare the two time between the two runs.
+
         ```python
         assertTrue(with_backoff_time - no_backoff_time >= 2.1)
         ```
+
         The sum of 5 backoffs is 3.1 seconds. There is a 1-second window to account for potential variance between the two
         runs.
+
+#### Test 2: Token Bucket Capacity is Enforced
+
+Drivers should test that retry token buckets are created at their maximum capacity and that that capacity is enforced.
+
+1. Let `client` be a `MongoClient`.
+2. Assert that the client's retry token bucket is at full capacity and that the capacity is
+    `DEFAULT_RETRY_TOKEN_CAPACITY`.
+3. Using `client`, execute a successful `ping` command.
+4. Assert that the successful command did not increase the number of tokens in the bucket above
+    `DEFAULT_RETRY_TOKEN_CAPACITY`.

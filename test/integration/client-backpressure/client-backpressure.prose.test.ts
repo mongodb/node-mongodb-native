@@ -16,6 +16,7 @@ describe('Client Backpressure (Prose)', function () {
   });
 
   afterEach(async function () {
+    sinon.restore();
     await client.close();
     await clearFailPoint(this.configuration);
   });

@@ -1254,9 +1254,9 @@ export function updateSessionFromResponse(session: ClientSession, document: Mong
       session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
     } else {
       const error = new MongoServerError(document.toObject());
-      const isBackpressureError = error.hasErrorLabel(MongoErrorLabel.RetryableError);
+      const isRetryableError = error.hasErrorLabel(MongoErrorLabel.RetryableError);
 
-      if (!isBackpressureError) {
+      if (!isRetryableError) {
         session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
       }
     }
