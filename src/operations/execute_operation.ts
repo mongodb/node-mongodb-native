@@ -28,7 +28,13 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import { RETRY_COST, RETRY_TOKEN_RETURN_RATE } from '../token_bucket';
+import {
+  BASE_BACKOFF_MS,
+  MAX_BACKOFF_MS,
+  MAX_RETRIES,
+  RETRY_COST,
+  RETRY_TOKEN_RETURN_RATE
+} from '../token_bucket';
 import { abortable, maxWireVersion, supportsRetryableWrites } from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
@@ -302,7 +308,7 @@ async function executeOperationWithRetries<
       }
 
       if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
-        maxAttempts = Math.min(6, operation.maxAttempts ?? 6);
+        maxAttempts = Math.min(MAX_RETRIES + 1, operation.maxAttempts ?? MAX_RETRIES + 1);
       }
 
       if (attempt + 1 >= maxAttempts) {
@@ -314,14 +320,14 @@ async function executeOperationWithRetries<
           throw error;
         }
 
-        const delayMS = Math.random() * Math.min(10_000, 100 * 2 ** attempt);
+        const backoffMS = Math.random() * Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * 2 ** attempt);
 
-        // if the delay would exhaust the CSOT timeout, short-circuit.
-        if (timeoutContext.csotEnabled() && delayMS > timeoutContext.remainingTimeMS) {
+        // if the backoff would exhaust the CSOT timeout, short-circuit.
+        if (timeoutContext.csotEnabled() && backoffMS > timeoutContext.remainingTimeMS) {
           throw error;
         }
 
-        await setTimeout(delayMS);
+        await setTimeout(backoffMS);
       }
 
       if (

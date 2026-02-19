@@ -30,6 +30,7 @@ import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
 import { TimeoutContext } from './timeout';
+import { MAX_RETRIES } from './token_bucket';
 import {
   isTransactionCommand,
   Transaction,
@@ -497,7 +498,7 @@ export class ClientSession
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
-    operation.maxAttempts = 6;
+    operation.maxAttempts = MAX_RETRIES + 1;
 
     const timeoutContext =
       this.timeoutContext ??
@@ -516,7 +517,7 @@ export class ClientSession
     } catch (firstCommitError) {
       this.commitAttempted = true;
 
-      const remainingAttempts = 6 - (operation.attemptsMade ?? 1);
+      const remainingAttempts = MAX_RETRIES + 1 - (operation.attemptsMade ?? 1);
       if (remainingAttempts <= 0) {
         throw firstCommitError;
       }
