@@ -390,7 +390,7 @@ async function executeOperationWithRetries<
 
     // batch operations are only retryable if the batch is retryable
     if (operation.hasAspect(Aspect.COMMAND_BATCHING)) {
-      return operation.canRetryWrite;
+      return operation.canRetryWrite && isRetryableWriteError(error);
     }
 
     return (
