@@ -8,7 +8,7 @@ import {
   Timeout,
   TimeoutContext,
   TimeoutError
-} from '../mongodb';
+} from '../mongodb_runtime-testing';
 
 describe('Timeout', function () {
   let timeout: Timeout;

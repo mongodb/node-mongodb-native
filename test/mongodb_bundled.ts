@@ -17,10 +17,12 @@ export const {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent,
+  CSOTTimeoutContext,
   Db,
   Double,
   HostAddress,
   isHello,
+  LegacyTimeoutContext,
   Long,
   MongoAPIError,
   MongoBulkWriteError,
@@ -31,6 +33,7 @@ export const {
   MongoLogger,
   MongoParseError,
   MongoServerError,
+  MongoRuntimeError,
   ObjectId,
   parseOptions,
   ReadConcern,
@@ -39,6 +42,9 @@ export const {
   ReturnDocument,
   ServerApiVersion,
   SeverityLevel,
+  Timeout,
+  TimeoutContext,
+  TimeoutError,
   TopologyType,
   WriteConcern
 } = exportSource;
@@ -61,6 +67,7 @@ import type {
   CommandSucceededEvent as _CommandSucceededEventType,
   HostAddress as _HostAddressType,
   MongoClient as _MongoClientType,
+  Timeout as _TimeoutType,
   TopologyType as _TopologyType
 } from './tools/runner/bundle/types/index';
 export type Collection = _CollectionType;
@@ -69,4 +76,5 @@ export type CommandStartedEvent = _CommandStartedEventType;
 export type CommandSucceededEvent = _CommandSucceededEventType;
 export type HostAddress = _HostAddressType;
 export type MongoClient = _MongoClientType;
+export type Timeout = _TimeoutType;
 export type TopologyType = _TopologyType;
