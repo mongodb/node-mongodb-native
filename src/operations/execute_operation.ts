@@ -262,10 +262,8 @@ async function executeOperationWithRetries<
         const result = await server.command(operation, timeoutContext);
         topology.tokenBucket.deposit(
           attempt > 0
-            ? // on successful retry, deposit the retry cost + the refresh rate.
-              RETRY_TOKEN_RETURN_RATE + RETRY_COST
-            : // otherwise, just deposit the refresh rate.
-              RETRY_TOKEN_RETURN_RATE
+            ? RETRY_TOKEN_RETURN_RATE + RETRY_COST // on successful retry
+            : RETRY_TOKEN_RETURN_RATE // otherwise
         );
         return operation.handleOk(result);
       } catch (error) {
