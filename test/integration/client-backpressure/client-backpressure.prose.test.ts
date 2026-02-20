@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { type Collection, type MongoClient, MongoServerError } from '../../../src';
+import {
+  type Collection,
+  INITIAL_TOKEN_BUCKET_SIZE,
+  type MongoClient,
+  MongoServerError
+} from '../../mongodb';
 import { clearFailPoint, configureFailPoint, measureDuration } from '../../tools/utils';
 
 describe('Client Backpressure (Prose)', function () {
@@ -58,4 +63,19 @@ describe('Client Backpressure (Prose)', function () {
       expect(durationBackoff - durationNoBackoff).to.be.within(3100 - 1000, 3100 + 1000);
     }
   );
+
+  it('Test 2: Token Bucket capacity is Enforced', async () => {
+    // 1-2. Assert that the client's retry token bucket is at full capacity and that the capacity
+    // is DEFAULT_RETRY_TOKEN_CAPACITY.
+    const tokenBucket = client.topology.tokenBucket;
+    expect(tokenBucket).to.have.property('budget', INITIAL_TOKEN_BUCKET_SIZE);
+    expect(tokenBucket).to.have.property('capacity', INITIAL_TOKEN_BUCKET_SIZE);
+
+    // 3. Execute a successful ping command.
+    await client.db('admin').command({ ping: 1 });
+
+    // 4. Assert that the successful command did not increase the number of tokens in the bucket
+    // above DEFAULT_RETRY_TOKEN_CAPACITY.
+    expect(tokenBucket).to.have.property('budget').that.is.at.most(INITIAL_TOKEN_BUCKET_SIZE);
+  });
 });

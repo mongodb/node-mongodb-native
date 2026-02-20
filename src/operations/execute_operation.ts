@@ -284,6 +284,8 @@ async function executeOperationWithRetries<
         topology.tokenBucket.deposit(RETRY_COST);
       }
 
+      // Preserve the original error once a write has been performed.
+      // Only update to the latest error if no writes were performed.
       if (error == null) {
         error = operationError;
       } else {
