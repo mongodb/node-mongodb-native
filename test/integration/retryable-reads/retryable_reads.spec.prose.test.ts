@@ -190,7 +190,14 @@ describe('Retryable Reads Spec Prose', () => {
       it('retries on a different server when SystemOverloadedError', TEST_METADATA, async () => {
         await client.db('test').collection('test').find().toArray();
 
-        console.log('failed event:', JSON.stringify(commandFailedEvents[0]));
+        console.log('failed event:', {
+          address: commandFailedEvents[0].address,
+          failure: {
+            name: commandFailedEvents[0].failure.name,
+            code: (commandFailedEvents[0].failure as any).code,
+            labels: (commandFailedEvents[0].failure as any).errorLabels
+          }
+        });
 
         expect(commandFailedEvents).to.have.lengthOf(1);
         expect(commandSucceededEvents).to.have.lengthOf(1);
