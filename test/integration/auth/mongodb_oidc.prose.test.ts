@@ -39,6 +39,11 @@ const generateResult = (token: string, expiresInSeconds?: number, extraFields?: 
   return response;
 };
 
+let appNameCounter = 0;
+const createAppName = (extra?: string) => {
+  return `oidc-${appNameCounter++}-app${extra ? `-${extra}` : ''}`;
+};
+
 const DEFAULT_URI = 'mongodb://127.0.0.1:27017';
 const URI_SINGLE = process.env.MONGODB_URI_SINGLE ?? DEFAULT_URI;
 const isCallbackTest = process.env.ENVIRONMENT === 'test';
@@ -278,6 +283,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('3.3 Unexpected error code does not clear the cache', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         // Create a MongoClient with a callback that returns a valid token.
         // Set a fail point for saslStart commands of the form:
@@ -299,8 +305,8 @@ describe('OIDC Auth Spec Tests', function () {
         // `[callback-only]` Assert that the callback has been called once.
         // Close the client.
         beforeEach(async function () {
-          client = getClient({}, callbackSpy);
-          utilClient = getClient({}, createCallback());
+          client = getClient({ appName }, callbackSpy);
+          utilClient = getClient({ appName }, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -312,15 +318,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['saslStart'],
-                errorCode: 20
+                errorCode: 20,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -364,6 +373,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('4.1 Reauthentication Succeeds', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         // Create an OIDC configured client.
         // Set a fail point for find commands of the form:
@@ -383,8 +393,8 @@ describe('OIDC Auth Spec Tests', function () {
         // `[callback-only]` Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
         // Close the client.
         beforeEach(async function () {
-          client = getClient({}, callbackSpy);
-          utilClient = getClient({}, createCallback());
+          client = getClient({ appName }, callbackSpy);
+          utilClient = getClient({ appName }, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -402,9 +412,11 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -419,6 +431,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('4.1 Reauthentication Succeeds (promoteValues: false)', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         // Create an OIDC configured client.
         // Set a fail point for find commands of the form:
@@ -438,8 +451,8 @@ describe('OIDC Auth Spec Tests', function () {
         // `[callback-only]` Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
         // Close the client.
         beforeEach(async function () {
-          client = getClient({ promoteValues: false }, callbackSpy);
-          utilClient = getClient({ promoteValues: false }, createCallback());
+          client = getClient({ promoteValues: false, appName }, callbackSpy);
+          utilClient = getClient({ promoteValues: false, appName }, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -457,9 +470,11 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -474,6 +489,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('4.2 `[callback-only]` Read Commands Fail If Reauthentication Fails', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createBadCallback());
         // Create a MongoClient whose OIDC callback returns one good token and then bad tokens after the first call.
         // Perform a find operation that succeeds.
@@ -498,12 +514,13 @@ describe('OIDC Auth Spec Tests', function () {
             this.test.skipReason = 'Callback validation tests only run in test environment';
             this.test.skip();
           }
-          client = getClient({}, callbackSpy);
+          client = getClient({ appName }, callbackSpy);
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('test');
           await utilClient
@@ -516,15 +533,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient?.close();
         });
@@ -538,6 +558,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('4.3 `[callback-only]` Write Commands Fail If Reauthentication Fails', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createBadCallback());
         // Create a MongoClient whose OIDC callback returns one good token and then bad tokens after the first call.
         // Perform an insert operation that succeeds.
@@ -562,12 +583,13 @@ describe('OIDC Auth Spec Tests', function () {
             this.test.skipReason = 'Callback validation tests only run in test environment';
             this.test.skip();
           }
-          client = getClient({}, callbackSpy);
+          client = getClient({ appName }, callbackSpy);
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('test');
           await collection.insertOne({ n: 1 });
@@ -581,15 +603,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['insert'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient?.close();
         });
@@ -603,6 +628,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('4.4 Speculative Authentication should be ignored on Reauthentication', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         const saslStarts = [];
         // - Create an OIDC configured client.
@@ -631,8 +657,8 @@ describe('OIDC Auth Spec Tests', function () {
         // - Assert there were `SaslStart` commands executed.
         // - Close the client.
         beforeEach(async function () {
-          utilClient = getClient({}, createCallback());
-          client = getClient({ monitorCommands: true }, callbackSpy);
+          utilClient = getClient({ appName }, createCallback());
+          client = getClient({ monitorCommands: true, appName }, callbackSpy);
           client.on('commandStarted', event => {
             if (event.commandName === 'saslStart') {
               saslStarts.push(event);
@@ -654,9 +680,11 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient?.close();
         });
@@ -678,7 +706,8 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['insert'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
 
@@ -693,6 +722,7 @@ describe('OIDC Auth Spec Tests', function () {
       describe('4.5 Reauthentication Succeeds when a Session is involved', function () {
         let utilClient: MongoClient;
         let session: ClientSession;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         // Create an OIDC configured client.
         // Set a fail point for find commands of the form:
@@ -713,8 +743,8 @@ describe('OIDC Auth Spec Tests', function () {
         // `[callback-only]` Assert that the callback was called 2 times (once during the connection handshake, and again during reauthentication).
         // Close the session and the client.
         beforeEach(async function () {
-          client = getClient({}, callbackSpy);
-          utilClient = getClient({}, createCallback());
+          client = getClient({ appName }, callbackSpy);
+          utilClient = getClient({ appName }, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -726,16 +756,19 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
           session = client.startSession();
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
           await session.endSession();
@@ -1039,6 +1072,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('2.3 Refresh Token Is Passed To The Callback', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         // Create a MongoClient with a human callback that checks for the presence of a refresh token.
         // Perform a find operation that succeeds.
@@ -1063,13 +1097,15 @@ describe('OIDC Auth Spec Tests', function () {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
@@ -1083,15 +1119,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -1114,6 +1153,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('3.1 Uses speculative authentication if there is a cached token', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         // Create an OIDC configured client with a human callback that returns a valid token.
         // Set a fail point for find commands of the form:
@@ -1150,13 +1190,15 @@ describe('OIDC Auth Spec Tests', function () {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('testHuman');
           await utilClient
@@ -1169,7 +1211,8 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                closeConnection: true
+                closeConnection: true,
+                appName
               }
             });
           const error = await collection.findOne().catch(error => error);
@@ -1184,15 +1227,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['saslStart'],
-                errorCode: 18
+                errorCode: 18,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -1205,6 +1251,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('3.2 Does not use speculative authentication if there is no cached token', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         // Create an OIDC configured client with a human callback that returns a valid token.
         // Set a fail point for saslStart commands of the form:
@@ -1227,13 +1274,15 @@ describe('OIDC Auth Spec Tests', function () {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: callbackSpy
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('testHuman');
           await utilClient
@@ -1246,15 +1295,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['saslStart'],
-                errorCode: 18
+                errorCode: 18,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -1276,6 +1328,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('4.1 Succeeds', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         const commandStartedEvents = [];
         const commandSucceededEvents = [];
@@ -1312,13 +1365,15 @@ describe('OIDC Auth Spec Tests', function () {
               OIDC_HUMAN_CALLBACK: callbackSpy
             },
             monitorCommands: true,
-            retryReads: false
+            retryReads: false,
+            appName
           });
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
@@ -1342,15 +1397,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -1366,6 +1424,7 @@ describe('OIDC Auth Spec Tests', function () {
 
       describe('4.2 Succeeds no refresh', function () {
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createCallback());
         // Create an OIDC configured client with a human callback that does not return a refresh token.
         // Perform a find operation that succeeds.
@@ -1392,13 +1451,15 @@ describe('OIDC Auth Spec Tests', function () {
               OIDC_HUMAN_CALLBACK: callbackSpy
             },
             monitorCommands: true,
-            retryReads: false
+            retryReads: false,
+            appName
           });
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
@@ -1413,15 +1474,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -1443,6 +1507,7 @@ describe('OIDC Auth Spec Tests', function () {
         };
 
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createBadCallback());
         // Create an OIDC configured client with a callback that returns the test_user1 access token and a bad refresh token.
         // Perform a find operation that succeeds.
@@ -1469,13 +1534,15 @@ describe('OIDC Auth Spec Tests', function () {
               OIDC_HUMAN_CALLBACK: callbackSpy
             },
             monitorCommands: true,
-            retryReads: false
+            retryReads: false,
+            appName
           });
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
@@ -1490,15 +1557,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
@@ -1528,6 +1598,7 @@ describe('OIDC Auth Spec Tests', function () {
         };
 
         let utilClient: MongoClient;
+        const appName = createAppName();
         const callbackSpy = sinon.spy(createBadCallback());
         // Create an OIDC configured client that returns invalid refresh tokens and returns invalid access tokens after the first access.
         // Perform a find operation that succeeds.
@@ -1554,13 +1625,15 @@ describe('OIDC Auth Spec Tests', function () {
               OIDC_HUMAN_CALLBACK: callbackSpy
             },
             monitorCommands: true,
-            retryReads: false
+            retryReads: false,
+            appName
           });
           utilClient = new MongoClient(uriSingle, {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false
+            retryReads: false,
+            appName
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
@@ -1575,15 +1648,18 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
+          // explicitly remove the fail point to prevent interaction betweet test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
-            mode: 'off'
+            mode: 'off',
+            data: { appName }
           });
           await utilClient.close();
         });
