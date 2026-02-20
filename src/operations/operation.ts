@@ -66,10 +66,10 @@ export abstract class AbstractOperation<TResult = any> {
   /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
 
-  /** @internal Used by commitTransaction to share the retry budget across two executeOperation calls. */
+  /** Used by commitTransaction to share the retry budget across two executeOperation calls. */
   maxAttempts?: number;
 
-  /** @internal Tracks how many attempts were made in the last executeOperation call. */
+  /** Tracks how many attempts were made in the last executeOperation call. */
   attemptsMade?: number;
 
   private _session: ClientSession | undefined;
