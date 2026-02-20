@@ -65,6 +65,7 @@ import type {
   CommandFailedEvent as _CommandFailedEventType,
   CommandStartedEvent as _CommandStartedEventType,
   CommandSucceededEvent as _CommandSucceededEventType,
+  CSOTTimeoutContext as _CSOTTimeoutContextType,
   HostAddress as _HostAddressType,
   MongoClient as _MongoClientType,
   Timeout as _TimeoutType,
@@ -74,6 +75,7 @@ export type Collection = _CollectionType;
 export type CommandFailedEvent = _CommandFailedEventType;
 export type CommandStartedEvent = _CommandStartedEventType;
 export type CommandSucceededEvent = _CommandSucceededEventType;
+export type CSOTTimeoutContext = _CSOTTimeoutContextType;
 export type HostAddress = _HostAddressType;
 export type MongoClient = _MongoClientType;
 export type Timeout = _TimeoutType;

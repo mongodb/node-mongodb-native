@@ -778,6 +778,15 @@ Call the following command to rebuild the bundle:
    `npm run build:bundle`
 
 You can now run the unit or integ tests locally and they will be importing from the patched bundle.
+   `npm run check:unit`
+or
+   `npm run check:test`
+or through an IDE.
+
+Note that you don't need to run `*-bundled` scripts after switching.
+
+To revert the barrel file changes, run:
+   `npm run switch:to-unbundled`
 
 ## GCP
 
