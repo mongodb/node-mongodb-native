@@ -121,9 +121,7 @@ export function loadContextifiedMongoDBModule() {
   const moduleContainer = { exports: exportsContainer };
 
   // Wrap the bundle in a CommonJS-style wrapper
-  const wrapper = `(function(exports, module, require) {
-        ${bundleCode}
-    })`;
+  const wrapper = `(function(exports, module, require) {${bundleCode}})`;
 
   const script = new vm.Script(wrapper, { filename: bundlePath });
   const fn = script.runInContext(sandbox);
