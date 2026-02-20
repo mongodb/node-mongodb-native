@@ -36,7 +36,7 @@ describe.only('server selection timeout cleanup', function () {
             data: {
               failCommands: ['insert'],
               errorCode: 6,
-              errorsLabels: ['RetryableWriteError'],
+              errorLabels: ['RetryableWriteError'],
               closeConnection: false
             }
           });
@@ -52,7 +52,7 @@ describe.only('server selection timeout cleanup', function () {
             data: {
               failCommands: ['insert'],
               errorCode: 6,
-              errorsLabels: ['RetryableWriteError'],
+              errorLabels: ['RetryableWriteError'],
               closeConnection: false
             }
           });
