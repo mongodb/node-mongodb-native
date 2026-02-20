@@ -412,11 +412,19 @@
           "events": [
             {
               "commandStartedEvent": {
+                "command": {
+                  "startTransaction": true,
+                  "autocommit": false
+                },
                 "commandName": "insert"
               }
             },
             {
               "commandStartedEvent": {
+                "command": {
+                  "startTransaction": true,
+                  "autocommit": false
+                },
                 "commandName": "insert"
               }
             },
