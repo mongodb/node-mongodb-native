@@ -14,11 +14,15 @@ describe.only('server selection timeout cleanup', function () {
     { requires: { topology: 'sharded', mongodb: '>=4.4' } },
     function () {
       beforeEach(async function () {
-        client = this.configuration.newClient({ serverSelectionTimeoutMS: 500, retryWrites: true });
+        client = this.configuration.newClient(
+          this.configuration.url({ useMultipleMongoses: true }),
+          { serverSelectionTimeoutMS: 500, retryWrites: true }
+        );
         await client.connect();
 
         collection = client.db('server_selection').collection('timeout_cleanup');
 
+        utilClients = [];
         // we need to configure failpoint for every mongos as we don't know where the session will be pinned to
         const seeds = client.topology.s.seedlist.map(address => address.toString());
         for (const seed of seeds) {
