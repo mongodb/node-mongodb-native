@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 
-import { type Collection, type MongoClient } from '../../mongodb';
+import {
+  type Collection,
+  type CommandFailedEvent,
+  type CommandSucceededEvent,
+  type MongoClient
+} from '../../mongodb';
+import { filterForCommands } from '../shared';
 
 describe('Retryable Reads Spec Prose', () => {
   let client: MongoClient, failPointName;
@@ -134,6 +140,101 @@ describe('Retryable Reads Spec Prose', () => {
           'expected 3 find command started events'
         );
       }
+    });
+  });
+
+  describe('Retrying Reads in a Replica Set', () => {
+    // These tests verify that server deprioritization on replica sets only occurs
+    // for SystemOverloadedError errors.
+
+    const TEST_METADATA: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.2', topology: 'replicaset' }
+    };
+
+    describe('Retryable Reads Caused by Overload Errors Are Retried on a Different Server', () => {
+      let client: MongoClient;
+      const commandFailedEvents: CommandFailedEvent[] = [];
+      const commandSucceededEvents: CommandSucceededEvent[] = [];
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({
+          retryReads: true,
+          readPreference: 'primaryPreferred',
+          monitorCommands: true
+        });
+
+        client.on('commandFailed', filterForCommands('find', commandFailedEvents));
+        client.on('commandSucceeded', filterForCommands('find', commandSucceededEvents));
+
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['find'],
+            errorCode: 6,
+            errorLabels: ['RetryableError', 'SystemOverloadedError']
+          }
+        });
+
+        commandFailedEvents.length = 0;
+        commandSucceededEvents.length = 0;
+      });
+
+      afterEach(async function () {
+        await client?.db('admin').command({ configureFailPoint: 'failCommand', mode: 'off' });
+        await client?.close();
+      });
+
+      it('retries on a different server when SystemOverloadedError', TEST_METADATA, async () => {
+        await client.db('test').collection('test').find().toArray();
+
+        expect(commandFailedEvents).to.have.lengthOf(1);
+        expect(commandSucceededEvents).to.have.lengthOf(1);
+        expect(commandFailedEvents[0].address).to.not.equal(commandSucceededEvents[0].address);
+      });
+    });
+
+    describe('Retryable Reads Caused by Non-Overload Errors Are Retried on the Same Server', () => {
+      let client: MongoClient;
+      const commandFailedEvents: CommandFailedEvent[] = [];
+      const commandSucceededEvents: CommandSucceededEvent[] = [];
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({
+          retryReads: true,
+          readPreference: 'primaryPreferred',
+          monitorCommands: true
+        });
+
+        client.on('commandFailed', filterForCommands('find', commandFailedEvents));
+        client.on('commandSucceeded', filterForCommands('find', commandSucceededEvents));
+
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['find'],
+            errorCode: 6,
+            errorLabels: ['RetryableError']
+          }
+        });
+
+        commandFailedEvents.length = 0;
+        commandSucceededEvents.length = 0;
+      });
+
+      afterEach(async function () {
+        await client?.db('admin').command({ configureFailPoint: 'failCommand', mode: 'off' });
+        await client?.close();
+      });
+
+      it('retries on the same server when no SystemOverloadedError', TEST_METADATA, async () => {
+        await client.db('test').collection('test').find().toArray();
+
+        expect(commandFailedEvents).to.have.lengthOf(1);
+        expect(commandSucceededEvents).to.have.lengthOf(1);
+        expect(commandFailedEvents[0].address).to.equal(commandSucceededEvents[0].address);
+      });
     });
   });
 });
