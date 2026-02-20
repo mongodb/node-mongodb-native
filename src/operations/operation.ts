@@ -70,7 +70,7 @@ export abstract class AbstractOperation<TResult = any> {
   maxAttempts?: number;
 
   /** Tracks how many attempts were made in the last executeOperation call. */
-  attemptsMade?: number;
+  attemptsMade: number;
 
   private _session: ClientSession | undefined;
 
@@ -88,6 +88,8 @@ export abstract class AbstractOperation<TResult = any> {
 
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
+
+    this.attemptsMade = 0;
   }
 
   /** Must match the first key of the command object sent to the server.
