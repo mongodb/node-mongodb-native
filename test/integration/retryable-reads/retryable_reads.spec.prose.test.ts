@@ -148,10 +148,10 @@ describe('Retryable Reads Spec Prose', () => {
     // for SystemOverloadedError errors.
 
     const TEST_METADATA: MongoDBMetadataUI = {
-      requires: { mongodb: '>=4.2', topology: 'replicaset' }
+      requires: { mongodb: '>=4.4', topology: 'replicaset' }
     };
 
-    describe.only('Retryable Reads Caused by Overload Errors Are Retried on a Different Server', () => {
+    describe('Retryable Reads Caused by Overload Errors Are Retried on a Different Server', () => {
       let client: MongoClient;
       const commandFailedEvents: CommandFailedEvent[] = [];
       const commandSucceededEvents: CommandSucceededEvent[] = [];
@@ -189,15 +189,6 @@ describe('Retryable Reads Spec Prose', () => {
 
       it('retries on a different server when SystemOverloadedError', TEST_METADATA, async () => {
         await client.db('test').collection('test').find().toArray();
-
-        console.log('failed event:', {
-          address: commandFailedEvents[0].address,
-          failure: {
-            name: commandFailedEvents[0].failure.name,
-            code: (commandFailedEvents[0].failure as any).code,
-            labels: (commandFailedEvents[0].failure as any).errorLabels
-          }
-        });
 
         expect(commandFailedEvents).to.have.lengthOf(1);
         expect(commandSucceededEvents).to.have.lengthOf(1);
