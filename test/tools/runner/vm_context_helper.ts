@@ -14,7 +14,11 @@ function createRestrictedRequire() {
   return function restrictedRequire(moduleName: string) {
     // Block core modules
     if (isBuiltin(moduleName) && blockedModules.has(moduleName)) {
-      throw new Error(`Access to core module '${moduleName}' is restricted in this context`);
+      const sourceFile = new Error().stack.split('\n')[2]?.replace('at', '').trim();
+      const source = sourceFile ? `from ${sourceFile}` : 'from an unknown source';
+      throw new Error(
+        `Access to core module '${moduleName}' (${source}) is restricted in this context`
+      );
     }
 
     return require(moduleName);
