@@ -43,9 +43,15 @@ about the types of tests and how to run them.
     - [AWS Authentication tests](#aws-authentication-tests)
       - [Running AWS tests](#running-aws-tests)
     - [Container Tests](#container-tests)
+    - [Node-less Runtime Testing](#node-less-runtime-testing)
+      - [Design](#design)
+      - [Adding tests to be tested with Node-less Runtime](#adding-tests-to-be-tested-with-node-less-runtime)
+      - [Running tests in Node-less Runtime](#running-tests-in-node-less-runtime)
+      - [Running tests manually in Node-less Runtime](#running-tests-manually-in-node-less-runtime)
   - [GCP](#gcp)
   - [Azure](#azure)
   - [AWS](#aws)
+    - [Running tests with TLS](#running-tests-with-tls)
     - [TODO Special Env Sections](#todo-special-env-sections)
   - [Testing driver changes with mongosh](#testing-driver-changes-with-mongosh)
     - [Point mongosh to the driver](#point-mongosh-to-the-driver)
@@ -715,6 +721,64 @@ our existing integration test suite and run Evergreen patches against a single i
 _Note that in cases where the tests need to run longer than one hour to ensure that tokens expire
 that the mocha timeout must be increased in order for the test not to timeout._
 
+### Node-less Runtime Testing
+
+We are starting to remove explicit Node requirements, and are making it possible for users to provide us with the required functionality.
+
+To that end, need to run our tests in a Node-less environment. These tests need to fail if our code erroneously uses Node.
+
+#### Design
+
+The approach we are taking is to modify our unit and integration tests to run against a patched version of the driver, where any illegal `require` calls are blocked.
+
+Here are a few of the relevant components of this system:
+
+1. [test/mongodb.ts](test/mongodb.ts)
+   - Test entrypoint that exports Driver and all internal types.
+2. [etc/bundle-driver.mjs](etc/bundle-driver.mjs)
+   - Creates a CommonJS bundle (Driver and all internal types) from `test/mongodb.ts`.
+3. [test/tools/runner/vm_context_helper.ts](./tools/runner/vm_context_helper.ts)
+   - Special VM that blocks specific `require` calls.
+4. [test/mongodb_bundled.ts](./mongodb_bundled.ts)
+   - Exports MongoDB from CommonJS bundle created by `etc/bundle-driver.mjs`, using `vm_context_helper.ts` to detect usages of blocked `require` calls.
+   - This file is currently maintained by hand and needs to export types explicitly. We may want to generate this file as well.
+5. [test/mongodb_runtime-testing.ts](./mongodb_runtime-testing.ts)
+   - Generated "barrel file". It exports either `test/mongodb.ts` (Driver + all internal types) or `test/mongodb_bundled.ts` (Driver + all internal types, loaded from bundle, and using `vm_context_helper.ts` to block `require` calls.)
+6. [etc/build-runtime-barrel.mjs](./etc/build-runtime-barrel.mjs)
+   - Generates the barrel file `test/mongodb_runtime-testing.ts` based on `MONGODB_BUNDLED` env var.
+
+#### Adding tests to be tested with Node-less Runtime
+
+Change the test's import from
+   `} from '../../mongodb';`
+to
+   `} from '../../mongodb_runtime-testing';`
+
+#### Running tests in Node-less Runtime
+
+To run opted-in unit or integration tests in a Node-less runtime, run:
+
+   `npm run check:unit-bundled`
+or
+   `npm run check:test-bundled`
+
+Either command will:
+
+1. Create a bundle from `test/mongodb.ts`
+2. Regenerate the barrel file to export from the generated bundle
+3. Run unit or integ tests
+4. Regenerate the barrel file to export from the test entry point
+
+#### Running tests manually in Node-less Runtime
+
+Call the following command to regenerate the barrel file to import from the bundle:
+   `npm run switch:to-bundled`
+
+Call the following command to rebuild the bundle:
+   `npm run build:bundle`
+
+You can now run the unit or integ tests locally and they will be importing from the patched bundle.
+
 ## GCP
 
 1. Add a new GCP prose test to `test/integration/auth/mongodb_oidc_gcp.prose.06.test.ts` that mimics the behaviour that
@@ -748,7 +812,7 @@ We tests TLS in two suites in CI:
 
 Setting up a local environment is the same for both suites.
 
-First, configure a server with TLS enabled by following the steps in [Runing the Tests Locally](#Running-the-Tests-Locally) with the environment 
+First, configure a server with TLS enabled by following the steps in [Runing the Tests Locally](#Running-the-Tests-Locally) with the environment
 variable `SSL=SSL` set.
 
 Then, in addition to setting the `MONGODB_URI` environment varialbe, set the following environment variables:
