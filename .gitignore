@@ -108,3 +108,5 @@ uri.txt
 crypt_shared.sh
 
 *keytab
+driver.bundle.js
+test/tools/runner/bundle/

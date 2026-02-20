@@ -17,10 +17,11 @@ import {
   MongoClient,
   type MongoClientOptions,
   ObjectId,
+  runNodelessTests,
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
 import { flakyTests } from './flaky';
@@ -220,7 +221,10 @@ export class TestConfiguration {
     return uri.indexOf('MONGODB-OIDC') > -1 && uri.indexOf(`ENVIRONMENT:${env}`) > -1;
   }
 
-  newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: MongoClientOptions) {
+  newClient(
+    urlOrQueryOptions?: string | Record<string, any>,
+    serverOptions?: MongoClientOptions
+  ): MongoClient {
     const baseOptions: MongoClientOptions = this.compressor
       ? {
           compressors: this.compressor
@@ -228,6 +232,14 @@ export class TestConfiguration {
       : {};
 
     serverOptions = Object.assign(baseOptions, getEnvironmentalOptions(), serverOptions);
+    // If using contextified mongodb, inject Node.js runtime adapters
+    if (runNodelessTests) {
+      serverOptions.runtimeAdapters = {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        os: require('os'),
+        ...serverOptions.runtimeAdapters
+      };
+    }
 
     if (this.loggingEnabled && !Object.hasOwn(serverOptions, 'mongodbLogPath')) {
       serverOptions = this.setupLogging(serverOptions);
@@ -239,7 +251,8 @@ export class TestConfiguration {
         throw new Error(`Cannot use options to specify host/port, must be in ${urlOrQueryOptions}`);
       }
 
-      return new MongoClient(urlOrQueryOptions, serverOptions);
+      const newClient: MongoClient = new MongoClient(urlOrQueryOptions, serverOptions);
+      return newClient;
     }
 
     const queryOptions = urlOrQueryOptions ?? {};
