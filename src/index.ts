@@ -87,7 +87,6 @@ export {
   MongoWriteConcernError,
   WriteConcernErrorResult
 } from './error';
-export type { TokenBucket } from './token_bucket';
 export {
   AbstractCursor,
   // Actual driver classes exported
@@ -622,6 +621,7 @@ export type {
   TimeoutContext,
   TimeoutContextOptions
 } from './timeout';
+export type { TokenBucket } from './token_bucket';
 export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,
