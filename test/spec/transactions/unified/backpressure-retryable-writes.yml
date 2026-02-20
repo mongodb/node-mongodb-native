@@ -240,16 +240,53 @@ tests:
         events:
           - commandStartedEvent:
               command:
+                insert: test
+                documents:
+                  - _id: 2
+                ordered: true
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
                 startTransaction: true
                 autocommit: false
+                readConcern:
+                  $$exists: false
+                writeConcern:
+                  $$exists: false
               commandName: insert
+              databaseName: *database_name
           - commandStartedEvent:
               command:
+                insert: test
+                documents:
+                  - _id: 2
+                ordered: true
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
                 startTransaction: true
                 autocommit: false
+                readConcern:
+                  $$exists: false
+                writeConcern:
+                  $$exists: false
               commandName: insert
+              databaseName: *database_name
           - commandStartedEvent:
+              command:
+                lsid:
+                  $$sessionLsid: *session0
+                txnNumber:
+                  $numberLong: "1"
+                startTransaction:
+                  $$exists: false
+                autocommit: false
+                writeConcern:
+                  $$exists: false
               commandName: abortTransaction
+              databaseName: admin
     outcome:
       - collectionName: *collection_name
         databaseName: *database_name
