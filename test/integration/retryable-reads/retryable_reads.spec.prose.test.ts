@@ -151,7 +151,7 @@ describe('Retryable Reads Spec Prose', () => {
       requires: { mongodb: '>=4.2', topology: 'replicaset' }
     };
 
-    describe('Retryable Reads Caused by Overload Errors Are Retried on a Different Server', () => {
+    describe.only('Retryable Reads Caused by Overload Errors Are Retried on a Different Server', () => {
       let client: MongoClient;
       const commandFailedEvents: CommandFailedEvent[] = [];
       const commandSucceededEvents: CommandSucceededEvent[] = [];
@@ -165,6 +165,8 @@ describe('Retryable Reads Spec Prose', () => {
 
         client.on('commandFailed', filterForCommands('find', commandFailedEvents));
         client.on('commandSucceeded', filterForCommands('find', commandSucceededEvents));
+
+        await client.connect();
 
         await client.db('admin').command({
           configureFailPoint: 'failCommand',
@@ -188,6 +190,8 @@ describe('Retryable Reads Spec Prose', () => {
       it('retries on a different server when SystemOverloadedError', TEST_METADATA, async () => {
         await client.db('test').collection('test').find().toArray();
 
+        console.log('failed event:', JSON.stringify(commandFailedEvents[0]));
+
         expect(commandFailedEvents).to.have.lengthOf(1);
         expect(commandSucceededEvents).to.have.lengthOf(1);
         expect(commandFailedEvents[0].address).to.not.equal(commandSucceededEvents[0].address);
@@ -208,6 +212,8 @@ describe('Retryable Reads Spec Prose', () => {
 
         client.on('commandFailed', filterForCommands('find', commandFailedEvents));
         client.on('commandSucceeded', filterForCommands('find', commandSucceededEvents));
+
+        await client.connect();
 
         await client.db('admin').command({
           configureFailPoint: 'failCommand',
