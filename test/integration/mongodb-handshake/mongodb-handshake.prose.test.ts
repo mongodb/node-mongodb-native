@@ -5,8 +5,10 @@ import * as sinon from 'sinon';
 import {
   type ClientMetadata,
   Connection,
+  type Document,
   type DriverInfo,
   getFAASEnv,
+  type HandshakeDocument,
   Int32,
   isDriverInfoEqual,
   LEGACY_HELLO_COMMAND,
@@ -947,5 +949,40 @@ describe('Client Metadata Update Prose Tests', function () {
         });
       });
     }
+  });
+});
+
+// TODO: add prose test descriptions here to align the test with the spec.
+describe('Backpressure Metadata', function () {
+  let client: MongoClient;
+  let spy: sinon.SinonSpy<Parameters<typeof Connection.prototype.command>>;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+    spy = sinon.spy(Connection.prototype, 'command');
+    await client.connect();
+
+    // run an operation to force a connection establishment,
+    // if we're testing noauth load balanced mode.
+    await client.db('foo').collection('bar').insertOne({ name: 'bumpy' });
+  });
+
+  afterEach(async function () {
+    sinon.restore();
+    await client?.close();
+  });
+
+  it('includes backpressure in the handshake document', function () {
+    const isHello = (cmd: Document): cmd is HandshakeDocument =>
+      `hello` in cmd || LEGACY_HELLO_COMMAND in cmd;
+
+    const hellos = spy.args.map(([_ns, command, _options]) => command).filter(isHello);
+
+    expect(hellos.length).to.be.greaterThan(0);
+
+    expect(
+      hellos.every(hello => hello.backpressure === true),
+      `some handshake documents did not specify backpressure: true`
+    );
   });
 });

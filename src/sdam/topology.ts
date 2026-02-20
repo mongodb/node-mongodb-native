@@ -35,6 +35,7 @@ import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { Timeout, TimeoutContext, TimeoutError } from '../timeout';
+import { INITIAL_TOKEN_BUCKET_SIZE, TokenBucket } from '../token_bucket';
 import type { Transaction } from '../transactions';
 import {
   addAbortListener,
@@ -207,18 +208,16 @@ export type TopologyEvents = {
  * @internal
  */
 export class Topology extends TypedEventEmitter<TopologyEvents> {
-  /** @internal */
   s: TopologyPrivate;
-  /** @internal */
   waitQueue: List<ServerSelectionRequest>;
-  /** @internal */
   hello?: Document;
-  /** @internal */
   _type?: string;
+
+  /** @internal */
+  tokenBucket = new TokenBucket(INITIAL_TOKEN_BUCKET_SIZE);
 
   client!: MongoClient;
 
-  /** @internal */
   private connectionLock?: Promise<Topology>;
 
   /** @event */
@@ -595,7 +594,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
+
+      if (!options.timeoutContext || options.timeoutContext.clearServerSelectionTimeout) {
+        timeout?.clear();
+      }
+
       return transaction.server;
     }
 
@@ -666,7 +669,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       throw error;
     } finally {
       abortListener?.[kDispose]();
-      if (options.timeoutContext?.clearServerSelectionTimeout) timeout?.clear();
+      if (!options.timeoutContext || options.timeoutContext.clearServerSelectionTimeout) {
+        timeout?.clear();
+      }
     }
   }
   /**

@@ -30,6 +30,7 @@ import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
 import { TimeoutContext } from './timeout';
+import { MAX_RETRIES } from './token_bucket';
 import {
   isTransactionCommand,
   Transaction,
@@ -467,7 +468,11 @@ export class ClientSession
       } else {
         const wcKeys = Object.keys(wc);
         if (wcKeys.length > 2 || (!wcKeys.includes('wtimeoutMS') && !wcKeys.includes('wTimeoutMS')))
-          // if the write concern was specified with wTimeoutMS, then we set both wtimeoutMS and wTimeoutMS, guaranteeing at least two keys, so if we have more than two keys, then we can automatically assume that we should add the write concern to the command. If it has 2 or fewer keys, we need to check that those keys aren't the wtimeoutMS or wTimeoutMS options before we add the write concern to the command
+          // if the write concern was specified with wTimeoutMS, then we set both wtimeoutMS
+          // and wTimeoutMS, guaranteeing at least two keys, so if we have more than two keys,
+          // then we can automatically assume that we should add the write concern to the command.
+          // If it has 2 or fewer keys, we need to check that those keys aren't the wtimeoutMS
+          // or wTimeoutMS options before we add the write concern to the command
           WriteConcern.apply(command, { ...wc, wtimeoutMS: undefined });
       }
     }
@@ -493,6 +498,7 @@ export class ClientSession
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
+    operation.maxAttempts = MAX_RETRIES + 1;
 
     const timeoutContext =
       this.timeoutContext ??
@@ -510,6 +516,12 @@ export class ClientSession
       return;
     } catch (firstCommitError) {
       this.commitAttempted = true;
+
+      const remainingAttempts = MAX_RETRIES + 1 - operation.attemptsMade;
+      if (remainingAttempts <= 0) {
+        throw firstCommitError;
+      }
+
       if (firstCommitError instanceof MongoError && isRetryableWriteError(firstCommitError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
@@ -517,15 +529,13 @@ export class ClientSession
         this.unpin({ force: true });
 
         try {
-          await executeOperation(
-            this.client,
-            new RunCommandOperation(new MongoDBNamespace('admin'), command, {
-              session: this,
-              readPreference: ReadPreference.primary,
-              bypassPinningCheck: true
-            }),
-            timeoutContext
-          );
+          const op = new RunCommandOperation(new MongoDBNamespace('admin'), command, {
+            session: this,
+            readPreference: ReadPreference.primary,
+            bypassPinningCheck: true
+          });
+          op.maxAttempts = remainingAttempts;
+          await executeOperation(this.client, op, timeoutContext);
           return;
         } catch (retryCommitError) {
           // If the retry failed, we process that error instead of the original
@@ -1202,7 +1212,6 @@ export function applySession(
   command.autocommit = false;
 
   if (session.transaction.state === TxnState.STARTING_TRANSACTION) {
-    session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
     command.startTransaction = true;
 
     const readConcern =
@@ -1238,6 +1247,19 @@ export function updateSessionFromResponse(session: ClientSession, document: Mong
     const atClusterTime = document.atClusterTime;
     if (atClusterTime) {
       session.snapshotTime = atClusterTime;
+    }
+  }
+
+  if (session.transaction.state === TxnState.STARTING_TRANSACTION) {
+    if (document.ok === 1) {
+      session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
+    } else {
+      const error = new MongoServerError(document.toObject());
+      const isRetryableError = error.hasErrorLabel(MongoErrorLabel.RetryableError);
+
+      if (!isRetryableError) {
+        session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
+      }
     }
   }
 }
