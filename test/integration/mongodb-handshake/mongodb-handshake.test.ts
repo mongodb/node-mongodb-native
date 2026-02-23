@@ -9,7 +9,7 @@ import {
   OpMsgRequest,
   OpQueryRequest,
   ServerApiVersion
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 describe('MongoDB Handshake', () => {
   let client;
 

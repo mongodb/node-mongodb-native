@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type MongoClient, MongoServerError } from '../../mongodb';
+import { type MongoClient, MongoServerError } from '../../mongodb_runtime-testing';
 import { setupDatabase } from '../shared';
 
 describe('Errors', function () {

@@ -21,7 +21,7 @@ import {
   ns,
   ServerHeartbeatStartedEvent,
   Topology
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import * as mock from '../../tools/mongodb-mock/index';
 import { processTick, runtime, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';

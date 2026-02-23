@@ -9,7 +9,7 @@ import {
   MongoCursorExhaustedError,
   promiseWithResolvers,
   TimeoutContext
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { filterForCommands } from '../shared';
 
 describe('Find Cursor', function () {

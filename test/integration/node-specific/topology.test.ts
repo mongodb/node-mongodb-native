@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoClient, type MongoClientOptions, type Topology } from '../../mongodb';
+import { MongoClient, type MongoClientOptions, type Topology } from '../../mongodb_runtime-testing';
 
 describe('Topology', function () {
   it('should correctly track states of a topology', {

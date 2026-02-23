@@ -2,7 +2,12 @@ import { expect } from 'chai';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { Connection, LEGACY_HELLO_COMMAND, type MongoClient, ScramSHA256 } from '../../mongodb';
+import {
+  Connection,
+  LEGACY_HELLO_COMMAND,
+  type MongoClient,
+  ScramSHA256
+} from '../../mongodb_runtime-testing';
 import { type TestConfiguration } from '../../tools/runner/config';
 
 function makeConnectionString(config, username, password) {

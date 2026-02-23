@@ -7,7 +7,7 @@ import {
   type MongoClient,
   ProfilingLevel,
   ReturnDocument
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { sleep as delay } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 

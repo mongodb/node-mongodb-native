@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoClient } from '../../mongodb';
+import { MongoClient } from '../../mongodb_runtime-testing';
 import { configureMongocryptdSpawnHooks } from '../../tools/utils';
 
 describe('class ServerDescription', function () {

@@ -6,7 +6,7 @@ import {
   MongoClient,
   MongoInvalidArgumentError,
   MongoServerError
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { setupDatabase } from '../shared';
 
 describe('Db', function () {

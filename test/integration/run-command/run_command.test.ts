@@ -7,7 +7,7 @@ import {
   ReadConcern,
   ReadPreference,
   WriteConcern
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 
 describe('RunCommand API', () => {
   let client: MongoClient;

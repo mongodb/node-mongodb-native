@@ -9,7 +9,7 @@ import {
   MongoServerError,
   ObjectId,
   ReturnDocument
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { assert as test, filterForCommands } from '../shared';
 
 describe('Find', function () {

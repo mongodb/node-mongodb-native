@@ -9,7 +9,7 @@ import {
   MongoAPIError,
   type MongoClient,
   type WithId
-} from '../../../mongodb';
+} from '../../../mongodb_runtime-testing';
 describe('useBigInt64 option', function () {
   let client: MongoClient;
   let db: Db;

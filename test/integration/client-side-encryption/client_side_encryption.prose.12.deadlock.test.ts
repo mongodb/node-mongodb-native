@@ -9,7 +9,7 @@ import {
   type CommandStartedEvent,
   type MongoClient,
   type MongoClientOptions
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { dropCollection } from '../shared';

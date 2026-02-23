@@ -11,7 +11,7 @@ import {
   MongoServerError,
   MongoWriteConcernError,
   Server
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { sleep } from '../../tools/utils';
 
 describe('Retryable Writes Spec Prose', () => {

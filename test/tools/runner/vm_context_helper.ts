@@ -5,20 +5,36 @@ import { isBuiltin } from 'node:module';
 import * as path from 'node:path';
 import * as vm from 'node:vm';
 
+const repoRoot = path.resolve(__dirname, '../../..');
+
 /**
  * Creates a require function that blocks access to specified core modules
  */
 function createRestrictedRequire() {
   const blockedModules = new Set(['os']);
+  const allowedRequesterToModuleMapping: Record<string, string[]> = {
+    'src/runtime_adapters.ts': ['os']
+  };
 
   return function restrictedRequire(moduleName: string) {
     // Block core modules
     if (isBuiltin(moduleName) && blockedModules.has(moduleName)) {
-      const sourceFile = new Error().stack.split('\n')[2]?.replace('at', '').trim();
-      const source = sourceFile ? `from ${sourceFile}` : 'from an unknown source';
-      throw new Error(
-        `Access to core module '${moduleName}' (${source}) is restricted in this context`
-      );
+      let sourceFile = new Error().stack.split('\n')[2]?.replace('at', '').trim() || '';
+      sourceFile =
+        sourceFile.indexOf('(') !== -1 ? sourceFile.split('(')[1].slice(0, -1) : sourceFile; // Extract file path if present
+      sourceFile = sourceFile.indexOf(':') !== -1 ? sourceFile.split(':')[0] : sourceFile; // Remove line number if present
+      const srcRelativePath = path.relative(repoRoot, sourceFile);
+      const isAllowed = allowedRequesterToModuleMapping[srcRelativePath]?.includes(moduleName);
+
+      if (isAllowed) {
+        // Allow access to the module if the requester is in the allowlist
+        console.log(`Allowing access to core module '${moduleName}' for ${srcRelativePath}`);
+      } else {
+        console.log(`Blocking access to core module '${moduleName}' from ${srcRelativePath}`);
+        throw new Error(
+          `Access to core module '${moduleName}' from ${srcRelativePath} is restricted in this context`
+        );
+      }
     }
 
     return require(moduleName);

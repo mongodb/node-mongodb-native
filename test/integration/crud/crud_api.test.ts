@@ -105,7 +105,7 @@ describe('CRUD API', function () {
         const result = await collection.findOne({});
         expect(result).to.deep.equal({ _id: 1 });
         if (runNodelessTests) {
-          expect(ensureTypeByName(events.at(0), 'CommandSucceededEvent')).to.be.true;
+          ensureTypeByName(events.at(0), 'CommandSucceededEvent');
         } else {
           expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
           expect(spy.returnValues.at(0)).to.have.property('closed', true);
@@ -141,7 +141,7 @@ describe('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'find');
         const error = await collection.findOne({}).catch(error => error);
         if (runNodelessTests) {
-          expect(ensureTypeByName(error, 'MongoServerError')).to.be.true;
+          ensureTypeByName(error, 'MongoServerError');
         } else {
           expect(error).to.be.instanceOf(MongoServerError);
           expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
@@ -183,7 +183,7 @@ describe('CRUD API', function () {
         const result = await collection.countDocuments({});
         expect(result).to.deep.equal(2);
         if (runNodelessTests) {
-          expect(ensureTypeByName(events[0], 'CommandSucceededEvent')).to.be.true;
+          ensureTypeByName(events[0], 'CommandSucceededEvent');
         } else {
           expect(events[0]).to.be.instanceOf(CommandSucceededEvent);
           expect(spy.returnValues[0]).to.have.property('closed', true);
@@ -219,7 +219,7 @@ describe('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'aggregate');
         const error = await collection.countDocuments({}).catch(error => error);
         if (runNodelessTests) {
-          expect(ensureTypeByName(error, 'MongoServerError')).to.be.true;
+          ensureTypeByName(error, 'MongoServerError');
         } else {
           expect(error).to.be.instanceOf(MongoServerError);
           expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
@@ -803,7 +803,7 @@ describe('CRUD API', function () {
         .catch(error => error);
 
       if (runNodelessTests) {
-        expect(ensureTypeByName(error, 'MongoBulkWriteError')).to.be.true;
+        ensureTypeByName(error, 'MongoBulkWriteError');
       } else {
         expect(error).to.be.instanceOf(MongoBulkWriteError);
       }
@@ -829,8 +829,7 @@ describe('CRUD API', function () {
       .collection('t20_1')
       .bulkWrite(ops, { ordered: true, writeConcern: { w: 1 } })
       .catch(err => err);
-    // expect(err).to.be.instanceOf(MongoBulkWriteError);
-    expect(ensureTypeByName(err, 'MongoBulkWriteError')).to.be.true;
+    ensureTypeByName(err, 'MongoBulkWriteError');
   });
 
   describe('sort support', function () {

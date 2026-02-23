@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { BSONRegExp, type MongoClient } from '../../../mongodb';
+import { BSONRegExp, type MongoClient } from '../../../mongodb_runtime-testing';
 
 describe('BSONRegExp', () => {
   describe('bsonRegExp option', () => {

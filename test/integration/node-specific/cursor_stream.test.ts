@@ -10,7 +10,7 @@ import {
   type Db,
   type MongoClient,
   MongoServerError
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { sleep } from '../../tools/utils';
 
 describe('Cursor Streams', function () {

@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 
-import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../mongodb';
+import {
+  MongoBulkWriteError,
+  type MongoClient,
+  MongoServerError
+} from '../../mongodb_runtime-testing';
 import { setupDatabase } from '../shared';
 
 describe('Document Validation', function () {

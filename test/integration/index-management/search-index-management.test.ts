@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 
-import { type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  type MongoClient
+} from '../../mongodb_runtime-testing';
 
 describe('Search Index Management Integration Tests', function () {
   describe('read concern and write concern ', function () {

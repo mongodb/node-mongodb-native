@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type MongoClient, ObjectId, ReadPreference } from '../../mongodb';
+import { type MongoClient, ObjectId, ReadPreference } from '../../mongodb_runtime-testing';
 import { filterForCommands, setupDatabase } from '../shared';
 
 describe('Command Monitoring', function () {

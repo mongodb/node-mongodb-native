@@ -1,6 +1,11 @@
 import { expect } from 'chai';
 
-import { type Collection, type CommandStartedEvent, Long, type MongoClient } from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  Long,
+  type MongoClient
+} from '../../mongodb_runtime-testing';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 
 const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;

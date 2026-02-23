@@ -11,7 +11,7 @@ import {
   LEGACY_HELLO_COMMAND,
   MongoClient,
   OpMsgRequest
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import * as mock from '../../tools/mongodb-mock/index';
 import { filterForCommands } from '../shared';
 

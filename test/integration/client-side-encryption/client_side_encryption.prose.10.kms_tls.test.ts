@@ -3,7 +3,7 @@ import * as process from 'process';
 import { satisfies } from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { ClientEncryption, type MongoClient } from '../../mongodb';
+import { ClientEncryption, type MongoClient } from '../../mongodb_runtime-testing';
 
 const metadata: MongoDBMetadataUI = {
   requires: {

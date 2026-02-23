@@ -22,7 +22,7 @@ import {
   resolveTimeoutOptions,
   StateMachine,
   TimeoutContext
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import {
   clearFailPoint,
   configureFailPoint,

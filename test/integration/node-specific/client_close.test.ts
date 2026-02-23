@@ -9,7 +9,7 @@ import {
   type CommandStartedEvent,
   type FindCursor,
   type MongoClient
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { configureMongocryptdSpawnHooks } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';

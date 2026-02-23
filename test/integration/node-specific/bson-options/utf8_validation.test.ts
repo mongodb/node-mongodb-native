@@ -10,7 +10,7 @@ import {
   type MongoClient,
   MongoServerError,
   OpMsgResponse
-} from '../../../mongodb';
+} from '../../../mongodb_runtime-testing';
 describe('class MongoDBResponse', () => {
   let client;
 

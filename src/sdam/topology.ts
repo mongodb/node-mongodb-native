@@ -272,7 +272,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     for (const seed of seeds) {
       if (typeof seed === 'string') {
         seedlist.push(HostAddress.fromString(seed));
-      } else if (seed instanceof HostAddress) {
+      } else if (seed instanceof HostAddress || (seed as any).constructor.name === 'HostAddress') {
         seedlist.push(seed);
       } else {
         // FIXME(NODE-3483): May need to be a MongoParseError

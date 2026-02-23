@@ -9,7 +9,7 @@ import {
   type MongoClient,
   SERVER_HEARTBEAT_FAILED,
   SERVER_HEARTBEAT_SUCCEEDED
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { sleep } from '../../tools/utils';
 
 describe('Server Discovery and Monitoring Prose Tests', function () {

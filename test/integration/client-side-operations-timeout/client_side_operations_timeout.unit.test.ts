@@ -21,7 +21,7 @@ import {
   Timeout,
   TimeoutContext,
   Topology
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { measureDuration, sleep } from '../../tools/utils';
 import { createTimerSandbox } from '../../unit/timer_sandbox';
 

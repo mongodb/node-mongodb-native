@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { env } from 'process';
 
-import { Binary, ClientEncryption } from '../../mongodb';
+import { Binary, ClientEncryption } from '../../mongodb_runtime-testing';
 const dataKeyOptions = {
   masterKey: {
     projectId: 'devprod-drivers',

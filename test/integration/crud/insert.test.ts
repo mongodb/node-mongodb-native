@@ -23,7 +23,7 @@ import {
   ObjectId,
   ReturnDocument,
   Timestamp
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { assert as test, setupDatabase } from '../shared';
 
 describe('crud - insert', function () {

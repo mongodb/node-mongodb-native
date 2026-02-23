@@ -11,7 +11,7 @@ import {
   type Db,
   MongoCryptCreateEncryptedCollectionError,
   MongoServerError
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,

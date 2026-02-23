@@ -9,7 +9,7 @@ import {
   MongoRuntimeError,
   StateMachine,
   type UUID
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 describe('mongocryptd auto spawn', function () {
   let client: MongoClient;
   const kmsProviders: KMSProviders = {

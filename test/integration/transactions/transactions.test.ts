@@ -8,7 +8,7 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   type ServerSessionPool
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { type FailCommandFailPoint } from '../../tools/utils';
 
 describe('Transactions', function () {

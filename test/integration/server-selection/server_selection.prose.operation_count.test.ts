@@ -5,7 +5,7 @@ import {
   type CommandStartedEvent,
   HostAddress,
   type MongoClient
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { waitUntilPoolsFilled } from '../../tools/utils';
 
 const failPoint = {

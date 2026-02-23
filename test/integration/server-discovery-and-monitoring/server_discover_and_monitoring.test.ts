@@ -8,7 +8,7 @@ import {
   type MongoClient,
   promiseWithResolvers,
   type ServerHeartbeatSucceededEvent
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 

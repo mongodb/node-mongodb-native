@@ -30,7 +30,7 @@ import {
   ObjectId,
   promiseWithResolvers,
   TopologyType
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { type FailCommandFailPoint, type FailPoint, waitUntilPoolsFilled } from '../../tools/utils';
 
 const metadata = { requires: { mongodb: '>=4.4' } };

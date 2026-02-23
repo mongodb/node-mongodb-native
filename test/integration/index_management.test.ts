@@ -7,7 +7,7 @@ import {
   type Db,
   type MongoClient,
   MongoServerError
-} from '../mongodb';
+} from '../mongodb_runtime-testing';
 import { type FailCommandFailPoint } from '../tools/utils';
 import { assert as test, filterForCommands, setupDatabase } from './shared';
 

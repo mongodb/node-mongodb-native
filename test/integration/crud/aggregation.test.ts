@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 
-import { type MongoClient, MongoInvalidArgumentError, MongoServerError } from '../../mongodb';
+import {
+  type MongoClient,
+  MongoInvalidArgumentError,
+  MongoServerError
+} from '../../mongodb_runtime-testing';
 import { filterForCommands } from '../shared';
 
 describe('Aggregation', function () {

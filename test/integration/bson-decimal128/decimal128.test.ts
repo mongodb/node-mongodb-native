@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type Collection, Decimal128, type MongoClient } from '../../mongodb';
+import { type Collection, Decimal128, type MongoClient } from '../../mongodb_runtime-testing';
 
 describe('Decimal128', function () {
   let client: MongoClient;

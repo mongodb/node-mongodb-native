@@ -16,7 +16,7 @@ import {
   MongoNetworkError,
   ObjectId,
   Timestamp
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 

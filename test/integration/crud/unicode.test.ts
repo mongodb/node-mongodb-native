@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as process from 'process';
 import { satisfies } from 'semver';
 
-import type { MongoClient } from '../../mongodb';
+import type { MongoClient } from '../../mongodb_runtime-testing';
 import { assert as test, setupDatabase } from '../shared';
 
 describe('Unicode', function () {
