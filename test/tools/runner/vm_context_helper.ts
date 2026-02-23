@@ -19,7 +19,8 @@ function createRestrictedRequire() {
   return function restrictedRequire(moduleName: string) {
     // Block core modules
     if (isBuiltin(moduleName) && blockedModules.has(moduleName)) {
-      let sourceFile = new Error().stack.split('\n')[2]?.replace('at', '').trim() || '';
+      const callStack = new Error().stack;
+      let sourceFile = callStack.split('\n')[2]?.replace('at', '').trim() || ''; // Get the caller's source file from the stack trace
       sourceFile =
         sourceFile.indexOf('(') !== -1 ? sourceFile.split('(')[1].slice(0, -1) : sourceFile; // Extract file path if present
       sourceFile = sourceFile.indexOf(':') !== -1 ? sourceFile.split(':')[0] : sourceFile; // Remove line number if present
@@ -30,7 +31,7 @@ function createRestrictedRequire() {
         // Allow access to the module if the requester is in the allowlist
       } else {
         throw new Error(
-          `Access to core module '${moduleName}' from ${srcRelativePath} is restricted in this context`
+          `Access to core module '${moduleName}' from ${srcRelativePath} is restricted in this context (callStack: ${callStack}, sourceFile: ${sourceFile}, srcRelativePath: ${srcRelativePath})`
         );
       }
     }
