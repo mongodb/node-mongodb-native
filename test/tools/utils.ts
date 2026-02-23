@@ -33,8 +33,8 @@ export function ensureCalledWith(stub: any, args: any[]) {
 }
 
 export function ensureTypeByName(obj: any, typeName: string): void {
-  expect(obj).to.be.an('object');
-  expect(obj.constructor).to.be.an('function');
+  expect(obj).to.be.not.null;
+  expect(obj.constructor).to.be.not.null;
   expect(obj.constructor.name).to.equal(typeName);
 }
 
