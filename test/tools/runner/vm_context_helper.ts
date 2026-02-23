@@ -28,9 +28,7 @@ function createRestrictedRequire() {
 
       if (isAllowed) {
         // Allow access to the module if the requester is in the allowlist
-        console.log(`Allowing access to core module '${moduleName}' for ${srcRelativePath}`);
       } else {
-        console.log(`Blocking access to core module '${moduleName}' from ${srcRelativePath}`);
         throw new Error(
           `Access to core module '${moduleName}' from ${srcRelativePath} is restricted in this context`
         );

@@ -13,15 +13,14 @@ import {
   type MongoClient,
   MongoServerError,
   ObjectId,
-  ReturnDocument,
-  runNodelessTests
+  ReturnDocument
 } from '../../mongodb_runtime-testing';
 import { ensureTypeByName, type FailCommandFailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
 
 const DB_NAME = 'crud_api_tests';
 
-describe('CRUD API', function () {
+describe.only('CRUD API', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
@@ -104,13 +103,9 @@ describe('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'find');
         const result = await collection.findOne({});
         expect(result).to.deep.equal({ _id: 1 });
-        if (runNodelessTests) {
-          ensureTypeByName(events.at(0), 'CommandSucceededEvent');
-        } else {
-          expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
-          expect(spy.returnValues.at(0)).to.have.property('closed', true);
-          expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
-        }
+        expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
+        expect(spy.returnValues.at(0)).to.have.property('closed', true);
+        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
       });
     });
 
@@ -140,14 +135,10 @@ describe('CRUD API', function () {
       it('the cursor for findOne is closed', async function () {
         const spy = sinon.spy(Collection.prototype, 'find');
         const error = await collection.findOne({}).catch(error => error);
-        if (runNodelessTests) {
-          ensureTypeByName(error, 'MongoServerError');
-        } else {
-          expect(error).to.be.instanceOf(MongoServerError);
-          expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
-          expect(spy.returnValues.at(0)).to.have.property('closed', true);
-          expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
-        }
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
+        expect(spy.returnValues.at(0)).to.have.property('closed', true);
+        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
       });
     });
   });
@@ -182,13 +173,9 @@ describe('CRUD API', function () {
         const spy = sinon.spy(Collection.prototype, 'aggregate');
         const result = await collection.countDocuments({});
         expect(result).to.deep.equal(2);
-        if (runNodelessTests) {
-          ensureTypeByName(events[0], 'CommandSucceededEvent');
-        } else {
-          expect(events[0]).to.be.instanceOf(CommandSucceededEvent);
-          expect(spy.returnValues[0]).to.have.property('closed', true);
-          expect(spy.returnValues[0]).to.have.nested.property('session.hasEnded', true);
-        }
+        expect(events[0]).to.be.instanceOf(CommandSucceededEvent);
+        expect(spy.returnValues[0]).to.have.property('closed', true);
+        expect(spy.returnValues[0]).to.have.nested.property('session.hasEnded', true);
       });
     });
 
@@ -218,14 +205,10 @@ describe('CRUD API', function () {
       it('the cursor for countDocuments is closed', async function () {
         const spy = sinon.spy(Collection.prototype, 'aggregate');
         const error = await collection.countDocuments({}).catch(error => error);
-        if (runNodelessTests) {
-          ensureTypeByName(error, 'MongoServerError');
-        } else {
-          expect(error).to.be.instanceOf(MongoServerError);
-          expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
-          expect(spy.returnValues.at(0)).to.have.property('closed', true);
-          expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
-        }
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
+        expect(spy.returnValues.at(0)).to.have.property('closed', true);
+        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
       });
     });
   });
@@ -802,11 +785,7 @@ describe('CRUD API', function () {
         .bulkWrite(ops, { ordered: false, writeConcern: { w: 1 } })
         .catch(error => error);
 
-      if (runNodelessTests) {
-        ensureTypeByName(error, 'MongoBulkWriteError');
-      } else {
-        expect(error).to.be.instanceOf(MongoBulkWriteError);
-      }
+      expect(error).to.be.instanceOf(MongoBulkWriteError);
       // 1004 because one of them is duplicate key
       // but since it is unordered we continued to write
       expect(error).to.have.property('insertedCount', 1004);
