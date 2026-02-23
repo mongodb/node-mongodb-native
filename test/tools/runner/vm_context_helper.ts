@@ -30,6 +30,9 @@ function createRestrictedRequire() {
       if (isAllowed) {
         // Allow access to the module if the requester is in the allowlist
       } else {
+        console.log(
+          `Access to core module '${moduleName}' from ${srcRelativePath} is restricted in this context (callStack: ${callStack}, sourceFile: ${sourceFile}, srcRelativePath: ${srcRelativePath})`
+        );
         throw new Error(
           `Access to core module '${moduleName}' from ${srcRelativePath} is restricted in this context (callStack: ${callStack}, sourceFile: ${sourceFile}, srcRelativePath: ${srcRelativePath})`
         );
