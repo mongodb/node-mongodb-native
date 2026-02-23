@@ -2,10 +2,9 @@
 
 import * as fs from 'node:fs';
 import { isBuiltin } from 'node:module';
+import { platform } from 'node:os';
 import * as path from 'node:path';
 import * as vm from 'node:vm';
-
-const repoRoot = path.resolve(__dirname, '../../..');
 
 /**
  * Creates a require function that blocks access to specified core modules
@@ -14,7 +13,7 @@ function createRestrictedRequire() {
   const blockedModules = new Set(['os']);
   const allowedRequesters = [
     {
-      file: 'src/runtime_adapters.ts',
+      file: 'runtime_adapters.ts',
       method: 'resolveRuntimeAdapters',
       module: 'os'
     }
@@ -24,18 +23,19 @@ function createRestrictedRequire() {
     // Block core modules
     if (isBuiltin(moduleName) && blockedModules.has(moduleName)) {
       const callStack = new Error().stack;
+      const correctPath = platform() === 'win32' ? path.win32 : path.posix;
       const methodAndFile = callStack.split('\n')[2];
       const match = methodAndFile.match(/at (.*) \((.*)\)/);
       const method = match ? match[1] : null;
       const sourceFileAndLineNumbers = match ? match[2] : null;
       const sourceFile =
-        sourceFileAndLineNumbers.indexOf(':') !== -1
-          ? sourceFileAndLineNumbers.split(':')[0]
+        sourceFileAndLineNumbers.indexOf('.ts:') !== -1
+          ? sourceFileAndLineNumbers.substring(0, sourceFileAndLineNumbers.lastIndexOf('.ts:') + 3)
           : sourceFileAndLineNumbers;
-      const srcRelativePath = path.relative(repoRoot, sourceFile);
+      const sourceFileName = correctPath.basename(sourceFile);
       const isAllowed = allowedRequesters.some(
         requester =>
-          requester.file === srcRelativePath &&
+          requester.file === sourceFileName &&
           requester.method === method &&
           requester.module === moduleName
       );
@@ -43,19 +43,8 @@ function createRestrictedRequire() {
       if (isAllowed) {
         // Allow access to the module if the requester is in the allowlist
       } else {
-        console.log({
-          message: `Blocked access to core module '${moduleName}' from ${srcRelativePath}`,
-          callStack,
-          methodAndFile,
-          match,
-          method,
-          sourceFileAndLineNumbers,
-          sourceFile,
-          srcRelativePath,
-          allowedRequesters
-        });
         throw new Error(
-          `Access to core module '${moduleName}' from ${srcRelativePath} is restricted in this context (callStack: ${callStack}, sourceFile: ${sourceFile}, srcRelativePath: ${srcRelativePath})`
+          `Access to core module '${moduleName}' from ${sourceFileName} is restricted in this context`
         );
       }
     }
