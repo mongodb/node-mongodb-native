@@ -47,7 +47,6 @@ about the types of tests and how to run them.
       - [Design](#design)
       - [Adding tests to be tested with Node-less Runtime](#adding-tests-to-be-tested-with-node-less-runtime)
       - [Running tests in Node-less Runtime](#running-tests-in-node-less-runtime)
-      - [Running tests manually in Node-less Runtime](#running-tests-manually-in-node-less-runtime)
   - [GCP](#gcp)
   - [Azure](#azure)
   - [AWS](#aws)
@@ -750,9 +749,13 @@ Here are a few of the relevant components of this system:
 #### Adding tests to be tested with Node-less Runtime
 
 Change the test's import from
-   `} from '../../mongodb';`
+   `} from '../mongodb';`
 to
-   `} from '../../mongodb_runtime-testing';`
+   `} from '../mongodb_runtime-testing';`
+
+Then run the tests.
+
+If any are failing because of a missing export, you will need to export those types in [test/mongodb_bundled.ts](test/mongodb_bundled.ts).
 
 #### Running tests in Node-less Runtime
 
@@ -767,26 +770,9 @@ Either command will:
 1. Create a bundle from `test/mongodb.ts`
 2. Regenerate the barrel file to export from the generated bundle
 3. Run unit or integ tests
-4. Regenerate the barrel file to export from the test entry point
 
-#### Running tests manually in Node-less Runtime
-
-Call the following command to regenerate the barrel file to import from the bundle:
-   `npm run switch:to-bundled`
-
-Call the following command to rebuild the bundle:
-   `npm run build:bundle`
-
-You can now run the unit or integ tests locally and they will be importing from the patched bundle.
-   `npm run check:unit`
-or
-   `npm run check:test`
-or through an IDE.
-
-Note that you don't need to run `*-bundled` scripts after switching.
-
-To revert the barrel file changes, run:
-   `npm run switch:to-unbundled`
+Note: the barrel file will point to the bundle after either script is used.
+You can either revert that change, or run `npm run switch:to-unbundled` to use the unbundled imports.
 
 ## GCP
 
