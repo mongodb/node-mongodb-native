@@ -11,7 +11,7 @@ import {
   type MongoClient,
   ObjectId,
   ReadConcern
-} from '../mongodb';
+} from '../mongodb_runtime-testing';
 
 class TimeoutController extends AbortController {
   timeoutId: NodeJS.Timeout;

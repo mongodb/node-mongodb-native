@@ -4,7 +4,7 @@ import * as os from 'os';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { MongoClient } from '../mongodb';
+import { MongoClient } from '../mongodb_runtime-testing';
 
 const expect = chai.expect;
 

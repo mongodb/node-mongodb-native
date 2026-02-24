@@ -15,7 +15,7 @@ import {
   type Server,
   shuffle,
   TimeoutContext
-} from '../mongodb';
+} from '../mongodb_runtime-testing';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { type FailCommandFailPoint, sleep } from './utils';
 

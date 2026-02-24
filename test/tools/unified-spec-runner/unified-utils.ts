@@ -14,7 +14,7 @@ import {
   getMongoDBClientEncryption,
   type MongoClient,
   ReturnDocument
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
 import { MalformedOperationError } from './operations';

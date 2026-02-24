@@ -1,6 +1,6 @@
 import * as process from 'process';
 
-import { type MongoClient } from '../../../mongodb';
+import { type MongoClient } from '../../../mongodb_runtime-testing';
 import { Filter } from './filter';
 
 /**

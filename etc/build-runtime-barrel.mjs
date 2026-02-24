@@ -13,6 +13,7 @@ const source = useBundled ? './mongodb_bundled' : './mongodb';
 const contents =
   `// This file is auto-generated. Do not edit.\n` +
   `// Run 'npm run build:runtime-barrel' to regenerate.\n` +
+  `export const runNodelessTests = ${useBundled};\n` +
   `export * from '${source}';\n`;
 await fs.writeFile(outputBarrelFile, contents);
 

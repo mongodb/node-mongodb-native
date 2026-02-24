@@ -49,7 +49,7 @@ import {
   type TopologyDescriptionChangedEvent,
   type TopologyOpeningEvent,
   WriteConcern
-} from '../../mongodb';
+} from '../../mongodb_runtime-testing';
 import { getEncryptExtraOptions, getEnvironmentalOptions } from '../../tools/utils';
 import { AlpineTestConfiguration, type TestConfiguration } from '../runner/config';
 import { EntityEventRegistry } from './entity_event_registry';

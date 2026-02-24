@@ -17,7 +17,6 @@ import {
   MongoClient,
   type MongoClientOptions,
   ObjectId,
-  runNodelessTests,
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
@@ -232,14 +231,6 @@ export class TestConfiguration {
       : {};
 
     serverOptions = Object.assign(baseOptions, getEnvironmentalOptions(), serverOptions);
-    // If using contextified mongodb, inject Node.js runtime adapters
-    if (runNodelessTests) {
-      serverOptions.runtimeAdapters = {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        os: require('os'),
-        ...serverOptions.runtimeAdapters
-      };
-    }
 
     if (this.loggingEnabled && !Object.hasOwn(serverOptions, 'mongodbLogPath')) {
       serverOptions = this.setupLogging(serverOptions);

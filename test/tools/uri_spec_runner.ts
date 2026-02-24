@@ -6,7 +6,7 @@ import {
   MongoInvalidArgumentError,
   MongoParseError,
   MongoRuntimeError
-} from '../mongodb';
+} from '../mongodb_runtime-testing';
 
 type HostObject = {
   type: 'ipv4' | 'ip_literal' | 'hostname' | 'unix';
