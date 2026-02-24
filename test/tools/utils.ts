@@ -33,7 +33,6 @@ export function ensureCalledWith(stub: any, args: any[]) {
 }
 
 export function checkTypeByName(obj: any, typeName: string): boolean {
-  console.log(`pavel >>> checking obj: ${obj} for type ${typeName}`);
   if (obj !== null && obj.constructor != null && obj.constructor.name === typeName) {
     return true;
   }

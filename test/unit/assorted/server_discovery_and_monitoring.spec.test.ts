@@ -468,21 +468,12 @@ async function executeSDAMTest(testData: SDAMTest) {
               checkTypeByName(error, 'MongoNetworkError') ||
               checkTypeByName(error, 'MongoNetworkTimeoutError') ||
               checkTypeByName(error, 'MongoServerError');
-            console.log(`pavel >>> checking error: ${error.name}, result: ${result}`);
             return result;
           };
           expect(
             thrownError,
             `expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError (referred to in the spec as an "Application Error") got ${thrownError.name} ${thrownError.stack}`
-          ).to.satisfy(e => {
-            const result = isApplicationError(e);
-            if (!result) {
-              console.error(
-                `pavel >>> unexpected error thrown from SDAM test: ${e.name} ${e.stack}`
-              );
-            }
-            return result;
-          });
+          ).to.satisfy(isApplicationError);
         }
       } else if (phase.outcome != null && Object.keys(phase).length === 1) {
         // Load Balancer SDAM tests have no "work" to be done for the phase
