@@ -128,6 +128,7 @@ export const {
   Int32,
   isDriverInfoEqual,
   isHello,
+  isRecord,
   isResumableError,
   isRetryableReadError,
   isStateChangeError,
