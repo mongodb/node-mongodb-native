@@ -12,6 +12,7 @@ import {
   MongoCryptCreateEncryptedCollectionError,
   MongoServerError
 } from '../../mongodb_runtime-testing';
+import { ensureTypeByName } from '../../tools/utils';
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
@@ -94,7 +95,7 @@ describe('21. Automatic Data Encryption Keys', () => {
         })
         .catch(error => error);
 
-      expect(result).to.be.instanceOf(TypeError);
+      ensureTypeByName(result, 'TypeError');
     });
 
     it('Case 3: Invalid keyId', metadata, async () => {
