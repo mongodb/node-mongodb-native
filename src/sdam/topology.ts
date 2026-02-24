@@ -213,7 +213,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   hello?: Document;
   _type?: string;
 
-  /** @internal */
   tokenBucket = new TokenBucket(INITIAL_TOKEN_BUCKET_SIZE);
 
   client!: MongoClient;
