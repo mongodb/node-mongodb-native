@@ -29,6 +29,7 @@ export const {
   BSONSymbol,
   BSONType,
   BufferPool,
+  ChangeStream,
   ChangeStreamCursor,
   checkParentDomainMatch,
   ClientEncryption,
@@ -58,7 +59,18 @@ export const {
   CONNECTION_POOL_READY,
   CONNECTION_READY,
   Connection,
+  ConnectionCheckedInEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionClosedEvent,
+  ConnectionCreatedEvent,
   ConnectionPool,
+  ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent,
+  ConnectionPoolReadyEvent,
+  ConnectionReadyEvent,
   COSMOS_DB_MSG,
   CountOperation,
   CreateCollectionOperation,
@@ -210,8 +222,13 @@ export const {
   SERVER_HEARTBEAT_SUCCEEDED,
   Server,
   ServerApiVersion,
+  ServerClosedEvent,
   ServerDescription,
+  ServerDescriptionChangedEvent,
+  ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent,
+  ServerOpeningEvent,
   ServerSession,
   ServerSessionPool,
   ServerType,
@@ -229,6 +246,9 @@ export const {
   Timestamp,
   TOPOLOGY_EVENTS,
   Topology,
+  TopologyClosedEvent,
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent,
   TopologyType,
   Transaction,
   uncompressibleCommands,
@@ -252,7 +272,6 @@ export type {
   AWSCredentials,
   BSONSerializeOptions,
   BSONTypeAlias,
-  ChangeStream,
   ChangeStreamCollModDocument,
   ChangeStreamCreateDocument,
   ChangeStreamCreateIndexDocument,
@@ -287,19 +306,8 @@ export type {
   CollectionOptions,
   CommandOptions,
   CompressorName,
-  ConnectionCheckedInEvent,
-  ConnectionCheckedOutEvent,
-  ConnectionCheckOutFailedEvent,
-  ConnectionCheckOutStartedEvent,
-  ConnectionClosedEvent,
-  ConnectionCreatedEvent,
   ConnectionOptions,
-  ConnectionPoolClearedEvent,
-  ConnectionPoolClosedEvent,
-  ConnectionPoolCreatedEvent,
   ConnectionPoolOptions,
-  ConnectionPoolReadyEvent,
-  ConnectionReadyEvent,
   ConnectOptions,
   DataKey,
   DbOptions,
@@ -321,17 +329,9 @@ export type {
   ResumeToken,
   Runtime,
   ServerApi,
-  ServerClosedEvent,
-  ServerDescriptionChangedEvent,
-  ServerHeartbeatFailedEvent,
-  ServerHeartbeatSucceededEvent,
-  ServerOpeningEvent,
   ServerSessionId,
   TagSet,
-  TopologyClosedEvent,
   TopologyDescription,
-  TopologyDescriptionChangedEvent,
-  TopologyOpeningEvent,
   TopologyOptions,
   TransactionOptions,
   UpdateDescription,
@@ -347,45 +347,61 @@ export type {
 import type {
   AbstractCursor as _AbstractCursor,
   AuthMechanism as _AuthMechanism,
+  ChangeStream as _ChangeStream,
   ClientEncryption as _ClientEncryption,
+  ClientSession as _ClientSession,
   Collection as _Collection,
   CommandFailedEvent as _CommandFailedEvent,
   CommandStartedEvent as _CommandStartedEvent,
   CommandSucceededEvent as _CommandSucceededEvent,
   Connection as _Connection,
+  ConnectionClosedEvent as _ConnectionClosedEvent,
   ConnectionPool as _ConnectionPool,
+  ConnectionPoolClearedEvent as _ConnectionPoolClearedEvent,
   CSOTTimeoutContext as _CSOTTimeoutContext,
   CursorTimeoutContext as _CursorTimeoutContext,
   Db as _Db,
   FindCursor as _FindCursor,
+  GridFSBucket as _GridFSBucket,
   HostAddress as _HostAddress,
   MongoClient as _MongoClient,
+  MongoError as _MongoError,
   Server as _Server,
+  ServerDescriptionChangedEvent as _ServerDescriptionChangedEvent,
   Timeout as _Timeout,
   TimeoutContext as _TimeoutContext,
   Topology as _Topology,
+  TopologyDescriptionChangedEvent as _TopologyDescriptionChangedEvent,
   TopologyType as _TopologyType,
   UUID as _UUID
 } from './tools/runner/bundle/types/index';
 export type AbstractCursor = _AbstractCursor;
 export type AuthMechanism = _AuthMechanism;
+export type ChangeStream = _ChangeStream;
 export type ClientEncryption = _ClientEncryption;
+export type ClientSession = _ClientSession;
 export type Collection = _Collection;
 export type CommandFailedEvent = _CommandFailedEvent;
 export type CommandStartedEvent = _CommandStartedEvent;
 export type CommandSucceededEvent = _CommandSucceededEvent;
 export type Connection = _Connection;
+export type ConnectionClosedEvent = _ConnectionClosedEvent;
 export type ConnectionPool = _ConnectionPool;
+export type ConnectionPoolClearedEvent = _ConnectionPoolClearedEvent;
 export type CSOTTimeoutContext = _CSOTTimeoutContext;
 export type CursorTimeoutContext = _CursorTimeoutContext;
 export type Db = _Db;
 export type FindCursor = _FindCursor;
+export type GridFSBucket = _GridFSBucket;
 export type HostAddress = _HostAddress;
 export type MongoClient = _MongoClient;
+export type MongoError = _MongoError;
 export type Server = _Server;
+export type ServerDescriptionChangedEvent = _ServerDescriptionChangedEvent;
 export type Timeout = _Timeout;
 export type TimeoutContext = _TimeoutContext;
 export type Topology = _Topology;
+export type TopologyDescriptionChangedEvent = _TopologyDescriptionChangedEvent;
 export type TopologyType = _TopologyType;
 export type UUID = _UUID;
 
