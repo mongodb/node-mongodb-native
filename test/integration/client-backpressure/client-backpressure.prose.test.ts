@@ -53,7 +53,7 @@ describe('Client Backpressure (Prose)', function () {
         expect(error).to.be.instanceof(MongoServerError);
       });
 
-      stub.returns(1);
+      stub.returns(0.99);
 
       const { duration: durationBackoff } = await measureDuration(async () => {
         const error = await collection.insertOne({ a: 1 }).catch(e => e);
