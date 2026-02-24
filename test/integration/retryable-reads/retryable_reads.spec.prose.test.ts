@@ -157,6 +157,8 @@ describe('Retryable Reads Spec Prose', () => {
       const commandSucceededEvents: CommandSucceededEvent[] = [];
 
       beforeEach(async function () {
+        // 1. Create a client `client` with `retryReads=true`, `readPreference=primaryPreferred`, and command event monitoring
+        //     enabled.
         client = this.configuration.newClient({
           retryReads: true,
           readPreference: 'primaryPreferred',
@@ -168,6 +170,18 @@ describe('Retryable Reads Spec Prose', () => {
 
         await client.connect();
 
+        /*
+        * 2. Configure the following fail point for `client`:
+            {
+                configureFailPoint: "failCommand",
+                mode: { times: 1 },
+                data: {
+                    failCommands: ["find"],
+                    errorLabels: ["RetryableError", "SystemOverloadedError"]
+                    errorCode: 6
+                }
+            }
+        * */
         await client.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
@@ -178,6 +192,7 @@ describe('Retryable Reads Spec Prose', () => {
           }
         });
 
+        // 3. Reset the command event monitor to clear the failpoint command from its stored events.
         commandFailedEvents.length = 0;
         commandSucceededEvents.length = 0;
       });
@@ -188,10 +203,14 @@ describe('Retryable Reads Spec Prose', () => {
       });
 
       it('retries on a different server when SystemOverloadedError', TEST_METADATA, async () => {
+        // 4. Execute a `find` command with `client`.
         await client.db('test').collection('test').find().toArray();
 
+        // 5. Assert that one failed command event and one successful command event occurred.
         expect(commandFailedEvents).to.have.lengthOf(1);
         expect(commandSucceededEvents).to.have.lengthOf(1);
+
+        // 6. Assert that both events occurred on different servers.
         expect(commandFailedEvents[0].address).to.not.equal(commandSucceededEvents[0].address);
       });
     });
@@ -202,6 +221,8 @@ describe('Retryable Reads Spec Prose', () => {
       const commandSucceededEvents: CommandSucceededEvent[] = [];
 
       beforeEach(async function () {
+        // 1. Create a client `client` with `retryReads=true`, `readPreference=primaryPreferred`, and command event monitoring
+        //     enabled.
         client = this.configuration.newClient({
           retryReads: true,
           readPreference: 'primaryPreferred',
@@ -213,6 +234,18 @@ describe('Retryable Reads Spec Prose', () => {
 
         await client.connect();
 
+        /*
+        * 2. Configure the following fail point for `client`:
+            {
+                configureFailPoint: "failCommand",
+                mode: { times: 1 },
+                data: {
+                    failCommands: ["find"],
+                    errorLabels: ["RetryableError"]
+                    errorCode: 6
+                }
+            }
+        * */
         await client.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
@@ -223,6 +256,7 @@ describe('Retryable Reads Spec Prose', () => {
           }
         });
 
+        // 3. Reset the command event monitor to clear the failpoint command from its stored events.
         commandFailedEvents.length = 0;
         commandSucceededEvents.length = 0;
       });
@@ -233,10 +267,14 @@ describe('Retryable Reads Spec Prose', () => {
       });
 
       it('retries on the same server when no SystemOverloadedError', TEST_METADATA, async () => {
+        // 4. Execute a `find` command with `client`.
         await client.db('test').collection('test').find().toArray();
 
+        // 5. Assert that one failed command event and one successful command event occurred.
         expect(commandFailedEvents).to.have.lengthOf(1);
         expect(commandSucceededEvents).to.have.lengthOf(1);
+
+        // 6. Assert that both events occurred on the same server.
         expect(commandFailedEvents[0].address).to.equal(commandSucceededEvents[0].address);
       });
     });
