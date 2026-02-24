@@ -11,7 +11,7 @@ import {
   isDriverInfoEqual,
   LEGACY_HELLO_COMMAND,
   type MongoClient
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 type EnvironmentVariables = Array<[string, string]>;

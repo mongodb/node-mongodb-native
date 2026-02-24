@@ -12,7 +12,7 @@ import {
   Long,
   type MongoClient,
   MongoCryptError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 const getKmsProviders = () => {
   const result = getCSFLEKMSProviders();
 

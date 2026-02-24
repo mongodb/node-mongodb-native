@@ -1,11 +1,7 @@
 import { expect } from 'chai';
 import * as process from 'process';
 
-import {
-  AWSSDKCredentialProvider,
-  type MongoClient,
-  MongoServerError
-} from '../../mongodb_runtime-testing';
+import { AWSSDKCredentialProvider, type MongoClient, MongoServerError } from '../../mongodb';
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 
 describe('MONGODB-AWS Prose Tests', function () {

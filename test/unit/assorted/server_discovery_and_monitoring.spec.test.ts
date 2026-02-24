@@ -18,6 +18,7 @@ import {
   MongoServerError,
   ns,
   RunCommandOperation,
+  runNodelessTests,
   Server,
   SERVER_CLOSED,
   SERVER_DESCRIPTION_CHANGED,
@@ -40,7 +41,7 @@ import {
   TopologyOpeningEvent,
   type TopologyVersion
 } from '../../mongodb';
-import { ejson, fakeServer } from '../../tools/utils';
+import { checkTypeByName, ejson, fakeServer } from '../../tools/utils';
 
 const SDAM_EVENT_CLASSES = {
   ServerDescriptionChangedEvent,
@@ -193,7 +194,11 @@ function assertMonitoringOutcome(outcome: any): asserts outcome is MonitoringOut
 describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect: sinon.SinonStub;
 
-  before(() => {
+  before(function () {
+    if (runNodelessTests) {
+      this.skip();
+    }
+
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
       this.emit('connect');
@@ -201,6 +206,10 @@ describe('Server Discovery and Monitoring (spec)', function () {
   });
 
   after(() => {
+    if (runNodelessTests) {
+      return;
+    }
+
     serverConnect.restore();
   });
 
@@ -455,16 +464,25 @@ async function executeSDAMTest(testData: SDAMTest) {
 
           const isApplicationError = error => {
             // These errors all come from the withConnection stub
-            return (
-              error instanceof MongoNetworkError ||
-              error instanceof MongoNetworkTimeoutError ||
-              error instanceof MongoServerError
-            );
+            const result =
+              checkTypeByName(error, 'MongoNetworkError') ||
+              checkTypeByName(error, 'MongoNetworkTimeoutError') ||
+              checkTypeByName(error, 'MongoServerError');
+            console.log(`pavel >>> checking error: ${error.name}, result: ${result}`);
+            return result;
           };
           expect(
             thrownError,
             `expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError (referred to in the spec as an "Application Error") got ${thrownError.name} ${thrownError.stack}`
-          ).to.satisfy(isApplicationError);
+          ).to.satisfy(e => {
+            const result = isApplicationError(e);
+            if (!result) {
+              console.error(
+                `pavel >>> unexpected error thrown from SDAM test: ${e.name} ${e.stack}`
+              );
+            }
+            return result;
+          });
         }
       } else if (phase.outcome != null && Object.keys(phase).length === 1) {
         // Load Balancer SDAM tests have no "work" to be done for the phase

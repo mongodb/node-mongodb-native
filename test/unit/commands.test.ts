@@ -11,10 +11,17 @@ import {
   OpCompressedRequest,
   OpMsgRequest,
   OpQueryRequest,
+  runNodelessTests,
   uncompressibleCommands
 } from '../mongodb';
 
 describe('class OpCompressedRequest', () => {
+  before(function () {
+    if (runNodelessTests) {
+      this.skip();
+    }
+  });
+
   context('canCompress()', () => {
     for (const command of uncompressibleCommands) {
       it(`returns true when the command is ${command}`, () => {

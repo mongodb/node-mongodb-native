@@ -1,6 +1,6 @@
 import { loadContextifiedMongoDBModule } from './tools/runner/vm_context_helper';
 
-type all = typeof import('./mongodb');
+type all = typeof import('./mongodb_all');
 let exportSource: all;
 try {
   exportSource = loadContextifiedMongoDBModule() as all;
@@ -18,10 +18,16 @@ export const {
   AggregateOperation,
   AggregationCursor,
   applySession,
+  Aspect,
   AUTH_MECHS_AUTH_SRC_EXTERNAL,
+  AuthContext,
   AuthMechanism,
+  AuthProvider,
+  AutoEncrypter,
+  AutomatedCallbackWorkflow,
   aws4Sign,
   AWSSDKCredentialProvider,
+  azureCallback,
   Binary,
   BSON,
   BSONError,
@@ -29,9 +35,20 @@ export const {
   BSONSymbol,
   BSONType,
   BufferPool,
+  buildDeleteManyOperation,
+  buildDeleteOneOperation,
+  buildInsertOneOperation,
+  buildReplaceOneOperation,
+  buildUpdateManyOperation,
+  buildUpdateOneOperation,
+  CallbackWorkflow,
+  CancellationToken,
   ChangeStream,
   ChangeStreamCursor,
   checkParentDomainMatch,
+  ClientBulkWriteCommandBuilder,
+  ClientBulkWriteCursorResponse,
+  ClientBulkWriteResultsMerger,
   ClientEncryption,
   ClientSession,
   CMAP_EVENTS,
@@ -44,6 +61,7 @@ export const {
   CommandStartedEvent,
   CommandSucceededEvent,
   compareObjectId,
+  compareTopologyVersion,
   compress,
   Compressor,
   connect,
@@ -69,6 +87,7 @@ export const {
   ConnectionPoolClearedEvent,
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
+  ConnectionPoolMetrics,
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent,
   COSMOS_DB_MSG,
@@ -77,6 +96,7 @@ export const {
   CreateIndexesOperation,
   CreateSearchIndexesOperation,
   createStdioLogger,
+  CryptoConnection,
   CSOTTimeoutContext,
   CursorResponse,
   CursorTimeoutContext,
@@ -85,9 +105,11 @@ export const {
   DBRef,
   DbStatsOperation,
   Decimal128,
+  decompress,
   decorateWithExplain,
   DEFAULT_ALLOWED_HOSTS,
   DEFAULT_MAX_DOCUMENT_LENGTH,
+  DEFAULT_PK_FACTORY,
   DeleteManyOperation,
   DeleteOneOperation,
   DeleteOperation,
@@ -95,6 +117,7 @@ export const {
   deserialize,
   DistinctOperation,
   DOCUMENT_DB_MSG,
+  DocumentSequence,
   Double,
   DropCollectionOperation,
   DropDatabaseOperation,
@@ -114,11 +137,16 @@ export const {
   FindOneAndUpdateOperation,
   FindOperation,
   formatSort,
+  gcpCallback,
+  getAwsCredentialProvider,
   getFAASEnv,
+  getGcpMetadata,
   getMongoDBClientEncryption,
   GetMoreOperation,
   getTopology,
   GridFSBucket,
+  GSSAPI,
+  GSSAPICanonicalizationValue,
   hasAtomicOperators,
   HEARTBEAT_EVENTS,
   HostAddress,
@@ -127,6 +155,7 @@ export const {
   InsertOperation,
   Int32,
   isDriverInfoEqual,
+  isEmptyCredentials,
   isHello,
   isRecord,
   isResumableError,
@@ -138,6 +167,7 @@ export const {
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   LegacyTimeoutContext,
+  LimitedSizeDocument,
   List,
   ListCollectionsCursor,
   ListCollectionsOperation,
@@ -145,7 +175,12 @@ export const {
   ListIndexesOperation,
   Long,
   makeClientMetadata,
+  MAX_SUPPORTED_SERVER_VERSION,
+  MAX_SUPPORTED_WIRE_VERSION,
   MaxKey,
+  MIN_SECONDARY_WRITE_WIRE_VERSION,
+  MIN_SUPPORTED_SERVER_VERSION,
+  MIN_SUPPORTED_WIRE_VERSION,
   MinKey,
   MongoAPIError,
   MongoAWSError,
@@ -155,10 +190,12 @@ export const {
   MongoClientAuthProviders,
   MongoClientBulkWriteError,
   MongoClientClosedError,
+  MongoCompatibilityError,
   MongoCredentials,
   MongoCryptAzureKMSRequestError,
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError,
+  MongocryptdManager,
   MongoCryptError,
   MongoCryptInvalidArgumentError,
   MongoCursorExhaustedError,
@@ -184,22 +221,30 @@ export const {
   MongoServerError,
   MongoServerSelectionError,
   MongoSystemError,
+  MongoUnexpectedServerResponseError,
   MongoWriteConcernError,
+  Monitor,
+  MonitorInterval,
   needsRetryableWriteLabel,
   NODE_IS_RECOVERING_ERROR_MESSAGE,
   noop,
   ns,
   ObjectId,
+  OIDC_VERSION,
+  OnDemandDocument,
   OP_MSG,
   OP_QUERY,
   OpCompressedRequest,
   OpMsgRequest,
   OpMsgResponse,
   OpQueryRequest,
+  OpReply,
   parseOptions,
   parseSeverityFromString,
+  performGSSAPICanonicalizeHostName,
   PoolClearedError,
   PoolClosedError,
+  prepareHandshakeDocument,
   processTimeMS,
   ProfilingLevel,
   ProfilingLevelOperation,
@@ -207,20 +252,30 @@ export const {
   ReadConcern,
   ReadConcernLevel,
   ReadPreference,
+  readPreferenceServerSelector,
   refreshKMSCredentials,
   RemoveUserOperation,
   RenameOperation,
   ReplaceOneOperation,
+  resolveCname,
   resolveRuntimeAdapters,
   resolveSRVRecord,
   resolveTimeoutOptions,
   ReturnDocument,
+  RTTSampler,
   RunCommandOperation,
+  RunCursorCommandOperation,
+  sameServerSelector,
   ScramSHA256,
+  secondaryWritableServerSelector,
   SENSITIVE_COMMANDS,
+  serialize,
+  SERVER_CLOSED,
   SERVER_DESCRIPTION_CHANGED,
   SERVER_HEARTBEAT_FAILED,
+  SERVER_HEARTBEAT_STARTED,
   SERVER_HEARTBEAT_SUCCEEDED,
+  SERVER_OPENING,
   Server,
   ServerApiVersion,
   ServerClosedEvent,
@@ -230,6 +285,7 @@ export const {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
   ServerOpeningEvent,
+  ServerSelectionEvent,
   ServerSession,
   ServerSessionPool,
   ServerType,
@@ -237,17 +293,27 @@ export const {
   SetProfilingLevelOperation,
   SeverityLevel,
   shuffle,
+  SizedMessageTransform,
   squashError,
   SrvPoller,
+  SrvPollingEvent,
   StateMachine,
+  StreamDescription,
   stringifyWithMaxLen,
   Timeout,
   TimeoutContext,
   TimeoutError,
   Timestamp,
+  tokenCache,
+  TokenCache,
+  tokenMachineCallback,
+  TOPOLOGY_CLOSED,
+  TOPOLOGY_DESCRIPTION_CHANGED,
   TOPOLOGY_EVENTS,
+  TOPOLOGY_OPENING,
   Topology,
   TopologyClosedEvent,
+  TopologyDescription,
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent,
   TopologyType,
@@ -260,15 +326,16 @@ export const {
   UUID,
   ValidateCollectionOperation,
   WaitQueueTimeoutError,
+  writableServerSelector,
   WriteConcern
 } = exportSource;
 
 // Export types from the contextified module
+// Hint: This list IS automatically alphabetized, so add new types anywhere in the list and it will stay organized
 export type {
   AbstractOperation,
   Admin,
   AnyClientBulkWriteModel,
-  AutoEncrypter,
   AutoEncryptionOptions,
   AWSCredentials,
   BSONSerializeOptions,
@@ -294,6 +361,7 @@ export type {
   ChangeStreamShardCollectionDocument,
   ChangeStreamUpdateDocument,
   ClientBulkWriteModel,
+  ClientBulkWriteResult,
   ClientDeleteManyModel,
   ClientDeleteOneModel,
   ClientEncryptionDataKeyProvider,
@@ -332,8 +400,8 @@ export type {
   ServerApi,
   ServerSessionId,
   TagSet,
-  TopologyDescription,
   TopologyOptions,
+  TopologyVersion,
   TransactionOptions,
   UpdateDescription,
   UpdateFilter,
@@ -345,6 +413,7 @@ export type {
 
 // Export "clashing" types from the contextified module.
 // These are types that clash with the objects of the same name (eg Collection), so we need to export them separately to avoid type errors.
+// Hint: This list IS automatically alphabetized, so add new types anywhere in the list and it will stay organized
 import type {
   AbstractCursor as _AbstractCursor,
   AuthMechanism as _AuthMechanism,
@@ -367,15 +436,21 @@ import type {
   HostAddress as _HostAddress,
   MongoClient as _MongoClient,
   MongoError as _MongoError,
+  OnDemandDocument as _OnDemandDocument,
   Server as _Server,
+  ServerDescription as _ServerDescription,
   ServerDescriptionChangedEvent as _ServerDescriptionChangedEvent,
   Timeout as _Timeout,
   TimeoutContext as _TimeoutContext,
   Topology as _Topology,
+  TopologyDescription as _TopologyDescription,
   TopologyDescriptionChangedEvent as _TopologyDescriptionChangedEvent,
   TopologyType as _TopologyType,
   UUID as _UUID
 } from './tools/runner/bundle/types/index';
+
+// Export "clashing" types from the contextified module
+// Hint: This list IS NOT automatically alphabetized, but VSCode's "Sort Lines Ascending" command can be used to keep it organized
 export type AbstractCursor = _AbstractCursor;
 export type AuthMechanism = _AuthMechanism;
 export type ChangeStream = _ChangeStream;
@@ -397,16 +472,20 @@ export type GridFSBucket = _GridFSBucket;
 export type HostAddress = _HostAddress;
 export type MongoClient = _MongoClient;
 export type MongoError = _MongoError;
+export type OnDemandDocument = _OnDemandDocument;
 export type Server = _Server;
+export type ServerDescription = _ServerDescription;
 export type ServerDescriptionChangedEvent = _ServerDescriptionChangedEvent;
 export type Timeout = _Timeout;
 export type TimeoutContext = _TimeoutContext;
 export type Topology = _Topology;
+export type TopologyDescription = _TopologyDescription;
 export type TopologyDescriptionChangedEvent = _TopologyDescriptionChangedEvent;
 export type TopologyType = _TopologyType;
 export type UUID = _UUID;
 
 // Export specific types from other files in the contextified module
+// Hint: This list IS automatically alphabetized, so add new types anywhere in the list and it will stay organized
 export type { AzureKMSRequestOptions } from './tools/runner/bundle/types/client-side-encryption/providers/azure';
 export type { AwsSigv4Options } from './tools/runner/bundle/types/cmap/auth/aws4';
 export type {
@@ -415,3 +494,5 @@ export type {
   OIDCCallbackParams,
   OIDCResponse
 } from './tools/runner/bundle/types/cmap/auth/mongodb_oidc';
+import type { ClientBulkWriteCursorResponse as _ClientBulkWriteCursorResponse } from './tools/runner/bundle/types/cmap/wire_protocol/responses';
+export type ClientBulkWriteCursorResponse = _ClientBulkWriteCursorResponse;

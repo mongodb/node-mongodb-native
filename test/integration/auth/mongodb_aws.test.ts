@@ -21,7 +21,7 @@ import {
   MongoServerError,
   refreshKMSCredentials,
   setDifference
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 
 describe('MONGODB-AWS', function () {

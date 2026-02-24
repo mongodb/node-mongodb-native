@@ -14,7 +14,7 @@ import {
   MongoRuntimeError,
   MongoServerError,
   MongoServerSelectionError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { AlpineTestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { APMEventCollector, dropCollection } from '../shared';

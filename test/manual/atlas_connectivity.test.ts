@@ -1,6 +1,6 @@
 import * as process from 'process';
 
-import { LEGACY_HELLO_COMMAND, MongoClient } from '../mongodb_runtime-testing';
+import { LEGACY_HELLO_COMMAND, MongoClient } from '../mongodb';
 /**
  * ATLAS_CONNECTIVITY env variable is JSON
  * Here's some typescript describing the shape:

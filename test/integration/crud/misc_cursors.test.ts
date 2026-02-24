@@ -7,7 +7,7 @@ import {
   MongoClientClosedError,
   ReadPreference,
   ServerType
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { ensureTypeByName, runLater, sleep } from '../../tools/utils';
 import { assert as test, filterForCommands, setupDatabase } from '../shared';
 

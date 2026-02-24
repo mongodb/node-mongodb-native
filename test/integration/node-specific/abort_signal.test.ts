@@ -22,7 +22,7 @@ import {
   ReadPreference,
   setDifference,
   StateMachine
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,

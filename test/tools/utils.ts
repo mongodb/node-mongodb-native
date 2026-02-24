@@ -24,7 +24,7 @@ import {
   type ServerApiVersion,
   Topology,
   type TopologyOptions
-} from '../mongodb_runtime-testing';
+} from '../mongodb';
 import { type TestConfiguration } from './runner/config';
 import { isTLSEnabled } from './runner/filters/tls_filter';
 
@@ -32,6 +32,13 @@ export function ensureCalledWith(stub: any, args: any[]) {
   args.forEach((m: any) => expect(stub).to.have.been.calledWith(m));
 }
 
+export function checkTypeByName(obj: any, typeName: string): boolean {
+  console.log(`pavel >>> checking obj: ${obj} for type ${typeName}`);
+  if (obj !== null && obj.constructor != null && obj.constructor.name === typeName) {
+    return true;
+  }
+  return false;
+}
 export function ensureTypeByName(obj: any, typeName: string): void {
   expect(obj).to.be.not.null;
   expect(obj.constructor).to.be.not.null;

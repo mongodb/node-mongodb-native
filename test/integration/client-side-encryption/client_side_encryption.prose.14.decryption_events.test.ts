@@ -8,7 +8,7 @@ import {
   type CommandSucceededEvent,
   type MongoClient,
   MongoNetworkError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {

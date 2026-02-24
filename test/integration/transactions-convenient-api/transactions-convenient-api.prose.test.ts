@@ -2,11 +2,7 @@ import { expect } from 'chai';
 import { test } from 'mocha';
 import * as sinon from 'sinon';
 
-import {
-  type ClientSession,
-  type Collection,
-  type MongoClient
-} from '../../mongodb_runtime-testing';
+import { type ClientSession, type Collection, type MongoClient } from '../../mongodb';
 import { configureFailPoint, type FailCommandFailPoint, measureDuration } from '../../tools/utils';
 
 const failCommand: FailCommandFailPoint = {

@@ -5,7 +5,7 @@ import {
   type MongoClient,
   type MongoClientOptions,
   TopologyType
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 describe('TopologyDescription (integration tests)', function () {
   let client: MongoClient;
 

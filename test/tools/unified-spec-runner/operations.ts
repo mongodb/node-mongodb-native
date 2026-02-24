@@ -23,7 +23,7 @@ import {
   type TopologyType,
   type TransactionOptions,
   WriteConcern
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 import { type TestConfiguration } from '../runner/config';
 import { EntitiesMap } from './entities';

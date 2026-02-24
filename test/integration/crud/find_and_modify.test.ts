@@ -6,7 +6,7 @@ import {
   type MongoClient,
   MongoServerError,
   ObjectId
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { setupDatabase } from '../shared';
 
 describe('Collection (#findOneAnd...)', function () {

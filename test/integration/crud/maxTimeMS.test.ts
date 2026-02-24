@@ -8,7 +8,7 @@ import {
   type MongoClient,
   MongoCursorExhaustedError,
   MongoServerError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 
 describe('MaxTimeMS', function () {
   let client: MongoClient;

@@ -6,6 +6,7 @@ import * as sinon from 'sinon';
 // Intentionally import from src, because we need to stub the `get()` function.
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as utils from '../../../../src/utils';
+import { runNodelessTests } from '../../../mongodb';
 import {
   AWSSDKCredentialProvider,
   fetchAzureKMSToken,
@@ -15,7 +16,7 @@ import {
   MongoNetworkTimeoutError,
   refreshKMSCredentials,
   tokenCache
-} from '../../../mongodb';
+} from '../../../mongodb_all'; // continue to import from mongodb_all, skipping these tests for nodeless
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -23,6 +24,12 @@ const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 const originalSessionToken = process.env.AWS_SESSION_TOKEN;
 
 describe('#refreshKMSCredentials', function () {
+  before(function () {
+    if (runNodelessTests) {
+      this.skip();
+    }
+  });
+
   context('isEmptyCredentials()', () => {
     it('returns true for an empty object', () => {
       expect(isEmptyCredentials('aws', { aws: {} })).to.be.true;

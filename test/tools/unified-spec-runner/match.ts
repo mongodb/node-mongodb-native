@@ -38,7 +38,7 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { ejson } from '../utils';
 import { type CmapEvent, type CommandEvent, type EntitiesMap, type SdamEvent } from './entities';
 import {

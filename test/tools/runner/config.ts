@@ -20,7 +20,7 @@ import {
   type ServerApi,
   TopologyType,
   type WriteConcernSettings
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
 import { type Filter } from './filters/filter';
 import { flakyTests } from './flaky';

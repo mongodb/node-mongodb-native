@@ -10,7 +10,7 @@ import {
   type MongoClient,
   MongoNetworkError,
   ns
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 

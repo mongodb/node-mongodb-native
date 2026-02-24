@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type MongoClient, ReadConcernLevel } from '../../mongodb_runtime-testing';
+import { type MongoClient, ReadConcernLevel } from '../../mongodb';
 import { filterForCommands, setupDatabase } from '../shared';
 
 describe('ReadConcern', function () {

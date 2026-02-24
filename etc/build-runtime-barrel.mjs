@@ -7,8 +7,8 @@ const useBundled = process.env.MONGODB_BUNDLED === 'true';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
-const outputBarrelFile = path.join(rootDir, 'test/mongodb_runtime-testing.ts');
-const source = useBundled ? './mongodb_bundled' : './mongodb';
+const outputBarrelFile = path.join(rootDir, 'test/mongodb.ts');
+const source = useBundled ? './mongodb_bundled' : './mongodb_all';
 
 const contents =
   `// This file is auto-generated. Do not edit.\n` +

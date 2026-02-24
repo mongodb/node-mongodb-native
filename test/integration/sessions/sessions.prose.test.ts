@@ -7,7 +7,7 @@ import {
   MongoClient,
   MongoDriverError,
   MongoInvalidArgumentError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { configureMongocryptdSpawnHooks, sleep } from '../../tools/utils';
 
 describe('Sessions Prose Tests', () => {

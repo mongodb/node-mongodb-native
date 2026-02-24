@@ -1,8 +1,8 @@
 'use strict';
 
 const mock = require('./mongodb-mock/index');
-const { ObjectId, Timestamp, Long, Binary } = require('../mongodb_runtime-testing');
-const { LEGACY_HELLO_COMMAND, isHello } = require('../mongodb_runtime-testing');
+const { ObjectId, Timestamp, Long, Binary } = require('../mongodb');
+const { LEGACY_HELLO_COMMAND, isHello } = require('../mongodb');
 
 class ReplSetFixture {
   constructor() {

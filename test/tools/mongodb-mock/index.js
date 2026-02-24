@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { LEGACY_HELLO_COMMAND } = require('../../mongodb_runtime-testing');
+const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { MockServer } = require('./src/server');
 const process = require('node:process');
 

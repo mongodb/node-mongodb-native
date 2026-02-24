@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { ValidateCollectionOperation } from '../../mongodb_runtime-testing';
+import { ValidateCollectionOperation } from '../../mongodb';
 
 describe('ValidateCollectionOperation', function () {
   let client;

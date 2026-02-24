@@ -24,7 +24,7 @@ import {
   MongoRuntimeError,
   shuffle
 } from '../mongodb';
-import { sleep } from '../tools/utils';
+import { ensureTypeByName, sleep } from '../tools/utils';
 
 describe('driver utils', function () {
   describe('.hasAtomicOperators', function () {
@@ -463,8 +463,7 @@ describe('driver utils', function () {
     describe('*[Symbol.iterator]()', () => {
       it('should be instanceof GeneratorFunction', () => {
         const list = new List<number>();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        expect(list[Symbol.iterator]).to.be.instanceOf(function* () {}.constructor);
+        ensureTypeByName(list[Symbol.iterator], 'GeneratorFunction');
       });
 
       it('should only run generator for the number of items in the list', () => {

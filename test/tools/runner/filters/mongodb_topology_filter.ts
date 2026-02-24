@@ -1,4 +1,4 @@
-import { type MongoClient, TopologyType } from '../../../mongodb_runtime-testing';
+import { type MongoClient, TopologyType } from '../../../mongodb';
 import { Filter } from './filter';
 
 /**

@@ -7,7 +7,7 @@ import {
   LEGACY_HELLO_COMMAND,
   type MongoClient,
   type RTTPinger
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 /**

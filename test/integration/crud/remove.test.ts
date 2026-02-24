@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type MongoClient } from '../../mongodb_runtime-testing';
+import { type MongoClient } from '../../mongodb';
 
 describe('Remove', function () {
   let client: MongoClient;

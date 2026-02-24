@@ -6,7 +6,7 @@ const process = require('node:process');
 
 const expect = chai.expect;
 const { EJSON } = require('bson');
-const { isRecord } = require('../../mongodb_runtime-testing');
+const { isRecord } = require('../../mongodb');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 const {
@@ -14,7 +14,7 @@ const {
   CMAP_EVENTS: SOURCE_CMAP_EVENTS,
   TOPOLOGY_EVENTS,
   HEARTBEAT_EVENTS
-} = require('../../mongodb_runtime-testing');
+} = require('../../mongodb');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
 const { getCSFLEKMSProviders } = require('../../csfle-kms-providers');
 

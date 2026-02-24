@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 
-import { HostAddress, MongoClient } from '../../mongodb_runtime-testing';
+import { HostAddress, MongoClient } from '../../mongodb';
 
 function makeTest(test, topology) {
   let client;

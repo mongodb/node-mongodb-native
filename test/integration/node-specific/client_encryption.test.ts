@@ -14,7 +14,7 @@ import {
   MongoCryptInvalidArgumentError,
   StateMachine,
   UUID
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 function readHttpResponse(path) {
   let data = readFileSync(path, 'utf8').toString();
   data = data.split('\n').join('\r\n');

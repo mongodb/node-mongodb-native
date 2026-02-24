@@ -48,7 +48,7 @@ import {
   UpdateOperation,
   UpdateSearchIndexOperation,
   ValidateCollectionOperation
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 
 describe('abstract operation', function () {
   describe('command name getter', function () {

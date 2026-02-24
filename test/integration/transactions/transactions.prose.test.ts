@@ -1,7 +1,7 @@
 import { type ObjectId } from 'bson';
 import { expect } from 'chai';
 
-import { type MongoClient } from '../../mongodb_runtime-testing';
+import { type MongoClient } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
   requires: {

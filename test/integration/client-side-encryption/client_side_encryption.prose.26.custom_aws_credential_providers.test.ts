@@ -1,12 +1,7 @@
 import { expect } from 'chai';
 import * as process from 'process';
 
-import {
-  AWSSDKCredentialProvider,
-  Binary,
-  ClientEncryption,
-  MongoClient
-} from '../../mongodb_runtime-testing';
+import { AWSSDKCredentialProvider, Binary, ClientEncryption, MongoClient } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata: MongoDBMetadataUI = {

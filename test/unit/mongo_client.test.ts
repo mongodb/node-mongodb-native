@@ -23,6 +23,7 @@ import {
   SeverityLevel,
   WriteConcern
 } from '../mongodb';
+import { ensureTypeByName } from '../tools/utils';
 
 describe('MongoClient', function () {
   it('programmatic options should override URI options', function () {
@@ -1207,7 +1208,8 @@ describe('MongoClient', function () {
 
     it('when client.close is pending, client.closeLock is set', () => {
       client.close();
-      expect(client.closeLock).to.be.instanceOf(Promise);
+      // expect(client.closeLock).to.be.instanceOf(Promise);
+      ensureTypeByName(client.closeLock, 'Promise');
     });
 
     it('when client.close is not pending, client.closeLock is not set', async () => {

@@ -7,7 +7,7 @@ import {
   MongoWriteConcernError,
   PoolClearedError,
   Server
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 describe('Non Server Retryable Writes', function () {
   let client: MongoClient;
   let collection: Collection<{ _id: 1 }>;

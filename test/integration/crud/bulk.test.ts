@@ -11,7 +11,7 @@ import {
   type MongoClient,
   MongoDriverError,
   MongoInvalidArgumentError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { assert as test } from '../shared';
 
 const MAX_BSON_SIZE = 16777216;

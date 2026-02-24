@@ -11,7 +11,7 @@ import {
   type Db,
   MongoCryptCreateEncryptedCollectionError,
   MongoServerError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { ensureTypeByName } from '../../tools/utils';
 const metadata: MongoDBMetadataUI = {
   requires: {

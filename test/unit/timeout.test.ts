@@ -8,9 +8,9 @@ import {
   Timeout,
   TimeoutContext,
   TimeoutError
-} from '../mongodb_runtime-testing';
+} from '../mongodb';
 
-describe('Timeout', function () {
+describe.only('Timeout', function () {
   let timeout: Timeout;
 
   beforeEach(() => {

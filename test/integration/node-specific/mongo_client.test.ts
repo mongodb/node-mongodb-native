@@ -17,7 +17,7 @@ import {
   ReadPreference,
   ServerDescription,
   Topology
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { clearFailPoint, configureFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 

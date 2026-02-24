@@ -14,7 +14,7 @@ import {
   type OIDCCallbackFunction,
   type OIDCCallbackParams,
   type OIDCResponse
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 const createCallback = (tokenFile = 'test_user1', expiresInSeconds?: number, extraFields?: any) => {
   return async (params: OIDCCallbackParams) => {
     const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, tokenFile), {

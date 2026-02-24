@@ -6,7 +6,7 @@ import {
   LEGACY_HELLO_COMMAND,
   type MongoClient,
   MongoServerError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import type { TestConfiguration } from '../../tools/runner/config';
 import { setupDatabase } from '../shared';
 

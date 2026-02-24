@@ -5,7 +5,7 @@ import {
   type MongoClient,
   ReadPreference,
   Topology
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { assert as test, filterForCommands, setupDatabase } from '../shared';
 
 describe('ReadPreference', function () {

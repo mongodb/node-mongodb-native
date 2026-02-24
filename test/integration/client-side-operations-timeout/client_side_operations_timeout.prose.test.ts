@@ -20,7 +20,7 @@ import {
   ObjectId,
   processTimeMS,
   squashError
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,

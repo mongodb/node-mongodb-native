@@ -8,6 +8,7 @@ import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError
 } from '../../mongodb';
+import { ensureTypeByName } from '../../tools/utils';
 class MockClient {
   options: any;
   s: { options: any };
@@ -99,27 +100,33 @@ describe('ClientEncryption', function () {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName)
           .catch(error => error);
-        expect(error)
-          .to.be.instanceOf(TypeError)
-          .to.match(/provider/);
+        // expect(error)
+        //   .to.be.instanceOf(TypeError)
+        //   .to.match(/provider/);
+        ensureTypeByName(error, 'TypeError');
+        expect(error.message).to.match(/provider/);
       });
 
       it('throws TypeError if options.createCollectionOptions are omitted', async () => {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName, {})
           .catch(error => error);
-        expect(error)
-          .to.be.instanceOf(TypeError)
-          .to.match(/encryptedFields/);
+        // expect(error)
+        //   .to.be.instanceOf(TypeError)
+        //   .to.match(/encryptedFields/);
+        ensureTypeByName(error, 'TypeError');
+        expect(error.message).to.match(/encryptedFields/);
       });
 
       it('throws TypeError if options.createCollectionOptions.encryptedFields are omitted', async () => {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName, { createCollectionOptions: {} })
           .catch(error => error);
-        expect(error)
-          .to.be.instanceOf(TypeError)
-          .to.match(/Cannot read properties/);
+        // expect(error)
+        //   .to.be.instanceOf(TypeError)
+        //   .to.match(/Cannot read properties/);
+        ensureTypeByName(error, 'TypeError');
+        expect(error.message).to.match(/Cannot read properties/);
       });
     });
 

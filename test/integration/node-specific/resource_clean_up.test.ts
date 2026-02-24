@@ -2,7 +2,7 @@ import * as v8 from 'node:v8';
 
 import { expect } from 'chai';
 
-import { runNodelessTests } from '../../mongodb_runtime-testing';
+import { runNodelessTests } from '../../mongodb';
 import { isTLSEnabled } from '../../tools/runner/filters/tls_filter';
 import { sleep } from '../../tools/utils';
 import { runScriptAndReturnHeapInfo } from './resource_tracking_script_builder';

@@ -8,7 +8,7 @@ import {
   type Db,
   type MongoClient,
   type Server
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { clearFailPoint, configureFailPoint, sleep } from '../../tools/utils';
 
 describe('Connection Pool', function () {

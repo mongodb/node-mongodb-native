@@ -163,7 +163,10 @@ export async function fetchAzureKMSToken(
     const response = await get(url, { headers });
     return await parseResponse(response);
   } catch (error) {
-    if (error instanceof MongoNetworkTimeoutError) {
+    if (
+      error instanceof MongoNetworkTimeoutError ||
+      (error && error.constructor && error.constructor.name === 'MongoNetworkTimeoutError')
+    ) {
       throw new MongoCryptAzureKMSRequestError(`[Azure KMS] ${error.message}`);
     }
     throw error;

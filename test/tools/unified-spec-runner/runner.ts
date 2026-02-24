@@ -11,7 +11,7 @@ import {
   ns,
   ReadPreference,
   TopologyType
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';

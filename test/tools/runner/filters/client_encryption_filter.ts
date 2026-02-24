@@ -5,7 +5,7 @@ import * as process from 'process';
 import { satisfies } from 'semver';
 
 import { kmsCredentialsPresent } from '../../../csfle-kms-providers';
-import { type MongoClient } from '../../../mongodb_runtime-testing';
+import { type MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
 
 /**

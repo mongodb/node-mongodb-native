@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import { expect } from 'chai';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import { BSON, type Document, type MongoClient } from '../../mongodb_runtime-testing';
+import { BSON, type Document, type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 

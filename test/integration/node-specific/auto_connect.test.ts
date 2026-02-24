@@ -12,7 +12,7 @@ import {
   ProfilingLevel,
   Topology,
   TopologyType
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('When executing an operation for the first time', () => {

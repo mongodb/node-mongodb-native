@@ -16,6 +16,7 @@ import {
   Monitor,
   MonitorInterval,
   RTTSampler,
+  runNodelessTests,
   ServerDescription,
   type ServerHeartbeatFailedEvent,
   type ServerHeartbeatStartedEvent,
@@ -50,6 +51,12 @@ class MockServer {
 
 describe('monitoring', function () {
   let mockServer;
+
+  before(function () {
+    if (runNodelessTests) {
+      this.skip();
+    }
+  });
 
   beforeEach(function () {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

@@ -14,7 +14,7 @@ await fs.rm(outdir, { recursive: true, force: true });
 
 const outputBundleFile = path.join(outdir, 'driver-bundle.js');
 await esbuild.build({
-  entryPoints: [path.join(rootDir, 'test/mongodb.ts')],
+  entryPoints: [path.join(rootDir, 'test/mongodb_all.ts')],
   bundle: true,
   outfile: outputBundleFile,
   platform: 'node',

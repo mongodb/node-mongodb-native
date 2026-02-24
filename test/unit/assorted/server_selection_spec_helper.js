@@ -1,6 +1,8 @@
 'use strict';
 
 const {
+  writableServerSelector,
+  readPreferenceServerSelector,
   MongoServerSelectionError,
   ReadPreference,
   ServerType,
@@ -119,11 +121,11 @@ export async function executeServerSelectionTest(testDefinition) {
 
   let selector;
   if (testDefinition.operation === 'write') {
-    selector = ServerSelectors.writableServerSelector();
+    selector = writableServerSelector();
   } else if (testDefinition.operation === 'read' || testDefinition.read_preference) {
     try {
       const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
-      selector = ServerSelectors.readPreferenceServerSelector(readPreference);
+      selector = readPreferenceServerSelector(readPreference);
     } catch (e) {
       if (testDefinition.error) return topology.close();
       throw e;

@@ -22,7 +22,7 @@ import {
   MongoServerError,
   ReadPreference,
   type ResumeToken
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
 import { type FailCommandFailPoint, sleep } from '../../tools/utils';

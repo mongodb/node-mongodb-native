@@ -7,13 +7,7 @@ import { promisify } from 'node:util';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  type Db,
-  GridFSBucket,
-  MongoAPIError,
-  type MongoClient,
-  ObjectId
-} from '../../mongodb_runtime-testing';
+import { type Db, GridFSBucket, MongoAPIError, type MongoClient, ObjectId } from '../../mongodb';
 
 describe('GridFS Stream', function () {
   let client: MongoClient;

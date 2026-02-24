@@ -14,7 +14,7 @@ import {
   MongoServerError,
   ObjectId,
   ReturnDocument
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { ensureTypeByName, type FailCommandFailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
 

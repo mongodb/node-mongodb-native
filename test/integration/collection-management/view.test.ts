@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type CollectionInfo, type Db, type MongoClient } from '../../mongodb_runtime-testing';
+import { type CollectionInfo, type Db, type MongoClient } from '../../mongodb';
 
 describe('Views', function () {
   let client: MongoClient;

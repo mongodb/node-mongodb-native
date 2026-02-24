@@ -6,7 +6,7 @@ import {
   type Collection,
   ConnectionPool,
   type MongoClient
-} from '../../mongodb_runtime-testing';
+} from '../../mongodb';
 import { type FailCommandFailPoint } from '../../tools/utils';
 
 const testMetadata: MongoDBMetadataUI = {
