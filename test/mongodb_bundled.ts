@@ -11,7 +11,8 @@ try {
 }
 
 // Export public API from the contextified module
-// Hint: This list isn't automatically alphabetized, but VSCode's "Sort Lines Ascending" command can be used to keep it organized
+// Hint: This list IS NOT automatically alphabetized
+// To re-sort: Highlight the list and use VSCode's "Sort Lines Ascending" command
 export const {
   abortable,
   AbstractCursor,
@@ -378,11 +379,13 @@ export type {
   ConnectionOptions,
   ConnectionPoolOptions,
   ConnectOptions,
+  CreateIndexesOptions,
   DataKey,
   DbOptions,
   Document,
   DriverInfo,
   Filter,
+  IndexDirection,
   InferIdType,
   KMSProviders,
   Log,
@@ -399,8 +402,8 @@ export type {
   Runtime,
   ServerApi,
   ServerSessionId,
+  Sort,
   TagSet,
-  TopologyOptions,
   TopologyVersion,
   TransactionOptions,
   UpdateDescription,
@@ -425,9 +428,18 @@ import type {
   CommandStartedEvent as _CommandStartedEvent,
   CommandSucceededEvent as _CommandSucceededEvent,
   Connection as _Connection,
+  ConnectionCheckedInEvent as _ConnectionCheckedInEvent,
+  ConnectionCheckedOutEvent as _ConnectionCheckedOutEvent,
+  ConnectionCheckOutFailedEvent as _ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent as _ConnectionCheckOutStartedEvent,
   ConnectionClosedEvent as _ConnectionClosedEvent,
+  ConnectionCreatedEvent as _ConnectionCreatedEvent,
   ConnectionPool as _ConnectionPool,
   ConnectionPoolClearedEvent as _ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent as _ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent as _ConnectionPoolCreatedEvent,
+  ConnectionPoolReadyEvent as _ConnectionPoolReadyEvent,
+  ConnectionReadyEvent as _ConnectionReadyEvent,
   CSOTTimeoutContext as _CSOTTimeoutContext,
   CursorTimeoutContext as _CursorTimeoutContext,
   Db as _Db,
@@ -435,22 +447,34 @@ import type {
   GridFSBucket as _GridFSBucket,
   HostAddress as _HostAddress,
   MongoClient as _MongoClient,
+  MongoCredentials as _MongoCredentials,
   MongoError as _MongoError,
   OnDemandDocument as _OnDemandDocument,
   Server as _Server,
+  ServerApiVersion as _ServerApiVersion,
+  ServerClosedEvent as _ServerClosedEvent,
   ServerDescription as _ServerDescription,
   ServerDescriptionChangedEvent as _ServerDescriptionChangedEvent,
+  ServerHeartbeatFailedEvent as _ServerHeartbeatFailedEvent,
+  ServerHeartbeatStartedEvent as _ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent as _ServerHeartbeatSucceededEvent,
+  ServerOpeningEvent as _ServerOpeningEvent,
+  ServerSessionPool as _ServerSessionPool,
   Timeout as _Timeout,
   TimeoutContext as _TimeoutContext,
   Topology as _Topology,
+  TopologyClosedEvent as _TopologyClosedEvent,
   TopologyDescription as _TopologyDescription,
   TopologyDescriptionChangedEvent as _TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent as _TopologyOpeningEvent,
+  TopologyOptions as _TopologyOptions,
   TopologyType as _TopologyType,
   UUID as _UUID
 } from './tools/runner/bundle/types/index';
 
 // Export "clashing" types from the contextified module
-// Hint: This list IS NOT automatically alphabetized, but VSCode's "Sort Lines Ascending" command can be used to keep it organized
+// Hint: This list IS NOT automatically alphabetized
+// To re-sort: Highlight the list and use VSCode's "Sort Lines Ascending" command
 export type AbstractCursor = _AbstractCursor;
 export type AuthMechanism = _AuthMechanism;
 export type ChangeStream = _ChangeStream;
@@ -461,9 +485,18 @@ export type CommandFailedEvent = _CommandFailedEvent;
 export type CommandStartedEvent = _CommandStartedEvent;
 export type CommandSucceededEvent = _CommandSucceededEvent;
 export type Connection = _Connection;
+export type ConnectionCheckedInEvent = _ConnectionCheckedInEvent;
+export type ConnectionCheckedOutEvent = _ConnectionCheckedOutEvent;
+export type ConnectionCheckOutFailedEvent = _ConnectionCheckOutFailedEvent;
+export type ConnectionCheckOutStartedEvent = _ConnectionCheckOutStartedEvent;
 export type ConnectionClosedEvent = _ConnectionClosedEvent;
+export type ConnectionCreatedEvent = _ConnectionCreatedEvent;
 export type ConnectionPool = _ConnectionPool;
 export type ConnectionPoolClearedEvent = _ConnectionPoolClearedEvent;
+export type ConnectionPoolClosedEvent = _ConnectionPoolClosedEvent;
+export type ConnectionPoolCreatedEvent = _ConnectionPoolCreatedEvent;
+export type ConnectionPoolReadyEvent = _ConnectionPoolReadyEvent;
+export type ConnectionReadyEvent = _ConnectionReadyEvent;
 export type CSOTTimeoutContext = _CSOTTimeoutContext;
 export type CursorTimeoutContext = _CursorTimeoutContext;
 export type Db = _Db;
@@ -471,16 +504,27 @@ export type FindCursor = _FindCursor;
 export type GridFSBucket = _GridFSBucket;
 export type HostAddress = _HostAddress;
 export type MongoClient = _MongoClient;
+export type MongoCredentials = _MongoCredentials;
 export type MongoError = _MongoError;
 export type OnDemandDocument = _OnDemandDocument;
 export type Server = _Server;
+export type ServerApiVersion = _ServerApiVersion;
+export type ServerClosedEvent = _ServerClosedEvent;
 export type ServerDescription = _ServerDescription;
 export type ServerDescriptionChangedEvent = _ServerDescriptionChangedEvent;
+export type ServerHeartbeatFailedEvent = _ServerHeartbeatFailedEvent;
+export type ServerHeartbeatStartedEvent = _ServerHeartbeatStartedEvent;
+export type ServerHeartbeatSucceededEvent = _ServerHeartbeatSucceededEvent;
+export type ServerOpeningEvent = _ServerOpeningEvent;
+export type ServerSessionPool = _ServerSessionPool;
 export type Timeout = _Timeout;
 export type TimeoutContext = _TimeoutContext;
 export type Topology = _Topology;
+export type TopologyClosedEvent = _TopologyClosedEvent;
 export type TopologyDescription = _TopologyDescription;
 export type TopologyDescriptionChangedEvent = _TopologyDescriptionChangedEvent;
+export type TopologyOpeningEvent = _TopologyOpeningEvent;
+export type TopologyOptions = _TopologyOptions;
 export type TopologyType = _TopologyType;
 export type UUID = _UUID;
 

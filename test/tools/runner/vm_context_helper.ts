@@ -27,11 +27,11 @@ function createRestrictedRequire() {
       const methodAndFile = callStack.split('\n')[2];
       const match = methodAndFile.match(/at (.*) \((.*)\)/);
       const method = match ? match[1] : null;
-      const sourceFileAndLineNumbers = match ? match[2] : null;
+      const sourceFileAndLineNumbers = match ? match[2] : 'unknown';
       const sourceFile =
-        sourceFileAndLineNumbers.indexOf('.ts:') !== -1
-          ? sourceFileAndLineNumbers.substring(0, sourceFileAndLineNumbers.lastIndexOf('.ts:') + 3)
-          : sourceFileAndLineNumbers;
+        sourceFileAndLineNumbers.indexOf('.ts:') === -1
+          ? sourceFileAndLineNumbers
+          : sourceFileAndLineNumbers.substring(0, sourceFileAndLineNumbers.lastIndexOf('.ts:') + 3);
       const sourceFileName = correctPath.basename(sourceFile);
       const isAllowed = allowedRequesters.some(
         requester =>
@@ -145,8 +145,8 @@ export function loadContextifiedMongoDBModule() {
 
   const bundleCode = fs.readFileSync(bundlePath, 'utf8');
 
-  const exportsContainer = {};
-  const moduleContainer = { exports: exportsContainer };
+  const exportsContainer = { __proto__: null };
+  const moduleContainer = { __proto__: null, exports: exportsContainer };
 
   // Wrap the bundle in a CommonJS-style wrapper
   const wrapper = `(function(exports, module, require) {${bundleCode}})`;

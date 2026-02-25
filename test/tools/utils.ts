@@ -14,6 +14,7 @@ import { inspect, promisify } from 'util';
 import {
   type AnyClientBulkWriteModel,
   type Document,
+  EJSON,
   type HostAddress,
   MongoClient,
   type MongoClientOptions,
