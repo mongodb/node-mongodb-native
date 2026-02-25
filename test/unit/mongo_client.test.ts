@@ -1208,7 +1208,6 @@ describe('MongoClient', function () {
 
     it('when client.close is pending, client.closeLock is set', () => {
       client.close();
-      // expect(client.closeLock).to.be.instanceOf(Promise);
       ensureTypeByName(client.closeLock, 'Promise');
     });
 

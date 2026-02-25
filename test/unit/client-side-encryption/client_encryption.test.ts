@@ -100,9 +100,6 @@ describe('ClientEncryption', function () {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName)
           .catch(error => error);
-        // expect(error)
-        //   .to.be.instanceOf(TypeError)
-        //   .to.match(/provider/);
         ensureTypeByName(error, 'TypeError');
         expect(error.message).to.match(/provider/);
       });
@@ -111,9 +108,6 @@ describe('ClientEncryption', function () {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName, {})
           .catch(error => error);
-        // expect(error)
-        //   .to.be.instanceOf(TypeError)
-        //   .to.match(/encryptedFields/);
         ensureTypeByName(error, 'TypeError');
         expect(error.message).to.match(/encryptedFields/);
       });
@@ -122,9 +116,6 @@ describe('ClientEncryption', function () {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName, { createCollectionOptions: {} })
           .catch(error => error);
-        // expect(error)
-        //   .to.be.instanceOf(TypeError)
-        //   .to.match(/Cannot read properties/);
         ensureTypeByName(error, 'TypeError');
         expect(error.message).to.match(/Cannot read properties/);
       });

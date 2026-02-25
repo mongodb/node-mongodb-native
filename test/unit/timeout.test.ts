@@ -10,7 +10,7 @@ import {
   TimeoutError
 } from '../mongodb';
 
-describe.only('Timeout', function () {
+describe('Timeout', function () {
   let timeout: Timeout;
 
   beforeEach(() => {
