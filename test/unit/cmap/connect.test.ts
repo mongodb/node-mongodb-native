@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { execSync } from 'child_process';
-import * as crypto from 'crypto';
+import * as fs from 'fs';
 import * as net from 'net';
+import * as path from 'path';
 import * as process from 'process';
 import * as sinon from 'sinon';
 import * as tls from 'tls';
@@ -12,6 +12,7 @@ import {
   connect,
   type Connection,
   type ConnectionOptions,
+  DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS,
   HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,
@@ -456,27 +457,24 @@ describe('Connect Tests', function () {
   });
 
   describe('makeSocket', function () {
-    // TLS sockets created by tls.connect() do not honor keepAlive/noDelay constructor
-    // options due to a Node.js bug (options are not forwarded to the net.Socket constructor).
-    // The driver must call setKeepAlive/setNoDelay explicitly on all sockets.
-    // See: https://github.com/nodejs/node/issues/...
-
     let tlsServer: tls.Server;
     let tlsPort: number;
     let setKeepAliveSpy: sinon.SinonSpy;
     let setNoDelaySpy: sinon.SinonSpy;
 
-    before(function (done) {
-      const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
-      const key = privateKey.export({ type: 'pkcs8', format: 'pem' });
-      const cert = execSync(
-        'openssl req -new -x509 -key /dev/stdin -out /dev/stdout -days 1 -subj /CN=localhost -batch 2>/dev/null',
-        { input: key }
-      ).toString();
+    const serverPem = fs.readFileSync(
+      path.join(__dirname, '../../integration/auth/ssl/server.pem')
+    );
 
-      tlsServer = tls.createServer({ key, cert }, () => {
-        /* empty */
-      });
+    before(function (done) {
+      // @SECLEVEL=0 allows the legacy test certificate (signed with SHA-1/1024-bit RSA)
+      // to be accepted by OpenSSL 3.x, which rejects at the default security level.
+      tlsServer = tls.createServer(
+        { key: serverPem, cert: serverPem, ciphers: 'DEFAULT:@SECLEVEL=0' },
+        () => {
+          /* empty */
+        }
+      );
       tlsServer.listen(0, '127.0.0.1', () => {
         tlsPort = (tlsServer.address() as net.AddressInfo).port;
         done();
@@ -501,14 +499,12 @@ describe('Connect Tests', function () {
         const socket = await makeSocket({
           hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
           tls: true,
-          rejectUnauthorized: false
+          rejectUnauthorized: false,
+          ciphers: 'DEFAULT:@SECLEVEL=0'
         } as ConnectionOptions);
+        socket.destroy();
 
-        try {
-          expect(setKeepAliveSpy).to.have.been.calledWith(true, 120000);
-        } finally {
-          socket.destroy();
-        }
+        expect(setKeepAliveSpy).to.have.been.calledWith(true, DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS);
       });
 
       it('calls setKeepAlive with custom keepAliveInitialDelay', async function () {
@@ -516,28 +512,24 @@ describe('Connect Tests', function () {
           hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
           tls: true,
           rejectUnauthorized: false,
+          ciphers: 'DEFAULT:@SECLEVEL=0',
           keepAliveInitialDelay: 5000
         } as ConnectionOptions);
+        socket.destroy();
 
-        try {
-          expect(setKeepAliveSpy).to.have.been.calledWith(true, 5000);
-        } finally {
-          socket.destroy();
-        }
+        expect(setKeepAliveSpy).to.have.been.calledWith(true, 5000);
       });
 
       it('calls setNoDelay with true by default', async function () {
         const socket = await makeSocket({
           hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
           tls: true,
-          rejectUnauthorized: false
+          rejectUnauthorized: false,
+          ciphers: 'DEFAULT:@SECLEVEL=0'
         } as ConnectionOptions);
+        socket.destroy();
 
-        try {
-          expect(setNoDelaySpy).to.have.been.calledWith(true);
-        } finally {
-          socket.destroy();
-        }
+        expect(setNoDelaySpy).to.have.been.calledWith(true);
       });
     });
 
@@ -547,12 +539,9 @@ describe('Connect Tests', function () {
           hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
           tls: false
         } as ConnectionOptions);
+        socket.destroy();
 
-        try {
-          expect(setKeepAliveSpy).to.have.been.calledWith(true, 120000);
-        } finally {
-          socket.destroy();
-        }
+        expect(setKeepAliveSpy).to.have.been.calledWith(true, DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS);
       });
 
       it('calls setNoDelay with true by default', async function () {
@@ -560,12 +549,9 @@ describe('Connect Tests', function () {
           hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
           tls: false
         } as ConnectionOptions);
+        socket.destroy();
 
-        try {
-          expect(setNoDelaySpy).to.have.been.calledWith(true);
-        } finally {
-          socket.destroy();
-        }
+        expect(setNoDelaySpy).to.have.been.calledWith(true);
       });
     });
   });
