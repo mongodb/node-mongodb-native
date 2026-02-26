@@ -325,7 +325,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -406,13 +406,14 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -464,13 +465,14 @@ describe('OIDC Auth Spec Tests', function () {
               },
               data: {
                 failCommands: ['find'],
-                errorCode: 391
+                errorCode: 391,
+                appName
               }
             });
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -540,7 +542,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -610,7 +612,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -680,7 +682,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient?.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -764,7 +766,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -1126,7 +1128,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -1234,7 +1236,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -1302,7 +1304,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -1404,7 +1406,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -1481,7 +1483,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -1564,7 +1566,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
@@ -1655,7 +1657,7 @@ describe('OIDC Auth Spec Tests', function () {
         });
 
         afterEach(async function () {
-          // explicitly remove the fail point to prevent interaction betweet test runs
+          // explicitly remove the fail point to prevent interaction between test runs
           await utilClient.db().admin().command({
             configureFailPoint: 'failCommand',
             mode: 'off',
