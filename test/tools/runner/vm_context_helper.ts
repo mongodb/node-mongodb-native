@@ -2,53 +2,37 @@
 
 import * as fs from 'node:fs';
 import { isBuiltin } from 'node:module';
-import { platform } from 'node:os';
 import * as path from 'node:path';
 import * as vm from 'node:vm';
+
+const allowedModules = new Set([
+  '@aws-sdk/credential-providers',
+  '@mongodb-js/saslprep',
+  '@mongodb-js/zstd',
+  'bson',
+  'gcp-metadata',
+  'kerberos',
+  'mongodb-client-encryption',
+  'mongodb-connection-string-url',
+  'path',
+  'snappy'
+]);
+const blockedModules = new Set(['os']);
 
 /**
  * Creates a require function that blocks access to specified core modules
  */
 function createRestrictedRequire() {
-  const blockedModules = new Set(['os']);
-  const allowedRequesters = [
-    {
-      file: 'runtime_adapters.ts',
-      method: 'resolveRuntimeAdapters',
-      module: 'os'
-    }
-  ];
-
   return function restrictedRequire(moduleName: string) {
-    // Block core modules
-    if (isBuiltin(moduleName) && blockedModules.has(moduleName)) {
-      const callStack = new Error().stack;
-      const correctPath = platform() === 'win32' ? path.win32 : path.posix;
-      const methodAndFile = callStack.split('\n')[2];
-      const match = methodAndFile.match(/at (.*) \((.*)\)/);
-      const method = match ? match[1] : null;
-      const sourceFileAndLineNumbers = match ? match[2] : 'unknown';
-      const sourceFile =
-        sourceFileAndLineNumbers.indexOf('.ts:') === -1
-          ? sourceFileAndLineNumbers
-          : sourceFileAndLineNumbers.substring(0, sourceFileAndLineNumbers.lastIndexOf('.ts:') + 3);
-      const sourceFileName = correctPath.basename(sourceFile);
-      const isAllowed = allowedRequesters.some(
-        requester =>
-          requester.file === sourceFileName &&
-          requester.method === method &&
-          requester.module === moduleName
-      );
+    const isModuleBuiltin = isBuiltin(moduleName);
+    const isModuleAllowed = allowedModules.has(moduleName);
+    const isModuleBlocked = blockedModules.has(moduleName);
+    const shouldAllow = isModuleAllowed || isModuleBuiltin;
+    const shouldBlock = isModuleBlocked || !shouldAllow;
 
-      if (isAllowed) {
-        // Allow access to the module if the requester is in the allowlist
-      } else {
-        throw new Error(
-          `Access to core module '${moduleName}' from ${sourceFileName} is restricted in this context`
-        );
-      }
+    if (shouldBlock) {
+      throw new Error(`Access to core module '${moduleName}' is restricted in this context`);
     }
-
     return require(moduleName);
   } as NodeRequire;
 }
@@ -77,51 +61,24 @@ const sandbox = vm.createContext({
   // Process
   process: process,
 
+  // TODO: NODE-7460 - Remove Error and other unnecessary exports
+
   // Global objects needed for runtime
   Buffer: Buffer,
   Headers: global.Headers,
-  Promise: Promise,
   Map: Map,
-  Set: Set,
-  WeakMap: WeakMap,
-  WeakSet: WeakSet,
-  ArrayBuffer: ArrayBuffer,
-  SharedArrayBuffer: SharedArrayBuffer,
-  Atomics: Atomics,
-  DataView: DataView,
-  Int8Array: Int8Array,
-  Uint8Array: Uint8Array,
-  Uint8ClampedArray: Uint8ClampedArray,
-  Int16Array: Int16Array,
-  Uint16Array: Uint16Array,
-  Int32Array: Int32Array,
-  Uint32Array: Uint32Array,
-  Float32Array: Float32Array,
-  Float64Array: Float64Array,
-  BigInt64Array: BigInt64Array,
-  BigUint64Array: BigUint64Array,
-
-  // Other necessary globals
+  Promise: Promise,
+  Math: Math,
   TextEncoder: global.TextEncoder,
   TextDecoder: global.TextDecoder,
   BigInt: global.BigInt,
-  Symbol: Symbol,
-  Proxy: Proxy,
-  Reflect: Reflect,
-  Object: Object,
-  Array: Array,
-  Function: Function,
-  String: String,
-  Number: Number,
-  Boolean: Boolean,
-  RegExp: RegExp,
-  Math: Math,
-  JSON: JSON,
-  Intl: global.Intl,
   crypto: global.crypto,
 
   // Custom require that blocks core modules
   require: createRestrictedRequire(),
+
+  // Driver require
+  __driver_require: require,
 
   // Needed for some modules
   global: undefined as any,

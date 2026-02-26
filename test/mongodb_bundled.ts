@@ -385,6 +385,7 @@ export type {
   Document,
   DriverInfo,
   Filter,
+  FindOptions,
   IndexDirection,
   InferIdType,
   KMSProviders,
@@ -449,6 +450,7 @@ import type {
   MongoClient as _MongoClient,
   MongoCredentials as _MongoCredentials,
   MongoError as _MongoError,
+  ObjectId as _ObjectId,
   OnDemandDocument as _OnDemandDocument,
   Server as _Server,
   ServerApiVersion as _ServerApiVersion,
@@ -506,6 +508,7 @@ export type HostAddress = _HostAddress;
 export type MongoClient = _MongoClient;
 export type MongoCredentials = _MongoCredentials;
 export type MongoError = _MongoError;
+export type ObjectId = _ObjectId;
 export type OnDemandDocument = _OnDemandDocument;
 export type Server = _Server;
 export type ServerApiVersion = _ServerApiVersion;
