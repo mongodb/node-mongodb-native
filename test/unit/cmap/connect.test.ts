@@ -1,5 +1,10 @@
 import { expect } from 'chai';
+import { execSync } from 'child_process';
+import * as crypto from 'crypto';
+import * as net from 'net';
 import * as process from 'process';
+import * as sinon from 'sinon';
+import * as tls from 'tls';
 
 import {
   CancellationToken,
@@ -11,6 +16,7 @@ import {
   isHello,
   LEGACY_HELLO_COMMAND,
   makeClientMetadata,
+  makeSocket,
   MongoClientAuthProviders,
   MongoCredentials,
   MongoNetworkError,
@@ -445,6 +451,121 @@ describe('Connect Tests', function () {
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument).not.have.property(LEGACY_HELLO_COMMAND, 1);
         });
+      });
+    });
+  });
+
+  describe('makeSocket', function () {
+    // TLS sockets created by tls.connect() do not honor keepAlive/noDelay constructor
+    // options due to a Node.js bug (options are not forwarded to the net.Socket constructor).
+    // The driver must call setKeepAlive/setNoDelay explicitly on all sockets.
+    // See: https://github.com/nodejs/node/issues/...
+
+    let tlsServer: tls.Server;
+    let tlsPort: number;
+    let setKeepAliveSpy: sinon.SinonSpy;
+    let setNoDelaySpy: sinon.SinonSpy;
+
+    before(function (done) {
+      const { privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+      const key = privateKey.export({ type: 'pkcs8', format: 'pem' });
+      const cert = execSync(
+        'openssl req -new -x509 -key /dev/stdin -out /dev/stdout -days 1 -subj /CN=localhost -batch 2>/dev/null',
+        { input: key }
+      ).toString();
+
+      tlsServer = tls.createServer({ key, cert }, () => {
+        /* empty */
+      });
+      tlsServer.listen(0, '127.0.0.1', () => {
+        tlsPort = (tlsServer.address() as net.AddressInfo).port;
+        done();
+      });
+    });
+
+    after(function () {
+      tlsServer?.close();
+    });
+
+    beforeEach(function () {
+      setKeepAliveSpy = sinon.spy(net.Socket.prototype, 'setKeepAlive');
+      setNoDelaySpy = sinon.spy(net.Socket.prototype, 'setNoDelay');
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    context('when tls is enabled', function () {
+      it('calls setKeepAlive with default keepAliveInitialDelay', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: true,
+          rejectUnauthorized: false
+        } as ConnectionOptions);
+
+        try {
+          expect(setKeepAliveSpy).to.have.been.calledWith(true, 120000);
+        } finally {
+          socket.destroy();
+        }
+      });
+
+      it('calls setKeepAlive with custom keepAliveInitialDelay', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: true,
+          rejectUnauthorized: false,
+          keepAliveInitialDelay: 5000
+        } as ConnectionOptions);
+
+        try {
+          expect(setKeepAliveSpy).to.have.been.calledWith(true, 5000);
+        } finally {
+          socket.destroy();
+        }
+      });
+
+      it('calls setNoDelay with true by default', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: true,
+          rejectUnauthorized: false
+        } as ConnectionOptions);
+
+        try {
+          expect(setNoDelaySpy).to.have.been.calledWith(true);
+        } finally {
+          socket.destroy();
+        }
+      });
+    });
+
+    context('when tls is disabled', function () {
+      it('calls setKeepAlive with default keepAliveInitialDelay', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: false
+        } as ConnectionOptions);
+
+        try {
+          expect(setKeepAliveSpy).to.have.been.calledWith(true, 120000);
+        } finally {
+          socket.destroy();
+        }
+      });
+
+      it('calls setNoDelay with true by default', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: false
+        } as ConnectionOptions);
+
+        try {
+          expect(setNoDelaySpy).to.have.been.calledWith(true);
+        } finally {
+          socket.destroy();
+        }
       });
     });
   });

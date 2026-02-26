@@ -396,6 +396,8 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     socket = net.createConnection(parseConnectOptions(options));
   }
 
+  socket.setKeepAlive(true, options.keepAliveInitialDelay ?? 120_000);
+  socket.setNoDelay(options.noDelay ?? true);
   socket.setTimeout(connectTimeoutMS);
 
   let cancellationHandler: ((err: Error) => void) | null = null;
