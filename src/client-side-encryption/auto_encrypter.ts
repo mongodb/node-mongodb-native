@@ -1,7 +1,7 @@
 import { type MongoCrypt, type MongoCryptOptions } from 'mongodb-client-encryption';
 import * as net from 'net';
 
-import { deserialize, type Document, serialize } from '../bson';
+import { ByteUtils, deserialize, type Document, serialize } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { kDecorateResult } from '../constants';
 import { getMongoDBClientEncryption } from '../deps';
@@ -256,20 +256,26 @@ export class AutoEncrypter {
       errorWrapper: defaultErrorWrapper
     };
     if (options.schemaMap) {
-      mongoCryptOptions.schemaMap = Buffer.isBuffer(options.schemaMap)
-        ? options.schemaMap
-        : (serialize(options.schemaMap) as Buffer);
+      if (ByteUtils.isUint8Array(options.schemaMap)) {
+        mongoCryptOptions.schemaMap = options.schemaMap;
+      } else {
+        mongoCryptOptions.schemaMap = serialize(options.schemaMap);
+      }
     }
 
     if (options.encryptedFieldsMap) {
-      mongoCryptOptions.encryptedFieldsMap = Buffer.isBuffer(options.encryptedFieldsMap)
-        ? options.encryptedFieldsMap
-        : (serialize(options.encryptedFieldsMap) as Buffer);
+      if (ByteUtils.isUint8Array(options.encryptedFieldsMap)) {
+        mongoCryptOptions.encryptedFieldsMap = options.encryptedFieldsMap;
+      } else {
+        mongoCryptOptions.encryptedFieldsMap = serialize(options.encryptedFieldsMap);
+      }
     }
 
-    mongoCryptOptions.kmsProviders = !Buffer.isBuffer(this._kmsProviders)
-      ? (serialize(this._kmsProviders) as Buffer)
-      : this._kmsProviders;
+    if (ByteUtils.isUint8Array(this._kmsProviders)) {
+      mongoCryptOptions.kmsProviders = this._kmsProviders;
+    } else {
+      mongoCryptOptions.kmsProviders = serialize(this._kmsProviders);
+    }
 
     if (options.options?.logger) {
       mongoCryptOptions.logger = options.options.logger;
@@ -396,7 +402,7 @@ export class AutoEncrypter {
       return cmd;
     }
 
-    const commandBuffer = Buffer.isBuffer(cmd) ? cmd : serialize(cmd, options);
+    const commandBuffer: Uint8Array = serialize(cmd, options);
     const context = this._mongocrypt.makeEncryptionContext(
       MongoDBCollectionNamespace.fromString(ns).db,
       commandBuffer

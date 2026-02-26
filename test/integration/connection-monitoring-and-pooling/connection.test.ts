@@ -7,22 +7,23 @@ import * as sinon from 'sinon';
 
 import {
   Binary,
+  connect,
+  Connection,
   type ConnectionOptions,
+  HostAddress,
+  LEGACY_HELLO_COMMAND,
+  makeClientMetadata,
   MongoClient,
   MongoClientAuthProviders,
   type MongoClientOptions,
+  MongoDBResponse,
   MongoServerError,
-  ServerHeartbeatStartedEvent
-} from '../../../src';
-import { connect } from '../../../src/cmap/connect';
-import { Connection } from '../../../src/cmap/connection';
-import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
-import { MongoDBResponse } from '../../../src/cmap/wire_protocol/responses';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { Topology } from '../../../src/sdam/topology';
-import { HostAddress, ns } from '../../../src/utils';
+  ns,
+  ServerHeartbeatStartedEvent,
+  Topology
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { processTick, sleep } from '../../tools/utils';
+import { processTick, runtime, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
 const commonConnectOptions = {
@@ -49,7 +50,10 @@ describe('Connection', function () {
           ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata([], {})
+          metadata: makeClientMetadata([], {
+            runtime
+          }),
+          runtime
         };
 
         let conn;
@@ -71,7 +75,8 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata([], {})
+          runtime,
+          metadata: makeClientMetadata([], { runtime })
         };
 
         let conn;
@@ -102,7 +107,10 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata([], {})
+          runtime,
+          metadata: makeClientMetadata([], {
+            runtime
+          })
         };
 
         let conn;

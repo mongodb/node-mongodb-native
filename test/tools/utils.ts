@@ -4,7 +4,6 @@ import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 
-import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
 import * as process from 'process';
@@ -18,12 +17,14 @@ import {
   type HostAddress,
   MongoClient,
   type MongoClientOptions,
+  OP_MSG,
+  processTimeMS,
+  resolveRuntimeAdapters,
+  type Runtime,
   type ServerApiVersion,
+  Topology,
   type TopologyOptions
-} from '../../src';
-import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
-import { Topology } from '../../src/sdam/topology';
-import { processTimeMS } from '../../src/utils';
+} from '../mongodb';
 import { type TestConfiguration } from './runner/config';
 import { isTLSEnabled } from './runner/filters/tls_filter';
 
@@ -604,3 +605,8 @@ export function configureMongocryptdSpawnHooks(
     port
   };
 }
+
+/**
+ * A `Runtime` that resolves to entirely Nodejs modules, useful when tests must provide a default `runtime` object to an API.
+ */
+export const runtime: Runtime = resolveRuntimeAdapters({});

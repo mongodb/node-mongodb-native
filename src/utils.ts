@@ -6,7 +6,14 @@ import * as http from 'http';
 import * as process from 'process';
 import { clearTimeout, setTimeout } from 'timers';
 
-import { deserialize, type Document, ObjectId, resolveBSONOptions } from './bson';
+import {
+  ByteUtils,
+  deserialize,
+  type Document,
+  NumberUtils,
+  ObjectId,
+  resolveBSONOptions
+} from './bson';
 import type { Connection } from './cmap/connection';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 import type { Collection } from './collection';
@@ -43,26 +50,6 @@ import { WriteConcern } from './write_concern';
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 
 export type AnyOptions = Document;
-
-export const ByteUtils = {
-  toLocalBufferType(this: void, buffer: Buffer | Uint8Array): Buffer {
-    return Buffer.isBuffer(buffer)
-      ? buffer
-      : Buffer.from(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  },
-
-  equals(this: void, seqA: Uint8Array, seqB: Uint8Array) {
-    return ByteUtils.toLocalBufferType(seqA).equals(seqB);
-  },
-
-  compare(this: void, seqA: Uint8Array, seqB: Uint8Array) {
-    return ByteUtils.toLocalBufferType(seqA).compare(seqB);
-  },
-
-  toBase64(this: void, uint8array: Uint8Array) {
-    return ByteUtils.toLocalBufferType(uint8array).toString('base64');
-  }
-};
 
 /**
  * Returns true if value is a Uint8Array or a Buffer
@@ -318,7 +305,7 @@ export function* makeCounter(seed = 0): Generator<number> {
  * Synchronously Generate a UUIDv4
  * @internal
  */
-export function uuidV4(): Buffer {
+export function uuidV4(): Uint8Array {
   const result = crypto.randomBytes(16);
   result[6] = (result[6] & 0x0f) | 0x40;
   result[8] = (result[8] & 0x3f) | 0x80;
@@ -793,7 +780,7 @@ export class List<T = unknown> {
  * @internal
  */
 export class BufferPool {
-  private buffers: List<Buffer>;
+  private buffers: List<Uint8Array>;
   private totalByteLength: number;
 
   constructor() {
@@ -806,7 +793,7 @@ export class BufferPool {
   }
 
   /** Adds a buffer to the internal buffer pool list */
-  append(buffer: Buffer): void {
+  append(buffer: Uint8Array): void {
     this.buffers.push(buffer);
     this.totalByteLength += buffer.length;
   }
@@ -821,13 +808,13 @@ export class BufferPool {
     }
     const firstBuffer = this.buffers.first();
     if (firstBuffer != null && firstBuffer.byteLength >= 4) {
-      return firstBuffer.readInt32LE(0);
+      return NumberUtils.getInt32LE(firstBuffer, 0);
     }
 
     // Unlikely case: an int32 is split across buffers.
     // Use read and put the returned buffer back on top
     const top4Bytes = this.read(4);
-    const value = top4Bytes.readInt32LE(0);
+    const value = NumberUtils.getInt32LE(top4Bytes, 0);
 
     // Put it back.
     this.totalByteLength += 4;
@@ -837,19 +824,19 @@ export class BufferPool {
   }
 
   /** Reads the requested number of bytes, optionally consuming them */
-  read(size: number): Buffer {
+  read(size: number): Uint8Array {
     if (typeof size !== 'number' || size < 0) {
       throw new MongoInvalidArgumentError('Argument "size" must be a non-negative number');
     }
 
     // oversized request returns empty buffer
     if (size > this.totalByteLength) {
-      return Buffer.alloc(0);
+      return ByteUtils.allocate(0);
     }
 
     // We know we have enough, we just don't know how it is spread across chunks
     // TODO(NODE-4732): alloc API should change based on raw option
-    const result = Buffer.allocUnsafe(size);
+    const result = ByteUtils.allocateUnsafe(size);
 
     for (let bytesRead = 0; bytesRead < size; ) {
       const buffer = this.buffers.shift();
@@ -1240,8 +1227,8 @@ export function squashError(_error: unknown) {
 }
 
 export const randomBytes = (size: number) => {
-  return new Promise<Buffer>((resolve, reject) => {
-    crypto.randomBytes(size, (error: Error | null, buf: Buffer) => {
+  return new Promise<Uint8Array>((resolve, reject) => {
+    crypto.randomBytes(size, (error: Error | null, buf: Uint8Array) => {
       if (error) return reject(error);
       resolve(buf);
     });
@@ -1331,10 +1318,10 @@ export function decorateDecryptionResult(
 ): void {
   if (isTopLevelDecorateCall) {
     // The original value could have been either a JS object or a BSON buffer
-    if (Buffer.isBuffer(original)) {
+    if (ByteUtils.isUint8Array(original)) {
       original = deserialize(original);
     }
-    if (Buffer.isBuffer(decrypted)) {
+    if (ByteUtils.isUint8Array(decrypted)) {
       throw new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');
     }
   }

@@ -4,11 +4,14 @@ import { EventEmitter, once } from 'events';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
-import { MongoDriverError } from '../../../src/error';
-import { TopologyType } from '../../../src/sdam/common';
-import { TopologyDescriptionChangedEvent } from '../../../src/sdam/events';
-import { SrvPoller, SrvPollingEvent } from '../../../src/sdam/srv_polling';
-import { TopologyDescription } from '../../../src/sdam/topology_description';
+import {
+  MongoDriverError,
+  SrvPoller,
+  SrvPollingEvent,
+  TopologyDescription,
+  TopologyDescriptionChangedEvent,
+  TopologyType
+} from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Mongos SRV Polling', function () {

@@ -3,15 +3,13 @@ import {
   type BSONElement,
   BSONError,
   BSONType,
+  ByteUtils,
   deserialize,
   type DeserializeOptions,
-  getBigInt64LE,
-  getFloat64LE,
-  getInt32LE,
+  NumberUtils,
   ObjectId,
   parseToElementsToArray,
-  Timestamp,
-  toUTF8
+  Timestamp
 } from '../../../bson';
 
 const BSONElementOffset = {
@@ -183,25 +181,25 @@ export class OnDemandDocument {
       case BSONType.undefined:
         return null;
       case BSONType.double:
-        return getFloat64LE(this.bson, offset);
+        return NumberUtils.getFloat64LE(this.bson, offset);
       case BSONType.int:
-        return getInt32LE(this.bson, offset);
+        return NumberUtils.getInt32LE(this.bson, offset);
       case BSONType.long:
-        return getBigInt64LE(this.bson, offset);
+        return NumberUtils.getBigInt64LE(this.bson, offset);
       case BSONType.bool:
         return Boolean(this.bson[offset]);
       case BSONType.objectId:
         return new ObjectId(this.bson.subarray(offset, offset + 12));
       case BSONType.timestamp:
-        return new Timestamp(getBigInt64LE(this.bson, offset));
+        return new Timestamp(NumberUtils.getBigInt64LE(this.bson, offset));
       case BSONType.string:
-        return toUTF8(this.bson, offset + 4, offset + length - 1, false);
+        return ByteUtils.toUTF8(this.bson, offset + 4, offset + length - 1, false);
       case BSONType.binData: {
-        const totalBinarySize = getInt32LE(this.bson, offset);
+        const totalBinarySize = NumberUtils.getInt32LE(this.bson, offset);
         const subType = this.bson[offset + 4];
 
         if (subType === 2) {
-          const subType2BinarySize = getInt32LE(this.bson, offset + 1 + 4);
+          const subType2BinarySize = NumberUtils.getInt32LE(this.bson, offset + 1 + 4);
           if (subType2BinarySize < 0)
             throw new BSONError('Negative binary type element size found for subtype 0x02');
           if (subType2BinarySize > totalBinarySize - 4)
@@ -221,7 +219,7 @@ export class OnDemandDocument {
       }
       case BSONType.date:
         // Pretend this is correct.
-        return new Date(Number(getBigInt64LE(this.bson, offset)));
+        return new Date(Number(NumberUtils.getBigInt64LE(this.bson, offset)));
 
       case BSONType.object:
         return new OnDemandDocument(this.bson, offset);
@@ -352,7 +350,7 @@ export class OnDemandDocument {
 
   /** Returns this document's bytes only */
   toBytes() {
-    const size = getInt32LE(this.bson, this.offset);
+    const size = NumberUtils.getInt32LE(this.bson, this.offset);
     return this.bson.subarray(this.offset, this.offset + size);
   }
 }

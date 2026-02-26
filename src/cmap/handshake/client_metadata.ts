@@ -1,7 +1,6 @@
-import * as os from 'os';
 import * as process from 'process';
 
-import { BSON, type Document, Int32, NumberUtils } from '../../bson';
+import { BSON, ByteUtils, type Document, Int32, NumberUtils } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { DriverInfo, MongoOptions } from '../../mongo_client';
 import { fileIsAccessible } from '../../utils';
@@ -96,7 +95,8 @@ export class LimitedSizeDocument {
   }
 }
 
-type MakeClientMetadataOptions = Pick<MongoOptions, 'appName'>;
+type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
+
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
@@ -107,16 +107,16 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName'>;
  */
 export async function makeClientMetadata(
   driverInfoList: DriverInfo[],
-  { appName = '' }: MakeClientMetadataOptions
+  { appName = '', runtime: { os } }: MakeClientMetadataOptions
 ): Promise<ClientMetadata> {
   const metadataDocument = new LimitedSizeDocument(512);
 
   // Add app name first, it must be sent
   if (appName.length > 0) {
     const name =
-      Buffer.byteLength(appName, 'utf8') <= 128
+      ByteUtils.utf8ByteLength(appName) <= 128
         ? appName
-        : Buffer.from(appName, 'utf8').subarray(0, 128).toString('utf8');
+        : ByteUtils.toUTF8(ByteUtils.fromUTF8(appName), 0, 128, false);
     metadataDocument.ifItFitsItSits('application', { name });
   }
 

@@ -1,14 +1,18 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { OpCompressedRequest, OpMsgRequest, OpQueryRequest } from '../../src/cmap/commands';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as compression from '../../src/cmap/wire_protocol/compression';
 import {
   compress,
   Compressor,
+  OP_MSG,
+  OP_QUERY,
+  OpCompressedRequest,
+  OpMsgRequest,
+  OpQueryRequest,
   uncompressibleCommands
-} from '../../src/cmap/wire_protocol/compression';
-import { OP_MSG, OP_QUERY } from '../../src/cmap/wire_protocol/constants';
+} from '../mongodb';
 
 describe('class OpCompressedRequest', () => {
   context('canCompress()', () => {

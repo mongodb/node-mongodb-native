@@ -3,6 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 
 import {
   type BSONSerializeOptions,
+  ByteUtils,
   deserialize,
   type DeserializeOptions,
   type Document,
@@ -35,6 +36,7 @@ import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type Abortable, type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
+import { type Runtime } from '../runtime_adapters';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import { type TimeoutContext, TimeoutError } from '../timeout';
@@ -143,6 +145,8 @@ export interface ConnectionOptions
   metadata: Promise<ClientMetadata>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
+  /** @internal */
+  runtime: Runtime;
 }
 
 /** @public */
@@ -174,7 +178,7 @@ function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
     return HostAddress.fromHostPort(remoteAddress, remotePort).toString();
   }
 
-  return uuidV4().toString('hex');
+  return ByteUtils.toHex(uuidV4());
 }
 
 /** @internal */
@@ -204,7 +208,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private lastUseTime: number;
   private clusterTime: Document | null = null;
   private error: Error | null = null;
-  private dataEvents: AsyncGenerator<Buffer, void, void> | null = null;
+  private dataEvents: AsyncGenerator<Uint8Array, void, void> | null = null;
 
   private readonly socketTimeoutMS: number;
   private readonly monitorCommands: boolean;
@@ -582,6 +586,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.throwIfAborted();
       }
     } catch (error) {
+      if (options.session != null && !(error instanceof MongoServerError)) {
+        updateSessionFromResponse(options.session, MongoDBResponse.empty);
+      }
       if (this.shouldEmitAndLogCommand) {
         this.emitAndLogCommand(
           this.monitorCommands,
@@ -696,7 +703,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             zlibCompressionLevel: options.zlibCompressionLevel ?? 0
           });
 
-    const buffer = Buffer.concat(await finalCommand.toBin());
+    const buffer = ByteUtils.concat(await finalCommand.toBin());
 
     if (options.timeoutContext?.csotEnabled()) {
       if (
@@ -794,7 +801,7 @@ export class SizedMessageTransform extends Transform {
     this.connection = connection;
   }
 
-  override _transform(chunk: Buffer, encoding: unknown, callback: TransformCallback): void {
+  override _transform(chunk: Uint8Array, encoding: unknown, callback: TransformCallback): void {
     if (this.connection.delayedTimeoutId != null) {
       clearTimeout(this.connection.delayedTimeoutId);
       this.connection.delayedTimeoutId = null;

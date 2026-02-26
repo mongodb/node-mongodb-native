@@ -1,4 +1,4 @@
-current = "7.0 Driver"
+current = "7.1 Driver"
 mongoDBManual = "https://www.mongodb.com/docs/drivers/node/"
 
 [[versions]]
@@ -9,8 +9,15 @@ usesMongoDBManual = true
 tag = "Next"
 
 [[versions]]
-version = "7.0 Driver"
+version = "7.1 Driver"
 status = "latest"
+api = "./7.1"
+usesMongoDBManual = true
+tag = "7.1"
+
+[[versions]]
+version = "7.0 Driver"
+status = "supported"
 api = "./7.0"
 usesMongoDBManual = true
 tag = "7.0"
@@ -171,70 +178,70 @@ tag = "6.0"
 
 [[versions]]
 version = "5.9 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.9"
 usesMongoDBManual = true
 tag = "5.9"
 
 [[versions]]
 version = "5.8 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.8"
 usesMongoDBManual = true
 tag = "5.8"
 
 [[versions]]
 version = "5.7 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.7"
 usesMongoDBManual = true
 tag = "5.7"
 
 [[versions]]
 version = "5.6 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.6"
 usesMongoDBManual = true
 tag = "5.6"
 
 [[versions]]
 version = "5.5 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.5"
 usesMongoDBManual = true
 tag = "5.5"
 
 [[versions]]
 version = "5.4 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.4"
 usesMongoDBManual = true
 tag = "5.4"
 
 [[versions]]
 version = "5.3 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.3"
 usesMongoDBManual = true
 tag = "5.3"
 
 [[versions]]
 version = "5.2 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.2"
 usesMongoDBManual = true
 tag = "5.2"
 
 [[versions]]
 version = "5.1 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.1"
 usesMongoDBManual = true
 tag = "5.1"
 
 [[versions]]
 version = "5.0 Driver"
-status = "supported"
+status = "not-supported"
 api = "./5.0"
 usesMongoDBManual = true
 tag = "5.0"

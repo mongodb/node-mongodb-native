@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
 
-import { MongoClient } from '../../../src';
+import { MongoClient } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = { requires: { topology: '!single', tls: 'disabled' } };
 

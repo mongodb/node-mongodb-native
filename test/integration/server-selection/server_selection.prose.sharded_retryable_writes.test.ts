@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import type { CommandFailedEvent, CommandSucceededEvent } from '../../../src';
+import type { CommandFailedEvent, CommandSucceededEvent } from '../../mongodb';
 
 const TEST_METADATA = { requires: { mongodb: '>=4.3.1', topology: 'sharded' } };
 const FAIL_COMMAND = {

@@ -3,7 +3,7 @@ import { spawnSync } from 'child_process';
 import { dirname } from 'path';
 import * as process from 'process';
 
-import { EJSON } from '../../../src/bson';
+import { EJSON } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 describe('crypt shared library', () => {

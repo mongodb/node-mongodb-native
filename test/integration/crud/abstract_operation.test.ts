@@ -3,58 +3,52 @@ import { expect } from 'chai';
 import {
   type AbstractOperation,
   type Admin,
+  AggregateOperation,
   type Collection,
+  CountOperation,
+  CreateCollectionOperation,
+  CreateIndexesOperation,
+  CreateSearchIndexesOperation,
   type Db,
-  Long,
-  type MongoClient,
-  type Server
-} from '../../../src';
-import { AggregateOperation } from '../../../src/operations/aggregate';
-import { CountOperation } from '../../../src/operations/count';
-import { CreateCollectionOperation } from '../../../src/operations/create_collection';
-import {
+  DbStatsOperation,
   DeleteManyOperation,
   DeleteOneOperation,
-  DeleteOperation
-} from '../../../src/operations/delete';
-import { DistinctOperation } from '../../../src/operations/distinct';
-import { DropCollectionOperation, DropDatabaseOperation } from '../../../src/operations/drop';
-import { EstimatedDocumentCountOperation } from '../../../src/operations/estimated_document_count';
-import { FindOperation } from '../../../src/operations/find';
-import {
+  DeleteOperation,
+  DistinctOperation,
+  DropCollectionOperation,
+  DropDatabaseOperation,
+  DropIndexOperation,
+  DropSearchIndexOperation,
+  EstimatedDocumentCountOperation,
   FindAndModifyOperation,
   FindOneAndDeleteOperation,
   FindOneAndReplaceOperation,
-  FindOneAndUpdateOperation
-} from '../../../src/operations/find_and_modify';
-import { GetMoreOperation } from '../../../src/operations/get_more';
-import {
-  CreateIndexesOperation,
-  DropIndexOperation,
-  ListIndexesOperation
-} from '../../../src/operations/indexes';
-import { InsertOneOperation, InsertOperation } from '../../../src/operations/insert';
-import { KillCursorsOperation } from '../../../src/operations/kill_cursors';
-import { ListCollectionsOperation } from '../../../src/operations/list_collections';
-import { ListDatabasesOperation } from '../../../src/operations/list_databases';
-import { ProfilingLevelOperation } from '../../../src/operations/profiling_level';
-import { RemoveUserOperation } from '../../../src/operations/remove_user';
-import { RenameOperation } from '../../../src/operations/rename';
-import { RunCommandOperation } from '../../../src/operations/run_command';
-import { CreateSearchIndexesOperation } from '../../../src/operations/search_indexes/create';
-import { DropSearchIndexOperation } from '../../../src/operations/search_indexes/drop';
-import { UpdateSearchIndexOperation } from '../../../src/operations/search_indexes/update';
-import { SetProfilingLevelOperation } from '../../../src/operations/set_profiling_level';
-import { DbStatsOperation } from '../../../src/operations/stats';
-import {
+  FindOneAndUpdateOperation,
+  FindOperation,
+  GetMoreOperation,
+  InsertOneOperation,
+  InsertOperation,
+  KillCursorsOperation,
+  ListCollectionsOperation,
+  ListDatabasesOperation,
+  ListIndexesOperation,
+  Long,
+  type MongoClient,
+  MongoDBNamespace,
+  ProfilingLevelOperation,
+  RemoveUserOperation,
+  RenameOperation,
   ReplaceOneOperation,
+  RunCommandOperation,
+  type Server,
+  SetProfilingLevelOperation,
+  TimeoutContext,
   UpdateManyOperation,
   UpdateOneOperation,
-  UpdateOperation
-} from '../../../src/operations/update';
-import { ValidateCollectionOperation } from '../../../src/operations/validate_collection';
-import { TimeoutContext } from '../../../src/timeout';
-import { MongoDBNamespace } from '../../../src/utils';
+  UpdateOperation,
+  UpdateSearchIndexOperation,
+  ValidateCollectionOperation
+} from '../../mongodb';
 
 describe('abstract operation', function () {
   describe('command name getter', function () {

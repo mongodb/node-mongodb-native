@@ -1,7 +1,7 @@
 import { saslprep } from '@mongodb-js/saslprep';
 import * as crypto from 'crypto';
 
-import { Binary, type Document } from '../../bson';
+import { Binary, ByteUtils, type Document } from '../../bson';
 import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
@@ -65,21 +65,21 @@ function cleanUsername(username: string) {
   return username.replace('=', '=3D').replace(',', '=2C');
 }
 
-function clientFirstMessageBare(username: string, nonce: Buffer) {
+function clientFirstMessageBare(username: string, nonce: Uint8Array) {
   // NOTE: This is done b/c Javascript uses UTF-16, but the server is hashing in UTF-8.
   // Since the username is not sasl-prep-d, we need to do this here.
-  return Buffer.concat([
-    Buffer.from('n=', 'utf8'),
-    Buffer.from(username, 'utf8'),
-    Buffer.from(',r=', 'utf8'),
-    Buffer.from(nonce.toString('base64'), 'utf8')
+  return ByteUtils.concat([
+    ByteUtils.fromUTF8('n='),
+    ByteUtils.fromUTF8(username),
+    ByteUtils.fromUTF8(',r='),
+    ByteUtils.fromUTF8(ByteUtils.toBase64(nonce))
   ]);
 }
 
 function makeFirstMessage(
   cryptoMethod: CryptoMethod,
   credentials: MongoCredentials,
-  nonce: Buffer
+  nonce: Uint8Array
 ) {
   const username = cleanUsername(credentials.username);
   const mechanism =
@@ -91,7 +91,7 @@ function makeFirstMessage(
     saslStart: 1,
     mechanism,
     payload: new Binary(
-      Buffer.concat([Buffer.from('n,,', 'utf8'), clientFirstMessageBare(username, nonce)])
+      ByteUtils.concat([ByteUtils.fromUTF8('n,,'), clientFirstMessageBare(username, nonce)])
     ),
     autoAuthorize: 1,
     options: { skipEmptyExchange: true }
@@ -136,7 +136,7 @@ async function continueScramConversation(
   const processedPassword =
     cryptoMethod === 'sha256' ? saslprep(password) : passwordDigest(username, password);
 
-  const payload: Binary = Buffer.isBuffer(response.payload)
+  const payload: Binary = ByteUtils.isUint8Array(response.payload)
     ? new Binary(response.payload)
     : response.payload;
 
@@ -159,7 +159,7 @@ async function continueScramConversation(
   const withoutProof = `c=biws,r=${rnonce}`;
   const saltedPassword = HI(
     processedPassword,
-    Buffer.from(salt, 'base64'),
+    ByteUtils.fromBase64(salt),
     iterations,
     cryptoMethod
   );
@@ -181,13 +181,13 @@ async function continueScramConversation(
   const saslContinueCmd = {
     saslContinue: 1,
     conversationId: response.conversationId,
-    payload: new Binary(Buffer.from(clientFinal))
+    payload: new Binary(ByteUtils.fromUTF8(clientFinal))
   };
 
   const r = await connection.command(ns(`${db}.$cmd`), saslContinueCmd, undefined);
   const parsedResponse = parsePayload(r.payload);
 
-  if (!compareDigest(Buffer.from(parsedResponse.v, 'base64'), serverSignature)) {
+  if (!compareDigest(ByteUtils.fromBase64(parsedResponse.v), serverSignature)) {
     throw new MongoRuntimeError('Server returned an invalid signature');
   }
 
@@ -199,7 +199,7 @@ async function continueScramConversation(
   const retrySaslContinueCmd = {
     saslContinue: 1,
     conversationId: r.conversationId,
-    payload: Buffer.alloc(0)
+    payload: ByteUtils.allocate(0)
   };
 
   await connection.command(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined);
@@ -245,15 +245,7 @@ function passwordDigest(username: string, password: string) {
 }
 
 // XOR two buffers
-function xor(a: Buffer, b: Buffer) {
-  if (!Buffer.isBuffer(a)) {
-    a = Buffer.from(a);
-  }
-
-  if (!Buffer.isBuffer(b)) {
-    b = Buffer.from(b);
-  }
-
+function xor(a: Uint8Array, b: Uint8Array) {
   const length = Math.max(a.length, b.length);
   const res = [];
 
@@ -261,19 +253,19 @@ function xor(a: Buffer, b: Buffer) {
     res.push(a[i] ^ b[i]);
   }
 
-  return Buffer.from(res).toString('base64');
+  return ByteUtils.toBase64(ByteUtils.fromNumberArray(res));
 }
 
-function H(method: CryptoMethod, text: Buffer) {
+function H(method: CryptoMethod, text: Uint8Array): Uint8Array {
   return crypto.createHash(method).update(text).digest();
 }
 
-function HMAC(method: CryptoMethod, key: Buffer, text: Buffer | string) {
+function HMAC(method: CryptoMethod, key: Uint8Array, text: Uint8Array | string): Uint8Array {
   return crypto.createHmac(method, key).update(text).digest();
 }
 
 interface HICache {
-  [key: string]: Buffer;
+  [key: string]: Uint8Array;
 }
 
 let _hiCache: HICache = {};
@@ -288,9 +280,9 @@ const hiLengthMap = {
   sha1: 20
 };
 
-function HI(data: string, salt: Buffer, iterations: number, cryptoMethod: CryptoMethod) {
+function HI(data: string, salt: Uint8Array, iterations: number, cryptoMethod: CryptoMethod) {
   // omit the work if already generated
-  const key = [data, salt.toString('base64'), iterations].join('_');
+  const key = [data, ByteUtils.toBase64(salt), iterations].join('_');
   if (_hiCache[key] != null) {
     return _hiCache[key];
   }
@@ -314,7 +306,7 @@ function HI(data: string, salt: Buffer, iterations: number, cryptoMethod: Crypto
   return saltedData;
 }
 
-function compareDigest(lhs: Buffer, rhs: Uint8Array) {
+function compareDigest(lhs: Uint8Array, rhs: Uint8Array) {
   if (lhs.length !== rhs.length) {
     return false;
   }

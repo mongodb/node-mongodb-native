@@ -66,6 +66,12 @@ export abstract class AbstractOperation<TResult = any> {
   /** Specifies the time an operation will run until it throws a timeout error. */
   timeoutMS?: number;
 
+  /** Used by commitTransaction to share the retry budget across two executeOperation calls. */
+  maxAttempts?: number;
+
+  /** Tracks how many attempts were made in the last executeOperation call. */
+  attemptsMade: number;
+
   private _session: ClientSession | undefined;
 
   static aspects?: Set<symbol>;
@@ -82,6 +88,8 @@ export abstract class AbstractOperation<TResult = any> {
 
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
+
+    this.attemptsMade = 0;
   }
 
   /** Must match the first key of the command object sent to the server.

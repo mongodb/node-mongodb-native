@@ -1,20 +1,24 @@
 import { expect } from 'chai';
 import * as process from 'process';
 
-import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
-import { connect, prepareHandshakeDocument } from '../../../src/cmap/connect';
-import { type Connection, type ConnectionOptions } from '../../../src/cmap/connection';
 import {
+  CancellationToken,
   type ClientMetadata,
-  makeClientMetadata
-} from '../../../src/cmap/handshake/client_metadata';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { MongoNetworkError } from '../../../src/error';
-import { MongoClientAuthProviders } from '../../../src/mongo_client_auth_providers';
-import { CancellationToken } from '../../../src/mongo_types';
-import { HostAddress, isHello } from '../../../src/utils';
+  connect,
+  type Connection,
+  type ConnectionOptions,
+  HostAddress,
+  isHello,
+  LEGACY_HELLO_COMMAND,
+  makeClientMetadata,
+  MongoClientAuthProviders,
+  MongoCredentials,
+  MongoNetworkError,
+  prepareHandshakeDocument
+} from '../../mongodb';
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
+import { runtime } from '../../tools/utils';
 
 const CONNECT_DEFAULTS = {
   id: 1,
@@ -210,7 +214,9 @@ describe('Connect Tests', function () {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              metadata: makeClientMetadata([], {})
+              metadata: makeClientMetadata([], {
+                runtime
+              })
             }
           };
         });
@@ -239,7 +245,10 @@ describe('Connect Tests', function () {
                   name: 's'.repeat(128)
                 }
               ],
-              { appName: longAppName }
+              {
+                appName: longAppName,
+                runtime
+              }
             );
             const longAuthContext = {
               connection: {},
@@ -267,7 +276,9 @@ describe('Connect Tests', function () {
             connection: {},
             options: {
               ...CONNECT_DEFAULTS,
-              metadata: makeClientMetadata([], {})
+              metadata: makeClientMetadata([], {
+                runtime
+              })
             }
           };
         });
@@ -296,7 +307,10 @@ describe('Connect Tests', function () {
                   name: 's'.repeat(128)
                 }
               ],
-              { appName: longAppName }
+              {
+                appName: longAppName,
+                runtime
+              }
             );
             const longAuthContext = {
               connection: {},

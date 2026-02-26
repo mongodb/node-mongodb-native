@@ -1,7 +1,7 @@
 import { once } from 'events';
 import { expectType } from 'tsd';
 
-import { type ConnectionPoolCreatedEvent, MongoClient } from '../../src';
+import { type ConnectionPoolCreatedEvent, MongoClient } from '../mongodb';
 
 const client: MongoClient = new MongoClient('');
 const p = once(client, 'connectionPoolCreated');

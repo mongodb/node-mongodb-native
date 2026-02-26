@@ -1,6 +1,6 @@
 'use strict';
 
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 
 const { setupDatabase } = require('../shared');
 const { expect } = require('chai');

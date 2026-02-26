@@ -9,7 +9,7 @@ import {
   MongoClient,
   ObjectId,
   type WithId
-} from '../../../../src';
+} from '../../../mongodb';
 import type { PropExists } from '../../utility_types';
 
 // collection.findX tests

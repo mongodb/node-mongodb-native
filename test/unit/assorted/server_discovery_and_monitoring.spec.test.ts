@@ -4,43 +4,42 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
 
-import { Connection } from '../../../src/cmap/connection';
-import { ConnectionPool } from '../../../src/cmap/connection_pool';
 import {
+  Connection,
+  ConnectionPool,
   HEARTBEAT_EVENTS,
+  isRecord,
   LEGACY_HELLO_COMMAND,
-  SERVER_CLOSED,
-  SERVER_DESCRIPTION_CHANGED,
-  SERVER_OPENING,
-  TOPOLOGY_CLOSED,
-  TOPOLOGY_DESCRIPTION_CHANGED,
-  TOPOLOGY_OPENING
-} from '../../../src/constants';
-import {
+  MongoClient,
   MongoCompatibilityError,
   MongoError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoServerError
-} from '../../../src/error';
-import { MongoClient } from '../../../src/mongo_client';
-import { RunCommandOperation } from '../../../src/operations/run_command';
-import {
+  MongoServerError,
+  ns,
+  RunCommandOperation,
+  Server,
+  SERVER_CLOSED,
+  SERVER_DESCRIPTION_CHANGED,
+  SERVER_OPENING,
   ServerClosedEvent,
+  ServerDescription,
   ServerDescriptionChangedEvent,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
   ServerOpeningEvent,
+  squashError,
+  TimeoutContext,
+  Topology,
+  TOPOLOGY_CLOSED,
+  TOPOLOGY_DESCRIPTION_CHANGED,
+  TOPOLOGY_OPENING,
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
-  TopologyOpeningEvent
-} from '../../../src/sdam/events';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription, type TopologyVersion } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
-import { TimeoutContext } from '../../../src/timeout';
-import { isRecord, ns, squashError } from '../../../src/utils';
+  TopologyOpeningEvent,
+  type TopologyVersion
+} from '../../mongodb';
 import { ejson, fakeServer } from '../../tools/utils';
 
 const SDAM_EVENT_CLASSES = {

@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.0](https://github.com/mongodb/node-mongodb-native/compare/v7.0.0...v7.1.0) (2026-02-02)
+
+
+### Features
+
+* **NODE-5393:** aws4 no longer required for AWS authentication ([#4824](https://github.com/mongodb/node-mongodb-native/issues/4824)) ([0f46db8](https://github.com/mongodb/node-mongodb-native/commit/0f46db8a6135178dbe2806bb1289870e8973f382))
+* **NODE-7121:** prevent connection churn on backpressure errors when establishing connections ([#4800](https://github.com/mongodb/node-mongodb-native/issues/4800)) ([4cb2b87](https://github.com/mongodb/node-mongodb-native/commit/4cb2b87537536461dc2f5cd9f0a8a56ad193cb13))
+* **NODE-7122:** exponential backoff between retries in convenient transaction API ([#4765](https://github.com/mongodb/node-mongodb-native/issues/4765)) ([e70fdc9](https://github.com/mongodb/node-mongodb-native/commit/e70fdc981dc2bdc0d3c12515b2eecc214d8f3ce4))
+* **NODE-7304:** remove usages in src of promisify ([#4799](https://github.com/mongodb/node-mongodb-native/issues/4799)) ([761b9bf](https://github.com/mongodb/node-mongodb-native/commit/761b9bfab8dfc8e3e7e311731d7a5cda1285bc6c))
+* **NODE-7306:** Replace global process with import node:process ([#4820](https://github.com/mongodb/node-mongodb-native/issues/4820)) ([cc503cb](https://github.com/mongodb/node-mongodb-native/commit/cc503cb9810e2dbde0862fd8c8daa8ee613ef7b1))
+* **NODE-7310:** Replace process.arch with os.arch() ([#4823](https://github.com/mongodb/node-mongodb-native/issues/4823)) ([f0af829](https://github.com/mongodb/node-mongodb-native/commit/f0af829f1a6fdf8cc0b070a327682f6299b747f1))
+* **NODE-7311:** Replace process.platform with os.platform() ([#4822](https://github.com/mongodb/node-mongodb-native/issues/4822)) ([c58ca1f](https://github.com/mongodb/node-mongodb-native/commit/c58ca1f9d6a177470e58098ca1874174607c35c8))
+* **NODE-7317:** use BSON.NumberUtils to determine endianness ([#4808](https://github.com/mongodb/node-mongodb-native/issues/4808)) ([4e9467e](https://github.com/mongodb/node-mongodb-native/commit/4e9467e8ab9ccbcf6eb47156d84ac538c5e3f6ea))
+* **NODE-7319:** update allowed hosts list with *.mongo.com ([#4802](https://github.com/mongodb/node-mongodb-native/issues/4802)) ([bfb7160](https://github.com/mongodb/node-mongodb-native/commit/bfb71603fdfaaaebf418a3064f293d2c95697865))
+* **NODE-7330:** deprecate RenameCollectionOptions.new_collection ([#4815](https://github.com/mongodb/node-mongodb-native/issues/4815)) ([a96fa26](https://github.com/mongodb/node-mongodb-native/commit/a96fa26dea3060828af747f0f2974229018de730))
+* **NODE-7333:** add support for deprioritized servers to all topologies  ([#4821](https://github.com/mongodb/node-mongodb-native/issues/4821)) ([a4211e7](https://github.com/mongodb/node-mongodb-native/commit/a4211e77a30450ca8b162cbe3eec9f3759d3f517))
+
+
+### Bug Fixes
+
+* **NODE-7290:** use valueof for error code check ([#4791](https://github.com/mongodb/node-mongodb-native/issues/4791)) ([1cc3d1c](https://github.com/mongodb/node-mongodb-native/commit/1cc3d1c952274b2fc18ffd4898978af97f76b554))
+* **NODE-7298:** ensure commonWireVersion is computed from server maxWireVersion ([#4805](https://github.com/mongodb/node-mongodb-native/issues/4805)) ([2b2366d](https://github.com/mongodb/node-mongodb-native/commit/2b2366dd18a76bd9e0b36b9911af6a0a317926c3))
+* **NODE-7307:** Replace node:process.hrtime() with performance.now() ([#4816](https://github.com/mongodb/node-mongodb-native/issues/4816)) ([ae2e037](https://github.com/mongodb/node-mongodb-native/commit/ae2e037e896fbc673061da49a7c45743ae145651))
+* **NODE-7308:** replace process.nextTick with queueMicrotask  ([#4817](https://github.com/mongodb/node-mongodb-native/issues/4817)) ([b1b6e81](https://github.com/mongodb/node-mongodb-native/commit/b1b6e81168a2cb6a2cc089d8c3cb83df1405931f))
+
 ## [7.0.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v7.0.0) (2025-11-06)
 
 

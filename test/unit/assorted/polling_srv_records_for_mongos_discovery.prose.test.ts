@@ -5,11 +5,17 @@ import * as process from 'process';
 import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 
-import { MongoClient } from '../../../src/mongo_client';
-import { TopologyType } from '../../../src/sdam/common';
-import { SrvPoller, type SrvPollerOptions, SrvPollingEvent } from '../../../src/sdam/srv_polling';
-import type { Topology, TopologyOptions } from '../../../src/sdam/topology';
-import { HostAddress, isHello } from '../../../src/utils';
+import {
+  HostAddress,
+  isHello,
+  MongoClient,
+  SrvPoller,
+  type SrvPollerOptions,
+  SrvPollingEvent,
+  type Topology,
+  type TopologyOptions,
+  TopologyType
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import type { MockServer } from '../../tools/mongodb-mock/src/server';
 import { processTick, topologyWithPlaceholderClient } from '../../tools/utils';

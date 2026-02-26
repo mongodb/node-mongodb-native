@@ -2,7 +2,7 @@ import * as aws4sign from 'aws4';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { aws4Sign, type AwsSigv4Options } from '../../src/cmap/auth/aws4';
+import { aws4Sign, type AwsSigv4Options } from '../mongodb';
 
 describe('Verify AWS4 signature generation', () => {
   const date = new Date('2025-12-15T12:34:56Z');

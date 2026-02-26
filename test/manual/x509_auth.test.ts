@@ -7,7 +7,7 @@ import {
   type MongoClientOptions,
   MongoServerError,
   MongoServerSelectionError
-} from '../../src';
+} from '../mongodb';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const connectionString = new ConnectionString(process.env.MONGODB_URI!);

@@ -6,7 +6,7 @@ import {
   GSSAPICanonicalizationValue,
   performGSSAPICanonicalizeHostName,
   resolveCname
-} from '../../../../src/cmap/auth/gssapi';
+} from '../../../mongodb';
 
 describe('GSSAPI', () => {
   let lookupSpy;

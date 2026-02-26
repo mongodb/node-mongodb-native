@@ -562,6 +562,7 @@ export type {
   ReadPreferenceLikeOptions,
   ReadPreferenceOptions
 } from './read_preference';
+export type { OsAdapter, Runtime, RuntimeAdapters } from './runtime_adapters';
 export type { ClusterTime } from './sdam/common';
 export type {
   Monitor,
@@ -620,6 +621,7 @@ export type {
   TimeoutContext,
   TimeoutContextOptions
 } from './timeout';
+export type { TokenBucket } from './token_bucket';
 export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,

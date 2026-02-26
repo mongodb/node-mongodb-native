@@ -12,7 +12,7 @@ import {
   MongoClientBulkWriteError,
   MongoInvalidArgumentError,
   MongoServerError
-} from '../../../src';
+} from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 

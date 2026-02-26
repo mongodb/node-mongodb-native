@@ -2,11 +2,14 @@ import { expect } from 'chai';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
 
-import { AuthContext } from '../../../src/cmap/auth/auth_provider';
-import { GSSAPI } from '../../../src/cmap/auth/gssapi';
-import { compress } from '../../../src/cmap/wire_protocol/compression';
-import { MongoMissingDependencyError } from '../../../src/error';
-import { HostAddress } from '../../../src/utils';
+import {
+  AuthContext,
+  compress,
+  GSSAPI,
+  HostAddress,
+  MongoMissingDependencyError
+} from '../../mongodb';
+import { runtime } from '../../tools/utils';
 
 function moduleExistsSync(moduleName) {
   return existsSync(resolve(__dirname, `../../../node_modules/${moduleName}`));
@@ -41,7 +44,13 @@ describe('optionalRequire', function () {
       const gssapi = new GSSAPI();
 
       const error = await gssapi
-        .auth(new AuthContext(null, true, { hostAddress: new HostAddress('a'), credentials: true }))
+        .auth(
+          new AuthContext(null, true, {
+            hostAddress: new HostAddress('a'),
+            credentials: true,
+            runtime
+          })
+        )
         .then(
           () => null,
           e => e

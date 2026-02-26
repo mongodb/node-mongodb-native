@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type Collection, type MongoClient, ObjectId } from '../../../../src';
+import { type Collection, type MongoClient, ObjectId } from '../../../mongodb';
 
 describe('raw bson support', () => {
   describe('raw', () => {
