@@ -11,7 +11,7 @@ import {
   runServerSelectionLogicTest
 } from './server_selection_logic_spec_utils';
 
-describe.only('Server Selection Logic (spec)', function () {
+describe('Server Selection Logic (spec)', function () {
   beforeEach(function () {
     if (this.currentTest.title.match(/Possible/)) {
       this.currentTest.skipReason = 'Nodejs driver does not support PossiblePrimary';
