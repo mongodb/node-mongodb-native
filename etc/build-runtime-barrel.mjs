@@ -1,12 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 // eslint-disable-next-line no-restricted-globals
 const useBundled = process.env.MONGODB_BUNDLED === 'true';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.join(__dirname, '..');
+const rootDir = path.join(import.meta.dirname, '..');
 const outputBarrelFile = path.join(rootDir, 'test/mongodb.ts');
 const source = useBundled ? './mongodb_bundled' : './mongodb_all';
 

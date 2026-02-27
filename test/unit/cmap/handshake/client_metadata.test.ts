@@ -318,7 +318,9 @@ describe('client metadata module', () => {
     context('when globalThis indicates alternative runtime', () => {
       beforeEach(function () {
         if (runNodelessTests) {
-          this.skip(); // these tests are meant to run in node and will fail in nodeless environments due to the presence of globalThis.Bun or globalThis.Deno
+          this.currentTest.skipReason =
+            'These tests are meant to run in node and will fail in nodeless environments';
+          this.currentTest.skip();
         }
       });
 

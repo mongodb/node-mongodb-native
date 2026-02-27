@@ -6,7 +6,6 @@ import * as sinon from 'sinon';
 // Intentionally import from src, because we need to stub the `get()` function.
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as utils from '../../../../src/utils';
-import { runNodelessTests } from '../../../mongodb';
 import {
   AWSSDKCredentialProvider,
   fetchAzureKMSToken,
@@ -24,12 +23,6 @@ const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 const originalSessionToken = process.env.AWS_SESSION_TOKEN;
 
 describe('#refreshKMSCredentials', function () {
-  before(function () {
-    if (runNodelessTests) {
-      this.skip();
-    }
-  });
-
   context('isEmptyCredentials()', () => {
     it('returns true for an empty object', () => {
       expect(isEmptyCredentials('aws', { aws: {} })).to.be.true;

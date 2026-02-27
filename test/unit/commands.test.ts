@@ -16,12 +16,6 @@ import {
 } from '../mongodb';
 
 describe('class OpCompressedRequest', () => {
-  before(function () {
-    if (runNodelessTests) {
-      this.skip();
-    }
-  });
-
   context('canCompress()', () => {
     for (const command of uncompressibleCommands) {
       it(`returns true when the command is ${command}`, () => {
@@ -96,20 +90,30 @@ describe('class OpCompressedRequest', () => {
           expect(compressedMessage).to.deep.equal(expectedCompressedCommand);
         });
 
-        it('respects the zlib compression level', async () => {
-          const spy = sinon.spy(compression, 'compress');
-          const [messageHeader] = await new OpCompressedRequest(msg, {
-            agreedCompressor: 'snappy',
-            zlibCompressionLevel: 3
-          }).toBin();
+        describe('zlib compression', function () {
+          before(function () {
+            if (runNodelessTests) {
+              this.currentTest.skipReason =
+                'This test relies on sinon spying on the compress() function, which is not currently possible in nodeless environments';
+              this.currentTest.skip();
+            }
+          });
 
-          expect(messageHeader.readInt32LE(12), 'opcode is not OP_COMPRESSED').to.equal(2012);
+          it('respects the zlib compression level', async function () {
+            const spy = sinon.spy(compression, 'compress');
+            const [messageHeader] = await new OpCompressedRequest(msg, {
+              agreedCompressor: 'snappy',
+              zlibCompressionLevel: 3
+            }).toBin();
 
-          expect(spy).to.have.been.called;
+            expect(messageHeader.readInt32LE(12), 'opcode is not OP_COMPRESSED').to.equal(2012);
 
-          expect(spy.args[0][0]).to.deep.equal({
-            agreedCompressor: 'snappy',
-            zlibCompressionLevel: 3
+            expect(spy).to.have.been.called;
+
+            expect(spy.args[0][0]).to.deep.equal({
+              agreedCompressor: 'snappy',
+              zlibCompressionLevel: 3
+            });
           });
         });
       });

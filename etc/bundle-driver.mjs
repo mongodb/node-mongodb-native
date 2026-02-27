@@ -21,16 +21,17 @@ await esbuild.build({
   format: 'cjs',
   target: 'node20',
   external: [
-    'bson',
-    'mongodb-connection-string-url',
+    '@aws-sdk/credential-providers',
     '@mongodb-js/saslprep',
     '@mongodb-js/zstd',
-    'mongodb-client-encryption',
-    'snappy',
     '@napi-rs/snappy*',
-    'kerberos',
+    'bson',
     'gcp-metadata',
-    '@aws-sdk/credential-providers'
+    'kerberos',
+    'mongodb-client-encryption',
+    'mongodb-connection-string-url',
+    'snappy',
+    'socks'
   ],
   plugins: [
     {

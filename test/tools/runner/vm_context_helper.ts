@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-globals, @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 import * as fs from 'node:fs';
 import { isBuiltin } from 'node:module';
@@ -15,9 +15,41 @@ const allowedModules = new Set([
   'mongodb-client-encryption',
   'mongodb-connection-string-url',
   'path',
-  'snappy'
+  'snappy',
+  'socks'
 ]);
 const blockedModules = new Set(['os']);
+
+// TODO: NODE-7460 - Remove Error and other unnecessary exports
+const exposedGlobals = new Set([
+  'AbortController',
+  'AbortSignal',
+  'BigInt',
+  'Buffer',
+  'Date',
+  'Error',
+  'Headers',
+  'Map',
+  'Math',
+  'Promise',
+  'TextDecoder',
+  'TextEncoder',
+  'URL',
+  'URLSearchParams',
+
+  'console',
+  'crypto',
+  'performance',
+  'process',
+
+  'clearImmediate',
+  'clearInterval',
+  'clearTimeout',
+  'setImmediate',
+  'setInterval',
+  'setTimeout',
+  'queueMicrotask'
+]);
 
 /**
  * Creates a require function that blocks access to specified core modules
@@ -34,45 +66,11 @@ function createRestrictedRequire() {
       throw new Error(`Access to core module '${moduleName}' is restricted in this context`);
     }
     return require(moduleName);
-  } as NodeRequire;
+  } as NodeJS.Require;
 }
 
-// Create a sandbox context with necessary globals
-const sandbox = vm.createContext({
+const context = {
   __proto__: null,
-
-  // Console and timing
-  console: console,
-  AbortController: AbortController,
-  AbortSignal: AbortSignal,
-  Date: global.Date,
-  Error: global.Error,
-  URL: global.URL,
-  URLSearchParams: global.URLSearchParams,
-  queueMicrotask: queueMicrotask,
-  performance: global.performance,
-  setTimeout: global.setTimeout,
-  clearTimeout: global.clearTimeout,
-  setInterval: global.setInterval,
-  clearInterval: global.clearInterval,
-  setImmediate: global.setImmediate,
-  clearImmediate: global.clearImmediate,
-
-  // Process
-  process: process,
-
-  // TODO: NODE-7460 - Remove Error and other unnecessary exports
-
-  // Global objects needed for runtime
-  Buffer: Buffer,
-  Headers: global.Headers,
-  Map: Map,
-  Promise: Promise,
-  Math: Math,
-  TextEncoder: global.TextEncoder,
-  TextDecoder: global.TextDecoder,
-  BigInt: global.BigInt,
-  crypto: global.crypto,
 
   // Custom require that blocks core modules
   require: createRestrictedRequire(),
@@ -83,7 +81,17 @@ const sandbox = vm.createContext({
   // Needed for some modules
   global: undefined as any,
   globalThis: undefined as any
-});
+};
+
+// Expose allowed globals in the context
+for (const globalName of exposedGlobals) {
+  if (globalName in global) {
+    context[globalName] = (global as any)[globalName];
+  }
+}
+
+// Create a sandbox context with necessary globals
+const sandbox = vm.createContext(context);
 
 // Make global and globalThis point to the sandbox
 sandbox.global = sandbox;
@@ -93,7 +101,7 @@ sandbox.globalThis = sandbox;
  * Load the bundled MongoDB driver module in a VM context
  * This allows us to control the globals that the driver has access to
  */
-export function loadContextifiedMongoDBModule() {
+export function loadContextifiedMongoDBModule(): typeof import('../../mongodb_all') {
   const bundlePath = path.join(__dirname, 'bundle/driver-bundle.js');
 
   if (!fs.existsSync(bundlePath)) {
@@ -114,5 +122,5 @@ export function loadContextifiedMongoDBModule() {
   // Execute the bundle with the restricted require from the sandbox
   fn(moduleContainer.exports, moduleContainer, sandbox.require);
 
-  return moduleContainer.exports;
+  return moduleContainer.exports as unknown as typeof import('../../mongodb_all');
 }

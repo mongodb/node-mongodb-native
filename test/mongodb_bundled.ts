@@ -3,7 +3,7 @@ import { loadContextifiedMongoDBModule } from './tools/runner/vm_context_helper'
 type all = typeof import('./mongodb_all');
 let exportSource: all;
 try {
-  exportSource = loadContextifiedMongoDBModule() as all;
+  exportSource = loadContextifiedMongoDBModule();
 } catch (error) {
   throw new Error(
     `Failed to load contextified MongoDB module: ${error instanceof Error ? error.message : String(error)}`
@@ -152,6 +152,7 @@ export const {
   HEARTBEAT_EVENTS,
   HostAddress,
   hostMatchesWildcards,
+  INITIAL_TOKEN_BUCKET_SIZE,
   InsertOneOperation,
   InsertOperation,
   Int32,
@@ -450,8 +451,11 @@ import type {
   MongoClient as _MongoClient,
   MongoCredentials as _MongoCredentials,
   MongoError as _MongoError,
+  Monitor as _Monitor,
+  MonitorInterval as _MonitorInterval,
   ObjectId as _ObjectId,
   OnDemandDocument as _OnDemandDocument,
+  RTTSampler as _RTTSampler,
   Server as _Server,
   ServerApiVersion as _ServerApiVersion,
   ServerClosedEvent as _ServerClosedEvent,
@@ -508,8 +512,11 @@ export type HostAddress = _HostAddress;
 export type MongoClient = _MongoClient;
 export type MongoCredentials = _MongoCredentials;
 export type MongoError = _MongoError;
+export type Monitor = _Monitor;
+export type MonitorInterval = _MonitorInterval;
 export type ObjectId = _ObjectId;
 export type OnDemandDocument = _OnDemandDocument;
+export type RTTSampler = _RTTSampler;
 export type Server = _Server;
 export type ServerApiVersion = _ServerApiVersion;
 export type ServerClosedEvent = _ServerClosedEvent;
