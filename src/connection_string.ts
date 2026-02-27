@@ -639,6 +639,10 @@ interface OptionDescriptor {
 }
 
 export const OPTIONS = {
+  adaptiveRetries: {
+    default: false,
+    type: 'boolean'
+  },
   appName: {
     type: 'string'
   },
