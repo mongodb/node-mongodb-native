@@ -324,14 +324,14 @@ async function executeOperationWithRetries<
       }
 
       if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
-        if (topology.s.options.adaptiveRetries && !topology.tokenBucket.consume(RETRY_COST)) {
-          throw error;
-        }
-
         const backoffMS = Math.random() * Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * 2 ** attempt);
 
         // if the backoff would exhaust the CSOT timeout, short-circuit.
         if (timeoutContext.csotEnabled() && backoffMS > timeoutContext.remainingTimeMS) {
+          throw error;
+        }
+
+        if (topology.s.options.adaptiveRetries && !topology.tokenBucket.consume(RETRY_COST)) {
           throw error;
         }
 
