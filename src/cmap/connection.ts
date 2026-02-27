@@ -586,6 +586,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.throwIfAborted();
       }
     } catch (error) {
+      if (options.session != null && !(error instanceof MongoServerError)) {
+        updateSessionFromResponse(options.session, MongoDBResponse.empty);
+      }
       if (this.shouldEmitAndLogCommand) {
         this.emitAndLogCommand(
           this.monitorCommands,
