@@ -706,8 +706,8 @@ export class ChangeStream<
   }
 
   /** Returns the currently buffered documents length of the underlying cursor. */
-  get bufferedCount(): number | undefined {
-    return this.cursor?.bufferedCount();
+  bufferedCount(): number {
+    return this.cursor?.bufferedCount() ?? 0;
   }
 
   /** Check if there is any document still available in the Change Stream */
