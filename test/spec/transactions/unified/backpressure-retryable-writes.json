@@ -412,17 +412,31 @@
           "events": [
             {
               "commandStartedEvent": {
-                "commandName": "insert"
+                "command": {
+                  "startTransaction": true
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
               }
             },
             {
               "commandStartedEvent": {
-                "commandName": "insert"
+                "command": {
+                  "startTransaction": true
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
               }
             },
             {
               "commandStartedEvent": {
-                "commandName": "abortTransaction"
+                "command": {
+                  "startTransaction": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "abortTransaction",
+                "databaseName": "admin"
               }
             }
           ]
