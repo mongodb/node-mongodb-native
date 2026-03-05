@@ -19,7 +19,7 @@ const TOKEN_RESOURCE_MISSING_ERROR =
  * @param params - The OIDC callback parameters.
  * @returns The OIDC response.
  */
-export const callback: OIDCCallbackFunction = async (
+export const azureCallback: OIDCCallbackFunction = async (
   params: OIDCCallbackParams
 ): Promise<OIDCResponse> => {
   const tokenAudience = params.tokenAudience;

@@ -12,7 +12,7 @@ const TOKEN_MISSING_ERROR = 'OIDC_TOKEN_FILE must be set in the environment.';
  * @param params - The OIDC callback parameters.
  * @returns The OIDC response.
  */
-export const callback: OIDCCallbackFunction = async (): Promise<OIDCResponse> => {
+export const tokenMachineCallback: OIDCCallbackFunction = async (): Promise<OIDCResponse> => {
   const tokenFile = process.env.OIDC_TOKEN_FILE;
   if (!tokenFile) {
     throw new MongoAWSError(TOKEN_MISSING_ERROR);

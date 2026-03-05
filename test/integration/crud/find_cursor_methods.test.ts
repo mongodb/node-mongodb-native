@@ -2,14 +2,14 @@ import { expect } from 'chai';
 
 import {
   type Collection,
+  CursorTimeoutContext,
   type FindCursor,
   MongoAPIError,
   type MongoClient,
-  MongoCursorExhaustedError
-} from '../../../src';
-import { CursorTimeoutContext } from '../../../src/cursor/abstract_cursor';
-import { TimeoutContext } from '../../../src/timeout';
-import { promiseWithResolvers } from '../../../src/utils';
+  MongoCursorExhaustedError,
+  promiseWithResolvers,
+  TimeoutContext
+} from '../../mongodb';
 import { filterForCommands } from '../shared';
 
 describe('Find Cursor', function () {

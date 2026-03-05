@@ -9,7 +9,7 @@ import {
   type MongoClient,
   MongoOperationTimeoutError,
   MongoServerError
-} from '../../../src';
+} from '../../mongodb';
 import { clearFailPoint, configureFailPoint, measureDuration } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
