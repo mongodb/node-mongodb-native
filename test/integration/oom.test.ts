@@ -1,8 +1,8 @@
 describe.only('OOM exit code detection', function () {
   it('allocates until OOM', function () {
-    const leak: Uint8Array[] = [];
+    const leak: object[] = [];
     while (true) {
-      leak.push(new Uint8Array(1_000_000));
+      leak.push({ a: Array.from({ length: 1_000 }, (_, i) => ({ i })) });
     }
   });
 });
