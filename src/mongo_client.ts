@@ -229,6 +229,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   retryReads?: boolean;
   /** Enable retryable writes. */
   retryWrites?: boolean;
+  /** Whether to enable adaptive retry rate limiting using a token bucket. Defaults to false. */
+  adaptiveRetries?: boolean;
   /** Allow a driver to force a Single topology type with a connection string containing one host */
   directConnection?: boolean;
   /** Instruct the driver it is connecting to a load balancer fronting a mongos like service */
@@ -1041,6 +1043,7 @@ export interface MongoOptions
   extends Required<
       Pick<
         MongoClientOptions,
+        | 'adaptiveRetries'
         | 'autoEncryption'
         | 'connectTimeoutMS'
         | 'directConnection'
