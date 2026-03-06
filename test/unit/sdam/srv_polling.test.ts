@@ -31,9 +31,9 @@ describe('Mongos SRV Polling', function () {
 
   function stubDns(err: Error | null, records?: dns.SrvRecord[]) {
     if (err) {
-      sinon.stub(dns.promises, 'resolveSrv').rejects(err);
+      sinon.stub(dns.promises, 'resolve').rejects(err);
     } else {
-      sinon.stub(dns.promises, 'resolveSrv').resolves(records);
+      sinon.stub(dns.promises, 'resolve').resolves(records);
     }
   }
 
@@ -96,13 +96,13 @@ describe('Mongos SRV Polling', function () {
       it('should poll dns srv records', async function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
-        sinon.stub(dns.promises, 'resolveSrv').resolves([srvRecord('iLoveJavascript.lots')]);
+        sinon.stub(dns.promises, 'resolve').resolves([srvRecord('iLoveJavascript.lots')]);
 
         await poller._poll();
 
         clearTimeout(poller._timeout);
 
-        expect(dns.promises.resolveSrv).to.have.been.calledOnce.and.to.have.been.calledWith(
+        expect(dns.promises.resolve).to.have.been.calledOnce.and.to.have.been.calledWith(
           `_mongodb._tcp.${SRV_HOST}`
         );
       });
