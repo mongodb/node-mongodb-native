@@ -417,6 +417,20 @@ for (const {
     }
     BUILD_VARIANTS.push(buildVariantData);
   }
+
+  // add Node-less variant
+  const buildVariantData = {
+    name: `${osName}-nodeless`,
+    display_name: `${osDisplayName} Nodeless`,
+    run_on,
+    expansions: {
+      MONGODB_BUNDLED: true,
+      NODE_LTS_VERSION: 'latest'
+    },
+    tasks: tasks.map(({ name }) => name)
+  };
+  buildVariantData.expansions.CLIENT_ENCRYPTION = clientEncryption;
+  BUILD_VARIANTS.push(buildVariantData);
 }
 
 // Running CSFLE tests with mongocryptd

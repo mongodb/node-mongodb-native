@@ -8,7 +8,7 @@ import {
   ReadPreference,
   ServerType
 } from '../../mongodb';
-import { runLater, sleep } from '../../tools/utils';
+import { ensureTypeByName, runLater, sleep } from '../../tools/utils';
 import { assert as test, filterForCommands, setupDatabase } from '../shared';
 
 describe('Cursor', function () {
@@ -1529,7 +1529,7 @@ describe('Cursor', function () {
       const promise = cursor.forEach(() => {
         // do nothing
       });
-      expect(promise).to.exist.and.to.be.an.instanceof(Promise);
+      ensureTypeByName(promise, 'Promise');
       return promise;
     });
   });

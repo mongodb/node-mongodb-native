@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-imports, @typescript-eslint/no-require-imports */
+/* eslint-disable no-restricted-imports*/
 
 // We squash the restricted import errors here because we are using type-only imports, which
 // do not impact the driver's actual runtime dependencies.
@@ -43,7 +43,9 @@ export interface Runtime {
  * not provided by in `options`, and returns a `Runtime`.
  */
 export function resolveRuntimeAdapters(options: MongoClientOptions): Runtime {
+  const correctRequire = (globalThis as any).__driver_require || require;
+
   return {
-    os: options.runtimeAdapters?.os ?? require('os')
+    os: options.runtimeAdapters?.os ?? correctRequire('os')
   };
 }
