@@ -1184,14 +1184,14 @@ describe('Change Streams', function () {
         { requires: { topology: 'replicaset' } },
         async function () {
           // existing documents
-          await collection.insertOne({ a: 1 });
-          await collection.insertOne({ a: 2 });
+          await collection.insertOne({ a: 1 }, { writeConcern: { w: 'majority' } });
+          await collection.insertOne({ a: 2 }, { writeConcern: { w: 'majority' } });
 
           changeStream = collection.watch([]);
 
           // docs inserted after the change stream was created
-          await collection.insertOne({ a: 3 });
-          await collection.insertOne({ a: 4 });
+          await collection.insertOne({ a: 3 }, { writeConcern: { w: 'majority' } });
+          await collection.insertOne({ a: 4 }, { writeConcern: { w: 'majority' } });
 
           expect(changeStream.bufferedCount()).to.equal(0);
           await changeStream.close();
@@ -1203,8 +1203,8 @@ describe('Change Streams', function () {
         async test() {
           changeStream = collection.watch([]);
           await initIteratorMode(changeStream);
-          await collection.insertOne({ a: 1 });
-          await collection.insertOne({ a: 2 });
+          await collection.insertOne({ a: 1 }, { writeConcern: { w: 'majority' } });
+          await collection.insertOne({ a: 2 }, { writeConcern: { w: 'majority' } });
 
           expect(changeStream.bufferedCount()).to.equal(0);
 
@@ -1221,25 +1221,28 @@ describe('Change Streams', function () {
         async test() {
           changeStream = collection.watch([]);
           await initIteratorMode(changeStream);
-          await collection.insertOne({ a: 1 });
-          await collection.insertOne({ a: 2 });
+          await collection.insertOne({ a: 1 }, { writeConcern: { w: 'majority' } });
+          await collection.insertOne({ a: 2 }, { writeConcern: { w: 'majority' } });
+          await collection.insertOne({ a: 3 }, { writeConcern: { w: 'majority' } });
 
           expect(changeStream.bufferedCount()).to.equal(0);
+
           // `next` triggers a batch fetch, buffering the documents
           // and then consumes one document from that buffer
-          await changeStream.next();
-          expect(changeStream.bufferedCount()).to.equal(1);
-          await changeStream.next();
-          expect(changeStream.bufferedCount()).to.equal(0);
+          for (let i = 2; i >= 0; i--) {
+            await changeStream.next();
+            expect(changeStream.bufferedCount()).to.equal(i);
+          }
 
-          await collection.insertOne({ a: 1 });
-          await collection.insertOne({ a: 2 });
+          await collection.insertOne({ a: 1 }, { writeConcern: { w: 'majority' } });
+          await collection.insertOne({ a: 2 }, { writeConcern: { w: 'majority' } });
+          await collection.insertOne({ a: 3 }, { writeConcern: { w: 'majority' } });
 
           // `tryNext` also triggers a batch fetch
-          await changeStream.tryNext();
-          expect(changeStream.bufferedCount()).to.equal(1);
-          await changeStream.tryNext();
-          expect(changeStream.bufferedCount()).to.equal(0);
+          for (let i = 2; i >= 0; i--) {
+            await changeStream.tryNext();
+            expect(changeStream.bufferedCount()).to.equal(i);
+          }
         }
       });
     });
