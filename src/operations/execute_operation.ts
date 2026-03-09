@@ -19,6 +19,7 @@ import {
 } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ReadPreference } from '../read_preference';
+import { TopologyType } from '../sdam/common';
 import {
   DeprioritizedServers,
   sameServerSelector,
@@ -342,7 +343,12 @@ async function executeOperationWithRetries<
         session.unpin({ force: true, forceClear: true });
       }
 
-      deprioritizedServers.add(server.description);
+      if (
+        topology.description.type === TopologyType.Sharded ||
+        operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+      ) {
+        deprioritizedServers.add(server.description);
+      }
 
       server = await topology.selectServer(selector, {
         session,
