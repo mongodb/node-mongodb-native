@@ -85,7 +85,7 @@
       }
     },
     {
-      "description": "Mark server unknown on network timeout application error (beforeHandshakeCompletes)",
+      "description": "Ignore network timeout application error (beforeHandshakeCompletes)",
       "applicationErrors": [
         {
           "address": "a:27017",
