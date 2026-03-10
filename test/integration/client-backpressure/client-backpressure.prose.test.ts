@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {
-  type Collection,
   INITIAL_TOKEN_BUCKET_SIZE,
   MAX_RETRIES,
   type MongoClient,
@@ -13,18 +12,11 @@ import { filterForCommands } from '../shared';
 
 describe('Client Backpressure (Prose)', function () {
   let client: MongoClient;
-  let collection: Collection;
-
-  beforeEach(async function () {
-    client = this.configuration.newClient();
-    await client.connect();
-
-    collection = client.db('foo').collection('bar');
-  });
 
   afterEach(async function () {
     sinon.restore();
     await client.close();
+    client = undefined;
     await clearFailPoint(this.configuration);
   });
 
@@ -36,6 +28,9 @@ describe('Client Backpressure (Prose)', function () {
       }
     },
     async function () {
+      client = this.configuration.newClient();
+      await client.connect();
+
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
@@ -49,6 +44,8 @@ describe('Client Backpressure (Prose)', function () {
       const stub = sinon.stub(Math, 'random');
 
       stub.returns(0);
+
+      const collection = client.db('foo').collection('bar');
 
       const { duration: durationNoBackoff } = await measureDuration(async () => {
         const error = await collection.insertOne({ a: 1 }).catch(e => e);
@@ -68,7 +65,7 @@ describe('Client Backpressure (Prose)', function () {
 
   it('Test 2: Token Bucket capacity is Enforced', async function () {
     // 1. Let client be a MongoClient with adaptiveRetries=True.
-    const client = this.configuration.newClient({
+    client = this.configuration.newClient({
       adaptiveRetries: true
     });
     await client.connect();
@@ -83,8 +80,6 @@ describe('Client Backpressure (Prose)', function () {
 
     // 4. Assert that the successful command did not increase the number of tokens in the bucket above DEFAULT_RETRY_TOKEN_CAPACITY.
     expect(tokenBucket).to.have.property('budget').that.is.at.most(INITIAL_TOKEN_BUCKET_SIZE);
-
-    await client.close();
   });
 
   it(
@@ -96,7 +91,7 @@ describe('Client Backpressure (Prose)', function () {
     },
     async function () {
       // 1. Let `client` be a `MongoClient` with command event monitoring enabled.
-      const client = this.configuration.newClient({
+      client = this.configuration.newClient({
         monitorCommands: true
       });
       await client.connect();
@@ -138,8 +133,6 @@ describe('Client Backpressure (Prose)', function () {
 
       // 6. Assert that the total number of started commands is MAX_RETRIES + 1 (6).
       expect(commandsStarted).to.have.length(MAX_RETRIES + 1);
-
-      await client.close();
     }
   );
 
@@ -152,7 +145,7 @@ describe('Client Backpressure (Prose)', function () {
     },
     async function () {
       // 1. Let `client` be a `MongoClient` with `adaptiveRetries=True` and command event monitoring enabled.
-      const client = this.configuration.newClient({
+      client = this.configuration.newClient({
         adaptiveRetries: true,
         monitorCommands: true
       });
@@ -199,8 +192,6 @@ describe('Client Backpressure (Prose)', function () {
 
       // 7. Assert that the total number of started commands is 3: one for the initial attempt and two for the retries.
       expect(commandsStarted).to.have.length(3);
-
-      await client.close();
     }
   );
 });
