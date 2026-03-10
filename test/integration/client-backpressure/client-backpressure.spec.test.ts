@@ -4,6 +4,8 @@ import { type Test } from '../../tools/unified-spec-runner/schema';
 
 const skippedTests = {
   'collection.dropIndexes retries at most maxAttempts=5 times':
+    'TODO(NODE-6517): dropIndexes squashes all errors other than ns not found',
+  'collection.dropIndexes (write) does not retry if retryWrites=false':
     'TODO(NODE-6517): dropIndexes squashes all errors other than ns not found'
 };
 
