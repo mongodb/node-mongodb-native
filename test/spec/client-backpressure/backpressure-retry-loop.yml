@@ -83,7 +83,7 @@ initialData:
 _yamlAnchors:
   bulWriteInsertNamespace: &client_bulk_write_ns retryable-writes-tests.coll
 
-tests: 
+tests:
   - description: 'client.listDatabases retries using operation loop'
     operations:
       - name: failPoint
@@ -743,7 +743,7 @@ tests:
               commandName: aggregate
 
 
-  - description: 'collection.aggregate retries using operation loop'
+  - description: 'collection.aggregate read retries using operation loop'
     operations:
       - name: failPoint
         object: testRunner
@@ -2344,7 +2344,7 @@ tests:
               commandName: dropIndexes
 
 
-  - description: 'collection.aggregate retries using operation loop'
+  - description: 'collection.aggregate write retries using operation loop'
     operations:
       - name: failPoint
         object: testRunner
@@ -2411,4 +2411,3 @@ tests:
               commandName: aggregate
           - commandFailedEvent:
               commandName: aggregate
-

@@ -1480,7 +1480,7 @@
       ]
     },
     {
-      "description": "collection.aggregate retries using operation loop",
+      "description": "collection.aggregate read retries using operation loop",
       "operations": [
         {
           "name": "failPoint",
@@ -4734,7 +4734,7 @@
       ]
     },
     {
-      "description": "collection.aggregate retries using operation loop",
+      "description": "collection.aggregate write retries using operation loop",
       "operations": [
         {
           "name": "failPoint",

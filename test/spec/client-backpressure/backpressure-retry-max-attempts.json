@@ -1026,7 +1026,7 @@
       ]
     },
     {
-      "description": "collection.aggregate retries at most maxAttempts=5 times",
+      "description": "collection.aggregate read retries at most maxAttempts=5 times",
       "operations": [
         {
           "name": "failPoint",
@@ -3448,7 +3448,7 @@
       ]
     },
     {
-      "description": "collection.aggregate retries at most maxAttempts=5 times",
+      "description": "collection.aggregate write retries at most maxAttempts=5 times",
       "operations": [
         {
           "name": "failPoint",

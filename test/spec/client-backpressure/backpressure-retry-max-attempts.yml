@@ -40,7 +40,7 @@ initialData:
       - { _id: 1, x: 11 }
       - { _id: 2, x: 22 }
 
-tests: 
+tests:
   - description: 'client.listDatabases retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
@@ -513,7 +513,7 @@ tests:
           - commandFailedEvent:
               commandName: aggregate
 
-  - description: 'collection.aggregate retries at most maxAttempts=5 times'
+  - description: 'collection.aggregate read retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -1711,7 +1711,7 @@ tests:
           - commandFailedEvent:
               commandName: dropIndexes
 
-  - description: 'collection.aggregate retries at most maxAttempts=5 times'
+  - description: 'collection.aggregate write retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
