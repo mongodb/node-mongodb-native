@@ -10,6 +10,7 @@
     {
       "client": {
         "id": "client0",
+        "useMultipleMongoses": false,
         "observeEvents": [
           "commandStartedEvent",
           "commandFailedEvent",
@@ -19,7 +20,8 @@
     },
     {
       "client": {
-        "id": "failPointClient"
+        "id": "failPointClient",
+        "useMultipleMongoses": false
       }
     },
     {
