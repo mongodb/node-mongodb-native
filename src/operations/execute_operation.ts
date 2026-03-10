@@ -267,11 +267,13 @@ async function executeOperationWithRetries<
     try {
       try {
         const result = await server.command(operation, timeoutContext);
-        topology.tokenBucket.deposit(
-          attempt > 0
-            ? RETRY_TOKEN_RETURN_RATE + RETRY_COST // on successful retry
-            : RETRY_TOKEN_RETURN_RATE // otherwise
-        );
+        if (topology.s.options.adaptiveRetries) {
+          topology.tokenBucket.deposit(
+            attempt > 0
+              ? RETRY_TOKEN_RETURN_RATE + RETRY_COST // on successful retry
+              : RETRY_TOKEN_RETURN_RATE // otherwise
+          );
+        }
         return operation.handleOk(result);
       } catch (error) {
         return operation.handleError(error);
@@ -280,7 +282,11 @@ async function executeOperationWithRetries<
       // Should never happen but if it does - propagate the error.
       if (!(operationError instanceof MongoError)) throw operationError;
 
-      if (attempt > 0 && !operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
+      if (
+        topology.s.options.adaptiveRetries &&
+        attempt > 0 &&
+        !operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+      ) {
         // if a retry attempt fails with a non-overload error, deposit 1 token.
         topology.tokenBucket.deposit(RETRY_COST);
       }
@@ -319,14 +325,14 @@ async function executeOperationWithRetries<
       }
 
       if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
-        if (!topology.tokenBucket.consume(RETRY_COST)) {
-          throw error;
-        }
-
         const backoffMS = Math.random() * Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * 2 ** attempt);
 
         // if the backoff would exhaust the CSOT timeout, short-circuit.
         if (timeoutContext.csotEnabled() && backoffMS > timeoutContext.remainingTimeMS) {
+          throw error;
+        }
+
+        if (topology.s.options.adaptiveRetries && !topology.tokenBucket.consume(RETRY_COST)) {
           throw error;
         }
 
