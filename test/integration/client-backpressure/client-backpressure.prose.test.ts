@@ -28,9 +28,30 @@ describe('Client Backpressure (Prose)', function () {
       }
     },
     async function () {
+      // 1. Let `client` be a `MongoClient`
       client = this.configuration.newClient();
       await client.connect();
 
+      // 2. Let `collection` be a collection
+      const collection = client.db('foo').collection('bar');
+
+      // 3. Now, run transactions without backoff:
+      //    i. Configure the random number generator used for jitter to always return `0` -- this effectively disables backoff.
+      const stub = sinon.stub(Math, 'random');
+      stub.returns(0);
+
+      //    ii. Configure the following failPoint:
+      //        ```javascript
+      //            {
+      //                configureFailPoint: 'failCommand',
+      //                mode: 'alwaysOn',
+      //                data: {
+      //                    failCommands: ['insert'],
+      //                    errorCode: 2,
+      //                    errorLabels: ['SystemOverloadedError', 'RetryableError']
+      //                }
+      //            }
+      //        ```
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
@@ -41,24 +62,23 @@ describe('Client Backpressure (Prose)', function () {
         }
       });
 
-      const stub = sinon.stub(Math, 'random');
-
-      stub.returns(0);
-
-      const collection = client.db('foo').collection('bar');
-
+      //    iii. Insert the document `{ a: 1 }`. Expect that the command errors. Measure the duration of the command execution.
       const { duration: durationNoBackoff } = await measureDuration(async () => {
         const error = await collection.insertOne({ a: 1 }).catch(e => e);
         expect(error).to.be.instanceof(MongoServerError);
       });
 
+      //    iv. Configure the random number generator used for jitter to always return a number as close as possible to `1`.
       stub.returns(0.99);
 
+      //    v. Execute step iii again.
       const { duration: durationBackoff } = await measureDuration(async () => {
         const error = await collection.insertOne({ a: 1 }).catch(e => e);
         expect(error).to.be.instanceof(MongoServerError);
       });
 
+      //    vi. Compare the two time between the two runs.
+      //        The sum of 5 backoffs is 3.1 seconds. There is a 1-second window to account for potential variance between the two runs.
       expect(durationBackoff - durationNoBackoff).to.be.within(3100 - 1000, 3100 + 1000);
     }
   );
