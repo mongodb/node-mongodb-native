@@ -306,7 +306,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Close the client.
         beforeEach(async function () {
           client = getClient({ appName }, callbackSpy);
-          utilClient = getClient({ appName }, createCallback());
+          utilClient = getClient({}, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -394,7 +394,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Close the client.
         beforeEach(async function () {
           client = getClient({ appName }, callbackSpy);
-          utilClient = getClient({ appName }, createCallback());
+          utilClient = getClient({}, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -453,7 +453,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Close the client.
         beforeEach(async function () {
           client = getClient({ promoteValues: false, appName }, callbackSpy);
-          utilClient = getClient({ promoteValues: false, appName }, createCallback());
+          utilClient = getClient({ promoteValues: false }, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -659,7 +659,7 @@ describe('OIDC Auth Spec Tests', function () {
         // - Assert there were `SaslStart` commands executed.
         // - Close the client.
         beforeEach(async function () {
-          utilClient = getClient({ appName }, createCallback());
+          utilClient = getClient({}, createCallback());
           client = getClient({ monitorCommands: true, appName }, callbackSpy);
           client.on('commandStarted', event => {
             if (event.commandName === 'saslStart') {
@@ -746,7 +746,7 @@ describe('OIDC Auth Spec Tests', function () {
         // Close the session and the client.
         beforeEach(async function () {
           client = getClient({ appName }, callbackSpy);
-          utilClient = getClient({ appName }, createCallback());
+          utilClient = getClient({}, createCallback());
           collection = client.db('test').collection('test');
           await utilClient
             .db()
@@ -1283,8 +1283,7 @@ describe('OIDC Auth Spec Tests', function () {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false,
-            appName
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
           await utilClient
@@ -1374,8 +1373,7 @@ describe('OIDC Auth Spec Tests', function () {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false,
-            appName
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
@@ -1460,8 +1458,7 @@ describe('OIDC Auth Spec Tests', function () {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false,
-            appName
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
@@ -1543,8 +1540,7 @@ describe('OIDC Auth Spec Tests', function () {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false,
-            appName
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
@@ -1634,8 +1630,7 @@ describe('OIDC Auth Spec Tests', function () {
             authMechanismProperties: {
               OIDC_HUMAN_CALLBACK: createCallback()
             },
-            retryReads: false,
-            appName
+            retryReads: false
           });
           collection = client.db('test').collection('testHuman');
           await collection.findOne();
