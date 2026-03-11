@@ -711,7 +711,7 @@
       ]
     },
     {
-      "description": "database.aggregate retries using operation loop",
+      "description": "database.aggregate read retries using operation loop",
       "operations": [
         {
           "name": "failPoint",

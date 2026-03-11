@@ -252,7 +252,7 @@ tests:
           - commandFailedEvent:
               commandName: bulkWrite
 
-  - description: 'database.aggregate retries at most maxAttempts=5 times'
+  - description: 'database.aggregate read retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
