@@ -389,18 +389,12 @@ async function executeOperationWithRetries<
   );
 
   function canRetry(operation: AbstractOperation, error: MongoError) {
-    // SystemOverloadedError is retryable, but still must respect retryReads/retryWrites settings
+    // always retryable
     if (
       error.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
       error.hasErrorLabel(MongoErrorLabel.RetryableError)
     ) {
-      // runCommand requires BOTH retryReads and retryWrites to be enabled (per spec)
-      if (operation instanceof RunCommandOperation) {
-        return willRetryRead && willRetryWrite;
-      }
-
-      // For other operations, check if retries are enabled for the operation type
-      return (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
+      return true;
     }
 
     // run command is only retryable if we get retryable overload errors
