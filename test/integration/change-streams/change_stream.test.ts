@@ -1168,6 +1168,12 @@ describe('Change Streams', function () {
       });
     });
 
+    // Note that `insertOne` in these tests is called with write concern `{ w: 'majority' }`.
+    // This is to avoid eventual consistency issues that make these tests brittle.
+    // A change stream won't see the new documents until they are persisted in the oplog and
+    // some MongoDB server versions (4.2-) used for testing default to write concern `{ w: 1 }`.
+    // Using write concern `{ w: 'majority' }` ensures that the new documents are persisted in 
+    // the oplog when the `insertOne` promise resolves, making these tests more reliable.
     describe('#bufferedCount()', function () {
       it(
         'should return 0 before starting to consume the change stream (empty collection)',
