@@ -94,7 +94,6 @@ for (const globalName of exposedGlobals) {
 const sandbox = vm.createContext(context);
 
 // Make global and globalThis point to the sandbox
-sandbox.global = sandbox;
 sandbox.globalThis = sandbox;
 
 /**
