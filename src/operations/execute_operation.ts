@@ -389,12 +389,28 @@ async function executeOperationWithRetries<
   );
 
   function canRetry(operation: AbstractOperation, error: MongoError) {
-    // always retryable
+    // SystemOverloadedError is retryable, but must respect retryReads/retryWrites settings
+    // Check topology options directly (not operation.canRetryRead/Write) because backpressure
+    // expands retry support beyond traditional retryable reads/writes
+    // NOTE: Unlike traditional retries, backpressure retries ARE allowed inside transactions
     if (
       error.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
       error.hasErrorLabel(MongoErrorLabel.RetryableError)
     ) {
-      return true;
+      // runCommand requires BOTH retryReads and retryWrites to be enabled (per spec step 2.4)
+      if (operation instanceof RunCommandOperation) {
+        return topology.s.options.retryReads && topology.s.options.retryWrites;
+      }
+
+      // Write-stage aggregates ($out/$merge) require retryWrites
+      if (operation instanceof AggregateOperation && operation.hasWriteStage) {
+        return topology.s.options.retryWrites;
+      }
+
+      // For other operations, check if retries are enabled based on operation type
+      const canRetryAsRead = hasReadAspect && topology.s.options.retryReads;
+      const canRetryAsWrite = hasWriteAspect && topology.s.options.retryWrites;
+      return canRetryAsRead || canRetryAsWrite;
     }
 
     // run command is only retryable if we get retryable overload errors
