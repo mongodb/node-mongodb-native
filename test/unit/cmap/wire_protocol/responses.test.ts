@@ -1,9 +1,13 @@
 import { expect } from 'chai';
 
-import { Int32, serialize } from '../../../../src/bson';
-import { OnDemandDocument } from '../../../../src/cmap/wire_protocol/on_demand/document';
-import { CursorResponse, MongoDBResponse } from '../../../../src/cmap/wire_protocol/responses';
-import { MongoUnexpectedServerResponseError } from '../../../../src/error';
+import {
+  CursorResponse,
+  Int32,
+  MongoDBResponse,
+  MongoUnexpectedServerResponseError,
+  OnDemandDocument,
+  serialize
+} from '../../../mongodb';
 
 describe('class MongoDBResponse', () => {
   it('is a subclass of OnDemandDocument', () => {

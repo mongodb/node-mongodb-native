@@ -1,0 +1,35 @@
+{
+  "tests": [
+    {
+      "description": "adaptiveRetries=true is parsed correctly",
+      "uri": "mongodb://example.com/?adaptiveRetries=true",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "adaptiveRetries": true
+      }
+    },
+    {
+      "description": "adaptiveRetries=false is parsed correctly",
+      "uri": "mongodb://example.com/?adaptiveRetries=false",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "adaptiveRetries": false
+      }
+    },
+    {
+      "description": "adaptiveRetries with invalid value causes a warning",
+      "uri": "mongodb://example.com/?adaptiveRetries=invalid",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": null
+    }
+  ]
+}

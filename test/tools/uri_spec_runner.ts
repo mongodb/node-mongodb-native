@@ -6,7 +6,7 @@ import {
   MongoInvalidArgumentError,
   MongoParseError,
   MongoRuntimeError
-} from '../../src';
+} from '../mongodb';
 
 type HostObject = {
   type: 'ipv4' | 'ip_literal' | 'hostname' | 'unix';
@@ -358,6 +358,7 @@ export function executeUriValidationTest(
       case 'serverSelectionTimeoutMS':
       case 'serverMonitoringMode':
       case 'socketTimeoutMS':
+      case 'adaptiveRetries':
       case 'retryWrites':
       case 'directConnection':
       case 'loadBalanced':

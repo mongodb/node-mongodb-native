@@ -2,8 +2,8 @@ import { expect } from 'chai';
 import { once } from 'events';
 import { createServer, type Server } from 'net';
 
-import { type MongoClient } from '../../../src';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+import { type MongoClient } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 describe('20. Bypass creating mongocryptd client when shared library is loaded', function () {

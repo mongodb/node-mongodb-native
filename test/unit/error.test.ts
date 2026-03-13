@@ -1,24 +1,20 @@
 import { expect } from 'chai';
 import { setTimeout } from 'timers';
 
-import {
-  PoolClosedError as MongoPoolClosedError,
-  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
-} from '../../src/cmap/errors';
 // Exception to the import from mongodb rule we're unit testing our public Errors API
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as importsFromErrorSrc from '../../src/error';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as importsFromEntryPoint from '../../src/index';
 import {
+  DeprioritizedServers,
+  isHello,
   isResumableError,
   isRetryableReadError,
   isStateChangeError,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   MONGODB_ERROR_CODES,
-  needsRetryableWriteLabel,
-  NODE_IS_RECOVERING_ERROR_MESSAGE
-} from '../../src/error';
-import * as importsFromEntryPoint from '../../src/index';
-import {
   MongoDriverError,
   MongoError,
   MongoErrorLabel,
@@ -30,14 +26,18 @@ import {
   MongoServerError,
   MongoSystemError,
   MongoWriteConcernError,
+  needsRetryableWriteLabel,
+  NODE_IS_RECOVERING_ERROR_MESSAGE,
+  ns,
+  PoolClosedError as MongoPoolClosedError,
+  RunCommandOperation,
+  setDifference,
+  TimeoutContext,
+  type Topology,
   type TopologyDescription,
-  type TopologyOptions
-} from '../../src/index';
-import { RunCommandOperation } from '../../src/operations/run_command';
-import { DeprioritizedServers } from '../../src/sdam/server_selection';
-import { type Topology } from '../../src/sdam/topology';
-import { TimeoutContext } from '../../src/timeout';
-import { isHello, ns, setDifference } from '../../src/utils';
+  type TopologyOptions,
+  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
+} from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../tools/utils';

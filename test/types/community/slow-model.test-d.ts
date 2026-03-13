@@ -7,7 +7,7 @@
 
 import type { UUID } from 'bson';
 
-import type { Collection, Db } from '../../../src';
+import type { Collection, Db } from '../../mongodb';
 
 interface MomentInputObject {
   years?: number;

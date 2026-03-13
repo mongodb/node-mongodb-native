@@ -3,8 +3,8 @@ import * as path from 'node:path';
 
 import { expect } from 'chai';
 
-import { BSON, type Document, type MongoClient } from '../../../src';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+import { BSON, type Document, type MongoClient } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { getEncryptExtraOptions } from '../../tools/utils';
 

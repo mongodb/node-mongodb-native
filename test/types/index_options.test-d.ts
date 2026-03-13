@@ -1,6 +1,6 @@
 import { expectAssignable, expectNotAssignable } from 'tsd';
 
-import type { IndexDescription } from '../../src';
+import type { IndexDescription } from '../mongodb';
 
 // test that all valid index options are allowed in IndexDescription
 expectAssignable<IndexDescription>({ key: {}, background: true });

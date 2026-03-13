@@ -1,6 +1,6 @@
 import { expectError, expectNotType, expectType } from 'tsd';
 
-import { Collection, Db, MongoClient, ObjectId } from '../../src';
+import { Collection, Db, MongoClient, ObjectId } from '../mongodb';
 
 const db = new Db(new MongoClient(''), '');
 

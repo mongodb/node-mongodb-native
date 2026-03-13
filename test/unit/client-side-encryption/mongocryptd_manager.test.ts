@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
+import { MongocryptdManager } from '../../mongodb';
 
 describe('MongocryptdManager', function () {
   it('should default to having spawnArgs of --idleShutdownTimeoutSecs=60', function () {

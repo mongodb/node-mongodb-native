@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, type MongoClient, MongoServerError } from '../../../src';
+import { Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 import { type FailCommandFailPoint } from '../../tools/utils';
 import { setupDatabase } from '../shared';

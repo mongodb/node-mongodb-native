@@ -4,8 +4,8 @@ import { dirname, resolve } from 'path';
 import * as process from 'process';
 import { satisfies } from 'semver';
 
-import { type MongoClient } from '../../../../src';
 import { kmsCredentialsPresent } from '../../../csfle-kms-providers';
+import { type MongoClient } from '../../../mongodb';
 import { Filter } from './filter';
 
 /**

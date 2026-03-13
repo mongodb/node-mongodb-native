@@ -2,8 +2,12 @@ import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
 
-import { type Connection, type MongoClient, type RTTPinger } from '../../../src';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import {
+  type Connection,
+  LEGACY_HELLO_COMMAND,
+  type MongoClient,
+  type RTTPinger
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 /**

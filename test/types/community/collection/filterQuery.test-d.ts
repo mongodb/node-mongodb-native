@@ -18,7 +18,7 @@ import {
   MongoClient,
   type UpdateFilter,
   type WithId
-} from '../../../../src';
+} from '../../../mongodb';
 
 /**
  * test the Filter type using collection.find<T>() method
