@@ -234,9 +234,12 @@ function passwordDigest(username: string, password: string) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     nodeCrypto = require('crypto');
   } catch (e) {
-    throw new MongoRuntimeError('global crypto is required for SCRAM-SHA-1 authentication', {
-      cause: e
-    });
+    throw new MongoRuntimeError(
+      'Node.js crypto module is required for SCRAM-SHA-1 authentication',
+      {
+        cause: e
+      }
+    );
   }
 
   try {

@@ -103,13 +103,14 @@ Additionally, our Typescript types are compatible with the ECMAScript standard f
 
 #### Running in Custom Runtimes
 
-We are working on removing NodeJS as a dependency of the driver, so that in the future it will be possible to use the drive in non-Node environments.
+We are working on removing NodeJS as a dependency of the driver, so that in the future it will be possible to use the driver in non-Node environments.
 This work is currently in progress, and if you're curious, this is [our first runtime adapter commit](https://github.com/mongodb/node-mongodb-native/commit/d2ad07f20903d86334da81222a6df9717f76faaa).
 
 Some things to keep in mind if you are using a non-Node runtime:
 
 1. Users of Webpack/Vite may need to prevent `crypto` polyfill injection.
-2. Auth mechanism `SCRAM-SHA-1` has a hard dependency on NodeJS and is not supported in FIPS mode.
+2. Auth mechanism `SCRAM-SHA-1` has a hard dependency on NodeJS.
+3. Auth mechanism `SCRAM-SHA-1` is not supported in FIPS mode.
 
 ## Installation
 
