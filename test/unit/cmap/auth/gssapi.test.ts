@@ -83,7 +83,7 @@ describe('GSSAPI', () => {
                 expect(host).to.equal(resolved);
                 expect(dns.lookup).to.be.calledOnceWith(hostName);
                 expect(dns.resolve).to.be.calledOnceWith(lookedUp.address, 'PTR');
-                expect(dns.resolve).to.not.be.calledOnceWith(lookedUp.address, 'CNAME');
+                expect(dns.resolve).to.not.be.calledWith(lookedUp.address, 'CNAME');
               });
             });
 
@@ -107,7 +107,7 @@ describe('GSSAPI', () => {
                 expect(host).to.equal(resolved);
                 expect(dns.lookup).to.be.calledOnceWith(hostName);
                 expect(dns.resolve).to.be.calledOnceWith(lookedUp.address, 'PTR');
-                expect(dns.resolve).to.not.be.calledOnceWith(sinon.match.string, 'CNAME');
+                expect(dns.resolve).to.not.be.calledWith(sinon.match.string, 'CNAME');
               });
             });
           });
