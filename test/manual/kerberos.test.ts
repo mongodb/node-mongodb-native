@@ -64,7 +64,7 @@ describe('Kerberos', function () {
           `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forward&maxPoolSize=1`
         );
         await client.connect();
-        expect(resolveStub.withArgs(sinon.match.any, 'CNAME')).to.be.calledOnceWith(host);
+        expect(resolveStub.withArgs(sinon.match.any, 'CNAME')).to.be.calledOnceWith(host, 'CNAME');
         await verifyKerberosAuthentication(client);
       });
     });
@@ -169,7 +169,7 @@ describe('Kerberos', function () {
 
         context('when the cname lookup is empty', function () {
           beforeEach(function () {
-            resolveStub.withArgs(sinon.match.string, 'CNAME').rejects([]);
+            resolveStub.withArgs(sinon.match.string, 'CNAME').resolves([]);
           });
 
           it('authenticates with a fallback host name', async function () {

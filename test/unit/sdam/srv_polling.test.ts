@@ -103,7 +103,8 @@ describe('Mongos SRV Polling', function () {
         clearTimeout(poller._timeout);
 
         expect(dns.promises.resolve).to.have.been.calledOnce.and.to.have.been.calledWith(
-          `_mongodb._tcp.${SRV_HOST}`
+          `_mongodb._tcp.${SRV_HOST}`,
+          'SRV'
         );
       });
 
