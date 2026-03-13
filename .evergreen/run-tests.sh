@@ -58,4 +58,43 @@ export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
 export TEST_CSFLE=${TEST_CSFLE}
 export COMPRESSOR=${COMPRESSOR}
-npm run check:integration-coverage
+
+# OOM exit code investigation - run through each layer and log exit codes
+set +e
+
+OOM_TEST="test/integration/oom.test.ts"
+
+echo "========================================="
+echo "Layer 1: direct mocha"
+echo "========================================="
+npx mocha --config test/mocha_mongodb.js "$OOM_TEST"
+echo "EXIT CODE: $?"
+
+echo "========================================="
+echo "Layer 2: npm run check:test (npm -> mocha)"
+echo "========================================="
+npm run check:test -- "$OOM_TEST"
+echo "EXIT CODE: $?"
+
+echo "========================================="
+echo "Layer 3: nyc mocha (nyc -> mocha, no npm)"
+echo "========================================="
+npx nyc mocha --config test/mocha_mongodb.js "$OOM_TEST"
+echo "EXIT CODE: $?"
+
+echo "========================================="
+echo "Layer 4: nyc npm run check:test (nyc -> npm -> mocha)"
+echo "========================================="
+npx nyc npm run check:test -- "$OOM_TEST"
+echo "EXIT CODE: $?"
+
+echo "========================================="
+echo "Layer 5: npm run check:integration-coverage (npm -> nyc -> npm -> mocha)"
+echo "========================================="
+npm run check:integration-coverage -- "$OOM_TEST"
+echo "EXIT CODE: $?"
+
+echo "========================================="
+echo "DONE - any EXIT CODE of 0 above means that layer swallows the OOM"
+echo "========================================="
+exit 1
