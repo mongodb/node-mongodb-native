@@ -123,7 +123,7 @@ describe('commands', function () {
 
           it('throws an exception', function () {
             const response = new OpReply(message, header, body);
-            expect(() => response.parse()).to.throw(RangeError, /outside buffer bounds/);
+            expect(() => response.parse()).to.throw(/outside buffer bounds/);
           });
         });
 
@@ -140,7 +140,7 @@ describe('commands', function () {
 
           it('throws an exception', function () {
             const response = new OpReply(message, header, body);
-            expect(() => response.parse()).to.throw(RangeError, /Invalid array length/i);
+            expect(() => response.parse()).to.throw(/Invalid array length/i);
           });
         });
       });

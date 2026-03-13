@@ -1,6 +1,9 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
+  "ignorePatterns": [
+    "test/tools/runner/bundle/**"
+  ],
   "parserOptions": {
     "ecmaVersion": 2023
   },

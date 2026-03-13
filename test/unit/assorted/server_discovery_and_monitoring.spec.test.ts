@@ -18,6 +18,7 @@ import {
   MongoServerError,
   ns,
   RunCommandOperation,
+  runNodelessTests,
   Server,
   SERVER_CLOSED,
   SERVER_DESCRIPTION_CHANGED,
@@ -40,7 +41,7 @@ import {
   TopologyOpeningEvent,
   type TopologyVersion
 } from '../../mongodb';
-import { ejson, fakeServer } from '../../tools/utils';
+import { checkTypeByName, ejson, fakeServer } from '../../tools/utils';
 
 const SDAM_EVENT_CLASSES = {
   ServerDescriptionChangedEvent,
@@ -193,15 +194,23 @@ function assertMonitoringOutcome(outcome: any): asserts outcome is MonitoringOut
 describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect: sinon.SinonStub;
 
-  before(() => {
+  before(function () {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
       this.emit('connect');
     });
   });
 
-  after(() => {
+  after(function () {
     serverConnect.restore();
+  });
+
+  beforeEach(function () {
+    if (runNodelessTests) {
+      this.currentTest.skipReason =
+        'SDAM spec tests rely heavily on stubbing Connection behavior, which is not currently possible in nodeless environments';
+      this.currentTest.skip();
+    }
   });
 
   const specTests = collectTests();
@@ -455,11 +464,11 @@ async function executeSDAMTest(testData: SDAMTest) {
 
           const isApplicationError = error => {
             // These errors all come from the withConnection stub
-            return (
-              error instanceof MongoNetworkError ||
-              error instanceof MongoNetworkTimeoutError ||
-              error instanceof MongoServerError
-            );
+            const result =
+              checkTypeByName(error, 'MongoNetworkError') ||
+              checkTypeByName(error, 'MongoNetworkTimeoutError') ||
+              checkTypeByName(error, 'MongoServerError');
+            return result;
           };
           expect(
             thrownError,

@@ -2,6 +2,7 @@ import * as v8 from 'node:v8';
 
 import { expect } from 'chai';
 
+import { runNodelessTests } from '../../mongodb';
 import { isTLSEnabled } from '../../tools/runner/filters/tls_filter';
 import { sleep } from '../../tools/utils';
 import { runScriptAndReturnHeapInfo } from './resource_tracking_script_builder';
@@ -91,7 +92,7 @@ describe('Driver Resources', () => {
 
   context('when 100s of operations are executed and complete', () => {
     beforeEach(function () {
-      if (this.currentTest && typeof v8.queryObjects !== 'function') {
+      if ((this.currentTest && typeof v8.queryObjects !== 'function') || runNodelessTests) {
         this.currentTest.skipReason = 'Test requires v8.queryObjects API to count Promises';
         this.currentTest?.skip();
       }

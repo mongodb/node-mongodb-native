@@ -13,4 +13,6 @@ export SCOPES=$(./node_modules/lerna/cli.js ls --all --json)
 
 cd -
 
+npm run build:bundle
+
 npx mocha --config test/manual/mocharc.json test/manual/mongosh_scopes.test.ts

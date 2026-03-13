@@ -10,7 +10,8 @@ import {
   getFAASEnv,
   LimitedSizeDocument,
   makeClientMetadata,
-  MongoInvalidArgumentError
+  MongoInvalidArgumentError,
+  runNodelessTests
 } from '../../../mongodb';
 import { runtime } from '../../../tools/utils';
 describe('client metadata module', () => {
@@ -315,6 +316,14 @@ describe('client metadata module', () => {
     });
 
     context('when globalThis indicates alternative runtime', () => {
+      beforeEach(function () {
+        if (runNodelessTests) {
+          this.currentTest.skipReason =
+            'These tests are meant to run in node and will fail in nodeless environments';
+          this.currentTest.skip();
+        }
+      });
+
       context('deno', () => {
         afterEach(() => {
           expect(delete globalThis.Deno, 'failed to delete Deno global').to.be.true;

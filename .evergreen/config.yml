@@ -3725,6 +3725,60 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: rhel80-large-nodeless
+    display_name: rhel8 Nodeless
+    run_on: rhel80-large
+    expansions:
+      MONGODB_BUNDLED: true
+      NODE_LTS_VERSION: latest
+      CLIENT_ENCRYPTION: true
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-latest-server-v1-api
+      - test-x509-authentication
+      - test-atlas-connectivity
+      - test-5.0-load-balanced
+      - test-6.0-load-balanced
+      - test-7.0-load-balanced
+      - test-8.0-load-balanced
+      - test-rapid-load-balanced
+      - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-socks5-csfle
+      - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-compression
+      - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: windows-2022-latest-large-iron
     display_name: Windows Node20.19.0
     run_on: windows-2022-latest-large
@@ -3847,6 +3901,49 @@ buildvariants:
       - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-socks5
+      - test-socks5-tls
+      - test-snappy-compression
+      - test-zstd-compression
+      - test-tls-support-latest
+      - test-tls-support-8.0
+      - test-tls-support-7.0
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
+  - name: windows-2022-latest-large-nodeless
+    display_name: Windows Nodeless
+    run_on: windows-2022-latest-large
+    expansions:
+      MONGODB_BUNDLED: true
+      NODE_LTS_VERSION: latest
+      CLIENT_ENCRYPTION: false
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-8.0-server
+      - test-8.0-replica_set
+      - test-8.0-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-latest-server-v1-api
       - test-socks5-tls
       - test-snappy-compression
       - test-zstd-compression
