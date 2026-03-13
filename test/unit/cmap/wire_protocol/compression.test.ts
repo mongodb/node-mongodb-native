@@ -1,4 +1,3 @@
-import * as zstd from '@mongodb-js/zstd';
 import { expect } from 'chai';
 
 import { compress, Compressor, decompress } from '../../../mongodb';
@@ -13,8 +12,8 @@ describe('compression', function () {
 
         it('compresses the data', async function () {
           const data = await compress(options, buffer);
-          // decompress throws if the message is not zstd compresed
-          expect(await zstd.decompress(data)).to.deep.equal(buffer);
+          expect(data).to.not.deep.equal(buffer);
+          expect(await decompress(Compressor.zstd, data)).to.deep.equal(buffer);
         });
       });
     });
