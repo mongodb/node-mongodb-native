@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0](https://github.com/mongodb/node-mongodb-native/compare/v7.1.0...v7.2.0) (2026-03-13)
+
+
+### Features
+
+* **NODE-7142:** Exponential backoff and jitter in retry loops ([#4871](https://github.com/mongodb/node-mongodb-native/issues/4871)) ([22c6031](https://github.com/mongodb/node-mongodb-native/commit/22c6031a673bef48597fb33041fe1122cc5ec549))
+* **NODE-7315:** Use BSON ByteUtils instead of Nodejs Buffer ([#4840](https://github.com/mongodb/node-mongodb-native/issues/4840)) ([1add538](https://github.com/mongodb/node-mongodb-native/commit/1add53872ea8e394959754375bf35af5632fbf0e))
+* **NODE-7385:** add experimental `os` runtime adapter  ([#4851](https://github.com/mongodb/node-mongodb-native/issues/4851)) ([d2ad07f](https://github.com/mongodb/node-mongodb-native/commit/d2ad07f20903d86334da81222a6df9717f76faaa))
+* **NODE-7452:** restrict server deprioritization on replica sets to overload errors ([#4875](https://github.com/mongodb/node-mongodb-native/issues/4875)) ([87a3465](https://github.com/mongodb/node-mongodb-native/commit/87a346536bc8528e67a8da4dfc96b4db289f80a9))
+* **NODE-7467:** make token bucket optional in client backpressure ([#4878](https://github.com/mongodb/node-mongodb-native/issues/4878)) ([4fb0a0a](https://github.com/mongodb/node-mongodb-native/commit/4fb0a0abe84efdab9de82acbdb09609f4be0d2fb))
+
+
+### Bug Fixes
+
+* **NODE-7469:** overload retry when retryReads/Writes=false ([#4888](https://github.com/mongodb/node-mongodb-native/issues/4888)) ([4157b26](https://github.com/mongodb/node-mongodb-native/commit/4157b2600dda54ee14693ee951abd72e4da2b07e))
+
 ## [7.1.0](https://github.com/mongodb/node-mongodb-native/compare/v7.0.0...v7.1.0) (2026-02-02)
 
 
