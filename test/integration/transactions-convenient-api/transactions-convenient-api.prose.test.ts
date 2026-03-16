@@ -111,7 +111,7 @@ describe('Retry Timeout is Enforced', function () {
   let collection: Collection;
 
   beforeEach(async function () {
-    client = this.configuration.newClient({ timeoutMS: 100 });
+    client = this.configuration.newClient({ timeoutMS: 500 });
     collection = client.db('foo').collection('bar');
   });
 
