@@ -100,22 +100,28 @@ describe('Retry Timeout is Enforced', function () {
   // Drivers should test that withTransaction enforces a non-configurable timeout before retrying
   // both commits and entire transactions.
   //
-  // Note: We use CSOT's timeoutMS to enforce a short timeout instead of blocking for the full
-  // 120-second retry timeout, as recommended by the spec: "This might be done by internally
-  // modifying the timeout value used by withTransaction with some private API or using a mock timer."
+  // We stub performance.now() to simulate elapsed time exceeding the 120-second retry limit,
+  // as recommended by the spec: "This might be done by internally modifying the timeout value
+  // used by withTransaction with some private API or using a mock timer."
   //
   // The error SHOULD be propagated as a timeout error if the language allows to expose the
   // underlying error as a cause of a timeout error.
 
   let client: MongoClient;
   let collection: Collection;
+  let timeOffset: number;
 
   beforeEach(async function () {
-    client = this.configuration.newClient({ timeoutMS: 500 });
+    client = this.configuration.newClient();
     collection = client.db('foo').collection('bar');
+
+    timeOffset = 0;
+    const originalNow = performance.now.bind(performance);
+    sinon.stub(performance, 'now').callsFake(() => originalNow() + timeOffset);
   });
 
   afterEach(async function () {
+    sinon.restore();
     await clearFailPoint(this.configuration);
     await client?.close();
   });
@@ -131,10 +137,10 @@ describe('Retry Timeout is Enforced', function () {
       }
     },
     async function () {
-      // 1. Configure a failpoint that always fails insert with TransientTransactionError.
+      // 1. Configure a failpoint that fails insert with TransientTransactionError.
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
-        mode: 'alwaysOn',
+        mode: { times: 1 },
         data: {
           failCommands: ['insert'],
           errorCode: 24,
@@ -142,12 +148,12 @@ describe('Retry Timeout is Enforced', function () {
         }
       });
 
-      // 2. Run withTransaction with a callback that performs an insert.
-      //    The insert will always fail with TransientTransactionError, triggering retries
-      //    until the timeout (timeoutMS: 100) is exceeded at the backoff check.
+      // 2. Run withTransaction. The callback advances the clock past the 120-second retry
+      //    limit before the insert fails, so the timeout is detected immediately.
       const { result } = await measureDuration(() => {
         return client.withSession(async s => {
           await s.withTransaction(async session => {
+            timeOffset = 120_000;
             await collection.insertOne({}, { session });
           });
         });
@@ -171,11 +177,10 @@ describe('Retry Timeout is Enforced', function () {
       }
     },
     async function () {
-      // 1. Configure a failpoint that always fails commitTransaction with
-      //    UnknownTransactionCommitResult.
+      // 1. Configure a failpoint that fails commitTransaction with UnknownTransactionCommitResult.
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
-        mode: 'alwaysOn',
+        mode: { times: 1 },
         data: {
           failCommands: ['commitTransaction'],
           errorCode: 64,
@@ -183,19 +188,20 @@ describe('Retry Timeout is Enforced', function () {
         }
       });
 
-      // 2. Run withTransaction with a callback that performs an insert (succeeds).
-      //    The commit will always fail with UnknownTransactionCommitResult, triggering commit
-      //    retries until the timeout (timeoutMS: 100) is exceeded.
+      // 2. Run withTransaction. The callback advances the clock past the 120-second retry
+      //    limit. The insert succeeds, but the commit fails and the timeout is detected.
       const { result } = await measureDuration(() => {
         return client.withSession(async s => {
           await s.withTransaction(async session => {
+            timeOffset = 120_000;
             await collection.insertOne({}, { session });
           });
         });
       });
 
-      // 3. Assert that the error is a timeout error.
+      // 3. Assert that the error is a timeout error wrapping the commit error.
       expect(result).to.be.instanceOf(MongoOperationTimeoutError);
+      expect((result as MongoOperationTimeoutError).cause).to.be.an('error');
     }
   );
 
@@ -212,11 +218,11 @@ describe('Retry Timeout is Enforced', function () {
       }
     },
     async function () {
-      // 1. Configure a failpoint that always fails commitTransaction with
-      //    TransientTransactionError (errorCode 251 = NoSuchTransaction).
+      // 1. Configure a failpoint that fails commitTransaction with TransientTransactionError
+      //    (errorCode 251 = NoSuchTransaction).
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
-        mode: 'alwaysOn',
+        mode: { times: 1 },
         data: {
           failCommands: ['commitTransaction'],
           errorCode: 251,
@@ -224,12 +230,12 @@ describe('Retry Timeout is Enforced', function () {
         }
       });
 
-      // 2. Run withTransaction with a callback that performs an insert (succeeds).
-      //    The commit will always fail with TransientTransactionError, triggering full
-      //    transaction retries until the timeout (timeoutMS: 100) is exceeded.
+      // 2. Run withTransaction. The callback advances the clock past the 120-second retry
+      //    limit. The insert succeeds, but the commit fails and the timeout is detected.
       const { result } = await measureDuration(() => {
         return client.withSession(async s => {
           await s.withTransaction(async session => {
+            timeOffset = 120_000;
             await collection.insertOne({}, { session });
           });
         });
