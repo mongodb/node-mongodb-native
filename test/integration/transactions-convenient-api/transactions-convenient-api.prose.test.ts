@@ -127,7 +127,7 @@ describe('Retry Timeout is Enforced', function () {
   });
 
   // Case 1: If the callback raises an error with the TransientTransactionError label and the retry
-  // timeout has been exceeded, withTransaction should propagate the error (see Note 1) to its caller.
+  // timeout has been exceeded, withTransaction should propagate the error to its caller.
   test(
     'callback TransientTransactionError propagated as timeout error when retry timeout exceeded',
     {
@@ -166,7 +166,7 @@ describe('Retry Timeout is Enforced', function () {
   );
 
   // Case 2: If committing raises an error with the UnknownTransactionCommitResult label, and the
-  // retry timeout has been exceeded, withTransaction should propagate the error (see Note 1) to
+  // retry timeout has been exceeded, withTransaction should propagate the error to
   // its caller.
   test(
     'commit UnknownTransactionCommitResult propagated as timeout error when retry timeout exceeded',
@@ -206,7 +206,7 @@ describe('Retry Timeout is Enforced', function () {
   );
 
   // Case 3: If committing raises an error with the TransientTransactionError label and the retry
-  // timeout has been exceeded, withTransaction should propagate the error (see Note 1) to its
+  // timeout has been exceeded, withTransaction should propagate the error to its
   // caller. This case may occur if the commit was internally retried against a new primary after a
   // failover and the second primary returned a NoSuchTransaction error response.
   test(
