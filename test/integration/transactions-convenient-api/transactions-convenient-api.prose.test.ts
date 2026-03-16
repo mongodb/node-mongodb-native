@@ -131,15 +131,12 @@ describe('Retry Timeout is Enforced', function () {
       }
     },
     async function () {
-      // 1. Configure a failpoint that always fails insert with TransientTransactionError
-      //    and blocks for 25ms to consume timeout budget.
+      // 1. Configure a failpoint that always fails insert with TransientTransactionError.
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
         data: {
           failCommands: ['insert'],
-          blockConnection: true,
-          blockTimeMS: 25,
           errorCode: 24,
           errorLabels: ['TransientTransactionError']
         }
@@ -147,7 +144,7 @@ describe('Retry Timeout is Enforced', function () {
 
       // 2. Run withTransaction with a callback that performs an insert.
       //    The insert will always fail with TransientTransactionError, triggering retries
-      //    until the timeout (timeoutMS: 100) is exceeded.
+      //    until the timeout (timeoutMS: 100) is exceeded at the backoff check.
       const { result } = await measureDuration(() => {
         return client.withSession(async s => {
           await s.withTransaction(async session => {
