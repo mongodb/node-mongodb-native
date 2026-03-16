@@ -2,8 +2,13 @@ import { expect } from 'chai';
 import { test } from 'mocha';
 import * as sinon from 'sinon';
 
-import { type ClientSession, type Collection, type MongoClient } from '../../mongodb';
-import { configureFailPoint, type FailCommandFailPoint, measureDuration } from '../../tools/utils';
+import { type ClientSession, type Collection, type MongoClient, MongoError } from '../../mongodb';
+import {
+  clearFailPoint,
+  configureFailPoint,
+  type FailCommandFailPoint,
+  measureDuration
+} from '../../tools/utils';
 
 const failCommand: FailCommandFailPoint = {
   configureFailPoint: 'failCommand',
@@ -82,6 +87,161 @@ describe('Retry Backoff is Enforced', function () {
         noBackoffTime + 1800 - 500,
         noBackoffTime + 1800 + 500
       );
+    }
+  );
+});
+
+describe('Retry Timeout is Enforced', function () {
+  // Drivers should test that withTransaction enforces a non-configurable timeout before retrying
+  // both commits and entire transactions.
+  //
+  // We stub performance.now() to simulate elapsed time exceeding the 120-second retry limit,
+  // as recommended by the spec: "This might be done by internally modifying the timeout value
+  // used by withTransaction with some private API or using a mock timer."
+  //
+  // Without CSOT, the original error is propagated directly.
+  // With CSOT, the error is wrapped in a MongoOperationTimeoutError.
+
+  let client: MongoClient;
+  let collection: Collection;
+  let timeOffset: number;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+    collection = client.db('foo').collection('bar');
+
+    timeOffset = 0;
+    const originalNow = performance.now.bind(performance);
+    sinon.stub(performance, 'now').callsFake(() => originalNow() + timeOffset);
+  });
+
+  afterEach(async function () {
+    sinon.restore();
+    await clearFailPoint(this.configuration);
+    await client?.close();
+  });
+
+  // Case 1: If the callback raises an error with the TransientTransactionError label and the retry
+  // timeout has been exceeded, withTransaction should propagate the error to its caller.
+  test(
+    'callback TransientTransactionError propagated when retry timeout exceeded',
+    {
+      requires: {
+        mongodb: '>=4.4',
+        topology: '!single'
+      }
+    },
+    async function () {
+      // 1. Configure a failpoint that fails insert with TransientTransactionError.
+      await configureFailPoint(this.configuration, {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['insert'],
+          errorCode: 24,
+          errorLabels: ['TransientTransactionError']
+        }
+      });
+
+      // 2. Run withTransaction. The callback advances the clock past the 120-second retry
+      //    limit before the insert fails, so the timeout is detected immediately.
+      const { result } = await measureDuration(() => {
+        return client.withSession(async s => {
+          await s.withTransaction(async session => {
+            timeOffset = 120_000;
+            await collection.insertOne({}, { session });
+          });
+        });
+      });
+
+      // 3. Assert that the error is the original TransientTransactionError (propagated directly
+      //    in the legacy non-CSOT path).
+      expect(result).to.be.instanceOf(MongoError);
+      expect((result as MongoError).hasErrorLabel('TransientTransactionError')).to.be.true;
+    }
+  );
+
+  // Case 2: If committing raises an error with the UnknownTransactionCommitResult label, and the
+  // retry timeout has been exceeded, withTransaction should propagate the error to
+  // its caller.
+  test(
+    'commit UnknownTransactionCommitResult propagated when retry timeout exceeded',
+    {
+      requires: {
+        mongodb: '>=4.4',
+        topology: '!single'
+      }
+    },
+    async function () {
+      // 1. Configure a failpoint that fails commitTransaction with UnknownTransactionCommitResult.
+      await configureFailPoint(this.configuration, {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['commitTransaction'],
+          errorCode: 64,
+          errorLabels: ['UnknownTransactionCommitResult']
+        }
+      });
+
+      // 2. Run withTransaction. The callback advances the clock past the 120-second retry
+      //    limit. The insert succeeds, but the commit fails and the timeout is detected.
+      const { result } = await measureDuration(() => {
+        return client.withSession(async s => {
+          await s.withTransaction(async session => {
+            timeOffset = 120_000;
+            await collection.insertOne({}, { session });
+          });
+        });
+      });
+
+      // 3. Assert that the error is the original commit error (propagated directly
+      //    in the legacy non-CSOT path).
+      expect(result).to.be.instanceOf(MongoError);
+      expect((result as MongoError).hasErrorLabel('UnknownTransactionCommitResult')).to.be.true;
+    }
+  );
+
+  // Case 3: If committing raises an error with the TransientTransactionError label and the retry
+  // timeout has been exceeded, withTransaction should propagate the error to its
+  // caller. This case may occur if the commit was internally retried against a new primary after a
+  // failover and the second primary returned a NoSuchTransaction error response.
+  test(
+    'commit TransientTransactionError propagated when retry timeout exceeded',
+    {
+      requires: {
+        mongodb: '>=4.4',
+        topology: '!single'
+      }
+    },
+    async function () {
+      // 1. Configure a failpoint that fails commitTransaction with TransientTransactionError
+      //    (errorCode 251 = NoSuchTransaction).
+      await configureFailPoint(this.configuration, {
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['commitTransaction'],
+          errorCode: 251,
+          errorLabels: ['TransientTransactionError']
+        }
+      });
+
+      // 2. Run withTransaction. The callback advances the clock past the 120-second retry
+      //    limit. The insert succeeds, but the commit fails and the timeout is detected.
+      const { result } = await measureDuration(() => {
+        return client.withSession(async s => {
+          await s.withTransaction(async session => {
+            timeOffset = 120_000;
+            await collection.insertOne({}, { session });
+          });
+        });
+      });
+
+      // 3. Assert that the error is the original commit error (propagated directly
+      //    in the legacy non-CSOT path).
+      expect(result).to.be.instanceOf(MongoError);
+      expect((result as MongoError).hasErrorLabel('TransientTransactionError')).to.be.true;
     }
   );
 });

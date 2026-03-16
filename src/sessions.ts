@@ -17,6 +17,7 @@ import {
   MongoErrorLabel,
   MongoExpiredSessionError,
   MongoInvalidArgumentError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
@@ -725,7 +726,7 @@ export class ClientSession
       timeoutMS?: number;
     }
   ): Promise<T> {
-    const MAX_TIMEOUT = 120000;
+    const MAX_TIMEOUT = 120_000;
 
     const timeoutMS = options?.timeoutMS ?? this.timeoutMS ?? null;
     this.timeoutContext =
@@ -737,10 +738,21 @@ export class ClientSession
           })
         : null;
 
-    // 1. Record the current monotonic time, which will be used to enforce the 120-second timeout before later retry attempts.
-    const startTime = this.timeoutContext?.csotEnabled() // This is strictly to appease TS.  We must narrow the context to a CSOT context before accessing `.start`.
-      ? this.timeoutContext.start
-      : processTimeMS();
+    // 1. Define the following:
+    // 1.1 Record the current monotonic time, which will be used to enforce the timeout before later retry attempts.
+    // 1.2 Set `transactionAttempt` to `0`.
+    // 1.3 Set `TIMEOUT_MS` to be `timeoutMS` if given, otherwise MAX_TIMEOUT (120-seconds).
+    //
+    // The spec describes timeout checks as "elapsed time < TIMEOUT_MS" (where elapsed = now - start).
+    // We precompute `deadline = start + TIMEOUT_MS` so each check becomes simply `now < deadline`.
+    //
+    // Note 1: When TIMEOUT_MS is reached, we MUST report a timeout error wrapping the last error that
+    // triggered retry. With CSOT this is a MongoOperationTimeoutError; without CSOT the raw error
+    // is propagated directly. See makeTimeoutError() below.
+    const csotEnabled = !!this.timeoutContext?.csotEnabled();
+    const deadline = this.timeoutContext?.csotEnabled()
+      ? processTimeMS() + this.timeoutContext.remainingTimeMS
+      : processTimeMS() + MAX_TIMEOUT;
 
     let committed = false;
     let result: T;
@@ -749,20 +761,16 @@ export class ClientSession
 
     try {
       retryTransaction: for (
-        // 2. Set `transactionAttempt` to `0`.
+        // 1.2 Set `transactionAttempt` to `0`.
         let transactionAttempt = 0, isRetry = false;
         !committed;
         ++transactionAttempt, isRetry = transactionAttempt > 0
       ) {
         // 2. If `transactionAttempt` > 0:
         if (isRetry) {
-          // 2.i If elapsed time + `backoffMS` > `TIMEOUT_MS`, then raise the previously encountered error. If the elapsed time of
-          //     `withTransaction` is less than TIMEOUT_MS, calculate the backoffMS to be
-          //     `jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), BACKOFF_MAX)`. sleep for `backoffMS`.
-          // 2.i.i jitter is a random float between \[0, 1)
-          // 2.i.ii `transactionAttempt` is the variable defined in step 1.
-          // 2.i.iii `BACKOFF_INITIAL` is 5ms
-          // 2.i.iv `BACKOFF_MAX` is 500ms
+          // 2.1 Calculate backoffMS. If elapsed time + backoffMS > TIMEOUT_MS
+          //     (i.e., now + backoff >= deadline), raise the previously encountered error (see Note 1).
+          //     Otherwise, sleep for backoffMS.
           const BACKOFF_INITIAL_MS = 5;
           const BACKOFF_MAX_MS = 500;
           const BACKOFF_GROWTH = 1.5;
@@ -774,30 +782,26 @@ export class ClientSession
               BACKOFF_MAX_MS
             );
 
-          const willExceedTransactionDeadline =
-            (this.timeoutContext?.csotEnabled() &&
-              backoffMS > this.timeoutContext.remainingTimeMS) ||
-            processTimeMS() + backoffMS > startTime + MAX_TIMEOUT;
-
-          if (willExceedTransactionDeadline) {
-            throw (
+          if (processTimeMS() + backoffMS >= deadline) {
+            throw makeTimeoutError(
               lastError ??
-              new MongoRuntimeError(
-                `Transaction retry did not record an error: should never occur. Please file a bug.`
-              )
+                new MongoRuntimeError(
+                  `Transaction retry did not record an error: should never occur. Please file a bug.`
+                ),
+              csotEnabled
             );
           }
 
           await setTimeout(backoffMS);
         }
 
-        // 3. Invoke startTransaction on the session
-        // 4. If `startTransaction` reported an error, propagate that error to the caller of `withTransaction` and return immediately.
+        // 3. Invoke startTransaction on the session and increment transactionAttempt.
+        // 4. If startTransaction reported an error, propagate that error to the caller and return immediately.
         this.startTransaction(options); // may throw on error
 
         try {
           // 5. Invoke the callback.
-          // 6. Control returns to withTransaction. (continued below)
+          // 6. Control returns to withTransaction. Determine the current state and whether the callback reported an error.
           const promise = fn(this);
           if (!isPromiseLike(promise)) {
             throw new MongoInvalidArgumentError(
@@ -807,17 +811,16 @@ export class ClientSession
 
           result = await promise;
 
-          // 6. (cont.) Determine the current state of the ClientSession (continued below)
+          // 8. If the ClientSession is in the "no transaction", "transaction aborted", or "transaction committed"
+          // state, assume the callback intentionally aborted or committed the transaction and return immediately.
+          // Drivers MAY allow the callback to return a value to be propagated as the return value of withTransaction.
           if (
             this.transaction.state === TxnState.NO_TRANSACTION ||
             this.transaction.state === TxnState.TRANSACTION_COMMITTED ||
             this.transaction.state === TxnState.TRANSACTION_ABORTED
           ) {
-            // 8. If the ClientSession is in the "no transaction", "transaction aborted", or "transaction committed" state,
-            // assume the callback intentionally aborted or committed the transaction and return immediately.
             return result;
           }
-          // 5. (cont.) and whether the callback reported an error
           // 7. If the callback reported an error:
         } catch (fnError) {
           if (!(fnError instanceof MongoError) || fnError instanceof MongoInvalidArgumentError) {
@@ -827,89 +830,94 @@ export class ClientSession
             throw fnError;
           }
 
+          lastError = fnError;
+
+          // 7.1 If the ClientSession is in the "starting transaction" or "transaction in progress"
+          // state, invoke abortTransaction on the session.
           if (
             this.transaction.state === TxnState.STARTING_TRANSACTION ||
             this.transaction.state === TxnState.TRANSACTION_IN_PROGRESS
           ) {
-            // 7.i If the ClientSession is in the "starting transaction" or "transaction in progress" state,
-            // invoke abortTransaction on the session
             await this.abortTransaction();
           }
 
-          if (
-            fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-            (this.timeoutContext?.csotEnabled() || processTimeMS() - startTime < MAX_TIMEOUT)
-          ) {
-            // 7.ii If the callback's error includes a "TransientTransactionError" label and the elapsed time of `withTransaction`
-            // is less than 120 seconds, jump back to step two.
-            lastError = fnError;
+          // 7.2 If the callback's error includes a "TransientTransactionError" label, jump back to step two.
+          if (fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
             continue retryTransaction;
           }
 
-          // 7.iii If the callback's error includes a "UnknownTransactionCommitResult" label, the callback must have manually committed a transaction,
-          // propagate the callback's error to the caller of withTransaction and return immediately.
-          // The 7.iii check is redundant with 6.iv, so we don't write code for it
-          // 7.iv Otherwise, propagate the callback's error to the caller of withTransaction and return immediately.
+          // 7.3 If the callback's error includes a "UnknownTransactionCommitResult" label, the callback
+          // must have manually committed a transaction, propagate the error and return immediately.
+          // (This check is redundant with step 8, so we don't write code for it.)
+          // 7.4 Otherwise, propagate the callback's error (see Note 1) and return immediately.
           throw fnError;
         }
 
+        // 9. Invoke commitTransaction on the session.
+        // We will rely on ClientSession.commitTransaction() to apply a majority write concern
+        // if commitTransaction is being retried (see: DRIVERS-601).
         retryCommit: while (!committed) {
           try {
-            /*
-             * We will rely on ClientSession.commitTransaction() to
-             * apply a majority write concern if commitTransaction is
-             * being retried (see: DRIVERS-601)
-             */
-            // 9. Invoke commitTransaction on the session.
             await this.commitTransaction();
             committed = true;
-            // 10. If commitTransaction reported an error:
           } catch (commitError) {
-            // If CSOT is enabled, we repeatedly retry until timeoutMS expires.  This is enforced by providing a
-            // timeoutContext to each async API, which know how to cancel themselves (i.e., the next retry will
-            // abort the withTransaction call).
-            // If CSOT is not enabled, do we still have time remaining or have we timed out?
-            const hasTimedOut =
-              !this.timeoutContext?.csotEnabled() && processTimeMS() - startTime >= MAX_TIMEOUT;
+            // 10. If commitTransaction reported an error:
+            lastError = commitError;
 
-            if (!hasTimedOut) {
-              /*
-               * Note: a maxTimeMS error will have the MaxTimeMSExpired
-               * code (50) and can be reported as a top-level error or
-               * inside writeConcernError, ex.
-               * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
-               * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
-               */
-              if (
-                !isMaxTimeMSExpiredError(commitError) &&
-                commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)
-              ) {
-                // 10.i If the `commitTransaction` error includes a "UnknownTransactionCommitResult" label and the error is not
-                // MaxTimeMSExpired and the elapsed time of `withTransaction` is less than 120 seconds, jump back to step eight.
-                continue retryCommit;
-              }
-
-              if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-                // 10.ii If the commitTransaction error includes a "TransientTransactionError" label
-                // and the elapsed time of withTransaction is less than 120 seconds, jump back to step two.
-                lastError = commitError;
-
-                continue retryTransaction;
-              }
+            // If elapsed time >= TIMEOUT_MS (i.e., now >= deadline), raise a timeout error (see Note 1).
+            if (processTimeMS() >= deadline) {
+              throw makeTimeoutError(commitError, csotEnabled);
             }
 
-            // 10.iii Otherwise, propagate the commitTransaction error to the caller of withTransaction and return immediately.
+            // 10.1 If the error includes "UnknownTransactionCommitResult" and is not MaxTimeMSExpired
+            // and elapsed time < TIMEOUT_MS (guaranteed — deadline check above), jump back to step nine.
+            // Note: a maxTimeMS error will have the MaxTimeMSExpired code (50) and can be reported
+            // as a top-level error or inside writeConcernError.
+            if (
+              !isMaxTimeMSExpiredError(commitError) &&
+              commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)
+            ) {
+              continue retryCommit;
+            }
+
+            // 10.2 If the error includes "TransientTransactionError" and elapsed time < TIMEOUT_MS
+            // (guaranteed — deadline check above), jump back to step two.
+            if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+              continue retryTransaction;
+            }
+
+            // 10.3 Otherwise, propagate the commitTransaction error (see Note 1) and return immediately.
             throw commitError;
           }
         }
       }
 
+      // 11. The transaction was committed successfully. Return immediately.
       // @ts-expect-error Result is always defined if we reach here, the for-loop above convinces TS it is not.
       return result;
     } finally {
       this.timeoutContext = null;
     }
   }
+}
+
+function makeTimeoutError(cause: Error, csotEnabled: boolean): Error {
+  // Async APIs know how to cancel themselves and might return CSOT error
+  if (cause instanceof MongoOperationTimeoutError) {
+    return cause;
+  }
+  if (csotEnabled) {
+    const timeoutError = new MongoOperationTimeoutError('Timed out during withTransaction', {
+      cause
+    });
+    if (cause instanceof MongoError) {
+      for (const label of cause.errorLabels) {
+        timeoutError.addErrorLabel(label);
+      }
+    }
+    return timeoutError;
+  }
+  return cause;
 }
 
 const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
