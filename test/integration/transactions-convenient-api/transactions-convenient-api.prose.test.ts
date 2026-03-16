@@ -172,14 +172,12 @@ describe('Retry Timeout is Enforced', function () {
     },
     async function () {
       // 1. Configure a failpoint that always fails commitTransaction with
-      //    UnknownTransactionCommitResult and blocks for 25ms to consume timeout budget.
+      //    UnknownTransactionCommitResult.
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
         data: {
           failCommands: ['commitTransaction'],
-          blockConnection: true,
-          blockTimeMS: 25,
           errorCode: 64,
           errorLabels: ['UnknownTransactionCommitResult']
         }
@@ -215,15 +213,12 @@ describe('Retry Timeout is Enforced', function () {
     },
     async function () {
       // 1. Configure a failpoint that always fails commitTransaction with
-      //    TransientTransactionError (errorCode 251 = NoSuchTransaction) and blocks for 25ms
-      //    to consume timeout budget.
+      //    TransientTransactionError (errorCode 251 = NoSuchTransaction).
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
         data: {
           failCommands: ['commitTransaction'],
-          blockConnection: true,
-          blockTimeMS: 25,
           errorCode: 251,
           errorLabels: ['TransientTransactionError']
         }
