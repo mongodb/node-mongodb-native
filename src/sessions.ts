@@ -17,6 +17,7 @@ import {
   MongoErrorLabel,
   MongoExpiredSessionError,
   MongoInvalidArgumentError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
@@ -777,14 +778,15 @@ export class ClientSession
           const willExceedTransactionDeadline =
             (this.timeoutContext?.csotEnabled() &&
               backoffMS > this.timeoutContext.remainingTimeMS) ||
-            processTimeMS() + backoffMS > startTime + MAX_TIMEOUT;
+            (!this.timeoutContext?.csotEnabled() &&
+              processTimeMS() + backoffMS > startTime + MAX_TIMEOUT);
 
           if (willExceedTransactionDeadline) {
-            throw (
+            throw makeWithTransactionTimeoutError(
               lastError ??
-              new MongoRuntimeError(
-                `Transaction retry did not record an error: should never occur. Please file a bug.`
-              )
+                new MongoRuntimeError(
+                  `Transaction retry did not record an error: should never occur. Please file a bug.`
+                )
             );
           }
 
@@ -827,6 +829,8 @@ export class ClientSession
             throw fnError;
           }
 
+          lastError = fnError;
+
           if (
             this.transaction.state === TxnState.STARTING_TRANSACTION ||
             this.transaction.state === TxnState.TRANSACTION_IN_PROGRESS
@@ -836,14 +840,15 @@ export class ClientSession
             await this.abortTransaction();
           }
 
-          if (
-            fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-            (this.timeoutContext?.csotEnabled() || processTimeMS() - startTime < MAX_TIMEOUT)
-          ) {
-            // 7.ii If the callback's error includes a "TransientTransactionError" label and the elapsed time of `withTransaction`
-            // is less than 120 seconds, jump back to step two.
-            lastError = fnError;
-            continue retryTransaction;
+          if (fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+            if (this.timeoutContext?.csotEnabled() || processTimeMS() - startTime < MAX_TIMEOUT) {
+              // 7.ii If the callback's error includes a "TransientTransactionError" label and the elapsed time of `withTransaction`
+              // is less than TIMEOUT_MS, jump back to step two.
+              continue retryTransaction;
+            } else {
+              // 7.ii (cont.) If timeout has been exceeded, raise a timeout error wrapping the transient error.
+              throw makeWithTransactionTimeoutError(fnError);
+            }
           }
 
           // 7.iii If the callback's error includes a "UnknownTransactionCommitResult" label, the callback must have manually committed a transaction,
@@ -865,37 +870,39 @@ export class ClientSession
             committed = true;
             // 10. If commitTransaction reported an error:
           } catch (commitError) {
-            // If CSOT is enabled, we repeatedly retry until timeoutMS expires.  This is enforced by providing a
-            // timeoutContext to each async API, which know how to cancel themselves (i.e., the next retry will
-            // abort the withTransaction call).
-            // If CSOT is not enabled, do we still have time remaining or have we timed out?
+            lastError = commitError;
+
+            // Check if the withTransaction timeout has been exceeded.
+            // With CSOT: check remaining time from the timeout context.
+            // Without CSOT: check if we've exceeded the 120-second timeout.
             const hasTimedOut =
-              !this.timeoutContext?.csotEnabled() && processTimeMS() - startTime >= MAX_TIMEOUT;
+              (this.timeoutContext?.csotEnabled() && this.timeoutContext.remainingTimeMS <= 0) ||
+              (!this.timeoutContext?.csotEnabled() && processTimeMS() - startTime >= MAX_TIMEOUT);
 
-            if (!hasTimedOut) {
-              /*
-               * Note: a maxTimeMS error will have the MaxTimeMSExpired
-               * code (50) and can be reported as a top-level error or
-               * inside writeConcernError, ex.
-               * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
-               * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
-               */
-              if (
-                !isMaxTimeMSExpiredError(commitError) &&
-                commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)
-              ) {
-                // 10.i If the `commitTransaction` error includes a "UnknownTransactionCommitResult" label and the error is not
-                // MaxTimeMSExpired and the elapsed time of `withTransaction` is less than 120 seconds, jump back to step eight.
-                continue retryCommit;
-              }
+            if (hasTimedOut) {
+              throw makeWithTransactionTimeoutError(commitError);
+            }
 
-              if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-                // 10.ii If the commitTransaction error includes a "TransientTransactionError" label
-                // and the elapsed time of withTransaction is less than 120 seconds, jump back to step two.
-                lastError = commitError;
+            /*
+             * Note: a maxTimeMS error will have the MaxTimeMSExpired
+             * code (50) and can be reported as a top-level error or
+             * inside writeConcernError, ex.
+             * { ok:0, code: 50, codeName: 'MaxTimeMSExpired' }
+             * { ok:1, writeConcernError: { code: 50, codeName: 'MaxTimeMSExpired' } }
+             */
+            if (
+              !isMaxTimeMSExpiredError(commitError) &&
+              commitError.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)
+            ) {
+              // 10.i If the `commitTransaction` error includes a "UnknownTransactionCommitResult" label and the error is not
+              // MaxTimeMSExpired and the elapsed time of `withTransaction` is less than TIMEOUT_MS, jump back to step eight.
+              continue retryCommit;
+            }
 
-                continue retryTransaction;
-              }
+            if (commitError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+              // 10.ii If the commitTransaction error includes a "TransientTransactionError" label
+              // and the elapsed time of withTransaction is less than TIMEOUT_MS, jump back to step two.
+              continue retryTransaction;
             }
 
             // 10.iii Otherwise, propagate the commitTransaction error to the caller of withTransaction and return immediately.
@@ -910,6 +917,18 @@ export class ClientSession
       this.timeoutContext = null;
     }
   }
+}
+
+function makeWithTransactionTimeoutError(cause: Error): MongoOperationTimeoutError {
+  const timeoutError = new MongoOperationTimeoutError('Timed out during withTransaction', {
+    cause
+  });
+  if (cause instanceof MongoError) {
+    for (const label of cause.errorLabels) {
+      timeoutError.addErrorLabel(label);
+    }
+  }
+  return timeoutError;
 }
 
 const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
