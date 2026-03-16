@@ -5,12 +5,14 @@ runOnRequirements:
 createEntities:
   - client:
       id: &client client0
+      useMultipleMongoses: false
       observeEvents:
         - commandStartedEvent
         - commandFailedEvent
         - commandSucceededEvent
   - client:
       id: &failPointClient failPointClient
+      useMultipleMongoses: false
   - database:
       id: db
       client: *client
@@ -26,7 +28,7 @@ initialData:
       - { a: 1 }
       - { a: 2 }
       - { a: 3 }
-    
+
 tests:
   - description: "getMores are retried"
     operations:
@@ -60,27 +62,27 @@ tests:
         events:
           - commandStartedEvent:
               commandName: find
-          - commandSucceededEvent: 
+          - commandSucceededEvent:
               commandName: find
           # first attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           # second attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           # third attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           # success
           - commandStartedEvent:
               commandName: getMore
-          - commandSucceededEvent: 
+          - commandSucceededEvent:
               commandName: getMore
 
   - description: "getMores are retried maxAttempts=5 times"
@@ -111,39 +113,39 @@ tests:
         events:
           - commandStartedEvent:
               commandName: find
-          - commandSucceededEvent: 
+          - commandSucceededEvent:
               commandName: find
           # first attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           # second attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           # third attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           # fourth attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           # fifth attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           # final attempt
           - commandStartedEvent:
               commandName: getMore
-          - commandFailedEvent: 
+          - commandFailedEvent:
               commandName: getMore
           - commandStartedEvent:
               commandName: killCursors
-          - commandSucceededEvent: 
+          - commandSucceededEvent:
               commandName: killCursors

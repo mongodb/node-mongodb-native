@@ -14,6 +14,7 @@ createEntities:
       id: &client client
       useMultipleMongoses: false
       observeEvents: [commandStartedEvent, commandSucceededEvent, commandFailedEvent]
+      ignoreCommandMonitoringEvents: [killCursors]
 
   - client:
       id: &fail_point_client fail_point_client
@@ -39,7 +40,7 @@ initialData:
       - { _id: 1, x: 11 }
       - { _id: 2, x: 22 }
 
-tests: 
+tests:
   - description: 'client.listDatabases retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
@@ -53,19 +54,19 @@ tests:
               failCommands: [listDatabases]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: listDatabases
         object: *client
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: listDatabases
@@ -105,17 +106,17 @@ tests:
               failCommands: [listDatabases]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: listDatabaseNames
         object: *client
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: listDatabases
@@ -155,19 +156,19 @@ tests:
               failCommands: [aggregate]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: createChangeStream
         object: *client
         arguments:
           pipeline: []
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: aggregate
@@ -209,7 +210,7 @@ tests:
               failCommands: [bulkWrite]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: clientBulkWrite
         object: *client
         arguments:
@@ -217,14 +218,14 @@ tests:
           - insertOne:
               namespace: *client_bulk_write_ns
               document: { _id: 8, x: 88 }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: bulkWrite
@@ -251,7 +252,7 @@ tests:
           - commandFailedEvent:
               commandName: bulkWrite
 
-  - description: 'database.aggregate retries at most maxAttempts=5 times'
+  - description: 'database.aggregate read retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -264,19 +265,19 @@ tests:
               failCommands: [aggregate]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: aggregate
         object: *database
         arguments:
           pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: aggregate
@@ -316,19 +317,19 @@ tests:
               failCommands: [listCollections]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: listCollections
         object: *database
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: listCollections
@@ -368,19 +369,19 @@ tests:
               failCommands: [listCollections]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: listCollectionNames
         object: *database
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: listCollections
@@ -420,20 +421,20 @@ tests:
               failCommands: [ping]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: runCommand
         object: *database
         arguments:
           command: { ping: 1 }
           commandName: ping
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: ping
@@ -473,19 +474,19 @@ tests:
               failCommands: [aggregate]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: createChangeStream
         object: *database
         arguments:
           pipeline: []
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: aggregate
@@ -512,7 +513,7 @@ tests:
           - commandFailedEvent:
               commandName: aggregate
 
-  - description: 'collection.aggregate retries at most maxAttempts=5 times'
+  - description: 'collection.aggregate read retries at most maxAttempts=5 times'
     operations:
       - name: failPoint
         object: testRunner
@@ -525,19 +526,19 @@ tests:
               failCommands: [aggregate]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: aggregate
         object: *collection
         arguments:
           pipeline: []
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: aggregate
@@ -577,19 +578,19 @@ tests:
               failCommands: [aggregate]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: countDocuments
         object: *collection
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: aggregate
@@ -629,17 +630,17 @@ tests:
               failCommands: [count]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: estimatedDocumentCount
         object: *collection
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: count
@@ -679,20 +680,20 @@ tests:
               failCommands: [distinct]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: distinct
         object: *collection
         arguments:
           fieldName: x
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: distinct
@@ -732,19 +733,19 @@ tests:
               failCommands: [find]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: find
         object: *collection
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: find
@@ -784,19 +785,19 @@ tests:
               failCommands: [find]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: findOne
         object: *collection
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: find
@@ -836,17 +837,17 @@ tests:
               failCommands: [listIndexes]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: listIndexes
         object: *collection
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: listIndexes
@@ -886,17 +887,17 @@ tests:
               failCommands: [listIndexes]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: listIndexNames
         object: *collection
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: listIndexes
@@ -936,19 +937,19 @@ tests:
               failCommands: [aggregate]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: createChangeStream
         object: *collection
         arguments:
           pipeline: []
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: aggregate
@@ -988,19 +989,19 @@ tests:
               failCommands: [insert]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: insertOne
         object: *collection
         arguments:
           document: { _id: 2, x: 22 }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: insert
@@ -1040,20 +1041,20 @@ tests:
               failCommands: [insert]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: insertMany
         object: *collection
         arguments:
           documents:
             - { _id: 2, x: 22 }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: insert
@@ -1093,19 +1094,19 @@ tests:
               failCommands: [delete]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: deleteOne
         object: *collection
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: delete
@@ -1145,19 +1146,19 @@ tests:
               failCommands: [delete]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: deleteMany
         object: *collection
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: delete
@@ -1197,20 +1198,20 @@ tests:
               failCommands: [update]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: replaceOne
         object: *collection
         arguments:
           filter: {}
           replacement: { x: 22 }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: update
@@ -1250,20 +1251,20 @@ tests:
               failCommands: [update]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: updateOne
         object: *collection
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: update
@@ -1303,20 +1304,20 @@ tests:
               failCommands: [update]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: updateMany
         object: *collection
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: update
@@ -1356,19 +1357,19 @@ tests:
               failCommands: [findAndModify]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: findOneAndDelete
         object: *collection
         arguments:
           filter: {}
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: findAndModify
@@ -1408,20 +1409,20 @@ tests:
               failCommands: [findAndModify]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: findOneAndReplace
         object: *collection
         arguments:
           filter: {}
           replacement: { x: 22 }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: findAndModify
@@ -1461,20 +1462,20 @@ tests:
               failCommands: [findAndModify]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: findOneAndUpdate
         object: *collection
         arguments:
           filter: {}
           update: { $set: { x: 22 } }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: findAndModify
@@ -1514,21 +1515,21 @@ tests:
               failCommands: [insert]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: bulkWrite
         object: *collection
         arguments:
           requests:
             - insertOne:
                 document: { _id: 2, x: 22 }
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: insert
@@ -1568,20 +1569,20 @@ tests:
               failCommands: [createIndexes]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: createIndex
         object: *collection
         arguments:
           keys: { x: 11 }
           name: "x_11"
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: createIndexes
@@ -1621,19 +1622,19 @@ tests:
               failCommands: [dropIndexes]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: dropIndex
         object: *collection
         arguments:
           name: "x_11"
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: dropIndexes
@@ -1673,17 +1674,17 @@ tests:
               failCommands: [dropIndexes]
               errorLabels: [RetryableError, SystemOverloadedError]
               errorCode: 2
-      
+
       - name: dropIndexes
         object: *collection
-        expectError: 
+        expectError:
           isError: true
           isClientError: false
 
     expectEvents:
       - client: *client
         events:
-          # we expect 6 pairs of command started and succeeded events: 
+          # we expect 6 pairs of command started and succeeded events:
           #   1 initial attempt and 5 retries.
           - commandStartedEvent:
               commandName: dropIndexes
@@ -1709,3 +1710,55 @@ tests:
               commandName: dropIndexes
           - commandFailedEvent:
               commandName: dropIndexes
+
+  - description: 'collection.aggregate write retries at most maxAttempts=5 times'
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *fail_point_client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: alwaysOn
+            data:
+              failCommands: [aggregate]
+              errorLabels: [RetryableError, SystemOverloadedError]
+              errorCode: 2
+
+      - name: aggregate
+        object: *collection
+        arguments:
+          pipeline: [{$out: "output"}]
+        expectError:
+          isError: true
+          isClientError: false
+
+    expectEvents:
+      - client: *client
+        events:
+          # we expect 6 pairs of command started and succeeded events:
+          #   1 initial attempt and 5 retries.
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate
+          - commandStartedEvent:
+              commandName: aggregate
+          - commandFailedEvent:
+              commandName: aggregate

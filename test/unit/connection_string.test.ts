@@ -635,13 +635,14 @@ describe('Connection String', function () {
 
       const mockRecord: string[][] = [[txtRecord]];
 
-      // first call is for stubbing resolveSrv
-      // second call is for stubbing resolveTxt
-      sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+      // first call is for stubbing resolve
+      // second call is for stubbing resolve
+      const stub = sinon.stub(dns.promises, 'resolve');
+      stub.withArgs(sinon.match.any, 'SRV').callsFake(async () => {
         return mockAddress;
       });
 
-      sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
+      stub.withArgs(sinon.match.any, 'TXT').callsFake(async () => {
         return mockRecord;
       });
     }
@@ -887,6 +888,25 @@ describe('Connection String', function () {
           }
         });
       }
+    });
+  });
+
+  context('when adaptiveRetries is set', function () {
+    it('defaults to false', function () {
+      const options = parseOptions('mongodb://localhost:27017');
+      expect(options.adaptiveRetries).to.equal(false);
+    });
+
+    it('can be enabled via connection string', function () {
+      const options = parseOptions('mongodb://localhost:27017?adaptiveRetries=true');
+      expect(options.adaptiveRetries).to.equal(true);
+    });
+
+    it('can be enabled via client options', function () {
+      const options = parseOptions('mongodb://localhost:27017', {
+        adaptiveRetries: true
+      });
+      expect(options.adaptiveRetries).to.equal(true);
     });
   });
 });

@@ -19,6 +19,7 @@ import {
 } from '../error';
 import type { MongoClient } from '../mongo_client';
 import { ReadPreference } from '../read_preference';
+import { TopologyType } from '../sdam/common';
 import {
   DeprioritizedServers,
   sameServerSelector,
@@ -266,11 +267,13 @@ async function executeOperationWithRetries<
     try {
       try {
         const result = await server.command(operation, timeoutContext);
-        topology.tokenBucket.deposit(
-          attempt > 0
-            ? RETRY_TOKEN_RETURN_RATE + RETRY_COST // on successful retry
-            : RETRY_TOKEN_RETURN_RATE // otherwise
-        );
+        if (topology.s.options.adaptiveRetries) {
+          topology.tokenBucket.deposit(
+            attempt > 0
+              ? RETRY_TOKEN_RETURN_RATE + RETRY_COST // on successful retry
+              : RETRY_TOKEN_RETURN_RATE // otherwise
+          );
+        }
         return operation.handleOk(result);
       } catch (error) {
         return operation.handleError(error);
@@ -279,7 +282,11 @@ async function executeOperationWithRetries<
       // Should never happen but if it does - propagate the error.
       if (!(operationError instanceof MongoError)) throw operationError;
 
-      if (attempt > 0 && !operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
+      if (
+        topology.s.options.adaptiveRetries &&
+        attempt > 0 &&
+        !operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+      ) {
         // if a retry attempt fails with a non-overload error, deposit 1 token.
         topology.tokenBucket.deposit(RETRY_COST);
       }
@@ -318,14 +325,14 @@ async function executeOperationWithRetries<
       }
 
       if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
-        if (!topology.tokenBucket.consume(RETRY_COST)) {
-          throw error;
-        }
-
         const backoffMS = Math.random() * Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * 2 ** attempt);
 
         // if the backoff would exhaust the CSOT timeout, short-circuit.
         if (timeoutContext.csotEnabled() && backoffMS > timeoutContext.remainingTimeMS) {
+          throw error;
+        }
+
+        if (topology.s.options.adaptiveRetries && !topology.tokenBucket.consume(RETRY_COST)) {
           throw error;
         }
 
@@ -342,7 +349,12 @@ async function executeOperationWithRetries<
         session.unpin({ force: true, forceClear: true });
       }
 
-      deprioritizedServers.add(server.description);
+      if (
+        topology.description.type === TopologyType.Sharded ||
+        operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+      ) {
+        deprioritizedServers.add(server.description);
+      }
 
       server = await topology.selectServer(selector, {
         session,
@@ -377,12 +389,28 @@ async function executeOperationWithRetries<
   );
 
   function canRetry(operation: AbstractOperation, error: MongoError) {
-    // always retryable
+    // SystemOverloadedError is retryable, but must respect retryReads/retryWrites settings
+    // Check topology options directly (not operation.canRetryRead/Write) because backpressure
+    // expands retry support beyond traditional retryable reads/writes
+    // NOTE: Unlike traditional retries, backpressure retries ARE allowed inside transactions
     if (
       error.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
       error.hasErrorLabel(MongoErrorLabel.RetryableError)
     ) {
-      return true;
+      // runCommand requires BOTH retryReads and retryWrites to be enabled (per spec step 2.4)
+      if (operation instanceof RunCommandOperation) {
+        return topology.s.options.retryReads && topology.s.options.retryWrites;
+      }
+
+      // Write-stage aggregates ($out/$merge) require retryWrites
+      if (operation instanceof AggregateOperation && operation.hasWriteStage) {
+        return topology.s.options.retryWrites;
+      }
+
+      // For other operations, check if retries are enabled based on operation type
+      const canRetryAsRead = hasReadAspect && topology.s.options.retryReads;
+      const canRetryAsWrite = hasWriteAspect && topology.s.options.retryWrites;
+      return canRetryAsRead || canRetryAsWrite;
     }
 
     // run command is only retryable if we get retryable overload errors
