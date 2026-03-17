@@ -350,6 +350,15 @@ async function executeOperationWithRetries<
       }
 
       if (
+        operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
+        session != null &&
+        session.isPinned &&
+        !session.inTransaction()
+      ) {
+        session.unpin({ force: true });
+      }
+
+      if (
         topology.description.type === TopologyType.Sharded ||
         operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
       ) {
