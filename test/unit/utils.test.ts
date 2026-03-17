@@ -148,6 +148,13 @@ describe('driver utils', function () {
           });
         });
 
+        context('when the wildcard starts with *.', function () {
+          it('returns false', function () {
+            expect(hostMatchesWildcards('test-mongodb.com', ['*.mongodb.com', 'test2'])).to.be
+              .false;
+          });
+        });
+
         context('when the host matches a FQDN', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('mongodb.net', ['*.mongodb.net', 'other'])).to.be.true;
@@ -219,6 +226,14 @@ describe('driver utils', function () {
         it('returns false', function () {
           expect(hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongod-27017.sock', 'test2']))
             .to.be.false;
+        });
+      });
+
+      context('when the host does not match partial matches', function () {
+        it('returns false', function () {
+          expect(
+            hostMatchesWildcards('/tmp/test-mongodb-27017.sock', ['*/mongodb-27017.sock', 'test2'])
+          ).to.be.false;
         });
       });
     });
