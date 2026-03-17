@@ -162,6 +162,8 @@ describe('Retry Timeout is Enforced', function () {
       // 3. Assert that the error is a timeout error wrapping the TransientTransactionError.
       expect(result).to.be.instanceOf(MongoOperationTimeoutError);
       expect((result as MongoOperationTimeoutError).cause).to.be.an('error');
+      expect((result as MongoOperationTimeoutError).hasErrorLabel('TransientTransactionError')).to.be
+        .true;
     }
   );
 
@@ -202,6 +204,9 @@ describe('Retry Timeout is Enforced', function () {
       // 3. Assert that the error is a timeout error wrapping the commit error.
       expect(result).to.be.instanceOf(MongoOperationTimeoutError);
       expect((result as MongoOperationTimeoutError).cause).to.be.an('error');
+      expect(
+        (result as MongoOperationTimeoutError).hasErrorLabel('UnknownTransactionCommitResult')
+      ).to.be.true;
     }
   );
 
@@ -244,6 +249,8 @@ describe('Retry Timeout is Enforced', function () {
       // 3. Assert that the error is a timeout error wrapping the TransientTransactionError.
       expect(result).to.be.instanceOf(MongoOperationTimeoutError);
       expect((result as MongoOperationTimeoutError).cause).to.be.an('error');
+      expect((result as MongoOperationTimeoutError).hasErrorLabel('TransientTransactionError')).to.be
+        .true;
     }
   );
 });
