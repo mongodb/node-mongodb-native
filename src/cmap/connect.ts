@@ -411,6 +411,7 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   // Explicit setKeepAlive/setNoDelay are required because tls.connect() silently
   // ignores these constructor options due to a Node.js bug.
   // See: https://github.com/nodejs/node/issues/62003
+  // TODO(NODE-7474): remove this fix once the underlying Node.js issue is resolved.
   socket.setKeepAlive(true, keepAliveInitialDelay);
   socket.setNoDelay(noDelay);
   socket.setTimeout(connectTimeoutMS);
