@@ -2,12 +2,7 @@ import { expect } from 'chai';
 import { test } from 'mocha';
 import * as sinon from 'sinon';
 
-import {
-  type ClientSession,
-  type Collection,
-  type MongoClient,
-  MongoOperationTimeoutError
-} from '../../mongodb';
+import { type ClientSession, type Collection, type MongoClient, MongoError } from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,
@@ -104,8 +99,8 @@ describe('Retry Timeout is Enforced', function () {
   // as recommended by the spec: "This might be done by internally modifying the timeout value
   // used by withTransaction with some private API or using a mock timer."
   //
-  // The error SHOULD be propagated as a timeout error if the language allows to expose the
-  // underlying error as a cause of a timeout error.
+  // Without CSOT, the original error is propagated directly.
+  // With CSOT, the error is wrapped in a MongoOperationTimeoutError.
 
   let client: MongoClient;
   let collection: Collection;
@@ -129,7 +124,7 @@ describe('Retry Timeout is Enforced', function () {
   // Case 1: If the callback raises an error with the TransientTransactionError label and the retry
   // timeout has been exceeded, withTransaction should propagate the error to its caller.
   test(
-    'callback TransientTransactionError propagated as timeout error when retry timeout exceeded',
+    'callback TransientTransactionError propagated when retry timeout exceeded',
     {
       requires: {
         mongodb: '>=4.4',
@@ -159,11 +154,10 @@ describe('Retry Timeout is Enforced', function () {
         });
       });
 
-      // 3. Assert that the error is a timeout error wrapping the TransientTransactionError.
-      expect(result).to.be.instanceOf(MongoOperationTimeoutError);
-      expect((result as MongoOperationTimeoutError).cause).to.be.an('error');
-      expect((result as MongoOperationTimeoutError).hasErrorLabel('TransientTransactionError')).to
-        .be.true;
+      // 3. Assert that the error is the original TransientTransactionError (propagated directly
+      //    in the legacy non-CSOT path).
+      expect(result).to.be.instanceOf(MongoError);
+      expect((result as MongoError).hasErrorLabel('TransientTransactionError')).to.be.true;
     }
   );
 
@@ -171,7 +165,7 @@ describe('Retry Timeout is Enforced', function () {
   // retry timeout has been exceeded, withTransaction should propagate the error to
   // its caller.
   test(
-    'commit UnknownTransactionCommitResult propagated as timeout error when retry timeout exceeded',
+    'commit UnknownTransactionCommitResult propagated when retry timeout exceeded',
     {
       requires: {
         mongodb: '>=4.4',
@@ -201,11 +195,10 @@ describe('Retry Timeout is Enforced', function () {
         });
       });
 
-      // 3. Assert that the error is a timeout error wrapping the commit error.
-      expect(result).to.be.instanceOf(MongoOperationTimeoutError);
-      expect((result as MongoOperationTimeoutError).cause).to.be.an('error');
-      expect((result as MongoOperationTimeoutError).hasErrorLabel('UnknownTransactionCommitResult'))
-        .to.be.true;
+      // 3. Assert that the error is the original commit error (propagated directly
+      //    in the legacy non-CSOT path).
+      expect(result).to.be.instanceOf(MongoError);
+      expect((result as MongoError).hasErrorLabel('UnknownTransactionCommitResult')).to.be.true;
     }
   );
 
@@ -214,7 +207,7 @@ describe('Retry Timeout is Enforced', function () {
   // caller. This case may occur if the commit was internally retried against a new primary after a
   // failover and the second primary returned a NoSuchTransaction error response.
   test(
-    'commit TransientTransactionError propagated as timeout error when retry timeout exceeded',
+    'commit TransientTransactionError propagated when retry timeout exceeded',
     {
       requires: {
         mongodb: '>=4.4',
@@ -245,11 +238,10 @@ describe('Retry Timeout is Enforced', function () {
         });
       });
 
-      // 3. Assert that the error is a timeout error wrapping the TransientTransactionError.
-      expect(result).to.be.instanceOf(MongoOperationTimeoutError);
-      expect((result as MongoOperationTimeoutError).cause).to.be.an('error');
-      expect((result as MongoOperationTimeoutError).hasErrorLabel('TransientTransactionError')).to
-        .be.true;
+      // 3. Assert that the error is the original commit error (propagated directly
+      //    in the legacy non-CSOT path).
+      expect(result).to.be.instanceOf(MongoError);
+      expect((result as MongoError).hasErrorLabel('TransientTransactionError')).to.be.true;
     }
   );
 });

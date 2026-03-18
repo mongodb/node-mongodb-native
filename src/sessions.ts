@@ -726,7 +726,7 @@ export class ClientSession
       timeoutMS?: number;
     }
   ): Promise<T> {
-    const MAX_TIMEOUT = 120000;
+    const MAX_TIMEOUT = 120_000;
 
     const timeoutMS = options?.timeoutMS ?? this.timeoutMS ?? null;
     this.timeoutContext =
@@ -738,10 +738,12 @@ export class ClientSession
           })
         : null;
 
-    // 1. Record the current monotonic time, which will be used to enforce the 120-second timeout before later retry attempts.
-    const startTime = this.timeoutContext?.csotEnabled() // This is strictly to appease TS.  We must narrow the context to a CSOT context before accessing `.start`.
-      ? this.timeoutContext.start
-      : processTimeMS();
+    // 1. Compute the absolute deadline for timeout enforcement.
+    // 1.3 Set `TIMEOUT_MS` to be `timeoutMS` if given, otherwise MAX_TIMEOUT (120-seconds).
+    const csotEnabled = !!this.timeoutContext?.csotEnabled();
+    const deadline = this.timeoutContext?.csotEnabled()
+      ? processTimeMS() + this.timeoutContext.remainingTimeMS
+      : processTimeMS() + MAX_TIMEOUT;
 
     let committed = false;
     let result: T;
@@ -775,18 +777,13 @@ export class ClientSession
               BACKOFF_MAX_MS
             );
 
-          const willExceedTransactionDeadline =
-            (this.timeoutContext?.csotEnabled() &&
-              backoffMS > this.timeoutContext.remainingTimeMS) ||
-            (!this.timeoutContext?.csotEnabled() &&
-              processTimeMS() + backoffMS > startTime + MAX_TIMEOUT);
-
-          if (willExceedTransactionDeadline) {
-            throw makeWithTransactionTimeoutError(
+          if (processTimeMS() + backoffMS >= deadline) {
+            throw makeTimeoutError(
               lastError ??
                 new MongoRuntimeError(
                   `Transaction retry did not record an error: should never occur. Please file a bug.`
-                )
+                ),
+              csotEnabled
             );
           }
 
@@ -841,13 +838,13 @@ export class ClientSession
           }
 
           if (fnError.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-            if (this.timeoutContext?.csotEnabled() || processTimeMS() - startTime < MAX_TIMEOUT) {
+            if (processTimeMS() < deadline) {
               // 7.ii If the callback's error includes a "TransientTransactionError" label and the elapsed time of `withTransaction`
               // is less than TIMEOUT_MS, jump back to step two.
               continue retryTransaction;
             } else {
-              // 7.ii (cont.) If timeout has been exceeded, raise a timeout error wrapping the transient error.
-              throw makeWithTransactionTimeoutError(fnError);
+              // 7.ii (cont.) If timeout has been exceeded, raise the transient error (or wrap in timeout for CSOT).
+              throw makeTimeoutError(fnError, csotEnabled);
             }
           }
 
@@ -872,15 +869,8 @@ export class ClientSession
           } catch (commitError) {
             lastError = commitError;
 
-            // Check if the withTransaction timeout has been exceeded.
-            // With CSOT: check remaining time from the timeout context.
-            // Without CSOT: check if we've exceeded the 120-second timeout.
-            const hasTimedOut =
-              (this.timeoutContext?.csotEnabled() && this.timeoutContext.remainingTimeMS <= 0) ||
-              (!this.timeoutContext?.csotEnabled() && processTimeMS() - startTime >= MAX_TIMEOUT);
-
-            if (hasTimedOut) {
-              throw makeWithTransactionTimeoutError(commitError);
+            if (processTimeMS() >= deadline) {
+              throw makeTimeoutError(commitError, csotEnabled);
             }
 
             /*
@@ -919,16 +909,19 @@ export class ClientSession
   }
 }
 
-function makeWithTransactionTimeoutError(cause: Error): MongoOperationTimeoutError {
-  const timeoutError = new MongoOperationTimeoutError('Timed out during withTransaction', {
-    cause
-  });
-  if (cause instanceof MongoError) {
-    for (const label of cause.errorLabels) {
-      timeoutError.addErrorLabel(label);
+function makeTimeoutError(cause: Error, csotEnabled: boolean): Error {
+  if (csotEnabled) {
+    const timeoutError = new MongoOperationTimeoutError('Timed out during withTransaction', {
+      cause
+    });
+    if (cause instanceof MongoError) {
+      for (const label of cause.errorLabels) {
+        timeoutError.addErrorLabel(label);
+      }
     }
+    return timeoutError;
   }
-  return timeoutError;
+  return cause;
 }
 
 const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
