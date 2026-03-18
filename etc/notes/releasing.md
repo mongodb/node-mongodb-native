@@ -30,9 +30,11 @@ Fixes are usually released in either the next patch version or in the next minor
 
 release-please automatically tags release commits with a tag in the format v<major>.<minor>.<patch>.  When backporting, first determine the target minor version and create a release branch for it by branching off of the release tag.  The release branch should follow the format `v<major>.<minor>.x`.  For example, to create a backport of bson's 6.5 release, create a release branch from the v6.5.0 tag with the name v6.5.x.  
 
-Then, backport the release action to the target release branch.  First, create a copy of our current release action (release.yml).  Then, change any references to `main` to the target branch.  Double check that there isn't any release tooling on main that doesn't exist on the target branch.  If there is, make sure this is backported too.  Check if the target branch has a release-please config and manifest file.  If not, make sure to adopt changes for release-please v4 (see https://github.com/mongodb/js-bson/pull/682 as an example).  Backport all of the above changes to the target release branch.
+Then, backport the release action to the target release branch. This should be done as the first PR on the release branch.
 
-Now, the release-please will work the same as `main`.  Any PRs that merge to the release branch trigger the release action and update release-pleases' release PR.  Proceed as normal from here.
+First, create a copy of our current release action (release.yml). Then, change any references to `main` to the target branch. Double check that there isn't any release tooling on main that doesn't exist on the target branch. If there is, make sure this is backported too. Check if the target branch has a release-please config and manifest file. If not, make sure to adopt changes for release-please v4 (see https://github.com/mongodb/js-bson/pull/682 as an example). Backport all of the above changes to the target release branch and open a PR.
+
+Once the release action PR is merged, release-please will work on this branch in the same was as it does on `main`. Any PRs that merge to the release branch trigger the release action and update release-pleases' release PR. Proceed as normal from here.
 
 ## `release-please`
 
