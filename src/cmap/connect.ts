@@ -279,6 +279,15 @@ export async function prepareHandshakeDocument(
   return handshakeDoc;
 }
 
+/**
+ * @internal
+ * Default TCP keepAlive initial delay in milliseconds.
+ * Set to half the Azure load balancer idle timeout (240s) to ensure
+ * probes fire well before cloud LBs (Azure, AWS PrivateLink/NLB)
+ * drop idle connections.
+ */
+export const DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS = 120_000;
+
 /** @public */
 export const LEGAL_TLS_SOCKET_OPTIONS = [
   'allowPartialTrustChain',
@@ -322,7 +331,7 @@ function parseConnectOptions(options: ConnectionOptions): SocketConnectOpts {
       (result as Document)[name] = options[name];
     }
   }
-  result.keepAliveInitialDelay ??= 120000;
+  result.keepAliveInitialDelay ??= DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS;
   result.keepAlive = true;
   result.noDelay = options.noDelay ?? true;
 
@@ -368,6 +377,9 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   const useTLS = options.tls ?? false;
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
   const existingSocket = options.existingSocket;
+  const keepAliveInitialDelay =
+    options.keepAliveInitialDelay ?? DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS;
+  const noDelay = options.noDelay ?? true;
 
   let socket: Stream;
 
@@ -394,6 +406,12 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     socket = net.createConnection(parseConnectOptions(options));
   }
 
+  // Explicit setKeepAlive/setNoDelay are required because tls.connect() silently
+  // ignores these constructor options due to a Node.js bug.
+  // See: https://github.com/nodejs/node/issues/62003
+  // TODO(NODE-7474): remove this fix once the underlying Node.js issue is resolved.
+  socket.setKeepAlive(true, keepAliveInitialDelay);
+  socket.setNoDelay(noDelay);
   socket.setTimeout(connectTimeoutMS);
 
   let cancellationHandler: ((err: Error) => void) | null = null;
