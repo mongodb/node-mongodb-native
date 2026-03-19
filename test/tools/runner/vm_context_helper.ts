@@ -5,6 +5,8 @@ import { isBuiltin } from 'node:module';
 import * as path from 'node:path';
 import * as vm from 'node:vm';
 
+import { ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME } from '../../mongodb_all';
+
 const allowedModules = new Set([
   '@aws-sdk/credential-providers',
   '@mongodb-js/saslprep',
@@ -20,7 +22,7 @@ const allowedModules = new Set([
 ]);
 const blockedModules = new Set(['os']);
 
-// TODO: NODE-7460 - Remove Error and other unnecessary exports
+// TODO: NODE-7460 - Remove Error, Map, Math, Promise, and other unnecessary exports
 const exposedGlobals = new Set([
   'AbortController',
   'AbortSignal',
@@ -56,11 +58,12 @@ const exposedGlobals = new Set([
  */
 function createRestrictedRequire() {
   return function restrictedRequire(moduleName: string) {
+    const isAllowedBySymbol = !!sandbox[ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME];
     const isModuleBuiltin = isBuiltin(moduleName);
     const isModuleAllowed = allowedModules.has(moduleName);
     const isModuleBlocked = blockedModules.has(moduleName);
     const shouldAllow = isModuleAllowed || isModuleBuiltin;
-    const shouldBlock = isModuleBlocked || !shouldAllow;
+    const shouldBlock = (isModuleBlocked || !shouldAllow) && !isAllowedBySymbol;
 
     if (shouldBlock) {
       throw new Error(`Access to core module '${moduleName}' is restricted in this context`);
@@ -74,9 +77,6 @@ const context = {
 
   // Custom require that blocks core modules
   require: createRestrictedRequire(),
-
-  // Driver require
-  __driver_require: require,
 
   // Needed for some modules
   global: undefined as any,
@@ -93,8 +93,7 @@ for (const globalName of exposedGlobals) {
 // Create a sandbox context with necessary globals
 const sandbox = vm.createContext(context);
 
-// Make global and globalThis point to the sandbox
-sandbox.global = sandbox;
+// Make globalThis point to the sandbox
 sandbox.globalThis = sandbox;
 
 /**
