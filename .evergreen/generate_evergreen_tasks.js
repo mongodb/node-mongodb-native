@@ -75,12 +75,12 @@ function makeTask({
 }) {
   const baseExpansions = nodeLtsVersion
     ? {
-        VERSION: mongoVersion,
-        TOPOLOGY: topology,
-        AUTH: auth,
-        SSL: ssl,
-        NODE_LTS_VERSION: nodeLtsVersion
-      }
+      VERSION: mongoVersion,
+      TOPOLOGY: topology,
+      AUTH: auth,
+      SSL: ssl,
+      NODE_LTS_VERSION: nodeLtsVersion
+    }
     : { VERSION: mongoVersion, TOPOLOGY: topology, SSL: ssl, AUTH: auth };
 
   if (testCsfle) {
@@ -833,17 +833,24 @@ const nodelessTasks = [
   'test-zstd-compression',
   'test-tls-support-latest',
 ]
+const nodelessExpansions = {
+  NODE_LTS_VERSION: LATEST_LTS,
+  CLIENT_ENCRYPTION: true,
+  MONGODB_BUNDLED: true
+};
 BUILD_VARIANTS.push({
   name: 'rhel8-nodeless',
   display_name: 'Nodeless',
   run_on: DEFAULT_OS,
-  tasks: nodelessTasks
+  tasks: nodelessTasks,
+  expansions: nodelessExpansions
 });
 BUILD_VARIANTS.push({
   name: 'windows-nodeless',
   display_name: 'Windows Nodeless',
   run_on: WINDOWS_OS,
-  tasks: nodelessTasks
+  tasks: nodelessTasks,
+  expansions: nodelessExpansions
 });
 
 // TODO(NODE-4897): Debug socks5 tests on node latest

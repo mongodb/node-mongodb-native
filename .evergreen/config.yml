@@ -4041,6 +4041,10 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+    expansions:
+      NODE_LTS_VERSION: 24
+      CLIENT_ENCRYPTION: true
+      MONGODB_BUNDLED: true
   - name: windows-nodeless
     display_name: Windows Nodeless
     run_on: windows-2022-latest-large
@@ -4063,3 +4067,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+    expansions:
+      NODE_LTS_VERSION: 24
+      CLIENT_ENCRYPTION: true
+      MONGODB_BUNDLED: true
