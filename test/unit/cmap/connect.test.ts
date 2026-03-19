@@ -1,5 +1,10 @@
 import { expect } from 'chai';
+import * as fs from 'fs';
+import * as net from 'net';
+import * as path from 'path';
 import * as process from 'process';
+import * as sinon from 'sinon';
+import * as tls from 'tls';
 
 import {
   CancellationToken,
@@ -7,10 +12,12 @@ import {
   connect,
   type Connection,
   type ConnectionOptions,
+  DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS,
   HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,
   makeClientMetadata,
+  makeSocket,
   MongoClientAuthProviders,
   MongoCredentials,
   MongoNetworkError,
@@ -445,6 +452,106 @@ describe('Connect Tests', function () {
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument).not.have.property(LEGACY_HELLO_COMMAND, 1);
         });
+      });
+    });
+  });
+
+  describe('makeSocket', function () {
+    let tlsServer: tls.Server;
+    let tlsPort: number;
+    let setKeepAliveSpy: sinon.SinonSpy;
+    let setNoDelaySpy: sinon.SinonSpy;
+
+    const serverPem = fs.readFileSync(
+      path.join(__dirname, '../../integration/auth/ssl/server.pem')
+    );
+
+    before(function (done) {
+      // @SECLEVEL=0 allows the legacy test certificate (signed with SHA-1/1024-bit RSA)
+      // to be accepted by OpenSSL 3.x, which rejects at the default security level.
+      tlsServer = tls.createServer(
+        { key: serverPem, cert: serverPem, ciphers: 'DEFAULT:@SECLEVEL=0' },
+        () => {
+          /* empty */
+        }
+      );
+      tlsServer.listen(0, '127.0.0.1', () => {
+        tlsPort = (tlsServer.address() as net.AddressInfo).port;
+        done();
+      });
+    });
+
+    after(function () {
+      tlsServer?.close();
+    });
+
+    beforeEach(function () {
+      setKeepAliveSpy = sinon.spy(net.Socket.prototype, 'setKeepAlive');
+      setNoDelaySpy = sinon.spy(net.Socket.prototype, 'setNoDelay');
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    context('when tls is enabled', function () {
+      it('calls setKeepAlive with default keepAliveInitialDelay', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: true,
+          rejectUnauthorized: false,
+          ciphers: 'DEFAULT:@SECLEVEL=0'
+        } as ConnectionOptions);
+        socket.destroy();
+
+        expect(setKeepAliveSpy).to.have.been.calledWith(true, DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS);
+      });
+
+      it('calls setKeepAlive with custom keepAliveInitialDelay', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: true,
+          rejectUnauthorized: false,
+          ciphers: 'DEFAULT:@SECLEVEL=0',
+          keepAliveInitialDelay: 5000
+        } as ConnectionOptions);
+        socket.destroy();
+
+        expect(setKeepAliveSpy).to.have.been.calledWith(true, 5000);
+      });
+
+      it('calls setNoDelay with true by default', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: true,
+          rejectUnauthorized: false,
+          ciphers: 'DEFAULT:@SECLEVEL=0'
+        } as ConnectionOptions);
+        socket.destroy();
+
+        expect(setNoDelaySpy).to.have.been.calledWith(true);
+      });
+    });
+
+    context('when tls is disabled', function () {
+      it('calls setKeepAlive with default keepAliveInitialDelay', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: false
+        } as ConnectionOptions);
+        socket.destroy();
+
+        expect(setKeepAliveSpy).to.have.been.calledWith(true, DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS);
+      });
+
+      it('calls setNoDelay with true by default', async function () {
+        const socket = await makeSocket({
+          hostAddress: new HostAddress(`127.0.0.1:${tlsPort}`),
+          tls: false
+        } as ConnectionOptions);
+        socket.destroy();
+
+        expect(setNoDelaySpy).to.have.been.calledWith(true);
       });
     });
   });
