@@ -417,20 +417,6 @@ for (const {
     }
     BUILD_VARIANTS.push(buildVariantData);
   }
-
-  // add Node-less variant
-  const buildVariantData = {
-    name: `${osName}-nodeless`,
-    display_name: `${osDisplayName} Nodeless`,
-    run_on,
-    expansions: {
-      MONGODB_BUNDLED: true,
-      NODE_LTS_VERSION: 'latest'
-    },
-    tasks: tasks.map(({ name }) => name)
-  };
-  buildVariantData.expansions.CLIENT_ENCRYPTION = clientEncryption;
-  BUILD_VARIANTS.push(buildVariantData);
 }
 
 // Running CSFLE tests with mongocryptd
@@ -824,6 +810,40 @@ BUILD_VARIANTS.push({
   display_name: 'TLS smoke tests',
   run_on: DEFAULT_OS,
   tasks: ['.ssl']
+});
+
+// small subset of tests to run on nodeless environments
+const nodelessTasks = [
+  'test-latest-server',
+  'test-latest-replica_set',
+  'test-latest-sharded_cluster',
+  'test-rapid-server',
+  'test-rapid-replica_set',
+  'test-rapid-sharded_cluster',
+  'test-latest-server-v1-api',
+  'test-x509-authentication',
+  'test-atlas-connectivity',
+  'test-rapid-load-balanced',
+  'test-latest-load-balanced',
+  'test-auth-kerberos',
+  'test-auth-ldap',
+  'test-socks5-csfle',
+  'test-socks5-tls',
+  'test-snappy-compression',
+  'test-zstd-compression',
+  'test-tls-support-latest',
+]
+BUILD_VARIANTS.push({
+  name: 'rhel8-nodeless',
+  display_name: 'Nodeless',
+  run_on: DEFAULT_OS,
+  tasks: nodelessTasks
+});
+BUILD_VARIANTS.push({
+  name: 'windows-nodeless',
+  display_name: 'Windows Nodeless',
+  run_on: WINDOWS_OS,
+  tasks: nodelessTasks
 });
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
