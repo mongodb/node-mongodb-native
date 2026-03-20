@@ -324,6 +324,26 @@ async function executeOperationWithRetries<
         throw error;
       }
 
+      if (
+        operationError instanceof MongoNetworkError &&
+        operation.hasAspect(Aspect.CURSOR_CREATING) &&
+        session != null &&
+        session.isPinned &&
+        !session.inTransaction()
+      ) {
+        session.unpin({ force: true, forceClear: true });
+      }
+
+      if (
+        operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
+        operation.hasAspect(Aspect.CURSOR_CREATING) &&
+        session != null &&
+        session.isPinned &&
+        !session.inTransaction()
+      ) {
+        session.unpin({ force: true });
+      }
+
       if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
         const backoffMS = Math.random() * Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * 2 ** attempt);
 
@@ -337,16 +357,6 @@ async function executeOperationWithRetries<
         }
 
         await setTimeout(backoffMS);
-      }
-
-      if (
-        operationError instanceof MongoNetworkError &&
-        operation.hasAspect(Aspect.CURSOR_CREATING) &&
-        session != null &&
-        session.isPinned &&
-        !session.inTransaction()
-      ) {
-        session.unpin({ force: true, forceClear: true });
       }
 
       if (
