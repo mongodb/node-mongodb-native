@@ -190,11 +190,6 @@ functions:
         working_dir: src
         script: |
           source ${DRIVERS_TOOLS}/.evergreen/init-node-and-npm-env.sh
-          # npm 11 passes its own built-in defaults (prefer-offline=false, prefer-online=false)
-          # as CLI flags to the child npm process used for git dep preparation, and then
-          # validates that both flags cannot be set simultaneously. Downgrade to npm 10
-          # (which lacks this validation) for this step.
-          npm install --global npm@10
           npm install --force ${PACKAGE}
 
   "run lint checks":
@@ -1002,6 +997,8 @@ tasks:
             - { key: VERSION, value: latest }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
+        vars:
+          NPM_VERSION: "11.11.1"
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -1024,6 +1021,8 @@ tasks:
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
+        vars:
+          NPM_VERSION: "11.11.1"
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
@@ -1047,6 +1046,8 @@ tasks:
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
+        vars:
+          NPM_VERSION: "11.11.1"
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
@@ -1070,6 +1071,8 @@ tasks:
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
+        vars:
+          NPM_VERSION: "11.11.1"
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
