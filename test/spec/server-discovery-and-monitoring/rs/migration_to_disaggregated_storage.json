@@ -1,0 +1,119 @@
+{
+  "description": "ASC to DSC forward migration - DSC uses setVersionASC + 1 to prevent false stale detection",
+  "uri": "mongodb://a/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "helloOk": true,
+            "isWritablePrimary": true,
+            "hosts": [
+              "a:27017",
+              "b:27017"
+            ],
+            "setName": "rs",
+            "setVersion": 10,
+            "electionId": {
+              "$oid": "000000000000000000000005"
+            },
+            "minWireVersion": 0,
+            "maxWireVersion": 17
+          }
+        ],
+        [
+          "b:27017",
+          {
+            "ok": 1,
+            "helloOk": true,
+            "isWritablePrimary": false,
+            "secondary": true,
+            "hosts": [
+              "a:27017",
+              "b:27017"
+            ],
+            "setName": "rs",
+            "setVersion": 10,
+            "minWireVersion": 0,
+            "maxWireVersion": 17
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 10,
+            "electionId": {
+              "$oid": "000000000000000000000005"
+            }
+          },
+          "b:27017": {
+            "type": "RSSecondary",
+            "setName": "rs",
+            "setVersion": 10,
+            "electionId": null
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs",
+        "maxSetVersion": 10,
+        "maxElectionId": {
+          "$oid": "000000000000000000000005"
+        }
+      }
+    },
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "helloOk": true,
+            "isWritablePrimary": true,
+            "hosts": [
+              "a:27017",
+              "b:27017"
+            ],
+            "setName": "rs",
+            "setVersion": 11,
+            "electionId": {
+              "$oid": "000000000000000000000006"
+            },
+            "minWireVersion": 0,
+            "maxWireVersion": 17
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 11,
+            "electionId": {
+              "$oid": "000000000000000000000006"
+            }
+          },
+          "b:27017": {
+            "type": "RSSecondary",
+            "setName": "rs",
+            "setVersion": 10,
+            "electionId": null
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs",
+        "maxSetVersion": 11,
+        "maxElectionId": {
+          "$oid": "000000000000000000000006"
+        }
+      }
+    }
+  ]
+}
