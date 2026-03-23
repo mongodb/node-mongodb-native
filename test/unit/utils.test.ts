@@ -4,6 +4,7 @@ import { ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+import { DEFAULT_ALLOWED_HOSTS } from '../../src/cmap/auth/mongo_credentials';
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../../src/error';
 import { decorateWithExplain, Explain } from '../../src/explain';
@@ -152,6 +153,19 @@ describe('driver utils', function () {
           it('returns false', function () {
             expect(hostMatchesWildcards('test-mongodb.com', ['*.mongodb.com', 'test2'])).to.be
               .false;
+          });
+        });
+
+        context('when using default allowed hosts', function () {
+          it('returns false', function () {
+            for (const host of DEFAULT_ALLOWED_HOSTS) {
+              // Only test the wildcard hosts, the non-wildcard hosts are tested in other test cases
+              if (!host.startsWith('*.')) {
+                continue;
+              }
+              const wrongHost = host.replace('*.', 'test-');
+              expect(hostMatchesWildcards(wrongHost, DEFAULT_ALLOWED_HOSTS)).to.be.false;
+            }
           });
         });
 
