@@ -20,6 +20,9 @@
           "commandStartedEvent",
           "commandSucceededEvent",
           "commandFailedEvent"
+        ],
+        "ignoreCommandMonitoringEvents": [
+          "killCursors"
         ]
       }
     },
@@ -493,7 +496,7 @@
       ]
     },
     {
-      "description": "database.aggregate retries at most maxAttempts=5 times",
+      "description": "database.aggregate read retries at most maxAttempts=5 times",
       "operations": [
         {
           "name": "failPoint",
@@ -1023,7 +1026,7 @@
       ]
     },
     {
-      "description": "collection.aggregate retries at most maxAttempts=5 times",
+      "description": "collection.aggregate read retries at most maxAttempts=5 times",
       "operations": [
         {
           "name": "failPoint",
@@ -3438,6 +3441,114 @@
             {
               "commandFailedEvent": {
                 "commandName": "dropIndexes"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "collection.aggregate write retries at most maxAttempts=5 times",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "fail_point_client",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "alwaysOn",
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "errorLabels": [
+                  "RetryableError",
+                  "SystemOverloadedError"
+                ],
+                "errorCode": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [
+              {
+                "$out": "output"
+              }
+            ]
+          },
+          "expectError": {
+            "isError": true,
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "aggregate"
               }
             }
           ]

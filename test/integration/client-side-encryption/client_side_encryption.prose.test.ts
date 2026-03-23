@@ -582,9 +582,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     let limitsDoc;
 
     before(async function () {
-      this.currentTest.skipReason = 'NODE-7417: large encryption tests skipped';
-      this.skip();
-
       limitsSchema = await loadLimits('limits-schema.json');
       limitsKey = await loadLimits('limits-key.json');
       limitsDoc = await loadLimits('limits-doc.json');

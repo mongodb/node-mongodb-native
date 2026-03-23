@@ -346,21 +346,21 @@ describe('Retryable Writes Spec Prose', () => {
     );
   });
 
-  describe('6. Test that drivers return the original error after encountering multiple WriteConcernErrors with a RetryableWriteError label', () => {
+  describe('6. Test error propagation after encountering multiple errors', () => {
+    // These tests MUST:
+    // - be implemented by any driver that implements the Command Monitoring specification.
+    // - only run against replica sets as mongos does not propagate the NoWritesPerformed label to the drivers.
+    // - be run against server versions 6.0 and above.
+    // - be implemented by any driver that has implemented the Client Backpressure specification.
+
+    // Additionally, this test requires drivers to set a fail point after an `insertOne` operation but before the subsequent
+    // retry. Drivers that are unable to set a failCommand after the CommandFailedEvent SHOULD use mocking or write a unit test
+    // to cover the same sequence of events.
+
     let client: MongoClient;
     let collection: Collection<{ _id: 1 }>;
 
     beforeEach(async function () {
-      // This test MUST:
-      // - be implemented by any driver that implements the Command Monitoring specification,
-      // - only run against replica sets as mongos does not propagate the NoWritesPerformed label to the drivers.
-      // - be run against server versions 6.0 and above.
-      // - be implemented by any driver that has implemented the Client Backpressure specification.
-
-      // Additionally, this test requires drivers to set a fail point after an `insertOne` operation but before the subsequent
-      // retry. Drivers that are unable to set a failCommand after the CommandFailedEvent SHOULD use mocking or write a unit test
-      // to cover the same sequence of events.
-
       // 1. Create a client with `retryWrites=true`.
       client = this.configuration.newClient({ monitorCommands: true, retryWrites: true });
       await client
@@ -372,26 +372,68 @@ describe('Retryable Writes Spec Prose', () => {
     });
 
     afterEach(async function () {
-      // 5. Disable the fail point:
-      //     ```javascript
-      //     {
-      //         configureFailPoint: "failCommand",
-      //         mode: "off"
-      //     }
-      //     ```
-
-      // (we don't use a failPoint, so we use sinon.restore instead)
+      // 5. Disable the fail point (we don't use a failPoint, so we use sinon.restore instead)
       sinon.restore();
       await client.close();
     });
 
     it(
-      'when a retry attempt fails with an error labeled NoWritesPerformed, drivers MUST return the original error',
-      { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
+      'Case 1: Test that drivers return the correct error when receiving only errors without NoWritesPerformed',
+      { requires: { topology: 'replicaset', mongodb: '>=6.0' } },
       async () => {
         // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
         //     `SystemOverloadedError` error labels:
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: {times: 1},
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorLabels: ["RetryableError", "SystemOverloadedError"],
+        //             errorCode: 91
+        //         }
+        //     }
+        //     ```
 
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `10107` (NotWritablePrimary):
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: "alwaysOn",
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorCode: 10107,
+        //             errorLabels: ["RetryableError", "SystemOverloadedError"]
+        //         }
+        //     }
+        //     ```
+        //     Configure the `10107` fail point command only if the the failed event is for the `91` error configured in step 2.
+        const serverCommandStub = sinon
+          .stub(Server.prototype, 'command')
+          .callsFake(async function () {
+            throw new MongoServerError({
+              message: 'Server Error',
+              errorLabels: [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError],
+              code: serverCommandStub.callCount === 1 ? 91 : 10107,
+              ok: 0
+            });
+          });
+
+        // 4. Attempt an `insertOne` operation on any record for any database and collection. Expect the `insertOne` to fail with a
+        //     server error. Assert that the error code of the server error is `10107`.
+        const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+
+        expect(insertResult).to.be.instanceOf(MongoServerError);
+        expect(insertResult).to.have.property('code', 10107);
+      }
+    );
+
+    it(
+      'Case 2: Test that drivers return the correct error when receiving only errors with NoWritesPerformed',
+      { requires: { topology: 'replicaset', mongodb: '>=6.0' } },
+      async () => {
+        // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError`,
+        //     `SystemOverloadedError`, and `NoWritesPerformed` error labels:
         //     ```javascript
         //     {
         //         configureFailPoint: "failCommand",
@@ -406,7 +448,6 @@ describe('Retryable Writes Spec Prose', () => {
 
         // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `10107` (NotWritablePrimary)
         //     and a NoWritesPerformed label:
-
         //     ```javascript
         //     {
         //         configureFailPoint: "failCommand",
@@ -414,13 +455,11 @@ describe('Retryable Writes Spec Prose', () => {
         //         data: {
         //             failCommands: ["insert"],
         //             errorCode: 10107,
-        //             errorLabels: ["RetryableError", "SystemOverloadedError", , "NoWritesPerformed"]
+        //             errorLabels: ["RetryableError", "SystemOverloadedError", "NoWritesPerformed"]
         //         }
         //     }
         //     ```
-
-        //     Drivers SHOULD only configure the `10107` fail point command if the the failed event is for the `91` error configured
-        //     in step 2.
+        //     Configure the `10107` fail point command only if the the failed event is for the `91` error configured in step 2.
         const serverCommandStub = sinon
           .stub(Server.prototype, 'command')
           .callsFake(async function () {
@@ -436,14 +475,78 @@ describe('Retryable Writes Spec Prose', () => {
             });
           });
 
+        // 4. Attempt an `insertOne` operation on any record for any database and collection. Expect the `insertOne` to fail with a
+        //     server error. Assert that the error code of the server error is 91.
         const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
 
         expect(serverCommandStub.callCount).to.equal(6);
 
-        // 4. Attempt an `insertOne` operation on any record for any database and collection. Expect the `insertOne` to fail with a
-        //     server error. Assert that the error code of the server error is 91.
         expect(insertResult).to.be.instanceOf(MongoServerError);
         expect(insertResult).to.have.property('code', 91);
+      }
+    );
+
+    it(
+      'Case 3: Test that drivers return the correct error when receiving some errors with NoWritesPerformed and some without NoWritesPerformed',
+      { requires: { topology: 'replicaset', mongodb: '>=6.0' } },
+      async () => {
+        // 2. Configure the client to listen to CommandFailedEvents. In the attached listener, configure a fail point with error
+        //     code `91` (NotWritablePrimary) and the `NoWritesPerformed`, `RetryableError` and `SystemOverloadedError` labels:
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: "alwaysOn",
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorLabels: ["RetryableError", "SystemOverloadedError", "NoWritesPerformed"],
+        //             errorCode: 91
+        //         }
+        //     }
+        //     ```
+
+        // 3. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+        //     `SystemOverloadedError` error labels but without the `NoWritesPerformed` error label:
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: {times: 1},
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorLabels: ["RetryableError", "SystemOverloadedError"],
+        //             errorCode: 91
+        //         }
+        //     }
+        //     ```
+        const serverCommandStub = sinon
+          .stub(Server.prototype, 'command')
+          .callsFake(async function () {
+            // First call: error WITHOUT NoWritesPerformed
+            // Subsequent calls: error WITH NoWritesPerformed
+            const errorLabels =
+              serverCommandStub.callCount === 1
+                ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
+                : [
+                    MongoErrorLabel.RetryableError,
+                    MongoErrorLabel.SystemOverloadedError,
+                    MongoErrorLabel.NoWritesPerformed
+                  ];
+
+            throw new MongoServerError({
+              message: 'Server Error',
+              errorLabels,
+              code: 91,
+              ok: 0
+            });
+          });
+
+        // 4. Attempt an `insertOne` operation on any record for any database and collection. Expect the `insertOne` to fail with a
+        //     server error. Assert that the error code of the server error is 91. Assert that the error does not contain the
+        //     error label `NoWritesPerformed`.
+        const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+
+        expect(insertResult).to.be.instanceOf(MongoServerError);
+        expect(insertResult).to.have.property('code', 91);
+        expect(insertResult.errorLabels).to.not.include(MongoErrorLabel.NoWritesPerformed);
       }
     );
   });

@@ -144,7 +144,7 @@ tests:
     outcome:
       - collectionName: *collection_name
         databaseName: *database_name
-        documents: 
+        documents:
           - { _id: 1 }
           - { _id: 2 }
   - description: writes are retried maxAttempts=5 times if backpressure labels are added
@@ -239,11 +239,21 @@ tests:
       - client: *client0
         events:
           - commandStartedEvent:
+              command:
+                startTransaction: true
               commandName: insert
+              databaseName: *database_name
           - commandStartedEvent:
+              command:
+                startTransaction: true
               commandName: insert
+              databaseName: *database_name
           - commandStartedEvent:
+              command:
+                startTransaction:
+                  $$exists: false
               commandName: abortTransaction
+              databaseName: admin
     outcome:
       - collectionName: *collection_name
         databaseName: *database_name

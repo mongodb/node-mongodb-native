@@ -146,6 +146,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   hosts: HostAddress[];
   retryWrites: boolean;
   retryReads: boolean;
+  adaptiveRetries: boolean;
   /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS: number;
   /** The name of the replica set to connect to */

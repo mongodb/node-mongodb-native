@@ -5,6 +5,7 @@ runOnRequirements:
 - minServerVersion: "7.0"
   auth: true
   authMechanism: "MONGODB-OIDC"
+  serverless: forbid
 createEntities:
 - client:
     id: &failPointClient failPointClient
@@ -20,6 +21,7 @@ createEntities:
       authMechanismProperties: { $$placeholder: 1 }
       retryReads: false
       retryWrites: false
+      appName: &appName mongodb-oidc-no-retry
     observeEvents:
     - commandStartedEvent
     - commandSucceededEvent
@@ -86,6 +88,7 @@ tests:
           failCommands:
           - find
           errorCode: 391 # ReauthenticationRequired
+          appName: *appName
   - name: find
     object: collection0
     arguments:
@@ -120,6 +123,7 @@ tests:
           failCommands:
           - insert
           errorCode: 391 # ReauthenticationRequired
+          appName: *appName
   - name: insertOne
     object: collection0
     arguments:
@@ -159,6 +163,7 @@ tests:
           failCommands:
           - insert
           closeConnection: true
+          appName: *appName
   - name: insertOne
     object: collection0
     arguments:
@@ -179,6 +184,7 @@ tests:
           failCommands:
           - saslStart
           errorCode: 18
+          appName: *appName
   - name: insertOne
     object: collection0
     arguments:
@@ -212,12 +218,13 @@ tests:
       client: failPointClient
       failPoint:
         configureFailPoint: failCommand
-        mode: 
+        mode:
           times: 1
         data:
           failCommands:
           - saslStart
           errorCode: 18
+          appName: *appName
   - name: insertOne
     object: collection0
     arguments:

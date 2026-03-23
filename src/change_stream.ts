@@ -705,6 +705,11 @@ export class ChangeStream<
     return this.cursor?.resumeToken;
   }
 
+  /** Returns the currently buffered documents length of the underlying cursor. */
+  bufferedCount(): number {
+    return this.cursor?.bufferedCount() ?? 0;
+  }
+
   /** Check if there is any document still available in the Change Stream */
   async hasNext(): Promise<boolean> {
     this._setIsIterator();

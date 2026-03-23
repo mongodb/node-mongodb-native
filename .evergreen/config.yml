@@ -921,6 +921,8 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
+        vars:
+          NPM_VERSION: 11.11.1
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -942,6 +944,8 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
+        vars:
+          NPM_VERSION: 11.11.1
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
@@ -964,6 +968,8 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
+        vars:
+          NPM_VERSION: 11.11.1
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
@@ -986,6 +992,8 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
+        vars:
+          NPM_VERSION: 11.11.1
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
