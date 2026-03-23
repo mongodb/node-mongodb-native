@@ -75,12 +75,12 @@ function makeTask({
 }) {
   const baseExpansions = nodeLtsVersion
     ? {
-      VERSION: mongoVersion,
-      TOPOLOGY: topology,
-      AUTH: auth,
-      SSL: ssl,
-      NODE_LTS_VERSION: nodeLtsVersion
-    }
+        VERSION: mongoVersion,
+        TOPOLOGY: topology,
+        AUTH: auth,
+        SSL: ssl,
+        NODE_LTS_VERSION: nodeLtsVersion
+      }
     : { VERSION: mongoVersion, TOPOLOGY: topology, SSL: ssl, AUTH: auth };
 
   if (testCsfle) {
@@ -831,8 +831,8 @@ const nodelessTasks = [
   'test-socks5-tls',
   'test-snappy-compression',
   'test-zstd-compression',
-  'test-tls-support-latest',
-]
+  'test-tls-support-latest'
+];
 const nodelessExpansions = {
   NODE_LTS_VERSION: LATEST_LTS,
   CLIENT_ENCRYPTION: true,
