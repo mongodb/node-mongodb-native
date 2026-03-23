@@ -32,7 +32,7 @@ release-please automatically tags release commits with a tag in the format v<maj
 
 Then, backport the release action to the target release branch. This should be done as the first PR on the release branch. Use the following instructions to create it.
 
-First, create a copy of our current release action (release.yml). Then, change any references to `main` to the target branch. Double check that there isn't any release tooling on `main` that doesn't exist on the target branch. If there is, make sure this is backported too. After opening the PR, check the CI to make sure everything works as expected: add backports of CI fixes as needed.
+First, create a copy of our current release action (release.yml). Then, change any references to `main` to the target branch. Also, add the branch to the list of CodeQL target branches (codeql.yml). Double check that there isn't any release tooling on `main` that doesn't exist on the target branch. If there is, make sure this is backported too. After opening the PR, check the CI to make sure everything works as expected: add backports of CI fixes as needed.
 
 Once the release action PR is merged, release-please will work on this branch in the same way as it does on `main`. Any PRs that merge to the release branch trigger the release action and update the release PR that release-please manages. Proceed as normal from here.
 
