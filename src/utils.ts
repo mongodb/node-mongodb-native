@@ -69,12 +69,26 @@ export function isUint8Array(value: unknown): value is Uint8Array {
  */
 export function hostMatchesWildcards(host: string, wildcards: string[]): boolean {
   for (const wildcard of wildcards) {
-    if (
-      host === wildcard ||
-      (wildcard.startsWith('*.') && host?.endsWith(wildcard.substring(2, wildcard.length))) ||
-      (wildcard.startsWith('*/') && host?.endsWith(wildcard.substring(2, wildcard.length)))
-    ) {
+    // Exact match always wins
+    if (host === wildcard) {
       return true;
+    }
+
+    // Wildcard match with leading *.
+    if (wildcard.startsWith('*.')) {
+      const suffix = wildcard.substring(2);
+      // Exact match or strict subdomain match
+      if (host === suffix || host.endsWith(`.${suffix}`)) {
+        return true;
+      }
+    }
+    // Wildcard match with leading */
+    if (wildcard.startsWith('*/')) {
+      const suffix = wildcard.substring(2);
+      // Exact match or strict subpath match
+      if (host === suffix || host.endsWith(`/${suffix}`)) {
+        return true;
+      }
     }
   }
   return false;

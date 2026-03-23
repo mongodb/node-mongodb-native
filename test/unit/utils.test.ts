@@ -10,6 +10,7 @@ import {
   checkParentDomainMatch,
   compareObjectId,
   decorateWithExplain,
+  DEFAULT_ALLOWED_HOSTS,
   Explain,
   hasAtomicOperators,
   HostAddress,
@@ -149,6 +150,26 @@ describe('driver utils', function () {
           });
         });
 
+        context('when the wildcard starts with *.', function () {
+          it('returns false', function () {
+            expect(hostMatchesWildcards('test-mongodb.com', ['*.mongodb.com', 'test2'])).to.be
+              .false;
+          });
+        });
+
+        context('when using default allowed hosts', function () {
+          it('returns false', function () {
+            for (const host of DEFAULT_ALLOWED_HOSTS) {
+              // Only test the wildcard hosts, the non-wildcard hosts are tested in other test cases
+              if (!host.startsWith('*.')) {
+                continue;
+              }
+              const wrongHost = host.replace('*.', 'test-');
+              expect(hostMatchesWildcards(wrongHost, DEFAULT_ALLOWED_HOSTS)).to.be.false;
+            }
+          });
+        });
+
         context('when the host matches a FQDN', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('mongodb.net', ['*.mongodb.net', 'other'])).to.be.true;
@@ -220,6 +241,14 @@ describe('driver utils', function () {
         it('returns false', function () {
           expect(hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongod-27017.sock', 'test2']))
             .to.be.false;
+        });
+      });
+
+      context('when the host does not match partial matches', function () {
+        it('returns false', function () {
+          expect(
+            hostMatchesWildcards('/tmp/test-mongodb-27017.sock', ['*/mongodb-27017.sock', 'test2'])
+          ).to.be.false;
         });
       });
     });
