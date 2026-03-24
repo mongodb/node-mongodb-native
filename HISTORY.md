@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.1](https://github.com/mongodb/node-mongodb-native/compare/v7.1.0...v7.1.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* **NODE-7477:** OIDC host allowlist fix ([#4896](https://github.com/mongodb/node-mongodb-native/issues/4896)) ([237c9ab](https://github.com/mongodb/node-mongodb-native/commit/237c9abf26e78d6d059b5f31177b25d4ab7e4e89))
+* **NODE-7482:** explicitly call setKeepAlive and setNoDelay on socket ([#4900](https://github.com/mongodb/node-mongodb-native/issues/4900)) ([b14ba21](https://github.com/mongodb/node-mongodb-native/commit/b14ba210783a62d475086bb739a75bc7f5db37f1))
+
 ## [7.1.0](https://github.com/mongodb/node-mongodb-native/compare/v7.0.0...v7.1.0) (2026-02-02)
 
 
@@ -4169,3 +4177,4 @@ parameters. You must pass in these parameters in the `options` object
 * Initial release support of driver using native node.js interface
 * Supports gridfs specification
 * Supports admin functionality
+
