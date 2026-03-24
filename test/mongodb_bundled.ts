@@ -177,6 +177,7 @@ export const {
   ListIndexesOperation,
   Long,
   makeClientMetadata,
+  MAX_RETRIES,
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
   MaxKey,
