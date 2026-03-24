@@ -1,4 +1,5 @@
 const MONGODB_VERSIONS = ['latest', 'rapid', '8.0', '7.0', '6.0', '5.0', '4.4', '4.2'];
+const COMPAT_TEST_DRIVER_VERSIONS = ['6.20.0', '6.21.0', '7.0.0', 'latest'];
 const versions = [
   { codeName: 'iron', versionNumber: '20.19.0' },
   { codeName: 'jod', versionNumber: 22 },
@@ -23,6 +24,7 @@ const DEBIAN_OS = 'debian11-small';
 
 module.exports = {
   MONGODB_VERSIONS,
+  COMPAT_TEST_DRIVER_VERSIONS,
   versions,
   NODE_VERSIONS,
   LB_VERSIONS,
