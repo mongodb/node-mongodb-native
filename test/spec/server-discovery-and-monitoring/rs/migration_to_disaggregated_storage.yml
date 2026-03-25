@@ -1,0 +1,85 @@
+# When migrating from a traditional replica set (incrementing setVersion) to
+# disaggregated storage (constant setVersion), the migration uses setVersionASC + 1
+# to prevent the driver from incorrectly marking the new primary as stale.
+description: ASC to DSC forward migration - DSC uses setVersionASC + 1 to prevent false stale detection
+uri: "mongodb://a/?replicaSet=rs"
+phases:
+  # Phase 1: Traditional replica set with incrementing setVersion=10
+  - responses:
+      -
+        - "a:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 10
+          electionId: {"$oid": "000000000000000000000005"}
+          minWireVersion: 0
+          maxWireVersion: 17
+      -
+        - "b:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: false
+          secondary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 10
+          minWireVersion: 0
+          maxWireVersion: 17
+    outcome:
+      servers:
+        a:27017:
+          type: RSPrimary
+          setName: rs
+          setVersion: 10
+          electionId: {"$oid": "000000000000000000000005"}
+        b:27017:
+          type: RSSecondary
+          setName: rs
+          setVersion: 10
+          electionId: null
+      topologyType: ReplicaSetWithPrimary
+      logicalSessionTimeoutMinutes: null
+      setName: rs
+      maxSetVersion: 10
+      maxElectionId: {"$oid": "000000000000000000000005"}
+  # Phase 2: After migration to disaggregated storage, setVersion becomes 11 (10 + 1)
+  # This ensures the driver sees a newer setVersion and accepts the new primary,
+  # even though future reconfigs will keep setVersion constant at 11
+  - responses:
+      -
+        - "a:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 11
+          electionId: {"$oid": "000000000000000000000006"}
+          minWireVersion: 0
+          maxWireVersion: 17
+    outcome:
+      servers:
+        a:27017:
+          type: RSPrimary
+          setName: rs
+          setVersion: 11
+          electionId: {"$oid": "000000000000000000000006"}
+        b:27017:
+          type: RSSecondary
+          setName: rs
+          setVersion: 10
+          electionId: null
+      topologyType: ReplicaSetWithPrimary
+      logicalSessionTimeoutMinutes: null
+      setName: rs
+      maxSetVersion: 11
+      maxElectionId: {"$oid": "000000000000000000000006"}

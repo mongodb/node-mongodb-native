@@ -1,0 +1,119 @@
+# When migrating from disaggregated storage (constant setVersion) back to a
+# traditional replica set (incrementing setVersion), a force reconfig is used
+# with a high setVersion value to ensure the driver accepts the new primary.
+description: DSC to ASC reverse migration - ASC primary with higher setVersion is accepted
+uri: "mongodb://a/?replicaSet=rs"
+phases:
+  # Phase 1: Disaggregated storage cluster with constant setVersion=1
+  - responses:
+      -
+        - "a:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000005"}
+          minWireVersion: 0
+          maxWireVersion: 17
+      -
+        - "b:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: false
+          secondary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 1
+          minWireVersion: 0
+          maxWireVersion: 17
+    outcome:
+      servers:
+        a:27017:
+          type: RSPrimary
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000005"}
+        b:27017:
+          type: RSSecondary
+          setName: rs
+          setVersion: 1
+          electionId: null
+      topologyType: ReplicaSetWithPrimary
+      logicalSessionTimeoutMinutes: null
+      setName: rs
+      maxSetVersion: 1
+      maxElectionId: {"$oid": "000000000000000000000005"}
+  # Phase 2: After migration to traditional replica set, B becomes primary with
+  # setVersion=1000 (force reconfig with high value) and newer electionId=6
+  # The driver should accept B as the new primary due to higher setVersion
+  - responses:
+      -
+        - "b:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 1000
+          electionId: {"$oid": "000000000000000000000006"}
+          minWireVersion: 0
+          maxWireVersion: 17
+    outcome:
+      servers:
+        a:27017:
+          type: Unknown
+          setName: null
+          setVersion: null
+          electionId: null
+        b:27017:
+          type: RSPrimary
+          setName: rs
+          setVersion: 1000
+          electionId: {"$oid": "000000000000000000000006"}
+      topologyType: ReplicaSetWithPrimary
+      logicalSessionTimeoutMinutes: null
+      setName: rs
+      maxSetVersion: 1000
+      maxElectionId: {"$oid": "000000000000000000000006"}
+  # Phase 3: Old disaggregated storage primary A tries to come back
+  # The driver should reject it because both setVersion (1 < 1000) and
+  # electionId (5 < 6) are stale
+  - responses:
+      -
+        - "a:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000005"}
+          minWireVersion: 0
+          maxWireVersion: 17
+    outcome:
+      servers:
+        a:27017:
+          type: Unknown
+          setName: null
+          setVersion: null
+          electionId: null
+        b:27017:
+          type: RSPrimary
+          setName: rs
+          setVersion: 1000
+          electionId: {"$oid": "000000000000000000000006"}
+      topologyType: ReplicaSetWithPrimary
+      logicalSessionTimeoutMinutes: null
+      setName: rs
+      maxSetVersion: 1000
+      maxElectionId: {"$oid": "000000000000000000000006"}
