@@ -1,6 +1,6 @@
 import * as process from 'process';
 
-import { type KMSProviders } from './mongodb';
+import { type KMSProviders } from './mongodb_all';
 
 const csfleKMSProviders = {
   aws: {

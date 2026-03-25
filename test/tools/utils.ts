@@ -14,6 +14,7 @@ import { inspect, promisify } from 'util';
 import {
   type AnyClientBulkWriteModel,
   type Document,
+  EJSON,
   type HostAddress,
   MongoClient,
   type MongoClientOptions,
@@ -30,6 +31,18 @@ import { isTLSEnabled } from './runner/filters/tls_filter';
 
 export function ensureCalledWith(stub: any, args: any[]) {
   args.forEach((m: any) => expect(stub).to.have.been.calledWith(m));
+}
+
+export function checkTypeByName(obj: any, typeName: string): boolean {
+  if (obj !== null && obj.constructor != null && obj.constructor.name === typeName) {
+    return true;
+  }
+  return false;
+}
+export function ensureTypeByName(obj: any, typeName: string): void {
+  expect(obj).to.be.not.null;
+  expect(obj.constructor).to.be.not.null;
+  expect(obj.constructor.name).to.equal(typeName);
 }
 
 export class EventCollector {
