@@ -1,0 +1,118 @@
+# Disaggregated storage clusters use a constant setVersion (typically 1) instead of
+# incrementing it on each reconfig. This test validates that primary staleness detection
+# works correctly using electionId when setVersion doesn't change.
+description: Static setVersion (DSC) is compatible with both pre and post DRIVERS-2412
+uri: "mongodb://a/?replicaSet=rs"
+phases:
+  # Phase 1: Initial state - A is primary with electionId=5, setVersion=1
+  - responses:
+      -
+        - "a:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000005"}
+          minWireVersion: 0
+          maxWireVersion: 17
+      -
+        - "b:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: false
+          secondary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 1
+          minWireVersion: 0
+          maxWireVersion: 17
+    outcome:
+      servers:
+        a:27017:
+          type: RSPrimary
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000005"}
+        b:27017:
+          type: RSSecondary
+          setName: rs
+          setVersion: 1
+          electionId: null
+      topologyType: ReplicaSetWithPrimary
+      logicalSessionTimeoutMinutes: null
+      setName: rs
+      maxSetVersion: 1
+      maxElectionId: {"$oid": "000000000000000000000005"}
+  # Phase 2: B becomes primary with newer electionId=6, but setVersion stays at 1
+  # The driver should accept B as the new primary and mark A as Unknown
+  - responses:
+      -
+        - "b:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000006"}
+          minWireVersion: 0
+          maxWireVersion: 17
+    outcome:
+      servers:
+        a:27017:
+          type: Unknown
+          setName: null
+          setVersion: null
+          electionId: null
+        b:27017:
+          type: RSPrimary
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000006"}
+      topologyType: ReplicaSetWithPrimary
+      logicalSessionTimeoutMinutes: null
+      setName: rs
+      maxSetVersion: 1
+      maxElectionId: {"$oid": "000000000000000000000006"}
+  # Phase 3: Old primary A tries to come back with stale electionId=5
+  # Even though setVersion is still 1 (unchanged), the driver should reject A
+  # because its electionId is older than the current maxElectionId=6
+  - responses:
+      -
+        - "a:27017"
+        - ok: 1
+          helloOk: true
+          isWritablePrimary: true
+          hosts:
+            - "a:27017"
+            - "b:27017"
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000005"}
+          minWireVersion: 0
+          maxWireVersion: 17
+    outcome:
+      servers:
+        a:27017:
+          type: Unknown
+          setName: null
+          setVersion: null
+          electionId: null
+        b:27017:
+          type: RSPrimary
+          setName: rs
+          setVersion: 1
+          electionId: {"$oid": "000000000000000000000006"}
+      topologyType: ReplicaSetWithPrimary
+      logicalSessionTimeoutMinutes: null
+      setName: rs
+      maxSetVersion: 1
+      maxElectionId: {"$oid": "000000000000000000000006"}
