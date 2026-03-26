@@ -485,7 +485,9 @@ const unitTestTasks = Array.from(
           updateExpansions({
             NODE_LTS_VERSION
           }),
-          { func: 'install dependencies' },
+          parseInt(NODE_LTS_VERSION, 10) === 22
+            ? { func: 'install dependencies', vars: { NPM_VERSION: '11.11.1' } }
+            : { func: 'install dependencies' },
           { func: 'run unit tests' }
         ]
       };

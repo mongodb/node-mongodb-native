@@ -1994,6 +1994,8 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
+        vars:
+          NPM_VERSION: 11.11.1
       - func: run unit tests
   - name: run-unit-tests-node-24
     tags:
