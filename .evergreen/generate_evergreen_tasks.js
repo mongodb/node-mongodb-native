@@ -397,6 +397,13 @@ for (const {
     const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
+    // bundled npm version in node 22 (v10.9.7) can't upgrade itself to @latest,
+    // so we need to pin npm version for these variants to latest "upgradable" version
+    const major = parseInt(NODE_LTS_VERSION, 10);
+    if (major === 22) {
+      expansions.NPM_VERSION = '11.11.1';
+    }
+
     expansions.CLIENT_ENCRYPTION = String(!!clientEncryption);
     expansions.TEST_CSFLE = expansions.CLIENT_ENCRYPTION;
 

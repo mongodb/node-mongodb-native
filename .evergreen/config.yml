@@ -3520,6 +3520,7 @@ buildvariants:
     run_on: rhel80-large
     expansions:
       NODE_LTS_VERSION: 20.19.0
+      NPM_VERSION: 11.11.1
       CLIENT_ENCRYPTION: 'true'
       TEST_CSFLE: 'true'
     tasks:
@@ -3575,6 +3576,7 @@ buildvariants:
     run_on: rhel80-large
     expansions:
       NODE_LTS_VERSION: 22
+      NPM_VERSION: 11.11.1
       CLIENT_ENCRYPTION: 'true'
       TEST_CSFLE: 'true'
     tasks:
@@ -3738,6 +3740,7 @@ buildvariants:
     run_on: windows-2022-latest-large
     expansions:
       NODE_LTS_VERSION: 20.19.0
+      NPM_VERSION: 11.11.1
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
@@ -3782,6 +3785,7 @@ buildvariants:
     run_on: windows-2022-latest-large
     expansions:
       NODE_LTS_VERSION: 22
+      NPM_VERSION: 11.11.1
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:
