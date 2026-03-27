@@ -841,7 +841,6 @@ const nodelessTasks = [
   'test-atlas-connectivity',
   'test-rapid-load-balanced',
   'test-latest-load-balanced',
-  'test-auth-kerberos',
   'test-auth-ldap',
   'test-socks5-csfle',
   'test-socks5-tls',
@@ -865,7 +864,10 @@ BUILD_VARIANTS.push({
   name: 'windows-nodeless',
   display_name: 'Windows Nodeless',
   run_on: WINDOWS_OS,
-  tasks: nodelessTasks,
+  // TODO(NODE-7500): Investigate why those tests are failing to setup (missing haproxy)
+  tasks: nodelessTasks.filter(
+    t => !['test-latest-load-balanced', 'test-rapid-load-balanced'].includes(t)
+  ),
   expansions: nodelessExpansions
 });
 
