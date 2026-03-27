@@ -841,6 +841,7 @@ const nodelessTasks = [
   'test-atlas-connectivity',
   'test-rapid-load-balanced',
   'test-latest-load-balanced',
+  'test-auth-kerberos',
   'test-auth-ldap',
   'test-socks5-csfle',
   'test-socks5-tls',
