@@ -864,10 +864,7 @@ BUILD_VARIANTS.push({
   name: 'windows-nodeless',
   display_name: 'Windows Nodeless',
   run_on: WINDOWS_OS,
-  // haproxy doesn't have windows installation
-  tasks: nodelessTasks.filter(
-    t => !['test-latest-load-balanced', 'test-rapid-load-balanced'].includes(t)
-  ),
+  tasks: nodelessTasks,
   expansions: nodelessExpansions
 });
 
