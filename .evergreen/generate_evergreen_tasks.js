@@ -20,6 +20,14 @@ const {
   UBUNTU_22_OS
 } = require('./ci_matrix_constants');
 
+// TODO(NODE-7499): unpin npm version once Node 22 ships a bundled npm that can upgrade itself
+const NODE22_NPM_VERSION = '11.11.1';
+
+/** Returns the major version number from a Node.js version string (e.g. 'v22.11.0', '20.19.0', 22). */
+function nodeMajorVersion(version) {
+  return semver.coerce(String(version))?.major;
+}
+
 const OPERATING_SYSTEMS = [
   {
     name: DEFAULT_OS,
@@ -397,6 +405,12 @@ for (const {
     const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
+    // bundled npm version in node v22.22.2 (v10.9.7) can't upgrade itself to @latest,
+    // so we need to pin npm version for these variants to latest "upgradable" version
+    if (nodeMajorVersion(NODE_LTS_VERSION) === 22) {
+      expansions.NPM_VERSION = NODE22_NPM_VERSION;
+    }
+
     expansions.CLIENT_ENCRYPTION = String(!!clientEncryption);
     expansions.TEST_CSFLE = expansions.CLIENT_ENCRYPTION;
 
@@ -478,7 +492,9 @@ const unitTestTasks = Array.from(
           updateExpansions({
             NODE_LTS_VERSION
           }),
-          { func: 'install dependencies' },
+          nodeMajorVersion(NODE_LTS_VERSION) === 22
+            ? { func: 'install dependencies', vars: { NPM_VERSION: NODE22_NPM_VERSION } }
+            : { func: 'install dependencies' },
           { func: 'run unit tests' }
         ]
       };
