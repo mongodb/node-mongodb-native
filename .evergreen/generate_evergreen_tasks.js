@@ -829,7 +829,7 @@ BUILD_VARIANTS.push({
 });
 
 // small subset of tests to run on nodeless environments
-const nodelessTasks = [
+const commonNodelessTasks = [
   'test-latest-server',
   'test-latest-replica_set',
   'test-latest-sharded_cluster',
@@ -839,9 +839,6 @@ const nodelessTasks = [
   'test-latest-server-v1-api',
   'test-x509-authentication',
   'test-atlas-connectivity',
-  'test-rapid-load-balanced',
-  'test-latest-load-balanced',
-  'test-auth-kerberos',
   'test-auth-ldap',
   'test-socks5-csfle',
   'test-socks5-tls',
@@ -849,6 +846,15 @@ const nodelessTasks = [
   'test-zstd-compression',
   'test-tls-support-latest'
 ];
+// small subset of linux-specific tests to run on nodeless environments
+const linuxOnlyTests = [
+  'test-rapid-load-balanced',
+  'test-latest-load-balanced',
+  'test-auth-kerberos'
+];
+
+const linuxNodelessTasks = commonNodelessTasks.concat(linuxOnlyTests);
+
 const nodelessExpansions = {
   NODE_LTS_VERSION: LATEST_LTS,
   CLIENT_ENCRYPTION: true,
@@ -858,14 +864,14 @@ BUILD_VARIANTS.push({
   name: 'rhel8-nodeless',
   display_name: 'Nodeless',
   run_on: DEFAULT_OS,
-  tasks: nodelessTasks,
+  tasks: linuxNodelessTasks,
   expansions: nodelessExpansions
 });
 BUILD_VARIANTS.push({
   name: 'windows-nodeless',
   display_name: 'Windows Nodeless',
   run_on: WINDOWS_OS,
-  tasks: nodelessTasks,
+  tasks: commonNodelessTasks,
   expansions: nodelessExpansions
 });
 
