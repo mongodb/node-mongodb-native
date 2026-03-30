@@ -4046,6 +4046,9 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-rapid-load-balanced
+      - test-latest-load-balanced
+      - test-auth-kerberos
     expansions:
       NODE_LTS_VERSION: 24
       CLIENT_ENCRYPTION: true
