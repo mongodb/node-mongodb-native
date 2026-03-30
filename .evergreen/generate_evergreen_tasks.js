@@ -83,12 +83,12 @@ function makeTask({
 }) {
   const baseExpansions = nodeLtsVersion
     ? {
-      VERSION: mongoVersion,
-      TOPOLOGY: topology,
-      AUTH: auth,
-      SSL: ssl,
-      NODE_LTS_VERSION: nodeLtsVersion
-    }
+        VERSION: mongoVersion,
+        TOPOLOGY: topology,
+        AUTH: auth,
+        SSL: ssl,
+        NODE_LTS_VERSION: nodeLtsVersion
+      }
     : { VERSION: mongoVersion, TOPOLOGY: topology, SSL: ssl, AUTH: auth };
 
   if (testCsfle) {
@@ -850,7 +850,7 @@ const commonNodelessTasks = [
 const linuxOnlyTests = [
   'test-rapid-load-balanced',
   'test-latest-load-balanced',
-  'test-auth-kerberos',
+  'test-auth-kerberos'
 ];
 
 const linuxNodelessTasks = commonNodelessTasks.concat(linuxOnlyTests);
