@@ -239,38 +239,40 @@ describe('Retryable Writes Spec Prose', () => {
      * Additionally, this test requires drivers to set a fail point after an insertOne operation but before the subsequent retry.
      * Drivers that are unable to set a failCommand after the CommandSucceededEvent SHOULD use mocking or write a unit test to cover the same sequence of events.
      *
-     * Create a client with retryWrites=true.
+     * 1. Create a client with retryWrites=true.
      *
-     * Configure a fail point with error code 91 (ShutdownInProgress):
+     * 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+     *     `SystemOverloadedError` error labels:
      * ```js
      * db.adminCommand({
      *   configureFailPoint: 'failCommand',
      *   mode: { times: 1 },
      *   data: {
-     *     writeConcernError: {
-     *       code: 91,
-     *       errorLabels: ['RetryableWriteError']
-     *     },
      *     failCommands: ['insert']
+     *     errorLabels: ['RetryableError', 'SystemOverloadedError'],
+     *     errorCode: 91,
      *   }
      * });
      * ```
-     * Via the command monitoring CommandSucceededEvent, configure a fail point with error code 10107 (NotWritablePrimary) and a NoWritesPerformed label:
+     * 
+     * 3. Via the command monitoring CommandSucceededEvent, configure a fail point with error code `91` (ShutdownInProgress) and
+     *     the `NoWritesPerformed`, `RetryableError` and `SystemOverloadedError` labels:
      *
      * ```js
      * db.adminCommand({
      *   configureFailPoint: 'failCommand',
-     *   mode: { times: 1 },
+     *   mode: 'alwaysOn',
      *   data: {
-     *     errorCode: 10107,
-     *     errorLabels: ['RetryableWriteError', 'NoWritesPerformed'],
      *     failCommands: ['insert']
+     *     errorLabels: [ 'RetryableError', 'SystemOverloadedError', 'NoWritesPerformed'],
+     *     errorCode: 91,
      *   }
      * });
      * ```
-     * Drivers SHOULD only configure the 10107 fail point command if the the succeeded event is for the 91 error configured in step 2.
+     * 
+     * Drivers SHOULD configure the second fail point command only if the event is for the first error configured in step 2.
      *
-     * Attempt an insertOne operation on any record for any database and collection. For the resulting error, assert that the associated error code is 91.
+     * 4. Attempt an insertOne operation on any record for any database and collection. For the resulting error, assert that the associated error code is 91.
      */
     it(
       'when a retry attempt fails with an error labeled NoWritesPerformed, drivers MUST return the original error',
@@ -279,7 +281,8 @@ describe('Retryable Writes Spec Prose', () => {
         const serverCommandStub = sinon.stub(Server.prototype, 'command');
         serverCommandStub.onCall(0).rejects(
           new MongoWriteConcernError({
-            errorLabels: ['RetryableWriteError'],
+            // errorLabels: ['RetryableError', 'SystemOverloadedError'], // expected changes, tests fail
+            errorLabels: ['RetryableWriteError'], // original, tests pass
             writeConcernError: { errmsg: 'ShutdownInProgress error', code: 91 },
             ok: 1
           })
@@ -287,8 +290,10 @@ describe('Retryable Writes Spec Prose', () => {
         serverCommandStub.onCall(1).returns(
           Promise.reject(
             new MongoWriteConcernError({
-              errorLabels: ['RetryableWriteError', 'NoWritesPerformed'],
-              writeConcernError: { errmsg: 'NotWritablePrimary error', errorCode: 10107 }
+              errorLabels: ['RetryableWriteError', 'NoWritesPerformed'], // original, tests pass
+              // errorLabels: ['RetryableError', 'SystemOverloadedError', 'NoWritesPerformed'], // expected changes, tests fail
+              writeConcernError: { errmsg: 'NotWritablePrimary error', code: 91 }, // my changes
+              ok: 1
             })
           )
         );
@@ -526,10 +531,10 @@ describe('Retryable Writes Spec Prose', () => {
               serverCommandStub.callCount === 1
                 ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
                 : [
-                    MongoErrorLabel.RetryableError,
-                    MongoErrorLabel.SystemOverloadedError,
-                    MongoErrorLabel.NoWritesPerformed
-                  ];
+                  MongoErrorLabel.RetryableError,
+                  MongoErrorLabel.SystemOverloadedError,
+                  MongoErrorLabel.NoWritesPerformed
+                ];
 
             throw new MongoServerError({
               message: 'Server Error',
