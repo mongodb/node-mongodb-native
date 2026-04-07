@@ -254,7 +254,7 @@ describe('Retryable Writes Spec Prose', () => {
      *   }
      * });
      * ```
-     * 
+     *
      * 3. Via the command monitoring CommandSucceededEvent, configure a fail point with error code `91` (ShutdownInProgress) and
      *     the `NoWritesPerformed`, `RetryableError` and `SystemOverloadedError` labels:
      *
@@ -269,7 +269,7 @@ describe('Retryable Writes Spec Prose', () => {
      *   }
      * });
      * ```
-     * 
+     *
      * Drivers SHOULD configure the second fail point command only if the event is for the first error configured in step 2.
      *
      * 4. Attempt an insertOne operation on any record for any database and collection. For the resulting error, assert that the associated error code is 91.
@@ -531,10 +531,10 @@ describe('Retryable Writes Spec Prose', () => {
               serverCommandStub.callCount === 1
                 ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
                 : [
-                  MongoErrorLabel.RetryableError,
-                  MongoErrorLabel.SystemOverloadedError,
-                  MongoErrorLabel.NoWritesPerformed
-                ];
+                    MongoErrorLabel.RetryableError,
+                    MongoErrorLabel.SystemOverloadedError,
+                    MongoErrorLabel.NoWritesPerformed
+                  ];
 
             throw new MongoServerError({
               message: 'Server Error',
