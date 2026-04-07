@@ -8,9 +8,11 @@ import {
   type MongoClient,
   MongoServerError,
   ObjectId,
-  ReturnDocument
+  ReturnDocument,
+  runNodelessTests
 } from '../../mongodb';
 import { assert as test, filterForCommands } from '../shared';
+import { platform } from 'os';
 
 describe('Find', function () {
   let client: MongoClient;
@@ -1078,6 +1080,11 @@ describe('Find', function () {
     'regression test (NODE-6878): CursorResponse.emptyGetMore contains all CursorResponse fields',
     { requires: { topology: 'sharded' } },
     async function () {
+      if (platform() === 'win32') {
+        // TODO: NODE-7511 - unskip test for NODE-6878 in Windows
+        this.skip();
+      }
+
       const collection = client.db('rewind-regression').collection('bar');
 
       await collection.deleteMany({});
