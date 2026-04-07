@@ -8,8 +8,7 @@ import {
   type MongoClient,
   MongoServerError,
   ObjectId,
-  ReturnDocument,
-  runNodelessTests
+  ReturnDocument
 } from '../../mongodb';
 import { assert as test, filterForCommands } from '../shared';
 
@@ -1079,11 +1078,6 @@ describe('Find', function () {
     'regression test (NODE-6878): CursorResponse.emptyGetMore contains all CursorResponse fields',
     { requires: { topology: 'sharded' } },
     async function () {
-      if (runNodelessTests) {
-        // This test relies on sinon spying on an internal method, but this doesn't work in nodeless due to the way sinon is bundled.
-        this.skip();
-      }
-
       const collection = client.db('rewind-regression').collection('bar');
 
       await collection.deleteMany({});
