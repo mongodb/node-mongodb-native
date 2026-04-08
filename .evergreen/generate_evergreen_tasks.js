@@ -417,7 +417,7 @@ for (const {
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
   }
 
-  const configureLatestNodeSmokeTest = os.match(/^rhel/);
+  const configureLatestNodeSmokeTest = os.match(/^(rhel|windows)/);
   if (configureLatestNodeSmokeTest) {
     const buildVariantData = {
       name: `${osName}-node-latest`,
