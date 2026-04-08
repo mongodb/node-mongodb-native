@@ -1076,8 +1076,8 @@ describe('Find', function () {
 
   it(
     'regression test (NODE-6878): CursorResponse.emptyGetMore contains all CursorResponse fields',
-    // TODO: NODE-7511 - unskip test for NODE-6878 in Windows
-    { requires: { topology: 'sharded', os: '!win32' } },
+    // TODO: NODE-7511 - unskip test for NODE-6878
+    { requires: { topology: 'sharded', mongodb: '<9' } },
     async function () {
       const collection = client.db('rewind-regression').collection('bar');
 
