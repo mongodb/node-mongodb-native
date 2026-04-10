@@ -10,6 +10,7 @@ import {
   checkParentDomainMatch,
   compareObjectId,
   decorateWithExplain,
+  DEFAULT_ALLOWED_HOSTS,
   Explain,
   hasAtomicOperators,
   HostAddress,
@@ -24,7 +25,7 @@ import {
   MongoRuntimeError,
   shuffle
 } from '../mongodb';
-import { sleep } from '../tools/utils';
+import { ensureTypeByName, sleep } from '../tools/utils';
 
 describe('driver utils', function () {
   describe('.hasAtomicOperators', function () {
@@ -149,6 +150,26 @@ describe('driver utils', function () {
           });
         });
 
+        context('when the wildcard starts with *.', function () {
+          it('returns false', function () {
+            expect(hostMatchesWildcards('test-mongodb.com', ['*.mongodb.com', 'test2'])).to.be
+              .false;
+          });
+        });
+
+        context('when using default allowed hosts', function () {
+          it('returns false', function () {
+            for (const host of DEFAULT_ALLOWED_HOSTS) {
+              // Only test the wildcard hosts, the non-wildcard hosts are tested in other test cases
+              if (!host.startsWith('*.')) {
+                continue;
+              }
+              const wrongHost = host.replace('*.', 'test-');
+              expect(hostMatchesWildcards(wrongHost, DEFAULT_ALLOWED_HOSTS)).to.be.false;
+            }
+          });
+        });
+
         context('when the host matches a FQDN', function () {
           it('returns true', function () {
             expect(hostMatchesWildcards('mongodb.net', ['*.mongodb.net', 'other'])).to.be.true;
@@ -220,6 +241,14 @@ describe('driver utils', function () {
         it('returns false', function () {
           expect(hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongod-27017.sock', 'test2']))
             .to.be.false;
+        });
+      });
+
+      context('when the host does not match partial matches', function () {
+        it('returns false', function () {
+          expect(
+            hostMatchesWildcards('/tmp/test-mongodb-27017.sock', ['*/mongodb-27017.sock', 'test2'])
+          ).to.be.false;
         });
       });
     });
@@ -463,8 +492,7 @@ describe('driver utils', function () {
     describe('*[Symbol.iterator]()', () => {
       it('should be instanceof GeneratorFunction', () => {
         const list = new List<number>();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        expect(list[Symbol.iterator]).to.be.instanceOf(function* () {}.constructor);
+        ensureTypeByName(list[Symbol.iterator], 'GeneratorFunction');
       });
 
       it('should only run generator for the number of items in the list', () => {

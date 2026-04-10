@@ -20,6 +20,14 @@ const {
   UBUNTU_22_OS
 } = require('./ci_matrix_constants');
 
+// TODO(NODE-7499): unpin npm version once Node 22 ships a bundled npm that can upgrade itself
+const NODE22_NPM_VERSION = '11.11.1';
+
+/** Returns the major version number from a Node.js version string (e.g. 'v22.11.0', '20.19.0', 22). */
+function nodeMajorVersion(version) {
+  return semver.coerce(String(version))?.major;
+}
+
 const OPERATING_SYSTEMS = [
   {
     name: DEFAULT_OS,
@@ -397,6 +405,12 @@ for (const {
     const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
+    // bundled npm version in node v22.22.2 (v10.9.7) can't upgrade itself to @latest,
+    // so we need to pin npm version for these variants to latest "upgradable" version
+    if (nodeMajorVersion(NODE_LTS_VERSION) === 22) {
+      expansions.NPM_VERSION = NODE22_NPM_VERSION;
+    }
+
     expansions.CLIENT_ENCRYPTION = String(!!clientEncryption);
     expansions.TEST_CSFLE = expansions.CLIENT_ENCRYPTION;
 
@@ -478,7 +492,9 @@ const unitTestTasks = Array.from(
           updateExpansions({
             NODE_LTS_VERSION
           }),
-          { func: 'install dependencies' },
+          nodeMajorVersion(NODE_LTS_VERSION) === 22
+            ? { func: 'install dependencies', vars: { NPM_VERSION: NODE22_NPM_VERSION } }
+            : { func: 'install dependencies' },
           { func: 'run unit tests' }
         ]
       };
@@ -810,6 +826,53 @@ BUILD_VARIANTS.push({
   display_name: 'TLS smoke tests',
   run_on: DEFAULT_OS,
   tasks: ['.ssl']
+});
+
+// small subset of tests to run on nodeless environments
+const commonNodelessTasks = [
+  'test-latest-server',
+  'test-latest-replica_set',
+  'test-latest-sharded_cluster',
+  'test-rapid-server',
+  'test-rapid-replica_set',
+  'test-rapid-sharded_cluster',
+  'test-latest-server-v1-api',
+  'test-x509-authentication',
+  'test-atlas-connectivity',
+  'test-auth-ldap',
+  'test-socks5-csfle',
+  'test-socks5-tls',
+  'test-snappy-compression',
+  'test-zstd-compression',
+  'test-tls-support-latest'
+];
+// small subset of linux-specific tests to run on nodeless environments
+const linuxOnlyTests = [
+  'test-rapid-load-balanced',
+  'test-latest-load-balanced',
+  'test-auth-kerberos'
+];
+
+const linuxNodelessTasks = commonNodelessTasks.concat(linuxOnlyTests);
+
+const nodelessExpansions = {
+  NODE_LTS_VERSION: LATEST_LTS,
+  CLIENT_ENCRYPTION: true,
+  MONGODB_BUNDLED: true
+};
+BUILD_VARIANTS.push({
+  name: 'rhel8-nodeless',
+  display_name: 'Nodeless',
+  run_on: DEFAULT_OS,
+  tasks: linuxNodelessTasks,
+  expansions: nodelessExpansions
+});
+BUILD_VARIANTS.push({
+  name: 'windows-nodeless',
+  display_name: 'Windows Nodeless',
+  run_on: WINDOWS_OS,
+  tasks: commonNodelessTasks,
+  expansions: nodelessExpansions
 });
 
 // TODO(NODE-4897): Debug socks5 tests on node latest

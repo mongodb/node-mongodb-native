@@ -242,7 +242,7 @@ function validateBufferSize(name: string, buffer: Uint8Array, maxBsonObjectSize:
 }
 
 /** @internal */
-interface ClientInsertOperation {
+export interface ClientInsertOperation {
   insert: number;
   document: OptionalId<Document>;
 }

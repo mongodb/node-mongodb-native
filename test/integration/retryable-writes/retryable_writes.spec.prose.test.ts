@@ -490,22 +490,8 @@ describe('Retryable Writes Spec Prose', () => {
       'Case 3: Test that drivers return the correct error when receiving some errors with NoWritesPerformed and some without NoWritesPerformed',
       { requires: { topology: 'replicaset', mongodb: '>=6.0' } },
       async () => {
-        // 2. Configure the client to listen to CommandFailedEvents. In the attached listener, configure a fail point with error
-        //     code `91` (NotWritablePrimary) and the `NoWritesPerformed`, `RetryableError` and `SystemOverloadedError` labels:
-        //     ```javascript
-        //     {
-        //         configureFailPoint: "failCommand",
-        //         mode: "alwaysOn",
-        //         data: {
-        //             failCommands: ["insert"],
-        //             errorLabels: ["RetryableError", "SystemOverloadedError", "NoWritesPerformed"],
-        //             errorCode: 91
-        //         }
-        //     }
-        //     ```
-
-        // 3. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
-        //     `SystemOverloadedError` error labels but without the `NoWritesPerformed` error label:
+        // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+        //     `SystemOverloadedError` error labels:
         //     ```javascript
         //     {
         //         configureFailPoint: "failCommand",
@@ -517,6 +503,22 @@ describe('Retryable Writes Spec Prose', () => {
         //         }
         //     }
         //     ```
+
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
+        //     the `NoWritesPerformed`, `RetryableError` and `SystemOverloadedError` labels:
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: "alwaysOn",
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorLabels: ["RetryableError", "SystemOverloadedError", "NoWritesPerformed"],
+        //             errorCode: 91
+        //         }
+        //     }
+        //     ```
+        //     Configure the second fail point command only if the failed event is for the first error configured in step 2.
+
         const serverCommandStub = sinon
           .stub(Server.prototype, 'command')
           .callsFake(async function () {

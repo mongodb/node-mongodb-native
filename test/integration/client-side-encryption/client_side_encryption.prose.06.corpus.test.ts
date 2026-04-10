@@ -11,11 +11,6 @@ import { ClientEncryption, type MongoClient, WriteConcern } from '../../mongodb'
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 describe('Client Side Encryption Prose Corpus Test', function () {
-  before(async function () {
-    this.currentTest.skipReason = 'NODE-7417: large encryption tests skipped';
-    this.skip();
-  });
-
   const metadata = {
     requires: {
       clientSideEncryption: true as const

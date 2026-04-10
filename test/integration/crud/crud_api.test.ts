@@ -15,7 +15,7 @@ import {
   ObjectId,
   ReturnDocument
 } from '../../mongodb';
-import { type FailCommandFailPoint } from '../../tools/utils';
+import { ensureTypeByName, type FailCommandFailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
 
 const DB_NAME = 'crud_api_tests';
@@ -808,7 +808,7 @@ describe('CRUD API', function () {
       .collection('t20_1')
       .bulkWrite(ops, { ordered: true, writeConcern: { w: 1 } })
       .catch(err => err);
-    expect(err).to.be.instanceOf(MongoBulkWriteError);
+    ensureTypeByName(err, 'MongoBulkWriteError');
   });
 
   describe('sort support', function () {
