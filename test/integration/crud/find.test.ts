@@ -1083,7 +1083,7 @@ describe('Find', function () {
       await collection.insertMany(Array.from({ length: 4 }, (_, i) => ({ x: i })));
 
       const cursor = collection.find({}, { batchSize: 1, limit: 3 });
-      // emptyGetMore is used internally after limit + 1 documents have been iterated
+      // Iterate limit + 1 times to exercise the post-limit cursor path before rewind.
       await cursor.next();
       await cursor.next();
       await cursor.next();
