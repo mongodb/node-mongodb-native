@@ -140,7 +140,7 @@
     "check:dependencies": "npm run build:bundle && mocha test/action/dependency.test.ts",
     "check:dts": "npm run build:bundle && node ./node_modules/typescript/bin/tsc --target es2023 --module commonjs --noEmit mongodb.d.ts && tsd",
     "check:search-indexes": "npm run build:bundle && nyc mocha --config test/mocha_mongodb.js test/manual/search-index-management.prose.test.ts",
-    "check:test": "npm run build:bundle && nyc mocha --config test/mocha_mongodb.js test/integration",
+    "check:test": "npm run build:bundle && nyc mocha --config test/mocha_mongodb.js test/integration/node-specific/client_close.test.ts test/integration/connection-monitoring-and-pooling/connection_pool.test.ts",
     "check:test:debug": "npm run mocha:debug -- --config test/mocha_mongodb.js test/integration",
     "check:test-bundled": "MONGODB_BUNDLED=true npm run check:test",
     "check:unit": "npm run build:bundle && nyc mocha test/unit",

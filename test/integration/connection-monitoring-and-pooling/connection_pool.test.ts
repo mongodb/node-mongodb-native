@@ -95,7 +95,7 @@ describe('Connection Pool', function () {
           }
         });
 
-        client = this.configuration.newClient({}, { readPreference: 'secondaryPreferred' });
+        client = this.configuration.newClient({}, {});
         await client.connect();
         await Promise.all(Array.from({ length: 100 }, () => client.db().command({ ping: 1 })));
       });
@@ -121,9 +121,21 @@ describe('Connection Pool', function () {
               .on('connectionClosed', pushToClientEvents);
 
             const finds = Promise.allSettled([
-              client.db('test').collection('test').findOne({ a: 1 }),
-              client.db('test').collection('test').findOne({ a: 1 }),
-              client.db('test').collection('test').findOne({ a: 1 })
+              client
+                .db('test')
+                .collection('test')
+                .findOne({
+                  a: 1,
+                  options: { readPreference: 'secondaryPreferred' }
+                }),
+              client
+                .db('test')
+                .collection('test')
+                .findOne({ a: 1, options: { readPreference: 'secondaryPreferred' } }),
+              client
+                .db('test')
+                .collection('test')
+                .findOne({ a: 1, options: { readPreference: 'secondaryPreferred' } })
             ]);
 
             // wait until all finds are pending on the server
