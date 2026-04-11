@@ -10,7 +10,12 @@ import {
   type FindCursor,
   type MongoClient
 } from '../../mongodb';
-import { configureMongocryptdSpawnHooks } from '../../tools/utils';
+import {
+  clearFailPoint,
+  configureFailPoint,
+  configureMongocryptdSpawnHooks,
+  sleep
+} from '../../tools/utils';
 import { filterForCommands } from '../shared';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
@@ -714,6 +719,78 @@ describe('MongoClient.close() Integration', () => {
         it.skip('no sockets remain after client.close()', metadata, async () => null);
       });
     });
+  });
+
+  describe('closeCheckedOutConnections', () => {
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4' } };
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      await configureFailPoint(this.configuration, {
+        configureFailPoint: 'failCommand',
+        mode: 'alwaysOn',
+        data: {
+          failCommands: ['find'],
+          blockConnection: true,
+          blockTimeMS: 500
+        }
+      });
+      client = this.configuration.newClient({}, {});
+      await client.connect();
+    });
+
+    afterEach(async function () {
+      await clearFailPoint(this.configuration);
+      await client?.close();
+    });
+
+    it(
+      'emits connectionCheckedIn immediately followed by connectionClosed for each in-flight connection',
+      metadata,
+      async function () {
+        const allEvents: Array<{ name: string; address: string; connectionId: number }> = [];
+        const push = e => allEvents.push(e);
+
+        client
+          .on('connectionCheckedOut', push)
+          .on('connectionCheckedIn', push)
+          .on('connectionClosed', push);
+
+        const finds = Promise.allSettled([
+          client.db('test').collection('test').findOne({ a: 1 }),
+          client.db('test').collection('test').findOne({ a: 1 }),
+          client.db('test').collection('test').findOne({ a: 1 })
+        ]);
+
+        // wait until all three finds have checked out a connection
+        while (allEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
+          await sleep(1);
+        }
+
+        const findConnectionIds = new Set(
+          allEvents
+            .filter(e => e.name === 'connectionCheckedOut')
+            .map(({ address, connectionId }) => `${address}+${connectionId}`)
+        );
+
+        await client.close();
+
+        const findEvents = allEvents
+          .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
+          .filter(({ address, connectionId }) =>
+            findConnectionIds.has(`${address}+${connectionId}`)
+          );
+
+        expect(findEvents).to.have.lengthOf(6);
+
+        // spec requires each connectionCheckedIn to be immediately followed by connectionClosed
+        expect(findEvents.map(e => e.name)).to.deep.equal(
+          Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat()
+        );
+
+        await finds;
+      }
+    );
   });
 
   describe('Server resource: Cursor', () => {

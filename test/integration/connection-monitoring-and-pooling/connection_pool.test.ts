@@ -95,7 +95,7 @@ describe('Connection Pool', function () {
           }
         });
 
-        client = this.configuration.newClient({}, { readPreference: 'secondaryPreferred' });
+        client = this.configuration.newClient({}, {});
         await client.connect();
         await Promise.all(Array.from({ length: 100 }, () => client.db().command({ ping: 1 })));
       });
