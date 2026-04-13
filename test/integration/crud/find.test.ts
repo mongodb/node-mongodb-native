@@ -1074,7 +1074,7 @@ describe('Find', function () {
   });
 
   it(
-    'regression test (NODE-6878): CursorResponse.emptyGetMore contains all CursorResponse fields',
+    'regression test (NODE-6878): cursor can be rewound after limit-based exhaustion',
     { requires: { topology: 'sharded' } },
     async function () {
       const collection = client.db('rewind-regression').collection('bar');
@@ -1094,8 +1094,9 @@ describe('Find', function () {
       // wasted getMore. On 9.0+, mongos returns cursorId: 0 when the limit is
       // reached. In both cases, rewinding and re-iterating the cursor must work.
 
+      // rewind + toArray must not throw. Before the NODE-6878 fix,
+      // this would fail with a TypeError from emptyGetMore lacking CursorResponse fields.
       cursor.rewind();
-
       await cursor.toArray();
     }
   );
