@@ -1,6 +1,6 @@
 {
   "description": "commit-transienttransactionerror-4.2",
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
       "minServerVersion": "4.1.6",
