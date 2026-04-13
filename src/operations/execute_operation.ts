@@ -29,13 +29,6 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
-import {
-  BASE_BACKOFF_MS,
-  MAX_BACKOFF_MS,
-  MAX_RETRIES,
-  RETRY_COST,
-  RETRY_TOKEN_RETURN_RATE
-} from '../token_bucket';
 import { abortable, maxWireVersion, supportsRetryableWrites } from '../utils';
 import { AggregateOperation } from './aggregate';
 import { AbstractOperation, Aspect } from './operation';
@@ -176,6 +169,10 @@ type RetryOptions = {
   topology: Topology;
   timeoutContext: TimeoutContext;
 };
+/** @internal The base backoff duration in milliseconds */
+const BASE_BACKOFF_MS = 100;
+/** @internal The maximum backoff duration in milliseconds */
+const MAX_BACKOFF_MS = 10_000;
 
 /**
  * Executes an operation and retries as appropriate
@@ -267,13 +264,6 @@ async function executeOperationWithRetries<
     try {
       try {
         const result = await server.command(operation, timeoutContext);
-        if (topology.s.options.adaptiveRetries) {
-          topology.tokenBucket.deposit(
-            attempt > 0
-              ? RETRY_TOKEN_RETURN_RATE + RETRY_COST // on successful retry
-              : RETRY_TOKEN_RETURN_RATE // otherwise
-          );
-        }
         return operation.handleOk(result);
       } catch (error) {
         return operation.handleError(error);
@@ -281,15 +271,6 @@ async function executeOperationWithRetries<
     } catch (operationError) {
       // Should never happen but if it does - propagate the error.
       if (!(operationError instanceof MongoError)) throw operationError;
-
-      if (
-        topology.s.options.adaptiveRetries &&
-        attempt > 0 &&
-        !operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
-      ) {
-        // if a retry attempt fails with a non-overload error, deposit 1 token.
-        topology.tokenBucket.deposit(RETRY_COST);
-      }
 
       // Preserve the original error once a write has been performed.
       // Only update to the latest error if no writes were performed.
@@ -317,7 +298,8 @@ async function executeOperationWithRetries<
       }
 
       if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
-        maxAttempts = Math.min(MAX_RETRIES + 1, operation.maxAttempts ?? MAX_RETRIES + 1);
+        const maxOverloadAttempts = topology.s.options.maxAdaptiveRetries + 1;
+        maxAttempts = Math.min(maxOverloadAttempts, operation.maxAttempts ?? maxOverloadAttempts);
       }
 
       if (attempt + 1 >= maxAttempts) {
@@ -352,16 +334,13 @@ async function executeOperationWithRetries<
           throw error;
         }
 
-        if (topology.s.options.adaptiveRetries && !topology.tokenBucket.consume(RETRY_COST)) {
-          throw error;
-        }
-
         await setTimeout(backoffMS);
       }
 
       if (
         topology.description.type === TopologyType.Sharded ||
-        operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)
+        (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError) &&
+          topology.s.options.enableOverloadRetargeting)
       ) {
         deprioritizedServers.add(server.description);
       }

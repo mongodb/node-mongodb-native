@@ -68,7 +68,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -146,16 +146,6 @@
               }
             },
             {
-              "commandFailedEvent": {
-                "commandName": "getMore"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "getMore"
-              }
-            },
-            {
               "commandSucceededEvent": {
                 "commandName": "getMore"
               }
@@ -165,7 +155,7 @@
       ]
     },
     {
-      "description": "getMores are retried maxAttempts=5 times",
+      "description": "getMores are retried maxAttempts=2 times",
       "operations": [
         {
           "name": "failPoint",
@@ -213,36 +203,6 @@
             {
               "commandSucceededEvent": {
                 "commandName": "find"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "getMore"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "getMore"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "getMore"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "getMore"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "getMore"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "getMore"
               }
             },
             {

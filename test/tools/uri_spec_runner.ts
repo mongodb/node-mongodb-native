@@ -358,7 +358,8 @@ export function executeUriValidationTest(
       case 'serverSelectionTimeoutMS':
       case 'serverMonitoringMode':
       case 'socketTimeoutMS':
-      case 'adaptiveRetries':
+      case 'maxAdaptiveRetries':
+      case 'enableOverloadRetargeting':
       case 'retryWrites':
       case 'directConnection':
       case 'loadBalanced':

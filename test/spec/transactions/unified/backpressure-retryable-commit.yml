@@ -135,7 +135,7 @@ tests:
         databaseName: *database_name
         documents:
           - _id: 1
-  - description: commitTransaction is retried maxAttempts=5 times if backpressure labels are added
+  - description: commitTransaction is retried maxAttempts=2 times if backpressure labels are added
     runOnRequirements:
       - serverless: forbid
     operations:
@@ -204,12 +204,6 @@ tests:
                   $$exists: false
               commandName: commitTransaction
               databaseName: admin
-          - commandStartedEvent:
-              commandName: commitTransaction
-          - commandStartedEvent:
-              commandName: commitTransaction
-          - commandStartedEvent:
-              commandName: commitTransaction
           - commandStartedEvent:
               commandName: commitTransaction
           - commandStartedEvent:

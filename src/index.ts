@@ -621,7 +621,6 @@ export type {
   TimeoutContext,
   TimeoutContextOptions
 } from './timeout';
-export type { MAX_RETRIES, TokenBucket } from './token_bucket';
 export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,

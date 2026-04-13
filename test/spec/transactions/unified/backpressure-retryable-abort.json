@@ -213,7 +213,7 @@
       ]
     },
     {
-      "description": "abortTransaction is retried maxAttempts=5 times if backpressure labels are added",
+      "description": "abortTransaction is retried maxAttempts=2 times if backpressure labels are added",
       "operations": [
         {
           "object": "testRunner",
@@ -315,21 +315,6 @@
                 },
                 "commandName": "abortTransaction",
                 "databaseName": "admin"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "abortTransaction"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "abortTransaction"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "abortTransaction"
               }
             },
             {

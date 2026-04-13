@@ -132,7 +132,7 @@ tests:
       - collectionName: *collection_name
         databaseName: *database_name
         documents: []
-  - description: abortTransaction is retried maxAttempts=5 times if backpressure labels are added
+  - description: abortTransaction is retried maxAttempts=2 times if backpressure labels are added
     operations:
       - object: testRunner
         name: failPoint
@@ -197,12 +197,6 @@ tests:
                   $$exists: false
               commandName: abortTransaction
               databaseName: admin
-          - commandStartedEvent:
-              commandName: abortTransaction
-          - commandStartedEvent:
-              commandName: abortTransaction
-          - commandStartedEvent:
-              commandName: abortTransaction
           - commandStartedEvent:
               commandName: abortTransaction
           - commandStartedEvent:
