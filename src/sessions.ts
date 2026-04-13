@@ -497,7 +497,7 @@ export class ClientSession
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     });
-    operation.maxAttempts = (this.client.topology?.s.options.maxAdaptiveRetries ?? 2) + 1;
+    operation.maxAttempts = this.clientOptions.maxAdaptiveRetries + 1;
 
     const timeoutContext =
       this.timeoutContext ??
@@ -517,7 +517,7 @@ export class ClientSession
       this.commitAttempted = true;
 
       const remainingAttempts =
-        (this.client.topology?.s.options.maxAdaptiveRetries ?? 2) + 1 - operation.attemptsMade;
+        this.clientOptions.maxAdaptiveRetries + 1 - operation.attemptsMade;
       if (remainingAttempts <= 0) {
         throw firstCommitError;
       }
