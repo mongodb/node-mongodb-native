@@ -479,7 +479,8 @@ describe('Retryable Writes Spec Prose', () => {
         //     server error. Assert that the error code of the server error is 91.
         const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
 
-        expect(serverCommandStub.callCount).to.equal(6);
+        // maxAdaptiveRetries defaults to 2, so we expect 3 total attempts (1 initial + 2 retries).
+        expect(serverCommandStub.callCount).to.equal(3);
 
         expect(insertResult).to.be.instanceOf(MongoServerError);
         expect(insertResult).to.have.property('code', 91);

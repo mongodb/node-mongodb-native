@@ -151,17 +151,18 @@ describe('Retryable Reads Spec Prose', () => {
       requires: { mongodb: '>=4.4', topology: 'replicaset' }
     };
 
-    describe('Retryable Reads Caused by Overload Errors Are Retried on a Different Server', () => {
+    describe('Retryable Reads Caused by Overload Errors Are Retried on a Different Server When enableOverloadRetargeting is enabled', () => {
       let client: MongoClient;
       const commandFailedEvents: CommandFailedEvent[] = [];
       const commandSucceededEvents: CommandSucceededEvent[] = [];
 
       beforeEach(async function () {
-        // 1. Create a client `client` with `retryReads=true`, `readPreference=primaryPreferred`, and command event monitoring
-        //     enabled.
+        // 1. Create a client `client` with `retryReads=true`, `readPreference=primaryPreferred`,
+        //    `enableOverloadRetargeting=true`, and command event monitoring enabled.
         client = this.configuration.newClient({
           retryReads: true,
           readPreference: 'primaryPreferred',
+          enableOverloadRetargeting: true,
           monitorCommands: true
         });
 
@@ -277,6 +278,74 @@ describe('Retryable Reads Spec Prose', () => {
         // 6. Assert that both events occurred on the same server.
         expect(commandFailedEvents[0].address).to.equal(commandSucceededEvents[0].address);
       });
+    });
+
+    describe('Retryable Reads Caused by Overload Errors Are Retried on Same Server When enableOverloadRetargeting is disabled', () => {
+      let client: MongoClient;
+      const commandFailedEvents: CommandFailedEvent[] = [];
+      const commandSucceededEvents: CommandSucceededEvent[] = [];
+
+      beforeEach(async function () {
+        // 1. Create a client `client` with `retryReads=true`, `readPreference=primaryPreferred`, and command event monitoring
+        //     enabled.
+        client = this.configuration.newClient({
+          retryReads: true,
+          readPreference: 'primaryPreferred',
+          monitorCommands: true
+        });
+
+        client.on('commandFailed', filterForCommands('find', commandFailedEvents));
+        client.on('commandSucceeded', filterForCommands('find', commandSucceededEvents));
+
+        await client.connect();
+
+        /*
+        * 2. Configure the following fail point for `client`:
+            {
+                configureFailPoint: "failCommand",
+                mode: { times: 1 },
+                data: {
+                    failCommands: ["find"],
+                    errorLabels: ["RetryableError", "SystemOverloadedError"]
+                    errorCode: 6
+                }
+            }
+        * */
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['find'],
+            errorCode: 6,
+            errorLabels: ['RetryableError', 'SystemOverloadedError']
+          }
+        });
+
+        // 3. Reset the command event monitor to clear the failpoint command from its stored events.
+        commandFailedEvents.length = 0;
+        commandSucceededEvents.length = 0;
+      });
+
+      afterEach(async function () {
+        await client?.db('admin').command({ configureFailPoint: 'failCommand', mode: 'off' });
+        await client?.close();
+      });
+
+      it(
+        'retries on the same server when SystemOverloadedError and enableOverloadRetargeting is disabled',
+        TEST_METADATA,
+        async () => {
+          // 4. Execute a `find` command with `client`.
+          await client.db('test').collection('test').find().toArray();
+
+          // 5. Assert that one failed command event and one successful command event occurred.
+          expect(commandFailedEvents).to.have.lengthOf(1);
+          expect(commandSucceededEvents).to.have.lengthOf(1);
+
+          // 6. Assert that both events occurred on the same server.
+          expect(commandFailedEvents[0].address).to.equal(commandSucceededEvents[0].address);
+        }
+      );
     });
   });
 });
