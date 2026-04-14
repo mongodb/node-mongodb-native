@@ -516,8 +516,7 @@ export class ClientSession
     } catch (firstCommitError) {
       this.commitAttempted = true;
 
-      const remainingAttempts =
-        this.clientOptions.maxAdaptiveRetries + 1 - operation.attemptsMade;
+      const remainingAttempts = this.clientOptions.maxAdaptiveRetries + 1 - operation.attemptsMade;
       if (remainingAttempts <= 0) {
         throw firstCommitError;
       }
