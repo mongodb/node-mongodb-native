@@ -27,7 +27,8 @@
         "awaitMinPoolSizeMS": 10000,
         "useMultipleMongoses": false,
         "observeEvents": [
-          "commandStartedEvent"
+          "commandStartedEvent",
+          "commandFailedEvent"
         ]
       }
     },
@@ -189,6 +190,11 @@
               }
             },
             {
+              "commandFailedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
               "commandStartedEvent": {
                 "commandName": "abortTransaction",
                 "databaseName": "admin",
@@ -201,6 +207,105 @@
                     ]
                   }
                 }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "withTransaction surfaces a timeout after exhausting transient transaction retries, retaining the last transient error as the timeout cause.",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "alwaysOn",
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 25,
+                "errorCode": 24,
+                "errorLabels": [
+                  "TransientTransactionError"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "withTransaction",
+          "object": "session",
+          "arguments": {
+            "callback": [
+              {
+                "name": "insertOne",
+                "object": "collection",
+                "arguments": {
+                  "document": {
+                    "_id": 1
+                  },
+                  "session": "session"
+                },
+                "expectError": {
+                  "isError": true
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "abortTransaction"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "abortTransaction"
+              }
+            },
+            {
+              "commandFailedEvent": {
+                "commandName": "abortTransaction"
               }
             }
           ]

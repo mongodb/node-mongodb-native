@@ -19,6 +19,7 @@ createEntities:
       useMultipleMongoses: false
       observeEvents:
         - commandStartedEvent
+        - commandFailedEvent
   - database:
       id: &database database
       client: *client
@@ -104,9 +105,73 @@ tests:
               command:
                 insert: *collectionName
                 maxTimeMS: { $$type: ["int", "long"] }
+          - commandFailedEvent:
+              commandName: insert
           - commandStartedEvent:
               commandName: abortTransaction
               databaseName: admin
               command:
                 abortTransaction: 1
                 maxTimeMS: { $$type: [ "int", "long" ] }
+
+  # This test verifies that when withTransaction encounters transient transaction errors it does not
+  # throw the transient transaction error when the timeout is exceeded, but instead surfaces a timeout error after
+  # exhausting the retry attempts within the specified timeout.
+  # The timeout error thrown contains as a cause the last transient error encountered.
+  - description: "withTransaction surfaces a timeout after exhausting transient transaction retries, retaining the last transient error as the timeout cause."
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: alwaysOn
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 25
+              errorCode: 24
+              errorLabels: ["TransientTransactionError"]
+
+      - name: withTransaction
+        object: *session
+        arguments:
+          callback:
+            - name: insertOne
+              object: *collection
+              arguments:
+                document: { _id: 1 }
+                session: *session
+              expectError:
+                isError: true
+        expectError:
+          isTimeoutError: true
+
+    # Verify that multiple insert (at least 2) attempts occurred due to TransientTransactionError retries
+    # The exact number of events depends on timing and retry backoff, but there should be at least:
+    # - 2 commandStartedEvent for insert (initial + at least one retry)
+    # - 2 commandFailedEvent for insert (corresponding failures)
+    expectEvents:
+      - client: *client
+        ignoreExtraEvents: true
+        events:
+          # First insert attempt
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: abortTransaction
+          - commandFailedEvent:
+              commandName: abortTransaction
+
+          # Second insert attempt (retry due to TransientTransactionError)
+          - commandStartedEvent:
+              commandName: insert
+          - commandFailedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: abortTransaction
+          - commandFailedEvent:
+              commandName: abortTransaction
