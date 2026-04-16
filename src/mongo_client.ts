@@ -237,6 +237,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /**
    * Whether or not to enable overload retargeting. Defaults to false.
    * @see https://www.mongodb.com/docs/atlas/overload-errors
+   * More information about the overload policy in drivers:
+   * @see https://github.com/mongodb/specifications/blob/master/source/client-backpressure/client-backpressure.md#overload-retry-policy
    * */
   enableOverloadRetargeting?: boolean;
   /** Allow a driver to force a Single topology type with a connection string containing one host */
