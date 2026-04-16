@@ -6,6 +6,7 @@ import * as sinon from 'sinon';
 
 import {
   type Collection,
+  MAX_RETRIES,
   type MongoClient,
   MongoError,
   MongoErrorLabel,
@@ -13,7 +14,7 @@ import {
   MongoWriteConcernError,
   Server
 } from '../../mongodb';
-import { sleep } from '../../tools/utils';
+import { measureDuration, sleep } from '../../tools/utils';
 
 describe('Retryable Writes Spec Prose', () => {
   describe('1. Test that retryable writes raise an exception when using the MMAPv1 storage engine.', () => {
@@ -549,6 +550,138 @@ describe('Retryable Writes Spec Prose', () => {
         expect(insertResult).to.be.instanceOf(MongoServerError);
         expect(insertResult).to.have.property('code', 91);
         expect(insertResult.errorLabels).to.not.include(MongoErrorLabel.NoWritesPerformed);
+      }
+    );
+
+    it(
+      'Case 4: Test that drivers set the maximum number of retries for all retryable write errors when an overload error is encountered',
+      { requires: { topology: 'replicaset', mongodb: '>=6.0' } },
+      async () => {
+        // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+        //     `SystemOverloadedError` error labels:
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: {times: 1},
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorLabels: ["RetryableError", "SystemOverloadedError"],
+        //             errorCode: 91
+        //         }
+        //     }
+        //     ```
+
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
+        //     the `RetryableWriteError` and `RetryableError` labels:
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: "alwaysOn",
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorLabels: ["RetryableError", "RetryableWriteError"],
+        //             errorCode: 91
+        //         }
+        //     }
+        //     ```
+        //     Configure the second fail point command only if the failed event is for the first error configured in step 2.
+        const serverCommandStub = sinon
+          .stub(Server.prototype, 'command')
+          .callsFake(async function () {
+            // First call: error WITH SystemOverloadedError
+            // Subsequent calls: error WITHOUT SystemOverloadedError (but still retryable)
+            const errorLabels =
+              serverCommandStub.callCount === 1
+                ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
+                : [MongoErrorLabel.RetryableError, MongoErrorLabel.RetryableWriteError];
+
+            throw new MongoServerError({
+              message: 'Server Error',
+              errorLabels,
+              code: 91,
+              ok: 0
+            });
+          });
+
+        // 4. Attempt an `insertOne` operation on any record for any database and collection. Expect the `insertOne` to fail with a
+        //     server error. Assert that `MAX_RETRIES + 1` attempts were made.
+        const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+
+        expect(insertResult).to.be.instanceOf(MongoServerError);
+        expect(serverCommandStub.callCount).to.equal(MAX_RETRIES + 1);
+      }
+    );
+
+    it(
+      'Case 5: Test that drivers do not apply backoff to non-overload errors',
+      { requires: { topology: 'replicaset', mongodb: '>=6.0' } },
+      async function () {
+        // Configure the random number generator used for jitter to always return a number as close as possible to `1`.
+        const stub = sinon.stub(Math, 'random');
+        stub.returns(0.99);
+
+        // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+        //     `SystemOverloadedError` error labels:
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: {times: 1},
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorLabels: ["RetryableError", "SystemOverloadedError"],
+        //             errorCode: 91
+        //         }
+        //     }
+        //     ```
+
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
+        //     the `RetryableWriteError` and `RetryableError` labels:
+        //     ```javascript
+        //     {
+        //         configureFailPoint: "failCommand",
+        //         mode: "alwaysOn",
+        //         data: {
+        //             failCommands: ["insert"],
+        //             errorLabels: ["RetryableError", "RetryableWriteError"],
+        //             errorCode: 91
+        //         }
+        //     }
+        //     ```
+        //     Configure the second fail point command only if the failed event is for the first error configured in step 2.
+        const serverCommandStub = sinon
+          .stub(Server.prototype, 'command')
+          .callsFake(async function () {
+            // First call: error WITH SystemOverloadedError
+            // Subsequent calls: error WITHOUT SystemOverloadedError (but still retryable)
+            const errorLabels =
+              serverCommandStub.callCount === 1
+                ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
+                : [MongoErrorLabel.RetryableError, MongoErrorLabel.RetryableWriteError];
+
+            throw new MongoServerError({
+              message: 'Server Error',
+              errorLabels,
+              code: 91,
+              ok: 0
+            });
+          });
+
+        // 4. Attempt an `insertOne` operation on any record for any database and collection. Expect the `insertOne` to fail with a
+        //     server error. Assert that backoff was applied only once for the initial overload error and not for the subsequent
+        //     non-overload retryable errors.
+        const { duration } = await measureDuration(async () => {
+          const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+          expect(insertResult).to.be.instanceOf(MongoServerError);
+        });
+
+        // The expected backoff for the first (overload) error is: Math.random() * Math.min(10000, 100 * 2^0)
+        // With Math.random() = 0.99, this gives us: 0.99 * 100 = 99ms
+        // Subsequent errors are non-overload, so they should have NO backoff applied.
+        // We add a margin for test execution overhead.
+        const expectedMinBackoff = 99; // First backoff
+        const expectedMaxBackoff = expectedMinBackoff + 1000; // Allow 1 second margin for test overhead
+
+        expect(duration).to.be.within(expectedMinBackoff, expectedMaxBackoff);
       }
     );
   });

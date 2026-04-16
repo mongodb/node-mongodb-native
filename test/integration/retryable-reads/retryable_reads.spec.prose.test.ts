@@ -1,12 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 import {
   type Collection,
   type CommandFailedEvent,
   type CommandSucceededEvent,
-  type MongoClient
+  MAX_RETRIES,
+  type MongoClient,
+  MongoErrorLabel,
+  MongoServerError,
+  Server
 } from '../../mongodb';
+import { measureDuration } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 describe('Retryable Reads Spec Prose', () => {
@@ -278,5 +284,151 @@ describe('Retryable Reads Spec Prose', () => {
         expect(commandFailedEvents[0].address).to.equal(commandSucceededEvents[0].address);
       });
     });
+  });
+
+  describe('4: Test that drivers set the maximum number of retries for all retryable read errors when an overload error is encountered', () => {
+    // This test MUST be executed against a MongoDB 4.4+ server that supports `retryReads=true` and has enabled the
+    // `configureFailPoint` command with the `errorLabels` option.
+
+    const TEST_METADATA: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
+
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      // 1. Create a client.
+      client = this.configuration.newClient({
+        monitorCommands: true
+      });
+      await client.connect();
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await client?.close();
+    });
+
+    it(
+      'should retry MAX_RETRIES times for all retryable errors after encountering an overload error',
+      TEST_METADATA,
+      async () => {
+        // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+        //     `SystemOverloadedError` error labels:
+
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
+        //     the `RetryableError` label:
+
+        // We use mocking to simulate the failpoint sequence:
+        // - First call: error WITH SystemOverloadedError
+        // - Subsequent calls: error WITHOUT SystemOverloadedError (but still retryable)
+        const serverCommandStub = sinon
+          .stub(Server.prototype, 'command')
+          .callsFake(async function () {
+            const errorLabels =
+              serverCommandStub.callCount === 1
+                ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
+                : [MongoErrorLabel.RetryableError];
+
+            throw new MongoServerError({
+              message: 'Server Error',
+              errorLabels,
+              code: 91,
+              ok: 0
+            });
+          });
+
+        // 4. Attempt a `findOne` operation on any record for any database and collection. Expect the `findOne` to fail with a
+        //     server error. Assert that `MAX_RETRIES + 1` attempts were made.
+        const error = await client
+          .db('test')
+          .collection('test')
+          .findOne({})
+          .catch(e => e);
+
+        expect(error).to.exist;
+        expect(serverCommandStub.callCount).to.equal(MAX_RETRIES + 1);
+      }
+    );
+  });
+
+  describe('5: Test that drivers do not apply backoff to non-overload errors', () => {
+    // This test MUST be executed against a MongoDB 4.4+ server that supports `retryReads=true` and has enabled the
+    // `configureFailPoint` command with the `errorLabels` option.
+
+    const TEST_METADATA: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4' }
+    };
+
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      // 1. Create a client.
+      client = this.configuration.newClient({
+        monitorCommands: true
+      });
+      await client.connect();
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await client?.close();
+    });
+
+    it(
+      'should apply backoff only once for the initial overload error and not for subsequent non-overload retryable errors',
+      TEST_METADATA,
+      async function () {
+        // Configure the random number generator used for jitter to always return a number as close as possible to `1`.
+        const randomStub = sinon.stub(Math, 'random');
+        randomStub.returns(0.99);
+
+        // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+        //     `SystemOverloadedError` error labels:
+
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
+        //     the `RetryableError` label:
+
+        // We use mocking to simulate the failpoint sequence:
+        // - First call: error WITH SystemOverloadedError
+        // - Subsequent calls: error WITHOUT SystemOverloadedError (but still retryable)
+        const serverCommandStub = sinon
+          .stub(Server.prototype, 'command')
+          .callsFake(async function () {
+            const errorLabels =
+              serverCommandStub.callCount === 1
+                ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
+                : [MongoErrorLabel.RetryableError];
+
+            throw new MongoServerError({
+              message: 'Server Error',
+              errorLabels,
+              code: 91,
+              ok: 0
+            });
+          });
+
+        // 4. Attempt a `findOne` operation on any record for any database and collection. Expect the `findOne` to fail with a
+        //     server error. Assert that backoff was applied only once for the initial overload error and not for the subsequent
+        //     non-overload retryable errors.
+        const { duration } = await measureDuration(async () => {
+          const error = await client
+            .db('test')
+            .collection('test')
+            .findOne({})
+            .catch(e => e);
+          expect(error).to.exist;
+        });
+
+        // The expected backoff for the first (overload) error is: Math.random() * Math.min(10000, 100 * 2^0)
+        // With Math.random() = 0.99, this gives us: 0.99 * 100 = 99ms
+        // Subsequent errors are non-overload, so they should have NO backoff applied.
+        // We add a margin for test execution overhead.
+        const expectedMinBackoff = 99; // First backoff
+        const expectedMaxBackoff = expectedMinBackoff + 1000; // Allow 1 second margin for test overhead
+
+        expect(duration).to.be.within(expectedMinBackoff, expectedMaxBackoff);
+      }
+    );
   });
 });
