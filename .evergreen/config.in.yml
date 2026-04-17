@@ -988,13 +988,13 @@ tasks:
           args:
             - .evergreen/run-search-index-management-tests.sh
 
-  - name: test-bson-latest-driver-7.0.0-unit-tests
+  - name: test-bson-8.0-driver-7.0.0-unit-tests
     commands:
       - command: expansions.update
         type: setup
         params:
           updates:
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: "8.0" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
         vars:
@@ -1008,13 +1008,13 @@ tasks:
       - func: log state
       - func: run unit tests
 
-  - name: test-bson-latest-driver-7.0.0-server-tests
+  - name: test-bson-8.0-driver-7.0.0-server-tests
     commands:
       - command: expansions.update
         type: setup
         params:
           updates:
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: "8.0" }
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
@@ -1033,13 +1033,13 @@ tasks:
       - func: log state
       - func: run tests
 
-  - name: test-bson-latest-driver-7.0.0-replica_set-tests
+  - name: test-bson-8.0-driver-7.0.0-replica_set-tests
     commands:
       - command: expansions.update
         type: setup
         params:
           updates:
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: "8.0" }
             - { key: TOPOLOGY, value: replica_set }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
@@ -1058,13 +1058,13 @@ tasks:
       - func: log state
       - func: run tests
 
-  - name: test-bson-latest-driver-7.0.0-sharded_cluster-tests
+  - name: test-bson-8.0-driver-7.0.0-sharded_cluster-tests
     commands:
       - command: expansions.update
         type: setup
         params:
           updates:
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: "8.0" }
             - { key: TOPOLOGY, value: sharded_cluster }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
@@ -1369,7 +1369,7 @@ buildvariants:
     display_name: BSON compatibility tests
     run_on: rhel80-large
     tasks:
-      - test-bson-latest-driver-7.0.0-unit-tests
-      - test-bson-latest-driver-7.0.0-server-tests
-      - test-bson-latest-driver-7.0.0-replica_set-tests
-      - test-bson-latest-driver-7.0.0-sharded_cluster-tests
+      - test-bson-8.0-driver-7.0.0-unit-tests
+      - test-bson-8.0-driver-7.0.0-server-tests
+      - test-bson-8.0-driver-7.0.0-replica_set-tests
+      - test-bson-8.0-driver-7.0.0-sharded_cluster-tests
