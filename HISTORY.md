@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0](https://github.com/mongodb/node-mongodb-native/compare/v7.1.0...v7.2.0) (2026-04-17)
+
+
+### Features
+
+* **NODE-7142:** Exponential backoff and jitter in retry loops ([#4871](https://github.com/mongodb/node-mongodb-native/issues/4871)) ([22c6031](https://github.com/mongodb/node-mongodb-native/commit/22c6031a673bef48597fb33041fe1122cc5ec549))
+* **NODE-7315:** Use BSON ByteUtils instead of Nodejs Buffer ([#4840](https://github.com/mongodb/node-mongodb-native/issues/4840)) ([1add538](https://github.com/mongodb/node-mongodb-native/commit/1add53872ea8e394959754375bf35af5632fbf0e))
+* **NODE-7335:** Create dedicated mocha runner with isolated vm context ([#4876](https://github.com/mongodb/node-mongodb-native/issues/4876)) ([a4cba4c](https://github.com/mongodb/node-mongodb-native/commit/a4cba4c86958198d17fe3a740b354e94fac37fc6))
+* **NODE-7379:** Refactor Crypto to Web Crypto API ([#4862](https://github.com/mongodb/node-mongodb-native/issues/4862)) ([ac98f4a](https://github.com/mongodb/node-mongodb-native/commit/ac98f4a9beed60c9c16443482c354333ba86ea25))
+* **NODE-7385:** add experimental `os` runtime adapter  ([#4851](https://github.com/mongodb/node-mongodb-native/issues/4851)) ([d2ad07f](https://github.com/mongodb/node-mongodb-native/commit/d2ad07f20903d86334da81222a6df9717f76faaa))
+* **NODE-7441:** add `ChangeStream.bufferedCount` ([#4870](https://github.com/mongodb/node-mongodb-native/issues/4870)) ([f7ea421](https://github.com/mongodb/node-mongodb-native/commit/f7ea42191f866c3dd691ed8ac1ff428e72281483))
+* **NODE-7452:** restrict server deprioritization on replica sets to overload errors ([#4875](https://github.com/mongodb/node-mongodb-native/issues/4875)) ([87a3465](https://github.com/mongodb/node-mongodb-native/commit/87a346536bc8528e67a8da4dfc96b4db289f80a9))
+* **NODE-7467:** make token bucket optional in client backpressure ([#4878](https://github.com/mongodb/node-mongodb-native/issues/4878)) ([4fb0a0a](https://github.com/mongodb/node-mongodb-native/commit/4fb0a0abe84efdab9de82acbdb09609f4be0d2fb))
+* **NODE-7491:** finalize client backpressure implementation for phase 1 rollout ([#4920](https://github.com/mongodb/node-mongodb-native/issues/4920)) ([2cc7983](https://github.com/mongodb/node-mongodb-native/commit/2cc7983e280bc946e7ecf8f7e29c7ac179f5eada))
+
+
+### Bug Fixes
+
+* **NODE-7430:** throw timeout error when `withTransaction` retries exceed deadline ([#4897](https://github.com/mongodb/node-mongodb-native/issues/4897)) ([16a899d](https://github.com/mongodb/node-mongodb-native/commit/16a899daa378a2c55aac75b1040159b5de8ee647))
+* **NODE-7459:** explicitly call setKeepAlive and setNoDelay on socket ([#4879](https://github.com/mongodb/node-mongodb-native/issues/4879)) ([778a2a1](https://github.com/mongodb/node-mongodb-native/commit/778a2a141cd79f86113866c1051117715a6021cd))
+* **NODE-7469:** overload retry when retryReads/Writes=false ([#4888](https://github.com/mongodb/node-mongodb-native/issues/4888)) ([4157b26](https://github.com/mongodb/node-mongodb-native/commit/4157b2600dda54ee14693ee951abd72e4da2b07e))
+* **NODE-7478:** OIDC host allowlist fix ([#4905](https://github.com/mongodb/node-mongodb-native/issues/4905)) ([f36b754](https://github.com/mongodb/node-mongodb-native/commit/f36b7546e937d980cc7decb760eb8f561334fa6a))
+
 ## [7.1.0](https://github.com/mongodb/node-mongodb-native/compare/v7.0.0...v7.1.0) (2026-02-02)
 
 
