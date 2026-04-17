@@ -994,7 +994,6 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: VERSION, value: latest }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
         vars:
@@ -1014,7 +1013,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: "8.0" }
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
@@ -1039,7 +1038,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: "8.0" }
             - { key: TOPOLOGY, value: replica_set }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
@@ -1064,7 +1063,7 @@ tasks:
         type: setup
         params:
           updates:
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: "8.0" }
             - { key: TOPOLOGY, value: sharded_cluster }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
