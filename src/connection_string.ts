@@ -643,7 +643,7 @@ interface OptionDescriptor {
 }
 
 export const OPTIONS = {
-  adaptiveRetries: {
+  enableOverloadRetargeting: {
     default: false,
     type: 'boolean'
   },
@@ -883,6 +883,10 @@ export const OPTIONS = {
   },
   localThresholdMS: {
     default: 15,
+    type: 'uint'
+  },
+  maxAdaptiveRetries: {
+    default: 2,
     type: 'uint'
   },
   maxConnecting: {

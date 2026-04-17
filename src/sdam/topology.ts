@@ -35,7 +35,6 @@ import { type Abortable, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { Timeout, TimeoutContext, TimeoutError } from '../timeout';
-import { INITIAL_TOKEN_BUCKET_SIZE, TokenBucket } from '../token_bucket';
 import type { Transaction } from '../transactions';
 import {
   addAbortListener,
@@ -146,7 +145,8 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   hosts: HostAddress[];
   retryWrites: boolean;
   retryReads: boolean;
-  adaptiveRetries: boolean;
+  maxAdaptiveRetries: number;
+  enableOverloadRetargeting: boolean;
   /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS: number;
   /** The name of the replica set to connect to */
@@ -213,8 +213,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   waitQueue: List<ServerSelectionRequest>;
   hello?: Document;
   _type?: string;
-
-  tokenBucket = new TokenBucket(INITIAL_TOKEN_BUCKET_SIZE);
 
   client!: MongoClient;
 

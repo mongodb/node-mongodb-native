@@ -222,7 +222,7 @@
       ]
     },
     {
-      "description": "commitTransaction is retried maxAttempts=5 times if backpressure labels are added",
+      "description": "commitTransaction is retried maxAttempts=2 times if backpressure labels are added",
       "runOnRequirements": [
         {
           "serverless": "forbid"
@@ -332,21 +332,6 @@
                 },
                 "commandName": "commitTransaction",
                 "databaseName": "admin"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "commitTransaction"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "commitTransaction"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "commitTransaction"
               }
             },
             {

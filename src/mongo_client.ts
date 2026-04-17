@@ -229,8 +229,18 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   retryReads?: boolean;
   /** Enable retryable writes. */
   retryWrites?: boolean;
-  /** Whether to enable adaptive retry rate limiting using a token bucket. Defaults to false. */
-  adaptiveRetries?: boolean;
+  /**
+   * The maximum number of retries during server overload. Set to 0 to disable overload retries. Defaults to 2.
+   * @see https://www.mongodb.com/docs/atlas/overload-errors
+   * */
+  maxAdaptiveRetries?: number;
+  /**
+   * Whether or not to enable overload retargeting. Defaults to false.
+   * @see https://www.mongodb.com/docs/atlas/overload-errors
+   * More information about the overload policy in drivers:
+   * @see https://github.com/mongodb/specifications/blob/master/source/client-backpressure/client-backpressure.md#overload-retry-policy
+   * */
+  enableOverloadRetargeting?: boolean;
   /** Allow a driver to force a Single topology type with a connection string containing one host */
   directConnection?: boolean;
   /** Instruct the driver it is connecting to a load balancer fronting a mongos like service */
@@ -1043,7 +1053,8 @@ export interface MongoOptions
   extends Required<
       Pick<
         MongoClientOptions,
-        | 'adaptiveRetries'
+        | 'maxAdaptiveRetries'
+        | 'enableOverloadRetargeting'
         | 'autoEncryption'
         | 'connectTimeoutMS'
         | 'directConnection'
