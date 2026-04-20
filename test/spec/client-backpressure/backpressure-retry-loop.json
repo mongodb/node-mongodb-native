@@ -145,7 +145,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -172,16 +172,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "listDatabases"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "listDatabases"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "listDatabases"
@@ -283,7 +273,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -307,16 +297,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "listDatabases"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "listDatabases"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "listDatabases"
@@ -415,7 +395,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -442,16 +422,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "aggregate"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "aggregate"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "aggregate"
@@ -558,7 +528,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -595,16 +565,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "bulkWrite"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "bulkWrite"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "bulkWrite"
@@ -721,7 +681,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -755,16 +715,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "aggregate"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "aggregate"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "aggregate"
@@ -873,7 +823,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -900,16 +850,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "listCollections"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "listCollections"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "listCollections"
@@ -1011,7 +951,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -1038,16 +978,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "listCollections"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "listCollections"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "listCollections"
@@ -1149,7 +1079,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -1179,16 +1109,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "ping"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "ping"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "ping"
@@ -1352,7 +1272,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -1379,16 +1299,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "aggregate"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "aggregate"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "aggregate"
@@ -1490,7 +1400,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -1517,16 +1427,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "aggregate"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "aggregate"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "aggregate"
@@ -1628,7 +1528,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -1655,16 +1555,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "aggregate"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "aggregate"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "aggregate"
@@ -1766,7 +1656,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -1790,16 +1680,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "count"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "count"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "count"
@@ -1898,7 +1778,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -1926,16 +1806,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "distinct"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "distinct"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "distinct"
@@ -2038,7 +1908,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -2065,16 +1935,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "find"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "find"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "find"
@@ -2176,7 +2036,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -2203,16 +2063,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "find"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "find"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "find"
@@ -2314,7 +2164,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -2338,16 +2188,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "listIndexes"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "listIndexes"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "listIndexes"
@@ -2446,7 +2286,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -2470,16 +2310,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "listIndexes"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "listIndexes"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "listIndexes"
@@ -2578,7 +2408,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -2605,16 +2435,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "aggregate"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "aggregate"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "aggregate"
@@ -2716,7 +2536,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -2746,16 +2566,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "insert"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "insert"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "insert"
@@ -2860,7 +2670,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -2892,16 +2702,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "insert"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "insert"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "insert"
@@ -3008,7 +2808,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -3035,16 +2835,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "delete"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "delete"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "delete"
@@ -3146,7 +2936,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -3173,16 +2963,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "delete"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "delete"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "delete"
@@ -3284,7 +3064,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -3314,16 +3094,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "update"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "update"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "update"
@@ -3428,7 +3198,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -3460,16 +3230,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "update"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "update"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "update"
@@ -3576,7 +3336,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -3608,16 +3368,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "update"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "update"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "update"
@@ -3724,7 +3474,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -3751,16 +3501,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "findAndModify"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "findAndModify"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "findAndModify"
@@ -3862,7 +3602,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -3892,16 +3632,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "findAndModify"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "findAndModify"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "findAndModify"
@@ -4006,7 +3736,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -4038,16 +3768,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "findAndModify"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "findAndModify"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "findAndModify"
@@ -4154,7 +3874,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -4190,16 +3910,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "insert"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "insert"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "insert"
@@ -4310,7 +4020,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -4340,16 +4050,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "createIndexes"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "createIndexes"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "createIndexes"
@@ -4464,7 +4164,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -4491,16 +4191,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "dropIndexes"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "dropIndexes"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "dropIndexes"
@@ -4612,7 +4302,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -4636,16 +4326,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "dropIndexes"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "dropIndexes"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "dropIndexes"
@@ -4744,7 +4424,7 @@
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
-                "times": 3
+                "times": 2
               },
               "data": {
                 "failCommands": [
@@ -4775,16 +4455,6 @@
         {
           "client": "client",
           "events": [
-            {
-              "commandStartedEvent": {
-                "commandName": "aggregate"
-              }
-            },
-            {
-              "commandFailedEvent": {
-                "commandName": "aggregate"
-              }
-            },
             {
               "commandStartedEvent": {
                 "commandName": "aggregate"

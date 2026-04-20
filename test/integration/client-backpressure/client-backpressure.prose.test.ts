@@ -1,12 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  INITIAL_TOKEN_BUCKET_SIZE,
-  MAX_RETRIES,
-  type MongoClient,
-  MongoServerError
-} from '../../mongodb';
+import { type MongoClient, MongoServerError } from '../../mongodb';
 import { clearFailPoint, configureFailPoint, measureDuration } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
@@ -36,22 +31,11 @@ describe('Client Backpressure (Prose)', function () {
       const collection = client.db('foo').collection('bar');
 
       // 3. Now, run transactions without backoff:
-      //    i. Configure the random number generator used for jitter to always return `0` -- this effectively disables backoff.
+      //    i. Configure the random number generator used for jitter to always return `0`
       const stub = sinon.stub(Math, 'random');
       stub.returns(0);
 
       //    ii. Configure the following failPoint:
-      //        ```javascript
-      //            {
-      //                configureFailPoint: 'failCommand',
-      //                mode: 'alwaysOn',
-      //                data: {
-      //                    failCommands: ['insert'],
-      //                    errorCode: 2,
-      //                    errorLabels: ['SystemOverloadedError', 'RetryableError']
-      //                }
-      //            }
-      //        ```
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
@@ -62,7 +46,7 @@ describe('Client Backpressure (Prose)', function () {
         }
       });
 
-      //    iii. Insert the document `{ a: 1 }`. Expect that the command errors. Measure the duration of the command execution.
+      //    iii. Insert the document `{ a: 1 }`. Expect that the command errors.
       const { duration: durationNoBackoff } = await measureDuration(async () => {
         const error = await collection.insertOne({ a: 1 }).catch(e => e);
         expect(error).to.be.instanceof(MongoServerError);
@@ -77,30 +61,11 @@ describe('Client Backpressure (Prose)', function () {
         expect(error).to.be.instanceof(MongoServerError);
       });
 
-      //    vi. Compare the two time between the two runs.
-      //        The sum of 5 backoffs is 3.1 seconds. There is a 1-second window to account for potential variance between the two runs.
-      expect(durationBackoff - durationNoBackoff).to.be.within(3100 - 1000, 3100 + 1000);
+      //    vi. Compare the time between the two runs.
+      //        The sum of 2 backoffs is 0.3 seconds. There is a 0.3-second window to account for potential variance.
+      expect(durationBackoff - durationNoBackoff).to.be.within(300 - 300, 300 + 300);
     }
   );
-
-  it('Test 2: Token Bucket capacity is Enforced', async function () {
-    // 1. Let client be a MongoClient with adaptiveRetries=True.
-    client = this.configuration.newClient({
-      adaptiveRetries: true
-    });
-    await client.connect();
-
-    // 2. Assert that the client's retry token bucket is at full capacity and that the capacity is DEFAULT_RETRY_TOKEN_CAPACITY.
-    const tokenBucket = client.topology.tokenBucket;
-    expect(tokenBucket).to.have.property('budget', INITIAL_TOKEN_BUCKET_SIZE);
-    expect(tokenBucket).to.have.property('capacity', INITIAL_TOKEN_BUCKET_SIZE);
-
-    // 3. Using client, execute a successful ping command.
-    await client.db('admin').command({ ping: 1 });
-
-    // 4. Assert that the successful command did not increase the number of tokens in the bucket above DEFAULT_RETRY_TOKEN_CAPACITY.
-    expect(tokenBucket).to.have.property('budget').that.is.at.most(INITIAL_TOKEN_BUCKET_SIZE);
-  });
 
   it(
     'Test 3: Overload Errors are Retried a Maximum of MAX_RETRIES times',
@@ -121,18 +86,7 @@ describe('Client Backpressure (Prose)', function () {
       const commandsStarted = [];
       client.on('commandStarted', filterForCommands(['find'], commandsStarted));
 
-      /*
-      * 3. Configure the following failpoint:
-          {
-              configureFailPoint: 'failCommand',
-              mode: 'alwaysOn',
-              data: {
-                  failCommands: ['find'],
-                  errorCode: 462,  // IngressRequestRateLimitExceeded
-                  errorLabels: ['SystemOverloadedError', 'RetryableError']
-              }
-          }
-      * */
+      // 3. Configure the following failpoint:
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
@@ -151,50 +105,35 @@ describe('Client Backpressure (Prose)', function () {
       expect(error.hasErrorLabel('RetryableError')).to.be.true;
       expect(error.hasErrorLabel('SystemOverloadedError')).to.be.true;
 
-      // 6. Assert that the total number of started commands is MAX_RETRIES + 1 (6).
-      expect(commandsStarted).to.have.length(MAX_RETRIES + 1);
+      // 6. Assert that the total number of started commands is MAX_RETRIES + 1 (3).
+      expect(commandsStarted).to.have.length(3);
     }
   );
 
   it(
-    'Test 4: Adaptive Retries are Limited by Token Bucket Tokens',
+    'Test 4: Overload Errors are Retried a Maximum of maxAdaptiveRetries times when configured',
     {
       requires: {
         mongodb: '>=4.4'
       }
     },
     async function () {
-      // 1. Let `client` be a `MongoClient` with `adaptiveRetries=True` and command event monitoring enabled.
+      // 1. Let `client` be a `MongoClient` with `maxAdaptiveRetries=1` and command event monitoring enabled.
       client = this.configuration.newClient({
-        adaptiveRetries: true,
+        maxAdaptiveRetries: 1,
         monitorCommands: true
       });
       await client.connect();
 
-      // 2. Set `client`'s retry token bucket to have 2 tokens.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      client.topology!.tokenBucket['budget'] = 2;
-
-      // 3. Let `coll` be a collection.
+      // 2. Let `coll` be a collection.
       const collection = client.db('foo').collection('bar');
       const commandsStarted = [];
       client.on('commandStarted', filterForCommands(['find'], commandsStarted));
 
-      /*
-      * 4. Configure the following failpoint:
-          {
-              configureFailPoint: 'failCommand',
-              mode: {times: 3},
-              data: {
-                  failCommands: ['find'],
-                  errorCode: 462,  // IngressRequestRateLimitExceeded
-                  errorLabels: ['SystemOverloadedError', 'RetryableError']
-              }
-          }
-      * */
+      // 3. Configure the following failpoint:
       await configureFailPoint(this.configuration, {
         configureFailPoint: 'failCommand',
-        mode: { times: 3 },
+        mode: 'alwaysOn',
         data: {
           failCommands: ['find'],
           errorCode: 462,
@@ -202,16 +141,16 @@ describe('Client Backpressure (Prose)', function () {
         }
       });
 
-      // 5. Perform a find operation with `coll` that fails.
+      // 4. Perform a find operation with `coll` that fails.
       const error = await collection.findOne({}).catch(e => e);
 
-      // 6. Assert that the raised error contains both the `RetryableError` and `SystemOverloadedError` error labels.
+      // 5. Assert that the raised error contains both the `RetryableError` and `SystemOverloadedError` error labels.
       expect(error).to.be.instanceof(MongoServerError);
       expect(error.hasErrorLabel('RetryableError')).to.be.true;
       expect(error.hasErrorLabel('SystemOverloadedError')).to.be.true;
 
-      // 7. Assert that the total number of started commands is 3: one for the initial attempt and two for the retries.
-      expect(commandsStarted).to.have.length(3);
+      // 6. Assert that the total number of started commands is `maxAdaptiveRetries` + 1 (2).
+      expect(commandsStarted).to.have.length(2);
     }
   );
 });

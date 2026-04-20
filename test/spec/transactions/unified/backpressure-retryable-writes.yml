@@ -144,10 +144,10 @@ tests:
     outcome:
       - collectionName: *collection_name
         databaseName: *database_name
-        documents:
+        documents: 
           - { _id: 1 }
           - { _id: 2 }
-  - description: writes are retried maxAttempts=5 times if backpressure labels are added
+  - description: writes are retried maxAttempts=2 times if backpressure labels are added
     operations:
       - object: *session0
         name: startTransaction
@@ -188,12 +188,6 @@ tests:
     expectEvents:
       - client: *client0
         events:
-          - commandStartedEvent:
-              commandName: insert
-          - commandStartedEvent:
-              commandName: insert
-          - commandStartedEvent:
-              commandName: insert
           - commandStartedEvent:
               commandName: insert
           - commandStartedEvent:

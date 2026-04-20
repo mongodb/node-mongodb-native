@@ -216,7 +216,7 @@
       ]
     },
     {
-      "description": "reads are retried maxAttempts=5 times if backpressure labels are added",
+      "description": "reads are retried maxAttempts=2 times if backpressure labels are added",
       "operations": [
         {
           "object": "session0",
@@ -283,21 +283,6 @@
             {
               "commandStartedEvent": {
                 "commandName": "insert"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "find"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "find"
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "find"
               }
             },
             {

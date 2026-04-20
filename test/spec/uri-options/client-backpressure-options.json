@@ -1,30 +1,61 @@
 {
   "tests": [
     {
-      "description": "adaptiveRetries=true is parsed correctly",
-      "uri": "mongodb://example.com/?adaptiveRetries=true",
+      "description": "maxAdaptiveRetries is parsed correctly",
+      "uri": "mongodb://example.com/?maxAdaptiveRetries=3",
       "valid": true,
       "warning": false,
       "hosts": null,
       "auth": null,
       "options": {
-        "adaptiveRetries": true
+        "maxAdaptiveRetries": 3
       }
     },
     {
-      "description": "adaptiveRetries=false is parsed correctly",
-      "uri": "mongodb://example.com/?adaptiveRetries=false",
+      "description": "maxAdaptiveRetries=0 is parsed correctly",
+      "uri": "mongodb://example.com/?maxAdaptiveRetries=0",
       "valid": true,
       "warning": false,
       "hosts": null,
       "auth": null,
       "options": {
-        "adaptiveRetries": false
+        "maxAdaptiveRetries": 0
       }
     },
     {
-      "description": "adaptiveRetries with invalid value causes a warning",
-      "uri": "mongodb://example.com/?adaptiveRetries=invalid",
+      "description": "maxAdaptiveRetries with invalid value causes a warning",
+      "uri": "mongodb://example.com/?maxAdaptiveRetries=-5",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "enableOverloadRetargeting is parsed correctly",
+      "uri": "mongodb://example.com/?enableOverloadRetargeting=true",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "enableOverloadRetargeting": true
+      }
+    },
+    {
+      "description": "enableOverloadRetargeting=false is parsed correctly",
+      "uri": "mongodb://example.com/?enableOverloadRetargeting=false",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "enableOverloadRetargeting": false
+      }
+    },
+    {
+      "description": "enableOverloadRetargeting with invalid value causes a warning",
+      "uri": "mongodb://example.com/?enableOverloadRetargeting=invalid",
       "valid": true,
       "warning": true,
       "hosts": null,

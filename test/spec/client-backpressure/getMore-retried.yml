@@ -38,7 +38,7 @@ tests:
           client: *failPointClient
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 3 }
+            mode: { times: 2 }
             data:
               failCommands: [getMore]
               errorLabels: [RetryableError, SystemOverloadedError]
@@ -74,18 +74,13 @@ tests:
               commandName: getMore
           - commandFailedEvent:
               commandName: getMore
-          # third attempt
-          - commandStartedEvent:
-              commandName: getMore
-          - commandFailedEvent:
-              commandName: getMore
           # success
           - commandStartedEvent:
               commandName: getMore
           - commandSucceededEvent:
               commandName: getMore
 
-  - description: "getMores are retried maxAttempts=5 times"
+  - description: "getMores are retried maxAttempts=2 times"
     operations:
       - name: failPoint
         object: testRunner
@@ -126,21 +121,6 @@ tests:
           - commandFailedEvent:
               commandName: getMore
           # third attempt
-          - commandStartedEvent:
-              commandName: getMore
-          - commandFailedEvent:
-              commandName: getMore
-          # fourth attempt
-          - commandStartedEvent:
-              commandName: getMore
-          - commandFailedEvent:
-              commandName: getMore
-          # fifth attempt
-          - commandStartedEvent:
-              commandName: getMore
-          - commandFailedEvent:
-              commandName: getMore
-          # final attempt
           - commandStartedEvent:
               commandName: getMore
           - commandFailedEvent:

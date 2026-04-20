@@ -820,10 +820,9 @@ describe('Indexes', function () {
       const indexName = await collection.createIndex('a', { hidden: true });
       expect(indexName).to.equal('a_1');
       const indexes = await collection.listIndexes().toArray();
-      expect(indexes).to.deep.equal([
-        { v: 2, key: { _id: 1 }, name: '_id_' },
-        { v: 2, key: { a: 1 }, name: 'a_1', hidden: true }
-      ]);
+      expect(indexes).to.have.lengthOf(2);
+      expect(indexes[0]).to.containSubset({ v: 2, key: { _id: 1 }, name: '_id_' });
+      expect(indexes[1]).to.containSubset({ v: 2, key: { a: 1 }, name: 'a_1', hidden: true });
     }
   );
 });

@@ -890,23 +890,4 @@ describe('Connection String', function () {
       }
     });
   });
-
-  context('when adaptiveRetries is set', function () {
-    it('defaults to false', function () {
-      const options = parseOptions('mongodb://localhost:27017');
-      expect(options.adaptiveRetries).to.equal(false);
-    });
-
-    it('can be enabled via connection string', function () {
-      const options = parseOptions('mongodb://localhost:27017?adaptiveRetries=true');
-      expect(options.adaptiveRetries).to.equal(true);
-    });
-
-    it('can be enabled via client options', function () {
-      const options = parseOptions('mongodb://localhost:27017', {
-        adaptiveRetries: true
-      });
-      expect(options.adaptiveRetries).to.equal(true);
-    });
-  });
 });
