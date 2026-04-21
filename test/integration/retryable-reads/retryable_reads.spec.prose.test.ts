@@ -500,10 +500,10 @@ describe('Retryable Reads Spec Prose', () => {
         expect(serverCommandStub.callCount).to.equal(3);
 
         // The expected backoff for the first (overload) error is: Math.random() * Math.min(10000, 100 * 2^0)
-        // With Math.random() = 0.99, this gives us: 0.99 * 100 = 99ms
-        // Subsequent errors are non-overload, so they should have NO backoff applied.
-        // We add a margin for test execution overhead.
-        const expectedMinBackoff = 99; // First backoff
+        // With Math.random() = 0.99, this gives ~99ms. `measureDuration` uses `Math.floor(performance.now())`
+        // on both ends and setTimeout can fire a couple ms early, so we allow slack on the lower bound.
+        // If the driver incorrectly applied backoff to all retries, total would be 0.99*(100+200) = ~297ms.
+        const expectedMinBackoff = 90; // First backoff
         const expectedMaxBackoff = expectedMinBackoff + 1000; // Allow 1 second margin for test overhead
 
         expect(duration).to.be.within(expectedMinBackoff, expectedMaxBackoff);
