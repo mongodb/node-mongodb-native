@@ -6,7 +6,6 @@ import * as sinon from 'sinon';
 
 import {
   type Collection,
-  MAX_RETRIES,
   type MongoClient,
   MongoError,
   MongoErrorLabel,
@@ -609,7 +608,10 @@ describe('Retryable Writes Spec Prose', () => {
         const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
 
         expect(insertResult).to.be.instanceOf(MongoServerError);
-        expect(serverCommandStub.callCount).to.equal(MAX_RETRIES + 1);
+        expect(insertResult.code).to.equal(91);
+        expect(insertResult.hasErrorLabel(MongoErrorLabel.RetryableError)).to.be.true;
+        // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2).
+        expect(serverCommandStub.callCount).to.equal(3);
       }
     );
 
@@ -673,7 +675,13 @@ describe('Retryable Writes Spec Prose', () => {
         const { duration } = await measureDuration(async () => {
           const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
           expect(insertResult).to.be.instanceOf(MongoServerError);
+          expect(insertResult.code).to.equal(91);
         });
+
+        // Ensure the full retry sequence executed (i.e. the test really exercised the
+        // post-overload non-overload retries, not just bailed after the first attempt).
+        // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2).
+        expect(serverCommandStub.callCount).to.equal(3);
 
         // The expected backoff for the first (overload) error is: Math.random() * Math.min(10000, 100 * 2^0)
         // With Math.random() = 0.99, this gives us: 0.99 * 100 = 99ms

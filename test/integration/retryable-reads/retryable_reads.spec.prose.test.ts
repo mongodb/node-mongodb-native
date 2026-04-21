@@ -6,7 +6,6 @@ import {
   type Collection,
   type CommandFailedEvent,
   type CommandSucceededEvent,
-  MAX_RETRIES,
   type MongoClient,
   MongoErrorLabel,
   MongoServerError,
@@ -368,7 +367,8 @@ describe('Retryable Reads Spec Prose', () => {
     beforeEach(async function () {
       // 1. Create a client.
       client = this.configuration.newClient({
-        monitorCommands: true
+        monitorCommands: true,
+        retryReads: true
       });
       await client.connect();
     });
@@ -415,8 +415,11 @@ describe('Retryable Reads Spec Prose', () => {
           .findOne({})
           .catch(e => e);
 
-        expect(error).to.exist;
-        expect(serverCommandStub.callCount).to.equal(MAX_RETRIES + 1);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error.code).to.equal(91);
+        expect(error.hasErrorLabel(MongoErrorLabel.RetryableError)).to.be.true;
+        // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2).
+        expect(serverCommandStub.callCount).to.equal(3);
       }
     );
   });
@@ -434,7 +437,8 @@ describe('Retryable Reads Spec Prose', () => {
     beforeEach(async function () {
       // 1. Create a client.
       client = this.configuration.newClient({
-        monitorCommands: true
+        monitorCommands: true,
+        retryReads: true
       });
       await client.connect();
     });
@@ -486,8 +490,14 @@ describe('Retryable Reads Spec Prose', () => {
             .collection('test')
             .findOne({})
             .catch(e => e);
-          expect(error).to.exist;
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(error.code).to.equal(91);
         });
+
+        // Ensure the full retry sequence executed (i.e. the test really exercised the
+        // post-overload non-overload retries, not just bailed after the first attempt).
+        // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2).
+        expect(serverCommandStub.callCount).to.equal(3);
 
         // The expected backoff for the first (overload) error is: Math.random() * Math.min(10000, 100 * 2^0)
         // With Math.random() = 0.99, this gives us: 0.99 * 100 = 99ms
