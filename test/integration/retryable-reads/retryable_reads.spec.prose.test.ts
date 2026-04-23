@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import * as timersPromises from 'timers/promises';
 
 import {
   type Collection,
@@ -8,10 +9,8 @@ import {
   type CommandSucceededEvent,
   type MongoClient,
   MongoErrorLabel,
-  MongoServerError,
-  Server
+  MongoServerError
 } from '../../mongodb';
-import { measureDuration } from '../../tools/utils';
 import { filterForCommands } from '../shared';
 
 describe('Retryable Reads Spec Prose', () => {
@@ -361,21 +360,23 @@ describe('Retryable Reads Spec Prose', () => {
     const TEST_METADATA: MongoDBMetadataUI = {
       requires: { mongodb: '>=4.4' }
     };
-
-    let client: MongoClient;
+    const APP_NAME = 'retryable-reads-prose-4';
 
     beforeEach(async function () {
       // 1. Create a client.
       client = this.configuration.newClient({
         monitorCommands: true,
-        retryReads: true
+        retryReads: true,
+        appName: APP_NAME
       });
       await client.connect();
     });
 
-    afterEach(async function () {
-      sinon.restore();
-      await client?.close();
+    afterEach(async () => {
+      await client
+        ?.db('admin')
+        .command({ configureFailPoint: 'failCommand', mode: 'off' })
+        .catch(() => null);
     });
 
     it(
@@ -383,29 +384,42 @@ describe('Retryable Reads Spec Prose', () => {
       TEST_METADATA,
       async () => {
         // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
-        //     `SystemOverloadedError` error labels:
+        //     `SystemOverloadedError` error labels.
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['find'],
+            errorLabels: ['RetryableError', 'SystemOverloadedError'],
+            errorCode: 91,
+            appName: APP_NAME
+          }
+        });
 
-        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
-        //     the `RetryableError` label:
-
-        // We use mocking to simulate the failpoint sequence:
-        // - First call: error WITH SystemOverloadedError
-        // - Subsequent calls: error WITHOUT SystemOverloadedError (but still retryable)
-        const serverCommandStub = sinon
-          .stub(Server.prototype, 'command')
-          .callsFake(async function () {
-            const errorLabels =
-              serverCommandStub.callCount === 1
-                ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
-                : [MongoErrorLabel.RetryableError];
-
-            throw new MongoServerError({
-              message: 'Server Error',
-              errorLabels,
-              code: 91,
-              ok: 0
-            });
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91`
+        //     (ShutdownInProgress) and the `RetryableError` label. Configure the second fail point command
+        //     only if the failed event is for the first error configured in step 2.
+        let secondFailpointConfigured = false;
+        client.on('commandFailed', async (event: CommandFailedEvent) => {
+          if (secondFailpointConfigured) return;
+          if (event.commandName !== 'find') return;
+          secondFailpointConfigured = true;
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['find'],
+              errorLabels: ['RetryableError'],
+              errorCode: 91,
+              appName: APP_NAME
+            }
           });
+        });
+
+        const findStartedEvents: Array<Record<string, any>> = [];
+        client.on('commandStarted', ev => {
+          if (ev.commandName === 'find') findStartedEvents.push(ev);
+        });
 
         // 4. Attempt a `findOne` operation on any record for any database and collection. Expect the `findOne` to fail with a
         //     server error. Assert that `MAX_RETRIES + 1` attempts were made.
@@ -419,7 +433,9 @@ describe('Retryable Reads Spec Prose', () => {
         expect(error.code).to.equal(91);
         expect(error.hasErrorLabel(MongoErrorLabel.RetryableError)).to.be.true;
         // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2).
-        expect(serverCommandStub.callCount).to.equal(3);
+        expect(findStartedEvents).to.have.lengthOf(3);
+
+        // 5. Disable the fail point — handled by the surrounding afterEach.
       }
     );
   });
@@ -431,82 +447,92 @@ describe('Retryable Reads Spec Prose', () => {
     const TEST_METADATA: MongoDBMetadataUI = {
       requires: { mongodb: '>=4.4' }
     };
-
-    let client: MongoClient;
+    const APP_NAME = 'retryable-reads-prose-5';
 
     beforeEach(async function () {
       // 1. Create a client.
       client = this.configuration.newClient({
         monitorCommands: true,
-        retryReads: true
+        retryReads: true,
+        appName: APP_NAME
       });
       await client.connect();
     });
 
-    afterEach(async function () {
+    afterEach(async () => {
       sinon.restore();
-      await client?.close();
+      await client
+        ?.db('admin')
+        .command({ configureFailPoint: 'failCommand', mode: 'off' })
+        .catch(() => null);
     });
 
     it(
       'should apply backoff only once for the initial overload error and not for subsequent non-overload retryable errors',
       TEST_METADATA,
       async function () {
-        // Configure the random number generator used for jitter to always return a number as close as possible to `1`.
-        const randomStub = sinon.stub(Math, 'random');
-        randomStub.returns(0.99);
+        // Spy on `timers/promises.setTimeout` — the only sleep on the retry path
+        // (src/operations/execute_operation.ts:337) — to count how many times backoff was applied.
+        // We use a spy (not a stub) so the real sleep still happens, giving the commandFailed
+        // listener below time to configure the second failpoint before the driver dispatches its
+        // next retry.
+        const setTimeoutSpy = sinon.spy(timersPromises, 'setTimeout');
 
         // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
-        //     `SystemOverloadedError` error labels:
+        //     `SystemOverloadedError` error labels.
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['find'],
+            errorLabels: ['RetryableError', 'SystemOverloadedError'],
+            errorCode: 91,
+            appName: APP_NAME
+          }
+        });
 
-        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91` (ShutdownInProgress) and
-        //     the `RetryableError` label:
-
-        // We use mocking to simulate the failpoint sequence:
-        // - First call: error WITH SystemOverloadedError
-        // - Subsequent calls: error WITHOUT SystemOverloadedError (but still retryable)
-        const serverCommandStub = sinon
-          .stub(Server.prototype, 'command')
-          .callsFake(async function () {
-            const errorLabels =
-              serverCommandStub.callCount === 1
-                ? [MongoErrorLabel.RetryableError, MongoErrorLabel.SystemOverloadedError]
-                : [MongoErrorLabel.RetryableError];
-
-            throw new MongoServerError({
-              message: 'Server Error',
-              errorLabels,
-              code: 91,
-              ok: 0
-            });
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91`
+        //     (ShutdownInProgress) and the `RetryableError` label. Configure the second fail point command
+        //     only if the failed event is for the first error configured in step 2.
+        let secondFailpointConfigured = false;
+        client.on('commandFailed', async (event: CommandFailedEvent) => {
+          if (secondFailpointConfigured) return;
+          if (event.commandName !== 'find') return;
+          secondFailpointConfigured = true;
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['find'],
+              errorLabels: ['RetryableError'],
+              errorCode: 91,
+              appName: APP_NAME
+            }
           });
+        });
+
+        const findStartedEvents: Array<Record<string, any>> = [];
+        client.on('commandStarted', ev => {
+          if (ev.commandName === 'find') findStartedEvents.push(ev);
+        });
 
         // 4. Attempt a `findOne` operation on any record for any database and collection. Expect the `findOne` to fail with a
         //     server error. Assert that backoff was applied only once for the initial overload error and not for the subsequent
         //     non-overload retryable errors.
-        const { duration } = await measureDuration(async () => {
-          const error = await client
-            .db('test')
-            .collection('test')
-            .findOne({})
-            .catch(e => e);
-          expect(error).to.be.instanceOf(MongoServerError);
-          expect(error.code).to.equal(91);
-        });
+        const error = await client
+          .db('test')
+          .collection('test')
+          .findOne({})
+          .catch(e => e);
 
-        // Ensure the full retry sequence executed (i.e. the test really exercised the
-        // post-overload non-overload retries, not just bailed after the first attempt).
-        // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2).
-        expect(serverCommandStub.callCount).to.equal(3);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error.code).to.equal(91);
+        // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2) — the full retry sequence ran.
+        expect(findStartedEvents).to.have.lengthOf(3);
+        // Backoff was applied exactly once — for the initial overload error only.
+        expect(setTimeoutSpy.callCount).to.equal(1);
 
-        // The expected backoff for the first (overload) error is: Math.random() * Math.min(10000, 100 * 2^0)
-        // With Math.random() = 0.99, this gives ~99ms. `measureDuration` uses `Math.floor(performance.now())`
-        // on both ends and setTimeout can fire a couple ms early, so we allow slack on the lower bound.
-        // If the driver incorrectly applied backoff to all retries, total would be 0.99*(100+200) = ~297ms.
-        const expectedMinBackoff = 90; // First backoff
-        const expectedMaxBackoff = expectedMinBackoff + 1000; // Allow 1 second margin for test overhead
-
-        expect(duration).to.be.within(expectedMinBackoff, expectedMaxBackoff);
+        // 5. Disable the fail point — handled by the surrounding afterEach.
       }
     );
   });
