@@ -361,6 +361,11 @@ describe('Retryable Reads Spec Prose', () => {
       requires: { mongodb: '>=4.4' }
     };
     const APP_NAME = 'retryable-reads-prose-4';
+    // Separate admin client for configureFailPoint calls. Code 91 (ShutdownInProgress) is a
+    // state-change error: the main client's server gets marked Unknown and its pool cleared on the
+    // first failpoint hit, so the listener's configureFailPoint would fail with MongoPoolClearedError
+    // if it went through `client`.
+    let adminClient: MongoClient;
 
     beforeEach(async function () {
       // 1. Create a client.
@@ -370,13 +375,17 @@ describe('Retryable Reads Spec Prose', () => {
         appName: APP_NAME
       });
       await client.connect();
+
+      adminClient = this.configuration.newClient();
+      await adminClient.connect();
     });
 
     afterEach(async () => {
-      await client
+      await adminClient
         ?.db('admin')
         .command({ configureFailPoint: 'failCommand', mode: 'off' })
         .catch(() => null);
+      await adminClient?.close();
     });
 
     it(
@@ -385,7 +394,7 @@ describe('Retryable Reads Spec Prose', () => {
       async () => {
         // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
         //     `SystemOverloadedError` error labels.
-        await client.db('admin').command({
+        await adminClient.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: {
@@ -400,20 +409,23 @@ describe('Retryable Reads Spec Prose', () => {
         //     (ShutdownInProgress) and the `RetryableError` label. Configure the second fail point command
         //     only if the failed event is for the first error configured in step 2.
         let secondFailpointConfigured = false;
-        client.on('commandFailed', async (event: CommandFailedEvent) => {
+        client.on('commandFailed', (event: CommandFailedEvent) => {
           if (secondFailpointConfigured) return;
           if (event.commandName !== 'find') return;
           secondFailpointConfigured = true;
-          await client.db('admin').command({
-            configureFailPoint: 'failCommand',
-            mode: 'alwaysOn',
-            data: {
-              failCommands: ['find'],
-              errorLabels: ['RetryableError'],
-              errorCode: 91,
-              appName: APP_NAME
-            }
-          });
+          adminClient
+            .db('admin')
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['find'],
+                errorLabels: ['RetryableError'],
+                errorCode: 91,
+                appName: APP_NAME
+              }
+            })
+            .catch(() => null);
         });
 
         const findStartedEvents: Array<Record<string, any>> = [];
@@ -448,6 +460,8 @@ describe('Retryable Reads Spec Prose', () => {
       requires: { mongodb: '>=4.4' }
     };
     const APP_NAME = 'retryable-reads-prose-5';
+    // Separate admin client for configureFailPoint calls. See Case 4 describe for rationale.
+    let adminClient: MongoClient;
 
     beforeEach(async function () {
       // 1. Create a client.
@@ -457,14 +471,18 @@ describe('Retryable Reads Spec Prose', () => {
         appName: APP_NAME
       });
       await client.connect();
+
+      adminClient = this.configuration.newClient();
+      await adminClient.connect();
     });
 
     afterEach(async () => {
       sinon.restore();
-      await client
+      await adminClient
         ?.db('admin')
         .command({ configureFailPoint: 'failCommand', mode: 'off' })
         .catch(() => null);
+      await adminClient?.close();
     });
 
     it(
@@ -480,7 +498,7 @@ describe('Retryable Reads Spec Prose', () => {
 
         // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
         //     `SystemOverloadedError` error labels.
-        await client.db('admin').command({
+        await adminClient.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: {
@@ -495,20 +513,23 @@ describe('Retryable Reads Spec Prose', () => {
         //     (ShutdownInProgress) and the `RetryableError` label. Configure the second fail point command
         //     only if the failed event is for the first error configured in step 2.
         let secondFailpointConfigured = false;
-        client.on('commandFailed', async (event: CommandFailedEvent) => {
+        client.on('commandFailed', (event: CommandFailedEvent) => {
           if (secondFailpointConfigured) return;
           if (event.commandName !== 'find') return;
           secondFailpointConfigured = true;
-          await client.db('admin').command({
-            configureFailPoint: 'failCommand',
-            mode: 'alwaysOn',
-            data: {
-              failCommands: ['find'],
-              errorLabels: ['RetryableError'],
-              errorCode: 91,
-              appName: APP_NAME
-            }
-          });
+          adminClient
+            .db('admin')
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['find'],
+                errorLabels: ['RetryableError'],
+                errorCode: 91,
+                appName: APP_NAME
+              }
+            })
+            .catch(() => null);
         });
 
         const findStartedEvents: Array<Record<string, any>> = [];

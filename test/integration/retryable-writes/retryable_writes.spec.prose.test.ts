@@ -365,6 +365,11 @@ describe('Retryable Writes Spec Prose', () => {
     // can't affect unrelated clients (and vice versa). Cases 1-3 ignore this — they mock the
     // server response via sinon and never configure a real failpoint.
     const FAILPOINT_APP_NAME = 'retryable-writes-prose-section-6';
+    // Separate admin client for Cases 4-5 configureFailPoint calls. Code 91 (ShutdownInProgress) is
+    // a state-change error: `client`'s server gets marked Unknown and its pool cleared on the first
+    // failpoint hit, so the listener's configureFailPoint would fail with MongoPoolClearedError if
+    // it went through `client`.
+    let adminClient: MongoClient;
 
     beforeEach(async function () {
       // 1. Create a client with `retryWrites=true`.
@@ -379,15 +384,19 @@ describe('Retryable Writes Spec Prose', () => {
         .drop()
         .catch(() => null);
       collection = client.db().collection('retryReturnsOriginal');
+
+      adminClient = this.configuration.newClient();
+      await adminClient.connect();
     });
 
     afterEach(async function () {
       // 5. Disable the fail point. Cases 1-3 rely on sinon stubs; Cases 4-5 configure real failpoints.
       sinon.restore();
-      await client
-        .db('admin')
+      await adminClient
+        ?.db('admin')
         .command({ configureFailPoint: 'failCommand', mode: 'off' })
         .catch(() => null);
+      await adminClient?.close();
       await client.close();
     });
 
@@ -575,7 +584,7 @@ describe('Retryable Writes Spec Prose', () => {
 
         // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
         //     `SystemOverloadedError` error labels.
-        await client.db('admin').command({
+        await adminClient.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: {
@@ -590,20 +599,23 @@ describe('Retryable Writes Spec Prose', () => {
         //     (ShutdownInProgress) and the `RetryableWriteError` and `RetryableError` labels. Configure the
         //     second fail point command only if the failed event is for the first error configured in step 2.
         let secondFailpointConfigured = false;
-        client.on('commandFailed', async (event: CommandFailedEvent) => {
+        client.on('commandFailed', (event: CommandFailedEvent) => {
           if (secondFailpointConfigured) return;
           if (event.commandName !== 'insert') return;
           secondFailpointConfigured = true;
-          await client.db('admin').command({
-            configureFailPoint: 'failCommand',
-            mode: 'alwaysOn',
-            data: {
-              failCommands: ['insert'],
-              errorLabels: ['RetryableError', 'RetryableWriteError'],
-              errorCode: 91,
-              appName: FAILPOINT_APP_NAME
-            }
-          });
+          adminClient
+            .db('admin')
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['insert'],
+                errorLabels: ['RetryableError', 'RetryableWriteError'],
+                errorCode: 91,
+                appName: FAILPOINT_APP_NAME
+              }
+            })
+            .catch(() => null);
         });
 
         const insertStartedEvents: Array<Record<string, any>> = [];
@@ -640,7 +652,7 @@ describe('Retryable Writes Spec Prose', () => {
 
         // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
         //     `SystemOverloadedError` error labels.
-        await client.db('admin').command({
+        await adminClient.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: {
@@ -655,20 +667,23 @@ describe('Retryable Writes Spec Prose', () => {
         //     (ShutdownInProgress) and the `RetryableWriteError` and `RetryableError` labels. Configure the
         //     second fail point command only if the failed event is for the first error configured in step 2.
         let secondFailpointConfigured = false;
-        client.on('commandFailed', async (event: CommandFailedEvent) => {
+        client.on('commandFailed', (event: CommandFailedEvent) => {
           if (secondFailpointConfigured) return;
           if (event.commandName !== 'insert') return;
           secondFailpointConfigured = true;
-          await client.db('admin').command({
-            configureFailPoint: 'failCommand',
-            mode: 'alwaysOn',
-            data: {
-              failCommands: ['insert'],
-              errorLabels: ['RetryableError', 'RetryableWriteError'],
-              errorCode: 91,
-              appName: FAILPOINT_APP_NAME
-            }
-          });
+          adminClient
+            .db('admin')
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['insert'],
+                errorLabels: ['RetryableError', 'RetryableWriteError'],
+                errorCode: 91,
+                appName: FAILPOINT_APP_NAME
+              }
+            })
+            .catch(() => null);
         });
 
         const insertStartedEvents: Array<Record<string, any>> = [];
