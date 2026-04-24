@@ -3,9 +3,11 @@ import { once } from 'node:events';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import * as timersPromises from 'timers/promises';
 
 import {
   type Collection,
+  type CommandFailedEvent,
   type MongoClient,
   MongoError,
   MongoErrorLabel,
@@ -359,21 +361,42 @@ describe('Retryable Writes Spec Prose', () => {
 
     let client: MongoClient;
     let collection: Collection<{ _id: 1 }>;
+    // Scope Cases 4-5 failpoints to our client via appName so a stale failpoint from these tests
+    // can't affect unrelated clients (and vice versa). Cases 1-3 ignore this — they mock the
+    // server response via sinon and never configure a real failpoint.
+    const FAILPOINT_APP_NAME = 'retryable-writes-prose-section-6';
+    // Separate admin client for Cases 4-5 configureFailPoint calls. Code 91 (ShutdownInProgress) is
+    // a state-change error: `client`'s server gets marked Unknown and its pool cleared on the first
+    // failpoint hit, so the listener's configureFailPoint would fail with MongoPoolClearedError if
+    // it went through `client`.
+    let adminClient: MongoClient;
 
     beforeEach(async function () {
       // 1. Create a client with `retryWrites=true`.
-      client = this.configuration.newClient({ monitorCommands: true, retryWrites: true });
+      client = this.configuration.newClient({
+        monitorCommands: true,
+        retryWrites: true,
+        appName: FAILPOINT_APP_NAME
+      });
       await client
         .db()
         .collection('retryReturnsOriginal')
         .drop()
         .catch(() => null);
       collection = client.db().collection('retryReturnsOriginal');
+
+      adminClient = this.configuration.newClient();
+      await adminClient.connect();
     });
 
     afterEach(async function () {
-      // 5. Disable the fail point (we don't use a failPoint, so we use sinon.restore instead)
+      // 5. Disable the fail point. Cases 1-3 rely on sinon stubs; Cases 4-5 configure real failpoints.
       sinon.restore();
+      await adminClient
+        ?.db('admin')
+        .command({ configureFailPoint: 'failCommand', mode: 'off' })
+        .catch(() => null);
+      await adminClient?.close();
       await client.close();
     });
 
@@ -550,6 +573,137 @@ describe('Retryable Writes Spec Prose', () => {
         expect(insertResult).to.be.instanceOf(MongoServerError);
         expect(insertResult).to.have.property('code', 91);
         expect(insertResult.errorLabels).to.not.include(MongoErrorLabel.NoWritesPerformed);
+      }
+    );
+
+    it(
+      'Case 4: Test that drivers set the maximum number of retries for all retryable write errors when an overload error is encountered',
+      { requires: { topology: 'replicaset', mongodb: '>=6.0' } },
+      async () => {
+        // 1. Create a client with `retryWrites=true` — handled by the surrounding beforeEach.
+
+        // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+        //     `SystemOverloadedError` error labels.
+        await adminClient.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['insert'],
+            errorLabels: ['RetryableError', 'SystemOverloadedError'],
+            errorCode: 91,
+            appName: FAILPOINT_APP_NAME
+          }
+        });
+
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91`
+        //     (ShutdownInProgress) and the `RetryableWriteError` and `RetryableError` labels. Configure the
+        //     second fail point command only if the failed event is for the first error configured in step 2.
+        let secondFailpointConfigured = false;
+        client.on('commandFailed', (event: CommandFailedEvent) => {
+          if (secondFailpointConfigured) return;
+          if (event.commandName !== 'insert') return;
+          secondFailpointConfigured = true;
+          adminClient
+            .db('admin')
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['insert'],
+                errorLabels: ['RetryableError', 'RetryableWriteError'],
+                errorCode: 91,
+                appName: FAILPOINT_APP_NAME
+              }
+            })
+            .catch(() => null);
+        });
+
+        const insertStartedEvents: Array<Record<string, any>> = [];
+        client.on('commandStarted', ev => {
+          if (ev.commandName === 'insert') insertStartedEvents.push(ev);
+        });
+
+        // 4. Attempt an `insertOne` operation on any record for any database and collection. Expect the `insertOne` to fail with a
+        //     server error. Assert that `MAX_RETRIES + 1` attempts were made.
+        const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+
+        expect(insertResult).to.be.instanceOf(MongoServerError);
+        expect(insertResult.code).to.equal(91);
+        expect(insertResult.hasErrorLabel(MongoErrorLabel.RetryableError)).to.be.true;
+        // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2).
+        expect(insertStartedEvents).to.have.lengthOf(3);
+
+        // 5. Disable the fail point — handled by the surrounding afterEach.
+      }
+    );
+
+    it(
+      'Case 5: Test that drivers do not apply backoff to non-overload errors',
+      { requires: { topology: 'replicaset', mongodb: '>=6.0' } },
+      async function () {
+        // 1. Create a client with `retryWrites=true` — handled by the surrounding beforeEach.
+
+        // Spy on `timers/promises.setTimeout` — the only sleep on the retry path
+        // (src/operations/execute_operation.ts:337) — to count how many times backoff was applied.
+        // We use a spy (not a stub) so the real sleep still happens, giving the commandFailed
+        // listener below time to configure the second failpoint before the driver dispatches its
+        // next retry.
+        const setTimeoutSpy = sinon.spy(timersPromises, 'setTimeout');
+
+        // 2. Configure a fail point with error code `91` (ShutdownInProgress) with the `RetryableError` and
+        //     `SystemOverloadedError` error labels.
+        await adminClient.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['insert'],
+            errorLabels: ['RetryableError', 'SystemOverloadedError'],
+            errorCode: 91,
+            appName: FAILPOINT_APP_NAME
+          }
+        });
+
+        // 3. Via the command monitoring CommandFailedEvent, configure a fail point with error code `91`
+        //     (ShutdownInProgress) and the `RetryableWriteError` and `RetryableError` labels. Configure the
+        //     second fail point command only if the failed event is for the first error configured in step 2.
+        let secondFailpointConfigured = false;
+        client.on('commandFailed', (event: CommandFailedEvent) => {
+          if (secondFailpointConfigured) return;
+          if (event.commandName !== 'insert') return;
+          secondFailpointConfigured = true;
+          adminClient
+            .db('admin')
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: 'alwaysOn',
+              data: {
+                failCommands: ['insert'],
+                errorLabels: ['RetryableError', 'RetryableWriteError'],
+                errorCode: 91,
+                appName: FAILPOINT_APP_NAME
+              }
+            })
+            .catch(() => null);
+        });
+
+        const insertStartedEvents: Array<Record<string, any>> = [];
+        client.on('commandStarted', ev => {
+          if (ev.commandName === 'insert') insertStartedEvents.push(ev);
+        });
+
+        // 4. Attempt an `insertOne` operation on any record for any database and collection. Expect the `insertOne` to fail with a
+        //     server error. Assert that backoff was applied only once for the initial overload error and not for the subsequent
+        //     non-overload retryable errors.
+        const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+
+        expect(insertResult).to.be.instanceOf(MongoServerError);
+        expect(insertResult.code).to.equal(91);
+        // MAX_RETRIES + 1 (default maxAdaptiveRetries is 2) — the full retry sequence ran.
+        expect(insertStartedEvents).to.have.lengthOf(3);
+        // Backoff was applied exactly once — for the initial overload error only.
+        expect(setTimeoutSpy.callCount).to.equal(1);
+
+        // 5. Disable the fail point — handled by the surrounding afterEach.
       }
     );
   });
