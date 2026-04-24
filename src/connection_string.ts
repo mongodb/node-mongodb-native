@@ -236,14 +236,8 @@ class CaseInsensitiveMap<Value = any> extends Map<string, Value> {
 
 export function parseOptions(
   uri: string,
-  mongoClient: MongoClient | MongoClientOptions | undefined = undefined,
   options: MongoClientOptions = {}
 ): MongoOptions {
-  if (mongoClient != null && !(mongoClient instanceof MongoClient)) {
-    options = mongoClient;
-    mongoClient = undefined;
-  }
-
   // validate BSONOptions
   if (options.useBigInt64 && typeof options.promoteLongs === 'boolean' && !options.promoteLongs) {
     throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
@@ -452,10 +446,9 @@ export function parseOptions(
 
   validateLoadBalancedOptions(hosts, mongoOptions, isSRV);
 
-  if (mongoClient && mongoOptions.autoEncryption) {
+  if (mongoOptions.autoEncryption) {
     Encrypter.checkForMongoCrypt();
-    mongoOptions.encrypter = new Encrypter(mongoClient, uri, options);
-    mongoOptions.autoEncrypter = mongoOptions.encrypter.autoEncrypter;
+    mongoOptions.useAutoEncryption = true;
   }
 
   // Potential SRV Overrides and SRV connection string validations
