@@ -24,7 +24,7 @@ npm run fix:eslint        # Auto-fix ESLint issues
 
 ### Testing
 
-Tests require a running MongoDB instance. To start one locally:
+Integration tests require a running MongoDB instance (unit tests do not). To start one locally:
 
 ```bash
 git submodule update --init
@@ -36,7 +36,7 @@ source mo-expansion.sh
 ```bash
 npm run check:unit        # Unit tests (no database required)
 npm run check:test        # Integration tests (requires database)
-npm test                  # Lint + unit + integration
+npm test                  # Full check (lint + d.ts/tsd) + unit + integration
 
 # Run a single test by name pattern
 npm run check:unit -- -g "pattern"
@@ -102,7 +102,7 @@ Public API (MongoClient, Db, Collection, Cursors)
 - **Type imports** — Use `import { type Foo }` (inline type imports).
 - **`return await`** — Required in `src/` (enforced by `@typescript-eslint/return-await: always`).
 - **Error messages** — Sentence case, no trailing period. Use driver-specific error types extending `MongoError`.
-- **Formatting** — Prettier with single quotes, 2-space tabs, 100-char width, no trailing commas.
+- **Formatting** — Prettier with single quotes, 2-space indentation, 100-char width, no trailing commas.
 
 ## Commit Messages
 
