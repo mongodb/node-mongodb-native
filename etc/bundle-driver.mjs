@@ -17,7 +17,7 @@ await esbuild.build({
   entryPoints: [path.join(rootDir, 'test/mongodb_all.ts')],
   bundle: true,
   outfile: outputBundleFile,
-  platform: 'node',
+  platform: 'browser',
   format: 'cjs',
   target: 'node20',
   external: [
@@ -25,7 +25,6 @@ await esbuild.build({
     '@mongodb-js/saslprep',
     '@mongodb-js/zstd',
     '@napi-rs/snappy*',
-    'bson',
     'gcp-metadata',
     'kerberos',
     'mongodb-client-encryption',

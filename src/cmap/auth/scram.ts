@@ -166,8 +166,10 @@ async function continueScramConversation(
   const clientKey = await HMAC(cryptoMethod, saltedPassword, 'Client Key');
   const serverKey = await HMAC(cryptoMethod, saltedPassword, 'Server Key');
   const storedKey = await H(cryptoMethod, clientKey);
+  const firstMessageBytes = clientFirstMessageBare(username, nonce);
+  const firstMessage = ByteUtils.toUTF8(firstMessageBytes, 0, firstMessageBytes.length, true);
   const authMessage = [
-    clientFirstMessageBare(username, nonce),
+    firstMessage,
     payload.toString('utf8'),
     withoutProof
   ].join(',');

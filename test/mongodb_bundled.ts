@@ -176,6 +176,7 @@ export const {
   ListIndexesOperation,
   Long,
   makeClientMetadata,
+  makeSocket,
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
   MaxKey,

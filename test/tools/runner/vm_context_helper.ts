@@ -7,11 +7,20 @@ import * as vm from 'node:vm';
 
 import { ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME } from '../../mongodb_all';
 
+/**
+ * Debug logging for bundled test environment issues
+ */
+function debug(msg: unknown) {
+  if (process.env.MONGODB_BUNDLE_DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log(`[BUNDLE_DEBUG] ${msg}`);
+  }
+}
+
 const allowedModules = new Set([
   '@aws-sdk/credential-providers',
   '@mongodb-js/saslprep',
   '@mongodb-js/zstd',
-  'bson',
   'gcp-metadata',
   'kerberos',
   'mongodb-client-encryption',
@@ -27,7 +36,6 @@ const exposedGlobals = new Set([
   'AbortController',
   'AbortSignal',
   'BigInt',
-  'Buffer',
   'Date',
   'Error',
   'Headers',
@@ -44,13 +52,15 @@ const exposedGlobals = new Set([
   'performance',
   'process',
 
+  'atob',
+  'btoa',
   'clearImmediate',
   'clearInterval',
   'clearTimeout',
   'setImmediate',
   'setInterval',
   'setTimeout',
-  'queueMicrotask'
+  'queueMicrotask',
 ]);
 
 /**
@@ -68,7 +78,10 @@ function createRestrictedRequire() {
     if (shouldBlock) {
       throw new Error(`Access to core module '${moduleName}' is restricted in this context`);
     }
-    return require(moduleName);
+
+    const required = require(moduleName);
+    debug(`Loaded external module: ${moduleName}`);
+    return required;
   } as NodeJS.Require;
 }
 
@@ -80,7 +93,10 @@ const context = {
 
   // Needed for some modules
   global: undefined as any,
-  globalThis: undefined as any
+  globalThis: undefined as any,
+
+  // Block Buffer from being accessible in the context
+  Buffer: undefined,
 };
 
 // Expose allowed globals in the context
@@ -90,11 +106,38 @@ for (const globalName of exposedGlobals) {
   }
 }
 
+// Ensure TextEncoder/TextDecoder are always available (needed for webByteUtils)
+if (!context.TextEncoder && typeof TextEncoder !== 'undefined') {
+  context.TextEncoder = TextEncoder;
+}
+if (!context.TextDecoder && typeof TextDecoder !== 'undefined') {
+  context.TextDecoder = TextDecoder;
+}
+
+// Ensure btoa/atob are available (needed for webByteUtils base64 encoding)
+if (!context.btoa && typeof btoa !== 'undefined') {
+  context.btoa = btoa;
+}
+if (!context.atob && typeof atob !== 'undefined') {
+  context.atob = atob;
+}
+
 // Create a sandbox context with necessary globals
 const sandbox = vm.createContext(context);
 
 // Make globalThis point to the sandbox
 sandbox.globalThis = sandbox;
+
+// Diagnostic: Check if Buffer is accessible in the VM context
+if (process.env.MONGODB_BUNDLE_DEBUG) {
+  try {
+    const testScript = new vm.Script('typeof Buffer');
+    const bufferType = testScript.runInContext(sandbox);
+    debug(`In VM context, typeof Buffer = ${bufferType}`);
+  } catch (e) {
+    debug(`Error checking Buffer in context: ${(e as Error).message}`);
+  }
+}
 
 /**
  * Load the bundled MongoDB driver module in a VM context
