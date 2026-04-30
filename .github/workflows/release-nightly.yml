@@ -11,7 +11,8 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  id-token: write
+  contents: read
+  actions: write
 
 name: release-nightly
 
@@ -25,6 +26,12 @@ jobs:
       - id: build_nightly
         run: npm run build:nightly
       - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
-        run: npm publish --provenance --tag=nightly
+        name: Dispatch npm-publish workflow
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run npm-publish.yml \
+            --ref "${{ github.ref_name }}" \
+            -f tag=nightly \
+            -f version="$(node -p "require('./package.json').version")" \
+            -f ref="${{ github.sha }}"
