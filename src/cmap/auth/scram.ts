@@ -168,9 +168,15 @@ async function continueScramConversation(
   const storedKey = await H(cryptoMethod, clientKey);
   const firstMessageBytes = clientFirstMessageBare(username, nonce);
   const firstMessage = ByteUtils.toUTF8(firstMessageBytes, 0, firstMessageBytes.length, true);
+  const payloadString = ByteUtils.toUTF8(
+    payload.buffer,
+    0,
+    payload.buffer.length,
+    true
+  );
   const authMessage = [
     firstMessage,
-    payload.toString('utf8'),
+    payloadString,
     withoutProof
   ].join(',');
 
@@ -207,7 +213,7 @@ async function continueScramConversation(
 }
 
 function parsePayload(payload: Binary) {
-  const payloadStr = payload.toString('utf8');
+  const payloadStr = ByteUtils.toUTF8(payload.buffer, 0, payload.buffer.length, true);
   const dict: Document = {};
   const parts = payloadStr.split(',');
   for (let i = 0; i < parts.length; i++) {
