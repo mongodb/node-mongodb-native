@@ -109,6 +109,7 @@ export const {
   decompress,
   decorateWithExplain,
   DEFAULT_ALLOWED_HOSTS,
+  DEFAULT_KEEP_ALIVE_INITIAL_DELAY_MS,
   DEFAULT_MAX_DOCUMENT_LENGTH,
   DEFAULT_PK_FACTORY,
   DeleteManyOperation,

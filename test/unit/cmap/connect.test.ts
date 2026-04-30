@@ -21,7 +21,8 @@ import {
   MongoClientAuthProviders,
   MongoCredentials,
   MongoNetworkError,
-  prepareHandshakeDocument
+  prepareHandshakeDocument,
+  runNodelessTests
 } from '../../mongodb';
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
@@ -467,6 +468,11 @@ describe('Connect Tests', function () {
     );
 
     before(function (done) {
+      if (runNodelessTests) {
+        // sinon doesn't work in nodeless tests
+        this.skip();
+      }
+
       // @SECLEVEL=0 allows the legacy test certificate (signed with SHA-1/1024-bit RSA)
       // to be accepted by OpenSSL 3.x, which rejects at the default security level.
       tlsServer = tls.createServer(

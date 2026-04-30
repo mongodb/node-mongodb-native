@@ -1,7 +1,8 @@
 import { Binary, BSON, BSONError, BSONType, ObjectId, Timestamp } from 'bson';
 import { expect } from 'chai';
 
-import { OnDemandDocument } from '../../../../mongodb';
+import { OnDemandDocument, runNodelessTests } from '../../../../mongodb';
+import { ensureTypeByName } from '../../../../tools/utils';
 
 describe('class OnDemandDocument', () => {
   context('when given an empty BSON sequence', () => {
@@ -118,21 +119,37 @@ describe('class OnDemandDocument', () => {
     it('supports requesting multiple types', () => {
       expect(
         document.get('bool', BSONType.int) ??
-          document.get('bool', BSONType.long) ??
-          document.get('bool', BSONType.bool)
+        document.get('bool', BSONType.long) ??
+        document.get('bool', BSONType.bool)
       ).to.be.true;
     });
 
     it('throws if required is set to true and element name does not exist', () => {
-      expect(() => document.get('blah!', BSONType.bool, true)).to.throw(BSONError);
+      if (runNodelessTests) {
+        try {
+          document.get('blah!', BSONType.bool, true);
+        } catch (e) {
+          ensureTypeByName(e, 'BSONError');
+        }
+      } else {
+        expect(() => document.get('blah!', BSONType.bool, true)).to.throw(BSONError);
+      }
       expect(document).to.have.nested.property('cache.blah!', false);
     });
 
     it('throws if requested type is unsupported', () => {
-      expect(() => {
-        // @ts-expect-error: checking a bad BSON type
-        document.get('unsupportedType', BSONType.regex);
-      }).to.throw(BSONError, /unsupported/i);
+      if (runNodelessTests) {
+        try {          // @ts-expect-error: checking a bad BSON type
+          document.get('unsupportedType', BSONType.regex, true);
+        } catch (e) {
+          ensureTypeByName(e, 'BSONError');
+        }
+      } else {
+        expect(() => {
+          // @ts-expect-error: checking a bad BSON type
+          document.get('unsupportedType', BSONType.regex);
+        }).to.throw(BSONError, /unsupported/i);
+      }
     });
 
     it('caches the value', () => {
@@ -245,15 +262,31 @@ describe('class OnDemandDocument', () => {
     });
 
     it('throws if required is set to true and element name does not exist', () => {
-      expect(() => document.getNumber('blah!', true)).to.throw(BSONError);
+      if (runNodelessTests) {
+        try {
+          document.getNumber('blah!', true);
+        } catch (e) {
+          ensureTypeByName(e, 'BSONError');
+        }
+      } else {
+        expect(() => document.getNumber('blah!', true)).to.throw(BSONError);
+      }
     });
 
     it('throws if required is set to true and element is not numeric', () => {
       // just making sure this test does not fail for the non-exist reason
       expect(document.has('string')).to.be.true;
-      expect(() => {
-        document.getNumber('string', true);
-      }).to.throw(BSONError);
+      if (runNodelessTests) {
+        try {
+          document.getNumber('string', true);
+        } catch (e) {
+          ensureTypeByName(e, 'BSONError');
+        }
+      } else {
+        expect(() => {
+          document.getNumber('string', true);
+        }).to.throw();
+      }
     });
 
     it('returns null if required is set to false and element does not exist', () => {
