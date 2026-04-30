@@ -30,8 +30,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh workflow run npm-publish.yml \
-            --ref "${{ github.ref_name }}" \
-            -f tag=nightly \
-            -f version="$(node -p "require('./package.json').version")" \
-            -f ref="${{ github.sha }}"
+          node ./.github/scripts/dispatch-and-wait.mjs npm-publish.yml \
+            tag=nightly \
+            version="$(node -p "require('./package.json').version")" \
+            ref="${{ github.sha }}"

@@ -1,3 +1,8 @@
+# This workflow is invoked by callers via `workflow_dispatch` (the GitHub
+# Actions API), NOT as a reusable workflow (`on: workflow_call:`). With
+# workflow_call, the OIDC token's workflow_ref claim points to the caller's
+# filename rather than this file, which breaks npm Trusted Publishing's
+# workflow-filename matching. See npm/documentation#1755.
 name: npm-publish
 
 run-name: 'npm-publish ${{ inputs.tag }}@${{ inputs.version }}'
