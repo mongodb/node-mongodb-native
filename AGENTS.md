@@ -6,6 +6,14 @@ This file provides guidance to AI coding agents (Claude Code, Codex, Copilot, Cu
 
 This is the official MongoDB Node.js driver (`mongodb` npm package). It provides a TypeScript/JavaScript interface for applications to interact with MongoDB deployments. The driver implements the cross-driver MongoDB specifications.
 
+## Related Repositories
+
+- **[mongodb/specifications](https://github.com/mongodb/specifications)** — Cross-driver MongoDB specifications. **This is the source of truth** for behavior the driver must implement (CRUD, SDAM, CMAP, retryable reads/writes, sessions, transactions, change streams, CSFLE, etc.). Spec test fixtures (YAML/JSON) are vendored under `test/spec/`. When behavior is ambiguous, the spec wins; do not change behavior away from the spec without raising it there first.
+- **[mongodb/js-bson](https://github.com/mongodb/js-bson)** — BSON serialization (`bson` npm package). Owned by this team. Bug reports and changes that touch BSON encoding/decoding belong there.
+- **[mongodb-js/kerberos](https://github.com/mongodb-js/kerberos)** — Native Kerberos bindings (`kerberos` npm package, optional dependency). Owned by this team. GSSAPI auth issues are typically fixed there, not in the driver.
+- **[mongodb-js/mongodb-client-encryption](https://github.com/mongodb-js/mongodb-client-encryption)** — Native bindings to `libmongocrypt` for CSFLE/Queryable Encryption (`mongodb-client-encryption` npm package). Owned by this team.
+- **[mongodb-js/zstd](https://github.com/mongodb-js/zstd)** and **[mongodb-js/saslprep](https://github.com/mongodb-js/saslprep)** — Compression and SCRAM SASLprep helpers, also team-owned.
+
 ## Common Commands
 
 ### Building
