@@ -42,6 +42,8 @@ describe('27. Text Explicit Encryption', function () {
 
   beforeEach(async function () {
     utilClient = this.configuration.newClient();
+    const isServer9OrAbove = this.configuration.version >= '9.0.0';
+    const shouldRunPrefixSuffixTests = !isServer9OrAbove;
 
     // Using QE CreateCollection() and Collection.Drop(), drop and create the following collections with majority write concern:
     // - db.prefix-suffix using the encryptedFields option set to the contents of encryptedFields-prefix-suffix.json
@@ -59,10 +61,12 @@ describe('27. Text Explicit Encryption', function () {
       });
     }
 
-    await dropAndCreateCollection(
-      'db.prefix-suffix',
-      await loadFLEDataFile('encryptedFields-prefix-suffix.json')
-    );
+    if (shouldRunPrefixSuffixTests) {
+      await dropAndCreateCollection(
+        'db.prefix-suffix',
+        await loadFLEDataFile('encryptedFields-prefix-suffix.json')
+      );
+    }
     await dropAndCreateCollection(
       'db.substring',
       await loadFLEDataFile('encryptedFields-substring.json')
@@ -154,6 +158,7 @@ describe('27. Text Explicit Encryption', function () {
         }
       });
 
+      if (shouldRunPrefixSuffixTests) {
       // Use `encryptedClient` to insert the following document into `db.prefix-suffix` with majority write concern:
       // { "_id": 0, "encryptedText": <encrypted 'foobarbaz'> }
       await encryptedClient
@@ -166,6 +171,7 @@ describe('27. Text Explicit Encryption', function () {
           },
           { writeConcern: { w: 'majority' } }
         );
+      }
     }
 
     {
