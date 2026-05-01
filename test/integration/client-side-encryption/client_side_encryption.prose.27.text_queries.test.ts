@@ -159,18 +159,18 @@ describe('27. Text Explicit Encryption', function () {
       });
 
       if (shouldRunPrefixSuffixTests) {
-      // Use `encryptedClient` to insert the following document into `db.prefix-suffix` with majority write concern:
-      // { "_id": 0, "encryptedText": <encrypted 'foobarbaz'> }
-      await encryptedClient
-        .db('db')
-        .collection<{ _id: number; encryptedText: Binary }>('prefix-suffix')
-        .insertOne(
-          {
-            _id: 0,
-            encryptedText
-          },
-          { writeConcern: { w: 'majority' } }
-        );
+        // Use `encryptedClient` to insert the following document into `db.prefix-suffix` with majority write concern:
+        // { "_id": 0, "encryptedText": <encrypted 'foobarbaz'> }
+        await encryptedClient
+          .db('db')
+          .collection<{ _id: number; encryptedText: Binary }>('prefix-suffix')
+          .insertOne(
+            {
+              _id: 0,
+              encryptedText
+            },
+            { writeConcern: { w: 'majority' } }
+          );
       }
     }
 
