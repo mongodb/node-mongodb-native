@@ -219,6 +219,7 @@ describe('27. Text Explicit Encryption', function () {
   });
 
   it('Case 1: can find a document by prefix', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "foo" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -271,6 +272,7 @@ describe('27. Text Explicit Encryption', function () {
   });
 
   it('Case 2: can find a document by suffix', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "baz" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -322,6 +324,7 @@ describe('27. Text Explicit Encryption', function () {
   });
 
   it('Case 3: assert no document found by prefix', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "baz" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -362,6 +365,7 @@ describe('27. Text Explicit Encryption', function () {
   });
 
   it('Case 4: assert no document found by suffix', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "foo" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -508,6 +512,7 @@ describe('27. Text Explicit Encryption', function () {
   });
 
   it('Case 7: assert contentionFactor is required', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "foo" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
