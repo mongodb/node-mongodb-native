@@ -1,4 +1,7 @@
 // @ts-check
+// TODO(NODE-7570): replace with workflow_call once GitHub/npm resolve the OIDC
+// workflow_ref mismatch (https://github.com/npm/documentation/issues/1755).
+//
 // Dispatch a workflow_dispatch-triggered GitHub Actions workflow and wait for
 // the resulting run to complete (propagating its exit status).
 //
