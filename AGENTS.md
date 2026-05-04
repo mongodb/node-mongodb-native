@@ -105,8 +105,8 @@ Public API (MongoClient, Db, Collection, Cursors)
 - **Public API stability** — Anything exported from `src/index.ts` flows into the published `mongodb.d.ts` via api-extractor. Renaming, removing, or narrowing exported types/signatures is a breaking change; confirm with a maintainer before doing so.
 - **No `export default`** — All exports must be named.
 - **No TypeScript enums** — Use string unions or `as const` objects instead.
-- **No `node:` import prefix** — Use bare module names (e.g., `import { setTimeout } from 'timers'`).
-- **Timer/process imports** — Must import `setTimeout`, `setInterval`, `clearTimeout`, `process`, etc. from their modules, not use globals.
+- **`src/`: no `node:` import prefix** — In source files, use bare module names (e.g., `import { setTimeout } from 'timers'`). Tests may use `node:` imports where allowed by the repo config.
+- **`src/`: timer/process imports** — In source files, import `setTimeout`, `setInterval`, `clearTimeout`, `process`, etc. from their modules instead of using globals.
 - **No `Buffer`** — Use `Uint8Array` in source code.
 - **BSON imports** — Source code must import from `src/bson.ts`, not from the `bson` package directly.
 - **Null/undefined checks** — Use loose equality (`== null`) not strict (`=== null` or `=== undefined`).
