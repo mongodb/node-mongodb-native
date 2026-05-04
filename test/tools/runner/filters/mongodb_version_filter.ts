@@ -34,6 +34,8 @@ export class MongoDBVersionFilter extends Filter {
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.mongodb) return true;
     if (typeof this.version !== 'string') throw new Error('expected version string!');
-    return semver.satisfies(this.version, test.metadata.requires.mongodb);
+    const isVersionCompatible = semver.satisfies(this.version, test.metadata.requires.mongodb);
+    console.log(`Checking mongodb version requirement ${test.metadata.requires.mongodb} against version ${this.version}, result: ${isVersionCompatible}`);
+    return isVersionCompatible;
   }
 }
