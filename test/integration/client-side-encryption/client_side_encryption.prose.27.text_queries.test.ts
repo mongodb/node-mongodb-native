@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { type Binary, type Document, EJSON } from 'bson';
 import { expect } from 'chai';
+import * as semver from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
@@ -42,8 +43,11 @@ describe('27. Text Explicit Encryption', function () {
 
   beforeEach(async function () {
     utilClient = this.configuration.newClient();
-    const isServer9OrAbove = this.configuration.version >= '9.0.0';
+    const isServer9OrAbove = semver.satisfies(this.configuration.version, '>=9.0.0');
     const shouldRunPrefixSuffixTests = !isServer9OrAbove;
+    console.log(
+      `Running tests for MongoDB version ${this.configuration.version}. Prefix/suffix tests should ${shouldRunPrefixSuffixTests ? '' : 'not'} run.`
+    );
 
     // Using QE CreateCollection() and Collection.Drop(), drop and create the following collections with majority write concern:
     // - db.prefix-suffix using the encryptedFields option set to the contents of encryptedFields-prefix-suffix.json
