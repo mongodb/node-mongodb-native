@@ -50,7 +50,6 @@ const exposedGlobals = new Set([
   'console',
   'crypto',
   'performance',
-  'process',
 
   'atob',
   'btoa',
@@ -95,8 +94,11 @@ const context = {
   global: undefined as any,
   globalThis: undefined as any,
 
-  // Block Buffer from being accessible in the context
-  Buffer: undefined,
+  TextEncoder: undefined,
+  TextDecoder: undefined,
+
+  atob: undefined,
+  btoa: undefined,
 };
 
 // Expose allowed globals in the context
@@ -127,6 +129,8 @@ const sandbox = vm.createContext(context);
 
 // Make globalThis point to the sandbox
 sandbox.globalThis = sandbox;
+
+export { sandbox };
 
 // Diagnostic: Check if Buffer is accessible in the VM context
 if (process.env.MONGODB_BUNDLE_DEBUG) {

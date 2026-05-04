@@ -19,7 +19,7 @@ await esbuild.build({
   outfile: outputBundleFile,
   platform: 'browser',
   format: 'cjs',
-  target: 'node20',
+  target: 'chrome112',
   external: [
     '@aws-sdk/credential-providers',
     '@mongodb-js/saslprep',
