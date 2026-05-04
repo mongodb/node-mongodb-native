@@ -14,6 +14,8 @@ This is the official MongoDB Node.js driver (`mongodb` npm package). It provides
 - **[mongodb-js/mongodb-client-encryption](https://github.com/mongodb-js/mongodb-client-encryption)** — Native bindings to `libmongocrypt` for CSFLE/Queryable Encryption (`mongodb-client-encryption` npm package). Owned by this team.
 - **[mongodb-js/zstd](https://github.com/mongodb-js/zstd)** and **[mongodb-js/saslprep](https://github.com/mongodb-js/saslprep)** — Compression and SCRAM SASLprep helpers, also team-owned.
 
+**Do not hand-edit**: `lib/` (build output), `mongodb.d.ts` (generated), `HISTORY.md` (release-please managed), `test/spec/` (vendored from specifications repo).
+
 ## Common Commands
 
 ### Building
@@ -100,6 +102,7 @@ Public API (MongoClient, Db, Collection, Cursors)
 
 ## Code Conventions
 
+- **Public API stability** — Anything exported from `src/index.ts` flows into the published `mongodb.d.ts` via api-extractor. Renaming, removing, or narrowing exported types/signatures is a breaking change; confirm with a maintainer before doing so.
 - **No `export default`** — All exports must be named.
 - **No TypeScript enums** — Use string unions or `as const` objects instead.
 - **No `node:` import prefix** — Use bare module names (e.g., `import { setTimeout } from 'timers'`).
