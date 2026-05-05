@@ -4079,3 +4079,16 @@ buildvariants:
       NODE_LTS_VERSION: 24
       CLIENT_ENCRYPTION: true
       MONGODB_BUNDLED: true
+  - name: amazon-linux-2023-arm64-graviton4
+    display_name: Graviton4 AL2023 Node24
+    run_on: amazon2023-arm64-latest-large-m8g
+    expansions:
+      NODE_LTS_VERSION: 24
+      CLIENT_ENCRYPTION: true
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-latest-server-v1-api
+      - test-zstd-compression
+      - test-snappy-compression
