@@ -57,6 +57,7 @@ export const readInt32LE = (buffer: Uint8Array, offset: number): number => {
 
 // readUint8, reads a single unsigned byte from buffer at given offset
 export const readUint8 = (buffer: Uint8Array, offset: number): number => {
+  validateBufferInputs(buffer, offset, 1);
   return buffer[offset];
 };
 
@@ -77,15 +78,15 @@ export const setUint32LE = (destination: Uint8Array, offset: number, value: numb
  */
 export interface BSONSerializeOptions
   extends Omit<SerializeOptions, 'index'>,
-    Omit<
-      DeserializeOptions,
-      | 'evalFunctions'
-      | 'cacheFunctions'
-      | 'cacheFunctionsCrc32'
-      | 'allowObjectSmallerThanBufferSize'
-      | 'index'
-      | 'validation'
-    > {
+  Omit<
+    DeserializeOptions,
+    | 'evalFunctions'
+    | 'cacheFunctions'
+    | 'cacheFunctionsCrc32'
+    | 'allowObjectSmallerThanBufferSize'
+    | 'index'
+    | 'validation'
+  > {
   /**
    * Enabling the raw option will return a [Node.js Buffer](https://nodejs.org/api/buffer.html)
    * which is allocated using [allocUnsafe API](https://nodejs.org/api/buffer.html#static-method-bufferallocunsafesize).

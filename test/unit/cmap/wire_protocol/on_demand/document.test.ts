@@ -128,6 +128,7 @@ describe('class OnDemandDocument', () => {
       if (runNodelessTests) {
         try {
           document.get('blah!', BSONType.bool, true);
+          expect.fail('expected exception');
         } catch (e) {
           ensureTypeByName(e, 'BSONError');
         }
@@ -142,6 +143,7 @@ describe('class OnDemandDocument', () => {
         try {
           // @ts-expect-error: checking a bad BSON type
           document.get('unsupportedType', BSONType.regex, true);
+          expect.fail('expected exception');
         } catch (e) {
           ensureTypeByName(e, 'BSONError');
         }
@@ -266,6 +268,7 @@ describe('class OnDemandDocument', () => {
       if (runNodelessTests) {
         try {
           document.getNumber('blah!', true);
+          expect.fail('expected exception');
         } catch (e) {
           ensureTypeByName(e, 'BSONError');
         }
@@ -286,7 +289,7 @@ describe('class OnDemandDocument', () => {
       } else {
         expect(() => {
           document.getNumber('string', true);
-        }).to.throw();
+        }).to.throw(BSONError);
       }
     });
 
