@@ -1,6 +1,7 @@
 import * as BSON from 'bson';
 import { expect } from 'chai';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { readInt32LE } from '../../../src/bson';
 import { DocumentSequence, OpMsgRequest, OpReply } from '../../mongodb';
 

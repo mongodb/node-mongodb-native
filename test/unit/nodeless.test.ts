@@ -12,7 +12,7 @@ describe('Nodeless tests', function () {
     expect(actualNodeless).to.equal(
       expectedNodeless,
       `runNodelessTests (${actualNodeless}) does not match MONGODB_BUNDLED env var (${nodelessEnv})` +
-      " run 'npm run build:runtime-barrel' to update the barrel file"
+        " run 'npm run build:runtime-barrel' to update the barrel file"
     );
   });
 

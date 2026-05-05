@@ -5,6 +5,8 @@ import { isBuiltin } from 'node:module';
 import * as path from 'node:path';
 import * as vm from 'node:vm';
 
+import * as process from 'process';
+
 import { ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME } from '../../mongodb_all';
 
 /**
@@ -12,7 +14,6 @@ import { ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME } from '../../mongodb_all';
  */
 function debug(msg: unknown) {
   if (process.env.MONGODB_BUNDLE_DEBUG) {
-    // eslint-disable-next-line no-console
     console.log(`[BUNDLE_DEBUG] ${msg}`);
   }
 }
@@ -59,7 +60,7 @@ const exposedGlobals = new Set([
   'setImmediate',
   'setInterval',
   'setTimeout',
-  'queueMicrotask',
+  'queueMicrotask'
 ]);
 
 /**
@@ -98,7 +99,7 @@ const context = {
   TextDecoder: undefined,
 
   atob: undefined,
-  btoa: undefined,
+  btoa: undefined
 };
 
 // Expose allowed globals in the context

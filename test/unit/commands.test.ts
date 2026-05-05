@@ -2,8 +2,9 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import * as compression from '../../src/cmap/wire_protocol/compression';
 import { readInt32LE, readUint8 } from '../../src/bson';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as compression from '../../src/cmap/wire_protocol/compression';
 import {
   compress,
   Compressor,

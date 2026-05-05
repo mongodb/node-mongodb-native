@@ -956,8 +956,9 @@ describe('driver utils', function () {
         continue;
       }
 
-      const title = `comparing ${oid1} to ${oid2} returns ${result === 0 ? 'equal' : result === -1 ? 'less than' : 'greater than'
-        }`;
+      const title = `comparing ${oid1} to ${oid2} returns ${
+        result === 0 ? 'equal' : result === -1 ? 'less than' : 'greater than'
+      }`;
       // @ts-expect-error: not narrowed based on numeric result, but these values are correct
       it(title, () => expect(compareObjectId(oid1, oid2)).to.equal(result));
     }

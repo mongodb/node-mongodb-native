@@ -119,8 +119,8 @@ describe('class OnDemandDocument', () => {
     it('supports requesting multiple types', () => {
       expect(
         document.get('bool', BSONType.int) ??
-        document.get('bool', BSONType.long) ??
-        document.get('bool', BSONType.bool)
+          document.get('bool', BSONType.long) ??
+          document.get('bool', BSONType.bool)
       ).to.be.true;
     });
 
@@ -139,7 +139,8 @@ describe('class OnDemandDocument', () => {
 
     it('throws if requested type is unsupported', () => {
       if (runNodelessTests) {
-        try {          // @ts-expect-error: checking a bad BSON type
+        try {
+          // @ts-expect-error: checking a bad BSON type
           document.get('unsupportedType', BSONType.regex, true);
         } catch (e) {
           ensureTypeByName(e, 'BSONError');
