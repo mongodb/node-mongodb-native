@@ -45,9 +45,6 @@ describe('27. Text Explicit Encryption', function () {
     utilClient = this.configuration.newClient();
     const isServer9OrAbove = semver.satisfies(this.configuration.version, '>=9.0.0');
     const shouldRunPrefixSuffixTests = !isServer9OrAbove;
-    console.log(
-      `Running tests for MongoDB version ${this.configuration.version}. Prefix/suffix tests should ${shouldRunPrefixSuffixTests ? '' : 'not'} run.`
-    );
 
     // Using QE CreateCollection() and Collection.Drop(), drop and create the following collections with majority write concern:
     // - db.prefix-suffix using the encryptedFields option set to the contents of encryptedFields-prefix-suffix.json
