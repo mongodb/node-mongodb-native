@@ -9,15 +9,6 @@ import * as process from 'process';
 
 import { ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME } from '../../mongodb_all';
 
-/**
- * Debug logging for bundled test environment issues
- */
-function debug(msg: unknown) {
-  if (process.env.MONGODB_BUNDLE_DEBUG) {
-    console.log(`[BUNDLE_DEBUG] ${msg}`);
-  }
-}
-
 const allowedModules = new Set([
   '@aws-sdk/credential-providers',
   '@mongodb-js/saslprep',
@@ -95,11 +86,11 @@ const context = {
   global: undefined as any,
   globalThis: undefined as any,
 
+  // These are needed for webByteUtils and are not available in the browser.
+  atob: undefined,
+  btoa: undefined,
   TextEncoder: undefined,
   TextDecoder: undefined,
-
-  atob: undefined,
-  btoa: undefined
 };
 
 // Expose allowed globals in the context
@@ -131,18 +122,8 @@ const sandbox = vm.createContext(context);
 // Make globalThis point to the sandbox
 sandbox.globalThis = sandbox;
 
+// Export the sandbox for use in tests
 export { sandbox };
-
-// Diagnostic: Check if Buffer is accessible in the VM context
-if (process.env.MONGODB_BUNDLE_DEBUG) {
-  try {
-    const testScript = new vm.Script('typeof Buffer');
-    const bufferType = testScript.runInContext(sandbox);
-    debug(`In VM context, typeof Buffer = ${bufferType}`);
-  } catch (e) {
-    debug(`Error checking Buffer in context: ${(e as Error).message}`);
-  }
-}
 
 /**
  * Load the bundled MongoDB driver module in a VM context
