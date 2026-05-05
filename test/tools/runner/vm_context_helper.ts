@@ -71,7 +71,6 @@ function createRestrictedRequire() {
     }
 
     const required = require(moduleName);
-    debug(`Loaded external module: ${moduleName}`);
     return required;
   } as NodeJS.Require;
 }
