@@ -29,7 +29,6 @@ jobs:
         name: Dispatch npm-publish workflow
         env:
           GH_TOKEN: ${{ github.token }}
-          DISPATCH_WORKFLOW_REF: ${{ github.sha }}
         run: |
           node ./.github/scripts/dispatch-and-wait.mjs npm-publish.yml \
             tag=nightly \
