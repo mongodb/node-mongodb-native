@@ -2,6 +2,7 @@ description: QE-Text-compactStructuredEncryptionData
 schemaVersion: "1.25"
 runOnRequirements:
   - minServerVersion: "8.2.0" # Server 8.2.0 adds preview support for QE text queries.
+    maxServerVersion: "8.99.99" # Server 9.0.0-rc0 removes support for "prefixPreview" and "suffixPreview": SERVER-123416
     topologies: ["replicaset", "sharded", "load-balanced"] # QE does not support standalone.
     csfle:
       minLibmongocryptVersion: 1.15.0 # For SPM-4158.
