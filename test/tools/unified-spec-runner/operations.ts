@@ -3,6 +3,7 @@
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
+import { ByteUtils } from 'bson';
 import { AssertionError, expect } from 'chai';
 import * as process from 'process';
 
@@ -30,7 +31,6 @@ import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { ExpectedEvent, OperationDescription } from './schema';
 import { getMatchingEventCount, translateOptions } from './unified-utils';
-import { ByteUtils } from 'bson';
 
 interface OperationFunctionParams {
   client: MongoClient;
@@ -126,7 +126,9 @@ operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operat
   expect(last.command).to.have.property('lsid');
   expect(secondLast.command).to.have.property('lsid');
 
-  expect(ByteUtils.compare(last.command.lsid.id.buffer, secondLast.command.lsid.id.buffer)).to.not.equal(0);
+  expect(
+    ByteUtils.compare(last.command.lsid.id.buffer, secondLast.command.lsid.id.buffer)
+  ).to.not.equal(0);
 });
 
 operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }) => {
@@ -145,7 +147,9 @@ operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }
   expect(last.command).to.have.property('lsid');
   expect(secondLast.command).to.have.property('lsid');
 
-  expect(ByteUtils.compare(last.command.lsid.id.buffer, secondLast.command.lsid.id.buffer)).to.equal(0);
+  expect(
+    ByteUtils.compare(last.command.lsid.id.buffer, secondLast.command.lsid.id.buffer)
+  ).to.equal(0);
 });
 
 operations.set('assertSessionDirty', async ({ operation }) => {
