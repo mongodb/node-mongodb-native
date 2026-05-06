@@ -17,7 +17,8 @@ const {
   MACOS_OS,
   UBUNTU_20_OS,
   DEBIAN_OS,
-  UBUNTU_22_OS
+  UBUNTU_22_OS,
+  GRAVITON_OS
 } = require('./ci_matrix_constants');
 
 // TODO(NODE-7499): unpin npm version once Node 22 ships a bundled npm that can upgrade itself
@@ -873,6 +874,26 @@ BUILD_VARIANTS.push({
   run_on: WINDOWS_OS,
   tasks: commonNodelessTasks,
   expansions: nodelessExpansions
+});
+
+const gravitonTasks = [
+  'test-latest-server',
+  'test-latest-replica_set',
+  'test-latest-sharded_cluster',
+  'test-latest-server-v1-api',
+  'test-zstd-compression',
+  'test-snappy-compression'
+];
+
+BUILD_VARIANTS.push({
+  name: 'amazon-linux-2023-arm64-graviton4',
+  display_name: `Graviton4 AL2023 Node${LATEST_LTS}`,
+  run_on: GRAVITON_OS,
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS,
+    CLIENT_ENCRYPTION: true
+  },
+  tasks: gravitonTasks
 });
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
