@@ -882,7 +882,7 @@ const gravitonTasks = [
   'test-latest-sharded_cluster',
   'test-latest-server-v1-api',
   'test-zstd-compression',
-  'test-snappy-compression',
+  'test-snappy-compression'
 ];
 
 BUILD_VARIANTS.push({
@@ -891,9 +891,9 @@ BUILD_VARIANTS.push({
   run_on: GRAVITON_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
-    CLIENT_ENCRYPTION: true,
+    CLIENT_ENCRYPTION: true
   },
-  tasks: gravitonTasks,
+  tasks: gravitonTasks
 });
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
