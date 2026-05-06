@@ -30,6 +30,7 @@ import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { ExpectedEvent, OperationDescription } from './schema';
 import { getMatchingEventCount, translateOptions } from './unified-utils';
+import { ByteUtils } from 'bson';
 
 interface OperationFunctionParams {
   client: MongoClient;
@@ -125,7 +126,7 @@ operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operat
   expect(last.command).to.have.property('lsid');
   expect(secondLast.command).to.have.property('lsid');
 
-  expect(last.command.lsid.id.buffer.equals(secondLast.command.lsid.id.buffer)).to.be.false;
+  expect(ByteUtils.compare(last.command.lsid.id.buffer, secondLast.command.lsid.id.buffer)).to.not.equal(0);
 });
 
 operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }) => {
@@ -144,7 +145,7 @@ operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }
   expect(last.command).to.have.property('lsid');
   expect(secondLast.command).to.have.property('lsid');
 
-  expect(last.command.lsid.id.buffer.equals(secondLast.command.lsid.id.buffer)).to.be.true;
+  expect(ByteUtils.compare(last.command.lsid.id.buffer, secondLast.command.lsid.id.buffer)).to.equal(0);
 });
 
 operations.set('assertSessionDirty', async ({ operation }) => {
