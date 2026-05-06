@@ -204,7 +204,7 @@ async function continueScramConversation(
 }
 
 function parsePayload(payload: Binary) {
-  const payloadStr = ByteUtils.toUTF8(payload.buffer, 0, payload.buffer.length, true);
+  const payloadStr = ByteUtils.toUTF8(payload.buffer, 0, payload.position, true);
   const dict: Document = {};
   const parts = payloadStr.split(',');
   for (let i = 0; i < parts.length; i++) {

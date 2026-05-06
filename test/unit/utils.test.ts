@@ -943,6 +943,7 @@ describe('driver utils', function () {
       if (result === 'throws') {
         if (runNodelessTests) {
           // web version of ByteUtils.compare doesn't throw on non-Buffer inputs, it just returns 0
+          // TODO: NODE-7576 - compareObjectId has different behavior in web and node versions
           it('passing non-objectId values returns 0', () => {
             // @ts-expect-error: Passing bad values to ensure thrown error
             expect(compareObjectId(oid1, oid2)).to.equal(0);

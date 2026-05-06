@@ -5,8 +5,6 @@ import { isBuiltin } from 'node:module';
 import * as path from 'node:path';
 import * as vm from 'node:vm';
 
-import * as process from 'process';
-
 import { ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME } from '../../mongodb_all';
 
 const allowedModules = new Set([
@@ -89,7 +87,7 @@ const context = {
   atob: undefined,
   btoa: undefined,
   TextEncoder: undefined,
-  TextDecoder: undefined,
+  TextDecoder: undefined
 };
 
 // Expose allowed globals in the context

@@ -78,15 +78,15 @@ export const setUint32LE = (destination: Uint8Array, offset: number, value: numb
  */
 export interface BSONSerializeOptions
   extends Omit<SerializeOptions, 'index'>,
-  Omit<
-    DeserializeOptions,
-    | 'evalFunctions'
-    | 'cacheFunctions'
-    | 'cacheFunctionsCrc32'
-    | 'allowObjectSmallerThanBufferSize'
-    | 'index'
-    | 'validation'
-  > {
+    Omit<
+      DeserializeOptions,
+      | 'evalFunctions'
+      | 'cacheFunctions'
+      | 'cacheFunctionsCrc32'
+      | 'allowObjectSmallerThanBufferSize'
+      | 'index'
+      | 'validation'
+    > {
   /**
    * Enabling the raw option will return a [Node.js Buffer](https://nodejs.org/api/buffer.html)
    * which is allocated using [allocUnsafe API](https://nodejs.org/api/buffer.html#static-method-bufferallocunsafesize).
