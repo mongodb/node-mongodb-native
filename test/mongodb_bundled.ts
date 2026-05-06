@@ -423,6 +423,7 @@ export type {
 import type {
   AbstractCursor as _AbstractCursor,
   AuthMechanism as _AuthMechanism,
+  Binary as _Binary,
   ChangeStream as _ChangeStream,
   ClientEncryption as _ClientEncryption,
   ClientSession as _ClientSession,
@@ -484,6 +485,7 @@ import type {
 // To re-sort: Highlight the list and use VSCode's "Sort Lines Ascending" command
 export type AbstractCursor = _AbstractCursor;
 export type AuthMechanism = _AuthMechanism;
+export type Binary = _Binary;
 export type ChangeStream = _ChangeStream;
 export type ClientEncryption = _ClientEncryption;
 export type ClientSession = _ClientSession;
