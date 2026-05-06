@@ -312,6 +312,15 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/run-atlas-tests.sh
+  run explicit version test:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-explicit-version-test.sh
   run socks5 tests:
     - command: ec2.assume_role
       params:
@@ -2167,6 +2176,78 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: build and test alpine FLE
+  - name: test-explicit-driver-version-6.20.0
+    tags:
+      - explicit-version
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: DRIVER_VERSION, value: 6.20.0}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: nossl}
+            - {key: CLIENT_ENCRYPTION, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run explicit version test
+  - name: test-explicit-driver-version-6.21.0
+    tags:
+      - explicit-version
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: DRIVER_VERSION, value: 6.21.0}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: nossl}
+            - {key: CLIENT_ENCRYPTION, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run explicit version test
+  - name: test-explicit-driver-version-7.0.0
+    tags:
+      - explicit-version
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: DRIVER_VERSION, value: 7.0.0}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: nossl}
+            - {key: CLIENT_ENCRYPTION, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run explicit version test
+  - name: test-explicit-driver-version-latest
+    tags:
+      - explicit-version
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: DRIVER_VERSION, value: latest}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: nossl}
+            - {key: CLIENT_ENCRYPTION, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run explicit version test
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -4025,6 +4106,30 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - .resource-management
+  - name: rhel8-explicit-driver-version
+    display_name: Explicit Driver Version Test (RHEL8)
+    run_on: rhel80-large
+    tasks:
+      - test-explicit-driver-version-6.20.0
+      - test-explicit-driver-version-6.21.0
+      - test-explicit-driver-version-7.0.0
+      - test-explicit-driver-version-latest
+  - name: windows-explicit-driver-version
+    display_name: Explicit Driver Version Test (Windows)
+    run_on: windows-2022-latest-large
+    tasks:
+      - test-explicit-driver-version-6.20.0
+      - test-explicit-driver-version-6.21.0
+      - test-explicit-driver-version-7.0.0
+      - test-explicit-driver-version-latest
+  - name: macos-explicit-driver-version
+    display_name: Explicit Driver Version Test (macOS 14 ARM)
+    run_on: macos-14-arm64
+    tasks:
+      - test-explicit-driver-version-6.20.0
+      - test-explicit-driver-version-6.21.0
+      - test-explicit-driver-version-7.0.0
+      - test-explicit-driver-version-latest
   - name: TLS tests
     display_name: TLS smoke tests
     run_on: rhel80-large

@@ -4,6 +4,7 @@ const semver = require('semver');
 
 const {
   MONGODB_VERSIONS,
+  COMPAT_TEST_DRIVER_VERSIONS,
   versions,
   NODE_VERSIONS,
   LB_VERSIONS,
@@ -820,6 +821,40 @@ BUILD_VARIANTS.push({
   run_on: DEFAULT_OS,
   tasks: ['.resource-management']
 });
+
+const EXPLICIT_VERSION_TASKS = COMPAT_TEST_DRIVER_VERSIONS.map(driverVersion => ({
+  name: `test-explicit-driver-version-${driverVersion}`,
+  tags: ['explicit-version'],
+  commands: [
+    updateExpansions({
+      DRIVER_VERSION: driverVersion,
+      NODE_LTS_VERSION: LOWEST_LTS,
+      VERSION: 'latest',
+      TOPOLOGY: 'server',
+      AUTH: 'auth',
+      SSL: 'nossl',
+      CLIENT_ENCRYPTION: 'false'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run explicit version test' }
+  ]
+}));
+
+SINGLETON_TASKS.push(...EXPLICIT_VERSION_TASKS);
+
+for (const [osName, runOn, displayName] of [
+  ['rhel8', DEFAULT_OS, 'RHEL8'],
+  ['windows', WINDOWS_OS, 'Windows'],
+  ['macos', MACOS_OS, 'macOS 14 ARM']
+]) {
+  BUILD_VARIANTS.push({
+    name: `${osName}-explicit-driver-version`,
+    display_name: `Explicit Driver Version Test (${displayName})`,
+    run_on: runOn,
+    tasks: EXPLICIT_VERSION_TASKS.map(t => t.name)
+  });
+}
 
 BUILD_VARIANTS.push({
   name: 'TLS tests',
