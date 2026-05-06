@@ -36,32 +36,6 @@ tests:
           operationType: create
           nsType: collection
 
-  - description: "nsType is present when creating timeseries"
-    operations:
-      - name: dropCollection
-        object: *database0
-        arguments:
-          collection: &collection0 foo
-      - name: createChangeStream
-        object: *database0
-        arguments:
-          pipeline: []
-          showExpandedEvents: true
-        saveResultAsEntity: &changeStream0 changeStream0
-      - name: createCollection
-        object: *database0
-        arguments:
-          collection: *collection0
-          timeseries:
-            timeField: "time"
-            metaField: "meta"
-            granularity: "minutes"
-      - name: iterateUntilDocumentOrError
-        object: *changeStream0
-        expectResult:
-          operationType: create
-          nsType: timeseries
-
   - description: "nsType is present when creating views"
     operations:
       - name: dropCollection

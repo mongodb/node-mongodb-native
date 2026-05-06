@@ -126,7 +126,7 @@
   ],
   "tests": [
     {
-      "description": "Insert QE suffixPreview",
+      "description": "Insert QE substringPreview",
       "operations": [
         {
           "name": "insertOne",

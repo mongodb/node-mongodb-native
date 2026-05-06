@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { type Binary, type Document, EJSON } from 'bson';
 import { expect } from 'chai';
+import * as semver from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
@@ -10,6 +11,15 @@ const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
     mongodb: '>=8.2.0',
+    topology: '!single',
+    libmongocrypt: '>=1.15.1'
+  }
+};
+// # Server 9.0.0-rc0 removes support for "prefixPreview" and "suffixPreview": SERVER-123416
+const metadataWithoutPreview: MongoDBMetadataUI = {
+  requires: {
+    clientSideEncryption: '>=6.4.0',
+    mongodb: '>=8.2.0 <9.0.0',
     topology: '!single',
     libmongocrypt: '>=1.15.1'
   }
@@ -33,9 +43,12 @@ describe('27. Text Explicit Encryption', function () {
 
   beforeEach(async function () {
     utilClient = this.configuration.newClient();
+    const isServer9OrAbove = semver.satisfies(this.configuration.version, '>=9.0.0');
+    const shouldRunPrefixSuffixTests = !isServer9OrAbove;
 
     // Using QE CreateCollection() and Collection.Drop(), drop and create the following collections with majority write concern:
     // - db.prefix-suffix using the encryptedFields option set to the contents of encryptedFields-prefix-suffix.json
+    //    Skip this step if testing server 9.0.0+.
     // - db.substring using the encryptedFields option set to the contents of encryptedFields-substring.json
     async function dropAndCreateCollection(ns: string, encryptedFields?: Document) {
       const { db, collection } = MongoDBCollectionNamespace.fromString(ns);
@@ -49,10 +62,12 @@ describe('27. Text Explicit Encryption', function () {
       });
     }
 
-    await dropAndCreateCollection(
-      'db.prefix-suffix',
-      await loadFLEDataFile('encryptedFields-prefix-suffix.json')
-    );
+    if (shouldRunPrefixSuffixTests) {
+      await dropAndCreateCollection(
+        'db.prefix-suffix',
+        await loadFLEDataFile('encryptedFields-prefix-suffix.json')
+      );
+    }
     await dropAndCreateCollection(
       'db.substring',
       await loadFLEDataFile('encryptedFields-substring.json')
@@ -144,18 +159,20 @@ describe('27. Text Explicit Encryption', function () {
         }
       });
 
-      // Use `encryptedClient` to insert the following document into `db.prefix-suffix` with majority write concern:
-      // { "_id": 0, "encryptedText": <encrypted 'foobarbaz'> }
-      await encryptedClient
-        .db('db')
-        .collection<{ _id: number; encryptedText: Binary }>('prefix-suffix')
-        .insertOne(
-          {
-            _id: 0,
-            encryptedText
-          },
-          { writeConcern: { w: 'majority' } }
-        );
+      if (shouldRunPrefixSuffixTests) {
+        // Use `encryptedClient` to insert the following document into `db.prefix-suffix` with majority write concern:
+        // { "_id": 0, "encryptedText": <encrypted 'foobarbaz'> }
+        await encryptedClient
+          .db('db')
+          .collection<{ _id: number; encryptedText: Binary }>('prefix-suffix')
+          .insertOne(
+            {
+              _id: 0,
+              encryptedText
+            },
+            { writeConcern: { w: 'majority' } }
+          );
+      }
     }
 
     {
@@ -208,7 +225,8 @@ describe('27. Text Explicit Encryption', function () {
     await Promise.allSettled([utilClient.close(), encryptedClient.close(), keyVaultClient.close()]);
   });
 
-  it('Case 1: can find a document by prefix', metadata, async function () {
+  it('Case 1: can find a document by prefix', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "foo" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -260,7 +278,8 @@ describe('27. Text Explicit Encryption', function () {
     expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
   });
 
-  it('Case 2: can find a document by suffix', metadata, async function () {
+  it('Case 2: can find a document by suffix', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "baz" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -311,7 +330,8 @@ describe('27. Text Explicit Encryption', function () {
     expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
   });
 
-  it('Case 3: assert no document found by prefix', metadata, async function () {
+  it('Case 3: assert no document found by prefix', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "baz" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -351,7 +371,8 @@ describe('27. Text Explicit Encryption', function () {
     expect(await encryptedClient.db('db').collection('prefix-suffix').findOne(filter)).to.be.null;
   });
 
-  it('Case 4: assert no document found by suffix', metadata, async function () {
+  it('Case 4: assert no document found by suffix', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "foo" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -497,7 +518,8 @@ describe('27. Text Explicit Encryption', function () {
     expect(result).to.be.null;
   });
 
-  it('Case 7: assert contentionFactor is required', metadata, async function () {
+  it('Case 7: assert contentionFactor is required', metadataWithoutPreview, async function () {
+    // Skip this test case if testing MongoDB server 9.0.0+.
     // Use clientEncryption.encrypt() to encrypt the string "foo" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,

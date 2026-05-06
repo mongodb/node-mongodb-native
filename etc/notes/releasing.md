@@ -104,6 +104,12 @@ The github action is able to publish with the repository secret `NPM_TOKEN`.
 This is a granular API key that is unique to each package and has to be rotated on a regular basis.
 The `dbx-node@mongodb.com` npm account is the author of the automated release.
 
+The nightly release flow is an exception: `release-nightly.yml` dispatches
+`.github/workflows/npm-publish.yml`, which authenticates to the npm registry
+via [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) (OIDC)
+rather than `NPM_TOKEN`. The `mongodb` package's trusted publisher entry on
+npmjs.com points at `npm-publish.yml`.
+
 ### Prebuilds
 
 Our native packages offer pre built binaries using [`prebuild`](https://github.com/prebuild/prebuild).

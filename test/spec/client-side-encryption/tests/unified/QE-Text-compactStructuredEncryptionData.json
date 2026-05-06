@@ -4,6 +4,7 @@
   "runOnRequirements": [
     {
       "minServerVersion": "8.2.0",
+      "maxServerVersion": "8.99.99",
       "topologies": [
         "replicaset",
         "sharded",
