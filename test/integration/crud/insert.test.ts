@@ -1,5 +1,6 @@
 import * as Script from 'node:vm';
 
+import { ByteUtils } from 'bson';
 import { expect } from 'chai';
 import * as process from 'process';
 import { satisfies } from 'semver';
@@ -25,7 +26,6 @@ import {
   Timestamp
 } from '../../mongodb';
 import { assert as test, setupDatabase } from '../shared';
-import { ByteUtils } from 'bson';
 
 describe('crud - insert', function () {
   let client: MongoClient;
