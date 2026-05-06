@@ -11,7 +11,9 @@ import {
   MongoServerError,
   OpMsgResponse
 } from '../../../mongodb';
-describe('class MongoDBResponse', () => {
+import { runOnlyInNodeMetadata } from '../../../tools/utils';
+
+describe('class MongoDBResponse', runOnlyInNodeMetadata, () => {
   let client;
 
   afterEach(async () => {
