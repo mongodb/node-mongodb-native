@@ -74,7 +74,7 @@ describe('class MongoDBResponse', runOnlyInNodeMetadata, () => {
   );
 });
 
-describe('parsing of utf8-invalid documents with cursors', function () {
+describe('parsing of utf8-invalid documents with cursors', runOnlyInNodeMetadata, function () {
   let client: MongoClient;
   let collection: Collection;
   const compressionPredicate = () =>
