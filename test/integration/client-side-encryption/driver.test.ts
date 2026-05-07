@@ -725,14 +725,14 @@ describe('CSOT', function () {
                   'test.test': {
                     bsonType: 'object',
                     encryptMetadata: {
-                      keyId: [new UUID(dataKey)]
+                      keyId: [new UUID(dataKey.toHexString(true))]
                     },
                     properties: {
                       a: {
                         encrypt: {
                           bsonType: 'int',
                           algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
-                          keyId: [new UUID(dataKey)]
+                          keyId: [new UUID(dataKey.toHexString(true))]
                         }
                       }
                     }
