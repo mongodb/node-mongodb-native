@@ -11,7 +11,9 @@ import {
   MongoServerError,
   OpMsgResponse
 } from '../../../mongodb';
-describe('class MongoDBResponse', () => {
+import { runOnlyInNodeMetadata } from '../../../tools/utils';
+
+describe('class MongoDBResponse', runOnlyInNodeMetadata, () => {
   let client;
 
   afterEach(async () => {
@@ -72,7 +74,7 @@ describe('class MongoDBResponse', () => {
   );
 });
 
-describe('parsing of utf8-invalid documents with cursors', function () {
+describe('parsing of utf8-invalid documents with cursors', runOnlyInNodeMetadata, function () {
   let client: MongoClient;
   let collection: Collection;
   const compressionPredicate = () =>

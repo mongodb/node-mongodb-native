@@ -11,7 +11,6 @@ const allowedModules = new Set([
   '@aws-sdk/credential-providers',
   '@mongodb-js/saslprep',
   '@mongodb-js/zstd',
-  'bson',
   'gcp-metadata',
   'kerberos',
   'mongodb-client-encryption',
@@ -27,7 +26,6 @@ const exposedGlobals = new Set([
   'AbortController',
   'AbortSignal',
   'BigInt',
-  'Buffer',
   'Date',
   'Error',
   'Headers',
@@ -42,8 +40,9 @@ const exposedGlobals = new Set([
   'console',
   'crypto',
   'performance',
-  'process',
 
+  'atob',
+  'btoa',
   'clearImmediate',
   'clearInterval',
   'clearTimeout',
@@ -68,7 +67,9 @@ function createRestrictedRequire() {
     if (shouldBlock) {
       throw new Error(`Access to core module '${moduleName}' is restricted in this context`);
     }
-    return require(moduleName);
+
+    const required = require(moduleName);
+    return required;
   } as NodeJS.Require;
 }
 
@@ -80,7 +81,13 @@ const context = {
 
   // Needed for some modules
   global: undefined as any,
-  globalThis: undefined as any
+  globalThis: undefined as any,
+
+  // These are needed for webByteUtils and are not available in the browser.
+  atob: undefined,
+  btoa: undefined,
+  TextEncoder: undefined,
+  TextDecoder: undefined
 };
 
 // Expose allowed globals in the context
@@ -90,11 +97,30 @@ for (const globalName of exposedGlobals) {
   }
 }
 
+// Ensure TextEncoder/TextDecoder are always available (needed for webByteUtils)
+if (!context.TextEncoder && typeof TextEncoder !== 'undefined') {
+  context.TextEncoder = TextEncoder;
+}
+if (!context.TextDecoder && typeof TextDecoder !== 'undefined') {
+  context.TextDecoder = TextDecoder;
+}
+
+// Ensure btoa/atob are available (needed for webByteUtils base64 encoding)
+if (!context.btoa && typeof btoa !== 'undefined') {
+  context.btoa = btoa;
+}
+if (!context.atob && typeof atob !== 'undefined') {
+  context.atob = atob;
+}
+
 // Create a sandbox context with necessary globals
 const sandbox = vm.createContext(context);
 
 // Make globalThis point to the sandbox
 sandbox.globalThis = sandbox;
+
+// Export the sandbox for use in tests
+export { sandbox };
 
 /**
  * Load the bundled MongoDB driver module in a VM context

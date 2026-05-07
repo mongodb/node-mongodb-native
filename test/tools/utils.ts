@@ -21,6 +21,7 @@ import {
   OP_MSG,
   processTimeMS,
   resolveRuntimeAdapters,
+  runNodelessTests,
   type Runtime,
   type ServerApiVersion,
   Topology,
@@ -623,3 +624,18 @@ export function configureMongocryptdSpawnHooks(
  * A `Runtime` that resolves to entirely Nodejs modules, useful when tests must provide a default `runtime` object to an API.
  */
 export const runtime: Runtime = resolveRuntimeAdapters({});
+
+/**
+ * Metadata that can be used to skip tests in nodeless environments.
+ */
+export const runOnlyInNodeMetadata: MongoDBMetadataUI = {
+  requires: {
+    predicate: _test => {
+      if (runNodelessTests) {
+        return 'Test is not node specific and should be run in nodeless environments';
+      } else {
+        return true;
+      }
+    }
+  }
+};

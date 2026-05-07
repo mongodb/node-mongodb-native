@@ -102,7 +102,8 @@ module.exports = Mocha.interfaces.metadata_ui = function (suite) {
         newSuite.parent._onlySuites = newSuite.parent._onlySuites.concat(newSuite);
         mocha.options.hasOnly = true;
       }
-      newSuite.metadata = testData.metadata || {};
+      // Inherit parent metadata if metadata is not explicitly provided
+      newSuite.metadata = testData.metadata || suites[1]?.metadata || {};
       if (typeof testData.fn === 'function') {
         testData.fn.call(newSuite);
         suites.shift();

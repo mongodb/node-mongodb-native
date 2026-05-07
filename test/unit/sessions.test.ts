@@ -9,11 +9,13 @@ import {
   MongoClient,
   MongoRuntimeError,
   processTimeMS,
+  runNodelessTests,
   ServerSession,
   ServerSessionPool
 } from '../mongodb';
 import { genClusterTime } from '../tools/common';
 import * as mock from '../tools/mongodb-mock/index';
+import { ensureTypeByName } from '../tools/utils';
 
 describe('Sessions - unit', function () {
   let client;
@@ -463,7 +465,11 @@ describe('Sessions - unit', function () {
 
         expect(result).to.not.exist;
         expect(command).to.have.property('lsid');
-        expect(command).to.have.property('txnNumber').instanceOf(Long);
+        if (runNodelessTests) {
+          ensureTypeByName(command.txnNumber, '_Long');
+        } else {
+          expect(command).to.have.property('txnNumber').instanceOf(Long);
+        }
         expect(command.txnNumber.toNumber()).to.equal(3);
         expect(session).to.have.property('_serverSession').that.is.instanceOf(ServerSession);
       });
