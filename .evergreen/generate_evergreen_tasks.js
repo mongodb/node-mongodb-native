@@ -891,7 +891,8 @@ BUILD_VARIANTS.push({
   run_on: GRAVITON_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
-    CLIENT_ENCRYPTION: true
+    CLIENT_ENCRYPTION: true,
+    TEST_CSFLE: true
   },
   tasks: gravitonTasks
 });

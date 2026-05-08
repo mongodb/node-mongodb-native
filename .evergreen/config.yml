@@ -4085,6 +4085,7 @@ buildvariants:
     expansions:
       NODE_LTS_VERSION: 24
       CLIENT_ENCRYPTION: true
+      TEST_CSFLE: true
     tasks:
       - test-latest-server
       - test-latest-replica_set
