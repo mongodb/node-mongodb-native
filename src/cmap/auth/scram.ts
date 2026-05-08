@@ -167,8 +167,8 @@ async function continueScramConversation(
   const serverKey = await HMAC(cryptoMethod, saltedPassword, 'Server Key');
   const storedKey = await H(cryptoMethod, clientKey);
   const firstMessageBytes = clientFirstMessageBare(username, nonce);
-  const firstMessage = ByteUtils.toUTF8(firstMessageBytes, 0, firstMessageBytes.length, true);
-  const payloadString = ByteUtils.toUTF8(payload.buffer, 0, payload.position, true);
+  const firstMessage = ByteUtils.toUTF8(firstMessageBytes, 0, firstMessageBytes.length, false);
+  const payloadString = ByteUtils.toUTF8(payload.buffer, 0, payload.position, false);
   const authMessage = [firstMessage, payloadString, withoutProof].join(',');
 
   const clientSignature = await HMAC(cryptoMethod, storedKey, authMessage);
@@ -204,7 +204,7 @@ async function continueScramConversation(
 }
 
 function parsePayload(payload: Binary) {
-  const payloadStr = ByteUtils.toUTF8(payload.buffer, 0, payload.position, true);
+  const payloadStr = ByteUtils.toUTF8(payload.buffer, 0, payload.position, false);
   const dict: Document = {};
   const parts = payloadStr.split(',');
   for (let i = 0; i < parts.length; i++) {

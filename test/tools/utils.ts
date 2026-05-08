@@ -627,12 +627,13 @@ export const runtime: Runtime = resolveRuntimeAdapters({});
 
 /**
  * Metadata that can be used to skip tests in nodeless environments.
+ * Use this for tests that rely on Node.js-specific features and cannot be run in nodeless environments like Deno or the browser.
  */
 export const runOnlyInNodeMetadata: MongoDBMetadataUI = {
   requires: {
     predicate: _test => {
       if (runNodelessTests) {
-        return 'Test is not node specific and should be run in nodeless environments';
+        return 'Test is a node specific test and should be not be run in nodeless environments';
       } else {
         return true;
       }
