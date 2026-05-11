@@ -81,13 +81,7 @@ const context = {
 
   // Needed for some modules
   global: undefined as any,
-  globalThis: undefined as any,
-
-  // These are needed for webByteUtils and are not available in the browser.
-  atob: undefined,
-  btoa: undefined,
-  TextEncoder: undefined,
-  TextDecoder: undefined
+  globalThis: undefined as any
 };
 
 // Expose allowed globals in the context
@@ -95,22 +89,6 @@ for (const globalName of exposedGlobals) {
   if (globalName in global) {
     context[globalName] = (global as any)[globalName];
   }
-}
-
-// Ensure TextEncoder/TextDecoder are always available (needed for webByteUtils)
-if (!context.TextEncoder && typeof TextEncoder !== 'undefined') {
-  context.TextEncoder = TextEncoder;
-}
-if (!context.TextDecoder && typeof TextDecoder !== 'undefined') {
-  context.TextDecoder = TextDecoder;
-}
-
-// Ensure btoa/atob are available (needed for webByteUtils base64 encoding)
-if (!context.btoa && typeof btoa !== 'undefined') {
-  context.btoa = btoa;
-}
-if (!context.atob && typeof atob !== 'undefined') {
-  context.atob = atob;
 }
 
 // Create a sandbox context with necessary globals
