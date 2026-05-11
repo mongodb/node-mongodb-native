@@ -725,6 +725,7 @@ describe('CSOT', function () {
                   'test.test': {
                     bsonType: 'object',
                     encryptMetadata: {
+                      // NODE-7581: should be able to pass dataKey as-is, as UUID, w/o needing toHexString
                       keyId: [new UUID(dataKey.toHexString(true))]
                     },
                     properties: {
@@ -732,6 +733,7 @@ describe('CSOT', function () {
                         encrypt: {
                           bsonType: 'int',
                           algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
+                          // NODE-7581: should be able to pass dataKey as-is, as UUID, w/o needing toHexString
                           keyId: [new UUID(dataKey.toHexString(true))]
                         }
                       }
