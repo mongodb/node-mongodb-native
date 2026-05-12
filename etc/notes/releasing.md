@@ -76,6 +76,13 @@ The MongoDB driver can now generate a cup of joe.
 
 1. On slack notify `#node-driver-docs`, `#nodejs-devtools`, and `#mongoose` that we intend to publish a release.
     - You may skip this step if you are releasing a package other than the driver.
+1. **If there are new or changed experimental features**, update `EXPERIMENTAL_FEATURES.md`
+    - Update the version number in the document header
+    - Update the count of experimental annotations (grep for `@experimental` in `src/`)
+    - Add descriptions for any new `@experimental` features
+    - Remove or update entries for features that are no longer experimental
+    - Ensure all source file references omit line numbers (links should point to files, not specific lines)
+    - Commit and push these changes to the release branch before running release notes
 1. Comment "`run release_notes`" on the release PR.
     - This will kick off the action that reads the notes from each PR going into the release.
     - Double check the result looks logically organized
