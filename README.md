@@ -351,6 +351,12 @@ Nightly versions are published regardless of testing outcome.
 This means there could be semantic breakages or partially implemented features.
 The nightly build is not suitable for production use.
 
+## Experimental Features
+
+The MongoDB Node.js driver offers cutting-edge experimental features that give you early access to new capabilities and APIs. These features are marked with `@experimental` tags and are great for exploring new functionality and providing feedback. They may evolve in future releases.
+
+Explore the full list of experimental features, complete with descriptions and usage examples, in [EXPERIMENTAL_FEATURES.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/EXPERIMENTAL_FEATURES.md).
+
 ## Next Steps
 
 - [MongoDB Documentation](https://www.mongodb.com/docs/manual/)
