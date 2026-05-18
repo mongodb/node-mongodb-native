@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write
+  actions: write
 
 name: release-5x
 
@@ -23,9 +23,11 @@ jobs:
       - if: ${{ steps.release.outputs.release_created }}
         uses: actions/checkout@v4
       - if: ${{ steps.release.outputs.release_created }}
-        name: actions/setup
-        uses: ./.github/actions/setup
-      - if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance --tag=5x
+        name: Dispatch npm-publish workflow
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node ./.github/scripts/dispatch-and-wait.mjs npm-publish.yml \
+            tag=5x \
+            version="$(node -p "require('./package.json').version")" \
+            ref="${{ github.sha }}"
