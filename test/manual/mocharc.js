@@ -14,5 +14,8 @@ module.exports = {
   failZero: true,
   color: true,
   timeout: 10000,
-  'node-option': Number(major) >= 23 ? ['no-experimental-strip-types'] : undefined
+  'node-option':
+    Number(major) >= 23
+      ? ['enable-source-maps', 'no-experimental-strip-types']
+      : ['enable-source-maps']
 };

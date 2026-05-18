@@ -31,5 +31,8 @@ module.exports = {
     'test/integration/node-specific/examples/transactions.test.js',
     'test/integration/node-specific/examples/versioned_api.js'
   ],
-  'node-option': Number(major) >= 23 ? ['no-experimental-strip-types'] : undefined
+  'node-option':
+    Number(major) >= 23
+      ? ['enable-source-maps', 'no-experimental-strip-types']
+      : ['enable-source-maps']
 };
