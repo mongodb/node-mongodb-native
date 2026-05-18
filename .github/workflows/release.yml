@@ -6,7 +6,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write
 
 name: release-latest
 
@@ -91,6 +90,9 @@ jobs:
 
   publish:
     needs: [release_please, ssdlc, build]
+    permissions:
+      actions: write
+      contents: read
     environment: release
     runs-on: ubuntu-latest
     steps:
