@@ -1,5 +1,6 @@
 import * as Script from 'node:vm';
 
+import { ByteUtils } from 'bson';
 import { expect } from 'chai';
 import * as process from 'process';
 import { satisfies } from 'semver';
@@ -180,7 +181,7 @@ describe('crud - insert', function () {
       test.equal(date.toString(), doc.date.toString());
       test.equal(date.getTime(), doc.date.getTime());
       test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-      test.equal(motherOfAllDocuments.binary.toString('hex'), doc.binary.value().toString('hex'));
+      test.equal(motherOfAllDocuments.binary.toString('hex'), ByteUtils.toHex(doc.binary.value()));
 
       test.equal(motherOfAllDocuments.int, doc.int);
       test.equal(motherOfAllDocuments.long, doc.long);
@@ -281,8 +282,8 @@ describe('crud - insert', function () {
       test.equal(date.getTime(), doc.date.getTime());
       test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
       test.equal(
-        motherOfAllDocuments.binary.value().toString('hex'),
-        doc.binary.value().toString('hex')
+        ByteUtils.toHex(motherOfAllDocuments.binary.value()),
+        ByteUtils.toHex(doc.binary.value())
       );
 
       test.equal(motherOfAllDocuments.int, doc.int);

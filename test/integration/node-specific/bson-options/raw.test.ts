@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 
 import { type Collection, type MongoClient, ObjectId } from '../../../mongodb';
+import { runOnlyInNodeMetadata } from '../../../tools/utils';
 
-describe('raw bson support', () => {
+describe('raw bson support', runOnlyInNodeMetadata, () => {
   describe('raw', () => {
     describe('option inheritance', () => {
       // define client and option for tests to use

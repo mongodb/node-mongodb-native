@@ -15,6 +15,7 @@ import {
   Db,
   type FindOptions,
   MongoClient,
+  runNodelessTests,
   squashError,
   StateMachine
 } from '../../mongodb';
@@ -60,6 +61,10 @@ describe('StateMachine', function () {
     let clientStub;
 
     beforeEach(function () {
+      if (runNodelessTests) {
+        // sinon doesn't work in nodeless tests
+        this.skip();
+      }
       this.sinon = sinon.createSandbox();
       runCommandStub = this.sinon.stub().resolves({});
       dbStub = this.sinon.createStubInstance(Db, {
