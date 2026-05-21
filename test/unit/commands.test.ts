@@ -2,6 +2,8 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { readInt32LE, readUint8 } from '../../src/bson';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as compression from '../../src/cmap/wire_protocol/compression';
 import {
   compress,
@@ -62,25 +64,25 @@ describe('class OpCompressedRequest', () => {
           const messageHeader = compressedCommand[0];
           expect(messageHeader.byteLength, 'message header is incorrect length').to.equal(16);
           expect(
-            messageHeader.readInt32LE(),
+            readInt32LE(messageHeader, 0),
             'message header reports incorrect message length'
           ).to.equal(16 + 9 + expectedCompressedCommand.length);
-          expect(messageHeader.readInt32LE(4), 'requestId incorrect').to.equal(1);
-          expect(messageHeader.readInt32LE(8), 'responseTo incorrect').to.equal(0);
-          expect(messageHeader.readInt32LE(12), 'opcode is not OP_COMPRESSED').to.equal(2012);
+          expect(readInt32LE(messageHeader, 4), 'requestId incorrect').to.equal(1);
+          expect(readInt32LE(messageHeader, 8), 'responseTo incorrect').to.equal(0);
+          expect(readInt32LE(messageHeader, 12), 'opcode is not OP_COMPRESSED').to.equal(2012);
         });
 
         it('constructs the compression details for the request', async () => {
           const compressionDetails = compressedCommand[1];
           expect(compressionDetails.byteLength, 'incorrect length').to.equal(9);
-          expect(compressionDetails.readInt32LE(), 'op code incorrect').to.equal(
+          expect(readInt32LE(compressionDetails, 0), 'op code incorrect').to.equal(
             protocol === OpMsgRequest ? OP_MSG : OP_QUERY
           );
           expect(
-            compressionDetails.readInt32LE(4),
+            readInt32LE(compressionDetails, 4),
             'uncompressed message length incorrect'
           ).to.equal(serializedFindCommand.length - 16);
-          expect(compressionDetails.readUint8(8), 'compressor incorrect').to.equal(
+          expect(readUint8(compressionDetails, 8), 'compressor incorrect').to.equal(
             Compressor['snappy']
           );
         });
@@ -106,7 +108,7 @@ describe('class OpCompressedRequest', () => {
               zlibCompressionLevel: 3
             }).toBin();
 
-            expect(messageHeader.readInt32LE(12), 'opcode is not OP_COMPRESSED').to.equal(2012);
+            expect(readInt32LE(messageHeader, 12), 'opcode is not OP_COMPRESSED').to.equal(2012);
 
             expect(spy).to.have.been.called;
 

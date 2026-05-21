@@ -11,7 +11,6 @@ const allowedModules = new Set([
   '@aws-sdk/credential-providers',
   '@mongodb-js/saslprep',
   '@mongodb-js/zstd',
-  'bson',
   'gcp-metadata',
   'kerberos',
   'mongodb-client-encryption',
@@ -27,7 +26,6 @@ const exposedGlobals = new Set([
   'AbortController',
   'AbortSignal',
   'BigInt',
-  'Buffer',
   'Date',
   'Error',
   'Headers',
@@ -42,8 +40,9 @@ const exposedGlobals = new Set([
   'console',
   'crypto',
   'performance',
-  'process',
 
+  'atob',
+  'btoa',
   'clearImmediate',
   'clearInterval',
   'clearTimeout',
@@ -68,7 +67,9 @@ function createRestrictedRequire() {
     if (shouldBlock) {
       throw new Error(`Access to core module '${moduleName}' is restricted in this context`);
     }
-    return require(moduleName);
+
+    const required = require(moduleName);
+    return required;
   } as NodeJS.Require;
 }
 
@@ -95,6 +96,9 @@ const sandbox = vm.createContext(context);
 
 // Make globalThis point to the sandbox
 sandbox.globalThis = sandbox;
+
+// Export the sandbox for use in tests
+export { sandbox };
 
 /**
  * Load the bundled MongoDB driver module in a VM context

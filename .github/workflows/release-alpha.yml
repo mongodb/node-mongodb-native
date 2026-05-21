@@ -9,7 +9,8 @@ on:
         type: string
 
 permissions:
-  id-token: write
+  actions: write
+  contents: read
 
 name: release-alpha
 
@@ -18,17 +19,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - shell: bash
+        env:
+          ALPHA_VERSION: ${{ inputs.alphaVersion }}
         run: |
           ALPHA_SEMVER_REGEXP="-alpha(\.([0-9]|[1-9][0-9]+))?$"
 
-          if ! [[ "${{ inputs.alphaVersion }}" =~ $ALPHA_SEMVER_REGEXP ]]; then
+          if ! [[ "$ALPHA_VERSION" =~ $ALPHA_SEMVER_REGEXP ]]; then
             echo "Invalid alphaVersion string"
             exit 1
           fi
       - uses: actions/checkout@v5
-      - name: Install Node and dependencies
-        uses: mongodb-labs/drivers-github-tools/node/setup@v3
-      - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
-      - run: npm publish --provenance --tag=alpha
+      - name: Dispatch npm-publish workflow
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          ALPHA_VERSION: ${{ inputs.alphaVersion }}
+        run: |
+          node ./.github/scripts/dispatch-and-wait.mjs npm-publish.yml \
+            tag=alpha \
+            version="$ALPHA_VERSION" \
+            ref="${{ github.sha }}"

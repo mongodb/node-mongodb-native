@@ -21,11 +21,12 @@ import {
   type MongoClient,
   MongoServerError,
   ReadPreference,
-  type ResumeToken
+  type ResumeToken,
+  runNodelessTests
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/unified_suite_builder';
-import { type FailCommandFailPoint, sleep } from '../../tools/utils';
+import { ensureTypeByName, type FailCommandFailPoint, sleep } from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
 
 const initIteratorMode = async (cs: ChangeStream) => {
@@ -1826,7 +1827,11 @@ describe('Change Streams', function () {
             expect(result).to.exist;
 
             const change = await willBeChange;
-            expect(change).to.have.nested.property('fullDocument.a').that.is.instanceOf(Long);
+            if (runNodelessTests) {
+              ensureTypeByName(change?.fullDocument?.a, '_Long');
+            } else {
+              expect(change).to.have.nested.property('fullDocument.a').that.is.instanceOf(Long);
+            }
           }
         });
       });

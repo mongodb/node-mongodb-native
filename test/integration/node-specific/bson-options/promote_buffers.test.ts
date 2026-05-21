@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 
+import { runOnlyInNodeMetadata } from '../../../tools/utils';
 import { setupDatabase } from '../../shared';
 
-describe('Promote Buffers', function () {
+describe('Promote Buffers', runOnlyInNodeMetadata, function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

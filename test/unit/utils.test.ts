@@ -23,6 +23,7 @@ import {
   MongoDBNamespace,
   MongoInvalidArgumentError,
   MongoRuntimeError,
+  runNodelessTests,
   shuffle
 } from '../mongodb';
 import { ensureTypeByName, sleep } from '../tools/utils';
@@ -940,9 +941,19 @@ describe('driver utils', function () {
 
     for (const { oid1, oid2, result } of table) {
       if (result === 'throws') {
-        it('passing non-objectId values throw', () =>
-          // @ts-expect-error: Passing bad values to ensure thrown error
-          expect(() => compareObjectId(oid1, oid2)).to.throw());
+        if (runNodelessTests) {
+          // web version of ByteUtils.compare doesn't throw on non-Buffer inputs, it just returns 0
+          // TODO: NODE-7576 - compareObjectId has different behavior in web and node versions
+          it('passing non-objectId values returns 0', () => {
+            // @ts-expect-error: Passing bad values to ensure thrown error
+            expect(compareObjectId(oid1, oid2)).to.equal(0);
+          });
+        } else {
+          it('passing non-objectId values throw', () => {
+            // @ts-expect-error: Passing bad values to ensure thrown error
+            expect(() => compareObjectId(oid1, oid2)).to.throw();
+          });
+        }
         continue;
       }
 
