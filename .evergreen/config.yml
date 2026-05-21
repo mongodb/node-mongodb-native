@@ -3687,7 +3687,8 @@ buildvariants:
     run_on: rhel80-large
     expansions:
       NODE_LTS_VERSION: latest
-      CLIENT_ENCRYPTION: true
+      CLIENT_ENCRYPTION: 'true'
+      TEST_CSFLE: 'true'
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -3873,6 +3874,8 @@ buildvariants:
     run_on: windows-2022-latest-large
     expansions:
       NODE_LTS_VERSION: latest
+      CLIENT_ENCRYPTION: 'false'
+      TEST_CSFLE: 'false'
     tasks:
       - test-latest-server
       - test-latest-replica_set

@@ -424,12 +424,13 @@ for (const {
       name: `${osName}-node-latest`,
       display_name: `${osDisplayName} Node Latest`,
       run_on,
-      expansions: { NODE_LTS_VERSION: 'latest' },
+      expansions: {
+        NODE_LTS_VERSION: 'latest',
+        CLIENT_ENCRYPTION: String(!!clientEncryption),
+        TEST_CSFLE: String(!!clientEncryption)
+      },
       tasks: tasks.map(({ name }) => name)
     };
-    if (clientEncryption) {
-      buildVariantData.expansions.CLIENT_ENCRYPTION = true;
-    }
     BUILD_VARIANTS.push(buildVariantData);
   }
 }
