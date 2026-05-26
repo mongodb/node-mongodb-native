@@ -117,7 +117,9 @@ Public API (MongoClient, Db, Collection, Cursors)
 
 ## Commit Messages
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>(NODE-XXXX): <subject>`
+PRs are **squash-merged**. The PR title becomes the single commit message on `main`, so only the PR title needs to follow the format below. Individual commits within a branch don't need to match (though it's good practice and helps reviewers).
+
+PR title format follows [Conventional Commits](https://www.conventionalcommits.org/): `<type>(NODE-XXXX): <subject>`
 
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
 
