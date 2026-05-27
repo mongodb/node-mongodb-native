@@ -14,9 +14,7 @@ This report documents all experimental features in the MongoDB Node.js Driver. T
 | [Runtime Adapters](#runtime-adapters) | Custom runtime module implementations | v7.2.0 |
 | [Queryable Encryption Text Search](#queryable-encryption-text-search) | Text search on encrypted fields | v6.19.0 |
 | [AbortSignal Support](#abortsignal-support) | Cancel operations using `AbortController` | v6.13.0 |
-| [Cursor Timeout Modes](#cursor-timeout-modes) | Configure how timeouts apply to cursors | v6.11.0 |
 | [Explicit Resource Management](#explicit-resource-management) | Automatic cleanup using `Symbol.asyncDispose` | v6.9.0 |
-| [GridFS Timeout Support](#gridfs-timeout-support) | Timeout options for GridFS streams | v6.6.0 |
 | [Timeout Management](#timeout-management) | Control operation timeouts with `timeoutMS` | v6.6.0 |
 | [Client-Side Encryption Features](#client-side-encryption-features) | Custom key material and rewrap APIs | v6.0.0 |
 | [Strict TypeScript Types](#strict-typescript-types) | Enhanced type safety for filters and updates | v5.0.0 |
@@ -84,37 +82,14 @@ await collection.find({}, { signal }).toArray();
 
 **Option**: `timeoutMS`
 
-**Description**: Specifies the time (in milliseconds) an operation will run until it throws a timeout error.
+**Description**: Specifies the time (in milliseconds) an operation will run until it throws a timeout error. `timeoutMS` can be configured at the client, database, collection, session, transaction, and per-operation levels, with narrower scopes overriding broader ones.
 
-**Available On**:
-- `CommandOperationOptions` - [src/db.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/db.ts)
-- `ClientSessionOptions` - [src/sessions.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/sessions.ts)
-- `ClientSessionStartOptions.defaultTimeoutMS` - [src/sessions.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/sessions.ts)
-- `ClientEncryptionOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/client-side-encryption/client_encryption.ts)
-- `MongoClientOptions` - [src/mongo_client.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/mongo_client.ts)
-- `RunCommandOptions` - [src/operations/run_command.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/operations/run_command.ts)
-- `RunCursorCommandOptions` - [src/cursor/run_command_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/cursor/run_command_cursor.ts)
-- `CollectionOptions` - [src/collection.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/collection.ts)
-- `OperationOptions` - [src/operations/operation.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/operations/operation.ts)
-- `GridFSBucketReadStreamOptions` - [src/gridfs/index.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/gridfs/index.ts)
-- `GridFSBucketWriteStreamOptions` - [src/gridfs/upload.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/gridfs/upload.ts)
-- Various database and collection operation options
+See [Limit Server Execution Time (CSOT) — MongoDB Node.js Driver Docs](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/csot/) for the full inheritance/override rules, cursor-specific behavior, Client Encryption interactions, and code examples.
 
-**Example**:
-```typescript
-// Set timeout at client level
-const client = new MongoClient(url, { timeoutMS: 10000 });
+#### Cursor Timeout Modes
 
-// Set timeout at operation level
-await collection.find({}, { timeoutMS: 5000 }).toArray();
-
-// Set timeout for session
-const session = client.startSession({ timeoutMS: 30000 });
-```
-
----
-
-### Cursor Timeout Modes
+> [!NOTE]
+> This configures how the CSOT `timeoutMS` above is applied to cursors.
 
 **Type**: `CursorTimeoutMode`
 **Source**:
@@ -133,24 +108,14 @@ const session = client.startSession({ timeoutMS: 30000 });
 - **Non-tailable cursors**: `'cursorLifetime'`
 - **Tailable cursors**: `'iteration'` (since tailable cursors can have arbitrarily long lifetimes)
 
-**Examples**:
-```typescript
-// Iteration mode: Each next() call must complete within 100ms
-const cursor1 = collection.find({}, { 
-  timeoutMS: 100, 
-  timeoutMode: 'iteration' 
-});
-for await (const doc of cursor1) {
-  // Process doc - each iteration has 100ms timeout
-}
+#### GridFS Streams
 
-// Cursor lifetime mode: Entire operation must complete within 1000ms
-const cursor2 = collection.find({}, { 
-  timeoutMS: 1000, 
-  timeoutMode: 'cursorLifetime' 
-});
-const docs = await cursor2.toArray(); // Must complete in 1000ms total
-```
+> [!NOTE]
+> Applies the CSOT `timeoutMS` above to GridFS upload and download streams as a per-stream lifetime.
+
+**Options**:
+- `timeoutMS` in `GridFSBucketReadStreamOptions` — [src/gridfs/index.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/gridfs/index.ts). Limits the lifetime of a download stream; if any async operation is in progress when the timeout expires, the stream throws a timeout error.
+- `timeoutMS` in `GridFSBucketWriteStreamOptions` — [src/gridfs/upload.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/gridfs/upload.ts). Limits the lifetime of an upload stream.
 
 ---
 
@@ -344,42 +309,6 @@ await db.createCollection('users', {
 // Drop collection with encrypted fields
 await db.dropCollection('users', {
   encryptedFields: encryptedFieldsConfig
-});
-```
-
----
-
-### GridFS Timeout Support
-
-**Description**: Timeout support for GridFS read and write streams.
-
-#### GridFS Read Stream Timeout
-
-**Option**: `timeoutMS` in `GridFSBucketReadStreamOptions`
-**Source**: [src/gridfs/index.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/gridfs/index.ts)
-
-**Description**: Specifies the lifetime duration of a GridFS read stream. If any async operations are in progress when this timeout expires, the stream will throw a timeout error.
-
-**Example**:
-```typescript
-const bucket = new GridFSBucket(db);
-const downloadStream = bucket.openDownloadStream(fileId, {
-  timeoutMS: 30000 // 30 second timeout for the entire download
-});
-```
-
-#### GridFS Write Stream Timeout
-
-**Option**: `timeoutMS` in `GridFSBucketWriteStreamOptions`
-**Source**: [src/gridfs/upload.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/gridfs/upload.ts)
-
-**Description**: Specifies the time an upload operation will run until it throws a timeout error.
-
-**Example**:
-```typescript
-const bucket = new GridFSBucket(db);
-const uploadStream = bucket.openUploadStream('filename.txt', {
-  timeoutMS: 60000 // 60 second timeout for the entire upload
 });
 ```
 
