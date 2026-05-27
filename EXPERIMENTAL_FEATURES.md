@@ -1,6 +1,9 @@
 # MongoDB Node.js Driver - Experimental Features
 
-This report documents all experimental features in the MongoDB Node.js Driver. The driver contains **34 experimental annotations** across 10 major feature categories. These features are marked as experimental because they may undergo breaking changes in future releases, even in minor or patch versions.
+This report documents all experimental features in the MongoDB Node.js Driver. The driver contains **34 experimental annotations** across 10 major feature categories.
+
+> [!WARNING]
+> Experimental features may change in any release, including patches and minors, and are not covered by the driver's semver guarantees. Updates can change runtime behavior or break TypeScript compilation, and may require source changes before you can upgrade.
 
 ---
 
@@ -71,8 +74,8 @@ setTimeout(() => controller.abort(new Error('Operation timeout')), 5000);
 await collection.find({}, { signal }).toArray();
 ```
 
-**⚠️ Important Warning**: 
-If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment.
+> [!WARNING]
+> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment.
 
 ---
 
@@ -203,8 +206,6 @@ const update: StrictUpdateFilter<User> = {
 };
 ```
 
-**⚠️ Production Warning**: As experimental features, these types can change at any time and are not recommended for production settings.
-
 ---
 
 ### Runtime Adapters
@@ -242,8 +243,6 @@ const client = new MongoClient(url, {
   }
 });
 ```
-
-**⚠️ Important Warning**: This feature is experimental and primarily intended for running the driver in non-Node.js JavaScript runtimes. The API may change in future versions.
 
 ---
 
@@ -321,8 +320,6 @@ const encrypted = await encryption.encrypt(value, {
   }
 });
 ```
-
-**⚠️ Critical Warning**: This is a Public Technical Preview feature. The `textPreview` algorithm and related options are experimental and may break at any time. Not recommended for production use.
 
 ---
 
