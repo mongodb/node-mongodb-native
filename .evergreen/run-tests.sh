@@ -36,7 +36,19 @@ echo "Running $AUTH tests over $SSL, connecting to $MONGODB_URI"
 if [[ -z "${SKIP_DEPS}" ]]; then
   source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
 else
+  # On Windows, DRIVERS_TOOLS is a C: path but Node may have been installed on Z: (NTFS
+  # junction).  Load NODE_ARTIFACTS_PATH written by install-dependencies.sh before calling
+  # init so we can restore it if init resolves to the wrong drive.
+  _RUN_TESTS_SAVED_NODE_PATH=""
+  if [ "${OS:-}" = "Windows_NT" ] && [ -f "${DRIVERS_TOOLS}/.env" ]; then
+    _RUN_TESTS_SAVED_NODE_PATH=$(grep '^NODE_ARTIFACTS_PATH=' "${DRIVERS_TOOLS}/.env" | tail -1 | cut -d= -f2-)
+  fi
   source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
+  if [ "${OS:-}" = "Windows_NT" ] && [ -n "$_RUN_TESTS_SAVED_NODE_PATH" ] && ! command -v npm >/dev/null 2>&1; then
+    export NODE_ARTIFACTS_PATH="$_RUN_TESTS_SAVED_NODE_PATH"
+    export PATH="$NODE_ARTIFACTS_PATH/nodejs/bin:$PATH"
+    hash -r
+  fi
 fi
 
 if [ "$COMPRESSOR" != "" ]; then
