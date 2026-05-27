@@ -1,6 +1,6 @@
 # MongoDB Node.js Driver - Experimental Features
 
-This report documents all experimental features in the MongoDB Node.js Driver. The driver contains **34 experimental annotations** across 10 major feature categories.
+This report documents all experimental features in the MongoDB Node.js Driver. The driver contains **34 experimental annotations** across 8 major feature categories.
 
 > [!WARNING]
 > Experimental features may change in any release, including patches and minors, and are not covered by the driver's semver guarantees. Updates can change runtime behavior or break TypeScript compilation, and may require source changes before you can upgrade.
@@ -16,7 +16,7 @@ This report documents all experimental features in the MongoDB Node.js Driver. T
 | [AbortSignal Support](#abortsignal-support) | Cancel operations using `AbortController` | v6.13.0 |
 | [Explicit Resource Management](#explicit-resource-management) | Automatic cleanup using `Symbol.asyncDispose` | v6.9.0 |
 | [Timeout Management](#timeout-management) | Control operation timeouts with `timeoutMS` | v6.6.0 |
-| [Client-Side Encryption Features](#client-side-encryption-features) | Custom key material and rewrap APIs | v6.0.0 |
+| [Client-Side Encryption Key Management](#client-side-encryption-key-management) | Custom key material and rewrap APIs | v6.0.0 |
 | [Strict TypeScript Types](#strict-typescript-types) | Enhanced type safety for filters and updates | v5.0.0 |
 | [Encrypted Fields](#encrypted-fields) | Schema for encrypted collections | v4.6.0 |
 
@@ -200,7 +200,7 @@ const client = new MongoClient(url, {
 
 ### Client-Side Encryption Key Management
 
-**Description**: Advanced client-side encryption capabilities for enhanced data security.
+**Description**: Experimental APIs for creating and rewrapping CSFLE data keys.
 
 #### Custom Key Material
 
