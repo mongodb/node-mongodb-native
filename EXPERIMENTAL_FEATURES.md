@@ -75,7 +75,9 @@ await collection.find({}, { signal }).toArray();
 ```
 
 > [!WARNING]
-> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment.
+> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment — programmatically aborting hundreds of operations can empty the driver's connection pool.
+>
+> `AbortSignal` is best suited for human-interactive interruption (e.g., Ctrl-C) where the cancellation frequency is reasonably low. Mitigation of this limitation is tracked in [NODE-6062](https://jira.mongodb.org/browse/NODE-6062) (`timeoutMS` expiration has the same limitation).
 
 ---
 
