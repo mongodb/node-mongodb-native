@@ -9,18 +9,18 @@ This report documents all experimental features in the MongoDB Node.js Driver. T
 
 ## Summary
 
-| Feature | Description | Introduced in | Status |
-|---------|-------------|---------------|--------|
-| [Runtime Adapters](#runtime-adapters) | Custom runtime module implementations | v7.2.0 | ⚠️ Experimental |
-| [Queryable Encryption Text Search](#queryable-encryption-text-search) | Text search on encrypted fields | v6.19.0 | ⚠️ Public Technical Preview |
-| [AbortSignal Support](#abortsignal-support) | Cancel operations using `AbortController` | v6.13.0 | ⚠️ Experimental |
-| [Cursor Timeout Modes](#cursor-timeout-modes) | Configure how timeouts apply to cursors | v6.11.0 | ⚠️ Experimental |
-| [Explicit Resource Management](#explicit-resource-management) | Automatic cleanup using `Symbol.asyncDispose` | v6.9.0 | ⚠️ Experimental |
-| [GridFS Timeout Support](#gridfs-timeout-support) | Timeout options for GridFS streams | v6.6.0 | ⚠️ Experimental |
-| [Timeout Management](#timeout-management) | Control operation timeouts with `timeoutMS` | v6.6.0 | ⚠️ Experimental |
-| [Client-Side Encryption Features](#client-side-encryption-features) | Custom key material and rewrap APIs | v6.0.0 | ⚠️ Experimental |
-| [Strict TypeScript Types](#strict-typescript-types) | Enhanced type safety for filters and updates | v5.0.0 | ⚠️ Experimental |
-| [Encrypted Fields](#encrypted-fields) | Schema for encrypted collections | v4.6.0 | ⚠️ Experimental |
+| Feature | Description | Introduced in |
+|---------|-------------|---------------|
+| [Runtime Adapters](#runtime-adapters) | Custom runtime module implementations | v7.2.0 |
+| [Queryable Encryption Text Search](#queryable-encryption-text-search) | Text search on encrypted fields | v6.19.0 |
+| [AbortSignal Support](#abortsignal-support) | Cancel operations using `AbortController` | v6.13.0 |
+| [Cursor Timeout Modes](#cursor-timeout-modes) | Configure how timeouts apply to cursors | v6.11.0 |
+| [Explicit Resource Management](#explicit-resource-management) | Automatic cleanup using `Symbol.asyncDispose` | v6.9.0 |
+| [GridFS Timeout Support](#gridfs-timeout-support) | Timeout options for GridFS streams | v6.6.0 |
+| [Timeout Management](#timeout-management) | Control operation timeouts with `timeoutMS` | v6.6.0 |
+| [Client-Side Encryption Features](#client-side-encryption-features) | Custom key material and rewrap APIs | v6.0.0 |
+| [Strict TypeScript Types](#strict-typescript-types) | Enhanced type safety for filters and updates | v5.0.0 |
+| [Encrypted Fields](#encrypted-fields) | Schema for encrypted collections | v4.6.0 |
 
 ---
 
@@ -28,7 +28,8 @@ This report documents all experimental features in the MongoDB Node.js Driver. T
 
 ### Explicit Resource Management
 
-**Status**: ⚠️ Experimental (until TC39 proposal completion)
+> [!WARNING]
+> Experimental until TC39 proposal completion
 
 **Description**: Native support for JavaScript's explicit resource management using `Symbol.asyncDispose`. This feature enables automatic cleanup of resources using the `await using` syntax.
 
@@ -56,8 +57,6 @@ await using session = client.startSession();
 
 ### AbortSignal Support
 
-**Status**: ⚠️ Experimental
-
 **Type**: `Abortable`
 **Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/mongo_types.ts)
 
@@ -82,8 +81,6 @@ await collection.find({}, { signal }).toArray();
 ---
 
 ### Timeout Management
-
-**Status**: ⚠️ Experimental
 
 **Option**: `timeoutMS`
 
@@ -118,8 +115,6 @@ const session = client.startSession({ timeoutMS: 30000 });
 ---
 
 ### Cursor Timeout Modes
-
-**Status**: ⚠️ Experimental
 
 **Type**: `CursorTimeoutMode`
 **Source**:
@@ -160,8 +155,6 @@ const docs = await cursor2.toArray(); // Must complete in 1000ms total
 ---
 
 ### Strict TypeScript Types
-
-**Status**: ⚠️ Experimental
 
 **Description**: Provides stricter type checking for MongoDB operations with better TypeScript inference for nested paths and type safety.
 
@@ -212,8 +205,6 @@ const update: StrictUpdateFilter<User> = {
 
 ### Runtime Adapters
 
-**Status**: ⚠️ Experimental
-
 **Description**: Allows providing custom implementations of Node.js runtime modules to the driver. This enables the driver to work in non-Node.js JavaScript environments or with alternative module implementations.
 
 **Types**:
@@ -249,8 +240,6 @@ const client = new MongoClient(url, {
 ---
 
 ### Client-Side Encryption Features
-
-**Status**: ⚠️ Experimental
 
 **Description**: Advanced client-side encryption capabilities for enhanced data security.
 
@@ -301,7 +290,8 @@ interface ClientEncryptionRewrapManyDataKeyResult {
 
 ### Queryable Encryption Text Search
 
-**Status**: ⚠️ Public Technical Preview (may break at any time)
+> [!NOTE]
+> This feature is a Public Technical Preview
 
 **Option**: `textOptions`
 **Type**: `TextQueryOptions`
@@ -326,8 +316,6 @@ const encrypted = await encryption.encrypt(value, {
 ---
 
 ### Encrypted Fields
-
-**Status**: ⚠️ Experimental
 
 **Option**: `encryptedFields`
 **Type**: `Document`
@@ -362,8 +350,6 @@ await db.dropCollection('users', {
 ---
 
 ### GridFS Timeout Support
-
-**Status**: ⚠️ Experimental
 
 **Description**: Timeout support for GridFS read and write streams.
 
