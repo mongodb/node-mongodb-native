@@ -27,7 +27,7 @@ This report documents all experimental features in the MongoDB Node.js Driver. T
 ### Explicit Resource Management
 
 > [!WARNING]
-> Experimental until TC39 proposal completion
+> Experimental until [TC39](https://github.com/tc39/proposal-explicit-resource-management) proposal completion
 
 **Description**: Native support for JavaScript's explicit resource management using `Symbol.asyncDispose`. This feature enables automatic cleanup of resources using the `await using` syntax.
 
@@ -44,12 +44,6 @@ await using client = new MongoClient(url);
 await using session = client.startSession();
 // No need to call client.close() or session.endSession()
 ```
-
-**References**:
-- [TC39 Explicit Resource Management Proposal](https://github.com/tc39/proposal-explicit-resource-management)
-- Driver upgrade notes: `etc/notes/CHANGES_7.0.0.md`
-
-**Stability Note**: Will remain experimental until the TC39 proposal is finalized.
 
 ---
 
@@ -170,7 +164,7 @@ const update: StrictUpdateFilter<User> = {
 
 ### Runtime Adapters
 
-**Description**: Allows providing custom implementations of Node.js runtime modules to the driver. This enables the driver to work in non-Node.js JavaScript environments or with alternative module implementations.
+**Description**: Allows providing custom implementations of Node.js runtime modules to the driver. This is useful both for customizing how the driver uses standard modules within a Node.js runtime (for example, supplying a custom DNS resolver) and for running the driver in non-Node.js JavaScript environments.
 
 **Types**:
 
@@ -204,7 +198,7 @@ const client = new MongoClient(url, {
 
 ---
 
-### Client-Side Encryption Features
+### Client-Side Encryption Key Management
 
 **Description**: Advanced client-side encryption capabilities for enhanced data security.
 
