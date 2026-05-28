@@ -24,144 +24,6 @@ This report documents all experimental features in the MongoDB Node.js Driver. T
 
 ## Feature Descriptions
 
-### Explicit Resource Management
-
-> [!WARNING]
-> Experimental until [TC39](https://github.com/tc39/proposal-explicit-resource-management) proposal completion
-
-**Description**: Native support for JavaScript's explicit resource management using `Symbol.asyncDispose`. This feature enables automatic cleanup of resources using the `await using` syntax.
-
-**Available On**:
-- `MongoClient` - [src/mongo_client.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts)
-- `ClientSession` - [src/sessions.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/sessions.ts)
-- `ChangeStream` - [src/change_stream.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/change_stream.ts)
-- All cursor types (`AbstractCursor`, `FindCursor`, `AggregationCursor`, etc.) - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
-
-**Example**:
-```typescript
-// Automatic cleanup when scope exits
-await using client = new MongoClient(url);
-await using session = client.startSession();
-// No need to call client.close() or session.endSession()
-```
-
----
-
-### AbortSignal Support
-
-**Type**: `Abortable`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
-
-**Description**: Allows using `AbortController` to abort asynchronous operations. The `signal.reason` value is used as the error thrown.
-
-**Example**:
-```typescript
-const controller = new AbortController();
-const { signal } = controller;
-
-// Abort operation after 5 seconds
-setTimeout(() => controller.abort(new Error('Operation timeout')), 5000);
-
-await collection.find({}, { signal }).toArray();
-```
-
-> [!WARNING]
-> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment — programmatically aborting hundreds of operations can empty the driver's connection pool.
->
-> `AbortSignal` is best suited for human-interactive interruption (e.g., Ctrl-C) where the cancellation frequency is reasonably low. Mitigation of this limitation is tracked in [NODE-6062](https://jira.mongodb.org/browse/NODE-6062) (`timeoutMS` expiration has the same limitation).
-
----
-
-### Timeout Management
-
-**Option**: `timeoutMS`
-
-**Description**: Specifies the time (in milliseconds) an operation will run until it throws a timeout error. `timeoutMS` can be configured at the client, database, collection, session, transaction, and per-operation levels, with narrower scopes overriding broader ones.
-
-See [Limit Server Execution Time (CSOT) — MongoDB Node.js Driver Docs](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/csot/) for the full inheritance/override rules, cursor-specific behavior, Client Encryption interactions, and code examples.
-
-#### Cursor Timeout Modes
-
-> [!NOTE]
-> This configures how the CSOT `timeoutMS` above is applied to cursors.
-
-**Type**: `CursorTimeoutMode`
-**Source**:
-- Constant definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
-- Type definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
-- Option in `AbstractCursorOptions` - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
-- Option in `RunCursorCommandOptions` - [src/cursor/run_command_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/run_command_cursor.ts)
-
-**Values**:
-- `'cursorLifetime'` - Timeout applies to the entire cursor lifetime
-- `'iteration'` - Timeout applies to each `cursor.next()` call
-
-**Description**: Specifies how `timeoutMS` is applied to cursors.
-
-**Default Behavior**:
-- **Non-tailable cursors**: `'cursorLifetime'`
-- **Tailable cursors**: `'iteration'` (since tailable cursors can have arbitrarily long lifetimes)
-
-#### GridFS Streams
-
-> [!NOTE]
-> Applies the CSOT `timeoutMS` above to GridFS upload and download streams as a per-stream lifetime.
-
-**Options**:
-- `timeoutMS` in `GridFSBucketReadStreamOptions` — [src/gridfs/download.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts). Limits the lifetime of a download stream; if any async operation is in progress when the timeout expires, the stream throws a timeout error.
-- `timeoutMS` in `GridFSBucketWriteStreamOptions` — [src/gridfs/upload.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts). Limits the lifetime of an upload stream.
-
----
-
-### Strict TypeScript Types
-
-**Description**: Provides stricter type checking for MongoDB operations with better TypeScript inference for nested paths and type safety.
-
-**Types**:
-
-#### `StrictFilter<TSchema>`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
-
-Provides strict type checking for filter predicates with proper nested path support.
-
-#### `StrictMatchKeysAndValues<TSchema>`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
-
-Ensures type-safe matching of keys and values in update operations.
-
-#### `StrictUpdateFilter<TSchema>`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
-
-Provides strict typing for update operators (`$set`, `$inc`, `$push`, etc.).
-
-**Example**:
-```typescript
-interface User {
-  name: string;
-  age: number;
-  address: {
-    city: string;
-    zip: number;
-  };
-}
-
-const collection: Collection<User> = db.collection('users');
-
-// Type-safe filter with nested paths
-const filter: StrictFilter<User> = { 
-  'address.city': 'New York' // ✓ Valid
-  // 'address.city': 123 // ✗ Compile error: number not assignable to string
-};
-
-// Type-safe update
-const update: StrictUpdateFilter<User> = {
-  $set: { age: 30 }, // ✓ Valid
-  // $set: { age: 'thirty' } // ✗ Compile error
-};
-```
-
----
-
 ### Runtime Adapters
 
 **Description**: Allows providing custom implementations of Node.js runtime modules to the driver. This is useful both for customizing how the driver uses standard modules within a Node.js runtime (for example, supplying a custom DNS resolver) and for running the driver in non-Node.js JavaScript environments.
@@ -195,6 +57,120 @@ const client = new MongoClient(url, {
   }
 });
 ```
+
+---
+
+### Queryable Encryption Text Search
+
+> [!NOTE]
+> This feature is a Public Technical Preview
+
+**Option**: `textOptions`
+**Type**: `TextQueryOptions`
+**Location**: `ClientEncryptionEncryptOptions`
+**Source**:
+- Option in `ClientEncryptionEncryptOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
+- Interface `TextQueryOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
+
+**Description**: Options for Queryable Encryption fields supporting text queries. Only valid when the encryption algorithm is set to `TextPreview`.
+
+**Example**:
+```typescript
+const encrypted = await encryption.encrypt(value, {
+  algorithm: 'TextPreview',
+  keyId: dataKeyId,
+  textOptions: {
+    // Text search configuration options
+  }
+});
+```
+
+---
+
+### AbortSignal Support
+
+**Type**: `Abortable`
+**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
+
+**Description**: Allows using `AbortController` to abort asynchronous operations. The `signal.reason` value is used as the error thrown.
+
+**Example**:
+```typescript
+const controller = new AbortController();
+const { signal } = controller;
+
+// Abort operation after 5 seconds
+setTimeout(() => controller.abort(new Error('Operation timeout')), 5000);
+
+await collection.find({}, { signal }).toArray();
+```
+
+> [!WARNING]
+> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment — programmatically aborting hundreds of operations can empty the driver's connection pool.
+>
+> `AbortSignal` is best suited for human-interactive interruption (e.g., Ctrl-C) where the cancellation frequency is reasonably low. Mitigation of this limitation is tracked in [NODE-6062](https://jira.mongodb.org/browse/NODE-6062) (`timeoutMS` expiration has the same limitation).
+
+---
+
+### Explicit Resource Management
+
+> [!WARNING]
+> Experimental until [TC39](https://github.com/tc39/proposal-explicit-resource-management) proposal completion
+
+**Description**: Native support for JavaScript's explicit resource management using `Symbol.asyncDispose`. This feature enables automatic cleanup of resources using the `await using` syntax.
+
+**Available On**:
+- `MongoClient` - [src/mongo_client.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts)
+- `ClientSession` - [src/sessions.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/sessions.ts)
+- `ChangeStream` - [src/change_stream.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/change_stream.ts)
+- All cursor types (`AbstractCursor`, `FindCursor`, `AggregationCursor`, etc.) - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
+
+**Example**:
+```typescript
+// Automatic cleanup when scope exits
+await using client = new MongoClient(url);
+await using session = client.startSession();
+// No need to call client.close() or session.endSession()
+```
+
+---
+
+### Timeout Management
+
+**Option**: `timeoutMS`
+
+**Description**: Specifies the time (in milliseconds) an operation will run until it throws a timeout error. `timeoutMS` can be configured at the client, database, collection, session, transaction, and per-operation levels, with narrower scopes overriding broader ones.
+
+See [Limit Server Execution Time (CSOT) — MongoDB Node.js Driver Docs](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/csot/) for the full inheritance/override rules, cursor-specific behavior, Client Encryption interactions, and code examples.
+
+#### Cursor Timeout Modes
+
+> [!NOTE]
+> This configures how the CSOT `timeoutMS` above is applied to cursors.
+
+**Type**: `CursorTimeoutMode`
+**Source**:
+- Constant definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
+- Type definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
+- Option in `AbstractCursorOptions` - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
+- Option in `RunCursorCommandOptions` - [src/cursor/run_command_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/run_command_cursor.ts)
+
+**Values**:
+- `'cursorLifetime'` - Timeout applies to the entire cursor lifetime
+- `'iteration'` - Timeout applies to each `cursor.next()` call
+
+**Default Behavior**:
+- **Non-tailable cursors**: `'cursorLifetime'`
+- **Tailable cursors**: `'iteration'` (since tailable cursors can have arbitrarily long lifetimes)
+
+#### GridFS Streams
+
+> [!NOTE]
+> Applies the CSOT `timeoutMS` above to GridFS upload and download streams as a per-stream lifetime.
+
+**Options**:
+- `timeoutMS` in `GridFSBucketReadStreamOptions` — [src/gridfs/download.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts). Limits the lifetime of a download stream; if any async operation is in progress when the timeout expires, the stream throws a timeout error.
+- `timeoutMS` in `GridFSBucketWriteStreamOptions` — [src/gridfs/upload.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts). Limits the lifetime of an upload stream.
 
 ---
 
@@ -247,29 +223,51 @@ interface ClientEncryptionRewrapManyDataKeyResult {
 
 ---
 
-### Queryable Encryption Text Search
+### Strict TypeScript Types
 
-> [!NOTE]
-> This feature is a Public Technical Preview
+**Description**: Provides stricter type checking for MongoDB operations with better TypeScript inference for nested paths and type safety.
 
-**Option**: `textOptions`
-**Type**: `TextQueryOptions`
-**Location**: `ClientEncryptionEncryptOptions`
-**Source**:
-- Option in `ClientEncryptionEncryptOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
-- Interface `TextQueryOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
+**Types**:
 
-**Description**: Options for Queryable Encryption fields supporting text queries. Only valid when the encryption algorithm is set to `TextPreview`.
+#### `StrictFilter<TSchema>`
+**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
+
+Provides strict type checking for filter predicates with proper nested path support.
+
+#### `StrictMatchKeysAndValues<TSchema>`
+**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
+
+Ensures type-safe matching of keys and values in update operations.
+
+#### `StrictUpdateFilter<TSchema>`
+**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
+
+Provides strict typing for update operators (`$set`, `$inc`, `$push`, etc.).
 
 **Example**:
 ```typescript
-const encrypted = await encryption.encrypt(value, {
-  algorithm: 'TextPreview',
-  keyId: dataKeyId,
-  textOptions: {
-    // Text search configuration options
-  }
-});
+interface User {
+  name: string;
+  age: number;
+  address: {
+    city: string;
+    zip: number;
+  };
+}
+
+const collection: Collection<User> = db.collection('users');
+
+// Type-safe filter with nested paths
+const filter: StrictFilter<User> = {
+  'address.city': 'New York' // ✓ Valid
+  // 'address.city': 123 // ✗ Compile error: number not assignable to string
+};
+
+// Type-safe update
+const update: StrictUpdateFilter<User> = {
+  $set: { age: 30 }, // ✓ Valid
+  // $set: { age: 'thirty' } // ✗ Compile error
+};
 ```
 
 ---
@@ -305,4 +303,3 @@ await db.dropCollection('users', {
   encryptedFields: encryptedFieldsConfig
 });
 ```
-
