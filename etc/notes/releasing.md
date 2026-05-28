@@ -120,7 +120,7 @@ It may take some time for the building and uploading to finish, but no more than
 
 To configure a repo for a prerelease:
 
-1. Update the release Github action's `npm publish` step to publish an alpha by specifying `--tag alpha`:
+1. Update the release GitHub action's publish step to dispatch `npm-publish.yml` with `--tag alpha`:
 
 ```yaml
       - name: Dispatch npm-publish workflow

@@ -46,7 +46,7 @@ gpg --verify mongodb-X.Y.Z.tgz.sig mongodb-X.Y.Z.tgz
 ```
 
 > [!Note]
-> No GPG verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.
+> No GPG verification is done when using npm to install the package. The contents of the GitHub tarball and npm's tarball are identical.
 
 Releases published to the npm registry also include a [provenance attestation](https://docs.npmjs.com/generating-provenance-statements), which cryptographically links the package to its source repository and build workflow. To verify provenance:
 
