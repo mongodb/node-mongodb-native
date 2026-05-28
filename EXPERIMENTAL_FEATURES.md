@@ -32,10 +32,10 @@ This report documents all experimental features in the MongoDB Node.js Driver. T
 **Description**: Native support for JavaScript's explicit resource management using `Symbol.asyncDispose`. This feature enables automatic cleanup of resources using the `await using` syntax.
 
 **Available On**:
-- `MongoClient` - [src/mongo_client.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/mongo_client.ts)
-- `ClientSession` - [src/sessions.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/sessions.ts)
-- `ChangeStream` - [src/change_stream.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/change_stream.ts)
-- All cursor types (`AbstractCursor`, `FindCursor`, `AggregationCursor`, etc.) - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/cursor/abstract_cursor.ts)
+- `MongoClient` - [src/mongo_client.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts)
+- `ClientSession` - [src/sessions.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/sessions.ts)
+- `ChangeStream` - [src/change_stream.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/change_stream.ts)
+- All cursor types (`AbstractCursor`, `FindCursor`, `AggregationCursor`, etc.) - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
 
 **Example**:
 ```typescript
@@ -50,7 +50,7 @@ await using session = client.startSession();
 ### AbortSignal Support
 
 **Type**: `Abortable`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/mongo_types.ts)
+**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
 
 **Description**: Allows using `AbortController` to abort asynchronous operations. The `signal.reason` value is used as the error thrown.
 
@@ -87,10 +87,10 @@ See [Limit Server Execution Time (CSOT) — MongoDB Node.js Driver Docs](https:/
 
 **Type**: `CursorTimeoutMode`
 **Source**:
-- Constant definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/cursor/abstract_cursor.ts)
-- Type definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/cursor/abstract_cursor.ts)
-- Option in `AbstractCursorOptions` - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/cursor/abstract_cursor.ts)
-- Option in `RunCursorCommandOptions` - [src/cursor/run_command_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/cursor/run_command_cursor.ts)
+- Constant definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
+- Type definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
+- Option in `AbstractCursorOptions` - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
+- Option in `RunCursorCommandOptions` - [src/cursor/run_command_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/run_command_cursor.ts)
 
 **Values**:
 - `'cursorLifetime'` - Timeout applies to the entire cursor lifetime
@@ -108,8 +108,8 @@ See [Limit Server Execution Time (CSOT) — MongoDB Node.js Driver Docs](https:/
 > Applies the CSOT `timeoutMS` above to GridFS upload and download streams as a per-stream lifetime.
 
 **Options**:
-- `timeoutMS` in `GridFSBucketReadStreamOptions` — [src/gridfs/index.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/gridfs/index.ts). Limits the lifetime of a download stream; if any async operation is in progress when the timeout expires, the stream throws a timeout error.
-- `timeoutMS` in `GridFSBucketWriteStreamOptions` — [src/gridfs/upload.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/gridfs/upload.ts). Limits the lifetime of an upload stream.
+- `timeoutMS` in `GridFSBucketReadStreamOptions` — [src/gridfs/download.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts). Limits the lifetime of a download stream; if any async operation is in progress when the timeout expires, the stream throws a timeout error.
+- `timeoutMS` in `GridFSBucketWriteStreamOptions` — [src/gridfs/upload.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts). Limits the lifetime of an upload stream.
 
 ---
 
@@ -120,17 +120,17 @@ See [Limit Server Execution Time (CSOT) — MongoDB Node.js Driver Docs](https:/
 **Types**:
 
 #### `StrictFilter<TSchema>`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/mongo_types.ts)
+**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
 
 Provides strict type checking for filter predicates with proper nested path support.
 
 #### `StrictMatchKeysAndValues<TSchema>`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/mongo_types.ts)
+**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
 
 Ensures type-safe matching of keys and values in update operations.
 
 #### `StrictUpdateFilter<TSchema>`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/mongo_types.ts)
+**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
 
 Provides strict typing for update operators (`$set`, `$inc`, `$push`, etc.).
 
@@ -169,17 +169,17 @@ const update: StrictUpdateFilter<User> = {
 **Types**:
 
 #### `RuntimeAdapters`
-**Source**: [src/runtime_adapters.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/runtime_adapters.ts)
+**Source**: [src/runtime_adapters.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/runtime_adapters.ts)
 
 Interface for providing custom runtime module implementations.
 
 #### `OsAdapter`
-**Source**: [src/runtime_adapters.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/runtime_adapters.ts)
+**Source**: [src/runtime_adapters.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/runtime_adapters.ts)
 
 Represents the required functionality from the Node.js `os` module.
 
 **Available On**:
-- `MongoClientOptions.runtimeAdapters` - [src/mongo_client.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/mongo_client.ts)
+- `MongoClientOptions.runtimeAdapters` - [src/mongo_client.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts)
 
 **Example**:
 ```typescript
@@ -207,7 +207,7 @@ const client = new MongoClient(url, {
 **Option**: `keyMaterial`
 **Type**: `Buffer | Binary`
 **Location**: `ClientEncryptionCreateDataKeyProviderOptions`
-**Source**: [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/client-side-encryption/client_encryption.ts)
+**Source**: [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
 
 **Description**: Allows providing custom key material when creating data keys, giving more control over the encryption key generation process.
 
@@ -226,8 +226,8 @@ const dataKeyId = await encryption.createDataKey('local', {
 #### RewrapManyDataKey API
 
 **Interfaces**:
-- `ClientEncryptionRewrapManyDataKeyProviderOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/client-side-encryption/client_encryption.ts)
-- `ClientEncryptionRewrapManyDataKeyResult` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/client-side-encryption/client_encryption.ts)
+- `ClientEncryptionRewrapManyDataKeyProviderOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
+- `ClientEncryptionRewrapManyDataKeyResult` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
 
 **Description**: Experimental API for rewrapping multiple data keys in a single operation, useful for key rotation scenarios.
 
@@ -256,8 +256,8 @@ interface ClientEncryptionRewrapManyDataKeyResult {
 **Type**: `TextQueryOptions`
 **Location**: `ClientEncryptionEncryptOptions`
 **Source**:
-- Option in `ClientEncryptionEncryptOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/client-side-encryption/client_encryption.ts)
-- Interface `TextQueryOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/client-side-encryption/client_encryption.ts)
+- Option in `ClientEncryptionEncryptOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
+- Interface `TextQueryOptions` - [src/client-side-encryption/client_encryption.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/client-side-encryption/client_encryption.ts)
 
 **Description**: Options for Queryable Encryption fields supporting text queries. Only valid when the encryption algorithm is set to `TextPreview`.
 
@@ -280,8 +280,8 @@ const encrypted = await encryption.encrypt(value, {
 **Type**: `Document`
 
 **Available On**:
-- `CreateCollectionOptions` - [src/operations/create_collection.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/operations/create_collection.ts)
-- `DropCollectionOptions` - [src/operations/drop.ts](https://github.com/mongodb/node-mongodb-native/blob/v7.2.0/src/operations/drop.ts)
+- `CreateCollectionOptions` - [src/operations/create_collection.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/operations/create_collection.ts)
+- `DropCollectionOptions` - [src/operations/drop.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/operations/drop.ts)
 
 **Description**: Specifies the schema for encrypted fields in a collection, used with Queryable Encryption.
 
