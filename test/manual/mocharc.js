@@ -8,7 +8,8 @@ module.exports = {
   require: [
     'ts-node/register',
     'test/tools/runner/throw_rejections.cjs',
-    'test/tools/runner/chai_addons.ts'
+    'test/tools/runner/chai_addons.ts',
+    'test/mocha_root_hooks.ts'
   ],
   reporter: 'test/tools/reporter/mongodb_reporter.js',
   failZero: true,
