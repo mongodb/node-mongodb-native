@@ -6,14 +6,14 @@ const [major] = process.versions.node.split('.');
 /** @type {import("mocha").MochaOptions} */
 module.exports = {
   require: [
+    'test/mocha_root_hooks.ts',
     'source-map-support/register',
     'ts-node/register',
     'test/tools/runner/throw_rejections.cjs',
     'test/tools/runner/chai_addons.ts',
     'test/tools/runner/ee_checker.ts',
     'test/tools/runner/hooks/configuration.ts',
-    'test/tools/runner/hooks/leak_checker.ts',
-    'test/mocha_root_hooks.ts'
+    'test/tools/runner/hooks/leak_checker.ts'
   ],
   extension: ['js', 'ts'],
   ui: 'test/tools/runner/metadata_ui.js',

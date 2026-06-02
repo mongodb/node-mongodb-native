@@ -6,10 +6,10 @@ const [major] = process.versions.node.split('.');
 /** @type {import("mocha").MochaOptions} */
 module.exports = {
   require: [
+    'test/mocha_root_hooks.ts',
     'ts-node/register',
     'test/tools/runner/throw_rejections.cjs',
-    'test/tools/runner/chai_addons.ts',
-    'test/mocha_root_hooks.ts'
+    'test/tools/runner/chai_addons.ts'
   ],
   reporter: 'test/tools/reporter/mongodb_reporter.js',
   failZero: true,
