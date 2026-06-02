@@ -1367,14 +1367,7 @@ buildvariants:
   - name: BSON compatibility tests
     display_name: BSON compatibility tests
     run_on: rhel80-large
-    allowed_requesters: [
-      "patch",
-      "github_tag",
-      "commit",
-      "trigger",
-      "ad_hoc",
-      "github_merge_queue"
-    ]
+    tags: ["bson-compat"]
     tasks:
       - test-bson-latest-driver-7.0.0-unit-tests
       - test-bson-latest-driver-7.0.0-server-tests
