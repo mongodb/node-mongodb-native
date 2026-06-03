@@ -21,9 +21,9 @@ import type {
 // The twelve `import type` lines above are erased without replacement, so
 // in the compiled JS this falls on line 31 − 12 = line 19.
 //
-// source-map-support patches Error.prepareStackTrace so `error.stack`
-// already shows the correct TS line.  The demo below DISABLES that patch
-// temporarily so we can see what V8 reports natively.
+// ts-node's bundled `@cspotcode/source-map-support` patches
+// Error.prepareStackTrace so `error.stack` already shows the correct TS
+// line.  The demo below DISABLES that patch to see what V8 reports natively.
 //
 //   OLD commit (no --enable-source-maps): V8 says line 19  ← WRONG
 //   NEW commit (   --enable-source-maps): V8 says line 31  ← correct
@@ -32,8 +32,9 @@ const errorAtKnownLine = new Error('source-map probe'); // ← line 31
 
 /**
  * Capture a raw V8 stack frame by temporarily removing
- * source-map-support's prepareStackTrace override so we see exactly what
- * V8 reports — with or without its own source-map awareness.
+ * `@cspotcode/source-map-support`'s prepareStackTrace override (installed
+ * by ts-node) so we see exactly what V8 reports — with or without its own
+ * source-map awareness.
  */
 function rawV8FrameOf(err: Error): {
   file: string | null;

@@ -1,10 +1,5 @@
 /* eslint-disable simple-import-sort/imports */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-require('source-map-support').install({
-  hookRequire: true
-});
-
 import * as process from 'process';
 import * as os from 'os';
 
