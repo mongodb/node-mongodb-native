@@ -23,7 +23,7 @@ import type {
 //
 // ts-node's bundled `@cspotcode/source-map-support` patches
 // Error.prepareStackTrace so `error.stack` already shows the correct TS
-// line.  The demo below DISABLES that patch to see what V8 reports natively.
+// line. We DISABLE that patch to see what V8 reports natively.
 //
 //   OLD commit (no --enable-source-maps): V8 says line 19  ← WRONG
 //   NEW commit (   --enable-source-maps): V8 says line 31  ← correct
@@ -53,8 +53,8 @@ function rawV8FrameOf(err: Error): {
   return { file: match[1], line: Number(match[2]), col: Number(match[3]) };
 }
 
-describe('Source map verification (NODE-7493)', function () {
-  it('V8 native stack frame reports correct TypeScript line number', function () {
+describe('Source maps', function () {
+  it('report the collect line number when enabled', function () {
     const frame = rawV8FrameOf(errorAtKnownLine);
 
     console.log('\n  ── raw V8 frame (prepareStackTrace bypassed) ──');
@@ -68,8 +68,8 @@ describe('Source map verification (NODE-7493)', function () {
     expect(frame.line).to.equal(
       TS_SOURCE_LINE,
       `V8 reported line ${frame.line} but TypeScript source line is ${TS_SOURCE_LINE}. ` +
-        `This means --enable-source-maps is absent and V8 is reading the compiled-JS ` +
-        `line number instead of the original TypeScript line.`
+      `This means --enable-source-maps is absent and V8 is reading the compiled-JS ` +
+      `line number instead of the original TypeScript line.`
     );
   });
 });
