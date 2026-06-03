@@ -914,7 +914,7 @@ tasks:
             - .evergreen/run-search-index-management-tests.sh
   - name: test-bson-latest-driver-7.0.0-unit-tests
     tags:
-      - bson-compat
+      - bsoncompat
     commands:
       - command: expansions.update
         type: setup
@@ -934,7 +934,7 @@ tasks:
       - func: run unit tests
   - name: test-bson-latest-driver-7.0.0-server-tests
     tags:
-      - bson-compat
+      - bsoncompat
     commands:
       - command: expansions.update
         type: setup
@@ -960,7 +960,7 @@ tasks:
       - func: run tests
   - name: test-bson-latest-driver-7.0.0-replica_set-tests
     tags:
-      - bson-compat
+      - bsoncompat
     commands:
       - command: expansions.update
         type: setup
@@ -986,7 +986,7 @@ tasks:
       - func: run tests
   - name: test-bson-latest-driver-7.0.0-sharded_cluster-tests
     tags:
-      - bson-compat
+      - bsoncompat
     commands:
       - command: expansions.update
         type: setup
@@ -3520,7 +3520,7 @@ buildvariants:
     display_name: BSON compatibility tests
     run_on: rhel80-large
     tags:
-      - bson-compat
+      - bsoncompat
     tasks:
       - test-bson-latest-driver-7.0.0-unit-tests
       - test-bson-latest-driver-7.0.0-server-tests
