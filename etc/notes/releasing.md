@@ -100,15 +100,9 @@ The MongoDB driver can now generate a cup of joe.
 
 ### Authentication
 
-The github action is able to publish with the repository secret `NPM_TOKEN`.
-This is a granular API key that is unique to each package and has to be rotated on a regular basis.
-The `dbx-node@mongodb.com` npm account is the author of the automated release.
+The GitHub Actions release workflow publishes to npm using [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) (OIDC). A short-lived OIDC token is issued by GitHub Actions at publish time — no long-lived `NPM_TOKEN` secret is required on the `main` branch. The `mongodb` package's trusted publisher entry on npmjs.com points at `npm-publish.yml`, which is dispatched by `release.yml` via `dispatch-and-wait.mjs`.
 
-The nightly release flow is an exception: `release-nightly.yml` dispatches
-`.github/workflows/npm-publish.yml`, which authenticates to the npm registry
-via [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers) (OIDC)
-rather than `NPM_TOKEN`. The `mongodb` package's trusted publisher entry on
-npmjs.com points at `npm-publish.yml`.
+The `5.x` and `6.x` backport branches still publish using the legacy `NPM_TOKEN` secret. These branches are only used when a backport release is actually needed — the migration to trusted publishers will be done at that point, not proactively.
 
 ### Prebuilds
 
@@ -126,13 +120,17 @@ It may take some time for the building and uploading to finish, but no more than
 
 To configure a repo for a prerelease:
 
-1. Update the release Github action's `npm publish` step to publish an alpha by specifying `--tag alpha`:
+1. Update the release GitHub action's publish step to dispatch `npm-publish.yml` with `--tag alpha`:
 
 ```yaml
-      - run: npm publish --provenance --tag alpha
-        if: ${{ needs.release_please.outputs.release_created }}
+      - name: Dispatch npm-publish workflow
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node ./.github/scripts/dispatch-and-wait.mjs npm-publish.yml \
+            tag=alpha \
+            version="${{ inputs.alphaVersion }}" \
+            ref="${{ github.sha }}"
 ```
 
 2. Update the release please configuration file with the following parameters:
