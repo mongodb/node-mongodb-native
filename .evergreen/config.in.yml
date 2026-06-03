@@ -1367,6 +1367,7 @@ buildvariants:
   - name: BSON compatibility tests
     display_name: BSON compatibility tests
     run_on: rhel80-large
+    tags: ["bson-compat"]
     tasks:
       - test-bson-latest-driver-7.0.0-unit-tests
       - test-bson-latest-driver-7.0.0-server-tests
