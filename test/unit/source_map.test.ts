@@ -57,14 +57,15 @@ describe('Source maps', function () {
   it('report the correct line number when enabled', function () {
     const frame = rawV8FrameOf(errorAtKnownLine);
 
-    console.log('\n  ── raw V8 frame (prepareStackTrace bypassed) ──');
-    console.log(`  file : ${frame.file}`);
-    console.log(`  line : ${frame.line}  (TypeScript source line is ${TS_SOURCE_LINE})`);
-    console.log(`  col  : ${frame.col}`);
-    console.log(
-      `  ${frame.line === TS_SOURCE_LINE ? '✔ line matches TS source' : `✘ line ${frame.line} ≠ TS source line ${TS_SOURCE_LINE} — source maps not applied by V8`}`
-    );
-
+    if (process.env.VERBOSE) {
+      console.error('\n  ── raw V8 frame (prepareStackTrace bypassed) ──');
+      console.error(`  file : ${frame.file}`);
+      console.error(`  line : ${frame.line}  (TypeScript source line is ${TS_SOURCE_LINE})`);
+      console.error(`  col  : ${frame.col}`);
+      console.error(
+        `  ${frame.line === TS_SOURCE_LINE ? '✔ line matches TS source' : `✘ line ${frame.line} ≠ TS source line ${TS_SOURCE_LINE} — source maps not applied by V8`}`
+      );
+    }
     expect(frame.line).to.equal(
       TS_SOURCE_LINE,
       `V8 reported line ${frame.line} but TypeScript source line is ${TS_SOURCE_LINE}. ` +
