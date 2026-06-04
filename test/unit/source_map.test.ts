@@ -54,7 +54,7 @@ function rawV8FrameOf(err: Error): {
 }
 
 describe('Source maps', function () {
-  it('report the collect line number when enabled', function () {
+  it('report the correct line number when enabled', function () {
     const frame = rawV8FrameOf(errorAtKnownLine);
 
     console.log('\n  ── raw V8 frame (prepareStackTrace bypassed) ──');
