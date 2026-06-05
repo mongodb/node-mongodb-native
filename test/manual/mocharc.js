@@ -6,8 +6,8 @@ const [major] = process.versions.node.split('.');
 /** @type {import("mocha").MochaOptions} */
 module.exports = {
   require: [
-    'source-map-support/register',
     'ts-node/register',
+    'test/tools/runner/source_map.cjs',
     'test/tools/runner/throw_rejections.cjs',
     'test/tools/runner/chai_addons.ts'
   ],
