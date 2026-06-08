@@ -5,6 +5,7 @@ const [major] = process.versions.node.split('.');
 /** @type {import("mocha").MochaOptions} */
 module.exports = {
   require: [
+    'test/mocha_root_hooks.ts',
     'ts-node/register',
     'test/tools/runner/throw_rejections.cjs',
     'test/tools/runner/chai_addons.ts',

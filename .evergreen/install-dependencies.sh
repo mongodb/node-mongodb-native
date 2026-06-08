@@ -21,7 +21,7 @@ if [ "${OS:-}" = "Windows_NT" ] && [ -n "${NODE_ARTIFACTS_PATH:-}" ]; then
 fi
 _INSTALL_DEPS_NODE_ARTIFACTS_PATH="${NODE_ARTIFACTS_PATH:-}"
 
-if [ "$NATIVE" = "true" ]; then
+if [ "$NATIVE" = "true" ] || [ "${OS:-}" = "Windows_NT" ]; then
   # https://github.com/nodejs/node-gyp#configuring-python-dependency
   . $DRIVERS_TOOLS/.evergreen/find-python3.sh
   NODE_GYP_FORCE_PYTHON=$(find_python3)
