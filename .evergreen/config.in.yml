@@ -119,6 +119,7 @@ functions:
       params:
         env:
           TEST_CSFLE: "true"
+          NODE_OPTIONS: "--max-old-space-size=64"
         add_expansions_to_env: true
         working_dir: "src"
         timeout_secs: 300
