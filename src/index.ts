@@ -42,6 +42,7 @@ export {
   MongoBulkWriteError
 } from './bulk/common';
 export { ClientEncryption } from './client-side-encryption/client_encryption';
+// Atlas Stream Processing (experimental)
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export { ExplainableCursor } from './cursor/explainable_cursor';
 export {
@@ -87,6 +88,12 @@ export {
   MongoWriteConcernError,
   WriteConcernErrorResult
 } from './error';
+export {
+  SampleCursor,
+  StreamProcessingClient,
+  StreamProcessor,
+  StreamProcessors
+} from './stream_processing';
 export {
   AbstractCursor,
   // Actual driver classes exported
@@ -612,6 +619,15 @@ export type {
   WithTransactionCallback
 } from './sessions';
 export type { Sort, SortDirection, SortDirectionForCmd, SortForCmd } from './sort';
+export type {
+  CreateStreamProcessorOptions,
+  GetStreamProcessorSamplesOptions,
+  GetStreamProcessorSamplesResult,
+  GetStreamProcessorStatsOptions,
+  StartStreamProcessorOptions,
+  StreamProcessorInfo,
+  StreamProcessorTier
+} from './stream_processing';
 export type {
   CSOTTimeoutContext,
   CSOTTimeoutContextOptions,
