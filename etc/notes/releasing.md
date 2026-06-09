@@ -78,7 +78,9 @@ The MongoDB driver can now generate a cup of joe.
     - You may skip this step if you are releasing a package other than the driver.
 1. Comment "`run release_notes`" on the release PR.
     - This will kick off the action that reads the notes from each PR going into the release.
-    - Double check the result looks logically organized
+    - Double check the result looks logically organized and complete
+        - As a rule of thumb, every `feat` and `fix` should have a corresponding release note
+        - Cross-reference the list of tickets in the corresponding jira release for consistency
     - You may edit the PR body for any quick edits or re-orderings.
     - If there are a number of changes, edit the original PRs and post a new `run` comment
 1. Merge the release PR
