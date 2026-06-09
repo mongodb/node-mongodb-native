@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.3.0](https://github.com/mongodb/node-mongodb-native/compare/v7.2.0...v7.3.0) (2026-06-04)
+
+
+### Features
+
+* **NODE-7518:** bump maxWireVersion ([#4950](https://github.com/mongodb/node-mongodb-native/issues/4950)) ([4447050](https://github.com/mongodb/node-mongodb-native/commit/444705061ae49973a432fbcb0098419b72b75409))
+
+
+### Bug Fixes
+
+* **NODE-7548:** SCRAM authentication fails on non-Node runtimes ([#4932](https://github.com/mongodb/node-mongodb-native/issues/4932)) ([a10d2c9](https://github.com/mongodb/node-mongodb-native/commit/a10d2c937eaa2bfb30aece513c9770ec55541280))
+
 ## [7.2.0](https://github.com/mongodb/node-mongodb-native/compare/v7.1.0...v7.2.0) (2026-04-17)
 
 
