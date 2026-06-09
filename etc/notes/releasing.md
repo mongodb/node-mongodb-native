@@ -81,8 +81,8 @@ The MongoDB driver can now generate a cup of joe.
     - Double check the result looks logically organized and complete
         - As a rule of thumb, every `feat` and `fix` should have a corresponding release note
         - Cross-reference the list of tickets in the corresponding jira release for consistency
-    - You may edit the PR body for any quick edits or re-orderings.
-    - If there are a number of changes, edit the original PRs and post a new `run` comment
+    - You may modify the release PR body directly for any quick edits or re-orderings.
+    - If there are any non-cosmetic changes, edit the original PRs and post a new `run release_notes` comment
 1. Merge the release PR
     - If this is a release to a previous major, navigate to the new release and reset "latest" to our latest release in our _current_ major.
 1. If this is a new driver minor release, generate the new documentation
