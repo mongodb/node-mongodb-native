@@ -28,7 +28,7 @@ jobs:
             echo "Invalid alphaVersion string"
             exit 1
           fi
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Dispatch npm-publish workflow
         env:
           GH_TOKEN: ${{ github.token }}
