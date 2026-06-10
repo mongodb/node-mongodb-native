@@ -230,6 +230,16 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Enable retryable writes. */
   retryWrites?: boolean;
   /**
+   * When the server monitor detects a network timeout it clears the connection pool
+   * and, by default, interrupts ("kills") in-use connections, rejecting their
+   * in-flight operations with a `PoolClearedOnNetworkError`. Set this to `false` to
+   * leave in-use connections untouched on a monitor timeout, so a transient blip
+   * (for example the host being suspended/resumed) does not abort in-flight
+   * operations that the driver does not retry, such as tailable `getMore`s.
+   * Defaults to `true` (the Server Discovery and Monitoring spec behaviour).
+   */
+  interruptInUseConnections?: boolean;
+  /**
    * The maximum number of retries during server overload. Set to 0 to disable overload retries. Defaults to 2.
    * @see https://www.mongodb.com/docs/atlas/overload-errors
    * */
@@ -1062,6 +1072,7 @@ export interface MongoOptions
         | 'forceServerObjectId'
         | 'minHeartbeatFrequencyMS'
         | 'heartbeatFrequencyMS'
+        | 'interruptInUseConnections'
         | 'localThresholdMS'
         | 'maxConnecting'
         | 'maxIdleTimeMS'

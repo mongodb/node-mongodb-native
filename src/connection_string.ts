@@ -850,6 +850,10 @@ export const OPTIONS = {
   ignoreUndefined: {
     type: 'boolean'
   },
+  interruptInUseConnections: {
+    default: true,
+    type: 'boolean'
+  },
   j: {
     deprecated: 'Please use journal instead',
     target: 'writeConcern',

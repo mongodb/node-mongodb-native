@@ -281,6 +281,25 @@ describe('Connection String', function () {
     }
   });
 
+  describe('interruptInUseConnections', function () {
+    it('defaults to true', function () {
+      const options = parseOptions('mongodb://localhost:27017');
+      expect(options).to.have.property('interruptInUseConnections', true);
+    });
+
+    it('can be disabled via the options object', function () {
+      const options = parseOptions('mongodb://localhost:27017', {
+        interruptInUseConnections: false
+      });
+      expect(options).to.have.property('interruptInUseConnections', false);
+    });
+
+    it('can be disabled via the connection string', function () {
+      const options = parseOptions('mongodb://localhost:27017/?interruptInUseConnections=false');
+      expect(options).to.have.property('interruptInUseConnections', false);
+    });
+  });
+
   it('should parse compression options', function () {
     const options = parseOptions('mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4');
     expect(options).to.have.property('compressors');

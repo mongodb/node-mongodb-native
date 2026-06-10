@@ -12,12 +12,15 @@ import {
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   makeClientMetadata,
   MongoClient,
+  MongoErrorLabel,
+  MongoNetworkTimeoutError,
   MongoServerSelectionError,
   ns,
   ReadPreference,
   RunCommandOperation,
   RunCursorCommandOperation,
   Server,
+  ServerDescription,
   SrvPoller,
   SrvPollingEvent,
   TimeoutContext,
@@ -40,6 +43,59 @@ describe('Topology (unit)', function () {
 
     if (topology) {
       topology.close();
+    }
+  });
+
+  describe('interruptInUseConnections option (meteor/meteor#13108)', function () {
+    // When the SDAM monitor sees a network timeout it labels the error with both
+    // ResetPool and InterruptInUseConnections. updateServers() then clears the pool;
+    // the new `interruptInUseConnections` client option (default true) gates whether
+    // in-use connections are interrupted.
+    let mockServer;
+
+    beforeEach(async () => {
+      mockServer = await mock.createServer();
+      mockServer.setMessageHandler(request => {
+        const doc = request.document;
+        if (isHello(doc)) {
+          request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
+        } else {
+          request.reply({ ok: 1 });
+        }
+      });
+    });
+
+    afterEach(async () => {
+      await mock.cleanup();
+      sinon.restore();
+    });
+
+    for (const { setting, expected } of [
+      { setting: undefined, expected: true },
+      { setting: true, expected: true },
+      { setting: false, expected: false }
+    ]) {
+      it(`clears the pool with interruptInUseConnections=${expected} when the option is ${setting}`, async function () {
+        topology = topologyWithPlaceholderClient(
+          [mockServer.hostAddress()],
+          setting === undefined ? {} : { interruptInUseConnections: setting }
+        );
+        await topology.connect();
+
+        const [address] = topology.s.servers.keys();
+        const server = topology.s.servers.get(address);
+        const clearStub = sinon.stub(server.pool, 'clear');
+
+        // Simulate the SDAM monitor reporting a network timeout for this server.
+        const error = new MongoNetworkTimeoutError('connection <monitor> timed out');
+        error.addErrorLabel(MongoErrorLabel.ResetPool);
+        error.addErrorLabel(MongoErrorLabel.InterruptInUseConnections);
+        topology.serverUpdateHandler(new ServerDescription(address, undefined, { error }));
+
+        expect(clearStub).to.have.been.calledOnceWithExactly({
+          interruptInUseConnections: expected
+        });
+      });
     }
   });
 
