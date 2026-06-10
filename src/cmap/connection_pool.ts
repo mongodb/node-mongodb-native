@@ -76,6 +76,11 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
   waitQueueTimeoutMS: number;
   /** If we are in load balancer mode. */
   loadBalanced: boolean;
+  /**
+   * Whether a monitor-driven pool clear may interrupt in-use connections.
+   * See {@link MongoClientOptions.interruptInUseConnections}. Defaults to `true`.
+   */
+  interruptInUseConnections?: boolean;
   /** @internal */
   minPoolSizeCheckFrequencyMS?: number;
 }

@@ -869,9 +869,15 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
         incomingServerDescription.error instanceof MongoError &&
         incomingServerDescription.error.hasErrorLabel(MongoErrorLabel.ResetPool)
       ) {
-        const interruptInUseConnections = incomingServerDescription.error.hasErrorLabel(
-          MongoErrorLabel.InterruptInUseConnections
-        );
+        // Honour the `interruptInUseConnections` client option (default true). When
+        // disabled, a monitor network timeout still clears the pool (ResetPool) but
+        // does NOT kill in-use connections, so a transient blip (e.g. a suspended/
+        // resumed host) doesn't abort in-flight operations the driver won't retry.
+        // See meteor/meteor#13108.
+        const interruptInUseConnections =
+          incomingServerDescription.error.hasErrorLabel(
+            MongoErrorLabel.InterruptInUseConnections
+          ) && topology.s.options.interruptInUseConnections !== false;
 
         server.pool.clear({ interruptInUseConnections });
       } else if (incomingServerDescription.error == null) {
