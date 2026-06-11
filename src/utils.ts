@@ -1079,6 +1079,47 @@ export function commandSupportsReadConcern(command: Document): boolean {
   if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
     return true;
   }
+  return false;
+}
+
+/**
+ * @internal
+ */
+export function commandSupportsAfterClusterTime(command: Document): boolean {
+  // READ operations
+  if (
+    command.aggregate ||
+    command.count ||
+    command.dbStats ||
+    command.distinct ||
+    command.find ||
+    command.geoNear ||
+    // command.getMore ||
+    command.listIndexes ||
+    command.listCollections ||
+    command.listDatabases
+  ) {
+    return true;
+  }
+
+  // WRITE operations
+  if (
+    command.bulkWrite ||
+    command.create ||
+    command.createIndexes ||
+    command.delete ||
+    command.drop ||
+    command.dropDatabase ||
+    command.dropIndexes ||
+    // command.dropUser ||
+    // command.endSessions ||
+    command.findAndModify ||
+    command.insert ||
+    // command.renameCollection ||
+    command.update
+  ) {
+    return true;
+  }
 
   return false;
 }

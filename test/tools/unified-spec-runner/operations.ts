@@ -319,6 +319,12 @@ operations.set('dropCollection', async ({ entities, operation }) => {
   return await db.dropCollection(collection, opts);
 });
 
+operations.set('dropDatabase', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.object);
+  const { database, ...opts } = operation.arguments!;
+  return await client.db(database).dropDatabase(opts);
+});
+
 operations.set('drop', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
   return await bucket.drop(operation.arguments);
