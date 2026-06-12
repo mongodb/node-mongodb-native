@@ -404,7 +404,7 @@
       ]
     },
     {
-      "description": "change stream can be iterated again if previous iteration times out",
+      "description": "change stream iteration succeeds after a timeout error",
       "operations": [
         {
           "name": "createChangeStream",
@@ -441,6 +441,26 @@
           "object": "changeStream",
           "expectError": {
             "isTimeoutError": true
+          }
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 150
+              }
+            }
           }
         },
         {
@@ -494,21 +514,6 @@
                       "long"
                     ]
                   }
-                }
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "commandName": "getMore",
-                "databaseName": "test",
-                "command": {
-                  "getMore": {
-                    "$$type": [
-                      "int",
-                      "long"
-                    ]
-                  },
-                  "collection": "coll"
                 }
               }
             }
