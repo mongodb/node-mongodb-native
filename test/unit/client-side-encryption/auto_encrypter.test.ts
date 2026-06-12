@@ -43,13 +43,14 @@ class MockClient {
   s: { options: any };
 
   constructor(options?: any) {
-    this.options = { options: options || {} };
+    this.options = { ...options || {} };
     this.s = { options: this.options };
   }
 }
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+const emptyLogger = () => { };
 
 describe('AutoEncrypter', function () {
   this.timeout(12000);
@@ -95,10 +96,7 @@ describe('AutoEncrypter', function () {
       const autoEncrypterOptions = {
         mongocryptdBypassSpawn: true,
         keyVaultNamespace: 'admin.datakeys',
-        options: {
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          logger: () => {}
-        },
+        options: { logger: emptyLogger },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -141,6 +139,53 @@ describe('AutoEncrypter', function () {
         });
       });
     });
+
+    it('should pass settings to the mongocryptd client', function () {
+      const client = new MockClient() as MongoClient;
+      const autoEncrypterOptions = {
+        mongocryptdBypassSpawn: true,
+        keyVaultNamespace: 'admin.datakeys',
+        options: { logger: emptyLogger },
+        kmsProviders: {
+          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+          local: { key: Buffer.alloc(96) }
+        }
+      };
+      const autoEncrypter = new AutoEncrypter(client, autoEncrypterOptions);
+      expect(autoEncrypter._mongocryptdClient.options.autoSelectFamily).to.be.true;
+    });
+    it('should pass autoSelectFamily settings to the mongocryptd client', function () {
+      const client = new MockClient({
+        autoFamilySelect: true,
+      }) as MongoClient;
+      const autoEncrypterOptions = {
+        mongocryptdBypassSpawn: true,
+        keyVaultNamespace: 'admin.datakeys',
+        options: { logger: emptyLogger },
+        kmsProviders: {
+          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+          local: { key: Buffer.alloc(96) }
+        }
+      };
+      const autoEncrypter = new AutoEncrypter(client, autoEncrypterOptions);
+      expect(autoEncrypter._mongocryptdClient.options.autoSelectFamily).to.be.true;
+    });
+    it('should pass autoSelectFamilyAttemptTimeout settings to the mongocryptd client', function () {
+      const client = new MockClient({
+        autoSelectFamilyAttemptTimeout: 223456
+      }) as MongoClient;
+      const autoEncrypterOptions = {
+        mongocryptdBypassSpawn: true,
+        keyVaultNamespace: 'admin.datakeys',
+        options: { logger: emptyLogger },
+        kmsProviders: {
+          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
+          local: { key: Buffer.alloc(96) }
+        }
+      };
+      const autoEncrypter = new AutoEncrypter(client, autoEncrypterOptions);
+      expect(autoEncrypter._mongocryptdClient.options.autoSelectFamilyAttemptTimeout).to.equal(223456);
+    });
   });
 
   it('should support `bypassAutoEncryption`', async function () {
@@ -149,10 +194,7 @@ describe('AutoEncrypter', function () {
       bypassAutoEncryption: true,
       mongocryptdBypassSpawn: true,
       keyVaultNamespace: 'admin.datakeys',
-      options: {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        logger: () => {}
-      },
+      options: { logger: emptyLogger },
       kmsProviders: {
         aws: { accessKeyId: 'example', secretAccessKey: 'example' },
         local: { key: Buffer.alloc(96) }
@@ -169,10 +211,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient() as MongoClient;
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        options: {
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          logger: () => {}
-        },
+        options: { logger: emptyLogger },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -192,10 +231,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        options: {
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          logger: () => {}
-        },
+        options: { logger: emptyLogger },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -252,10 +288,7 @@ describe('AutoEncrypter', function () {
         const client = new MockClient();
         const mc = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          options: {
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            logger: () => {}
-          },
+          options: { logger: emptyLogger },
           kmsProviders: {
             aws: {}
           }
@@ -291,10 +324,7 @@ describe('AutoEncrypter', function () {
         const client = new MockClient();
         const mc = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          options: {
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            logger: () => {}
-          },
+          options: { logger: emptyLogger },
           kmsProviders: {
             aws: {}
           }
@@ -310,10 +340,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        options: {
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          logger: () => {}
-        },
+        options: { logger: emptyLogger },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
