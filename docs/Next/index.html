@@ -54,7 +54,7 @@
 </tr>
 </tbody>
 </table>
-<a id="md:release-integrity" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Release Integrity<a href="#md:release-integrity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Releases are created automatically and signed using the <a href="https://pgp.mongodb.com/node-driver.asc" target="_blank" class="external">Node team's GPG key</a>. This applies to the git tag as well as all release packages provided as part of a GitHub release. To verify the provided packages, download the key and import it using gpg:</p>
+<a id="md:release-integrity" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Release Integrity<a href="#md:release-integrity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Releases are created automatically and signed using the <a href="https://pgp.mongodb.com/node-driver.asc" target="_blank" class="external">Node team's GPG key</a>. All release packages provided as part of a GitHub release are signed. To verify the provided packages, download the key and import it using gpg:</p>
 <pre><code class="shell"><span class="hl-0">gpg</span><span class="hl-1"> </span><span class="hl-2">--import</span><span class="hl-1"> </span><span class="hl-3">node-driver.asc</span>
 </code><button type="button">Copy</button></pre>
 
@@ -71,8 +71,12 @@
 
 <blockquote>
 <p>[!Note]
-No verification is done when using npm to install the package. The contents of the Github tarball and npm's tarball are identical.</p>
+No GPG verification is done when using npm to install the package. The contents of the GitHub tarball and npm's tarball are identical.</p>
 </blockquote>
+<p>Releases published to the npm registry also include a <a href="https://docs.npmjs.com/generating-provenance-statements" target="_blank" class="external">provenance attestation</a>, which cryptographically links the package to its source repository and build workflow. To verify provenance:</p>
+<pre><code class="shell"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-3">audit</span><span class="hl-1"> </span><span class="hl-3">signatures</span>
+</code><button type="button">Copy</button></pre>
+
 <p>The MongoDB Node.js driver follows <a href="https://semver.org/" target="_blank" class="external">semantic versioning</a> for its releases.</p>
 <a id="md:bugs--feature-requests" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Bugs / Feature Requests<a href="#md:bugs--feature-requests" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Think you’ve found a bug? Want to see a new feature in <code>node-mongodb-native</code>? Please open a
 case in our issue management tool, JIRA:</p>
