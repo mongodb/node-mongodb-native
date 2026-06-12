@@ -615,7 +615,8 @@ tests:
                 documents:
                   - { _id: 2 }
                 ordered: true
-                readConcern: { $$exists: false }
+                readConcern:
+                  afterClusterTime: { $$exists: true }
                 lsid: { $$sessionLsid: *session1 }
                 txnNumber: { $$exists: false }
                 startTransaction: { $$exists: false }
@@ -698,7 +699,8 @@ tests:
                 documents:
                   - { _id: 2 }
                 ordered: true
-                readConcern: { $$exists: false }
+                readConcern:
+                  afterClusterTime: { $$exists: true }
                 lsid: { $$sessionLsid: *session1 }
                 txnNumber: { $$exists: false }
                 startTransaction: { $$exists: false }

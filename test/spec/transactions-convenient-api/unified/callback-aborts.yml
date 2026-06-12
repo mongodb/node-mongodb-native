@@ -164,9 +164,10 @@ tests:
                   - { _id: 2 }
                 ordered: true
                 lsid: { $$sessionLsid: *session0 }
+                readConcern:
+                  afterClusterTime: { $$exists: true }
                 # omitted fields
                 autocommit: { $$exists: false }
-                readConcern: { $$exists: false }
                 startTransaction: { $$exists: false }
                 writeConcern: { $$exists: false }
               commandName: insert

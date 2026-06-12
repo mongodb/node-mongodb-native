@@ -39,7 +39,7 @@ import {
 } from './transactions';
 import {
   calculateDurationInMs,
-  commandSupportsReadConcern,
+  commandSupportsAfterClusterTime,
   isPromiseLike,
   List,
   MongoDBNamespace,
@@ -1215,7 +1215,7 @@ export function applySession(
     if (
       session.supports.causalConsistency &&
       session.operationTime &&
-      commandSupportsReadConcern(command)
+      commandSupportsAfterClusterTime(command)
     ) {
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
