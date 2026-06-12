@@ -274,7 +274,7 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
     // NOTE: consider some TS magic for this
     switch (field) {
       case 'comment':
-        this.findOptions.comment = value as string | Document;
+        this.findOptions.comment = value;
         break;
 
       case 'explain':
