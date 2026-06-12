@@ -615,7 +615,7 @@ export function isRecord(
   }
 
   if (requiredKeys) {
-    const keys = Object.keys(value as Record<string, any>);
+    const keys = Object.keys(value);
     return isSuperset(keys, requiredKeys);
   }
 
