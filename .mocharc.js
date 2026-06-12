@@ -6,7 +6,6 @@ const [major] = process.versions.node.split('.');
 module.exports = {
   require: [
     'test/mocha_root_hooks.ts',
-    'source-map-support/register',
     'ts-node/register',
     'test/tools/runner/throw_rejections.cjs',
     'test/tools/runner/chai_addons.ts',
@@ -19,5 +18,8 @@ module.exports = {
   reporter: 'test/tools/reporter/mongodb_reporter.js',
   sort: true,
   color: true,
-  'node-option': Number(major) >= 23 ? ['no-experimental-strip-types'] : undefined
+  'node-option':
+    Number(major) >= 23
+      ? ['enable-source-maps', 'no-experimental-strip-types']
+      : ['enable-source-maps']
 };
