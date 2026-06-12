@@ -1,7 +1,6 @@
 import { type Connection } from '..';
 import type { Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
-import type { Collection } from '../collection';
 import type { ClientSession } from '../sessions';
 import type { MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
@@ -29,7 +28,7 @@ export class CountOperation extends CommandOperation<number> {
   query: Document;
 
   constructor(namespace: MongoDBNamespace, filter: Document, options: CountOptions) {
-    super({ s: { namespace: namespace } } as unknown as Collection, options);
+    super({ s: { namespace: namespace } }, options);
 
     this.options = options;
     this.collectionName = namespace.collection;
