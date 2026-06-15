@@ -136,6 +136,7 @@ tests:
                 ordered: true
                 readConcern:
                   afterClusterTime: { $$exists: true }
+                  level: { $$exists: false }
                 lsid: { $$sessionLsid: *session0 }
                 txnNumber: { $numberLong: '2' }
                 startTransaction: true
@@ -522,6 +523,7 @@ tests:
                 ordered: true
                 readConcern:
                   afterClusterTime: { $$exists: true }
+                  level: { $$exists: false }
                 lsid: { $$sessionLsid: *session0 }
                 # txnNumber 2 was skipped
                 txnNumber: { $numberLong: '3' }
@@ -617,6 +619,7 @@ tests:
                 ordered: true
                 readConcern:
                   afterClusterTime: { $$exists: true }
+                  level: { $$exists: false }
                 lsid: { $$sessionLsid: *session1 }
                 txnNumber: { $$exists: false }
                 startTransaction: { $$exists: false }
@@ -701,6 +704,7 @@ tests:
                 ordered: true
                 readConcern:
                   afterClusterTime: { $$exists: true }
+                  level: { $$exists: false }
                 lsid: { $$sessionLsid: *session1 }
                 txnNumber: { $$exists: false }
                 startTransaction: { $$exists: false }
