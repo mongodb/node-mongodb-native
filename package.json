@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "description": "The official MongoDB driver for Node.js",
   "main": "lib/index.js",
   "files": [
@@ -141,8 +141,10 @@
     "check:dts": "npm run build:bundle && node ./node_modules/typescript/bin/tsc --target es2023 --module commonjs --noEmit mongodb.d.ts && tsd",
     "check:search-indexes": "npm run build:bundle && nyc mocha --config test/mocha_mongodb.js test/manual/search-index-management.prose.test.ts",
     "check:test": "npm run build:bundle && nyc mocha --config test/mocha_mongodb.js test/integration",
+    "check:test:debug": "npm run mocha:debug -- --config test/mocha_mongodb.js test/integration",
     "check:test-bundled": "MONGODB_BUNDLED=true npm run check:test",
     "check:unit": "npm run build:bundle && nyc mocha test/unit",
+    "check:unit:debug": "npm run mocha:debug -- test/unit",
     "check:unit-bundled": "MONGODB_BUNDLED=true npm run check:unit",
     "check:ts": "node ./node_modules/typescript/bin/tsc -v && node ./node_modules/typescript/bin/tsc --noEmit",
     "check:atlas": "npm run build:bundle && nyc mocha --config test/manual/mocharc.js test/manual/atlas_connectivity.test.ts",
@@ -157,6 +159,7 @@
     "check:csfle": "npm run build:bundle && nyc mocha --config test/mocha_mongodb.js test/integration/client-side-encryption",
     "check:snappy": "npm run build:bundle && nyc mocha test/unit/assorted/snappy.test.js",
     "check:x509": "npm run build:bundle && nyc mocha test/manual/x509_auth.test.ts",
+    "mocha:debug": "npm run build:bundle && node --inspect --enable-source-maps --no-experimental-strip-types ./node_modules/mocha/bin/mocha.js",
     "build:bundle": "npm run bundle:driver && npm run bundle:types && npm run build:runtime-barrel",
     "build:runtime-barrel": "node etc/build-runtime-barrel.mjs",
     "bundle:driver": "node etc/bundle-driver.mjs",
