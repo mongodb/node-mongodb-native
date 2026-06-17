@@ -65,6 +65,16 @@ const eeMetadata: MongoDBMetadataUI = {
   }
 };
 
+// TODO(NODE-7628): Case 2 explicitly inserts with contentionFactor:10 into a collection
+// configured with contention:0; SERVER-91887 now rejects this mismatch on 9.0+.
+const eeMetadataPre90: MongoDBMetadataUI = {
+  requires: {
+    clientSideEncryption: true,
+    mongodb: '>=7.0.0 <9.0.0',
+    topology: ['replicaset', 'sharded']
+  }
+};
+
 async function loadExternal(file) {
   return EJSON.parse(
     await fs.readFile(
@@ -2063,7 +2073,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     context(
       'Case 2: can insert encrypted indexed and find with non-zero contention',
-      eeMetadata,
+      eeMetadataPre90,
       function () {
         let findPayload;
         let findPayload2;
