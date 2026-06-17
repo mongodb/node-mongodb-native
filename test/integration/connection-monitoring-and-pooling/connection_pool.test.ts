@@ -79,6 +79,7 @@ describe('Connection Pool', function () {
 
       beforeEach(async function () {
         if (!this.configuration.filters.MongoDBVersionFilter.filter({ metadata })) {
+          console.log('mod')
           return;
         }
         if (!this.configuration.filters.MongoDBTopologyFilter.filter({ metadata })) {
