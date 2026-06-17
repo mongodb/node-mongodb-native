@@ -1090,14 +1090,9 @@ export function commandSupportsAfterClusterTime(command: Document): boolean {
   if (
     command.aggregate ||
     command.count ||
-    command.dbStats ||
     command.distinct ||
     command.find ||
-    command.geoNear ||
-    // command.getMore ||
-    command.listIndexes ||
-    command.listCollections ||
-    command.listDatabases
+    command.geoNear
   ) {
     return true;
   }
@@ -1111,11 +1106,8 @@ export function commandSupportsAfterClusterTime(command: Document): boolean {
     command.drop ||
     command.dropDatabase ||
     command.dropIndexes ||
-    // command.dropUser ||
-    // command.endSessions ||
     command.findAndModify ||
     command.insert ||
-    // command.renameCollection ||
     command.update
   ) {
     return true;
