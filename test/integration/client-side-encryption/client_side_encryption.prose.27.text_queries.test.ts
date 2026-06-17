@@ -7,16 +7,17 @@ import * as semver from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
-const metadata: MongoDBMetadataUI = {
+// # Server 9.0.0-rc0 removes support for "prefixPreview" and "suffixPreview": SERVER-123416
+const metadataWithoutPreview: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
-    mongodb: '>=8.2.0',
+    mongodb: '>=8.2.0 <9.0.0',
     topology: '!single',
     libmongocrypt: '>=1.15.1'
   }
 };
-// # Server 9.0.0-rc0 removes support for "prefixPreview" and "suffixPreview": SERVER-123416
-const metadataWithoutPreview: MongoDBMetadataUI = {
+// TODO(NODE-7628): substringPreview contention validation broken on MongoDB 9.0+ (SERVER-91887).
+const metadataWithoutSubstringPreview: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
     mongodb: '>=8.2.0 <9.0.0',
@@ -418,7 +419,7 @@ describe('27. Text Explicit Encryption', function () {
     expect(result).to.be.null;
   });
 
-  it('Case 5: can find a document by substring', metadata, async function () {
+  it('Case 5: can find a document by substring', metadataWithoutSubstringPreview, async function () {
     // Use clientEncryption.encrypt() to encrypt the string "bar" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
@@ -468,7 +469,7 @@ describe('27. Text Explicit Encryption', function () {
     expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
   });
 
-  it('Case 6: assert no document found by substring', metadata, async function () {
+  it('Case 6: assert no document found by substring', metadataWithoutSubstringPreview, async function () {
     // Use clientEncryption.encrypt() to encrypt the string "bar" with the following EncryptOpts:
     // class EncryptOpts {
     //    keyId : <key1ID>,
