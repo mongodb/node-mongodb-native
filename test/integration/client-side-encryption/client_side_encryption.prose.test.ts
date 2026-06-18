@@ -65,7 +65,7 @@ const eeMetadata: MongoDBMetadataUI = {
   }
 };
 
-// TODO(NODE-7628): Case 2 explicitly inserts with contentionFactor:10 into a collection
+// TODO(NODE-7623): Case 2 explicitly inserts with contentionFactor:10 into a collection
 // configured with contention:0; SERVER-91887 now rejects this mismatch on 9.0+.
 const eeMetadataPre90: MongoDBMetadataUI = {
   requires: {

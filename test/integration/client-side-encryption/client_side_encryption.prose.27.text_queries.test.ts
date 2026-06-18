@@ -16,7 +16,7 @@ const metadataWithoutPreview: MongoDBMetadataUI = {
     libmongocrypt: '>=1.15.1'
   }
 };
-// TODO(NODE-7628): substringPreview contention validation broken on MongoDB 9.0+ (SERVER-91887).
+// TODO(NODE-7623): substringPreview contention validation broken on MongoDB 9.0+ (SERVER-91887).
 const metadataWithoutSubstringPreview: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
