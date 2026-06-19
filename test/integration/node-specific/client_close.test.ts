@@ -768,13 +768,13 @@ describe('MongoClient.close() Integration', () => {
         await configureFailPoint(
           this.configuration,
           {
-        configureFailPoint: 'failCommand',
-        mode: 'alwaysOn',
-        data: {
-          failCommands: ['find'],
-          blockConnection: true,
-          blockTimeMS: 500
-        }
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['find'],
+              blockConnection: true,
+              blockTimeMS: 500
+            }
           },
           `mongodb://${hostAddress}/?directConnection=true`
         );
