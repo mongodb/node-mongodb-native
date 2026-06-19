@@ -797,15 +797,10 @@ describe('MongoClient.close() Integration', () => {
       'emits connectionCheckedIn immediately followed by connectionClosed for each in-flight connection across topology',
       metadata,
       async function () {
-        const memberMap: Record<string, { name: string; address: string; connectionId: number }[]> =
-          {};
-
-        const push = e => {
-          if (!memberMap[e.address]) {
-            memberMap[e.address] = [];
-          }
-          memberMap[e.address].push({ ...e });
-        };
+        type ConnEvent = { name: string; address: string; connectionId: number };
+        const events: ConnEvent[] = [];
+        const push = ({ name, address, connectionId }: ConnEvent) =>
+          events.push({ name, address, connectionId });
 
         client
           .on('connectionCheckedOut', push)
@@ -813,7 +808,7 @@ describe('MongoClient.close() Integration', () => {
           .on('connectionClosed', push);
 
         const finds = Promise.allSettled([
-          // Make sure that at least one connection is checked out from a secondary (we're testing across 2 connpools)
+          // secondary read ensures at least one connection is checked out from a different pool
           client.db('test').collection('test').findOne({ a: 1 }, { readPreference: 'secondary' }),
           client.db('test').collection('test').findOne({ a: 1 }),
           client.db('test').collection('test').findOne({ a: 1 })
@@ -821,37 +816,32 @@ describe('MongoClient.close() Integration', () => {
 
         await client.connect();
 
-        // wait until all three finds have checked out a connection
-        while (
-          Object.values(memberMap)
-            .flat()
-            .filter(e => e.name === 'connectionCheckedOut').length < 3
-        ) {
+        while (events.filter(e => e.name === 'connectionCheckedOut').length < 3) {
           await sleep(1);
         }
 
-        const findConnectionIds = new Set(
-          Object.values(memberMap)
-            .flat()
-            .filter(e => e.name === 'connectionCheckedOut')
-            .map(({ address, connectionId }) => `${address}+${connectionId}`)
-        );
+        // all events at this point are connectionCheckedOut; snapshot their ids before close
+        const findConnKeys = new Set(events.map(e => `${e.address}:${e.connectionId}`));
 
         await client.close();
 
-        const findEvents = Object.values(memberMap)
-          .flat()
-          .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
-          .filter(({ address, connectionId }) =>
-            findConnectionIds.has(`${address}+${connectionId}`)
-          );
-
-        expect(findEvents).to.have.lengthOf(6);
-
         // spec requires each connectionCheckedIn to be immediately followed by connectionClosed
-        expect(findEvents.map(e => e.name)).to.deep.equal(
-          Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat()
-        );
+        const closeSequence = events
+          .filter(
+            e =>
+              e.name !== 'connectionCheckedOut' &&
+              findConnKeys.has(`${e.address}:${e.connectionId}`)
+          )
+          .map(e => e.name);
+
+        expect(closeSequence).to.deep.equal([
+          'connectionCheckedIn',
+          'connectionClosed',
+          'connectionCheckedIn',
+          'connectionClosed',
+          'connectionCheckedIn',
+          'connectionClosed'
+        ]);
 
         await finds;
       }
