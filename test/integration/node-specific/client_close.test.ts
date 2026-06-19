@@ -854,9 +854,6 @@ describe('MongoClient.close() Integration', () => {
         );
 
         await finds;
-
-        console.dir({ finds }, { depth: null });
-        console.dir({ memberMap }, { depth: null });
       }
     );
   });
