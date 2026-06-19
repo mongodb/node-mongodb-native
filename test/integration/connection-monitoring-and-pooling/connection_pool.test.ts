@@ -121,21 +121,9 @@ describe('Connection Pool', function () {
               .on('connectionClosed', pushToClientEvents);
 
             const finds = Promise.allSettled([
-              client
-                .db('test')
-                .collection('test')
-                .findOne({
-                  a: 1,
-                  options: { readPreference: 'secondaryPreferred' }
-                }),
-              client
-                .db('test')
-                .collection('test')
-                .findOne({ a: 1, options: { readPreference: 'secondaryPreferred' } }),
-              client
-                .db('test')
-                .collection('test')
-                .findOne({ a: 1, options: { readPreference: 'secondaryPreferred' } })
+              client.db('test').collection('test').findOne({ a: 1 }),
+              client.db('test').collection('test').findOne({ a: 1 }),
+              client.db('test').collection('test').findOne({ a: 1 })
             ]);
 
             // wait until all finds are pending on the server

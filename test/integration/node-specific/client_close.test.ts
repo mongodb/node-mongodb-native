@@ -764,7 +764,10 @@ describe('MongoClient.close() Integration', () => {
     let client: MongoClient;
 
     beforeEach(async function () {
-      await configureFailPoint(this.configuration, {
+      for (const hostAddress of this.configuration.options.hostAddresses) {
+        await configureFailPoint(
+          this.configuration,
+          {
         configureFailPoint: 'failCommand',
         mode: 'alwaysOn',
         data: {
@@ -772,22 +775,37 @@ describe('MongoClient.close() Integration', () => {
           blockConnection: true,
           blockTimeMS: 500
         }
-      });
+          },
+          `mongodb://${hostAddress}/?directConnection=true`
+        );
+      }
       client = this.configuration.newClient({}, {});
-      await client.connect();
     });
 
     afterEach(async function () {
-      await clearFailPoint(this.configuration);
+      for (const hostAddress of this.configuration.options.hostAddresses) {
+        await clearFailPoint(
+          this.configuration,
+          'failCommand',
+          `mongodb://${hostAddress}/?directConnection=true`
+        );
+      }
       await client?.close();
     });
 
     it(
-      'emits connectionCheckedIn immediately followed by connectionClosed for each in-flight connection',
+      'emits connectionCheckedIn immediately followed by connectionClosed for each in-flight connection across topology',
       metadata,
       async function () {
-        const allEvents: Array<{ name: string; address: string; connectionId: number }> = [];
-        const push = e => allEvents.push(e);
+        const memberMap: Record<string, { name: string; address: string; connectionId: number }[]> =
+          {};
+
+        const push = e => {
+          if (!memberMap[e.address]) {
+            memberMap[e.address] = [];
+          }
+          memberMap[e.address].push({ ...e });
+        };
 
         client
           .on('connectionCheckedOut', push)
@@ -795,25 +813,34 @@ describe('MongoClient.close() Integration', () => {
           .on('connectionClosed', push);
 
         const finds = Promise.allSettled([
-          client.db('test').collection('test').findOne({ a: 1 }),
+          // Make sure that at least one connection is checked out from a secondary (we're testing across 2 connpools)
+          client.db('test').collection('test').findOne({ a: 1 }, { readPreference: 'secondary' }),
           client.db('test').collection('test').findOne({ a: 1 }),
           client.db('test').collection('test').findOne({ a: 1 })
         ]);
 
+        await client.connect();
+
         // wait until all three finds have checked out a connection
-        while (allEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
+        while (
+          Object.values(memberMap)
+            .flat()
+            .filter(e => e.name === 'connectionCheckedOut').length < 3
+        ) {
           await sleep(1);
         }
 
         const findConnectionIds = new Set(
-          allEvents
+          Object.values(memberMap)
+            .flat()
             .filter(e => e.name === 'connectionCheckedOut')
             .map(({ address, connectionId }) => `${address}+${connectionId}`)
         );
 
         await client.close();
 
-        const findEvents = allEvents
+        const findEvents = Object.values(memberMap)
+          .flat()
           .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
           .filter(({ address, connectionId }) =>
             findConnectionIds.has(`${address}+${connectionId}`)
@@ -827,6 +854,9 @@ describe('MongoClient.close() Integration', () => {
         );
 
         await finds;
+
+        console.dir({ finds }, { depth: null });
+        console.dir({ memberMap }, { depth: null });
       }
     );
   });
