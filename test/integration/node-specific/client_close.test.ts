@@ -765,6 +765,11 @@ describe('MongoClient.close() Integration', () => {
 
     beforeEach(async function () {
       for (const hostAddress of this.configuration.options.hostAddresses) {
+        const uri = new URL(this.configuration.url());
+        uri.host = hostAddress.toString();
+        uri.searchParams.set('directConnection', 'true');
+        uri.searchParams.delete('replicaSet');
+        uri.searchParams.delete('loadBalanced');
         await configureFailPoint(
           this.configuration,
           {
@@ -776,7 +781,7 @@ describe('MongoClient.close() Integration', () => {
               blockTimeMS: 500
             }
           },
-          `mongodb://${hostAddress}/?directConnection=true`
+          uri.toString()
         );
       }
       client = this.configuration.newClient({}, {});
@@ -784,11 +789,12 @@ describe('MongoClient.close() Integration', () => {
 
     afterEach(async function () {
       for (const hostAddress of this.configuration.options.hostAddresses) {
-        await clearFailPoint(
-          this.configuration,
-          'failCommand',
-          `mongodb://${hostAddress}/?directConnection=true`
-        );
+        const uri = new URL(this.configuration.url());
+        uri.host = hostAddress.toString();
+        uri.searchParams.set('directConnection', 'true');
+        uri.searchParams.delete('replicaSet');
+        uri.searchParams.delete('loadBalanced');
+        await clearFailPoint(this.configuration, 'failCommand', uri.toString());
       }
       await client?.close();
     });
