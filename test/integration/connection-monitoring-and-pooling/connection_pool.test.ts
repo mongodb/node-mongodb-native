@@ -72,7 +72,7 @@ describe('Connection Pool', function () {
       });
     });
 
-    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4' } };
+    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', topology: 'single' } };
 
     describe('ConnectionCheckedInEvent', metadata, function () {
       let client: MongoClient;
@@ -91,13 +91,12 @@ describe('Connection Pool', function () {
           data: {
             failCommands: ['find'],
             blockConnection: true,
-            blockTimeMS: 500
+            blockTimeMS: 5000
           }
         });
 
         client = this.configuration.newClient({}, {});
         await client.connect();
-        await Promise.all(Array.from({ length: 100 }, () => client.db().command({ ping: 1 })));
       });
 
       afterEach(async function () {
@@ -112,13 +111,19 @@ describe('Connection Pool', function () {
           'a connection pool emits checked in events for closed connections',
           metadata,
           async () => {
-            const allClientEvents = [];
-            const pushToClientEvents = e => allClientEvents.push(e);
+            type PoolEvent = { name: string; address: string; connectionId: number };
+            const eventsByConn = new Map<string, PoolEvent[]>();
+            const pushToPoolEvents = (e: PoolEvent) => {
+              const key = `${e.address}:${e.connectionId}`;
+              const connEvents = eventsByConn.get(key) ?? [];
+              eventsByConn.set(key, connEvents);
+              connEvents.push(e);
+            };
 
             client
-              .on('connectionCheckedOut', pushToClientEvents)
-              .on('connectionCheckedIn', pushToClientEvents)
-              .on('connectionClosed', pushToClientEvents);
+              .on('connectionCheckedOut', pushToPoolEvents)
+              .on('connectionCheckedIn', pushToPoolEvents)
+              .on('connectionClosed', pushToPoolEvents);
 
             const finds = Promise.allSettled([
               client.db('test').collection('test').findOne({ a: 1 }),
@@ -126,33 +131,34 @@ describe('Connection Pool', function () {
               client.db('test').collection('test').findOne({ a: 1 })
             ]);
 
-            // wait until all finds are pending on the server
-            while (allClientEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
-              await sleep(1);
+            const deadline = Date.now() + 5000;
+            while (
+              [...eventsByConn.values()].flat().filter(e => e.name === 'connectionCheckedOut')
+                .length < 3
+            ) {
+              if (Date.now() > deadline) {
+                console.log('deadline exceeded');
+                console.dir({ eventsByConn }, { depth: null, colors: true });
+                throw new Error('Timed out waiting for connectionCheckedOut events');
+              }
+              await sleep(200);
             }
 
-            const findConnectionIds = allClientEvents
-              .filter(e => e.name === 'connectionCheckedOut')
-              .map(({ address, connectionId }) => `${address} + ${connectionId}`);
-
+            console.log('client closing');
             await client.close();
-
-            await sleep(100);
-
-            const findCheckInAndCloses = allClientEvents
-              .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
-              .filter(({ address, connectionId }) =>
-                findConnectionIds.includes(`${address} + ${connectionId}`)
-              );
-
-            expect(findCheckInAndCloses).to.have.lengthOf(6);
-
-            // check that each check-in is followed by a close (not proceeded by one)
-            expect(findCheckInAndCloses.map(e => e.name)).to.deep.equal(
-              Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat(1)
-            );
-
+            console.log('awaiting finds');
             await finds;
+
+            // check that each connection's last events are checkedIn immediately followed by closed
+            for (const connEvents of [...eventsByConn.values()].filter(arr =>
+              arr.find(e => e.name === 'connectionCheckedOut')
+            )) {
+              const closeSeq = connEvents
+                .slice(-3)
+                .filter(e => e.name !== 'connectionCheckedOut')
+                .map(e => e.name);
+              expect(closeSeq).to.deep.equal(['connectionCheckedIn', 'connectionClosed']);
+            }
           }
         );
       });

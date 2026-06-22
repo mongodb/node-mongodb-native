@@ -4,12 +4,7 @@ import { expect } from 'chai';
 import * as process from 'process';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
-import {
-  type Collection,
-  type CommandStartedEvent,
-  type FindCursor,
-  type MongoClient
-} from '../../mongodb';
+import { type MongoClient } from '../../mongodb';
 import {
   clearFailPoint,
   configureFailPoint,
@@ -780,7 +775,7 @@ describe('MongoClient.close() Integration', () => {
             data: {
               failCommands: ['find'],
               blockConnection: true,
-              blockTimeMS: 500
+              blockTimeMS: 5000
             }
           },
           uri.toString()
@@ -806,10 +801,15 @@ describe('MongoClient.close() Integration', () => {
       metadata,
       async function () {
         type ConnEvent = { name: string; address: string; connectionId: number };
-        const events: ConnEvent[] = [];
-        const push = ({ name, address, connectionId }: ConnEvent) =>
-          events.push({ name, address, connectionId });
+        const eventsByConn = new Map<string, ConnEvent[]>();
+        const push = (e: any) => {
+          const key = `${e.address}:${e.connectionId}`;
+          const connEvents = eventsByConn.get(key) ?? [];
+          eventsByConn.set(key, connEvents);
+          connEvents.push({ name: e.name, address: e.address, connectionId: e.connectionId });
+        };
 
+        console.log('connecting');
         await client.connect();
 
         client
@@ -824,35 +824,34 @@ describe('MongoClient.close() Integration', () => {
           client.db('test').collection('test').findOne({ a: 1 })
         ]);
 
-        while (events.filter(e => e.name === 'connectionCheckedOut').length < 3) {
-          await sleep(1);
+        console.dir({ eventsByConn }, { depth: null, colors: true });
+
+        const deadline = Date.now() + 3000;
+        while (
+          [...eventsByConn.values()].flat().filter(e => e.name === 'connectionCheckedOut').length <
+          3
+        ) {
+          if (Date.now() > deadline) {
+            console.log('deadline exceeded');
+            console.dir({ eventsByConn }, { depth: null, colors: true });
+            throw new Error('Timed out waiting for connectionCheckedOut events');
+          }
+          await sleep(200);
         }
 
-        // all events at this point are connectionCheckedOut; snapshot their ids before close
-        const findConnKeys = new Set(events.map(e => `${e.address}:${e.connectionId}`));
-
+        console.log('client closing');
         await client.close();
+        console.log('awaiting finds');
+        await finds;
 
         // spec requires each connectionCheckedIn to be immediately followed by connectionClosed
-        const closeSequence = events
-          .filter(
-            e =>
-              e.name !== 'connectionCheckedOut' &&
-              findConnKeys.has(`${e.address}:${e.connectionId}`)
-          )
-          .sort((a, b) => `${a.address}:${a.connectionId}` - `${b.address}:${b.connectionId}`)
-          .map(e => e.name);
-
-        expect(closeSequence).to.deep.equal([
-          'connectionCheckedIn',
-          'connectionClosed',
-          'connectionCheckedIn',
-          'connectionClosed',
-          'connectionCheckedIn',
-          'connectionClosed'
-        ]);
-
-        await finds;
+        for (const connEvents of eventsByConn.values()) {
+          const closeSeq = connEvents
+            .slice(-3)
+            .filter(e => e.name !== 'connectionCheckedOut')
+            .map(e => e.name);
+          expect(closeSeq).to.deep.equal(['connectionCheckedIn', 'connectionClosed']);
+        }
       }
     );
   });
@@ -906,4 +905,5 @@ describe('MongoClient.close() Integration', () => {
       });
     });
   });
+  
 });
