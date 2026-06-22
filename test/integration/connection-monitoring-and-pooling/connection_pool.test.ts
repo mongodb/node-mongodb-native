@@ -137,6 +137,8 @@ describe('Connection Pool', function () {
 
             await client.close();
 
+            await sleep(100);
+
             const findCheckInAndCloses = allClientEvents
               .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
               .filter(({ address, connectionId }) =>
