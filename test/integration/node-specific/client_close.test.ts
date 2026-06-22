@@ -810,6 +810,8 @@ describe('MongoClient.close() Integration', () => {
         const push = ({ name, address, connectionId }: ConnEvent) =>
           events.push({ name, address, connectionId });
 
+        await client.connect();
+
         client
           .on('connectionCheckedOut', push)
           .on('connectionCheckedIn', push)
@@ -821,8 +823,6 @@ describe('MongoClient.close() Integration', () => {
           client.db('test').collection('test').findOne({ a: 1 }),
           client.db('test').collection('test').findOne({ a: 1 })
         ]);
-
-        await client.connect();
 
         while (events.filter(e => e.name === 'connectionCheckedOut').length < 3) {
           await sleep(1);
