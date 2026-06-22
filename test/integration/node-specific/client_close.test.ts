@@ -815,14 +815,14 @@ describe('MongoClient.close() Integration', () => {
           .on('connectionCheckedIn', push)
           .on('connectionClosed', push);
 
-        await client.connect();
-
         const finds = Promise.allSettled([
           // secondary read ensures at least one connection is checked out from a different pool
           client.db('test').collection('test').findOne({ a: 1 }, { readPreference: 'secondary' }),
           client.db('test').collection('test').findOne({ a: 1 }),
           client.db('test').collection('test').findOne({ a: 1 })
         ]);
+
+        await client.connect();
 
         while (events.filter(e => e.name === 'connectionCheckedOut').length < 3) {
           await sleep(1);
@@ -840,6 +840,7 @@ describe('MongoClient.close() Integration', () => {
               e.name !== 'connectionCheckedOut' &&
               findConnKeys.has(`${e.address}:${e.connectionId}`)
           )
+          .sort((a, b) => `${a.address}:${a.connectionId}` - `${b.address}:${b.connectionId}`)
           .map(e => e.name);
 
         expect(closeSequence).to.deep.equal([
