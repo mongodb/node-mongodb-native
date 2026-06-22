@@ -760,7 +760,9 @@ describe('MongoClient.close() Integration', () => {
   });
 
   describe('closeCheckedOutConnections', () => {
-    const metadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4' } };
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4', topology: ['replicaset'] }
+    };
     let client: MongoClient;
 
     beforeEach(async function () {
