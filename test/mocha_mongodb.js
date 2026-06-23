@@ -7,7 +7,6 @@ const [major] = process.versions.node.split('.');
 module.exports = {
   require: [
     'test/mocha_root_hooks.ts',
-    'source-map-support/register',
     'ts-node/register',
     'test/tools/runner/throw_rejections.cjs',
     'test/tools/runner/chai_addons.ts',
@@ -32,5 +31,8 @@ module.exports = {
     'test/integration/node-specific/examples/transactions.test.js',
     'test/integration/node-specific/examples/versioned_api.js'
   ],
-  'node-option': Number(major) >= 23 ? ['no-experimental-strip-types'] : undefined
+  'node-option':
+    Number(major) >= 23
+      ? ['enable-source-maps', 'no-experimental-strip-types']
+      : ['enable-source-maps']
 };

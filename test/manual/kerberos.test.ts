@@ -9,7 +9,7 @@ import { MongoClient } from '../mongodb';
 const expect = chai.expect;
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-chai.use(require('sinon-chai'));
+chai.use(require('sinon-chai').default);
 
 async function verifyKerberosAuthentication(client) {
   const docs = await client.db('kerberos').collection('test').find().toArray();
