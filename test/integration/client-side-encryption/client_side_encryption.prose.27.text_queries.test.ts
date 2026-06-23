@@ -7,16 +7,17 @@ import * as semver from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
-const metadata: MongoDBMetadataUI = {
+// # Server 9.0.0-rc0 removes support for "prefixPreview" and "suffixPreview": SERVER-123416
+const metadataWithoutPreview: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
-    mongodb: '>=8.2.0',
+    mongodb: '>=8.2.0 <9.0.0',
     topology: '!single',
     libmongocrypt: '>=1.15.1'
   }
 };
-// # Server 9.0.0-rc0 removes support for "prefixPreview" and "suffixPreview": SERVER-123416
-const metadataWithoutPreview: MongoDBMetadataUI = {
+// TODO(NODE-7623): substringPreview contention validation broken on MongoDB 9.0+ (SERVER-91887).
+const metadataWithoutSubstringPreview: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
     mongodb: '>=8.2.0 <9.0.0',
@@ -418,105 +419,113 @@ describe('27. Text Explicit Encryption', function () {
     expect(result).to.be.null;
   });
 
-  it('Case 5: can find a document by substring', metadata, async function () {
-    // Use clientEncryption.encrypt() to encrypt the string "bar" with the following EncryptOpts:
-    // class EncryptOpts {
-    //    keyId : <key1ID>,
-    //    algorithm: "TextPreview",
-    //    queryType: "substringPreview",
-    //    contentionFactor: 0,
-    //    textOpts: TextOpts {
-    //       caseSensitive: true,
-    //       diacriticSensitive: true,
-    //       substring: SubstringOpts {
-    //        strMaxLength: 10,
-    //        strMaxQueryLength: 10,
-    //        strMinQueryLength: 2,
-    //       }
-    //    },
-    // }
-    const encryptedFoo = await clientEncryption.encrypt('bar', {
-      keyId: keyId1,
-      algorithm: 'TextPreview',
-      queryType: 'substringPreview',
-      contentionFactor: 0,
-      textOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        substring: {
-          strMaxLength: 10,
-          strMaxQueryLength: 10,
-          strMinQueryLength: 2
+  it(
+    'Case 5: can find a document by substring',
+    metadataWithoutSubstringPreview,
+    async function () {
+      // Use clientEncryption.encrypt() to encrypt the string "bar" with the following EncryptOpts:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "TextPreview",
+      //    queryType: "substringPreview",
+      //    contentionFactor: 0,
+      //    textOpts: TextOpts {
+      //       caseSensitive: true,
+      //       diacriticSensitive: true,
+      //       substring: SubstringOpts {
+      //        strMaxLength: 10,
+      //        strMaxQueryLength: 10,
+      //        strMinQueryLength: 2,
+      //       }
+      //    },
+      // }
+      const encryptedFoo = await clientEncryption.encrypt('bar', {
+        keyId: keyId1,
+        algorithm: 'TextPreview',
+        queryType: 'substringPreview',
+        contentionFactor: 0,
+        textOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          substring: {
+            strMaxLength: 10,
+            strMaxQueryLength: 10,
+            strMinQueryLength: 2
+          }
         }
-      }
-    });
+      });
 
-    // Use encryptedClient to run a "find" operation on the db.substring collection with the following filter:
-    // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'bar'>} } }
-    const filter = {
-      $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedFoo } }
-    };
+      // Use encryptedClient to run a "find" operation on the db.substring collection with the following filter:
+      // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'bar'>} } }
+      const filter = {
+        $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedFoo } }
+      };
 
-    const { __safeContent__, ...result } = await encryptedClient
-      .db('db')
-      .collection<{
-        _id: number;
-        encryptedText: Binary;
-        __safeContent__: any;
-      }>('substring')
-      .findOne(filter);
-    expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
-  });
+      const { __safeContent__, ...result } = await encryptedClient
+        .db('db')
+        .collection<{
+          _id: number;
+          encryptedText: Binary;
+          __safeContent__: any;
+        }>('substring')
+        .findOne(filter);
+      expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
+    }
+  );
 
-  it('Case 6: assert no document found by substring', metadata, async function () {
-    // Use clientEncryption.encrypt() to encrypt the string "bar" with the following EncryptOpts:
-    // class EncryptOpts {
-    //    keyId : <key1ID>,
-    //    algorithm: "TextPreview",
-    //    queryType: "substringPreview",
-    //    contentionFactor: 0,
-    //    textOpts: TextOpts {
-    //       caseSensitive: true,
-    //       diacriticSensitive: true,
-    //       substring: SubstringOpts {
-    //        strMaxLength: 10,
-    //        strMaxQueryLength: 10,
-    //        strMinQueryLength: 2,
-    //       }
-    //    },
-    // }
-    const encryptedQux = await clientEncryption.encrypt('qux', {
-      keyId: keyId1,
-      algorithm: 'TextPreview',
-      queryType: 'substringPreview',
-      contentionFactor: 0,
-      textOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        substring: {
-          strMaxLength: 10,
-          strMaxQueryLength: 10,
-          strMinQueryLength: 2
+  it(
+    'Case 6: assert no document found by substring',
+    metadataWithoutSubstringPreview,
+    async function () {
+      // Use clientEncryption.encrypt() to encrypt the string "bar" with the following EncryptOpts:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "TextPreview",
+      //    queryType: "substringPreview",
+      //    contentionFactor: 0,
+      //    textOpts: TextOpts {
+      //       caseSensitive: true,
+      //       diacriticSensitive: true,
+      //       substring: SubstringOpts {
+      //        strMaxLength: 10,
+      //        strMaxQueryLength: 10,
+      //        strMinQueryLength: 2,
+      //       }
+      //    },
+      // }
+      const encryptedQux = await clientEncryption.encrypt('qux', {
+        keyId: keyId1,
+        algorithm: 'TextPreview',
+        queryType: 'substringPreview',
+        contentionFactor: 0,
+        textOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          substring: {
+            strMaxLength: 10,
+            strMaxQueryLength: 10,
+            strMinQueryLength: 2
+          }
         }
-      }
-    });
+      });
 
-    // Use encryptedClient to run a "find" operation on the db.substring collection with the following filter:
-    // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'bar'>} } }
-    const filter = {
-      $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedQux } }
-    };
+      // Use encryptedClient to run a "find" operation on the db.substring collection with the following filter:
+      // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'bar'>} } }
+      const filter = {
+        $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedQux } }
+      };
 
-    const result = await encryptedClient
-      .db('db')
-      .collection<{
-        _id: number;
-        encryptedText: Binary;
-        __safeContent__: any;
-      }>('substring')
-      .findOne(filter);
-    expect(result).to.be.null;
-  });
+      const result = await encryptedClient
+        .db('db')
+        .collection<{
+          _id: number;
+          encryptedText: Binary;
+          __safeContent__: any;
+        }>('substring')
+        .findOne(filter);
+      expect(result).to.be.null;
+    }
+  );
 
   it('Case 7: assert contentionFactor is required', metadataWithoutPreview, async function () {
     // Skip this test case if testing MongoDB server 9.0.0+.

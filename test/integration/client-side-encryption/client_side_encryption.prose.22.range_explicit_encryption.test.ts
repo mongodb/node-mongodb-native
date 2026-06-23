@@ -270,8 +270,8 @@ describe('Range Explicit Encryption', function () {
       it('Case 2: can find encrypted range and return the maximum', metaData, async function () {
         const query = {
           $and: [
-            { 'encrypted<Type>': { $gte: factory(6) } },
-            { 'encrypted<Type>': { $lte: factory(200) } }
+            { [`encrypted${dataType}`]: { $gte: factory(6) } },
+            { [`encrypted${dataType}`]: { $lte: factory(200) } }
           ]
         };
 
@@ -322,8 +322,8 @@ describe('Range Explicit Encryption', function () {
       it('Case 3: can find encrypted range and return the minimum', metaData, async function () {
         const query = {
           $and: [
-            { 'encrypted<Type>': { $gte: factory(0) } },
-            { 'encrypted<Type>': { $lte: factory(6) } }
+            { [`encrypted${dataType}`]: { $gte: factory(0) } },
+            { [`encrypted${dataType}`]: { $lte: factory(6) } }
           ]
         };
 
@@ -369,7 +369,7 @@ describe('Range Explicit Encryption', function () {
 
       it('Case 4: can find encrypted range with an open range query', metaData, async function () {
         const query = {
-          $and: [{ 'encrypted<Type>': { $gt: factory(30) } }]
+          $and: [{ [`encrypted${dataType}`]: { $gt: factory(30) } }]
         };
 
         const findPayload = await clientEncryption.encryptExpression(query, {
@@ -398,7 +398,7 @@ describe('Range Explicit Encryption', function () {
       });
 
       it('Case 5: can run an aggregation expression inside $expr', metaData, async function () {
-        const query = { $and: [{ $lt: ['$encrypted<Type>', factory(30)] }] };
+        const query = { $and: [{ $lt: [`$encrypted${dataType}`, factory(30)] }] };
 
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
