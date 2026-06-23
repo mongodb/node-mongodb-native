@@ -45,7 +45,11 @@ describe('package.json', function () {
     after('reset npm dependencies', () => {
       // This test file is not meant to be run alongside others, but in case
       // we can attempt to reset the environment
-      fs.rmSync(path.join(repoRoot, 'node_modules'), { recursive: true, force: true });
+      fs.rmSync(path.join(repoRoot, 'node_modules'), {
+        recursive: true,
+        force: true,
+        maxRetries: 3 // Retry in case of transient file system errors
+      });
       execSync(`npm clean-install`);
     });
 
