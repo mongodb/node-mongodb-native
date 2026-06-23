@@ -746,8 +746,16 @@ export class ClientEncryption {
     expressionMode: boolean,
     options: ClientEncryptionEncryptOptions
   ): Promise<Binary> {
-    const { algorithm, keyId, keyAltName, contentionFactor, queryType, rangeOptions, textOptions } =
-      options;
+    const {
+      algorithm,
+      keyId,
+      keyAltName,
+      contentionFactor,
+      queryType,
+      rangeOptions,
+      stringOptions,
+      textOptions
+    } = options;
     const contextOptions: ExplicitEncryptionContextOptions = {
       expressionMode,
       algorithm
@@ -780,8 +788,9 @@ export class ClientEncryption {
       contextOptions.rangeOptions = serialize(rangeOptions);
     }
 
-    if (typeof textOptions === 'object') {
-      contextOptions.textOptions = serialize(textOptions);
+    const resolvedStringOptions = stringOptions ?? textOptions;
+    if (typeof resolvedStringOptions === 'object') {
+      contextOptions.textOptions = serialize(resolvedStringOptions);
     }
 
     const valueBuffer = serialize({ v: value });
@@ -815,6 +824,8 @@ export interface ClientEncryptionEncryptOptions {
     | 'Indexed'
     | 'Unindexed'
     | 'Range'
+    | 'String'
+    /** @deprecated Use `'String'` instead. */
     | 'TextPreview';
 
   /**
@@ -833,26 +844,38 @@ export interface ClientEncryptionEncryptOptions {
   /**
    * The query type.
    */
-  queryType?: 'equality' | 'range' | 'prefixPreview' | 'suffixPreview' | 'substringPreview';
+  queryType?:
+    | 'equality'
+    | 'range'
+    | 'prefix'
+    | 'suffix'
+    /** @deprecated Use `'prefix'` instead. */
+    | 'prefixPreview'
+    /** @deprecated Use `'suffix'` instead. */
+    | 'suffixPreview'
+    /** @experimental Public Technical Preview: `substringPreview` is an experimental feature and may break at any time. */
+    | 'substringPreview';
 
   /** The index options for a Queryable Encryption field supporting "range" queries.*/
   rangeOptions?: RangeOptions;
 
+  /** Options for a Queryable Encryption field supporting string queries. Only valid when `algorithm` is `'String'`. */
+  stringOptions?: StringQueryOptions;
+
   /**
-   * Options for a Queryable Encryption field supporting text queries.  Only valid when `algorithm` is `TextPreview`.
+   * Options for a Queryable Encryption field supporting text queries.  Only valid when `algorithm` is `'String'`.
    *
-   * @experimental Public Technical Preview: `textPreview` is an experimental feature and may break at any time.
+   * @deprecated Use `stringOptions` instead.
    */
-  textOptions?: TextQueryOptions;
+  textOptions?: StringQueryOptions;
 }
 
 /**
- * Options for a Queryable Encryption field supporting text queries.
+ * Options for a Queryable Encryption field supporting string queries.
  *
  * @public
- * @experimental Public Technical Preview: `textPreview` is an experimental feature and may break at any time.
  */
-export interface TextQueryOptions {
+export interface StringQueryOptions {
   /** Indicates that text indexes for this field are case sensitive */
   caseSensitive: boolean;
   /** Indicates that text indexes for this field are diacritic sensitive. */
@@ -872,6 +895,9 @@ export interface TextQueryOptions {
     strMinQueryLength: Int32 | number;
   };
 
+  /**
+   * @experimental Public Technical Preview: `substring` is an experimental feature and may break at any time.
+   */
   substring?: {
     /** The maximum allowed length to insert. */
     strMaxLength: Int32 | number;
@@ -881,6 +907,12 @@ export interface TextQueryOptions {
     strMinQueryLength: Int32 | number;
   };
 }
+
+/**
+ * @public
+ * @deprecated Use {@link StringQueryOptions} instead.
+ */
+export type TextQueryOptions = StringQueryOptions;
 
 /**
  * @public
