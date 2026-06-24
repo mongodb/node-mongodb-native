@@ -93,6 +93,7 @@ describe('Client Bulk Write', function () {
   describe('CSOT enabled', function () {
     before(function () {
       if (semver.satisfies(this.configuration.version, '>=9.0')) {
+        this.skipReason = 'TODO(NODE-7418): CSOT tests fail on server >=9.0, tracked in NODE-7418';
         this.skip();
       }
     });
