@@ -44,6 +44,13 @@ describe('CSOT spec prose tests', function () {
     await client?.close();
   });
 
+  before(function () {
+    if (semver.satisfies(this.configuration.version, '>=9.0')) {
+      this.skipReason = 'TODO(NODE-7418): CSOT tests fail on server >=9.0, tracked in NODE-7418';
+      this.skip();
+    }
+  });
+
   describe('1. Multi-batch writes', { requires: { topology: 'single', mongodb: '>=4.4' } }, () => {
     /**
      * This test MUST only run against standalones on server versions 4.4 and higher.
