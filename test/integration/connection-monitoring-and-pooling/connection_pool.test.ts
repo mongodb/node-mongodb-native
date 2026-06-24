@@ -106,24 +106,18 @@ describe('Connection Pool', function () {
         await client.close();
       });
 
+      
       describe('when a MongoClient is closed', function () {
         it(
           'a connection pool emits checked in events for closed connections',
           metadata,
           async () => {
-            type PoolEvent = { name: string; address: string; connectionId: number };
-            const eventsByConn = new Map<string, PoolEvent[]>();
-            const pushToPoolEvents = (e: PoolEvent) => {
-              const key = `${e.address}:${e.connectionId}`;
-              const connEvents = eventsByConn.get(key) ?? [];
-              eventsByConn.set(key, connEvents);
-              connEvents.push(e);
-            };
-
+            const allClientEvents = [];
+            const pushToClientEvents = e => allClientEvents.push(e);
             client
-              .on('connectionCheckedOut', pushToPoolEvents)
-              .on('connectionCheckedIn', pushToPoolEvents)
-              .on('connectionClosed', pushToPoolEvents);
+              .on('connectionCheckedOut', pushToClientEvents)
+              .on('connectionCheckedIn', pushToClientEvents)
+              .on('connectionClosed', pushToClientEvents);
 
             const finds = Promise.allSettled([
               client.db('test').collection('test').findOne({ a: 1 }),
@@ -131,26 +125,29 @@ describe('Connection Pool', function () {
               client.db('test').collection('test').findOne({ a: 1 })
             ]);
 
-            while (
-              [...eventsByConn.values()].flat().filter(e => e.name === 'connectionCheckedOut')
-                .length < 3
-            ) {
-              await sleep(200);
+            // wait until all pings are pending on the server
+            while (allClientEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
+              await sleep(1);
             }
+            const insertConnectionIds = allClientEvents
+              .filter(e => e.name === 'connectionCheckedOut')
+              .map(({ address, connectionId }) => `${address} + ${connectionId}`);
 
             await client.close();
             await finds;
 
-            // check that each connection's last events are checkedIn immediately followed by closed
-            for (const connEvents of [...eventsByConn.values()].filter(arr =>
-              arr.find(e => e.name === 'connectionCheckedOut')
-            )) {
-              const closeSeq = connEvents
-                .slice(-3)
-                .filter(e => e.name !== 'connectionCheckedOut')
-                .map(e => e.name);
-              expect(closeSeq).to.deep.equal(['connectionCheckedIn', 'connectionClosed']);
-            }
+            const insertCheckInAndCloses = allClientEvents
+              .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
+              .filter(({ address, connectionId }) =>
+                insertConnectionIds.includes(`${address} + ${connectionId}`)
+              );
+
+            expect(insertCheckInAndCloses).to.have.lengthOf(6);
+
+            // check that each check-in is followed by a close (not proceeded by one)
+            expect(insertCheckInAndCloses.map(e => e.name)).to.deep.equal(
+              Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat(1)
+            );
           }
         );
       });
