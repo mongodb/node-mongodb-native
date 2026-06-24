@@ -38,5 +38,3 @@ if [ "${OS:-}" = "Windows_NT" ] && [ -n "$_INSTALL_DEPS_NODE_ARTIFACTS_PATH" ] &
   export PATH="$NODE_ARTIFACTS_PATH/nodejs/bin:$PATH"
   hash -r
 fi
-
-npm ls
