@@ -119,7 +119,14 @@ export function loadContextifiedMongoDBModule(): typeof import('../../mongodb_al
   // Wrap the bundle in a CommonJS-style wrapper
   const wrapper = `(function(exports, module, require) {${bundleCode}})`;
 
-  const script = new vm.Script(wrapper, { filename: bundlePath });
+  // The driver loads Node built-ins (e.g. `os`) via a dynamic `import()` rather than `require`
+  // (NODE-7603). vm scripts have no dynamic-import callback by default, so route any `import()` in
+  // the sandbox through the main context's loader; otherwise it throws "A dynamic import callback
+  // was not specified".
+  const script = new vm.Script(wrapper, {
+    filename: bundlePath,
+    importModuleDynamically: vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
+  });
   const fn = script.runInContext(sandbox);
 
   // Execute the bundle with the restricted require from the sandbox

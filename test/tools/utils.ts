@@ -1,7 +1,7 @@
 import * as child_process from 'node:child_process';
 import { on, once } from 'node:events';
 import * as fs from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import * as BSON from 'bson';
@@ -20,7 +20,6 @@ import {
   type MongoClientOptions,
   OP_MSG,
   processTimeMS,
-  resolveRuntimeAdapters,
   runNodelessTests,
   type Runtime,
   type ServerApiVersion,
@@ -594,7 +593,8 @@ export function configureMongocryptdSpawnHooks(
   options: { port?: string; pidfilepath?: string } = {}
 ): { port: string } {
   const port = options.port ?? '27022';
-  const pidfilepath = options.pidfilepath ?? path.join(tmpdir(), new BSON.ObjectId().toHexString());
+  const pidfilepath =
+    options.pidfilepath ?? path.join(os.tmpdir(), new BSON.ObjectId().toHexString());
 
   let childProcess: child_process.ChildProcess;
 
@@ -621,9 +621,11 @@ export function configureMongocryptdSpawnHooks(
 }
 
 /**
- * A `Runtime` that resolves to entirely Nodejs modules, useful when tests must provide a default `runtime` object to an API.
+ * A resolved `Runtime` backed by Node's own modules, useful when tests must provide a default
+ * `runtime` to an API. The `os` adapter is the live `os` module (rather than the driver's lazily
+ * imported default) so tests can `sinon.stub(os, ...)` it.
  */
-export const runtime: Runtime = resolveRuntimeAdapters({});
+export const runtime: Promise<Runtime> = Promise.resolve({ os });
 
 /**
  * Metadata that can be used to skip tests in nodeless environments.
