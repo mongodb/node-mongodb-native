@@ -1087,13 +1087,7 @@ export function commandSupportsReadConcern(command: Document): boolean {
  */
 export function commandSupportsAfterClusterTime(command: Document): boolean {
   // READ operations
-  if (
-    command.aggregate ||
-    command.count ||
-    command.distinct ||
-    command.find ||
-    command.geoNear
-  ) {
+  if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
     return true;
   }
 
