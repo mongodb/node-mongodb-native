@@ -808,8 +808,6 @@ describe('MongoClient.close() Integration', () => {
           eventsByConn.set(key, connEvents);
           connEvents.push({ name: e.name, address: e.address, connectionId: e.connectionId });
         };
-
-        console.log('connecting');
         await client.connect();
 
         client
@@ -824,24 +822,14 @@ describe('MongoClient.close() Integration', () => {
           client.db('test').collection('test').findOne({ a: 1 })
         ]);
 
-        console.dir({ eventsByConn }, { depth: null, colors: true });
-
-        const deadline = Date.now() + 3000;
         while (
           [...eventsByConn.values()].flat().filter(e => e.name === 'connectionCheckedOut').length <
           3
         ) {
-          if (Date.now() > deadline) {
-            console.log('deadline exceeded');
-            console.dir({ eventsByConn }, { depth: null, colors: true });
-            throw new Error('Timed out waiting for connectionCheckedOut events');
-          }
           await sleep(200);
         }
 
-        console.log('client closing');
         await client.close();
-        console.log('awaiting finds');
         await finds;
 
         // spec requires each connectionCheckedIn to be immediately followed by connectionClosed

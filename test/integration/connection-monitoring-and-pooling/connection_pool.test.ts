@@ -95,7 +95,7 @@ describe('Connection Pool', function () {
           }
         });
 
-        client = this.configuration.newClient({}, {});
+        client = this.configuration.newClient();
         await client.connect();
       });
 
@@ -131,22 +131,14 @@ describe('Connection Pool', function () {
               client.db('test').collection('test').findOne({ a: 1 })
             ]);
 
-            const deadline = Date.now() + 5000;
             while (
               [...eventsByConn.values()].flat().filter(e => e.name === 'connectionCheckedOut')
                 .length < 3
             ) {
-              if (Date.now() > deadline) {
-                console.log('deadline exceeded');
-                console.dir({ eventsByConn }, { depth: null, colors: true });
-                throw new Error('Timed out waiting for connectionCheckedOut events');
-              }
               await sleep(200);
             }
 
-            console.log('client closing');
             await client.close();
-            console.log('awaiting finds');
             await finds;
 
             // check that each connection's last events are checkedIn immediately followed by closed
