@@ -995,9 +995,6 @@ describe('CSOT driver tests', metadata, () => {
             .map(x => x.command);
           expect(aggregates).to.have.lengthOf(1);
 
-          // NODE-7171: capture the token before waiting for resumeTokenChanged — by the time the
-          // event fires, cs.resumeToken has already advanced to the post-batch token from the new
-          // aggregate, which differs from the token the resume aggregate was sent with.
           const resumeToken = cs.resumeToken;
 
           await once(cs, 'resumeTokenChanged');
