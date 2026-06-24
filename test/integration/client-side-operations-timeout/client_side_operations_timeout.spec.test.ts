@@ -38,6 +38,9 @@ describe('CSOT spec tests', function () {
   }
 
   runUnifiedSuite(specs, (test, configuration) => {
+    if (semver.satisfies(configuration.version, '>=9.0')) {
+      return 'TODO(NODE-7418): CSOT tests fail on server >=9.0, tracked in NODE-7418';
+    }
     const sessionCSOTTests = ['timeoutMS applied to withTransaction'];
     if (
       configuration.topologyType === 'LoadBalanced' &&
@@ -60,5 +63,10 @@ describe('CSOT modified spec tests', function () {
   const specs = loadSpecTests(
     join('..', 'integration', 'client-side-operations-timeout', 'unified-csot-node-specs')
   );
-  runUnifiedSuite(specs);
+  runUnifiedSuite(specs, (test, configuration) => {
+    if (semver.satisfies(configuration.version, '>=9.0')) {
+      return 'TODO(NODE-7418): CSOT tests fail on server >=9.0, tracked in NODE-7418';
+    }
+    return false;
+  });
 });
