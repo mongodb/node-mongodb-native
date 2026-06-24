@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as semver from 'semver';
 import { setTimeout } from 'timers/promises';
 
 import {
@@ -90,6 +91,12 @@ describe('Client Bulk Write', function () {
   });
 
   describe('CSOT enabled', function () {
+    before(function () {
+      if (semver.satisfies(this.configuration.version, '>=9.0')) {
+        this.skip();
+      }
+    });
+
     describe('when timeoutMS is set on the client', function () {
       beforeEach(async function () {
         client = this.configuration.newClient({}, { timeoutMS: 300 });
