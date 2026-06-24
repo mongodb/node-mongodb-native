@@ -106,7 +106,6 @@ describe('Connection Pool', function () {
         await client.close();
       });
 
-      
       describe('when a MongoClient is closed', function () {
         it(
           'a connection pool emits checked in events for closed connections',
