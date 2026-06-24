@@ -61,7 +61,7 @@ describe('CSOT spec tests', function () {
       semver.satisfies(configuration.version, '>=9.0') &&
       csotChangeStreamShardedSkips.has(test.description)
     ) {
-      return 'TODO(NODE-7418): CSOT createChangeStream tests hang on sharded clusters, fixed by NODE-7418';
+      return 'TODO(NODE-7418): CSOT createChangeStream tests hang on sharded clusters, tracked in NODE-7418';
     }
     return false;
   });
@@ -100,7 +100,7 @@ describe('CSOT modified spec tests', function () {
       semver.satisfies(configuration.version, '>=9.0') &&
       test.description === 'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set'
     ) {
-      return 'TODO(NODE-7418): CSOT createChangeStream tests hang on sharded clusters, fixed by NODE-7418';
+      return 'TODO(NODE-7418): CSOT createChangeStream tests hang on sharded clusters, tracked in NODE-7418';
     }
     return false;
   });
