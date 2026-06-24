@@ -52,12 +52,13 @@ describe('CSOT spec tests', function () {
     ) {
       return '4.4 replicaset fail point does not blockConnection for requested time';
     }
-    // TODO(NODE-7418): on sharded clusters the initial $changeStream aggregate blocks server-side
-    // for the full maxTimeMS because mongos propagates maxTimeMS to each shard as maxAwaitTimeMS.
-    // The legacy-timeout retryability tests also fail because socketTimeoutMS=100 is too tight for
-    // SSL connection establishment on a sharded+SSL Evergreen host.
+    // TODO(NODE-7418): on latest server (>=9.0) sharded clusters, the initial $changeStream
+    // aggregate blocks server-side for the full maxTimeMS because mongos propagates maxTimeMS to
+    // each shard as maxAwaitTimeMS. The legacy-timeout retryability tests also fail because
+    // socketTimeoutMS=100 is too tight for SSL connection establishment on a sharded+SSL host.
     if (
       configuration.topologyType === 'Sharded' &&
+      semver.satisfies(configuration.version, '>=9.0') &&
       csotChangeStreamShardedSkips.has(test.description)
     ) {
       return 'TODO(NODE-7418): CSOT createChangeStream tests hang on sharded clusters, fixed by NODE-7418';
@@ -66,12 +67,12 @@ describe('CSOT spec tests', function () {
   });
 });
 
-// Descriptions of CSOT change stream tests that fail specifically on sharded topologies.
-// On sharded clusters, mongos propagates maxTimeMS to each shard as maxAwaitTimeMS on the
-// initial $changeStream aggregate, causing the server to block for the full budget.
-// The legacy timeout tests additionally fail because socketTimeoutMS=100 is too tight
-// for SSL connection establishment overhead on sharded+SSL CI hosts.
-// Tracked in NODE-7418 / DRIVERS-3018.
+// Descriptions of CSOT change stream tests that fail specifically on sharded topologies
+// running against the latest server (>=9.0). On sharded clusters, mongos propagates maxTimeMS
+// to each shard as maxAwaitTimeMS on the initial $changeStream aggregate, causing the server to
+// block for the full budget. The legacy timeout tests additionally fail because socketTimeoutMS=100
+// is too tight for SSL connection establishment overhead on sharded+SSL CI hosts.
+// Tracked in NODE-7418 / DRIVERS-3018 / SERVER-129623.
 const csotChangeStreamShardedSkips = new Set([
   'change stream can be iterated again if previous iteration times out',
   'timeoutMS can be configured on a MongoCollection - createChangeStream on collection',
@@ -96,6 +97,7 @@ describe('CSOT modified spec tests', function () {
     // TODO(NODE-7418): same root cause as csotChangeStreamShardedSkips above.
     if (
       configuration.topologyType === 'Sharded' &&
+      semver.satisfies(configuration.version, '>=9.0') &&
       test.description === 'timeoutMS is refreshed for getMore if maxAwaitTimeMS is set'
     ) {
       return 'TODO(NODE-7418): CSOT createChangeStream tests hang on sharded clusters, fixed by NODE-7418';
