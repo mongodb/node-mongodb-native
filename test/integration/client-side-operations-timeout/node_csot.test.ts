@@ -36,6 +36,13 @@ import { type FailCommandFailPoint, type FailPoint, waitUntilPoolsFilled } from 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
 describe('CSOT driver tests', metadata, () => {
+  before(function () {
+    if (semver.satisfies(this.configuration.version, '>=9.0')) {
+      this.skipReason = 'TODO(NODE-7418): CSOT tests fail on server >=9.0, tracked in NODE-7418';
+      this.skip();
+    }
+  });
+
   // NOTE: minPoolSize here is set to ensure that connections are available when testing timeout
   // behaviour. This reduces flakiness in our tests since operations will not spend time
   // establishing connections, more closely mirroring long-running application behaviour
