@@ -8,10 +8,6 @@ All notable changes to this project will be documented in this file. See [standa
 ### Features
 
 * **NODE-7634:** remove experimental tag from async dispose methods ([#4976](https://github.com/mongodb/node-mongodb-native/issues/4976)) ([43ce3eb](https://github.com/mongodb/node-mongodb-native/commit/43ce3ebb701bf24af797d24e81788b576dccf1a9))
-
-
-### Bug Fixes
-
 * **NODE-7549:** send afterClusterTime on writes in causally-consistent sessions ([#4963](https://github.com/mongodb/node-mongodb-native/issues/4963)) ([3abfd26](https://github.com/mongodb/node-mongodb-native/commit/3abfd263c5da2eaa5c223a0d5b9b440a1e1d4cf6))
 
 ## [7.3.0](https://github.com/mongodb/node-mongodb-native/compare/v7.2.0...v7.3.0) (2026-06-04)
