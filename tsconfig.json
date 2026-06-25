@@ -6,7 +6,7 @@
     "alwaysStrict": true,
     "target": "ES2023",
     "module": "commonJS",
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "skipLibCheck": true,
     "lib": [
       "es2023"
