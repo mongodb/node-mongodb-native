@@ -430,7 +430,6 @@ export abstract class AbstractCursor<
   }
 
   /**
-   * @experimental
    * An alias for {@link AbstractCursor.close|AbstractCursor.close()}.
    */
   async [Symbol.asyncDispose]() {

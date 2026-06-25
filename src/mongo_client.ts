@@ -482,7 +482,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   }
 
   /**
-   * @experimental
    * An alias for {@link MongoClient.close|MongoClient.close()}.
    */
   async [Symbol.asyncDispose]() {
