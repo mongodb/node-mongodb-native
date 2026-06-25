@@ -290,7 +290,6 @@ export class ClientSession
     }
   }
   /**
-   * @experimental
    * An alias for {@link ClientSession.endSession|ClientSession.endSession()}.
    */
   async [Symbol.asyncDispose]() {

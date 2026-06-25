@@ -573,7 +573,6 @@ export class ChangeStream<
   implements AsyncDisposable
 {
   /**
-   * @experimental
    * An alias for {@link ChangeStream.close|ChangeStream.close()}.
    */
   async [Symbol.asyncDispose]() {
