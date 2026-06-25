@@ -419,7 +419,7 @@ export async function waitUntilPoolsFilled(
   let connectionCount = 0;
 
   async function wait$() {
-    for await (const _event of on(client, 'connectionCreated', { signal })) {
+    for await (const _event of on(client, 'connectionReady', { signal })) {
       connectionCount++;
       if (connectionCount >= count) {
         break;
