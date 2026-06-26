@@ -482,7 +482,7 @@ describe('27. String Explicit Encryption', function () {
       const byPrefix = {
         $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBing } }
       };
-      const { __safeContent__: _s1, ...byPrefixResult } = await explicitEncryptedClient
+      const { _id: _id1, __safeContent__: _s1, ...byPrefixResult } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix-ci-di')
         .findOne(byPrefix);
@@ -503,7 +503,7 @@ describe('27. String Explicit Encryption', function () {
       const bySuffix = {
         $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedLin } }
       };
-      const { __safeContent__: _s2, ...bySuffixResult } = await explicitEncryptedClient
+      const { _id: _id2, __safeContent__: _s2, ...bySuffixResult } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix-ci-di')
         .findOne(bySuffix);
@@ -535,7 +535,7 @@ describe('27. String Explicit Encryption', function () {
       const byPrefix = {
         $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedCafe } }
       };
-      const { __safeContent__: _s1, ...byPrefixResult } = await explicitEncryptedClient
+      const { _id: _id1, __safeContent__: _s1, ...byPrefixResult } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix-ci-di')
         .findOne(byPrefix);
@@ -556,7 +556,7 @@ describe('27. String Explicit Encryption', function () {
       const bySuffix = {
         $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedBaz } }
       };
-      const { __safeContent__: _s2, ...bySuffixResult } = await explicitEncryptedClient
+      const { _id: _id2, __safeContent__: _s2, ...bySuffixResult } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix-ci-di')
         .findOne(bySuffix);
@@ -588,7 +588,7 @@ describe('27. String Explicit Encryption', function () {
       const filter = {
         $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedBar } }
       };
-      const { __safeContent__, ...result } = await explicitEncryptedClient
+      const { _id, __safeContent__, ...result } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('substring-ci-di')
         .findOne(filter);
@@ -620,7 +620,7 @@ describe('27. String Explicit Encryption', function () {
       const filter = {
         $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedCafe } }
       };
-      const { __safeContent__, ...result } = await explicitEncryptedClient
+      const { _id, __safeContent__, ...result } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('substring-ci-di')
         .findOne(filter);
