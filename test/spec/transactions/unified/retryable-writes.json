@@ -217,7 +217,9 @@
                   ],
                   "ordered": true,
                   "readConcern": {
-                    "$$exists": false
+                    "afterClusterTime": {
+                      "$$exists": true
+                    }
                   },
                   "lsid": {
                     "$$sessionLsid": "session0"
@@ -306,7 +308,9 @@
                   ],
                   "ordered": true,
                   "readConcern": {
-                    "$$exists": false
+                    "afterClusterTime": {
+                      "$$exists": true
+                    }
                   },
                   "lsid": {
                     "$$sessionLsid": "session0"

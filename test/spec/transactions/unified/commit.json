@@ -209,6 +209,9 @@
                   "readConcern": {
                     "afterClusterTime": {
                       "$$exists": true
+                    },
+                    "level": {
+                      "$$exists": false
                     }
                   },
                   "lsid": {
@@ -870,6 +873,9 @@
                   "readConcern": {
                     "afterClusterTime": {
                       "$$exists": true
+                    },
+                    "level": {
+                      "$$exists": false
                     }
                   },
                   "lsid": {
@@ -1040,7 +1046,12 @@
                   ],
                   "ordered": true,
                   "readConcern": {
-                    "$$exists": false
+                    "afterClusterTime": {
+                      "$$exists": true
+                    },
+                    "level": {
+                      "$$exists": false
+                    }
                   },
                   "lsid": {
                     "$$sessionLsid": "session1"
@@ -1196,7 +1207,12 @@
                   ],
                   "ordered": true,
                   "readConcern": {
-                    "$$exists": false
+                    "afterClusterTime": {
+                      "$$exists": true
+                    },
+                    "level": {
+                      "$$exists": false
+                    }
                   },
                   "lsid": {
                     "$$sessionLsid": "session1"
