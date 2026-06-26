@@ -401,14 +401,14 @@ export async function itInNodeProcess(
 }
 
 /**
- * Connects the client and waits until `client` has emitted `count` connectionCreated events.
+ * Connects the client and waits until `client` has emitted `count` connectionReady events.
  *
  * **This will hang if the client does not have a maxPoolSizeSet!**
  *
  * This is useful when you want to ensure that the client has pools that are full of connections.
  *
- * This does not guarantee that all pools that the client has are completely full unless
- * count = number of servers to which the client is connected * maxPoolSize.  But it can
+ * This does not guarantee that all pools are completely full unless
+ * count == number of servers to which the client is connected * maxPoolSize. But it can
  * serve as a way to ensure that some connections have been established and are in the pools.
  */
 export async function waitUntilPoolsFilled(
