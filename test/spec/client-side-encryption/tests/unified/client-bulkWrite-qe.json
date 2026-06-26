@@ -1,0 +1,305 @@
+{
+  "description": "client bulkWrite with queryable encryption",
+  "schemaVersion": "1.25",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "8.0",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ],
+      "serverless": "forbid",
+      "csfle": {
+        "minLibmongocryptVersion": "1.10.0"
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent"
+        ],
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "local": {
+              "key": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk"
+            }
+          }
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    },
+    {
+      "client": {
+        "id": "client1",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database1",
+        "client": "client0",
+        "databaseName": "keyvault"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection1",
+        "database": "database0",
+        "collectionName": "datakeys"
+      }
+    },
+    {
+      "database": {
+        "id": "database2",
+        "client": "client1",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection2",
+        "database": "database2",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "local_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "local"
+          }
+        }
+      ]
+    },
+    {
+      "databaseName": "crud-tests",
+      "collectionName": "coll0",
+      "documents": [],
+      "createOptions": {
+        "encryptedFields": {
+          "fields": [
+            {
+              "keyId": {
+                "$binary": {
+                  "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                  "subType": "04"
+                }
+              },
+              "path": "encryptedInt",
+              "bsonType": "int",
+              "queries": {
+                "queryType": "equality",
+                "contention": {
+                  "$numberLong": "0"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "_yamlAnchors": {
+    "namespace": "crud-tests.coll0"
+  },
+  "tests": [
+    {
+      "description": "client bulkWrite QE replaceOne",
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1,
+                "encryptedInt": 11
+              },
+              {
+                "_id": 2,
+                "encryptedInt": 22
+              },
+              {
+                "_id": 3,
+                "encryptedInt": 33
+              }
+            ]
+          }
+        },
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "replaceOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "encryptedInt": {
+                      "$eq": 11
+                    }
+                  },
+                  "replacement": {
+                    "encryptedInt": 44
+                  }
+                }
+              }
+            ]
+          },
+          "expectResult": {
+            "insertedCount": 0,
+            "upsertedCount": 0,
+            "matchedCount": 1,
+            "modifiedCount": 1,
+            "deletedCount": 0
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedInt": 44
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encryptedInt": 44
+            }
+          ]
+        },
+        {
+          "object": "collection2",
+          "name": "find",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encryptedInt": {
+                "$$type": "binData"
+              },
+              "__safeContent__": {
+                "$$type": "array"
+              }
+            },
+            {
+              "_id": 2,
+              "encryptedInt": {
+                "$$type": "binData"
+              },
+              "__safeContent__": {
+                "$$type": "array"
+              }
+            },
+            {
+              "_id": 3,
+              "encryptedInt": {
+                "$$type": "binData"
+              },
+              "__safeContent__": {
+                "$$type": "array"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "client bulkWrite QE with multiple replace fails",
+      "operations": [
+        {
+          "object": "client0",
+          "name": "clientBulkWrite",
+          "arguments": {
+            "models": [
+              {
+                "replaceOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "encryptedInt": {
+                      "$eq": 11
+                    }
+                  },
+                  "replacement": {
+                    "encryptedInt": 44
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "namespace": "crud-tests.coll0",
+                  "filter": {
+                    "encryptedInt": {
+                      "$eq": 22
+                    }
+                  },
+                  "replacement": {
+                    "encryptedInt": 44
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isError": true,
+            "errorContains": "Only insert is supported in BulkWrite with multiple operations and Queryable Encryption"
+          }
+        }
+      ]
+    }
+  ]
+}

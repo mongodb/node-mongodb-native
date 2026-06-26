@@ -1,0 +1,153 @@
+description: fle2v2-Rangev2-Compact
+schemaVersion: "1.25"
+runOnRequirements:
+  - minServerVersion: "8.0.0" # Require range v2 support on server.
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topologies: ["replicaset", "sharded", "load-balanced"]
+    csfle:
+      minLibmongocryptVersion: "1.15.1"
+createEntities:
+  - client:
+      id: "client0"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+  - database:
+      id: "db"
+      client: "client0"
+      databaseName: default
+  - collection:
+      id: "coll"
+      database: "db"
+      collectionName: default
+initialData:
+  - databaseName: default
+    collectionName: default
+    documents: []
+    createOptions:
+      encryptedFields:
+        &encrypted_fields {
+          "fields":
+            [
+              {
+                "keyId": { "$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" } },
+                "path": "encryptedInt",
+                "bsonType": "int",
+                "queries":
+                  {
+                    "queryType": "range",
+                    "contention": { "$numberLong": "0" },
+                    "trimFactor": { "$numberInt": "1" },
+                    "sparsity": { "$numberLong": "1" },
+                    "min": { "$numberInt": "0" },
+                    "max": { "$numberInt": "200" },
+                  },
+              },
+            ],
+        }
+  - databaseName: keyvault
+    collectionName: datakeys
+    documents:
+      [
+        {
+          "_id": { "$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" } },
+          "keyMaterial":
+            {
+              "$binary":
+                {
+                  "base64": "sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==",
+                  "subType": "00",
+                },
+            },
+          "creationDate": { "$date": { "$numberLong": "1648914851981" } },
+          "updateDate": { "$date": { "$numberLong": "1648914851981" } },
+          "status": { "$numberInt": "0" },
+          "masterKey": { "provider": "local" },
+        },
+      ]
+tests:
+  - description: "Compact works with 'range' fields"
+    operations:
+      # Insert before running compact to ensure the server errors if `encryptionInformation` is incorrectly omitted.
+      - name: insertOne
+        arguments:
+          document: { _id: 0, encryptedInt: { $numberInt: "0" } }
+        object: "coll"
+      - name: runCommand
+        object: "db"
+        arguments:
+          command:
+            compactStructuredEncryptionData: &collection_name "default"
+          commandName: compactStructuredEncryptionData
+    expectEvents:
+      - client: "client0"
+        events:
+          - commandStartedEvent:
+              command:
+                listCollections: 1
+                filter:
+                  name: *collection_name
+              commandName: listCollections
+          - commandSucceededEvent:
+              commandName: listCollections
+              reply:
+                ok: 1
+          - commandStartedEvent:
+              command:
+                find: datakeys
+                filter:
+                  {
+                    "$or":
+                      [
+                        "_id": { "$in": ["$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" }] },
+                        "keyAltNames": { "$in": [] },
+                      ],
+                  }
+                $db: keyvault
+                readConcern: { level: "majority" }
+              commandName: find
+          - commandSucceededEvent:
+              commandName: find
+              reply:
+                ok: 1
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { "_id": 0, "encryptedInt": { $$type: "binData" } }
+                ordered: true
+                encryptionInformation: &encryptionInformation
+                  type: 1
+                  schema:
+                    default.default:
+                      # libmongocrypt applies escCollection and ecocCollection to outgoing command.
+                      escCollection: "enxcol_.default.esc"
+                      ecocCollection: "enxcol_.default.ecoc"
+                      <<: *encrypted_fields
+              commandName: insert
+          - commandSucceededEvent:
+              commandName: insert
+              reply:
+                ok: 1
+          - commandStartedEvent:
+              command:
+                compactStructuredEncryptionData: *collection_name
+                compactionTokens:
+                  "encryptedInt":
+                    {
+                      "ecoc":
+                        { "$binary": { "base64": "noN+05JsuO1oDg59yypIGj45i+eFH6HOTXOPpeZ//Mk=", "subType": "00" } },
+                      "anchorPaddingToken":
+                        { "$binary": { "base64": "QxKJD2If48p0l8NAXf2Kr0aleMd/dATSjBK6hTpNMyc=", "subType": "00" } },
+                    }
+                encryptionInformation: *encryptionInformation
+              commandName: compactStructuredEncryptionData
+          - commandSucceededEvent:
+              commandName: compactStructuredEncryptionData
+              reply:
+                ok: 1

@@ -1,0 +1,61 @@
+description: fle2v2-NoEncryption
+schemaVersion: "1.25"
+runOnRequirements:
+  - minServerVersion: "7.0.0"
+    # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topologies: ["replicaset", "sharded", "load-balanced"]
+    csfle:
+      minLibmongocryptVersion: "1.15.1"
+createEntities:
+  - client:
+      id: "client0"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db"
+      client: "client0"
+      databaseName: default
+  - collection:
+      id: "coll"
+      database: "db"
+      collectionName: default
+initialData:
+  - databaseName: default
+    collectionName: default
+    documents: []
+    createOptions:
+      encryptedFields: { "fields": [] }
+tests:
+  - description: "insert with no encryption succeeds"
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 { _id: 1, foo: "bar" }
+        object: "coll"
+    outcome:
+      - documents:
+          - *doc0
+        collectionName: &collection_name "default"
+        databaseName: &database_name "default"
+    expectEvents:
+      - client: "client0"
+        events:
+          - commandStartedEvent:
+              command:
+                listCollections: 1
+                filter:
+                  name: *collection_name
+              commandName: listCollections
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - *doc0
+                ordered: true
+              commandName: insert

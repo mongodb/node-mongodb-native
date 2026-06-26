@@ -32,7 +32,14 @@ initialData:
     documents:
       - &local_key_doc
         _id: &local_key_id { $binary: { base64: bG9jYWxrZXlsb2NhbGtleQ==, subType: "04" } }
-        keyMaterial: { $binary: { base64: ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==, subType: "00" } }
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==,
+                subType: "00",
+              },
+          }
         creationDate: { $date: { $numberLong: "1641024000000" } }
         updateDate: { $date: { $numberLong: "1641024000000" } }
         status: 1

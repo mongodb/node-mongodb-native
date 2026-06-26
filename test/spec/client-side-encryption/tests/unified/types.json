@@ -1,0 +1,2262 @@
+{
+  "description": "types",
+  "schemaVersion": "1.25",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.10",
+      "csfle": {
+        "minLibmongocryptVersion": "1.15.1"
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_objectId": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "objectId",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db0",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll0",
+        "database": "db0",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client1",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_symbol": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "symbol",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db1",
+        "client": "client1",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll1",
+        "database": "db1",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client2",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_int": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "int",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db2",
+        "client": "client2",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll2",
+        "database": "db2",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client3",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_double": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "double",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db3",
+        "client": "client3",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll3",
+        "database": "db3",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client4",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_decimal": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "decimal",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db4",
+        "client": "client4",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll4",
+        "database": "db4",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client5",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_binData": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "binData",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db5",
+        "client": "client5",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll5",
+        "database": "db5",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client6",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_javascript": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "javascript",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db6",
+        "client": "client6",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll6",
+        "database": "db6",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client7",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_javascriptWithScope": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "javascriptWithScope",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db7",
+        "client": "client7",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll7",
+        "database": "db7",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client8",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_object": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "object",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db8",
+        "client": "client8",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll8",
+        "database": "db8",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client9",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_timestamp": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "timestamp",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db9",
+        "client": "client9",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll9",
+        "database": "db9",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client10",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_regex": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "regex",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db10",
+        "client": "client10",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll10",
+        "database": "db10",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client11",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_date": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "date",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db11",
+        "client": "client11",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll11",
+        "database": "db11",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client12",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_minKey": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "minKey",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db12",
+        "client": "client12",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll12",
+        "database": "db12",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client13",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_maxKey": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "maxKey",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db13",
+        "client": "client13",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll13",
+        "database": "db13",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client14",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_undefined": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "undefined",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db14",
+        "client": "client14",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll14",
+        "database": "db14",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client15",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_array": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "array",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db15",
+        "client": "client15",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll15",
+        "database": "db15",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client16",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_bool": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "bool",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db16",
+        "client": "client16",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll16",
+        "database": "db16",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client17",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "schemaMap": {
+            "default.default": {
+              "properties": {
+                "encrypted_null": {
+                  "encrypt": {
+                    "keyId": [
+                      {
+                        "$binary": {
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                          "subType": "04"
+                        }
+                      }
+                    ],
+                    "bsonType": "null",
+                    "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                  }
+                }
+              },
+              "bsonType": "object"
+            }
+          },
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db17",
+        "client": "client17",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll17",
+        "database": "db17",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "default",
+      "collectionName": "default",
+      "documents": []
+    },
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "status": 1,
+          "_id": {
+            "$binary": {
+              "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+              "subType": "04"
+            }
+          },
+          "masterKey": {
+            "provider": "aws",
+            "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+            "region": "us-east-1"
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1552949630483"
+            }
+          },
+          "keyMaterial": {
+            "$binary": {
+              "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gEqnsxXlR51T5EbEVezUqqKAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDHa4jo6yp0Z18KgbUgIBEIB74sKxWtV8/YHje5lv5THTl0HIbhSwM6EqRlmBiFFatmEWaeMk4tO4xBX65eq670I5TWPSLMzpp8ncGHMmvHqRajNBnmFtbYxN3E3/WjxmdbOOe+OXpnGJPcGsftc7cB2shRfA4lICPnE26+oVNXT6p0Lo20nY5XC7jyCO",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1552949630483"
+            }
+          },
+          "keyAltNames": [
+            "altname",
+            "another_altname"
+          ]
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "type=objectId",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_objectId": {
+                "$oid": "AAAAAAAAAAAAAAAAAAAAAAAA"
+              }
+            }
+          },
+          "object": "coll0"
+        },
+        {
+          "name": "find",
+          "object": "coll0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_objectId": {
+                "$oid": "AAAAAAAAAAAAAAAAAAAAAAAA"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_objectId": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAAHmkTPqvzfHMWpvS1mEsrjOxVQ2dyihEgIFWD5E0eNEsiMBQsC0GuvjdqYRL5DHLFI1vKuGek7EYYp0Qyii/tHqA==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_objectId": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAAHmkTPqvzfHMWpvS1mEsrjOxVQ2dyihEgIFWD5E0eNEsiMBQsC0GuvjdqYRL5DHLFI1vKuGek7EYYp0Qyii/tHqA==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "type=symbol",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_symbol": {
+                "$symbol": "test"
+              }
+            }
+          },
+          "object": "coll1"
+        },
+        {
+          "name": "find",
+          "object": "coll1",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_symbol": {
+                "$symbol": "test"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_symbol": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAAOOmvDmWjcuKsSCO7U/7t9HJ8eI73B6wduyMbdkvn7n7V4uTJes/j+BTtneSdyG2JHKHGkevWAJSIU2XoO66BSXw==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client1",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_symbol": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAAOOmvDmWjcuKsSCO7U/7t9HJ8eI73B6wduyMbdkvn7n7V4uTJes/j+BTtneSdyG2JHKHGkevWAJSIU2XoO66BSXw==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "type=int",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_int": {
+                "$numberInt": "123"
+              }
+            }
+          },
+          "object": "coll2"
+        },
+        {
+          "name": "find",
+          "object": "coll2",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_int": {
+                "$numberInt": "123"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_int": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAAQPNXJVXMEjGZnftMuf2INKufXCtQIRHdw5wTgn6QYt3ejcoAXyiwI4XIUizkpsob494qpt2in4tWeiO7b9zkA8Q==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client2",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_int": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAAQPNXJVXMEjGZnftMuf2INKufXCtQIRHdw5wTgn6QYt3ejcoAXyiwI4XIUizkpsob494qpt2in4tWeiO7b9zkA8Q==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "type=double",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_double": {
+                "$numberDouble": "1.23"
+              }
+            }
+          },
+          "object": "coll3",
+          "expectError": {
+            "errorContains": "element of type: double"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=decimal",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_decimal": {
+                "$numberDecimal": "1.23"
+              }
+            }
+          },
+          "object": "coll4",
+          "expectError": {
+            "errorContains": "element of type: decimal"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=binData",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_binData": {
+                "$binary": {
+                  "base64": "AAAA",
+                  "subType": "00"
+                }
+              }
+            }
+          },
+          "object": "coll5"
+        },
+        {
+          "name": "find",
+          "object": "coll5",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_binData": {
+                "$binary": {
+                  "base64": "AAAA",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_binData": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAAFB/KHZQHaHHo8fctcl7v6kR+sLkJoTRx2cPSSck9ya+nbGROSeFhdhDRHaCzhV78fDEqnMDSVPNi+ZkbaIh46GQ==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client5",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_binData": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAAFB/KHZQHaHHo8fctcl7v6kR+sLkJoTRx2cPSSck9ya+nbGROSeFhdhDRHaCzhV78fDEqnMDSVPNi+ZkbaIh46GQ==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "type=javascript",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_javascript": {
+                "$code": "var x = 1;"
+              }
+            }
+          },
+          "object": "coll6"
+        },
+        {
+          "name": "find",
+          "object": "coll6",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_javascript": {
+                "$code": "var x = 1;"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_javascript": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAANrvMgJkTKWGMc9wt3E2RBR2Hu5gL9p+vIIdHe9FcOm99t1W480/oX1Gnd87ON3B399DuFaxi/aaIiQSo7gTX6Lw==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client6",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_javascript": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAANrvMgJkTKWGMc9wt3E2RBR2Hu5gL9p+vIIdHe9FcOm99t1W480/oX1Gnd87ON3B399DuFaxi/aaIiQSo7gTX6Lw==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "type=javascriptWithScope",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_javascriptWithScope": {
+                "$code": "var x = 1;",
+                "$scope": {}
+              }
+            }
+          },
+          "object": "coll7",
+          "expectError": {
+            "errorContains": "element of type: javascriptWithScope"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=object",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_object": {}
+            }
+          },
+          "object": "coll8",
+          "expectError": {
+            "errorContains": "element of type: object"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=timestamp",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_timestamp": {
+                "$timestamp": {
+                  "t": 123,
+                  "i": 456
+                }
+              }
+            }
+          },
+          "object": "coll9"
+        },
+        {
+          "name": "find",
+          "object": "coll9",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_timestamp": {
+                "$timestamp": {
+                  "t": 123,
+                  "i": 456
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_timestamp": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAARJHaM4Gq3MpDTdBasBsEolQaOmxJQU1wsZVaSFAOLpEh1QihDglXI95xemePFMKhg+KNpFg7lw1ChCs2Wn/c26Q==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client9",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_timestamp": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAARJHaM4Gq3MpDTdBasBsEolQaOmxJQU1wsZVaSFAOLpEh1QihDglXI95xemePFMKhg+KNpFg7lw1ChCs2Wn/c26Q==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "type=regex",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_regex": {
+                "$regularExpression": {
+                  "pattern": "test",
+                  "options": ""
+                }
+              }
+            }
+          },
+          "object": "coll10"
+        },
+        {
+          "name": "find",
+          "object": "coll10",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_regex": {
+                "$regularExpression": {
+                  "pattern": "test",
+                  "options": ""
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_regex": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAALVnxM4UqGhqf5eXw6nsS08am3YJrTf1EvjKitT8tyyMAbHsICIU3GUjuC7EBofCHbusvgo7pDyaClGostFz44nA==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client10",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_regex": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAALVnxM4UqGhqf5eXw6nsS08am3YJrTf1EvjKitT8tyyMAbHsICIU3GUjuC7EBofCHbusvgo7pDyaClGostFz44nA==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "type=date",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_date": {
+                "$date": {
+                  "$numberLong": "123"
+                }
+              }
+            }
+          },
+          "object": "coll11"
+        },
+        {
+          "name": "find",
+          "object": "coll11",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_date": {
+                "$date": {
+                  "$numberLong": "123"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_date": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAAJ5sN7u6l97+DswfKTqZAijSTSOo5htinGKQKUD7pHNJYlLXGOkB4glrCu7ibu0g3344RHQ5yUp4YxMEa8GD+Snw==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client11",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault",
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_date": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAAJ5sN7u6l97+DswfKTqZAijSTSOo5htinGKQKUD7pHNJYlLXGOkB4glrCu7ibu0g3344RHQ5yUp4YxMEa8GD+Snw==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "default",
+                  "filter": {
+                    "_id": 1
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "type=minKey",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_minKey": {
+                "$minKey": 1
+              }
+            }
+          },
+          "object": "coll12",
+          "expectError": {
+            "errorContains": "Cannot encrypt element of type: minKey"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=maxKey",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_maxKey": {
+                "$maxKey": 1
+              }
+            }
+          },
+          "object": "coll13",
+          "expectError": {
+            "errorContains": "Cannot encrypt element of type: maxKey"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=undefined",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_undefined": {
+                "$undefined": true
+              }
+            }
+          },
+          "object": "coll14",
+          "expectError": {
+            "errorContains": "Cannot encrypt element of type: undefined"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=array",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_array": []
+            }
+          },
+          "object": "coll15",
+          "expectError": {
+            "errorContains": "element of type: array"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=bool",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_bool": true
+            }
+          },
+          "object": "coll16",
+          "expectError": {
+            "errorContains": "element of type: bool"
+          }
+        }
+      ]
+    },
+    {
+      "description": "type=null",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_null": true
+            }
+          },
+          "object": "coll17",
+          "expectError": {
+            "errorContains": "Cannot encrypt element of type: null"
+          }
+        }
+      ]
+    }
+  ]
+}

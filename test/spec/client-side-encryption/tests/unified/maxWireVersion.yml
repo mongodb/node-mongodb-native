@@ -10,9 +10,9 @@ createEntities:
   - client:
       id: &client0 client0
       autoEncryptOpts:
-        kmsProviders:
-          aws: {}
         keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          aws: { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } }
         extraOptions:
           mongocryptdBypassSpawn: true # mongocryptd probably won't be on the path. mongocryptd was introduced in server 4.2.
   - database:
@@ -28,7 +28,27 @@ initialData:
   - databaseName: keyvault
     collectionName: datakeys
     documents:
-      - {'status': 1, '_id': {'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}}, 'masterKey': {'provider': 'aws', 'key': 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0', 'region': 'us-east-1'}, 'updateDate': {'$date': {'$numberLong': '1552949630483'}}, 'keyMaterial': {'$binary': {'base64': 'AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gEqnsxXlR51T5EbEVezUqqKAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDHa4jo6yp0Z18KgbUgIBEIB74sKxWtV8/YHje5lv5THTl0HIbhSwM6EqRlmBiFFatmEWaeMk4tO4xBX65eq670I5TWPSLMzpp8ncGHMmvHqRajNBnmFtbYxN3E3/WjxmdbOOe+OXpnGJPcGsftc7cB2shRfA4lICPnE26+oVNXT6p0Lo20nY5XC7jyCO', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1552949630483'}}, 'keyAltNames': ['altname', 'another_altname']}
+      - {
+          "status": 1,
+          "_id": { "$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" } },
+          "masterKey":
+            {
+              "provider": "aws",
+              "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+              "region": "us-east-1",
+            },
+          "updateDate": { "$date": { "$numberLong": "1552949630483" } },
+          "keyMaterial":
+            {
+              "$binary":
+                {
+                  "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gEqnsxXlR51T5EbEVezUqqKAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDHa4jo6yp0Z18KgbUgIBEIB74sKxWtV8/YHje5lv5THTl0HIbhSwM6EqRlmBiFFatmEWaeMk4tO4xBX65eq670I5TWPSLMzpp8ncGHMmvHqRajNBnmFtbYxN3E3/WjxmdbOOe+OXpnGJPcGsftc7cB2shRfA4lICPnE26+oVNXT6p0Lo20nY5XC7jyCO",
+                  "subType": "00",
+                },
+            },
+          "creationDate": { "$date": { "$numberLong": "1552949630483" } },
+          "keyAltNames": ["altname", "another_altname"],
+        }
 
 tests:
   - description: "operation fails with maxWireVersion < 8"

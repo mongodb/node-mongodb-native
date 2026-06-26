@@ -36,14 +36,21 @@ initialData:
     documents:
       - _id: { $binary: { base64: YXdzYXdzYXdzYXdzYXdzYQ==, subType: "04" } }
         keyAltNames: ["aws_key"]
-        keyMaterial: { $binary: { base64: AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gFXJqbF0Fy872MD7xl56D/2AAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDO7HPisPUlGzaio9vgIBEIB7/Qow46PMh/8JbEUbdXgTGhLfXPE+KIVW7T8s6YEMlGiRvMu7TV0QCIUJlSHPKZxzlJ2iwuz5yXeOag+EdY+eIQ0RKrsJ3b8UTisZYzGjfzZnxUKLzLoeXremtRCm3x47wCuHKd1dhh6FBbYt5TL2tDaj+vL2GBrKat2L, subType: "00" } }
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gFXJqbF0Fy872MD7xl56D/2AAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDO7HPisPUlGzaio9vgIBEIB7/Qow46PMh/8JbEUbdXgTGhLfXPE+KIVW7T8s6YEMlGiRvMu7TV0QCIUJlSHPKZxzlJ2iwuz5yXeOag+EdY+eIQ0RKrsJ3b8UTisZYzGjfzZnxUKLzLoeXremtRCm3x47wCuHKd1dhh6FBbYt5TL2tDaj+vL2GBrKat2L,
+                subType: "00",
+              },
+          }
         creationDate: { $date: { $numberLong: "1641024000000" } }
         updateDate: { $date: { $numberLong: "1641024000000" } }
         status: 1
         masterKey:
           provider: aws
           # "us-east-1" changed to "us-east-2" in both key and region.
-          key: arn:aws:kms:us-east-2:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0
+          key: "arn:aws:kms:us-east-2:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
           region: us-east-2
 
 tests:

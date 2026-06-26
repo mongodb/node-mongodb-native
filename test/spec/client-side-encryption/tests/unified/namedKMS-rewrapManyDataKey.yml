@@ -17,12 +17,16 @@ createEntities:
         keyVaultNamespace: keyvault.datakeys
         kmsProviders:
           "aws:name1": { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } }
-          "azure:name1": { tenantId: { $$placeholder: 1 }, clientId: { $$placeholder: 1 }, clientSecret: { $$placeholder: 1 } }
+          "azure:name1":
+            { tenantId: { $$placeholder: 1 }, clientId: { $$placeholder: 1 }, clientSecret: { $$placeholder: 1 } }
           "gcp:name1": { email: { $$placeholder: 1 }, privateKey: { $$placeholder: 1 } }
           "kmip:name1": { endpoint: { $$placeholder: 1 } }
           "local:name1": { key: { $$placeholder: 1 } }
           # Use a different local master key for `local:name2`.
-          "local:name2": { key: "local+name2+YUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk" }
+          "local:name2":
+            {
+              key: "local+name2+YUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+            }
           # Use a different AWS account to test wrapping between different AWS accounts.
           "aws:name2": { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } }
   - database:
@@ -40,7 +44,14 @@ initialData:
     documents:
       - _id: &aws:name1_key_id { $binary: { base64: YXdzYXdzYXdzYXdzYXdzYQ==, subType: "04" } }
         keyAltNames: ["aws:name1_key"]
-        keyMaterial: { $binary: { base64: AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gFXJqbF0Fy872MD7xl56D/2AAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDO7HPisPUlGzaio9vgIBEIB7/Qow46PMh/8JbEUbdXgTGhLfXPE+KIVW7T8s6YEMlGiRvMu7TV0QCIUJlSHPKZxzlJ2iwuz5yXeOag+EdY+eIQ0RKrsJ3b8UTisZYzGjfzZnxUKLzLoeXremtRCm3x47wCuHKd1dhh6FBbYt5TL2tDaj+vL2GBrKat2L, subType: "00" } }
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gFXJqbF0Fy872MD7xl56D/2AAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDO7HPisPUlGzaio9vgIBEIB7/Qow46PMh/8JbEUbdXgTGhLfXPE+KIVW7T8s6YEMlGiRvMu7TV0QCIUJlSHPKZxzlJ2iwuz5yXeOag+EdY+eIQ0RKrsJ3b8UTisZYzGjfzZnxUKLzLoeXremtRCm3x47wCuHKd1dhh6FBbYt5TL2tDaj+vL2GBrKat2L,
+                subType: "00",
+              },
+          }
         creationDate: { $date: { $numberLong: "1641024000000" } }
         updateDate: { $date: { $numberLong: "1641024000000" } }
         status: 1
@@ -50,7 +61,14 @@ initialData:
           region: us-east-1
       - _id: &azure:name1_key_id { $binary: { base64: YXp1cmVhenVyZWF6dXJlYQ==, subType: "04" } }
         keyAltNames: ["azure:name1_key"]
-        keyMaterial: { $binary: { base64: pr01l7qDygUkFE/0peFwpnNlv3iIy8zrQK38Q9i12UCN2jwZHDmfyx8wokiIKMb9kAleeY+vnt3Cf1MKu9kcDmI+KxbNDd+V3ytAAGzOVLDJr77CiWjF9f8ntkXRHrAY9WwnVDANYkDwXlyU0Y2GQFTiW65jiQhUtYLYH63Tk48SsJuQvnWw1Q+PzY8ga+QeVec8wbcThwtm+r2IHsCFnc72Gv73qq7weISw+O4mN08z3wOp5FOS2ZM3MK7tBGmPdBcktW7F8ODGsOQ1FU53OrWUnyX2aTi2ftFFFMWVHqQo7EYuBZHru8RRODNKMyQk0BFfKovAeTAVRv9WH9QU7g==, subType: "00" } }
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: pr01l7qDygUkFE/0peFwpnNlv3iIy8zrQK38Q9i12UCN2jwZHDmfyx8wokiIKMb9kAleeY+vnt3Cf1MKu9kcDmI+KxbNDd+V3ytAAGzOVLDJr77CiWjF9f8ntkXRHrAY9WwnVDANYkDwXlyU0Y2GQFTiW65jiQhUtYLYH63Tk48SsJuQvnWw1Q+PzY8ga+QeVec8wbcThwtm+r2IHsCFnc72Gv73qq7weISw+O4mN08z3wOp5FOS2ZM3MK7tBGmPdBcktW7F8ODGsOQ1FU53OrWUnyX2aTi2ftFFFMWVHqQo7EYuBZHru8RRODNKMyQk0BFfKovAeTAVRv9WH9QU7g==,
+                subType: "00",
+              },
+          }
         creationDate: { $date: { $numberLong: "1641024000000" } }
         updateDate: { $date: { $numberLong: "1641024000000" } }
         status: 1
@@ -60,7 +78,14 @@ initialData:
           keyName: key-name-csfle
       - _id: &gcp:name1_key_id { $binary: { base64: Z2NwZ2NwZ2NwZ2NwZ2NwZw==, subType: "04" } }
         keyAltNames: ["gcp:name1_key"]
-        keyMaterial: { $binary: { base64: CiQAIgLj0USbQtof/pYRLQO96yg/JEtZbD1UxKueaC37yzT5tTkSiQEAhClWB5ZCSgzHgxv8raWjNB4r7e8ePGdsmSuYTYmLC5oHHS/BdQisConzNKFaobEQZHamTCjyhy5NotKF8MWoo+dyfQApwI29+vAGyrUIQCXzKwRnNdNQ+lb3vJtS5bqvLTvSxKHpVca2kqyC9nhonV+u4qru5Q2bAqUgVFc8fL4pBuvlowZFTQ==, subType: "00" } }
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: CiQAIgLj0USbQtof/pYRLQO96yg/JEtZbD1UxKueaC37yzT5tTkSiQEAhClWB5ZCSgzHgxv8raWjNB4r7e8ePGdsmSuYTYmLC5oHHS/BdQisConzNKFaobEQZHamTCjyhy5NotKF8MWoo+dyfQApwI29+vAGyrUIQCXzKwRnNdNQ+lb3vJtS5bqvLTvSxKHpVca2kqyC9nhonV+u4qru5Q2bAqUgVFc8fL4pBuvlowZFTQ==,
+                subType: "00",
+              },
+          }
         creationDate: { $date: { $numberLong: "1641024000000" } }
         updateDate: { $date: { $numberLong: "1641024000000" } }
         status: 1
@@ -72,7 +97,14 @@ initialData:
           keyName: key-name-csfle
       - _id: &kmip:name1_key_id { $binary: { base64: a21pcGttaXBrbWlwa21pcA==, subType: "04" } }
         keyAltNames: ["kmip:name1_key"]
-        keyMaterial: { $binary: { base64: CklVctHzke4mcytd0TxGqvepkdkQN8NUF4+jV7aZQITAKdz6WjdDpq3lMt9nSzWGG2vAEfvRb3mFEVjV57qqGqxjq2751gmiMRHXz0btStbIK3mQ5xbY9kdye4tsixlCryEwQONr96gwlwKKI9Nubl9/8+uRF6tgYjje7Q7OjauEf1SrJwKcoQ3WwnjZmEqAug0kImCpJ/irhdqPzivRiA==, subType: "00" } }
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: CklVctHzke4mcytd0TxGqvepkdkQN8NUF4+jV7aZQITAKdz6WjdDpq3lMt9nSzWGG2vAEfvRb3mFEVjV57qqGqxjq2751gmiMRHXz0btStbIK3mQ5xbY9kdye4tsixlCryEwQONr96gwlwKKI9Nubl9/8+uRF6tgYjje7Q7OjauEf1SrJwKcoQ3WwnjZmEqAug0kImCpJ/irhdqPzivRiA==,
+                subType: "00",
+              },
+          }
         creationDate: { $date: { $numberLong: "1641024000000" } }
         updateDate: { $date: { $numberLong: "1641024000000" } }
         status: 1
@@ -81,7 +113,14 @@ initialData:
           keyId: "1"
       - _id: &local:name1_key_id { $binary: { base64: bG9jYWxrZXlsb2NhbGtleQ==, subType: "04" } }
         keyAltNames: ["local:name1_key"]
-        keyMaterial: { $binary: { base64: ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==, subType: "00" } }
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==,
+                subType: "00",
+              },
+          }
         creationDate: { $date: { $numberLong: "1641024000000" } }
         updateDate: { $date: { $numberLong: "1641024000000" } }
         status: 1
@@ -126,19 +165,51 @@ tests:
                 ordered: true
                 updates:
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "aws:name1", <<: *new_aws_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "aws:name1", <<: *new_aws_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "aws:name1", <<: *new_aws_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "aws:name1", <<: *new_aws_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "aws:name1", <<: *new_aws_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "aws:name1", <<: *new_aws_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "aws:name1", <<: *new_aws_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "aws:name1", <<: *new_aws_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                 writeConcern: { w: majority }
@@ -179,19 +250,51 @@ tests:
                 ordered: true
                 updates:
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "azure:name1", <<: *new_azure_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "azure:name1", <<: *new_azure_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "azure:name1", <<: *new_azure_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "azure:name1", <<: *new_azure_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "azure:name1", <<: *new_azure_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "azure:name1", <<: *new_azure_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "azure:name1", <<: *new_azure_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "azure:name1", <<: *new_azure_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                 writeConcern: { w: majority }
@@ -234,19 +337,51 @@ tests:
                 ordered: true
                 updates:
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "gcp:name1", <<: *new_gcp_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "gcp:name1", <<: *new_gcp_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "gcp:name1", <<: *new_gcp_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "gcp:name1", <<: *new_gcp_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "gcp:name1", <<: *new_gcp_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "gcp:name1", <<: *new_gcp_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "gcp:name1", <<: *new_gcp_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "gcp:name1", <<: *new_gcp_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                 writeConcern: { w: majority }
@@ -284,19 +419,51 @@ tests:
                 ordered: true
                 updates:
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "kmip:name1", keyId: { $$type: string } }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "kmip:name1", keyId: { $$type: string } },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "kmip:name1", keyId: { $$type: string } }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "kmip:name1", keyId: { $$type: string } },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "kmip:name1", keyId: { $$type: string } }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "kmip:name1", keyId: { $$type: string } },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "kmip:name1", keyId: { $$type: string } }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "kmip:name1", keyId: { $$type: string } },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                 writeConcern: { w: majority }
@@ -334,19 +501,35 @@ tests:
                 ordered: true
                 updates:
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "local:name1" }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set: { masterKey: { provider: "local:name1" }, keyMaterial: { $$type: binData } },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "local:name1" }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set: { masterKey: { provider: "local:name1" }, keyMaterial: { $$type: binData } },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "local:name1" }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set: { masterKey: { provider: "local:name1" }, keyMaterial: { $$type: binData } },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "local:name1" }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set: { masterKey: { provider: "local:name1" }, keyMaterial: { $$type: binData } },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                 writeConcern: { w: majority }
@@ -384,7 +567,11 @@ tests:
                 ordered: true
                 updates:
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "local:name2" }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set: { masterKey: { provider: "local:name2" }, keyMaterial: { $$type: binData } },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                 writeConcern: { w: majority }
@@ -397,8 +584,7 @@ tests:
           filter: { keyAltNames: { $eq: "aws:name1_key" } }
           opts:
             provider: "aws:name2"
-            masterKey: &new_awsname2_masterkey
-              # aws:name1 account does not have permissions to access this key.
+            masterKey: &new_awsname2_masterkey # aws:name1 account does not have permissions to access this key.
               key: "arn:aws:kms:us-east-1:857654397073:key/0f8468f0-f135-4226-aa0b-bd05c4c30df5"
               region: us-east-1
         expectResult:
@@ -426,7 +612,15 @@ tests:
                 ordered: true
                 updates:
                   - q: { _id: { $$type: binData } }
-                    u: { $set: { masterKey: { provider: "aws:name2", <<: *new_awsname2_masterkey }, keyMaterial: { $$type: binData } }, $currentDate: { updateDate: true } }
+                    u:
+                      {
+                        $set:
+                          {
+                            masterKey: { provider: "aws:name2", <<: *new_awsname2_masterkey },
+                            keyMaterial: { $$type: binData },
+                          },
+                        $currentDate: { updateDate: true },
+                      }
                     multi: { $$unsetOrMatches: false }
                     upsert: { $$unsetOrMatches: false }
                 writeConcern: { w: majority }

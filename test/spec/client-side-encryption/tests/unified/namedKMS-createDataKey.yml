@@ -17,7 +17,8 @@ createEntities:
         keyVaultNamespace: keyvault.datakeys
         kmsProviders:
           "aws:name1": { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } }
-          "azure:name1": { tenantId: { $$placeholder: 1 }, clientId: { $$placeholder: 1 }, clientSecret: { $$placeholder: 1 } }
+          "azure:name1":
+            { tenantId: { $$placeholder: 1 }, clientId: { $$placeholder: 1 }, clientSecret: { $$placeholder: 1 } }
           "gcp:name1": { email: { $$placeholder: 1 }, privateKey: { $$placeholder: 1 } }
           "kmip:name1": { endpoint: { $$placeholder: 1 } }
           "local:name1": { key: { $$placeholder: 1 } }

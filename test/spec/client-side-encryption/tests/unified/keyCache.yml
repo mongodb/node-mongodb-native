@@ -16,7 +16,10 @@ createEntities:
         keyVaultClient: *client0
         keyVaultNamespace: keyvault.datakeys
         kmsProviders:
-          "local" : { key: "OCTP9uKPPmvuqpHlqq83gPk4U6rUPxKVRRyVtrjFmVjdoa4Xzm1SzUbr7aIhNI42czkUBmrCtZKF31eaaJnxEBkqf0RFukA9Mo3NEHQWgAQ2cn9duOcRbaFUQo2z0/rB" }
+          "local":
+            {
+              key: "OCTP9uKPPmvuqpHlqq83gPk4U6rUPxKVRRyVtrjFmVjdoa4Xzm1SzUbr7aIhNI42czkUBmrCtZKF31eaaJnxEBkqf0RFukA9Mo3NEHQWgAQ2cn9duOcRbaFUQo2z0/rB",
+            }
         keyExpirationMS: 1
   - database:
       id: &database0 database0
@@ -32,23 +35,20 @@ initialData:
     collectionName: *collection0Name
     documents:
       - {
-            "_id": {
-                "$binary": {
-                    "base64": "a+YWzdygTAG62/cNUkqZiQ==",
-                    "subType": "04"
-                }
+          "_id": { "$binary": { "base64": "a+YWzdygTAG62/cNUkqZiQ==", "subType": "04" } },
+          "keyAltNames": [],
+          "keyMaterial":
+            {
+              "$binary":
+                {
+                  "base64": "iocBkhO3YBokiJ+FtxDTS71/qKXQ7tSWhWbcnFTXBcMjarsepvALeJ5li+SdUd9ePuatjidxAdMo7vh1V2ZESLMkQWdpPJ9PaJjA67gKQKbbbB4Ik5F2uKjULvrMBnFNVRMup4JNUwWFQJpqbfMveXnUVcD06+pUpAkml/f+DSXrV3e5rxciiNVtz03dAG8wJrsKsFXWj6vTjFhsfknyBA==",
+                  "subType": "00",
+                },
             },
-            "keyAltNames": [],
-            "keyMaterial": {
-                "$binary": {
-                    "base64": "iocBkhO3YBokiJ+FtxDTS71/qKXQ7tSWhWbcnFTXBcMjarsepvALeJ5li+SdUd9ePuatjidxAdMo7vh1V2ZESLMkQWdpPJ9PaJjA67gKQKbbbB4Ik5F2uKjULvrMBnFNVRMup4JNUwWFQJpqbfMveXnUVcD06+pUpAkml/f+DSXrV3e5rxciiNVtz03dAG8wJrsKsFXWj6vTjFhsfknyBA==",
-                    "subType": "00"
-                }
-            },
-            "creationDate": {"$date": {"$numberLong": "1552949630483"}},
-            "updateDate": {"$date": {"$numberLong": "1552949630483"}},
-            "status": {"$numberInt": "0"},
-            "masterKey": {"provider": "local"}
+          "creationDate": { "$date": { "$numberLong": "1552949630483" } },
+          "updateDate": { "$date": { "$numberLong": "1552949630483" } },
+          "status": { "$numberInt": "0" },
+          "masterKey": { "provider": "local" },
         }
 
 tests:
@@ -57,7 +57,14 @@ tests:
       - name: decrypt
         object: *clientEncryption0
         arguments:
-          value: { "$binary" : { "base64" : "AWvmFs3coEwButv3DVJKmYkCJ6lUzRX9R28WNlw5uyndb+8gurA+p8q14s7GZ04K2ZvghieRlAr5UwZbow3PMq27u5EIhDDczwBFcbdP1amllw==", "subType" : "06" } }
+          value:
+            {
+              "$binary":
+                {
+                  "base64": "AWvmFs3coEwButv3DVJKmYkCJ6lUzRX9R28WNlw5uyndb+8gurA+p8q14s7GZ04K2ZvghieRlAr5UwZbow3PMq27u5EIhDDczwBFcbdP1amllw==",
+                  "subType": "06",
+                },
+            }
         expectResult: "foobar"
       - name: wait
         object: testRunner
@@ -66,7 +73,14 @@ tests:
       - name: decrypt
         object: *clientEncryption0
         arguments:
-          value: { "$binary" : { "base64" : "AWvmFs3coEwButv3DVJKmYkCJ6lUzRX9R28WNlw5uyndb+8gurA+p8q14s7GZ04K2ZvghieRlAr5UwZbow3PMq27u5EIhDDczwBFcbdP1amllw==", "subType" : "06" } }
+          value:
+            {
+              "$binary":
+                {
+                  "base64": "AWvmFs3coEwButv3DVJKmYkCJ6lUzRX9R28WNlw5uyndb+8gurA+p8q14s7GZ04K2ZvghieRlAr5UwZbow3PMq27u5EIhDDczwBFcbdP1amllw==",
+                  "subType": "06",
+                },
+            }
         expectResult: "foobar"
     expectEvents:
       - client: *client0
@@ -74,12 +88,30 @@ tests:
           - commandStartedEvent:
               command:
                 find: datakeys
-                filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'a+YWzdygTAG62/cNUkqZiQ==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
+                filter:
+                  {
+                    "$or":
+                      [
+                        {
+                          "_id": { "$in": [{ "$binary": { "base64": "a+YWzdygTAG62/cNUkqZiQ==", "subType": "04" } }] },
+                        },
+                        { "keyAltNames": { "$in": [] } },
+                      ],
+                  }
                 $db: keyvault
                 readConcern: { level: "majority" }
           - commandStartedEvent:
               command:
                 find: datakeys
-                filter: {"$or": [{"_id": {"$in": [ {'$binary': {'base64': 'a+YWzdygTAG62/cNUkqZiQ==', 'subType': '04'}} ] }}, {"keyAltNames": {"$in": []}}]}
+                filter:
+                  {
+                    "$or":
+                      [
+                        {
+                          "_id": { "$in": [{ "$binary": { "base64": "a+YWzdygTAG62/cNUkqZiQ==", "subType": "04" } }] },
+                        },
+                        { "keyAltNames": { "$in": [] } },
+                      ],
+                  }
                 $db: keyvault
                 readConcern: { level: "majority" }

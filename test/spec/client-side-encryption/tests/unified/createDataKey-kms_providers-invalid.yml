@@ -58,7 +58,7 @@ tests:
           kmsProvider: aws
           opts:
             masterKey:
-              key: arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0
+              key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
               region: invalid
         expectError:
           isClientError: true

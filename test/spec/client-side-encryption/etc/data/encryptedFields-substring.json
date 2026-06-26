@@ -1,6 +1,6 @@
 {
-    "fields": [
-        {
+  "fields": [
+    {
             "keyId": {
                 "$binary": {
                     "base64": "EjRWeBI0mHYSNBI0VniQEg==",
@@ -21,10 +21,13 @@
                     "strMaxQueryLength": {
                         "$numberInt": "10"
                     },
+                    "contention": {
+                        "$numberLong": "0"
+                    },
                     "caseSensitive": true,
                     "diacriticSensitive": true
                 }
             ]
         }
-    ]
+  ]
 }

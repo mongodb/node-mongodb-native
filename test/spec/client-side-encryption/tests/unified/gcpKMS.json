@@ -1,0 +1,292 @@
+{
+  "description": "gcpKMS",
+  "schemaVersion": "1.25",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.10",
+      "csfle": {
+        "minLibmongocryptVersion": "1.15.1"
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "gcp": {
+              "email": {
+                "$$placeholder": 1
+              },
+              "privateKey": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll",
+        "database": "db",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "default",
+      "collectionName": "default",
+      "documents": [],
+      "createOptions": {
+        "validator": {
+          "$jsonSchema": {
+            "properties": {
+              "encrypted_string_aws": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_azure": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "AZURE+AAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_gcp": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "GCP+AAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_local": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_kmip": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "dBHpr8aITfeBQ15grpbLpQ==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_kmip_delegated": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$uuid": "7411e9af-c688-4df7-8143-5e60ae96cba6"
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              }
+            },
+            "bsonType": "object"
+          }
+        }
+      }
+    },
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "GCP+AAAAAAAAAAAAAAAAAA==",
+              "subType": "04"
+            }
+          },
+          "keyMaterial": {
+            "$binary": {
+              "base64": "CiQAIgLj0WyktnB4dfYHo5SLZ41K4ASQrjJUaSzl5vvVH0G12G0SiQEAjlV8XPlbnHDEDFbdTO4QIe8ER2/172U1ouLazG0ysDtFFIlSvWX5ZnZUrRMmp/R2aJkzLXEt/zf8Mn4Lfm+itnjgo5R9K4pmPNvvPKNZX5C16lrPT+aA+rd+zXFSmlMg3i5jnxvTdLHhg3G7Q/Uv1ZIJskKt95bzLoe0tUVzRWMYXLIEcohnQg==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1601574333107"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1601574333107"
+            }
+          },
+          "status": {
+            "$numberInt": "0"
+          },
+          "masterKey": {
+            "provider": "gcp",
+            "projectId": "devprod-drivers",
+            "location": "global",
+            "keyRing": "key-ring-csfle",
+            "keyName": "key-name-csfle"
+          },
+          "keyAltNames": [
+            "altname",
+            "gcp_altname"
+          ]
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Insert a document with auto encryption using GCP KMS provider",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string_gcp": "string0"
+            }
+          },
+          "object": "coll"
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_string_gcp": {
+                "$binary": {
+                  "base64": "ARgj/gAAAAAAAAAAAAAAAAACwFd+Y5Ojw45GUXNvbcIpN9YkRdoHDHkR4kssdn0tIMKlDQOLFkWFY9X07IRlXsxPD8DcTiKnl6XINK28vhcGlg==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1,
+                  "filter": {
+                    "name": "default"
+                  }
+                },
+                "commandName": "listCollections"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "GCP+AAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault"
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_string_gcp": {
+                        "$binary": {
+                          "base64": "ARgj/gAAAAAAAAAAAAAAAAACwFd+Y5Ojw45GUXNvbcIpN9YkRdoHDHkR4kssdn0tIMKlDQOLFkWFY9X07IRlXsxPD8DcTiKnl6XINK28vhcGlg==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

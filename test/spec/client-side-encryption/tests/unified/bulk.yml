@@ -1,0 +1,258 @@
+description: bulk
+schemaVersion: "1.25"
+runOnRequirements:
+  - minServerVersion: "4.1.10"
+    csfle:
+      minLibmongocryptVersion: "1.15.1"
+createEntities:
+  - client:
+      id: "client0"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          aws: { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } }
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db"
+      client: "client0"
+      databaseName: default
+  - collection:
+      id: "coll"
+      database: "db"
+      collectionName: default
+  - client:
+      id: "client_unencrypted"
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db_unencrypted"
+      client: "client_unencrypted"
+      databaseName: default
+  - collection:
+      id: "coll_unencrypted"
+      database: "db_unencrypted"
+      collectionName: default
+initialData:
+  - databaseName: default
+    collectionName: default
+    documents: []
+    createOptions:
+      validator:
+        $jsonSchema:
+          {
+            "properties":
+              {
+                "encrypted_w_altname":
+                  {
+                    "encrypt":
+                      {
+                        "keyId": "/altname",
+                        "bsonType": "string",
+                        "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+                      },
+                  },
+                "encrypted_string":
+                  {
+                    "encrypt":
+                      {
+                        "keyId": ["$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" }],
+                        "bsonType": "string",
+                        "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+                      },
+                  },
+                "random":
+                  {
+                    "encrypt":
+                      {
+                        "keyId": ["$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" }],
+                        "bsonType": "string",
+                        "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+                      },
+                  },
+                "encrypted_string_equivalent":
+                  {
+                    "encrypt":
+                      {
+                        "keyId": ["$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" }],
+                        "bsonType": "string",
+                        "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+                      },
+                  },
+              },
+            "bsonType": "object",
+          }
+  - databaseName: keyvault
+    collectionName: datakeys
+    documents:
+      [
+        {
+          "status": 1,
+          "_id": { "$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" } },
+          "masterKey":
+            {
+              "provider": "aws",
+              "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+              "region": "us-east-1",
+            },
+          "updateDate": { "$date": { "$numberLong": "1552949630483" } },
+          "keyMaterial":
+            {
+              "$binary":
+                {
+                  "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gEqnsxXlR51T5EbEVezUqqKAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDHa4jo6yp0Z18KgbUgIBEIB74sKxWtV8/YHje5lv5THTl0HIbhSwM6EqRlmBiFFatmEWaeMk4tO4xBX65eq670I5TWPSLMzpp8ncGHMmvHqRajNBnmFtbYxN3E3/WjxmdbOOe+OXpnGJPcGsftc7cB2shRfA4lICPnE26+oVNXT6p0Lo20nY5XC7jyCO",
+                  "subType": "00",
+                },
+            },
+          "creationDate": { "$date": { "$numberLong": "1552949630483" } },
+          "keyAltNames": ["altname", "another_altname"],
+        },
+      ]
+tests:
+  - description: "Bulk write with encryption"
+    operations:
+      - name: bulkWrite
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 1, encrypted_string: "string0", random: "abc" }
+            - insertOne:
+                document: { _id: 2, encrypted_string: "string1" }
+            - updateOne:
+                filter: { encrypted_string: "string0" }
+                update: { $set: { encrypted_string: "string1" } }
+            - deleteOne:
+                filter: { $and: [encrypted_string: "string1", _id: 2] }
+          ordered: true
+        object: "coll"
+      - name: find
+        object: coll_unencrypted
+        arguments:
+          filter: {}
+        expectResult:
+          - {
+              _id: 1,
+              encrypted_string:
+                {
+                  "$binary":
+                    {
+                      "base64": "AQAAAAAAAAAAAAAAAAAAAAACDdw4KFz3ZLquhsbt7RmDjD0N67n0uSXx7IGnQNCLeIKvot6s/ouI21Eo84IOtb6lhwUNPlSEBNY0/hbszWAKJg==",
+                      "subType": "06",
+                    },
+                },
+              random: { $$type: "binData" },
+            }
+    expectEvents:
+      - client: "client0"
+        events:
+          # Auto encryption will request the collection info.
+          - commandStartedEvent:
+              command:
+                listCollections: 1
+                filter:
+                  name: &collection_name default
+              commandName: listCollections
+          - commandStartedEvent:
+              command:
+                find: datakeys
+                filter:
+                  {
+                    "$or":
+                      [
+                        "_id": { "$in": ["$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" }] },
+                        "keyAltNames": { "$in": [] },
+                      ],
+                  }
+                $db: keyvault
+                readConcern: { level: "majority" }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - {
+                      _id: 1,
+                      encrypted_string:
+                        {
+                          "$binary":
+                            {
+                              "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
+                              "subType": "06",
+                            },
+                        },
+                      random: { $$type: "binData" },
+                    }
+                  - {
+                      _id: 2,
+                      encrypted_string:
+                        {
+                          "$binary":
+                            {
+                              "base64": "AQAAAAAAAAAAAAAAAAAAAAACDdw4KFz3ZLquhsbt7RmDjD0N67n0uSXx7IGnQNCLeIKvot6s/ouI21Eo84IOtb6lhwUNPlSEBNY0/hbszWAKJg==",
+                              "subType": "06",
+                            },
+                        },
+                    }
+                ordered: true
+              commandName: insert
+          - commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  - q:
+                      {
+                        encrypted_string:
+                          {
+                            $eq:
+                              {
+                                "$binary":
+                                  {
+                                    "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
+                                    "subType": "06",
+                                  },
+                              },
+                          },
+                      }
+                    u:
+                      {
+                        $set:
+                          {
+                            encrypted_string:
+                              {
+                                "$binary":
+                                  {
+                                    "base64": "AQAAAAAAAAAAAAAAAAAAAAACDdw4KFz3ZLquhsbt7RmDjD0N67n0uSXx7IGnQNCLeIKvot6s/ouI21Eo84IOtb6lhwUNPlSEBNY0/hbszWAKJg==",
+                                    "subType": "06",
+                                  },
+                              },
+                          },
+                      }
+                    multi: false
+                    upsert: false
+                ordered: true
+              commandName: update
+          - commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  - q:
+                      {
+                        "$and":
+                          [
+                            "encrypted_string":
+                              {
+                                "$eq":
+                                  {
+                                    "$binary":
+                                      {
+                                        "base64": "AQAAAAAAAAAAAAAAAAAAAAACDdw4KFz3ZLquhsbt7RmDjD0N67n0uSXx7IGnQNCLeIKvot6s/ouI21Eo84IOtb6lhwUNPlSEBNY0/hbszWAKJg==",
+                                        "subType": "06",
+                                      },
+                                  },
+                              },
+                            "_id": { "$eq": 2 },
+                          ],
+                      }
+                    limit: 1
+                ordered: true
+              commandName: delete

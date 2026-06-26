@@ -1,0 +1,415 @@
+{
+  "description": "kmipKMS",
+  "schemaVersion": "1.25",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.10",
+      "csfle": {
+        "minLibmongocryptVersion": "1.15.1"
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "kmip": {
+              "endpoint": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll",
+        "database": "db",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "default",
+      "collectionName": "default",
+      "documents": [],
+      "createOptions": {
+        "validator": {
+          "$jsonSchema": {
+            "properties": {
+              "encrypted_string_aws": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_azure": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "AZURE+AAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_gcp": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "GCP+AAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_local": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_kmip": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "dBHpr8aITfeBQ15grpbLpQ==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "encrypted_string_kmip_delegated": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$uuid": "7411e9af-c688-4df7-8143-5e60ae96cba6"
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              }
+            },
+            "bsonType": "object"
+          }
+        }
+      }
+    },
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "dBHpr8aITfeBQ15grpbLpQ==",
+              "subType": "04"
+            }
+          },
+          "keyMaterial": {
+            "$binary": {
+              "base64": "eUYDyB0HuWb+lQgUwO+6qJQyTTDTY2gp9FbemL7ZFo0pvr0x6rm6Ff9OVUTGH6HyMKipaeHdiIJU1dzsLwvqKvi7Beh+U4iaIWX/K0oEg1GOsJc0+Z/in8gNHbGUYLmycHViM3LES3kdt7FdFSUl5rEBHrM71yoNEXImz17QJWMGOuT4x6yoi2pvnaRJwfrI4DjpmnnTrDMac92jgZehbg==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1634220190041"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1634220190041"
+            }
+          },
+          "status": {
+            "$numberInt": "0"
+          },
+          "masterKey": {
+            "provider": "kmip",
+            "keyId": "1"
+          },
+          "keyAltNames": [
+            "altname",
+            "kmip_altname"
+          ]
+        },
+        {
+          "_id": {
+            "$uuid": "7411e9af-c688-4df7-8143-5e60ae96cba6"
+          },
+          "keyMaterial": {
+            "$binary": {
+              "base64": "5TLMFWlguBWe5GUESTvOVtkdBsCrynhnV72XRyZ66/nk+EP9/1oEp1t1sg0+vwCTqULHjBiUE6DRx2mYD/Eup1+u2Jgz9/+1sV1drXeOPALNPkSgiZiDbIb67zRi+wTABEcKcegJH+FhmSGxwUoQAiHCsCbcvia5P8tN1lt98YQ=",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1634220190041"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1634220190041"
+            }
+          },
+          "status": {
+            "$numberInt": "0"
+          },
+          "masterKey": {
+            "provider": "kmip",
+            "delegated": true,
+            "keyId": "11"
+          },
+          "keyAltNames": [
+            "delegated"
+          ]
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Insert a document with auto encryption using KMIP KMS provider",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string_kmip": "string0"
+            }
+          },
+          "object": "coll"
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_string_kmip": {
+                "$binary": {
+                  "base64": "AXQR6a/GiE33gUNeYK6Wy6UCKCwtKFIsL8eKObDVxvqGupJNUk7kXswHhB7G5j/C1D+6no+Asra0KgSU43bTL3ooIBLVyIzbV5CDJYqzAsa4WQ==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1,
+                  "filter": {
+                    "name": "default"
+                  }
+                },
+                "commandName": "listCollections"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "dBHpr8aITfeBQ15grpbLpQ==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault"
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_string_kmip": {
+                        "$binary": {
+                          "base64": "AXQR6a/GiE33gUNeYK6Wy6UCKCwtKFIsL8eKObDVxvqGupJNUk7kXswHhB7G5j/C1D+6no+Asra0KgSU43bTL3ooIBLVyIzbV5CDJYqzAsa4WQ==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Insert a document with auto encryption using KMIP delegated KMS provider",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string_kmip_delegated": "string0"
+            }
+          },
+          "object": "coll"
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "encrypted_string_kmip_delegated": {
+                "$binary": {
+                  "base64": "AXQR6a/GiE33gUNeYK6Wy6YCkB+8NVfAAjIbvLqyXIg6g1a8tXrym92DPoqmxpcdQyH0vQM3aFNMz7tZwQBimKs29ztZV/LWjM633HhO5ACl9A==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "default",
+          "databaseName": "default"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1,
+                  "filter": {
+                    "name": "default"
+                  }
+                },
+                "commandName": "listCollections"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$uuid": "7411e9af-c688-4df7-8143-5e60ae96cba6"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault"
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_string_kmip_delegated": {
+                        "$binary": {
+                          "base64": "AXQR6a/GiE33gUNeYK6Wy6YCkB+8NVfAAjIbvLqyXIg6g1a8tXrym92DPoqmxpcdQyH0vQM3aFNMz7tZwQBimKs29ztZV/LWjM633HhO5ACl9A==",
+                          "subType": "06"
+                        }
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,271 @@
+description: fle2v2-FindOneAndUpdate
+schemaVersion: "1.25"
+runOnRequirements:
+  - minServerVersion: "7.0.0"
+    # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topologies: ["replicaset", "sharded", "load-balanced"]
+    csfle:
+      minLibmongocryptVersion: "1.15.1"
+createEntities:
+  - client:
+      id: "client0"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db"
+      client: "client0"
+      databaseName: &database_name default
+  - collection:
+      id: "coll"
+      database: "db"
+      collectionName: &collection_name default
+  - client:
+      id: "client_unencrypted"
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db_unencrypted"
+      client: "client_unencrypted"
+      databaseName: default
+  - collection:
+      id: "coll_unencrypted"
+      database: "db_unencrypted"
+      collectionName: default
+initialData:
+  - databaseName: default
+    collectionName: default
+    documents: []
+    createOptions:
+      encryptedFields:
+        &encrypted_fields {
+          "fields":
+            [
+              {
+                "keyId": { "$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" } },
+                "path": "encryptedIndexed",
+                "bsonType": "string",
+                "queries": { "queryType": "equality", "contention": { "$numberLong": "0" } },
+              },
+              {
+                "keyId": { "$binary": { "base64": "q83vqxI0mHYSNBI0VniQEg==", "subType": "04" } },
+                "path": "encryptedUnindexed",
+                "bsonType": "string",
+              },
+            ],
+        }
+  - databaseName: keyvault
+    collectionName: datakeys
+    documents:
+      [
+        {
+          "_id": { "$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" } },
+          "keyMaterial":
+            {
+              "$binary":
+                {
+                  "base64": "sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==",
+                  "subType": "00",
+                },
+            },
+          "creationDate": { "$date": { "$numberLong": "1648914851981" } },
+          "updateDate": { "$date": { "$numberLong": "1648914851981" } },
+          "status": { "$numberInt": "0" },
+          "masterKey": { "provider": "local" },
+        },
+      ]
+tests:
+  - description: "findOneAndUpdate can query an FLE2 indexed field"
+    operations:
+      - name: insertOne
+        arguments:
+          document: { "_id": 1, "encryptedIndexed": "value123" }
+        object: "coll"
+      - name: findOneAndUpdate
+        arguments:
+          filter: { "encryptedIndexed": "value123" }
+          update: { "$set": { "foo": "bar" } }
+          returnDocument: Before
+        object: "coll"
+        expectResult: { "_id": 1, "encryptedIndexed": "value123" }
+      - name: find
+        object: coll_unencrypted
+        arguments:
+          filter: {}
+        expectResult:
+          - {
+              "_id": 1,
+              "encryptedIndexed": { "$$type": "binData" },
+              "foo": "bar",
+              "__safeContent__":
+                ["$binary": { "base64": "ThpoKfQ8AkOzkFfNC1+9PF0pY2nIzfXvRdxQgjkNbBw=", "subType": "00" }],
+            }
+    expectEvents:
+      - client: "client0"
+        events:
+          - commandStartedEvent:
+              command:
+                listCollections: 1
+                filter:
+                  name: *collection_name
+              commandName: listCollections
+          - commandStartedEvent:
+              command:
+                find: datakeys
+                filter:
+                  {
+                    "$or":
+                      [
+                        "_id": { "$in": ["$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" }] },
+                        "keyAltNames": { "$in": [] },
+                      ],
+                  }
+                $db: keyvault
+                readConcern: { level: "majority" }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { "_id": 1, "encryptedIndexed": { $$type: "binData" } }
+                ordered: true
+                encryptionInformation:
+                  type: 1
+                  schema:
+                    "default.default":
+                      # libmongocrypt applies escCollection and ecocCollection to outgoing command.
+                      escCollection: "enxcol_.default.esc"
+                      ecocCollection: "enxcol_.default.ecoc"
+                      <<: *encrypted_fields
+              commandName: insert
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection_name
+                query:
+                  {
+                    "encryptedIndexed":
+                      {
+                        "$eq":
+                          {
+                            "$binary":
+                              {
+                                "base64": "DIkAAAAFZAAgAAAAAPtVteJQAlgb2YMa/+7YWH00sbQPyt7L6Rb8OwBdMmL2BXMAIAAAAAAd44hgVKnEnTFlwNVC14oyc9OZOTspeymusqkRQj57nAVsACAAAAAAaZ9s3G+4znfxStxeOZwcZy1OhzjMGc5hjmdMN+b/w6kSY20AAAAAAAAAAAAA",
+                                "subType": "06",
+                              },
+                          },
+                      },
+                  }
+                update: { "$set": { "foo": "bar" } }
+                encryptionInformation:
+                  type: 1
+                  schema:
+                    "default.default":
+                      # libmongocrypt applies escCollection and ecocCollection to outgoing command.
+                      escCollection: "enxcol_.default.esc"
+                      ecocCollection: "enxcol_.default.ecoc"
+                      <<: *encrypted_fields
+              commandName: findAndModify
+  - description: "findOneAndUpdate can modify an FLE2 indexed field"
+    operations:
+      - name: insertOne
+        arguments:
+          document: { "_id": 1, "encryptedIndexed": "value123" }
+        object: "coll"
+      - name: findOneAndUpdate
+        arguments:
+          filter: { "encryptedIndexed": "value123" }
+          update: { "$set": { "encryptedIndexed": "value456" } }
+          returnDocument: Before
+        object: "coll"
+        expectResult: { "_id": 1, "encryptedIndexed": "value123" }
+      - name: find
+        arguments:
+          filter: { "_id": 1 }
+        object: "coll"
+        expectResult: ["encryptedIndexed": "value456"]
+      - name: find
+        object: coll_unencrypted
+        arguments:
+          filter: {}
+        expectResult:
+          - {
+              "_id": 1,
+              "encryptedIndexed": { "$$type": "binData" },
+              "__safeContent__":
+                ["$binary": { "base64": "rhe7/w8Ob8Unl44rGr/moScx6m5VODQnscDhF4Nkn6g=", "subType": "00" }],
+            }
+    expectEvents:
+      - client: "client0"
+        events:
+          - commandStartedEvent:
+              command:
+                listCollections: 1
+                filter:
+                  name: *collection_name
+              commandName: listCollections
+          - commandStartedEvent:
+              command:
+                find: datakeys
+                filter:
+                  {
+                    "$or":
+                      [
+                        "_id": { "$in": ["$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" }] },
+                        "keyAltNames": { "$in": [] },
+                      ],
+                  }
+                $db: keyvault
+                readConcern: { level: "majority" }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { "_id": 1, "encryptedIndexed": { $$type: "binData" } }
+                ordered: true
+                encryptionInformation:
+                  type: 1
+                  schema:
+                    "default.default":
+                      # libmongocrypt applies escCollection and ecocCollection to outgoing command.
+                      escCollection: "enxcol_.default.esc"
+                      ecocCollection: "enxcol_.default.ecoc"
+                      <<: *encrypted_fields
+              commandName: insert
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection_name
+                query:
+                  {
+                    "encryptedIndexed":
+                      {
+                        "$eq":
+                          {
+                            "$binary":
+                              {
+                                "base64": "DIkAAAAFZAAgAAAAAPtVteJQAlgb2YMa/+7YWH00sbQPyt7L6Rb8OwBdMmL2BXMAIAAAAAAd44hgVKnEnTFlwNVC14oyc9OZOTspeymusqkRQj57nAVsACAAAAAAaZ9s3G+4znfxStxeOZwcZy1OhzjMGc5hjmdMN+b/w6kSY20AAAAAAAAAAAAA",
+                                "subType": "06",
+                              },
+                          },
+                      },
+                  }
+                update: { "$set": { "encryptedIndexed": { "$$type": "binData" } } }
+                encryptionInformation:
+                  type: 1
+                  schema:
+                    "default.default":
+                      # libmongocrypt applies escCollection and ecocCollection to outgoing command.
+                      escCollection: "enxcol_.default.esc"
+                      ecocCollection: "enxcol_.default.ecoc"
+                      <<: *encrypted_fields
+              commandName: findAndModify
+          - commandStartedEvent:
+              command:
+                find: *collection_name
+                filter: { "_id": { "$eq": 1 } }
+              commandName: find

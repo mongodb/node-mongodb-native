@@ -1,16 +1,18 @@
 {
   "description": "fle2v2-BypassQueryAnalysis",
-  "schemaVersion": "1.23",
+  "schemaVersion": "1.25",
   "runOnRequirements": [
     {
       "minServerVersion": "7.0.0",
       "serverless": "forbid",
-      "csfle": true,
       "topologies": [
         "replicaset",
         "sharded",
         "load-balanced"
-      ]
+      ],
+      "csfle": {
+        "minLibmongocryptVersion": "1.15.1"
+      }
     }
   ],
   "createEntities": [

@@ -1,0 +1,150 @@
+description: fle2v2-InsertFind-Unindexed
+schemaVersion: "1.25"
+runOnRequirements:
+  - minServerVersion: "7.0.0"
+    # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topologies: ["replicaset", "sharded", "load-balanced"]
+    csfle:
+      minLibmongocryptVersion: "1.15.1"
+createEntities:
+  - client:
+      id: "client0"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db"
+      client: "client0"
+      databaseName: default
+  - collection:
+      id: "coll"
+      database: "db"
+      collectionName: &collection_name default
+  - client:
+      id: "client_unencrypted"
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db_unencrypted"
+      client: "client_unencrypted"
+      databaseName: default
+  - collection:
+      id: "coll_unencrypted"
+      database: "db_unencrypted"
+      collectionName: default
+initialData:
+  - databaseName: default
+    collectionName: default
+    documents: []
+    createOptions:
+      encryptedFields:
+        {
+          "fields":
+            [
+              {
+                "keyId": { "$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" } },
+                "path": "encryptedIndexed",
+                "bsonType": "string",
+                "queries": { "queryType": "equality", "contention": { "$numberLong": "0" } },
+              },
+              {
+                "keyId": { "$binary": { "base64": "q83vqxI0mHYSNBI0VniQEg==", "subType": "04" } },
+                "path": "encryptedUnindexed",
+                "bsonType": "string",
+              },
+            ],
+        }
+  - databaseName: keyvault
+    collectionName: datakeys
+    documents:
+      [
+        {
+          "_id": { "$binary": { "base64": "q83vqxI0mHYSNBI0VniQEg==", "subType": "04" } },
+          "keyMaterial":
+            {
+              "$binary":
+                {
+                  "base64": "HBk9BWihXExNDvTp1lUxOuxuZK2Pe2ZdVdlsxPEBkiO1bS4mG5NNDsQ7zVxJAH8BtdOYp72Ku4Y3nwc0BUpIKsvAKX4eYXtlhv5zUQxWdeNFhg9qK7qb8nqhnnLeT0f25jFSqzWJoT379hfwDeu0bebJHr35QrJ8myZdPMTEDYF08QYQ48ShRBli0S+QzBHHAQiM2iJNr4svg2WR8JSeWQ==",
+                  "subType": "00",
+                },
+            },
+          "creationDate": { "$date": { "$numberLong": "1648914851981" } },
+          "updateDate": { "$date": { "$numberLong": "1648914851981" } },
+          "status": { "$numberInt": "0" },
+          "masterKey": { "provider": "local" },
+        },
+      ]
+tests:
+  - description: "Insert and find FLE2 unindexed field"
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 { _id: 1, encryptedUnindexed: "value123" }
+        object: "coll"
+      - name: find
+        arguments:
+          filter: { _id: 1 }
+        object: "coll"
+        expectResult: [*doc0]
+      - name: find
+        object: coll_unencrypted
+        arguments:
+          filter: {}
+        expectResult:
+          - { "_id": 1, "encryptedUnindexed": { $$type: "binData" } }
+    expectEvents:
+      - client: "client0"
+        events:
+          - commandStartedEvent:
+              command:
+                listCollections: 1
+                filter:
+                  name: *collection_name
+              commandName: listCollections
+          - commandStartedEvent:
+              command:
+                find: datakeys
+                filter:
+                  {
+                    "$or":
+                      [
+                        "_id": { "$in": ["$binary": { "base64": "q83vqxI0mHYSNBI0VniQEg==", "subType": "04" }] },
+                        "keyAltNames": { "$in": [] },
+                      ],
+                  }
+                $db: keyvault
+                readConcern: { level: "majority" }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { "_id": 1, "encryptedUnindexed": { $$type: "binData" } }
+                ordered: true
+              commandName: insert
+          - commandStartedEvent:
+              command:
+                find: *collection_name
+                filter: { "_id": { "$eq": 1 } }
+              commandName: find
+  - description: "Query with an unindexed field fails"
+    operations:
+      - name: insertOne
+        arguments:
+          document: { _id: 1, encryptedUnindexed: "value123" }
+        object: "coll"
+      - name: find
+        arguments:
+          filter: { encryptedUnindexed: "value123" }
+        object: "coll"
+        expectError:
+          # Expected error message changed in https://github.com/10gen/mongo-enterprise-modules/commit/212b584d4f7a44bed41c826a180a4aff00923d7a#diff-5f12b55e8d5c52c2f62853ec595dc2c1e2e5cb4fdbf7a32739a8e3acb3c6f818
+          # Before the message was "cannot query non-indexed fields with the randomized encryption algorithm"
+          # After: "can only execute encrypted equality queries with an encrypted equality index"
+          # Use a small common substring.
+          errorContains: "encrypt"

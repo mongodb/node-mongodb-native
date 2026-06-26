@@ -33,7 +33,14 @@ initialData:
       - &local_key_doc
         _id: &local_key_id { $binary: { base64: bG9jYWxrZXlsb2NhbGtleQ==, subType: "04" } }
         keyAltNames: [alternate_name, local_key]
-        keyMaterial: { $binary: { base64: ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==, subType: "00" } }
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==,
+                subType: "00",
+              },
+          }
         creationDate: { $date: { $numberLong: "1641024000000" } }
         updateDate: { $date: { $numberLong: "1641024000000" } }
         status: 1
@@ -58,7 +65,23 @@ tests:
               command:
                 findAndModify: *collection0Name
                 query: { _id: *non_existent_id }
-                update: [{ $set: { keyAltNames: { $cond: [{ $eq: [$keyAltNames, [does_not_exist]] }, $$REMOVE, { $filter: { input: $keyAltNames, cond: { $ne: [$$this, does_not_exist] } } }] } } }]
+                update:
+                  [
+                    {
+                      $set:
+                        {
+                          keyAltNames:
+                            {
+                              $cond:
+                                [
+                                  { $eq: [$keyAltNames, [does_not_exist]] },
+                                  $$REMOVE,
+                                  { $filter: { input: $keyAltNames, cond: { $ne: [$$this, does_not_exist] } } },
+                                ],
+                            },
+                        },
+                    },
+                  ]
                 writeConcern: { w: majority }
     outcome:
       - collectionName: *collection0Name
@@ -82,7 +105,23 @@ tests:
               command:
                 findAndModify: *collection0Name
                 query: { _id: *local_key_id }
-                update: [{ $set: { keyAltNames: { $cond: [{ $eq: [$keyAltNames, [does_not_exist]] }, $$REMOVE, { $filter: { input: $keyAltNames, cond: { $ne: [$$this, does_not_exist] } } }] } } }]
+                update:
+                  [
+                    {
+                      $set:
+                        {
+                          keyAltNames:
+                            {
+                              $cond:
+                                [
+                                  { $eq: [$keyAltNames, [does_not_exist]] },
+                                  $$REMOVE,
+                                  { $filter: { input: $keyAltNames, cond: { $ne: [$$this, does_not_exist] } } },
+                                ],
+                            },
+                        },
+                    },
+                  ]
                 writeConcern: { w: majority }
     outcome:
       - collectionName: *collection0Name
@@ -113,7 +152,23 @@ tests:
               command:
                 findAndModify: *collection0Name
                 query: { _id: *local_key_id }
-                update: [{ $set: { keyAltNames: { $cond: [{ $eq: [$keyAltNames, [alternate_name]] }, $$REMOVE, { $filter: { input: $keyAltNames, cond: { $ne: [$$this, alternate_name] } } }] } } }]
+                update:
+                  [
+                    {
+                      $set:
+                        {
+                          keyAltNames:
+                            {
+                              $cond:
+                                [
+                                  { $eq: [$keyAltNames, [alternate_name]] },
+                                  $$REMOVE,
+                                  { $filter: { input: $keyAltNames, cond: { $ne: [$$this, alternate_name] } } },
+                                ],
+                            },
+                        },
+                    },
+                  ]
                 writeConcern: { w: majority }
           - commandStartedEvent: { commandName: find }
 
@@ -147,11 +202,43 @@ tests:
               command:
                 findAndModify: *collection0Name
                 query: { _id: *local_key_id }
-                update: [{ $set: { keyAltNames: { $cond: [{ $eq: [$keyAltNames, [alternate_name]] }, $$REMOVE, { $filter: { input: $keyAltNames, cond: { $ne: [$$this, alternate_name] } } }] } } }]
+                update:
+                  [
+                    {
+                      $set:
+                        {
+                          keyAltNames:
+                            {
+                              $cond:
+                                [
+                                  { $eq: [$keyAltNames, [alternate_name]] },
+                                  $$REMOVE,
+                                  { $filter: { input: $keyAltNames, cond: { $ne: [$$this, alternate_name] } } },
+                                ],
+                            },
+                        },
+                    },
+                  ]
                 writeConcern: { w: majority }
           - commandStartedEvent:
               databaseName: *database0Name
               command:
                 findAndModify: *collection0Name
                 query: { _id: *local_key_id }
-                update: [{ $set: { keyAltNames: { $cond: [{ $eq: [$keyAltNames, [local_key]] }, $$REMOVE, { $filter: { input: $keyAltNames, cond: { $ne: [$$this, local_key] } } }] } } }]
+                update:
+                  [
+                    {
+                      $set:
+                        {
+                          keyAltNames:
+                            {
+                              $cond:
+                                [
+                                  { $eq: [$keyAltNames, [local_key]] },
+                                  $$REMOVE,
+                                  { $filter: { input: $keyAltNames, cond: { $ne: [$$this, local_key] } } },
+                                ],
+                            },
+                        },
+                    },
+                  ]

@@ -1,0 +1,78 @@
+description: fle2v2-EncryptedFieldsMap-defaults
+schemaVersion: "1.25"
+runOnRequirements:
+  - minServerVersion: "7.0.0"
+    # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topologies: ["replicaset", "sharded", "load-balanced"]
+    csfle:
+      minLibmongocryptVersion: "1.15.1"
+createEntities:
+  - client:
+      id: "client0"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+        encryptedFieldsMap: { "default.default": { "fields": [] } }
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db"
+      client: "client0"
+      databaseName: default
+  - collection:
+      id: "coll"
+      database: "db"
+      collectionName: default
+initialData:
+  - databaseName: default
+    collectionName: default
+    documents: []
+tests:
+  - description: "default state collections are applied to encryptionInformation"
+    operations:
+      - name: insertOne
+        arguments:
+          document:
+            &doc0 {
+              _id: 1,
+              foo:
+                {
+                  "$binary":
+                    {
+                      "base64": "BYkAAAAFZAAgAAAAAE8KGPgq7h3n9nH5lfHcia8wtOTLwGkZNLBesb6PULqbBXMAIAAAAACq0558QyD3c3jkR5k0Zc9UpQK8ByhXhtn2d1xVQnuJ3AVjACAAAAAA1003zUWGwD4zVZ0KeihnZOthS3V6CEHUfnJZcIYHefISY20AAAAAAAAAAAAA",
+                      "subType": "06",
+                    },
+                },
+            }
+        object: "coll"
+    outcome:
+      - documents:
+          - *doc0
+        collectionName: &collection_name "default"
+        databaseName: &database_name "default"
+    expectEvents:
+      - client: "client0"
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - *doc0
+                encryptionInformation:
+                  {
+                    "type": { "$numberInt": "1" },
+                    "schema":
+                      {
+                        "default.default":
+                          {
+                            "escCollection": "enxcol_.default.esc",
+                            "ecocCollection": "enxcol_.default.ecoc",
+                            "fields": [],
+                          },
+                      },
+                  }
+                ordered: true
+              commandName: insert

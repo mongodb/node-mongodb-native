@@ -1,0 +1,188 @@
+{
+  "description": "accessToken-gcp",
+  "schemaVersion": "1.28",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.10",
+      "csfle": {
+        "minLibmongocryptVersion": "1.6.0"
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "gcp": {
+              "accessToken": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client",
+        "databaseName": "db"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll",
+        "database": "db",
+        "collectionName": "coll"
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "gcp": {
+              "accessToken": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "db",
+      "collectionName": "coll",
+      "documents": [],
+      "createOptions": {
+        "validator": {
+          "$jsonSchema": {
+            "properties": {
+              "secret": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "GCP+AAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              }
+            },
+            "bsonType": "object"
+          }
+        }
+      }
+    },
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "GCP+AAAAAAAAAAAAAAAAAA==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "my-key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "CiQAIgLj0WyktnB4dfYHo5SLZ41K4ASQrjJUaSzl5vvVH0G12G0SiQEAjlV8XPlbnHDEDFbdTO4QIe8ER2/172U1ouLazG0ysDtFFIlSvWX5ZnZUrRMmp/R2aJkzLXEt/zf8Mn4Lfm+itnjgo5R9K4pmPNvvPKNZX5C16lrPT+aA+rd+zXFSmlMg3i5jnxvTdLHhg3G7Q/Uv1ZIJskKt95bzLoe0tUVzRWMYXLIEcohnQg==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1552949630483"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1552949630483"
+            }
+          },
+          "status": {
+            "$numberInt": "0"
+          },
+          "masterKey": {
+            "provider": "gcp",
+            "projectId": "devprod-drivers",
+            "location": "global",
+            "keyRing": "key-ring-csfle",
+            "keyName": "key-name-csfle"
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Auto encrypt using access token GCP credentials",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "secret": "string0"
+            }
+          },
+          "object": "coll"
+        }
+      ],
+      "outcome": [
+        {
+          "documents": [
+            {
+              "_id": 1,
+              "secret": {
+                "$binary": {
+                  "base64": "ARgj/gAAAAAAAAAAAAAAAAACwFd+Y5Ojw45GUXNvbcIpN9YkRdoHDHkR4kssdn0tIMKlDQOLFkWFY9X07IRlXsxPD8DcTiKnl6XINK28vhcGlg==",
+                  "subType": "06"
+                }
+              }
+            }
+          ],
+          "collectionName": "coll",
+          "databaseName": "db"
+        }
+      ]
+    },
+    {
+      "description": "Explicit encrypt using access token GCP credentials",
+      "operations": [
+        {
+          "name": "encrypt",
+          "object": "clientEncryption",
+          "arguments": {
+            "value": "string0",
+            "opts": {
+              "keyAltName": "my-key",
+              "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+            }
+          },
+          "expectResult": {
+            "$binary": {
+              "base64": "ARgj/gAAAAAAAAAAAAAAAAACwFd+Y5Ojw45GUXNvbcIpN9YkRdoHDHkR4kssdn0tIMKlDQOLFkWFY9X07IRlXsxPD8DcTiKnl6XINK28vhcGlg==",
+              "subType": "06"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

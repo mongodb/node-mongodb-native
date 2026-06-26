@@ -1,0 +1,127 @@
+{
+  "description": "fle2v2-CreateCollection-OldServer",
+  "schemaVersion": "1.25",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "6.0.0",
+      "maxServerVersion": "6.3.99",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ],
+      "csfle": {
+        "minLibmongocryptVersion": "1.15.1"
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            }
+          },
+          "encryptedFieldsMap": {
+            "default.encryptedCollection": {
+              "fields": [
+                {
+                  "path": "firstName",
+                  "bsonType": "string",
+                  "keyId": {
+                    "$binary": {
+                      "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                      "subType": "04"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll",
+        "database": "db",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "driver returns an error if creating a QEv2 collection on unsupported server",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          },
+          "expectError": {
+            "errorContains": "Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption."
+          }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "default",
+            "collectionName": "enxcol_.encryptedCollection.esc"
+          }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "default",
+            "collectionName": "enxcol_.encryptedCollection.ecc"
+          }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "default",
+            "collectionName": "enxcol_.encryptedCollection.ecoc"
+          }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "default",
+            "collectionName": "encryptedCollection"
+          }
+        }
+      ]
+    }
+  ]
+}

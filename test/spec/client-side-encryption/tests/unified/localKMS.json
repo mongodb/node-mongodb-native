@@ -1,0 +1,261 @@
+{
+  "description": "localKMS",
+  "schemaVersion": "1.25",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.10",
+      "csfle": {
+        "minLibmongocryptVersion": "1.15.1"
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            },
+            "local": {
+              "key": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk"
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll",
+        "database": "db",
+        "collectionName": "default"
+      }
+    },
+    {
+      "client": {
+        "id": "client_unencrypted"
+      }
+    },
+    {
+      "database": {
+        "id": "db_unencrypted",
+        "client": "client_unencrypted",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll_unencrypted",
+        "database": "db_unencrypted",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "default",
+      "collectionName": "default",
+      "documents": [],
+      "createOptions": {
+        "validator": {
+          "$jsonSchema": {
+            "properties": {
+              "encrypted_string": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+                }
+              },
+              "random": {
+                "encrypt": {
+                  "keyId": [
+                    {
+                      "$binary": {
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                        "subType": "04"
+                      }
+                    }
+                  ],
+                  "bsonType": "string",
+                  "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
+                }
+              }
+            },
+            "bsonType": "object"
+          }
+        }
+      }
+    },
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+              "subType": "04"
+            }
+          },
+          "keyMaterial": {
+            "$binary": {
+              "base64": "Ce9HSz/HKKGkIt4uyy+jDuKGA+rLC2cycykMo6vc8jXxqa1UVDYHWq1r+vZKbnnSRBfB981akzRKZCFpC05CTyFqDhXv6OnMjpG97OZEREGIsHEYiJkBW0jJJvfLLgeLsEpBzsro9FztGGXASxyxFRZFhXvHxyiLOKrdWfs7X1O/iK3pEoHMx6uSNSfUOgbebLfIqW7TO++iQS5g1xovXA==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1552949630483"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1552949630483"
+            }
+          },
+          "status": {
+            "$numberInt": "0"
+          },
+          "masterKey": {
+            "provider": "local"
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Insert a document with auto encryption using local KMS provider",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string": "string0",
+              "random": "abc"
+            }
+          },
+          "object": "coll"
+        },
+        {
+          "name": "find",
+          "object": "coll_unencrypted",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "encrypted_string": {
+                "$binary": {
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAACV/+zJmpqMU47yxS/xIVAviGi7wHDuFwaULAixEAoIh0xHz73UYOM3D8D44gcJn67EROjbz4ITpYzzlCJovDL0Q==",
+                  "subType": "06"
+                }
+              },
+              "random": {
+                "$$type": "binData"
+              }
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1,
+                  "filter": {
+                    "name": "default"
+                  }
+                },
+                "commandName": "listCollections"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "datakeys",
+                  "filter": {
+                    "$or": [
+                      {
+                        "_id": {
+                          "$in": [
+                            {
+                              "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                                "subType": "04"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "keyAltNames": {
+                          "$in": []
+                        }
+                      }
+                    ]
+                  },
+                  "$db": "keyvault"
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "default",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encrypted_string": {
+                        "$binary": {
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAACV/+zJmpqMU47yxS/xIVAviGi7wHDuFwaULAixEAoIh0xHz73UYOM3D8D44gcJn67EROjbz4ITpYzzlCJovDL0Q==",
+                          "subType": "06"
+                        }
+                      },
+                      "random": {
+                        "$$type": "binData"
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

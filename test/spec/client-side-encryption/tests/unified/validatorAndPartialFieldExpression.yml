@@ -1,0 +1,200 @@
+description: validatorAndPartialFieldExpression
+schemaVersion: "1.25"
+runOnRequirements:
+  # Require server version 6.0.0 to get behavior added in SERVER-64911.
+  - minServerVersion: "6.0.0"
+
+    csfle:
+      minLibmongocryptVersion: "1.15.1"
+createEntities:
+  - client:
+      id: "client0"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+        schemaMap:
+          "default.encryptedCollection":
+            {
+              "properties":
+                {
+                  "encrypted_w_altname":
+                    {
+                      "encrypt":
+                        {
+                          "keyId": "/altname",
+                          "bsonType": "string",
+                          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+                        },
+                    },
+                  "encrypted_string":
+                    {
+                      "encrypt":
+                        {
+                          "keyId": ["$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" }],
+                          "bsonType": "string",
+                          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+                        },
+                    },
+                  "random":
+                    {
+                      "encrypt":
+                        {
+                          "keyId": ["$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" }],
+                          "bsonType": "string",
+                          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+                        },
+                    },
+                  "encrypted_string_equivalent":
+                    {
+                      "encrypt":
+                        {
+                          "keyId": ["$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" }],
+                          "bsonType": "string",
+                          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+                        },
+                    },
+                },
+              "bsonType": "object",
+            }
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db"
+      client: "client0"
+      databaseName: default
+  - collection:
+      id: "coll"
+      database: "db"
+      collectionName: default
+initialData:
+  - databaseName: default
+    collectionName: default
+    documents: []
+tests:
+  - description: "create with a validator on an unencrypted field is OK"
+    operations:
+      # Drop to remove a collection that may exist from previous test runs.
+      - name: dropCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+          validator:
+            unencrypted_string: "foo"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          databaseName: &database_name "default"
+          collectionName: "encryptedCollection"
+  - description: "create with a validator on an encrypted field is an error"
+    operations:
+      # Drop to remove a collection that may exist from previous test runs.
+      - name: dropCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+          validator:
+            encrypted_string: "foo"
+        expectError:
+          errorContains: "Comparison to encrypted fields not supported"
+  - description: "collMod with a validator on an unencrypted field is OK"
+    operations:
+      # Drop to remove a collection that may exist from previous test runs.
+      - name: dropCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: runCommand
+        object: "db"
+        arguments:
+          commandName: collMod
+          command:
+            collMod: "encryptedCollection"
+            validator:
+              unencrypted_string: "foo"
+  - description: "collMod with a validator on an encrypted field is an error"
+    operations:
+      # Drop to remove a collection that may exist from previous test runs.
+      - name: dropCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: runCommand
+        object: "db"
+        arguments:
+          commandName: collMod
+          command:
+            collMod: "encryptedCollection"
+            validator:
+              encrypted_string: "foo"
+        expectError:
+          errorContains: "Comparison to encrypted fields not supported"
+  - description: "createIndexes with a partialFilterExpression on an unencrypted field is OK"
+    operations:
+      # Drop to remove a collection that may exist from previous test runs.
+      - name: dropCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: runCommand
+        object: "db"
+        arguments:
+          commandName: createIndexes
+          command:
+            createIndexes: "encryptedCollection"
+            indexes:
+              - name: "name"
+                key: { name: 1 }
+                partialFilterExpression:
+                  unencrypted_string: "foo"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          databaseName: *database_name
+          collectionName: "encryptedCollection"
+          indexName: name
+  - description: "createIndexes with a partialFilterExpression on an encrypted field is an error"
+    operations:
+      # Drop to remove a collection that may exist from previous test runs.
+      - name: dropCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: "db"
+        arguments:
+          collection: "encryptedCollection"
+      - name: runCommand
+        object: "db"
+        arguments:
+          commandName: createIndexes
+          command:
+            createIndexes: "encryptedCollection"
+            indexes:
+              - name: "name"
+                key: { name: 1 }
+                partialFilterExpression:
+                  encrypted_string: "foo"
+        expectError:
+          errorContains: "Comparison to encrypted fields not supported"

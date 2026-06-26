@@ -1,0 +1,304 @@
+{
+  "description": "fle2v2-validatorAndPartialFieldExpression",
+  "schemaVersion": "1.25",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "7.0.0",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ],
+      "csfle": {
+        "minLibmongocryptVersion": "1.15.1"
+      }
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "autoEncryptOpts": {
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "local": {
+              "key": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk"
+            }
+          },
+          "encryptedFieldsMap": {
+            "default.encryptedCollection": {
+              "fields": [
+                {
+                  "keyId": {
+                    "$binary": {
+                      "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                      "subType": "04"
+                    }
+                  },
+                  "path": "encryptedIndexed",
+                  "bsonType": "string",
+                  "queries": {
+                    "queryType": "equality",
+                    "contention": {
+                      "$numberLong": "0"
+                    }
+                  }
+                },
+                {
+                  "keyId": {
+                    "$binary": {
+                      "base64": "q83vqxI0mHYSNBI0VniQEg==",
+                      "subType": "04"
+                    }
+                  },
+                  "path": "encryptedUnindexed",
+                  "bsonType": "string"
+                }
+              ]
+            }
+          }
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client0",
+        "databaseName": "default"
+      }
+    },
+    {
+      "collection": {
+        "id": "coll",
+        "database": "db",
+        "collectionName": "default"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "default",
+      "collectionName": "default",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "create with a validator on an unencrypted field is OK",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection",
+            "validator": {
+              "unencrypted_string": "foo"
+            }
+          }
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "default",
+            "collectionName": "encryptedCollection"
+          }
+        }
+      ]
+    },
+    {
+      "description": "create with a validator on an encrypted field is an error",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection",
+            "validator": {
+              "encryptedIndexed": "foo"
+            }
+          },
+          "expectError": {
+            "errorContains": "Comparison to encrypted fields not supported"
+          }
+        }
+      ]
+    },
+    {
+      "description": "collMod with a validator on an unencrypted field is OK",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "encryptedCollection",
+              "validator": {
+                "unencrypted_string": "foo"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "collMod with a validator on an encrypted field is an error",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "encryptedCollection",
+              "validator": {
+                "encryptedIndexed": "foo"
+              }
+            }
+          },
+          "expectError": {
+            "errorContains": "Comparison to encrypted fields not supported"
+          }
+        }
+      ]
+    },
+    {
+      "description": "createIndexes with a partialFilterExpression on an unencrypted field is OK",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "createIndexes",
+            "command": {
+              "createIndexes": "encryptedCollection",
+              "indexes": [
+                {
+                  "name": "name",
+                  "key": {
+                    "name": 1
+                  },
+                  "partialFilterExpression": {
+                    "unencrypted_string": "foo"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "assertIndexExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "default",
+            "collectionName": "encryptedCollection",
+            "indexName": "name"
+          }
+        }
+      ]
+    },
+    {
+      "description": "createIndexes with a partialFilterExpression on an encrypted field is an error",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "db",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "createIndexes",
+            "command": {
+              "createIndexes": "encryptedCollection",
+              "indexes": [
+                {
+                  "name": "name",
+                  "key": {
+                    "name": 1
+                  },
+                  "partialFilterExpression": {
+                    "encryptedIndexed": "foo"
+                  }
+                }
+              ]
+            }
+          },
+          "expectError": {
+            "errorContains": "Comparison to encrypted fields not supported"
+          }
+        }
+      ]
+    }
+  ]
+}

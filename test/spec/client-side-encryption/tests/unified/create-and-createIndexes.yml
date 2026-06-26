@@ -1,0 +1,69 @@
+description: create-and-createIndexes
+schemaVersion: "1.25"
+runOnRequirements:
+  - minServerVersion: "4.1.10"
+    csfle:
+      minLibmongocryptVersion: "1.15.1"
+createEntities:
+  - client:
+      id: "client0"
+      autoEncryptOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local:
+            key: Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: "db"
+      client: "client0"
+      databaseName: default
+  - collection:
+      id: "coll"
+      database: "db"
+      collectionName: unencryptedCollection
+initialData:
+  - databaseName: default
+    collectionName: unencryptedCollection
+    documents: []
+tests:
+  - description: "create is OK"
+    operations:
+      # Drop to remove a collection that may exist from previous test runs.
+      - name: dropCollection
+        object: "db"
+        arguments:
+          collection: "unencryptedCollection"
+      - name: createCollection
+        object: "db"
+        arguments:
+          collection: "unencryptedCollection"
+          validator:
+            unencrypted_string: "foo"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          databaseName: &database_name "default"
+          collectionName: "unencryptedCollection"
+  - description: "createIndexes is OK"
+    operations:
+      # Drop to remove a collection that may exist from previous test runs.
+      - name: dropCollection
+        object: "db"
+        arguments:
+          collection: "unencryptedCollection"
+      - name: createCollection
+        object: "db"
+        arguments:
+          collection: "unencryptedCollection"
+      - name: createIndex
+        object: "coll"
+        arguments:
+          keys: { x: 1 }
+          name: "name"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          databaseName: *database_name
+          collectionName: "unencryptedCollection"
+          indexName: name
