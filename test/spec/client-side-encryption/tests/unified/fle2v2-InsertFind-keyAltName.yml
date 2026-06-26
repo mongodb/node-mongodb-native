@@ -236,7 +236,7 @@ tests:
                         "keyId": { "$binary": { "base64": "EjRWeBI0mHYSNBI0VniQEg==", "subType": "04" } }
                       }
                     ]
-                }
+                  }
               commandName: create
           # Index on __safeContents__ is then created.
           - commandStartedEvent:
