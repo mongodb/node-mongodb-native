@@ -1002,6 +1002,8 @@ describe('CSOT driver tests', metadata, () => {
             .map(x => x.command);
           expect(aggregates).to.have.lengthOf(1);
 
+          const resumeToken = cs.resumeToken;
+
           await once(cs, 'resumeTokenChanged');
 
           aggregates = commandsStarted
@@ -1012,7 +1014,7 @@ describe('CSOT driver tests', metadata, () => {
 
           expect(aggregates[0].pipeline).to.deep.equal([{ $changeStream: {} }]);
           expect(aggregates[1].pipeline).to.deep.equal([
-            { $changeStream: { resumeAfter: cs.resumeToken } }
+            { $changeStream: { resumeAfter: resumeToken } }
           ]);
         });
       });
