@@ -7,6 +7,7 @@ import * as semver from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
+import { getEncryptExtraOptions } from '../../tools/utils';
 
 // Cases 1-4 GA: GA prefix/suffix requires server 9.0+ (SERVER-123416) and libmongocrypt 1.19.0+ (MONGOCRYPT-870).
 const metadataGA: MongoDBMetadataUI = {
@@ -147,7 +148,8 @@ describe('27. String Explicit Encryption', function () {
       {
         autoEncryption: {
           keyVaultNamespace: 'keyvault.datakeys',
-          kmsProviders: { local: getCSFLEKMSProviders().local }
+          kmsProviders: { local: getCSFLEKMSProviders().local },
+          extraOptions: getEncryptExtraOptions()
         }
       }
     );
@@ -482,7 +484,11 @@ describe('27. String Explicit Encryption', function () {
       const byPrefix = {
         $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBing } }
       };
-      const { _id: _id1, __safeContent__: _s1, ...byPrefixResult } = await explicitEncryptedClient
+      const {
+        _id: _id1,
+        __safeContent__: _s1,
+        ...byPrefixResult
+      } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix-ci-di')
         .findOne(byPrefix);
@@ -503,7 +509,11 @@ describe('27. String Explicit Encryption', function () {
       const bySuffix = {
         $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedLin } }
       };
-      const { _id: _id2, __safeContent__: _s2, ...bySuffixResult } = await explicitEncryptedClient
+      const {
+        _id: _id2,
+        __safeContent__: _s2,
+        ...bySuffixResult
+      } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix-ci-di')
         .findOne(bySuffix);
@@ -535,7 +545,11 @@ describe('27. String Explicit Encryption', function () {
       const byPrefix = {
         $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedCafe } }
       };
-      const { _id: _id1, __safeContent__: _s1, ...byPrefixResult } = await explicitEncryptedClient
+      const {
+        _id: _id1,
+        __safeContent__: _s1,
+        ...byPrefixResult
+      } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix-ci-di')
         .findOne(byPrefix);
@@ -556,7 +570,11 @@ describe('27. String Explicit Encryption', function () {
       const bySuffix = {
         $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedBaz } }
       };
-      const { _id: _id2, __safeContent__: _s2, ...bySuffixResult } = await explicitEncryptedClient
+      const {
+        _id: _id2,
+        __safeContent__: _s2,
+        ...bySuffixResult
+      } = await explicitEncryptedClient
         .db('db')
         .collection<{ encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix-ci-di')
         .findOne(bySuffix);
