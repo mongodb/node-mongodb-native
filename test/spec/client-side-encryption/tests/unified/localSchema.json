@@ -27,7 +27,7 @@
                     "keyId": [
                       {
                         "$binary": {
-                          "base64": "OyQRAeK7QlWMr0E2xWapYg==",
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
                           "subType": "04"
                         }
                       }
@@ -41,7 +41,7 @@
                     "keyId": [
                       {
                         "$binary": {
-                          "base64": "OyQRAeK7QlWMr0E2xWapYg==",
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
                           "subType": "04"
                         }
                       }
@@ -55,7 +55,7 @@
                     "keyId": [
                       {
                         "$binary": {
-                          "base64": "OyQRAeK7QlWMr0E2xWapYg==",
+                          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
                           "subType": "04"
                         }
                       }
@@ -76,6 +76,9 @@
               },
               "secretAccessKey": {
                 "$$placeholder": 1
+              },
+              "sessionToken": {
+                "$$placeholder": 1
               }
             }
           }
@@ -89,7 +92,6 @@
       "client": {
         "id": "client1",
         "autoEncryptOpts": {
-          "keyVaultNamespace": "keyvault.datakeys",
           "schemaMap": {
             "default.default": {
               "properties": {
@@ -103,12 +105,16 @@
               ]
             }
           },
+          "keyVaultNamespace": "keyvault.datakeys",
           "kmsProviders": {
             "aws": {
               "accessKeyId": {
                 "$$placeholder": 1
               },
               "secretAccessKey": {
+                "$$placeholder": 1
+              },
+              "sessionToken": {
                 "$$placeholder": 1
               }
             }
@@ -157,7 +163,7 @@
           "status": 1,
           "_id": {
             "$binary": {
-              "base64": "OyQRAeK7QlWMr0E2xWapYg==",
+              "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
               "subType": "04"
             }
           },
@@ -242,7 +248,7 @@
                           "$in": [
                             {
                               "$binary": {
-                                "base64": "OyQRAeK7QlWMr0E2xWapYg==",
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
                                 "subType": "04"
                               }
                             }
@@ -272,7 +278,7 @@
                       "_id": 1,
                       "encrypted_string": {
                         "$binary": {
-                          "base64": "ATskEQHiu0JVjK9BNsVmqWIClDjVEWlpmVRN76InSQuFW2piVbYFkh0QhZCKyx9DdvFBUG+FWluh0kXyhdq3b2Vt/nqNWjXn2y0+JPhrc4W+wQ==",
+                          "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
                           "subType": "06"
                         }
                       }
@@ -305,7 +311,7 @@
               "_id": 1,
               "encrypted_string": {
                 "$binary": {
-                  "base64": "ATskEQHiu0JVjK9BNsVmqWIClDjVEWlpmVRN76InSQuFW2piVbYFkh0QhZCKyx9DdvFBUG+FWluh0kXyhdq3b2Vt/nqNWjXn2y0+JPhrc4W+wQ==",
+                  "base64": "AQAAAAAAAAAAAAAAAAAAAAACwj+3zkv2VM+aTfk60RqhXq6a/77WlLwu/BxXFkL7EppGsju/m8f0x5kBDD3EZTtGALGXlym5jnpZAoSIkswHoA==",
                   "subType": "06"
                 }
               }

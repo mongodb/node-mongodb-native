@@ -12,17 +12,10 @@
       "client": {
         "id": "client0",
         "autoEncryptOpts": {
-          "keyVaultNamespace": "keyvault.datakeys",
           "kmsProviders": {
-            "aws": {
-              "accessKeyId": {
-                "$$placeholder": 1
-              },
-              "secretAccessKey": {
-                "$$placeholder": 1
-              }
-            }
+            "aws": {}
           },
+          "keyVaultNamespace": "keyvault.datakeys",
           "extraOptions": {
             "mongocryptdBypassSpawn": true
           }
