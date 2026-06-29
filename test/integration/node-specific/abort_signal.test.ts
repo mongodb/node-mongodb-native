@@ -504,8 +504,8 @@ describe('AbortSignal support', () => {
             let abortedAt: number;
             client.on('commandStarted', e => {
               if (e.commandName === cursorName) {
-                controller.abort();
                 abortedAt = performance.now();
+                controller.abort();
               }
             });
             let commandFailed = false;
