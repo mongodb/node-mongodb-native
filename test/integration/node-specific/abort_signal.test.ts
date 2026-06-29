@@ -501,7 +501,7 @@ describe('AbortSignal support', () => {
               }
             }
 
-            let abortedAt: number;
+            let abortedAt = 0;
             client.on('commandStarted', e => {
               if (e.commandName === cursorName) {
                 abortedAt = performance.now();
@@ -514,8 +514,8 @@ describe('AbortSignal support', () => {
 
             const result = await willBeResultBlocked;
             const end = performance.now();
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            expect(end - abortedAt!).to.be.lessThan(10); // shouldn't wait for the blocked connection
+            expect(abortedAt, 'commandStarted handler did not fire').to.be.greaterThan(0);
+            expect(end - abortedAt).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
             expect(result).to.be.instanceOf(DOMException);
 
@@ -939,7 +939,7 @@ describe('AbortSignal support', () => {
     });
 
     it(`rejects findOne`, async () => {
-      let abortedAt: number;
+      let abortedAt = 0;
       client.on(
         'commandStarted',
         // Abort a bit after find has started:
@@ -953,8 +953,8 @@ describe('AbortSignal support', () => {
 
       const result = await collection.findOne({}, { signal }).catch(error => error);
       const end = performance.now();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      expect(end - abortedAt!).to.be.lessThan(10); // shouldn't wait for the blocked connection
+      expect(abortedAt, 'commandStarted handler did not fire').to.be.greaterThan(0);
+      expect(end - abortedAt).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
     });
@@ -985,7 +985,7 @@ describe('AbortSignal support', () => {
     });
 
     it(`rejects command`, async () => {
-      let abortedAt: number;
+      let abortedAt = 0;
       client.on(
         'commandStarted',
         // Abort a bit after ping has started:
@@ -999,8 +999,8 @@ describe('AbortSignal support', () => {
 
       const result = await db.command({ ping: 1 }, { signal }).catch(error => error);
       const end = performance.now();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      expect(end - abortedAt!).to.be.lessThan(10); // shouldn't wait for the blocked connection
+      expect(abortedAt, 'commandStarted handler did not fire').to.be.greaterThan(0);
+      expect(end - abortedAt).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
     });
