@@ -1,3 +1,5 @@
+/* https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/tests/README.md#25-test-lookup */
+
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -37,7 +39,7 @@ const newEncryptedClient = ({ configuration }: { configuration: TestConfiguratio
     }
   );
 
-describe('$lookup support', defaultMetadata, function () {
+describe('25. Test $lookup', defaultMetadata, function () {
   before(async function () {
     const mochaTest = { metadata: defaultMetadata };
 

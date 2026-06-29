@@ -1,3 +1,5 @@
+/* https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/tests/README.md#27-string-explicit-encryption */
+
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
