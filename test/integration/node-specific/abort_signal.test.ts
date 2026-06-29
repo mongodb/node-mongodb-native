@@ -514,6 +514,7 @@ describe('AbortSignal support', () => {
 
             const result = await willBeResultBlocked;
             const end = performance.now();
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             expect(end - abortedAt!).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
             expect(result).to.be.instanceOf(DOMException);
@@ -952,6 +953,7 @@ describe('AbortSignal support', () => {
 
       const result = await collection.findOne({}, { signal }).catch(error => error);
       const end = performance.now();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expect(end - abortedAt!).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
@@ -997,6 +999,7 @@ describe('AbortSignal support', () => {
 
       const result = await db.command({ ping: 1 }, { signal }).catch(error => error);
       const end = performance.now();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expect(end - abortedAt!).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
