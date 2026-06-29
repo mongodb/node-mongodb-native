@@ -65,6 +65,15 @@ export async function resolveRuntimeAdapters(options: MongoClientOptions): Promi
  * @internal
  */
 function loadNodeOsAdapter(): Promise<OsAdapter> {
+  if (typeof require === 'function') {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const osModule = require('os') as typeof os;
+      return Promise.resolve(osModule);
+    } catch {
+      // If require fails, we fall back to dynamic import below.
+    }
+  }
   return dynamicImport<typeof os>('os');
 }
 
