@@ -172,190 +172,206 @@ describe('27. String Explicit Encryption', function () {
     ]);
   });
 
-  it('Case 1 (GA): can find a document by prefix', metadataGA, async function () {
-    const encryptedFoo = await clientEncryption.encrypt('foo', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'prefix',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
+  context('Case 1: can find a document by prefix', function () {
+    it('GA', metadataGA, async function () {
+      const encryptedFoo = await clientEncryption.encrypt('foo', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'prefix',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      const filter = {
+        $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedFoo } }
+      };
+      const { __safeContent__, ...result } = await explicitEncryptedClient
+        .db('db')
+        .collection<{
+          _id: number;
+          encryptedText: Binary;
+          __safeContent__: unknown;
+        }>('prefix-suffix')
+        .findOne(filter);
+
+      expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
     });
 
-    const filter = {
-      $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedFoo } }
-    };
-    const { __safeContent__, ...result } = await explicitEncryptedClient
-      .db('db')
-      .collection<{ _id: number; encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix')
-      .findOne(filter);
+    it('preview', metadataPreview, async function () {
+      const encryptedFoo = await clientEncryption.encrypt('foo', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'prefixPreview',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
 
-    expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
+      const filter = {
+        $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedFoo } }
+      };
+      const { __safeContent__, ...result } = await explicitEncryptedClient
+        .db('db')
+        .collection<{
+          _id: number;
+          encryptedText: Binary;
+          __safeContent__: unknown;
+        }>('prefix-suffix-preview')
+        .findOne(filter);
+
+      expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
+    });
   });
 
-  it('Case 1 (preview): can find a document by prefix', metadataPreview, async function () {
-    const encryptedFoo = await clientEncryption.encrypt('foo', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'prefixPreview',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
+  context('Case 2: can find a document by suffix', function () {
+    it('GA', metadataGA, async function () {
+      const encryptedBaz = await clientEncryption.encrypt('baz', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'suffix',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      const filter = {
+        $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedBaz } }
+      };
+      const { __safeContent__, ...result } = await explicitEncryptedClient
+        .db('db')
+        .collection<{
+          _id: number;
+          encryptedText: Binary;
+          __safeContent__: unknown;
+        }>('prefix-suffix')
+        .findOne(filter);
+
+      expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
     });
 
-    const filter = {
-      $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedFoo } }
-    };
-    const { __safeContent__, ...result } = await explicitEncryptedClient
-      .db('db')
-      .collection<{
-        _id: number;
-        encryptedText: Binary;
-        __safeContent__: unknown;
-      }>('prefix-suffix-preview')
-      .findOne(filter);
+    it('preview', metadataPreview, async function () {
+      const encryptedBaz = await clientEncryption.encrypt('baz', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'suffixPreview',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
 
-    expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
+      const filter = {
+        $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedBaz } }
+      };
+      const { __safeContent__, ...result } = await explicitEncryptedClient
+        .db('db')
+        .collection<{
+          _id: number;
+          encryptedText: Binary;
+          __safeContent__: unknown;
+        }>('prefix-suffix-preview')
+        .findOne(filter);
+
+      expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
+    });
   });
 
-  it('Case 2 (GA): can find a document by suffix', metadataGA, async function () {
-    const encryptedBaz = await clientEncryption.encrypt('baz', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'suffix',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
+  context('Case 3: assert no document found by prefix', function () {
+    it('GA', metadataGA, async function () {
+      const encryptedBaz = await clientEncryption.encrypt('baz', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'prefix',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      const filter = {
+        $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBaz } }
+      };
+      expect(await explicitEncryptedClient.db('db').collection('prefix-suffix').findOne(filter)).to
+        .be.null;
     });
 
-    const filter = {
-      $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedBaz } }
-    };
-    const { __safeContent__, ...result } = await explicitEncryptedClient
-      .db('db')
-      .collection<{ _id: number; encryptedText: Binary; __safeContent__: unknown }>('prefix-suffix')
-      .findOne(filter);
+    it('preview', metadataPreview, async function () {
+      const encryptedBaz = await clientEncryption.encrypt('baz', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'prefixPreview',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
 
-    expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
+      const filter = {
+        $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBaz } }
+      };
+      expect(
+        await explicitEncryptedClient.db('db').collection('prefix-suffix-preview').findOne(filter)
+      ).to.be.null;
+    });
   });
 
-  it('Case 2 (preview): can find a document by suffix', metadataPreview, async function () {
-    const encryptedBaz = await clientEncryption.encrypt('baz', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'suffixPreview',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
+  context('Case 4: assert no document found by suffix', function () {
+    it('GA', metadataGA, async function () {
+      const encryptedFoo = await clientEncryption.encrypt('foo', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'suffix',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      const filter = {
+        $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedFoo } }
+      };
+      expect(await explicitEncryptedClient.db('db').collection('prefix-suffix').findOne(filter)).to
+        .be.null;
     });
 
-    const filter = {
-      $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedBaz } }
-    };
-    const { __safeContent__, ...result } = await explicitEncryptedClient
-      .db('db')
-      .collection<{
-        _id: number;
-        encryptedText: Binary;
-        __safeContent__: unknown;
-      }>('prefix-suffix-preview')
-      .findOne(filter);
+    it('preview', metadataPreview, async function () {
+      const encryptedFoo = await clientEncryption.encrypt('foo', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'suffixPreview',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
 
-    expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
-  });
-
-  it('Case 3 (GA): assert no document found by prefix', metadataGA, async function () {
-    const encryptedBaz = await clientEncryption.encrypt('baz', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'prefix',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
+      const filter = {
+        $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedFoo } }
+      };
+      expect(
+        await explicitEncryptedClient.db('db').collection('prefix-suffix-preview').findOne(filter)
+      ).to.be.null;
     });
-
-    const filter = {
-      $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBaz } }
-    };
-    expect(await explicitEncryptedClient.db('db').collection('prefix-suffix').findOne(filter)).to.be
-      .null;
-  });
-
-  it('Case 3 (preview): assert no document found by prefix', metadataPreview, async function () {
-    const encryptedBaz = await clientEncryption.encrypt('baz', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'prefixPreview',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
-    });
-
-    const filter = {
-      $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBaz } }
-    };
-    expect(
-      await explicitEncryptedClient.db('db').collection('prefix-suffix-preview').findOne(filter)
-    ).to.be.null;
-  });
-
-  it('Case 4 (GA): assert no document found by suffix', metadataGA, async function () {
-    const encryptedFoo = await clientEncryption.encrypt('foo', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'suffix',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
-    });
-
-    const filter = {
-      $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedFoo } }
-    };
-    expect(await explicitEncryptedClient.db('db').collection('prefix-suffix').findOne(filter)).to.be
-      .null;
-  });
-
-  it('Case 4 (preview): assert no document found by suffix', metadataPreview, async function () {
-    const encryptedFoo = await clientEncryption.encrypt('foo', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'suffixPreview',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
-    });
-
-    const filter = {
-      $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedFoo } }
-    };
-    expect(
-      await explicitEncryptedClient.db('db').collection('prefix-suffix-preview').findOne(filter)
-    ).to.be.null;
   });
 
   it('Case 5: can find a document by substring', metadataSubstring, async function () {
