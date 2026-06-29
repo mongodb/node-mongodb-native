@@ -10,8 +10,8 @@ import * as semver from 'semver';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
 
-// Cases 1-4 GA: GA prefix/suffix requires server 9.0+ (SERVER-123416) and libmongocrypt 1.19.0+ (MONGOCRYPT-870).
-const metadataGA: MongoDBMetadataUI = {
+// Cases 1-4: prefix/suffix GA requires server 9.0+ (SERVER-123416) and libmongocrypt 1.19.0+ (MONGOCRYPT-870).
+const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
     mongodb: '>=9.0.0',
@@ -254,7 +254,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('GA', metadataGA, async function () {
+    it('GA', metadata, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"foo"` with the following `EncryptOpts`:
       const encryptedFoo = await clientEncryption.encrypt('foo', {
         keyId: keyId1,
@@ -359,7 +359,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('GA', metadataGA, async function () {
+    it('GA', metadata, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"baz"` with the following `EncryptOpts`:
       const encryptedBaz = await clientEncryption.encrypt('baz', {
         keyId: keyId1,
@@ -464,7 +464,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('GA', metadataGA, async function () {
+    it('GA', metadata, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"baz"` with the following `EncryptOpts`:
       const encryptedBaz = await clientEncryption.encrypt('baz', {
         keyId: keyId1,
@@ -554,7 +554,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('GA', metadataGA, async function () {
+    it('GA', metadata, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"foo"` with the following `EncryptOpts`:
       const encryptedFoo = await clientEncryption.encrypt('foo', {
         keyId: keyId1,
@@ -709,7 +709,7 @@ describe('27. String Explicit Encryption', function () {
       .null;
   });
 
-  it('Case 7: assert contentionFactor is required', metadataGA, async function () {
+  it('Case 7: assert contentionFactor is required', metadata, async function () {
     // Use `clientEncryption.encrypt()` to encrypt the string `"foo"` with the following `EncryptOpts`:
     // class EncryptOpts {
     //    keyId : <key1ID>,
