@@ -55,6 +55,7 @@ describe('27. String Explicit Encryption', function () {
   let keyVaultClient: MongoClient;
   let clientEncryption: ClientEncryption;
   let explicitEncryptedClient: MongoClient;
+  let autoEncryptedClient: MongoClient;
 
   beforeEach(async function () {
     utilClient = this.configuration.newClient();
@@ -76,12 +77,18 @@ describe('27. String Explicit Encryption', function () {
 
     // - `db.prefix-suffix` using the `encryptedFields` option set to the contents of
     //   encryptedFields-prefix-suffix.json. This step requires server 9.0.0+.
+    // - `db.prefix-suffix-ci-di` using the `encryptedFields` option set to the contents of
+    //   encryptedFields-prefix-suffix-ci-di.json. This step requires server 9.0.0+.
     // - `db.prefix-suffix-preview` using the `encryptedFields` option set to the contents of
     //   encryptedFields-prefix-suffix-preview.json. This step requires server pre-9.0.0.
     if (isServer9OrAbove) {
       await dropAndCreateCollection(
         'db.prefix-suffix',
         await loadFLEDataFile('encryptedFields-prefix-suffix.json')
+      );
+      await dropAndCreateCollection(
+        'db.prefix-suffix-ci-di',
+        await loadFLEDataFile('encryptedFields-prefix-suffix-ci-di.json')
       );
     } else {
       await dropAndCreateCollection(
@@ -92,9 +99,15 @@ describe('27. String Explicit Encryption', function () {
 
     // - `db.substring` using the `encryptedFields` option set to the contents of
     //   encryptedFields-substring.json
+    // - `db.substring-ci-di` using the `encryptedFields` option set to the contents of
+    //   encryptedFields-substring-ci-di.json
     await dropAndCreateCollection(
       'db.substring',
       await loadFLEDataFile('encryptedFields-substring.json')
+    );
+    await dropAndCreateCollection(
+      'db.substring-ci-di',
+      await loadFLEDataFile('encryptedFields-substring-ci-di.json')
     );
 
     // Load the file key1-document.json as `key1Document`.
@@ -139,6 +152,21 @@ describe('27. String Explicit Encryption', function () {
           keyVaultNamespace: 'keyvault.datakeys',
           kmsProviders: { local: getCSFLEKMSProviders().local },
           bypassQueryAnalysis: true
+        }
+      }
+    );
+
+    // Create a MongoClient named `autoEncryptedClient` with these `AutoEncryptionOpts`:
+    // class AutoEncryptionOpts {
+    //    keyVaultNamespace: "keyvault.datakeys",
+    //    kmsProviders: { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } },
+    // }
+    autoEncryptedClient = this.configuration.newClient(
+      {},
+      {
+        autoEncryption: {
+          keyVaultNamespace: 'keyvault.datakeys',
+          kmsProviders: { local: getCSFLEKMSProviders().local }
         }
       }
     );
@@ -229,6 +257,7 @@ describe('27. String Explicit Encryption', function () {
     await Promise.allSettled([
       utilClient.close(),
       explicitEncryptedClient.close(),
+      autoEncryptedClient.close(),
       keyVaultClient.close()
     ]);
   });
@@ -741,4 +770,302 @@ describe('27. String Explicit Encryption', function () {
 
     expect(error).to.match(/contention factor is required for string algorithm/);
   });
+
+  it(
+    'Case 8: can find an auto-encrypted case-insensitively indexed document by prefix and suffix',
+    metadata,
+    async function () {
+      // Use `autoEncryptedClient` to insert the following document into `db.prefix-suffix-ci-di`
+      // with majority write concern:
+      // { "encryptedText": "BingQiLin" }
+      await autoEncryptedClient
+        .db('db')
+        .collection('prefix-suffix-ci-di')
+        .insertOne({ encryptedText: 'BingQiLin' }, { writeConcern: { w: 'majority' } });
+
+      // Use `clientEncryption.encrypt()` to encrypt the string `"bing"` with the following `EncryptOpts`:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "String",
+      //    queryType: "prefix",
+      //    contentionFactor: 0,
+      //    stringOpts: StringOpts {
+      //       caseSensitive: false,
+      //       diacriticSensitive: false,
+      //       prefix: PrefixOpts {
+      //         strMaxQueryLength: 10,
+      //         strMinQueryLength: 2,
+      //      }
+      //    },
+      // }
+      const encryptedBing = await clientEncryption.encrypt('bing', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'prefix',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: false,
+          diacriticSensitive: false,
+          prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.prefix-suffix-ci-di`
+      // collection with the following filter:
+      // { $expr: { $encStrStartsWith: {input: '$encryptedText', prefix: <encrypted 'bing'>} } }
+      // Assert the following document is returned:
+      // { "encryptedText": "BingQiLin" }
+      const { _id: _id1, __safeContent__: _sc1, ...prefixResult } = await explicitEncryptedClient
+        .db('db')
+        .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
+          'prefix-suffix-ci-di'
+        )
+        .findOne({ $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBing } } });
+      expect(prefixResult).to.deep.equal({ encryptedText: 'BingQiLin' });
+
+      // Use `clientEncryption.encrypt()` to encrypt the string `"lin"` with the following `EncryptOpts`:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "String",
+      //    queryType: "suffix",
+      //    contentionFactor: 0,
+      //    stringOpts: StringOpts {
+      //       caseSensitive: false,
+      //       diacriticSensitive: false,
+      //       suffix: SuffixOpts {
+      //         strMaxQueryLength: 10,
+      //         strMinQueryLength: 2,
+      //      }
+      //    },
+      // }
+      const encryptedLin = await clientEncryption.encrypt('lin', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'suffix',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: false,
+          diacriticSensitive: false,
+          suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.prefix-suffix-ci-di`
+      // collection with the following filter:
+      // { $expr: { $encStrEndsWith: {input: '$encryptedText', suffix: <encrypted 'lin'>} } }
+      // Assert the following document is returned:
+      // { "encryptedText": "BingQiLin" }
+      const { _id: _id2, __safeContent__: _sc2, ...suffixResult } = await explicitEncryptedClient
+        .db('db')
+        .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
+          'prefix-suffix-ci-di'
+        )
+        .findOne({ $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedLin } } });
+      expect(suffixResult).to.deep.equal({ encryptedText: 'BingQiLin' });
+    }
+  );
+
+  it(
+    'Case 9: can find an auto-encrypted diacritic-insensitively indexed document by prefix and suffix',
+    metadata,
+    async function () {
+      // Use `autoEncryptedClient` to insert the following document into `db.prefix-suffix-ci-di`
+      // with majority write concern:
+      // { "encryptedText": "cafébarbäz" }
+      await autoEncryptedClient
+        .db('db')
+        .collection('prefix-suffix-ci-di')
+        .insertOne({ encryptedText: 'cafébarbäz' }, { writeConcern: { w: 'majority' } });
+
+      // Use `clientEncryption.encrypt()` to encrypt the string `"cafe"` with the following `EncryptOpts`:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "String",
+      //    queryType: "prefix",
+      //    contentionFactor: 0,
+      //    stringOpts: StringOpts {
+      //       caseSensitive: false,
+      //       diacriticSensitive: false,
+      //       prefix: PrefixOpts {
+      //         strMaxQueryLength: 10,
+      //         strMinQueryLength: 2,
+      //      }
+      //    },
+      // }
+      const encryptedCafe = await clientEncryption.encrypt('cafe', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'prefix',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: false,
+          diacriticSensitive: false,
+          prefix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.prefix-suffix-ci-di`
+      // collection with the following filter:
+      // { $expr: { $encStrStartsWith: {input: '$encryptedText', prefix: <encrypted 'cafe'>} } }
+      // Assert the following document is returned:
+      // { "encryptedText": "cafébarbäz" }
+      const { _id: _id1, __safeContent__: _sc1, ...prefixResult } = await explicitEncryptedClient
+        .db('db')
+        .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
+          'prefix-suffix-ci-di'
+        )
+        .findOne({ $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedCafe } } });
+      expect(prefixResult).to.deep.equal({ encryptedText: 'cafébarbäz' });
+
+      // Use `clientEncryption.encrypt()` to encrypt the string `"baz"` with the following `EncryptOpts`:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "String",
+      //    queryType: "suffix",
+      //    contentionFactor: 0,
+      //    stringOpts: StringOpts {
+      //       caseSensitive: false,
+      //       diacriticSensitive: false,
+      //       suffix: SuffixOpts {
+      //         strMaxQueryLength: 10,
+      //         strMinQueryLength: 2,
+      //      }
+      //    },
+      // }
+      const encryptedBaz = await clientEncryption.encrypt('baz', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'suffix',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: false,
+          diacriticSensitive: false,
+          suffix: { strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.prefix-suffix-ci-di`
+      // collection with the following filter:
+      // { $expr: { $encStrEndsWith: {input: '$encryptedText', suffix: <encrypted 'baz'>} } }
+      // Assert the following document is returned:
+      // { "encryptedText": "cafébarbäz" }
+      const { _id: _id2, __safeContent__: _sc2, ...suffixResult } = await explicitEncryptedClient
+        .db('db')
+        .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
+          'prefix-suffix-ci-di'
+        )
+        .findOne({ $expr: { $encStrEndsWith: { input: '$encryptedText', suffix: encryptedBaz } } });
+      expect(suffixResult).to.deep.equal({ encryptedText: 'cafébarbäz' });
+    }
+  );
+
+  it(
+    'Case 10: can find an auto-encrypted case-insensitively indexed document by substring',
+    metadataSubstring,
+    async function () {
+      // Use `autoEncryptedClient` to insert the following document into `db.substring-ci-di`
+      // with majority write concern:
+      // { "encryptedText": "FooBarBaz" }
+      await autoEncryptedClient
+        .db('db')
+        .collection('substring-ci-di')
+        .insertOne({ encryptedText: 'FooBarBaz' }, { writeConcern: { w: 'majority' } });
+
+      // Use `clientEncryption.encrypt()` to encrypt the string `"bar"` with the following `EncryptOpts`:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "String",
+      //    queryType: "substringPreview",
+      //    contentionFactor: 0,
+      //    stringOpts: StringOpts {
+      //       caseSensitive: false,
+      //       diacriticSensitive: false,
+      //       substring: SubstringOpts {
+      //        strMaxLength: 10,
+      //        strMaxQueryLength: 10,
+      //        strMinQueryLength: 2,
+      //       }
+      //    },
+      // }
+      const encryptedBar = await clientEncryption.encrypt('bar', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'substringPreview',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: false,
+          diacriticSensitive: false,
+          substring: { strMaxLength: 10, strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.substring-ci-di`
+      // collection with the following filter:
+      // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'bar'>} } }
+      // Assert the following document is returned:
+      // { "encryptedText": "FooBarBaz" }
+      const { _id, __safeContent__, ...result } = await explicitEncryptedClient
+        .db('db')
+        .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
+          'substring-ci-di'
+        )
+        .findOne({ $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedBar } } });
+      expect(result).to.deep.equal({ encryptedText: 'FooBarBaz' });
+    }
+  );
+
+  it(
+    'Case 11: can find an auto-encrypted diacritic-insensitively indexed document by substring',
+    metadataSubstring,
+    async function () {
+      // Use `autoEncryptedClient` to insert the following document into `db.substring-ci-di`
+      // with majority write concern:
+      // { "encryptedText": "foocafébaz" }
+      await autoEncryptedClient
+        .db('db')
+        .collection('substring-ci-di')
+        .insertOne({ encryptedText: 'foocafébaz' }, { writeConcern: { w: 'majority' } });
+
+      // Use `clientEncryption.encrypt()` to encrypt the string `"cafe"` with the following `EncryptOpts`:
+      // class EncryptOpts {
+      //    keyId : <key1ID>,
+      //    algorithm: "String",
+      //    queryType: "substringPreview",
+      //    contentionFactor: 0,
+      //    stringOpts: StringOpts {
+      //       caseSensitive: false,
+      //       diacriticSensitive: false,
+      //       substring: SubstringOpts {
+      //        strMaxLength: 10,
+      //        strMaxQueryLength: 10,
+      //        strMinQueryLength: 2,
+      //       }
+      //    },
+      // }
+      const encryptedCafe = await clientEncryption.encrypt('cafe', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'substringPreview',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: false,
+          diacriticSensitive: false,
+          substring: { strMaxLength: 10, strMaxQueryLength: 10, strMinQueryLength: 2 }
+        }
+      });
+
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.substring-ci-di`
+      // collection with the following filter:
+      // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'cafe'>} } }
+      // Assert the following document is returned:
+      // { "encryptedText": "foocafébaz" }
+      const { _id, __safeContent__, ...result } = await explicitEncryptedClient
+        .db('db')
+        .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
+          'substring-ci-di'
+        )
+        .findOne({ $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedCafe } } });
+      expect(result).to.deep.equal({ encryptedText: 'foocafébaz' });
+    }
+  );
 });
