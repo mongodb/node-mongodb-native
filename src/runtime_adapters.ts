@@ -66,12 +66,14 @@ export async function resolveRuntimeAdapters(options: MongoClientOptions): Promi
  */
 function loadNodeOsAdapter(): Promise<OsAdapter> {
   if (typeof require === 'function') {
+    // Some environments (plain Node, CJS bundling, native ESM), have a `require` function available, we try that first.
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const osModule = require('os') as typeof os;
       return Promise.resolve(osModule);
     } catch {
       // If require fails, we fall back to dynamic import below.
+      // This can happen in ESM bundles where `require` may be available, but will always throw.
     }
   }
   return dynamicImport<typeof os>('os');
