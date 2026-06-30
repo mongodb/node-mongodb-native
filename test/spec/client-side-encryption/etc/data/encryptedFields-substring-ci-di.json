@@ -21,9 +21,7 @@
           "strMaxQueryLength": {
             "$numberInt": "10"
           },
-          "contention": {
-            "$numberLong": "0"
-          },
+          "contention": 0,
           "caseSensitive": false,
           "diacriticSensitive": false
         }
