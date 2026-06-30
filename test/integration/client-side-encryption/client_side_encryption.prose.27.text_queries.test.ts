@@ -9,6 +9,7 @@ import * as semver from 'semver';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
+import { getEncryptExtraOptions } from '../../tools/utils';
 
 // Cases 1-4: prefix/suffix GA requires server 9.0+ (SERVER-123416) and libmongocrypt 1.19.0+ (MONGOCRYPT-870).
 const metadata: MongoDBMetadataUI = {
@@ -166,7 +167,8 @@ describe('27. String Explicit Encryption', function () {
       {
         autoEncryption: {
           keyVaultNamespace: 'keyvault.datakeys',
-          kmsProviders: { local: getCSFLEKMSProviders().local }
+          kmsProviders: { local: getCSFLEKMSProviders().local },
+          extraOptions: getEncryptExtraOptions()
         }
       }
     );
@@ -815,12 +817,18 @@ describe('27. String Explicit Encryption', function () {
       // { $expr: { $encStrStartsWith: {input: '$encryptedText', prefix: <encrypted 'bing'>} } }
       // Assert the following document is returned:
       // { "encryptedText": "BingQiLin" }
-      const { _id: _id1, __safeContent__: _sc1, ...prefixResult } = await explicitEncryptedClient
+      const {
+        _id: _id1,
+        __safeContent__: _sc1,
+        ...prefixResult
+      } = await explicitEncryptedClient
         .db('db')
         .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
           'prefix-suffix-ci-di'
         )
-        .findOne({ $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBing } } });
+        .findOne({
+          $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedBing } }
+        });
       expect(prefixResult).to.deep.equal({ encryptedText: 'BingQiLin' });
 
       // Use `clientEncryption.encrypt()` to encrypt the string `"lin"` with the following `EncryptOpts`:
@@ -855,7 +863,11 @@ describe('27. String Explicit Encryption', function () {
       // { $expr: { $encStrEndsWith: {input: '$encryptedText', suffix: <encrypted 'lin'>} } }
       // Assert the following document is returned:
       // { "encryptedText": "BingQiLin" }
-      const { _id: _id2, __safeContent__: _sc2, ...suffixResult } = await explicitEncryptedClient
+      const {
+        _id: _id2,
+        __safeContent__: _sc2,
+        ...suffixResult
+      } = await explicitEncryptedClient
         .db('db')
         .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
           'prefix-suffix-ci-di'
@@ -909,12 +921,18 @@ describe('27. String Explicit Encryption', function () {
       // { $expr: { $encStrStartsWith: {input: '$encryptedText', prefix: <encrypted 'cafe'>} } }
       // Assert the following document is returned:
       // { "encryptedText": "cafébarbäz" }
-      const { _id: _id1, __safeContent__: _sc1, ...prefixResult } = await explicitEncryptedClient
+      const {
+        _id: _id1,
+        __safeContent__: _sc1,
+        ...prefixResult
+      } = await explicitEncryptedClient
         .db('db')
         .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
           'prefix-suffix-ci-di'
         )
-        .findOne({ $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedCafe } } });
+        .findOne({
+          $expr: { $encStrStartsWith: { input: '$encryptedText', prefix: encryptedCafe } }
+        });
       expect(prefixResult).to.deep.equal({ encryptedText: 'cafébarbäz' });
 
       // Use `clientEncryption.encrypt()` to encrypt the string `"baz"` with the following `EncryptOpts`:
@@ -949,7 +967,11 @@ describe('27. String Explicit Encryption', function () {
       // { $expr: { $encStrEndsWith: {input: '$encryptedText', suffix: <encrypted 'baz'>} } }
       // Assert the following document is returned:
       // { "encryptedText": "cafébarbäz" }
-      const { _id: _id2, __safeContent__: _sc2, ...suffixResult } = await explicitEncryptedClient
+      const {
+        _id: _id2,
+        __safeContent__: _sc2,
+        ...suffixResult
+      } = await explicitEncryptedClient
         .db('db')
         .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
           'prefix-suffix-ci-di'
@@ -1009,7 +1031,9 @@ describe('27. String Explicit Encryption', function () {
         .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
           'substring-ci-di'
         )
-        .findOne({ $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedBar } } });
+        .findOne({
+          $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedBar } }
+        });
       expect(result).to.deep.equal({ encryptedText: 'FooBarBaz' });
     }
   );
@@ -1064,7 +1088,9 @@ describe('27. String Explicit Encryption', function () {
         .collection<{ _id: unknown; encryptedText: Binary; __safeContent__: unknown }>(
           'substring-ci-di'
         )
-        .findOne({ $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedCafe } } });
+        .findOne({
+          $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedCafe } }
+        });
       expect(result).to.deep.equal({ encryptedText: 'foocafébaz' });
     }
   );
