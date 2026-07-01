@@ -6,8 +6,8 @@
 
 import type * as os from 'os';
 
-import { type MongoClientOptions } from './mongo_client';
 import { dynamicImport } from '../shims/runtime_import';
+import { type MongoClientOptions } from './mongo_client';
 
 /**
  * @internal
