@@ -6,6 +6,7 @@
   "files": [
     "lib",
     "src",
+    "shims",
     "etc/prepare.js",
     "mongodb.d.ts",
     "tsconfig.json"

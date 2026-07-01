@@ -28,15 +28,26 @@ describe('bundling the runtime adapters into ESM output', function () {
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2023 }
     });
 
+    // Mirror the published package layout: the compiled module lives in lib/ and requires the
+    // hand-written shim as `../shims/runtime_import`, so reproduce those sibling directories.
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mongodb-esm-bundle-'));
-    fs.writeFileSync(path.join(tmpDir, 'runtime_adapters.js'), compiledCjs);
+    fs.mkdirSync(path.join(tmpDir, 'lib'));
+    fs.mkdirSync(path.join(tmpDir, 'shims'));
+    fs.writeFileSync(path.join(tmpDir, 'lib', 'runtime_adapters.js'), compiledCjs);
+    // runtime_import.js is the hand-written CommonJS shim that resolveRuntimeAdapters imports for
+    // its dynamic import() fallback. It is deliberately NOT compiled (that is the whole point of
+    // NODE-7603), so copy it verbatim into the sibling shims/ dir, exactly as it ships.
+    fs.copyFileSync(
+      path.join(repoRoot, 'shims', 'runtime_import.js'),
+      path.join(tmpDir, 'shims', 'runtime_import.js')
+    );
     esmBundlePath = path.join(tmpDir, 'app.mjs');
 
     await esbuild.build({
       stdin: {
         // No user-provided os adapter, so resolveRuntimeAdapters falls back to loading Node's os.
         contents: `
-          import { resolveRuntimeAdapters } from './runtime_adapters.js';
+          import { resolveRuntimeAdapters } from './lib/runtime_adapters.js';
           const runtime = await resolveRuntimeAdapters({});
           const osAdapter = await runtime.os;
           if (typeof osAdapter.platform !== 'function') {
