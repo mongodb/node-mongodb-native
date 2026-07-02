@@ -13,7 +13,7 @@
  *      are unaffected — mongodb.d.ts is tsc-generated)
  *   7. @__PURE__ tree-shaking annotations added (additive hints for downstream bundlers)
  */
-import { execFileSync, execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -49,26 +49,26 @@ await fs.cp(path.join(rootDir, 'lib'), newDir, {
 // Normalize formatting so the diff shows structure, not prettier-irrelevant layout.
 run('npx', ['prettier', '--log-level', 'warn', '--write', `${gateDir}/**/*.js`]);
 
-// git diff --no-index exits 1 when files differ; capture instead of failing.
-let report = '';
-try {
-  report = execSync(`git diff --no-index --stat "${oldDir}" "${newDir}"`, {
-    cwd: rootDir,
-    encoding: 'utf8'
-  });
-} catch (error) {
-  report = error.stdout ?? '';
+// git diff --no-index exits 1 when files differ; treat only that as success-with-diff and
+// surface every other failure (missing git, OOM, output truncation) instead of masking it —
+// a verification gate must not fail silently.
+function gitDiff(extraArgs) {
+  try {
+    return execFileSync('git', ['diff', '--no-index', ...extraArgs, oldDir, newDir], {
+      cwd: rootDir,
+      encoding: 'utf8',
+      maxBuffer: 256 * 1024 * 1024
+    });
+  } catch (error) {
+    if (error.status === 1 && typeof error.stdout === 'string') {
+      return error.stdout;
+    }
+    throw error;
+  }
 }
-let full = '';
-try {
-  full = execSync(`git diff --no-index "${oldDir}" "${newDir}"`, {
-    cwd: rootDir,
-    encoding: 'utf8',
-    maxBuffer: 256 * 1024 * 1024
-  });
-} catch (error) {
-  full = error.stdout ?? '';
-}
+
+const report = gitDiff(['--stat']);
+const full = gitDiff([]);
 await fs.writeFile(path.join(gateDir, 'report.diff'), full);
 
 // eslint-disable-next-line no-console
