@@ -1,8 +1,9 @@
 /* eslint-disable no-restricted-imports*/
 
-// We squash the restricted import errors here because we are using type-only imports, which
-// do not impact the driver's actual runtime dependencies.
-// We also allow restricted imports in this file, because we expect this file to be the only place actually importing restricted Node APIs.
+// We squash the restricted import errors here: the module-scope imports are type-only, and the
+// one runtime dependency this file takes — the dynamic `import('os')` fallback in
+// resolveRuntimeAdapters — is deliberate: this file is expected to be the only place that loads
+// restricted Node APIs at runtime (NODE-7603).
 
 import type * as os from 'os';
 
@@ -11,8 +12,9 @@ import { type MongoClientOptions } from './mongo_client';
 /**
  * @internal
  *
- * This propery can be set on the global object to allow the driver to require otherwise blocked modules.
- * This is used by our test suite to allow tests to access the `os` module without allowing user code to do so.
+ * Legacy escape hatch for the test sandbox's restricted `require`: the driver no longer sets this
+ * property (the os adapter loads via dynamic `import()` since NODE-7603), but the vm test harness
+ * still checks it. Kept until the sandbox contract is revisited in a follow-up.
  */
 export const ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME = 'allowedDriverRequire';
 

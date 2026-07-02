@@ -6,6 +6,7 @@
  * test/unit/bundling.test.ts.
  */
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -29,6 +30,25 @@ assert.equal(
   typeof runtime.os.platform,
   'function',
   'default os adapter resolves via dynamic import()'
+);
+
+// Drift-proof guard for the NODE-7603 pipeline contract: the shipped bytes must retain the
+// dynamic import('os') and must not contain a downleveled require('os'). The runtime checks
+// above cannot catch a downleveling regression, because real Node always has `require`, so a
+// broken emit still passes them; only the artifact text itself proves the pipeline held.
+const runtimeAdaptersEmit = await readFile(
+  new URL('../lib/runtime_adapters.js', import.meta.url),
+  'utf8'
+);
+assert.match(
+  runtimeAdaptersEmit,
+  /import\(["']os["']\)/,
+  'lib/runtime_adapters.js must preserve the dynamic import("os")'
+);
+assert.doesNotMatch(
+  runtimeAdaptersEmit,
+  /require\(["']os["']\)/,
+  'lib/runtime_adapters.js must not contain a downleveled require("os")'
 );
 
 // eslint-disable-next-line no-console
