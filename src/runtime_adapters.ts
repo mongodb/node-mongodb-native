@@ -47,18 +47,17 @@ export interface Runtime {
 /**
  * @internal
  *
- * Given a MongoClientOptions, this function resolves the set of runtime options, providing Nodejs implementations if
- * not provided by in `options`, and returns a `Runtime`.
+ * Given a MongoClientOptions, this function resolves the set of runtime options, providing Nodejs
+ * implementations if not provided in `options`, and returns a `Runtime`.
+ *
+ * Resolution is asynchronous because the default `os` adapter is loaded via a dynamic `import()`.
+ * Unlike `require`, dynamic import exists in every module system the driver ships into or is
+ * bundled into (CJS, ESM, and bundled ESM output — NODE-7603), and the literal specifier keeps it
+ * statically analyzable for bundlers (NODE-3199). The promise is created during synchronous
+ * options parsing and awaited later by consumers, so the public constructor stays synchronous.
  */
-export function resolveRuntimeAdapters(options: MongoClientOptions): Runtime {
-  (globalThis as any)[ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME] = true;
-  try {
-    const runtime = {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      os: options.runtimeAdapters?.os ?? require('os')
-    };
-    return runtime;
-  } finally {
-    (globalThis as any)[ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME] = false;
-  }
+export async function resolveRuntimeAdapters(options: MongoClientOptions): Promise<Runtime> {
+  return {
+    os: options.runtimeAdapters?.os ?? (await import('os'))
+  };
 }

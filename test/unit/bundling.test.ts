@@ -17,31 +17,33 @@ describe('bundling the runtime adapters into ESM output', function () {
   let tmpDir: string;
   let esmBundlePath: string;
 
-  before('replicate the build pipeline for runtime_adapters and bundle it into ESM', async function () {
-    // NODE-7603: resolveRuntimeAdapters used to call require('os'), which throws in bundled ESM
-    // output (no `require` in module scope). This test replicates what ships in lib/ for this
-    // file — tsc ESM emit (module: es2022, mirroring tsconfig.build.json) followed by esbuild's
-    // ESM->CJS transform (mirroring etc/build-lib.mjs) — then bundles that CJS to ESM the way a
-    // downstream Vite/esbuild user build would, and executes it with no `require` in module scope.
-    const source = fs.readFileSync(path.join(repoRoot, 'src', 'runtime_adapters.ts'), 'utf8');
-    const { outputText: esmIntermediate } = ts.transpileModule(source, {
-      compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2023 }
-    });
-    const { code: compiledCjs } = await esbuild.transform(esmIntermediate, {
-      format: 'cjs',
-      platform: 'node',
-      target: 'node20'
-    });
+  before(
+    'replicate the build pipeline for runtime_adapters and bundle it into ESM',
+    async function () {
+      // NODE-7603: resolveRuntimeAdapters used to call require('os'), which throws in bundled ESM
+      // output (no `require` in module scope). This test replicates what ships in lib/ for this
+      // file — tsc ESM emit (module: es2022, mirroring tsconfig.build.json) followed by esbuild's
+      // ESM->CJS transform (mirroring etc/build-lib.mjs) — then bundles that CJS to ESM the way a
+      // downstream Vite/esbuild user build would, and executes it with no `require` in module scope.
+      const source = fs.readFileSync(path.join(repoRoot, 'src', 'runtime_adapters.ts'), 'utf8');
+      const { outputText: esmIntermediate } = ts.transpileModule(source, {
+        compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2023 }
+      });
+      const { code: compiledCjs } = await esbuild.transform(esmIntermediate, {
+        format: 'cjs',
+        platform: 'node',
+        target: 'node20'
+      });
 
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mongodb-esm-bundle-'));
-    fs.mkdirSync(path.join(tmpDir, 'lib'));
-    fs.writeFileSync(path.join(tmpDir, 'lib', 'runtime_adapters.js'), compiledCjs);
-    esmBundlePath = path.join(tmpDir, 'app.mjs');
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mongodb-esm-bundle-'));
+      fs.mkdirSync(path.join(tmpDir, 'lib'));
+      fs.writeFileSync(path.join(tmpDir, 'lib', 'runtime_adapters.js'), compiledCjs);
+      esmBundlePath = path.join(tmpDir, 'app.mjs');
 
-    await esbuild.build({
-      stdin: {
-        // No user-provided os adapter, so resolveRuntimeAdapters falls back to loading Node's os.
-        contents: `
+      await esbuild.build({
+        stdin: {
+          // No user-provided os adapter, so resolveRuntimeAdapters falls back to loading Node's os.
+          contents: `
           import { resolveRuntimeAdapters } from './lib/runtime_adapters.js';
           const runtime = await resolveRuntimeAdapters({});
           if (typeof runtime.os.platform !== 'function') {
@@ -49,17 +51,18 @@ describe('bundling the runtime adapters into ESM output', function () {
           }
           console.log('resolved os adapter');
         `,
-        resolveDir: tmpDir,
-        loader: 'js'
-      },
-      bundle: true,
-      outfile: esmBundlePath,
-      platform: 'node',
-      format: 'esm',
-      target: 'node20',
-      logLevel: 'silent'
-    });
-  });
+          resolveDir: tmpDir,
+          loader: 'js'
+        },
+        bundle: true,
+        outfile: esmBundlePath,
+        platform: 'node',
+        format: 'esm',
+        target: 'node20',
+        logLevel: 'silent'
+      });
+    }
+  );
 
   after(function () {
     if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true });

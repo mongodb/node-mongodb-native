@@ -146,7 +146,7 @@ export interface ConnectionOptions
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
   /** @internal */
-  runtime: Runtime;
+  runtime: Promise<Runtime>;
 }
 
 /** @public */
