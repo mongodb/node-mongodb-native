@@ -62,6 +62,7 @@ build/Release
 node_modules
 yarn.lock
 lib/
+lib-intermediate/
 *.tgz
 *.d.ts
 # type definition tests

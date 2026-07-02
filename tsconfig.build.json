@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Emit genuine ESM into the intermediate so no dynamic import() is downleveled (NODE-7603).
+    // The intermediate is ESM-shaped but CJS-hosted (it still contains bare require() calls for
+    // optional deps) — it is never executed or published; only etc/build-lib.mjs consumes it.
+    "module": "es2022",
+    "outDir": "lib-intermediate",
+    // Declarations are module-format-agnostic; emit them straight to lib/ so api-extractor and
+    // declaration maps see the same layout as before.
+    "declarationDir": "lib"
+  }
+}
