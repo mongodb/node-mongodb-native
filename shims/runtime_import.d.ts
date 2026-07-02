@@ -5,7 +5,6 @@
  * outside `src/` so the TypeScript build never compiles it, which would downlevel its dynamic
  * `import()` to `require()`.
  *
- * @param specifier - The module specifier to import.
- * @returns A promise that resolves to the imported module namespace.
+ * @returns A promise that resolves to the `os` module namespace.
  */
-export declare function dynamicImport<T>(specifier: string): Promise<T>;
+export declare function importOs(): Promise<typeof import('os')>;

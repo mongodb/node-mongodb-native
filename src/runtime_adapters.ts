@@ -6,7 +6,7 @@
 
 import type * as os from 'os';
 
-import { dynamicImport } from '../shims/runtime_import';
+import { importOs } from '../shims/runtime_import';
 import { type MongoClientOptions } from './mongo_client';
 
 /**
@@ -81,5 +81,5 @@ function loadNodeOsAdapter(): Promise<OsAdapter> {
   // Fall back to a genuine dynamic `import()`. This lives in the hand-written CommonJS shim
   // `../shims/runtime_import`, which is kept out of the TypeScript build so the `import()` is not
   // downleveled to `require()`.
-  return dynamicImport<typeof os>('os');
+  return importOs();
 }
