@@ -81,7 +81,7 @@ function isReadonlyArray<T>(value: any): value is readonly T[] {
 
 /** @internal */
 function pairToMap(v: readonly [string, SortDirection]): SortForCmd {
-  return new Map([[`${v[0]}`, prepareDirection([v[1]])]]);
+  return new Map([[`${v[0]}`, prepareDirection(v[1])]]);
 }
 
 /** @internal */
