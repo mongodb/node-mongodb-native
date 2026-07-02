@@ -987,7 +987,7 @@ export const OPTIONS = {
   readConcern: {
     transform({ values: [value], options }) {
       if (value instanceof ReadConcern || isRecord(value, ['level'] as const)) {
-        return ReadConcern.fromOptions({ ...options.readConcern, ...value } as any);
+        return ReadConcern.fromOptions({ ...options.readConcern, ...value });
       }
       throw new MongoParseError(`ReadConcern must be an object, got ${JSON.stringify(value)}`);
     }
@@ -1008,13 +1008,13 @@ export const OPTIONS = {
         return ReadPreference.fromOptions({
           readPreference: { ...options.readPreference, ...value },
           ...value
-        } as any);
+        });
       }
       if (isRecord(value, ['mode'] as const)) {
         const rp = ReadPreference.fromOptions({
           readPreference: { ...options.readPreference, ...value },
           ...value
-        } as any);
+        });
         if (rp) return rp;
         else throw new MongoParseError(`Cannot make read preference from ${JSON.stringify(value)}`);
       }
