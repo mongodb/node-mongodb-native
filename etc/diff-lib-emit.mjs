@@ -8,6 +8,10 @@
  *   2. getter-based export wiring instead of `exports.X = ...` assignments
  *   3. `import('os')` preserved in runtime_adapters.js instead of downleveled to require
  *   4. `0 && (module.exports = {...})` cjs-module-lexer annotations
+ *   5. `undefined` rewritten to `void 0` (semantically identical esbuild output form)
+ *   6. comments stripped from emitted js (esbuild keeps only license comments; types/IntelliSense
+ *      are unaffected — mongodb.d.ts is tsc-generated)
+ *   7. @__PURE__ tree-shaking annotations added (additive hints for downstream bundlers)
  */
 import { execFileSync, execSync } from 'node:child_process';
 import fs from 'node:fs/promises';
