@@ -460,7 +460,6 @@ describe('MongoErrors', () => {
       // 9 - above server version 4.4
 
       const ABOVE_4_4 = 9;
-      const BELOW_4_4 = 8;
 
       const tests: {
         description: string;
@@ -468,36 +467,6 @@ describe('MongoErrors', () => {
         error: Error;
         maxWireVersion: number;
       }[] = [
-        {
-          description: 'a plain error',
-          result: false,
-          error: new Error('do not retry me!'),
-          maxWireVersion: BELOW_4_4
-        },
-        {
-          description: 'a MongoError with no code nor label',
-          result: false,
-          error: new MongoError('do not retry me!'),
-          maxWireVersion: BELOW_4_4
-        },
-        {
-          description: 'network error',
-          result: true,
-          error: new MongoNetworkError('socket bad, try again'),
-          maxWireVersion: BELOW_4_4
-        },
-        {
-          description: 'a MongoWriteConcernError with a random label',
-          result: false,
-          error: new MongoWriteConcernError({
-            writeConcernError: {
-              errmsg: 'random label',
-              code: 1
-            },
-            errorLabels: ['myLabel']
-          }),
-          maxWireVersion: BELOW_4_4
-        },
         {
           description: 'a MongoWriteConcernError with a retryable code above server 4.4',
           result: false,
@@ -508,29 +477,6 @@ describe('MongoErrors', () => {
             }
           }),
           maxWireVersion: ABOVE_4_4
-        },
-        {
-          description: 'a MongoWriteConcernError with a retryable code below server 4.4',
-          result: true,
-          error: new MongoWriteConcernError({
-            writeConcernError: {
-              errmsg: 'code 262',
-              code: 262
-            }
-          }),
-          maxWireVersion: BELOW_4_4
-        },
-        {
-          description: 'a MongoWriteConcernError with a RetryableWriteError label below server 4.4',
-          result: false,
-          error: new MongoWriteConcernError({
-            writeConcernError: {
-              errmsg: 'code 1',
-              code: 1
-            },
-            errorLabels: ['RetryableWriteError']
-          }),
-          maxWireVersion: BELOW_4_4
         },
         {
           description: 'a MongoWriteConcernError with a RetryableWriteError label above server 4.4',
@@ -557,9 +503,9 @@ describe('MongoErrors', () => {
           maxWireVersion: ABOVE_4_4
         }
       ];
-      for (const { description, result, error, maxWireVersion } of tests) {
+      for (const { description, result, error } of tests) {
         it(`${description} ${result ? 'needs' : 'does not need'} a retryable write label`, () => {
-          expect(needsRetryableWriteLabel(error, maxWireVersion)).to.be.equal(result);
+          expect(needsRetryableWriteLabel(error)).to.be.equal(result);
         });
       }
     });
