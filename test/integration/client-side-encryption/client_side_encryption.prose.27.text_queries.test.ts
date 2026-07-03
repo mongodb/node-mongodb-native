@@ -10,7 +10,7 @@ import * as semver from 'semver';
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
 import { ClientEncryption, type MongoClient, MongoDBCollectionNamespace } from '../../mongodb';
 
-// Cases 1-4: prefix/suffix GA requires server 9.0+ (SERVER-123416) and libmongocrypt 1.19.0+ (MONGOCRYPT-870).
+// Cases 1-4: prefix/suffix require server 9.0+ (SERVER-123416) and libmongocrypt 1.19.0+ (MONGOCRYPT-870).
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
@@ -30,8 +30,18 @@ const metadataPreview: MongoDBMetadataUI = {
   }
 };
 
-// TODO(NODE-7623): substringPreview contention validation broken on MongoDB 9.0+ (SERVER-91887).
+// Cases 5-6: substring requires server 9.0+ (SERVER-123416) and libmongocrypt 1.20.0+.
 const metadataSubstring: MongoDBMetadataUI = {
+  requires: {
+    clientSideEncryption: '>=6.4.0',
+    mongodb: '>=9.0.0',
+    topology: '!single',
+    libmongocrypt: '>=1.20.0'
+  }
+};
+
+// Cases 5-6 preview: substringPreview removed in server 9.0.0 (SERVER-123416).
+const metadataSubstringPreview: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: '>=6.4.0',
     mongodb: '>=8.2.0 <9.0.0',
@@ -91,11 +101,20 @@ describe('27. String Explicit Encryption', function () {
     }
 
     // - `db.substring` using the `encryptedFields` option set to the contents of
-    //   encryptedFields-substring.json
-    await dropAndCreateCollection(
-      'db.substring',
-      await loadFLEDataFile('encryptedFields-substring.json')
-    );
+    //   encryptedFields-substring.json. This step requires server 9.0.0+.
+    // - `db.substring-preview` using the `encryptedFields` option set to the contents of
+    //   encryptedFields-substring-preview.json. This step requires server pre-9.0.0.
+    if (isServer9OrAbove) {
+      await dropAndCreateCollection(
+        'db.substring',
+        await loadFLEDataFile('encryptedFields-substring.json')
+      );
+    } else {
+      await dropAndCreateCollection(
+        'db.substring-preview',
+        await loadFLEDataFile('encryptedFields-substring-preview.json')
+      );
+    }
 
     // Load the file key1-document.json as `key1Document`.
     keyDocument1 = await loadFLEDataFile('keys/key1-document.json');
@@ -199,13 +218,13 @@ describe('27. String Explicit Encryption', function () {
     //       diacriticSensitive: true,
     //       substring: SubstringOpts {
     //        strMaxLength: 10,
-    //        strMaxQueryLength: 10,
+    //        strMaxQueryLength: 6,
     //        strMinQueryLength: 2,
     //       }
     //    },
     // }
-    // Use `explicitEncryptedClient` to insert the following document into `db.substring` with
-    // majority write concern:
+    // Use `explicitEncryptedClient` to insert the following document into `db.substring`
+    // (if created) and `db.substring-preview` (if created) with majority write concern:
     // { "_id": 0, "encryptedText": <encrypted 'foobarbaz'> }
     {
       const encryptedText = await clientEncryption.encrypt('foobarbaz', {
@@ -215,13 +234,20 @@ describe('27. String Explicit Encryption', function () {
         stringOptions: {
           caseSensitive: true,
           diacriticSensitive: true,
-          substring: { strMaxLength: 10, strMaxQueryLength: 10, strMinQueryLength: 2 }
+          substring: { strMaxLength: 10, strMaxQueryLength: 6, strMinQueryLength: 2 }
         }
       });
-      await explicitEncryptedClient
-        .db('db')
-        .collection<{ _id: number; encryptedText: Binary }>('substring')
-        .insertOne({ _id: 0, encryptedText }, { writeConcern: { w: 'majority' } });
+      if (isServer9OrAbove) {
+        await explicitEncryptedClient
+          .db('db')
+          .collection<{ _id: number; encryptedText: Binary }>('substring')
+          .insertOne({ _id: 0, encryptedText }, { writeConcern: { w: 'majority' } });
+      } else {
+        await explicitEncryptedClient
+          .db('db')
+          .collection<{ _id: number; encryptedText: Binary }>('substring-preview')
+          .insertOne({ _id: 0, encryptedText }, { writeConcern: { w: 'majority' } });
+      }
     }
   });
 
@@ -254,7 +280,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('GA', metadata, async function () {
+    it('prefix', metadata, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"foo"` with the following `EncryptOpts`:
       const encryptedFoo = await clientEncryption.encrypt('foo', {
         keyId: keyId1,
@@ -303,7 +329,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('preview', metadataPreview, async function () {
+    it('prefixPreview', metadataPreview, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"foo"` with the following `EncryptOpts`:
       const encryptedFoo = await clientEncryption.encrypt('foo', {
         keyId: keyId1,
@@ -359,7 +385,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('GA', metadata, async function () {
+    it('suffix', metadata, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"baz"` with the following `EncryptOpts`:
       const encryptedBaz = await clientEncryption.encrypt('baz', {
         keyId: keyId1,
@@ -408,7 +434,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('preview', metadataPreview, async function () {
+    it('suffixPreview', metadataPreview, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"baz"` with the following `EncryptOpts`:
       const encryptedBaz = await clientEncryption.encrypt('baz', {
         keyId: keyId1,
@@ -464,7 +490,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('GA', metadata, async function () {
+    it('prefix', metadata, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"baz"` with the following `EncryptOpts`:
       const encryptedBaz = await clientEncryption.encrypt('baz', {
         keyId: keyId1,
@@ -505,7 +531,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('preview', metadataPreview, async function () {
+    it('prefixPreview', metadataPreview, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"baz"` with the following `EncryptOpts`:
       const encryptedBaz = await clientEncryption.encrypt('baz', {
         keyId: keyId1,
@@ -554,7 +580,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('GA', metadata, async function () {
+    it('suffix', metadata, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"foo"` with the following `EncryptOpts`:
       const encryptedFoo = await clientEncryption.encrypt('foo', {
         keyId: keyId1,
@@ -595,7 +621,7 @@ describe('27. String Explicit Encryption', function () {
     //      }
     //    },
     // }
-    it('preview', metadataPreview, async function () {
+    it('suffixPreview', metadataPreview, async function () {
       // Use `clientEncryption.encrypt()` to encrypt the string `"foo"` with the following `EncryptOpts`:
       const encryptedFoo = await clientEncryption.encrypt('foo', {
         keyId: keyId1,
@@ -623,90 +649,168 @@ describe('27. String Explicit Encryption', function () {
     });
   });
 
-  it('Case 5: can find a document by substring', metadataSubstring, async function () {
-    // Use `clientEncryption.encrypt()` to encrypt the string `"bar"` with the following `EncryptOpts`:
+  // Run this case multiple times with the following sets of parameters:
+  // - `queryType=substring` and `collection=substring`
+  //     - Require server 9.0.0+ and libmongocrypt 1.20.0+.
+  // - `queryType=substringPreview` and `collection=substring-preview`
+  //     - Require server pre-9.0.0 and libmongocrypt 1.18.1+.
+  context('Case 5: can find a document by substring', function () {
+    // `queryType=substring` and `collection=substring`
     // class EncryptOpts {
     //    keyId : <key1ID>,
     //    algorithm: "String",
-    //    queryType: "substringPreview",
+    //    queryType: "substring",
     //    contentionFactor: 0,
     //    stringOpts: StringOpts {
     //       caseSensitive: true,
     //       diacriticSensitive: true,
     //       substring: SubstringOpts {
     //        strMaxLength: 10,
-    //        strMaxQueryLength: 10,
+    //        strMaxQueryLength: 6,
     //        strMinQueryLength: 2,
     //       }
     //    },
     // }
-    const encryptedBar = await clientEncryption.encrypt('bar', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'substringPreview',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        substring: { strMaxLength: 10, strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
+    it('substring', metadataSubstring, async function () {
+      // Use `clientEncryption.encrypt()` to encrypt the string `"bar"` with the following `EncryptOpts`:
+      const encryptedBar = await clientEncryption.encrypt('bar', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'substring',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          substring: { strMaxLength: 10, strMaxQueryLength: 6, strMinQueryLength: 2 }
+        }
+      });
+
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.<collection>` collection
+      // with the following filter:
+      // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'bar'>} } }
+      const filter = {
+        $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedBar } }
+      };
+      const { __safeContent__, ...result } = await explicitEncryptedClient
+        .db('db')
+        .collection<{ _id: number; encryptedText: Binary; __safeContent__: unknown }>('substring')
+        .findOne(filter);
+
+      // Assert the following document is returned:
+      // { "_id": 0, "encryptedText": "foobarbaz" }
+      expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
     });
 
-    // Use `explicitEncryptedClient` to run a "find" operation on the `db.substring` collection
-    // with the following filter:
-    // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'bar'>} } }
-    const filter = {
-      $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedBar } }
-    };
-    const { __safeContent__, ...result } = await explicitEncryptedClient
-      .db('db')
-      .collection<{ _id: number; encryptedText: Binary; __safeContent__: unknown }>('substring')
-      .findOne(filter);
+    // `queryType=substringPreview` and `collection=substring-preview`
+    it('substringPreview', metadataSubstringPreview, async function () {
+      // Use `clientEncryption.encrypt()` to encrypt the string `"bar"` with the following `EncryptOpts`:
+      const encryptedBar = await clientEncryption.encrypt('bar', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'substringPreview',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          substring: { strMaxLength: 10, strMaxQueryLength: 6, strMinQueryLength: 2 }
+        }
+      });
 
-    // Assert the following document is returned:
-    // { "_id": 0, "encryptedText": "foobarbaz" }
-    expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.<collection>` collection
+      // with the following filter:
+      // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'bar'>} } }
+      const filter = {
+        $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedBar } }
+      };
+      const { __safeContent__, ...result } = await explicitEncryptedClient
+        .db('db')
+        .collection<{
+          _id: number;
+          encryptedText: Binary;
+          __safeContent__: unknown;
+        }>('substring-preview')
+        .findOne(filter);
+
+      // Assert the following document is returned:
+      // { "_id": 0, "encryptedText": "foobarbaz" }
+      expect(result).to.deep.equal({ _id: 0, encryptedText: 'foobarbaz' });
+    });
   });
 
-  it('Case 6: assert no document found by substring', metadataSubstring, async function () {
-    // Use `clientEncryption.encrypt()` to encrypt the string `"qux"` with the following `EncryptOpts`:
+  // Run this case multiple times with the following sets of parameters:
+  // - `queryType=substring` and `collection=substring`
+  //     - Require server 9.0.0+ and libmongocrypt 1.20.0+.
+  // - `queryType=substringPreview` and `collection=substring-preview`
+  //     - Require server pre-9.0.0 and libmongocrypt 1.18.1+.
+  context('Case 6: assert no document found by substring', function () {
+    // `queryType=substring` and `collection=substring`
     // class EncryptOpts {
     //    keyId : <key1ID>,
     //    algorithm: "String",
-    //    queryType: "substringPreview",
+    //    queryType: "substring",
     //    contentionFactor: 0,
     //    stringOpts: StringOpts {
     //       caseSensitive: true,
     //       diacriticSensitive: true,
     //       substring: SubstringOpts {
     //        strMaxLength: 10,
-    //        strMaxQueryLength: 10,
+    //        strMaxQueryLength: 6,
     //        strMinQueryLength: 2,
     //       }
     //    },
     // }
-    const encryptedQux = await clientEncryption.encrypt('qux', {
-      keyId: keyId1,
-      algorithm: 'String',
-      queryType: 'substringPreview',
-      contentionFactor: 0,
-      stringOptions: {
-        caseSensitive: true,
-        diacriticSensitive: true,
-        substring: { strMaxLength: 10, strMaxQueryLength: 10, strMinQueryLength: 2 }
-      }
+    it('substring', metadataSubstring, async function () {
+      // Use `clientEncryption.encrypt()` to encrypt the string `"qux"` with the following `EncryptOpts`:
+      const encryptedQux = await clientEncryption.encrypt('qux', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'substring',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          substring: { strMaxLength: 10, strMaxQueryLength: 6, strMinQueryLength: 2 }
+        }
+      });
+
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.<collection>` collection
+      // with the following filter:
+      // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'qux'>} } }
+      const filter = {
+        $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedQux } }
+      };
+
+      // Assert that no documents are returned.
+      expect(await explicitEncryptedClient.db('db').collection('substring').findOne(filter)).to.be
+        .null;
     });
 
-    // Use `explicitEncryptedClient` to run a "find" operation on the `db.substring` collection
-    // with the following filter:
-    // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'qux'>} } }
-    const filter = {
-      $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedQux } }
-    };
+    // `queryType=substringPreview` and `collection=substring-preview`
+    it('substringPreview', metadataSubstringPreview, async function () {
+      // Use `clientEncryption.encrypt()` to encrypt the string `"qux"` with the following `EncryptOpts`:
+      const encryptedQux = await clientEncryption.encrypt('qux', {
+        keyId: keyId1,
+        algorithm: 'String',
+        queryType: 'substringPreview',
+        contentionFactor: 0,
+        stringOptions: {
+          caseSensitive: true,
+          diacriticSensitive: true,
+          substring: { strMaxLength: 10, strMaxQueryLength: 6, strMinQueryLength: 2 }
+        }
+      });
 
-    // Assert that no documents are returned.
-    expect(await explicitEncryptedClient.db('db').collection('substring').findOne(filter)).to.be
-      .null;
+      // Use `explicitEncryptedClient` to run a "find" operation on the `db.<collection>` collection
+      // with the following filter:
+      // { $expr: { $encStrContains: {input: '$encryptedText', substring: <encrypted 'qux'>} } }
+      const filter = {
+        $expr: { $encStrContains: { input: '$encryptedText', substring: encryptedQux } }
+      };
+
+      // Assert that no documents are returned.
+      expect(await explicitEncryptedClient.db('db').collection('substring-preview').findOne(filter))
+        .to.be.null;
+    });
   });
 
   it('Case 7: assert contentionFactor is required', metadata, async function () {

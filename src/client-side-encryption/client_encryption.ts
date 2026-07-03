@@ -849,11 +849,12 @@ export interface ClientEncryptionEncryptOptions {
     | 'range'
     | 'prefix'
     | 'suffix'
+    | 'substring'
     /** @deprecated Use `'prefix'` instead. */
     | 'prefixPreview'
     /** @deprecated Use `'suffix'` instead. */
     | 'suffixPreview'
-    /** @experimental Public Technical Preview: `substringPreview` is an experimental feature and may break at any time. */
+    /** @deprecated Use `'substring'` instead. */
     | 'substringPreview';
 
   /** The index options for a Queryable Encryption field supporting "range" queries.*/
@@ -895,9 +896,6 @@ export interface StringQueryOptions {
     strMinQueryLength: Int32 | number;
   };
 
-  /**
-   * @experimental Public Technical Preview: `substring` is an experimental feature and may break at any time.
-   */
   substring?: {
     /** The maximum allowed length to insert. */
     strMaxLength: Int32 | number;
