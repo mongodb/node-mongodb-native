@@ -3,7 +3,6 @@ import {
   type ClientBulkWriteError,
   type ClientBulkWriteResult
 } from './operations/client_bulk_write/common';
-import type { ServerType } from './sdam/common';
 import type { TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
 
@@ -1394,22 +1393,14 @@ const RETRYABLE_READ_ERROR_CODES = new Set<number>([
 // see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.md#terms
 const RETRYABLE_WRITE_ERROR_CODES = RETRYABLE_READ_ERROR_CODES;
 
-export function needsRetryableWriteLabel(
-  error: Error,
-  maxWireVersion: number,
-  serverType: ServerType
-): boolean {
+export function needsRetryableWriteLabel(error: Error): boolean {
   // pre-4.4 server, then the driver adds an error label for every valid case
   // execute operation will only inspect the label, code/message logic is handled here
   if (error instanceof MongoNetworkError) {
     return true;
   }
-
   if (error instanceof MongoError) {
-    if (
-      (maxWireVersion >= 9 || isRetryableWriteError(error)) &&
-      !error.hasErrorLabel(MongoErrorLabel.HandshakeError)
-    ) {
+    if (isRetryableWriteError(error) && !error.hasErrorLabel(MongoErrorLabel.HandshakeError)) {
       // If we already have the error label no need to add it again. 4.4+ servers add the label.
       // In the case where we have a handshake error, need to fall down to the logic checking
       // the codes.
@@ -1418,10 +1409,6 @@ export function needsRetryableWriteLabel(
   }
 
   if (error instanceof MongoWriteConcernError) {
-    if (serverType === 'Mongos' && maxWireVersion < 9) {
-      // use original top-level code from server response
-      return RETRYABLE_WRITE_ERROR_CODES.has(error.result.code ?? 0);
-    }
     const code = error.result.writeConcernError.code ?? Number(error.code);
     return RETRYABLE_WRITE_ERROR_CODES.has(Number.isNaN(code) ? 0 : code);
   }

@@ -343,9 +343,7 @@ export function maxWireVersion(handshakeAware?: Connection | Topology | Server):
     // object being checked will be a connection, and we will have a hello response on
     // it. For other cases, such as retryable writes, the object will be a server or
     // topology, and there will be no hello response on those objects, so we return
-    // the max wire version so we support retryability. Once we have a min supported
-    // wire version of 9, then the needsRetryableWriteLabel() check can remove the
-    // usage of passing the wire version into it.
+    // the max wire version so we support retryability.
     if (handshakeAware.loadBalanced) {
       return MAX_SUPPORTED_WIRE_VERSION;
     }

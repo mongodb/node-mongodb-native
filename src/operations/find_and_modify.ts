@@ -6,7 +6,7 @@ import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
 import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
-import { decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
+import { decorateWithCollation, hasAtomicOperators } from '../utils';
 import { type WriteConcern, type WriteConcernSettings } from '../write_concern';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -146,7 +146,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
   }
 
   override buildCommandDocument(
-    connection: Connection,
+    _connection: Connection,
     _session?: ClientSession
   ): Document & FindAndModifyCmdBase {
     const options = this.options;
@@ -192,7 +192,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
 
     if (options.hint) {
       const unacknowledgedWrite = this.writeConcern?.w === 0;
-      if (unacknowledgedWrite && maxWireVersion(connection) < 9) {
+      if (unacknowledgedWrite) {
         throw new MongoCompatibilityError(
           'hint for the findAndModify command is only supported on MongoDB 4.4+'
         );

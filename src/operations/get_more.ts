@@ -4,7 +4,7 @@ import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoRuntimeError } from '../error';
 import type { Server, ServerCommandOptions } from '../sdam/server';
 import { type TimeoutContext } from '../timeout';
-import { maxWireVersion, type MongoDBNamespace } from '../utils';
+import { type MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /** @internal */
@@ -55,7 +55,7 @@ export class GetMoreOperation extends AbstractOperation<CursorResponse> {
     return 'getMore' as const;
   }
 
-  override buildCommand(connection: Connection): Document {
+  override buildCommand(_connection: Connection): Document {
     if (this.cursorId == null || this.cursorId.isZero()) {
       throw new MongoRuntimeError('Unable to iterate cursor with no id');
     }
@@ -82,7 +82,7 @@ export class GetMoreOperation extends AbstractOperation<CursorResponse> {
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (this.options.comment !== undefined && maxWireVersion(connection) >= 9) {
+    if (this.options.comment !== undefined) {
       getMoreCmd.comment = this.options.comment;
     }
 

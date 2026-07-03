@@ -3,7 +3,6 @@ import { type Connection } from '../cmap/connection';
 import { CursorResponse, MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
-import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
 import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
@@ -299,20 +298,13 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     return 'createIndexes';
   }
 
-  override buildCommandDocument(connection: Connection): Document {
+  override buildCommandDocument(_connection: Connection): Document {
     const options = this.options;
     const indexes = this.indexes;
-
-    const serverWireVersion = maxWireVersion(connection);
 
     const cmd: Document = { createIndexes: this.collectionName, indexes };
 
     if (options.commitQuorum != null) {
-      if (serverWireVersion < 9) {
-        throw new MongoCompatibilityError(
-          'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
-        );
-      }
       cmd.commitQuorum = options.commitQuorum;
     }
     return cmd;
