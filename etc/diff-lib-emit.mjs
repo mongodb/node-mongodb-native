@@ -4,7 +4,9 @@
  * the new pipeline (etc/build-lib.mjs), prettier-normalizes both, and diffs them.
  *
  * Run with: npm run check:lib-emit-diff
- * Output: a stat summary on stdout and the full normalized diff in .diff-gate/report.diff, plus
+ * Output: a stat summary on stdout, the full normalized diff in .diff-gate/report.diff, the
+ * unexplained remainder in .diff-gate/residual.diff (read that one — it's the review artifact),
+ * plus
  * an AST-based classification (etc/lib-emit-classify.mjs) that mechanically checks the diff
  * instead of relying on the classes below being sampled correctly by a human. This is temporary
  * migration tooling — it verifies the esbuild-based pipeline against the old tsc-only emit and
@@ -165,6 +167,14 @@ if (classification.allExportChecksPass) {
     );
   }
 }
+// Persist the residual itself, not just its size — reviewers should be able to read every line.
+const residualDetail = classification.files
+  .filter(f => f.residualLineCount > 0)
+  .sort((a, b) => b.residualLineCount - a.residualLineCount)
+  .map(f => `=== ${f.file} (${f.residualLineCount} residual line(s)) ===\n${f.residualDiff}\n`)
+  .join('\n');
+await fs.writeFile(path.join(gateDir, 'residual.diff'), residualDetail);
+
 // eslint-disable-next-line no-console
 console.log(
   `Explained mechanically before the residual: ${classification.totalRenamedBindings} local-binding renames (alpha-normalized) and ${classification.totalToEsmUnwraps} __toESM interop wraps.`
@@ -173,6 +183,8 @@ console.log(
 console.log(
   `Residual after stripping known-safe transformations: ${classification.totalResidualLines} lines total (was ${full.split('\n').length} before classification)`
 );
+// eslint-disable-next-line no-console
+console.log('Residual detail written to .diff-gate/residual.diff');
 
 // The export-set check is the only thing here with real teeth: an unexplained residual is
 // reported for a human to read, but only a dropped/renamed export fails the build.
