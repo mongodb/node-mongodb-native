@@ -19,11 +19,17 @@
  *   6. comments stripped from emitted js (esbuild keeps only license comments; types/IntelliSense
  *      are unaffected — mongodb.d.ts is tsc-generated)
  *   7. `@__PURE__` tree-shaking annotations added (additive hints for downstream bundlers)
+ *   8. require-binding naming: tsc names them `foo_1`, esbuild names them `import_foo` (and wraps
+ *      some, e.g. `dns`/`process`/`mongodb-connection-string-url`, in `__toESM(...)` for CJS/ESM
+ *      interop) — this single naming-scheme difference, and the local-variable-shadowing renames
+ *      it forces, dominates most of the residual reported below
  *
  * etc/lib-emit-classify.mjs proves classes 1-5 mechanically per file (export-name-set equality,
  * a hard gate) and reports whatever textual residual is left after stripping those classes'
  * exact statement shapes (informational — see that module's header for what it does and does
- * not attempt to explain).
+ * not attempt to explain). Class 8 is not stripped, by design: it dominates nearly every file's
+ * residual, so leaving it visible is what makes the residual count meaningful as a real signal
+ * rather than a number that's already been explained away.
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -41,7 +47,11 @@ const newDir = path.join(gateDir, 'new');
 
 const run = (cmd, args) => execFileSync(cmd, args, { cwd: rootDir, stdio: 'inherit' });
 
-await fs.rm(gateDir, { recursive: true, force: true });
+// maxRetries/retryDelay: a recursive delete of a directory that recently had ~260 files written
+// into it can transiently fail with ENOTEMPTY (e.g. a filesystem indexer briefly touching the
+// directory) — retry a few times instead of crashing the whole gate. Observed directly in this
+// workspace; see etc/lib-emit-classify.mjs's history for the same pattern.
+await fs.rm(gateDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
 await fs.mkdir(gateDir, { recursive: true });
 
 // Old pipeline: plain tsc against the base config (module: commonjs), js only.

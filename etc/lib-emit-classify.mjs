@@ -21,10 +21,10 @@
  * Nothing here changes runtime behavior; it only classifies the diff that
  * etc/diff-lib-emit.mjs already produces.
  */
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import * as prettier from 'prettier';
 import * as ts from 'typescript';
 
 // esbuild's per-file interop preamble: `var __helper = ...;` top-level declarations. Not every
@@ -486,11 +486,15 @@ function lineDiff(oldText, newText) {
   return diffLines;
 }
 
-// Strips, substitutes, and prints both sides for one file, writing the results into tmpDir so
-// they can be prettier-normalized in a single batched call (see classifyEmitDiff) rather than one
-// `npx prettier` process per file per side — with 131 files that difference is the whole runtime
-// of this step.
-async function prepareResidualFiles(relFile, oldSourceFile, newSourceFile, targetName, tmpDir) {
+// Strips, substitutes, and prints both sides for one file, returning plain source text ready for
+// prettier. Everything here is in-memory (no tmp files): earlier versions of this function shelled
+// out to `npx prettier --write` against a scratch directory under .diff-gate/, but that directory
+// is itself gitignored and prettier 3 skips gitignored paths during its own glob-matching even
+// when --ignore-path is overridden — on top of that, the scratch directory sat inside a workspace
+// whose filesystem showed glob/readdir inconsistencies right after a burst of ~260 file writes,
+// occasionally making freshly-written files invisible to the very next `npx prettier` invocation.
+// Calling prettier's own formatting API on in-memory strings sidesteps both problems entirely.
+function prepareResidualSource(relFile, oldSourceFile, newSourceFile, targetName) {
   let strippedOld = stripOldStatements(oldSourceFile);
   let strippedNew = stripNewStatements(newSourceFile, targetName);
 
@@ -506,16 +510,7 @@ async function prepareResidualFiles(relFile, oldSourceFile, newSourceFile, targe
   strippedOld = normalizeVoidZero(strippedOld);
   strippedNew = normalizeVoidZero(strippedNew);
 
-  const oldPrinted = printer.printFile(strippedOld);
-  const newPrinted = printer.printFile(strippedNew);
-
-  const safeName = relFile.replace(/[/\\]/g, '__');
-  const oldTmpPath = path.join(tmpDir, `${safeName}.old.js`);
-  const newTmpPath = path.join(tmpDir, `${safeName}.new.js`);
-  await fs.writeFile(oldTmpPath, oldPrinted);
-  await fs.writeFile(newTmpPath, newPrinted);
-
-  return { oldTmpPath, newTmpPath };
+  return { oldPrinted: printer.printFile(strippedOld), newPrinted: printer.printFile(strippedNew) };
 }
 
 // Recursively lists files (relative paths) under dir, matching diff-lib-emit.mjs's own tree
@@ -549,16 +544,15 @@ export async function classifyEmitDiff(oldDir, newDir) {
   const newFiles = new Set(await listJsFilesRecursive(newDir));
   const commonFiles = [...oldFiles].filter(f => newFiles.has(f)).sort();
 
-  const tmpDir = path.join(path.dirname(oldDir), 'residual-tmp');
-  // maxRetries/retryDelay: recursive deletes of a directory that just had ~260 files written into
-  // it in quick succession can transiently fail with ENOTEMPTY (e.g. a filesystem indexer briefly
-  // touching the directory) — retry a few times instead of crashing the whole classification run.
-  await fs.rm(tmpDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
-  await fs.mkdir(tmpDir, { recursive: true });
+  // prettier's config (quote style, width, etc.) is resolved once against this file's own
+  // location, same as the rest of the repo's `.prettierrc.json`-driven formatting.
+  const prettierConfig = (await prettier.resolveConfig(import.meta.url)) ?? {};
+  const formatJs = text => prettier.format(text, { ...prettierConfig, parser: 'babel' });
 
-  // Pass 1: parse, run the (cheap, in-memory) export-set check, strip known-safe plumbing, and
-  // write both stripped-and-printed sides to tmpDir for every file.
-  const pending = [];
+  const files = [];
+  let totalResidualLines = 0;
+  let allExportChecksPass = true;
+
   for (const relFile of commonFiles) {
     const oldText = await fs.readFile(path.join(oldDir, relFile), 'utf8');
     const newText = await fs.readFile(path.join(newDir, relFile), 'utf8');
@@ -572,77 +566,32 @@ export async function classifyEmitDiff(oldDir, newDir) {
     const onlyInOld = setDifference(oldExports, newExports);
     const onlyInNew = setDifference(newExports, oldExports);
     const exportCheckOk = onlyInOld.length === 0 && onlyInNew.length === 0;
+    if (!exportCheckOk) allExportChecksPass = false;
 
     const targetName = exportCall ? exportCall.targetName : null;
-    const { oldTmpPath, newTmpPath } = await prepareResidualFiles(
+    const { oldPrinted, newPrinted } = prepareResidualSource(
       relFile,
       oldSourceFile,
       newSourceFile,
-      targetName,
-      tmpDir
+      targetName
     );
+    const [oldFormatted, newFormatted] = await Promise.all([
+      formatJs(oldPrinted),
+      formatJs(newPrinted)
+    ]);
 
-    pending.push({
+    const diffLines = oldFormatted === newFormatted ? [] : lineDiff(oldFormatted, newFormatted);
+    totalResidualLines += diffLines.length;
+
+    files.push({
       file: relFile,
       oldExports: [...oldExports].sort(),
       newExports: [...newExports].sort(),
       exportCheck: { ok: exportCheckOk, onlyInOld, onlyInNew },
-      oldTmpPath,
-      newTmpPath
-    });
-  }
-
-  // Pass 2: normalize every stripped file in one batched prettier invocation — one `npx prettier`
-  // process for the whole tree instead of one per file per side (262 invocations otherwise).
-  // Prettier expands the glob itself (as diff-lib-emit.mjs's own call does), so no shell is needed.
-  // --ignore-path overrides prettier 3's default of [.gitignore, .prettierignore]: tmpDir lives
-  // under .diff-gate/, which is itself gitignored, so without this the write is silently skipped
-  // and every residual would be a wall of quote-style/line-wrap noise instead of real structure.
-  if (pending.length > 0) {
-    const noIgnorePath = path.join(tmpDir, '.prettier-ignore-none');
-    await fs.writeFile(noIgnorePath, '');
-    execFileSync(
-      'npx',
-      [
-        'prettier',
-        '--log-level',
-        'warn',
-        '--ignore-path',
-        noIgnorePath,
-        '--write',
-        `${tmpDir}/*.js`
-      ],
-      { encoding: 'utf8' }
-    );
-  }
-
-  // Pass 3: read back the normalized text and line-diff each pair.
-  const files = [];
-  let totalResidualLines = 0;
-  let allExportChecksPass = true;
-  for (const entry of pending) {
-    const [oldFormatted, newFormatted] = await Promise.all([
-      fs.readFile(entry.oldTmpPath, 'utf8'),
-      fs.readFile(entry.newTmpPath, 'utf8')
-    ]);
-    const diffLines = oldFormatted === newFormatted ? [] : lineDiff(oldFormatted, newFormatted);
-    if (!entry.exportCheck.ok) allExportChecksPass = false;
-    totalResidualLines += diffLines.length;
-
-    files.push({
-      file: entry.file,
-      oldExports: entry.oldExports,
-      newExports: entry.newExports,
-      exportCheck: entry.exportCheck,
       residualLineCount: diffLines.length,
       residualDiff: diffLines.join('\n')
     });
   }
-
-  // maxRetries/retryDelay: recursive deletes of a directory that just had ~260 files written into
-  // it in quick succession can transiently fail with ENOTEMPTY (e.g. a filesystem indexer briefly
-  // touching the directory) — retry a few times instead of crashing the whole classification run.
-  await fs.rm(tmpDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
 
   return { files, allExportChecksPass, totalResidualLines };
 }
