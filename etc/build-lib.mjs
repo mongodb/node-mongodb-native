@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Builds the shipped lib/ tree (NODE-7603).
+ * Builds the shipped lib/ tree.
  *
  * 1. tsc (tsconfig.build.json) compiles src/ to genuine ESM in lib-intermediate/ so dynamic
  *    import() is not downleveled to require(); declarations are emitted straight to lib/.

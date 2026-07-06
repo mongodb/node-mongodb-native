@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Shipped-artifact smoke test (NODE-7603): loads the built lib/ through both module systems in a
+ * Shipped-artifact smoke test: loads the built lib/ through both module systems in a
  * real Node process and forces runtime-adapter resolution. This guards the esbuild emit of the
  * shipped bytes (interop, export wiring); the bundled-ESM bug itself is covered by
  * test/unit/bundling.test.ts.
@@ -32,7 +32,7 @@ assert.equal(
   'default os adapter resolves via dynamic import()'
 );
 
-// Drift-proof guard for the NODE-7603 pipeline contract: the shipped bytes must retain the
+// Drift-proof guard for the pipeline contract: the shipped bytes must retain the
 // dynamic import('os') and must not contain a downleveled require('os'). The runtime checks
 // above cannot catch a downleveling regression, because real Node always has `require`, so a
 // broken emit still passes them; only the artifact text itself proves the pipeline held.

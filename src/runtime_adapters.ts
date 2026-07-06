@@ -3,7 +3,7 @@
 // We squash the restricted import errors here: the module-scope imports are type-only, and the
 // one runtime dependency this file takes — the dynamic `import('os')` fallback in
 // resolveRuntimeAdapters — is deliberate: this file is expected to be the only place that loads
-// restricted Node APIs at runtime (NODE-7603).
+// restricted Node APIs at runtime.
 
 import type * as os from 'os';
 
@@ -13,7 +13,7 @@ import { type MongoClientOptions } from './mongo_client';
  * @internal
  *
  * Legacy escape hatch for the test sandbox's restricted `require`: the driver no longer sets this
- * property (the os adapter loads via dynamic `import()` since NODE-7603), but the vm test harness
+ * property (the os adapter loads via dynamic `import()`), but the vm test harness
  * still checks it. Kept until the sandbox contract is revisited in a follow-up.
  */
 export const ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME = 'allowedDriverRequire';
@@ -54,8 +54,8 @@ export interface Runtime {
  *
  * Resolution is asynchronous because the default `os` adapter is loaded via a dynamic `import()`.
  * Unlike `require`, dynamic import exists in every module system the driver ships into or is
- * bundled into (CJS, ESM, and bundled ESM output — NODE-7603), and the literal specifier keeps it
- * statically analyzable for bundlers (NODE-3199). The promise is created during synchronous
+ * bundled into (CJS, ESM, and bundled ESM output), and the literal specifier keeps it
+ * statically analyzable for bundlers. The promise is created during synchronous
  * options parsing and awaited later by consumers, so the public constructor stays synchronous.
  */
 export async function resolveRuntimeAdapters(options: MongoClientOptions): Promise<Runtime> {
