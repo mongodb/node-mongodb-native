@@ -10,6 +10,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import * as process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import * as esbuild from 'esbuild';

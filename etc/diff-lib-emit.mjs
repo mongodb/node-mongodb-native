@@ -16,11 +16,12 @@
  *   5. `undefined` rewritten to `void 0` (semantically identical esbuild output form)
  *   6. comments stripped from emitted js (esbuild keeps only license comments; types/IntelliSense
  *      are unaffected — mongodb.d.ts is tsc-generated)
- *   7. @__PURE__ tree-shaking annotations added (additive hints for downstream bundlers)
+ *   7. `@__PURE__` tree-shaking annotations added (additive hints for downstream bundlers)
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import * as process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -37,11 +38,16 @@ await fs.mkdir(gateDir, { recursive: true });
 // Old pipeline: plain tsc against the base config (module: commonjs), js only.
 run(process.execPath, [
   path.join(rootDir, 'node_modules', 'typescript', 'bin', 'tsc'),
-  '-p', 'tsconfig.json',
-  '--outDir', oldDir,
-  '--declaration', 'false',
-  '--declarationMap', 'false',
-  '--sourceMap', 'false'
+  '-p',
+  'tsconfig.json',
+  '--outDir',
+  oldDir,
+  '--declaration',
+  'false',
+  '--declarationMap',
+  'false',
+  '--sourceMap',
+  'false'
 ]);
 
 // New pipeline: whatever `npm run build:ts` ships today, copied out of lib/.
