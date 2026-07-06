@@ -3,6 +3,11 @@
  * Migration diff gate (NODE-7603): builds lib/ with the old pipeline (tsc module: commonjs) and
  * the new pipeline (etc/build-lib.mjs), prettier-normalizes both, and diffs them.
  *
+ * Run with: npm run check:lib-emit-diff
+ * Output: a stat summary on stdout and the full normalized diff in .diff-gate/report.diff.
+ * This is temporary migration tooling — it verifies the esbuild-based pipeline against the old
+ * tsc-only emit and is slated for removal after the release soak.
+ *
  * Expected diff classes (anything else must be explained before merging):
  *   1. esbuild interop preamble (__toESM/__toCommonJS/__export helpers) replacing tsc's helpers
  *   2. getter-based export wiring instead of `exports.X = ...` assignments
