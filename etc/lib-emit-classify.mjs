@@ -378,6 +378,440 @@ function normalizeVoidZero(sourceFile) {
   return ts.visitNode(sourceFile, visit);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Tier-2 normalization: alpha-renaming and emit-style canonicalization.
+//
+// The dominant residual class after tier-1 stripping is require-binding naming: tsc calls a
+// binding `error_1`, esbuild calls it `import_error`, and esbuild's collision avoidance renames
+// unrelated locals (`value` -> `value2`) in shadowed scopes. A regex over the diff text cannot
+// discount these safely — `value` vs `value2` is textually indistinguishable from a real change.
+// Alpha-renaming can: rename every FILE-LOCALLY DECLARED binding, on both sides, with the same
+// deterministic positional rule (`$1`, `$2`, ... in declaration order). Two files that differ
+// only by consistent renaming become identical; anything else survives. Soundness properties:
+//   - Only identifiers that resolve to a declaration inside the file are renamed. Property
+//     names, exported names (already proven equal by Check 1), string contents, labels, and
+//     globals are never touched, so `.foo` -> `.bar` or a changed literal still surfaces.
+//   - Implementation failure direction is fail-visible: a resolution bug misaligns the
+//     canonical numbering and GROWS the residual; it cannot silently shrink it.
+//
+// The same pass canonicalizes three other pure emit-style differences observed between the two
+// compilers, each of which would otherwise pollute the residual:
+//   - string/template literals are compared by cooked VALUE (`'\x00'` vs `'\0'` are identical),
+//   - object shorthand is expanded (`{ payload }` -> `{ payload: payload }`) so a renamed value
+//     no longer forces a shorthand/longhand mismatch,
+//   - `__toESM(require(x))` is unwrapped to `require(x)` on the new side — this one is real
+//     interop structure (documented esbuild helper behavior, runtime-verified by the smoke
+//     test), so it is COUNTED and reported rather than silently erased,
+//   - `var`/`const` is normalized to `const` only on require-binding statements (tsc emits
+//     `const x_1 = require(..)`, esbuild emits `var import_x = require(..)`; kind differences
+//     anywhere else are left alone and surface as residual).
+// ---------------------------------------------------------------------------------------------
+
+const isRequireCall = e =>
+  ts.isCallExpression(e) &&
+  ts.isIdentifier(e.expression) &&
+  e.expression.text === 'require' &&
+  e.arguments.length === 1;
+
+const isRequireLikeExpr = e =>
+  isRequireCall(e) ||
+  (ts.isCallExpression(e) &&
+    ts.isIdentifier(e.expression) &&
+    e.expression.text === '__toESM' &&
+    e.arguments.length >= 1 &&
+    isRequireCall(e.arguments[0]));
+
+// Template raw text for synthesized template parts: escape what would change the cooked value.
+const templateRaw = text =>
+  text.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+
+// Collects every name bound by a (possibly destructuring) binding-name node.
+function collectBoundNames(name, declare) {
+  if (ts.isIdentifier(name)) {
+    declare(name.text);
+    return;
+  }
+  if (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name)) {
+    for (const el of name.elements) {
+      if (ts.isBindingElement(el)) collectBoundNames(el.name, declare);
+    }
+  }
+}
+
+// Registers, in DOCUMENT ORDER, every declaration that binds in a function-level scope: `var`s
+// and function declarations found recursively (without crossing into nested function or class
+// bodies), interleaved with the lexical (`let`/`const`/`class`) declarations of the immediate
+// statement list. Document-order interleaving — rather than hoisted-then-lexical phases — is
+// what keeps canonical numbering aligned between the two emits even where one side declares a
+// binding with `const` and the other with `var` (the require bindings: tsc emits const, esbuild
+// emits var; a phase-ordered numbering would systematically misalign every such file).
+function registerFunctionScope(statements, declare) {
+  const walk = (node, immediate) => {
+    if (ts.isFunctionDeclaration(node)) {
+      if (node.name) declare(node.name.text);
+      return;
+    }
+    if (ts.isClassDeclaration(node)) {
+      if (immediate && node.name) declare(node.name.text);
+      return;
+    }
+    if (
+      ts.isFunctionExpression(node) ||
+      ts.isArrowFunction(node) ||
+      ts.isMethodDeclaration(node) ||
+      ts.isConstructorDeclaration(node) ||
+      ts.isGetAccessorDeclaration(node) ||
+      ts.isSetAccessorDeclaration(node) ||
+      ts.isClassExpression(node)
+    ) {
+      return;
+    }
+    if (ts.isVariableStatement(node)) {
+      if (immediate || !(node.declarationList.flags & ts.NodeFlags.BlockScoped)) {
+        for (const d of node.declarationList.declarations) collectBoundNames(d.name, declare);
+      }
+      return;
+    }
+    if (ts.isVariableDeclarationList(node)) {
+      // for-statement heads reached via recursion: only `var` binds at function scope here.
+      if (!(node.flags & ts.NodeFlags.BlockScoped)) {
+        for (const d of node.declarations) collectBoundNames(d.name, declare);
+      }
+      return;
+    }
+    ts.forEachChild(node, child => walk(child, false));
+  };
+  for (const s of statements) walk(s, true);
+}
+
+// Registers the lexical (`let`/`const`/`class`/block-level `function`) declarations of a
+// statement list at scope entry, so closures referencing later-declared siblings still resolve.
+function registerLexicalDeclarations(statements, declare) {
+  for (const s of statements) {
+    if (ts.isVariableStatement(s) && s.declarationList.flags & ts.NodeFlags.BlockScoped) {
+      for (const d of s.declarationList.declarations) collectBoundNames(d.name, declare);
+    } else if (ts.isClassDeclaration(s) && s.name) {
+      declare(s.name.text);
+    } else if (ts.isFunctionDeclaration(s) && s.name) {
+      declare(s.name.text);
+    }
+  }
+}
+
+// OLD-side only: tsc emits directly-exported values as `exports.NAME = <expr>;` with no local
+// binding, and every later reference reads `exports.NAME`; esbuild creates a local `const NAME`
+// (wired to exports via the already-stripped getter block). Check 1 has already proven the
+// export-name sets identical, so rewriting the tsc form into `const NAME = <expr>` (and its
+// reads into plain `NAME`) makes the two sides alpha-comparable without losing any signal —
+// the value expressions themselves still diff normally. Only single-target, top-level
+// assignments convert; anything unusual (chained value exports, later reassignment) is left
+// alone and surfaces as residual.
+function rewriteOldExportAssignments(sourceFile) {
+  const factory = ts.factory;
+
+  const isConvertibleStatement = stmt =>
+    ts.isExpressionStatement(stmt) &&
+    ts.isBinaryExpression(stmt.expression) &&
+    stmt.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+    isExportsPropertyAccess(stmt.expression.left) &&
+    !(
+      ts.isBinaryExpression(stmt.expression.right) &&
+      stmt.expression.right.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      isExportsPropertyAccess(stmt.expression.right.left)
+    );
+
+  const converted = new Set();
+  for (const stmt of sourceFile.statements) {
+    if (isConvertibleStatement(stmt)) converted.add(stmt.expression.left.name.text);
+  }
+  if (converted.size === 0) return sourceFile;
+
+  const rewriteReads = node => {
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'exports' &&
+      converted.has(node.name.text)
+    ) {
+      return factory.createIdentifier(node.name.text);
+    }
+    return ts.visitEachChild(node, rewriteReads, undefined);
+  };
+
+  const declared = new Set();
+  const statements = sourceFile.statements.map(stmt => {
+    if (isConvertibleStatement(stmt) && converted.has(stmt.expression.left.name.text)) {
+      const name = stmt.expression.left.name.text;
+      const init = ts.visitNode(stmt.expression.right, rewriteReads);
+      if (declared.has(name)) {
+        // A reassignment after the converted declaration: keep it an assignment so the printed
+        // output stays valid for prettier's parser.
+        return factory.createExpressionStatement(
+          factory.createAssignment(factory.createIdentifier(name), init)
+        );
+      }
+      declared.add(name);
+      return factory.createVariableStatement(
+        undefined,
+        factory.createVariableDeclarationList(
+          [factory.createVariableDeclaration(name, undefined, undefined, init)],
+          ts.NodeFlags.Const
+        )
+      );
+    }
+    return ts.visitNode(stmt, rewriteReads);
+  });
+
+  return factory.updateSourceFile(sourceFile, statements);
+}
+
+/**
+ * Alpha-normalizes one already-stripped source file: canonical positional renaming of file-local
+ * bindings plus the emit-style canonicalizations described above. Returns the transformed file
+ * and counts of what was mechanically explained.
+ */
+function alphaNormalize(sourceFile, { unwrapToESM }) {
+  let counter = 0;
+  const stats = { renamedBindings: 0, toEsmUnwraps: 0 };
+
+  class Scope {
+    constructor(parent) {
+      this.parent = parent;
+      this.names = new Map();
+    }
+    declare(name) {
+      if (!this.names.has(name)) {
+        counter += 1;
+        this.names.set(name, `$${counter}`);
+        stats.renamedBindings += 1;
+      }
+    }
+    resolve(name) {
+      const own = this.names.get(name);
+      if (own != null) return own;
+      return this.parent != null ? this.parent.resolve(name) : null;
+    }
+  }
+
+  let current = new Scope(null);
+  const factory = ts.factory;
+  // Function bodies whose declarations were already registered at function entry (params share
+  // that scope) — the generic Block case must not open a second scope for them.
+  const functionBodies = new Set();
+
+  function inScope(setup, run) {
+    const saved = current;
+    current = new Scope(saved);
+    try {
+      setup();
+      return run();
+    } finally {
+      current = saved;
+    }
+  }
+
+  // Identifier positions that are names-of-things rather than references — never renamed.
+  function isNamePosition(id) {
+    const p = id.parent;
+    if (p == null) return false;
+    if (ts.isPropertyAccessExpression(p) && p.name === id) return true;
+    if (ts.isPropertyAssignment(p) && p.name === id) return true;
+    if (
+      (ts.isMethodDeclaration(p) ||
+        ts.isPropertyDeclaration(p) ||
+        ts.isGetAccessorDeclaration(p) ||
+        ts.isSetAccessorDeclaration(p)) &&
+      p.name === id
+    ) {
+      return true;
+    }
+    if (ts.isBindingElement(p) && p.propertyName === id) return true;
+    if ((ts.isBreakStatement(p) || ts.isContinueStatement(p)) && p.label === id) return true;
+    if (ts.isLabeledStatement(p) && p.label === id) return true;
+    return false;
+  }
+
+  function renameIfResolvable(id) {
+    const canonical = current.resolve(id.text);
+    return canonical != null ? factory.createIdentifier(canonical) : id;
+  }
+
+  function visit(node) {
+    // Literal canonicalization: compare by cooked value, not source spelling.
+    if (ts.isNumericLiteral(node)) {
+      const value = Number(node.text.replace(/_/g, ''));
+      return Number.isFinite(value) ? factory.createNumericLiteral(String(value)) : node;
+    }
+    if (ts.isStringLiteral(node)) return factory.createStringLiteral(node.text);
+    if (ts.isNoSubstitutionTemplateLiteral(node)) {
+      return factory.createNoSubstitutionTemplateLiteral(node.text, templateRaw(node.text));
+    }
+    if (node.kind === ts.SyntaxKind.TemplateHead) {
+      return factory.createTemplateHead(node.text, templateRaw(node.text));
+    }
+    if (node.kind === ts.SyntaxKind.TemplateMiddle) {
+      return factory.createTemplateMiddle(node.text, templateRaw(node.text));
+    }
+    if (node.kind === ts.SyntaxKind.TemplateTail) {
+      return factory.createTemplateTail(node.text, templateRaw(node.text));
+    }
+
+    // `__toESM(require(x))` -> `require(x)` (new side only; counted, not silent).
+    if (
+      unwrapToESM &&
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === '__toESM' &&
+      node.arguments.length >= 1 &&
+      isRequireCall(node.arguments[0])
+    ) {
+      stats.toEsmUnwraps += 1;
+      return visit(node.arguments[0]);
+    }
+
+    // `{ payload }` -> `{ payload: payload }` (key untouched, value visited as a reference), so
+    // renaming the value binding can't force a shorthand/longhand mismatch between the sides.
+    if (ts.isShorthandPropertyAssignment(node) && node.objectAssignmentInitializer == null) {
+      return factory.createPropertyAssignment(
+        factory.createIdentifier(node.name.text),
+        renameIfResolvable(node.name)
+      );
+    }
+
+    // Object-pattern shorthand binding `{ a }`: keep `a` as the property, rename the binding.
+    if (
+      ts.isBindingElement(node) &&
+      node.propertyName == null &&
+      node.dotDotDotToken == null &&
+      ts.isIdentifier(node.name) &&
+      node.parent != null &&
+      ts.isObjectBindingPattern(node.parent)
+    ) {
+      const canonical = current.resolve(node.name.text);
+      if (canonical != null) {
+        return factory.updateBindingElement(
+          node,
+          undefined,
+          factory.createIdentifier(node.name.text),
+          factory.createIdentifier(canonical),
+          node.initializer != null ? ts.visitNode(node.initializer, visit) : undefined
+        );
+      }
+      return ts.visitEachChild(node, visit, undefined);
+    }
+
+    // Function-likes open a scope: params + own name (expressions) + hoisted vars of the body.
+    if (
+      ts.isFunctionDeclaration(node) ||
+      ts.isFunctionExpression(node) ||
+      ts.isArrowFunction(node) ||
+      ts.isMethodDeclaration(node) ||
+      ts.isConstructorDeclaration(node) ||
+      ts.isGetAccessorDeclaration(node) ||
+      ts.isSetAccessorDeclaration(node)
+    ) {
+      return inScope(
+        () => {
+          if (ts.isFunctionExpression(node) && node.name) current.declare(node.name.text);
+          for (const p of node.parameters) collectBoundNames(p.name, n => current.declare(n));
+          if (node.body != null && ts.isBlock(node.body)) {
+            functionBodies.add(node.body);
+            registerFunctionScope(node.body.statements, n => current.declare(n));
+          }
+        },
+        () => ts.visitEachChild(node, visit, undefined)
+      );
+    }
+
+    if (ts.isClassExpression(node) && node.name) {
+      return inScope(
+        () => current.declare(node.name.text),
+        () => ts.visitEachChild(node, visit, undefined)
+      );
+    }
+
+    if (ts.isBlock(node)) {
+      if (functionBodies.has(node)) {
+        return ts.visitEachChild(node, visit, undefined);
+      }
+      return inScope(
+        () => registerLexicalDeclarations(node.statements, n => current.declare(n)),
+        () => ts.visitEachChild(node, visit, undefined)
+      );
+    }
+
+    if (ts.isCaseBlock(node)) {
+      return inScope(
+        () => {
+          for (const clause of node.clauses) {
+            registerLexicalDeclarations(clause.statements, n => current.declare(n));
+          }
+        },
+        () => ts.visitEachChild(node, visit, undefined)
+      );
+    }
+
+    if (ts.isForStatement(node) || ts.isForInStatement(node) || ts.isForOfStatement(node)) {
+      return inScope(
+        () => {
+          const init = node.initializer;
+          if (
+            init != null &&
+            ts.isVariableDeclarationList(init) &&
+            init.flags & ts.NodeFlags.BlockScoped
+          ) {
+            for (const d of init.declarations) collectBoundNames(d.name, n => current.declare(n));
+          }
+        },
+        () => ts.visitEachChild(node, visit, undefined)
+      );
+    }
+
+    if (ts.isCatchClause(node)) {
+      return inScope(
+        () => {
+          if (node.variableDeclaration != null) {
+            collectBoundNames(node.variableDeclaration.name, n => current.declare(n));
+          }
+        },
+        () => ts.visitEachChild(node, visit, undefined)
+      );
+    }
+
+    // Require-binding statements: normalize declaration kind (tsc `const` vs esbuild `var`).
+    if (ts.isVariableStatement(node)) {
+      const allRequireInits =
+        node.declarationList.declarations.length > 0 &&
+        node.declarationList.declarations.every(
+          d => d.initializer != null && isRequireLikeExpr(d.initializer)
+        );
+      const visited = ts.visitEachChild(node, visit, undefined);
+      if (allRequireInits) {
+        return factory.updateVariableStatement(
+          visited,
+          visited.modifiers,
+          factory.createVariableDeclarationList(
+            [...visited.declarationList.declarations],
+            ts.NodeFlags.Const
+          )
+        );
+      }
+      return visited;
+    }
+
+    if (ts.isIdentifier(node)) {
+      if (isNamePosition(node)) return node;
+      return renameIfResolvable(node);
+    }
+
+    return ts.visitEachChild(node, visit, undefined);
+  }
+
+  registerFunctionScope(sourceFile.statements, n => current.declare(n));
+  const transformed = ts.visitEachChild(sourceFile, visit, undefined);
+  return { sourceFile: transformed, stats };
+}
+
 // `module.exports = __toCommonJS(X)` identifies X unambiguously even on the zero-export files
 // that have no `__export(...)` call to derive a target from (esbuild still emits the
 // `X_exports = {}` / `__toCommonJS(X)` wiring even when there is nothing to put in it — see
@@ -507,10 +941,22 @@ function prepareResidualSource(relFile, oldSourceFile, newSourceFile, targetName
     strippedNew = newResult.transformed;
   }
 
-  strippedOld = normalizeVoidZero(strippedOld);
-  strippedNew = normalizeVoidZero(strippedNew);
+  // Tier-2: alpha-rename local bindings and canonicalize emit-style differences on both sides.
+  // Stats are reported from the new side (the esbuild emit is where the renames/wraps originate).
+  strippedOld = rewriteOldExportAssignments(strippedOld);
+  const oldNorm = alphaNormalize(strippedOld, { unwrapToESM: false });
+  const newNorm = alphaNormalize(strippedNew, { unwrapToESM: true });
+  strippedOld = normalizeVoidZero(oldNorm.sourceFile);
+  strippedNew = normalizeVoidZero(newNorm.sourceFile);
 
-  return { oldPrinted: printer.printFile(strippedOld), newPrinted: printer.printFile(strippedNew) };
+  return {
+    oldPrinted: printer.printFile(strippedOld),
+    newPrinted: printer.printFile(strippedNew),
+    explained: {
+      renamedBindings: newNorm.stats.renamedBindings,
+      toEsmUnwraps: newNorm.stats.toEsmUnwraps
+    }
+  };
 }
 
 // Recursively lists files (relative paths) under dir, matching diff-lib-emit.mjs's own tree
@@ -552,6 +998,8 @@ export async function classifyEmitDiff(oldDir, newDir) {
   const files = [];
   let totalResidualLines = 0;
   let allExportChecksPass = true;
+  let totalRenamedBindings = 0;
+  let totalToEsmUnwraps = 0;
 
   for (const relFile of commonFiles) {
     const oldText = await fs.readFile(path.join(oldDir, relFile), 'utf8');
@@ -569,7 +1017,7 @@ export async function classifyEmitDiff(oldDir, newDir) {
     if (!exportCheckOk) allExportChecksPass = false;
 
     const targetName = exportCall ? exportCall.targetName : null;
-    const { oldPrinted, newPrinted } = prepareResidualSource(
+    const { oldPrinted, newPrinted, explained } = prepareResidualSource(
       relFile,
       oldSourceFile,
       newSourceFile,
@@ -582,16 +1030,25 @@ export async function classifyEmitDiff(oldDir, newDir) {
 
     const diffLines = oldFormatted === newFormatted ? [] : lineDiff(oldFormatted, newFormatted);
     totalResidualLines += diffLines.length;
+    totalRenamedBindings += explained.renamedBindings;
+    totalToEsmUnwraps += explained.toEsmUnwraps;
 
     files.push({
       file: relFile,
       oldExports: [...oldExports].sort(),
       newExports: [...newExports].sort(),
       exportCheck: { ok: exportCheckOk, onlyInOld, onlyInNew },
+      explained,
       residualLineCount: diffLines.length,
       residualDiff: diffLines.join('\n')
     });
   }
 
-  return { files, allExportChecksPass, totalResidualLines };
+  return {
+    files,
+    allExportChecksPass,
+    totalResidualLines,
+    totalRenamedBindings,
+    totalToEsmUnwraps
+  };
 }

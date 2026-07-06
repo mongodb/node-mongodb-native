@@ -21,15 +21,24 @@
  *   7. `@__PURE__` tree-shaking annotations added (additive hints for downstream bundlers)
  *   8. require-binding naming: tsc names them `foo_1`, esbuild names them `import_foo` (and wraps
  *      some, e.g. `dns`/`process`/`mongodb-connection-string-url`, in `__toESM(...)` for CJS/ESM
- *      interop) — this single naming-scheme difference, and the local-variable-shadowing renames
- *      it forces, dominates most of the residual reported below
+ *      interop), forcing local-variable-shadowing renames (`value` becomes `value2`) elsewhere
+ *   9. esbuild syntax respelling with identical semantics: string-escape form (`'\x00'` vs
+ *      `'\0'`), object shorthand (`{ payload: payload }` vs `{ payload }`), and `var` vs `const`
+ *      on the require-binding statements themselves
  *
- * etc/lib-emit-classify.mjs proves classes 1-5 mechanically per file (export-name-set equality,
- * a hard gate) and reports whatever textual residual is left after stripping those classes'
- * exact statement shapes (informational — see that module's header for what it does and does
- * not attempt to explain). Class 8 is not stripped, by design: it dominates nearly every file's
- * residual, so leaving it visible is what makes the residual count meaningful as a real signal
- * rather than a number that's already been explained away.
+ * etc/lib-emit-classify.mjs verifies all of this mechanically per file: export-name-set equality
+ * is the hard gate (exit 1 on any mismatch), and classes 1-5 and 8-9 are then normalized away
+ * soundly (AST-level alpha-renaming of file-local bindings — never property names, exports,
+ * globals, or literal contents — plus by-value literal comparison and counted `__toESM`
+ * unwrapping) so the residual printed below contains ONLY differences no known-safe rule
+ * explains. Read every residual line. The three shapes expected there today, all verified
+ * semantics-preserving by eye (~150 lines total):
+ *   - esbuild string-constant folding ('a' + 'b' emitted as 'ab', concatenated template
+ *     literals merged), plus the prettier re-wraps the changed line lengths force,
+ *   - canonical-numbering cascades where one side hoists a bare `var x;` declaration to a
+ *     different position (declaration order, not content — the lines differ only in `$N`s),
+ *   - call style for exported siblings: tsc's `(0, exports.fn)(...)` vs esbuild's local call.
+ * Anything not matching those shapes is a genuine finding.
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -156,6 +165,10 @@ if (classification.allExportChecksPass) {
     );
   }
 }
+// eslint-disable-next-line no-console
+console.log(
+  `Explained mechanically before the residual: ${classification.totalRenamedBindings} local-binding renames (alpha-normalized) and ${classification.totalToEsmUnwraps} __toESM interop wraps.`
+);
 // eslint-disable-next-line no-console
 console.log(
   `Residual after stripping known-safe transformations: ${classification.totalResidualLines} lines total (was ${full.split('\n').length} before classification)`
