@@ -34,7 +34,7 @@
     "@mongodb-js/zstd": "^7.0.0",
     "gcp-metadata": "^7.0.1",
     "kerberos": "^7.0.0",
-    "mongodb-client-encryption": ">=7.0.0 <7.1.0",
+    "mongodb-client-encryption": "^7.2.0",
     "snappy": "^7.3.2",
     "socks": "^2.8.6"
   },
@@ -96,7 +96,7 @@
     "js-yaml": "^4.2.0",
     "mocha": "^11.7.6",
     "mocha-sinon": "^2.1.2",
-    "mongodb-client-encryption": "^7.0.0",
+    "mongodb-client-encryption": "^7.2.0",
     "nyc": "^17.1.0",
     "prettier": "^3.6.2",
     "semver": "^7.7.2",

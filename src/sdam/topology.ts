@@ -492,7 +492,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   closeCheckedOutConnections() {
     for (const server of this.s.servers.values()) {
-      return server.closeCheckedOutConnections();
+      server.closeCheckedOutConnections();
     }
   }
 

@@ -11,15 +11,26 @@
             "bsonType": "string",
             "queries": [
                 {
-                    "queryType": "substring",
-                    "strMaxLength": {
-                        "$numberInt": "10"
-                    },
+                    "queryType": "prefixPreview",
                     "strMinQueryLength": {
                         "$numberInt": "2"
                     },
                     "strMaxQueryLength": {
-                        "$numberInt": "6"
+                        "$numberInt": "10"
+                    },
+                    "contention": {
+                        "$numberLong": "0"
+                    },
+                    "caseSensitive": true,
+                    "diacriticSensitive": true
+                },
+                {
+                    "queryType": "suffixPreview",
+                    "strMinQueryLength": {
+                        "$numberInt": "2"
+                    },
+                    "strMaxQueryLength": {
+                        "$numberInt": "10"
                     },
                     "contention": {
                         "$numberLong": "0"
