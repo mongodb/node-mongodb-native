@@ -232,6 +232,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /**
    * The maximum number of retries during server overload. Set to 0 to disable overload retries. Defaults to 2.
    * @see https://www.mongodb.com/docs/atlas/overload-errors
+   *
+   * This option works with MongoDB Atlas Server Version 9.0 and above.
    * */
   maxAdaptiveRetries?: number;
   /**
@@ -239,6 +241,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * @see https://www.mongodb.com/docs/atlas/overload-errors
    * More information about the overload policy in drivers:
    * @see https://github.com/mongodb/specifications/blob/master/source/client-backpressure/client-backpressure.md#overload-retry-policy
+   *
+   * This option works with MongoDB Atlas Server Version 9.0 and above.
    * */
   enableOverloadRetargeting?: boolean;
   /** Allow a driver to force a Single topology type with a connection string containing one host */
