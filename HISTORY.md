@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.5.0](https://github.com/mongodb/node-mongodb-native/compare/v7.4.0...v7.5.0) (2026-07-07)
+
+
+### Features
+
+* **NODE-7537:** promote QE string queries (prefix/suffix/substring) ([#4996](https://github.com/mongodb/node-mongodb-native/issues/4996)) ([dc4900c](https://github.com/mongodb/node-mongodb-native/commit/dc4900c36207d70b718c6fc013c5233ceb9f343c))
+
+
+### Bug Fixes
+
+* **NODE-7171:** capture resume token before resumeTokenChanged fires ([#4973](https://github.com/mongodb/node-mongodb-native/issues/4973)) ([371579d](https://github.com/mongodb/node-mongodb-native/commit/371579d45944a67dfa160090a543e1760aa60e2f))
+* **NODE-7411:** iterate all servers on close ([#4967](https://github.com/mongodb/node-mongodb-native/issues/4967)) ([72c0296](https://github.com/mongodb/node-mongodb-native/commit/72c02969f49ebc239dd15ef3deaf9be15fbbb94f))
+
 ## [7.4.0](https://github.com/mongodb/node-mongodb-native/compare/v7.3.0...v7.4.0) (2026-06-25)
 
 
