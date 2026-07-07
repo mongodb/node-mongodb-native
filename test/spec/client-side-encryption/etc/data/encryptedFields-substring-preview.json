@@ -1,6 +1,6 @@
 {
-    "fields": [
-        {
+  "fields": [
+    {
             "keyId": {
                 "$binary": {
                     "base64": "EjRWeBI0mHYSNBI0VniQEg==",
@@ -11,7 +11,7 @@
             "bsonType": "string",
             "queries": [
                 {
-                    "queryType": "substring",
+                    "queryType": "substringPreview",
                     "strMaxLength": {
                         "$numberInt": "10"
                     },
@@ -29,5 +29,5 @@
                 }
             ]
         }
-    ]
+  ]
 }

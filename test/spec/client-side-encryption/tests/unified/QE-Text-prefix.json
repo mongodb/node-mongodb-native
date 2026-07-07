@@ -1,5 +1,5 @@
 {
-  "description": "QE-Text-compactStructuredEncryptionData",
+  "description": "QE-Text-prefix",
   "schemaVersion": "1.25",
   "runOnRequirements": [
     {
@@ -101,7 +101,7 @@
               "bsonType": "string",
               "queries": [
                 {
-                  "queryType": "suffix",
+                  "queryType": "prefix",
                   "contention": {
                     "$numberLong": "0"
                   },
@@ -123,20 +123,17 @@
   ],
   "tests": [
     {
-      "description": "QE Text compactStructuredEncryptionData works",
+      "description": "Insert QE prefix",
       "operations": [
         {
-          "name": "runCommand",
-          "object": "db",
+          "name": "insertOne",
           "arguments": {
-            "command": {
-              "compactStructuredEncryptionData": "coll"
-            },
-            "commandName": "compactStructuredEncryptionData"
+            "document": {
+              "_id": 1,
+              "encryptedText": "foobar"
+            }
           },
-          "expectResult": {
-            "ok": 1
-          }
+          "object": "coll"
         }
       ],
       "expectEvents": [
@@ -190,70 +187,150 @@
             {
               "commandStartedEvent": {
                 "command": {
-                  "compactStructuredEncryptionData": "coll",
-                  "encryptionInformation": {
-                    "type": {
-                      "$numberInt": "1"
-                    },
-                    "schema": {
-                      "db.coll": {
-                        "fields": [
-                          {
-                            "keyId": {
-                              "$binary": {
-                                "base64": "q83vqxI0mHYSNBI0VniQEg==",
-                                "subType": "04"
-                              }
-                            },
-                            "path": "encryptedText",
-                            "bsonType": "string",
-                            "queries": [
-                              {
-                                "queryType": "suffix",
-                                "contention": {
-                                  "$numberLong": "0"
-                                },
-                                "strMinQueryLength": {
-                                  "$numberLong": "3"
-                                },
-                                "strMaxQueryLength": {
-                                  "$numberLong": "30"
-                                },
-                                "caseSensitive": true,
-                                "diacriticSensitive": true
-                              }
-                            ]
-                          }
-                        ],
-                        "strEncodeVersion": {
-                          "$numberInt": "1"
-                        },
-                        "escCollection": "enxcol_.coll.esc",
-                        "ecocCollection": "enxcol_.coll.ecoc"
+                  "insert": "coll",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "encryptedText": {
+                        "$$type": "binData"
                       }
                     }
-                  },
-                  "compactionTokens": {
-                    "encryptedText": {
-                      "ecoc": {
-                        "$binary": {
-                          "base64": "SWO8WEoZ2r2Kx/muQKb7+COizy85nIIUFiHh4K9kcvA=",
-                          "subType": "00"
-                        }
-                      },
-                      "anchorPaddingToken": {
-                        "$binary": {
-                          "base64": "YAiF7Iwhqq1UyfxPvm70xfQJtrIRPrjfD2yRLG1+saQ=",
-                          "subType": "00"
-                        }
-                      }
-                    }
-                  }
+                  ],
+                  "ordered": true
                 },
-                "commandName": "compactStructuredEncryptionData"
+                "commandName": "insert"
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "description": "Query with matching $encStrStartsWith",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedText": "foobar"
+            }
+          },
+          "object": "coll"
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "$expr": {
+                "$encStrStartsWith": {
+                  "input": "$encryptedText",
+                  "prefix": "foo"
+                }
+              }
+            }
+          },
+          "object": "coll",
+          "expectResult": [
+            {
+              "_id": {
+                "$numberInt": "1"
+              },
+              "encryptedText": "foobar",
+              "__safeContent__": [
+                {
+                  "$binary": {
+                    "base64": "wpaMBVDjL4bHf9EtSP52PJFzyNn1R19+iNI/hWtvzdk=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "fmUMXTMV/XRiN0IL3VXxSEn6SQG9E6Po30kJKB8JJlQ=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "vZIDMiFDgjmLNYVrrbnq1zT4hg7sGpe/PMtighSsnRc=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "26Z5G+sHTzV3D7F8Y0m08389USZ2afinyFV3ez9UEBQ=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "q/JEq8of7bE0QE5Id0XuOsNQ4qVpANYymcPQDUL2Ywk=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "Uvvv46LkfbgLoPqZ6xTBzpgoYRTM6FUgRdqZ9eaVojI=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "nMxdq2lladuBJA3lv3JC2MumIUtRJBNJVLp3PVE6nQk=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "hS3V0qq5CF/SkTl3ZWWWgXcAJ8G5yGtkY2RwcHNc5Oc=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "McgwYUxfKj5+4D0vskZymy4KA82s71MR25iV/Enutww=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "Ciqdk1b+t+Vrr6oIlFFk0Zdym5BPmwN3glQ0/VcsVdM=",
+                    "subType": "00"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Query with non-matching $encStrStartsWith",
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedText": "foobar"
+            }
+          },
+          "object": "coll"
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "$expr": {
+                "$encStrStartsWith": {
+                  "input": "$encryptedText",
+                  "prefix": "bar"
+                }
+              }
+            }
+          },
+          "object": "coll",
+          "expectResult": []
         }
       ]
     }

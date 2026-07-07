@@ -241,6 +241,7 @@ export type {
   GCPEncryptionKeyOptions,
   KMIPEncryptionKeyOptions,
   RangeOptions,
+  StringQueryOptions,
   TextQueryOptions
 } from './client-side-encryption/client_encryption';
 export {
