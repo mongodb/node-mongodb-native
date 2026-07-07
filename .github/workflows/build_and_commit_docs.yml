@@ -19,13 +19,13 @@ jobs:
     runs-on: 'ubuntu-latest'
     
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: "Build documentation"
         uses: ./.github/actions/build_documentation
 
       - name: Open Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           title: 'docs: generate docs from latest main [skip-ci]'
           delete-branch: true

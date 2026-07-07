@@ -1,4 +1,4 @@
-import { Binary } from 'bson';
+import { Binary, BSON } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
@@ -344,6 +344,77 @@ describe('ClientEncryption', function () {
         expect(resultEncryptedFields.fields.filter(({ keyId }) => keyId === null)).to.have.lengthOf(
           0
         );
+      });
+    });
+  });
+
+  describe('#encrypt', () => {
+    let clientEncryption;
+    const keyId = new Binary(Buffer.alloc(16), 4);
+
+    beforeEach(function () {
+      clientEncryption = new ClientEncryption(new MockClient(), {
+        keyVaultNamespace: 'client.encryption',
+        kmsProviders: { local: { key: Buffer.alloc(96, 0) } }
+      });
+    });
+
+    afterEach(() => sinon.restore());
+
+    /**
+     * Stubs `makeExplicitEncryptionContext` to capture the `contextOptions` built by `_encrypt`
+     * and abort before the state machine runs, so we can assert on the serialized options.
+     */
+    function captureContextOptions() {
+      const captured: { textOptions?: BSON.Document } = {};
+      sinon
+        .stub(clientEncryption._mongoCrypt, 'makeExplicitEncryptionContext')
+        .callsFake((_value, options) => {
+          captured.textOptions =
+            options.textOptions != null ? BSON.deserialize(options.textOptions) : undefined;
+          throw new Error('stop before state machine');
+        });
+      return captured;
+    }
+
+    context('when both stringOptions and textOptions are provided', () => {
+      it('prefers stringOptions over the deprecated textOptions', async () => {
+        const captured = captureContextOptions();
+
+        await clientEncryption
+          .encrypt('foo', {
+            keyId,
+            algorithm: 'String',
+            contentionFactor: 0,
+            stringOptions: { caseSensitive: true, diacriticSensitive: true },
+            textOptions: { caseSensitive: false, diacriticSensitive: false }
+          })
+          .catch(() => null);
+
+        expect(captured.textOptions).to.deep.equal({
+          caseSensitive: true,
+          diacriticSensitive: true
+        });
+      });
+    });
+
+    context('when only the deprecated textOptions is provided', () => {
+      it('falls back to textOptions', async () => {
+        const captured = captureContextOptions();
+
+        await clientEncryption
+          .encrypt('foo', {
+            keyId,
+            algorithm: 'String',
+            contentionFactor: 0,
+            textOptions: { caseSensitive: false, diacriticSensitive: false }
+          })
+          .catch(() => null);
+
+        expect(captured.textOptions).to.deep.equal({
+          caseSensitive: false,
+          diacriticSensitive: false
+        });
       });
     });
   });

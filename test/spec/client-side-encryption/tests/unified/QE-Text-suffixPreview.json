@@ -11,7 +11,7 @@
         "load-balanced"
       ],
       "csfle": {
-        "minLibmongocryptVersion": "1.15.0"
+        "minLibmongocryptVersion": "1.19.1"
       }
     }
   ],
@@ -207,7 +207,7 @@
       ]
     },
     {
-      "description": "Query with matching $encStrStartsWith",
+      "description": "Query with matching $encStrEndsWith",
       "operations": [
         {
           "name": "insertOne",

@@ -4,13 +4,13 @@ import { expect } from 'chai';
 import * as process from 'process';
 
 import { getCSFLEKMSProviders } from '../../csfle-kms-providers';
+import { type MongoClient } from '../../mongodb';
 import {
-  type Collection,
-  type CommandStartedEvent,
-  type FindCursor,
-  type MongoClient
-} from '../../mongodb';
-import { configureMongocryptdSpawnHooks } from '../../tools/utils';
+  clearFailPoint,
+  configureFailPoint,
+  configureMongocryptdSpawnHooks,
+  sleep
+} from '../../tools/utils';
 import { filterForCommands } from '../shared';
 import { runScriptAndGetProcessInfo } from './resource_tracking_script_builder';
 
@@ -498,6 +498,44 @@ describe('MongoClient.close() Integration', () => {
     });
 
     describe('when MongoClient.close is called', function () {
+      it('clears resources on a never-connected client', async () => {
+        client.db('x').collection('y').find();
+        client.startSession();
+
+        expect(client.topology).to.be.undefined;
+        expect(client.s.activeCursors.size).not.to.equal(0);
+        expect(client.s.activeSessions.size).not.to.equal(0);
+        await client.close();
+        expect(client.topology).to.be.undefined;
+        expect(client.s.activeCursors.size).to.equal(0);
+        expect(client.s.activeSessions.size).to.equal(0);
+      });
+
+      it('clears resources on a connected client', async () => {
+        await client.connect();
+        client.db('x').collection('y').find();
+        client.startSession();
+
+        expect(client.topology).not.to.be.undefined;
+        expect(client.s.activeCursors.size).not.to.equal(0);
+        expect(client.s.activeSessions.size).not.to.equal(0);
+        await client.close();
+        expect(client.topology).to.be.undefined;
+        expect(client.s.activeCursors.size).to.equal(0);
+        expect(client.s.activeSessions.size).to.equal(0);
+      });
+
+      it('is resilient to invalid close() call orders', async () => {
+        // close() before connect()
+        await client.close();
+        await client.connect();
+        expect(client.topology).not.to.be.undefined;
+        // double close
+        await client.close();
+        expect(client.topology).to.be.undefined;
+        await client.close();
+      });
+
       describe('when sessions are supported', function () {
         it('sends an endSessions command', async function () {
           await client.db('a').collection('a').insertOne({ a: 1 });
@@ -714,6 +752,96 @@ describe('MongoClient.close() Integration', () => {
         it.skip('no sockets remain after client.close()', metadata, async () => null);
       });
     });
+  });
+
+  describe('closeCheckedOutConnections', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4', topology: ['replicaset'] }
+    };
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      for (const hostAddress of this.configuration.options.hostAddresses) {
+        const uri = new URL(this.configuration.url());
+        uri.host = hostAddress.toString();
+        uri.searchParams.set('directConnection', 'true');
+        uri.searchParams.delete('replicaSet');
+        uri.searchParams.delete('loadBalanced');
+        await configureFailPoint(
+          this.configuration,
+          {
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['find'],
+              blockConnection: true,
+              blockTimeMS: 5000
+            }
+          },
+          uri.toString()
+        );
+      }
+      client = this.configuration.newClient({}, {});
+    });
+
+    afterEach(async function () {
+      for (const hostAddress of this.configuration.options.hostAddresses) {
+        const uri = new URL(this.configuration.url());
+        uri.host = hostAddress.toString();
+        uri.searchParams.set('directConnection', 'true');
+        uri.searchParams.delete('replicaSet');
+        uri.searchParams.delete('loadBalanced');
+        await clearFailPoint(this.configuration, 'failCommand', uri.toString());
+      }
+      await client?.close();
+    });
+
+    it(
+      'emits connectionCheckedIn immediately followed by connectionClosed for each in-flight connection across topology',
+      metadata,
+      async function () {
+        type ConnEvent = { name: string; address: string; connectionId: number };
+        const eventsByConn = new Map<string, ConnEvent[]>();
+        const push = (e: any) => {
+          const key = `${e.address}:${e.connectionId}`;
+          const connEvents = eventsByConn.get(key) ?? [];
+          eventsByConn.set(key, connEvents);
+          connEvents.push({ name: e.name, address: e.address, connectionId: e.connectionId });
+        };
+        await client.connect();
+
+        client
+          .on('connectionCheckedOut', push)
+          .on('connectionCheckedIn', push)
+          .on('connectionClosed', push);
+
+        const finds = Promise.allSettled([
+          // secondary read ensures at least one connection is checked out from a different pool
+          client.db('test').collection('test').findOne({ a: 1 }, { readPreference: 'secondary' }),
+          client.db('test').collection('test').findOne({ a: 1 }),
+          client.db('test').collection('test').findOne({ a: 1 })
+        ]);
+
+        while (
+          [...eventsByConn.values()].flat().filter(e => e.name === 'connectionCheckedOut').length <
+          3
+        ) {
+          await sleep(200);
+        }
+
+        await client.close();
+        await finds;
+
+        // spec requires each connectionCheckedIn to be immediately followed by connectionClosed
+        for (const connEvents of eventsByConn.values()) {
+          const closeSeq = connEvents
+            .slice(-3)
+            .filter(e => e.name !== 'connectionCheckedOut')
+            .map(e => e.name);
+          expect(closeSeq).to.deep.equal(['connectionCheckedIn', 'connectionClosed']);
+        }
+      }
+    );
   });
 
   describe('Server resource: Cursor', () => {
