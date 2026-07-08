@@ -11,7 +11,7 @@
             "bsonType": "string",
             "queries": [
                 {
-                    "queryType": "substringPreview",
+                    "queryType": "substring",
                     "strMaxLength": {
                         "$numberInt": "10"
                     },
@@ -19,7 +19,10 @@
                         "$numberInt": "2"
                     },
                     "strMaxQueryLength": {
-                        "$numberInt": "10"
+                        "$numberInt": "6"
+                    },
+                    "contention": {
+                        "$numberLong": "0"
                     },
                     "caseSensitive": true,
                     "diacriticSensitive": true

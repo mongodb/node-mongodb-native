@@ -89,15 +89,14 @@ describe('Connection Pool', function () {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
           data: {
-            failCommands: ['insert'],
+            failCommands: ['find'],
             blockConnection: true,
-            blockTimeMS: 500
+            blockTimeMS: 5000
           }
         });
 
         client = this.configuration.newClient();
         await client.connect();
-        await Promise.all(Array.from({ length: 100 }, () => client.db().command({ ping: 1 })));
       });
 
       afterEach(async function () {
@@ -114,28 +113,27 @@ describe('Connection Pool', function () {
           async () => {
             const allClientEvents = [];
             const pushToClientEvents = e => allClientEvents.push(e);
-
             client
               .on('connectionCheckedOut', pushToClientEvents)
               .on('connectionCheckedIn', pushToClientEvents)
               .on('connectionClosed', pushToClientEvents);
 
-            const inserts = Promise.allSettled([
-              client.db('test').collection('test').insertOne({ a: 1 }),
-              client.db('test').collection('test').insertOne({ a: 1 }),
-              client.db('test').collection('test').insertOne({ a: 1 })
+            const finds = Promise.allSettled([
+              client.db('test').collection('test').findOne({ a: 1 }),
+              client.db('test').collection('test').findOne({ a: 1 }),
+              client.db('test').collection('test').findOne({ a: 1 })
             ]);
 
             // wait until all pings are pending on the server
             while (allClientEvents.filter(e => e.name === 'connectionCheckedOut').length < 3) {
               await sleep(1);
             }
-
             const insertConnectionIds = allClientEvents
               .filter(e => e.name === 'connectionCheckedOut')
               .map(({ address, connectionId }) => `${address} + ${connectionId}`);
 
             await client.close();
+            await finds;
 
             const insertCheckInAndCloses = allClientEvents
               .filter(e => e.name === 'connectionCheckedIn' || e.name === 'connectionClosed')
@@ -149,8 +147,6 @@ describe('Connection Pool', function () {
             expect(insertCheckInAndCloses.map(e => e.name)).to.deep.equal(
               Array.from({ length: 3 }, () => ['connectionCheckedIn', 'connectionClosed']).flat(1)
             );
-
-            await inserts;
           }
         );
       });

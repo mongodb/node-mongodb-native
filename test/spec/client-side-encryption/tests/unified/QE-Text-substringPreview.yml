@@ -2,6 +2,7 @@ description: QE-Text-substringPreview
 schemaVersion: "1.25"
 runOnRequirements:
   - minServerVersion: "8.2.0" # Server 8.2.0 adds preview support for QE text queries.
+    maxServerVersion: "8.99.99" # Server 9.0.0 will remove support for "substringPreview": SERVER-129158
     topologies: ["replicaset", "sharded", "load-balanced"] # QE does not support standalone.
     csfle:
       minLibmongocryptVersion: 1.15.0 # For SPM-4158.
@@ -64,7 +65,7 @@ initialData:
                       "queryType": "substringPreview",
                       "contention": { "$numberLong": "0" },
                       "strMinQueryLength": { "$numberLong": "3" },
-                      "strMaxQueryLength": { "$numberLong": "10" },
+                      "strMaxQueryLength": { "$numberLong": "6" },
                       "strMaxLength": { "$numberLong": "20" },
                       "caseSensitive": true,
                       "diacriticSensitive": true,
@@ -348,104 +349,6 @@ tests:
                     "$binary":
                       {
                         "base64": "u9Fvsclwrs9lwIcMPV/fMZD7L3d5anSfJQVjQb9mgLg=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "LZ32ttmLJGOIw9oFaUCn3Sx5uHPTYJPSFpeGRWNqlUc=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "mMsZvGEePTqtl0FJAL/jAdyWNQIlpwN61YIlZsSIZ6s=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "XZcu1a/ZGsIzAl3j4MXQlLo4v2p7kvIqRHtIQYFmL6k=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "Zse27LinlYCEnX6iTmJceI33mEJxFb0LdPxp0RiMOaQ=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "vOv2Hgb2/sBpnX9XwFbIN6yDxhjchwlmczUf82W2tp4=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "oQxZ9A6j3x5j6x1Jqw/N9tpP4rfWMjcV3y+a3PkrL7c=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "/D7ew3EijyUnmT22awVFspcuyo3JChJcDeCPwpljzVM=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "BEmmwqyamt9X3bcWDld61P01zquy8fBHAXq3SHAPP0M=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "wygD9/kAo1KsRvtr1v+9/lvqoWdKwgh6gDHvAQfXPPk=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "pRTKgF/uksrF1c1AcfSTY6ZhqBKVud1vIztQ4/36SLs=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "C4iUo8oNJsjJ37BqnBgIgSQpf99X2Bb4W5MZEAmakHU=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "icoE53jIq6Fu/YGKUiSUTYyZ8xdiTQY9jJiGxVJObpw=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "oubCwk0V6G2RFWtcOnYDU4uUBoXBrhBRi4nZgrYj9JY=",
-                        "subType": "00",
-                      },
-                  },
-                  {
-                    "$binary":
-                      {
-                        "base64": "IyqhQ9nGhzEi5YW2W6v1kGU5DY2u2qSqbM/qXdLdWVU=",
                         "subType": "00",
                       },
                   },
