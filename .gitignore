@@ -62,7 +62,6 @@ build/Release
 node_modules
 yarn.lock
 lib/
-lib-intermediate/
 .diff-gate/
 *.tgz
 *.d.ts

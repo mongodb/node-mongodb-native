@@ -5,8 +5,15 @@
     "strict": true,
     "alwaysStrict": true,
     "target": "ES2023",
-    "module": "commonJS",
-    "moduleResolution": "node",
+    // node16 still emits CommonJS for this package (no "type": "module") but, unlike
+    // `module: commonjs`, models Node's real semantics: dynamic `import()` is legal inside CJS
+    // and is preserved verbatim instead of being downleveled to `require()` (NODE-7603).
+    "module": "node16",
+    "moduleResolution": "node16",
+    // node16 defaults esModuleInterop on; keep it off to preserve this package's historical
+    // emit exactly (`import * as x` stays `const x = require(...)`, no __importStar wrappers —
+    // which sinon-based module stubbing in the test suite also relies on).
+    "esModuleInterop": false,
     "skipLibCheck": true,
     "lib": [
       "es2023"

@@ -22,17 +22,15 @@ describe('bundling the runtime adapters into ESM output', function () {
     async function () {
       // NODE-7603: resolveRuntimeAdapters used to call require('os'), which throws in bundled ESM
       // output (no `require` in module scope). This test replicates what ships in lib/ for this
-      // file — tsc ESM emit (module: es2022, mirroring tsconfig.build.json) followed by esbuild's
-      // ESM->CJS transform (mirroring etc/build-lib.mjs) — then bundles that CJS to ESM the way a
-      // downstream Vite/esbuild user build would, and executes it with no `require` in module scope.
+      // file — tsc CJS emit under `module: node16` (mirroring tsconfig.json, which preserves
+      // dynamic import() instead of downleveling it to require) — then bundles that CJS to ESM
+      // the way a downstream Vite/esbuild user build would, and executes it with no `require` in
+      // module scope. Under the old `module: commonjs` setting this transpile emits
+      // `Promise.resolve().then(() => require('os'))` and the bundled app fails — which is
+      // exactly the regression this test exists to catch.
       const source = fs.readFileSync(path.join(repoRoot, 'src', 'runtime_adapters.ts'), 'utf8');
-      const { outputText: esmIntermediate } = ts.transpileModule(source, {
-        compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2023 }
-      });
-      const { code: compiledCjs } = await esbuild.transform(esmIntermediate, {
-        format: 'cjs',
-        platform: 'node',
-        target: 'node20'
+      const { outputText: compiledCjs } = ts.transpileModule(source, {
+        compilerOptions: { module: ts.ModuleKind.Node16, target: ts.ScriptTarget.ES2023 }
       });
 
       tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mongodb-esm-bundle-'));

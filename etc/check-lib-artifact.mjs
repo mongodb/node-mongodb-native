@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Shipped-artifact smoke test: loads the built lib/ through both module systems in a
- * real Node process and forces runtime-adapter resolution. This guards the esbuild emit of the
- * shipped bytes (interop, export wiring); the bundled-ESM bug itself is covered by
- * test/unit/bundling.test.ts.
+ * real Node process and forces runtime-adapter resolution. This guards the emitted shipped
+ * bytes (interop, export wiring, the preserved dynamic import); the bundled-ESM bug itself is
+ * covered by test/unit/bundling.test.ts.
  */
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -32,10 +32,11 @@ assert.equal(
   'default os adapter resolves via dynamic import()'
 );
 
-// Drift-proof guard for the pipeline contract: the shipped bytes must retain the
-// dynamic import('os') and must not contain a downleveled require('os'). The runtime checks
-// above cannot catch a downleveling regression, because real Node always has `require`, so a
-// broken emit still passes them; only the artifact text itself proves the pipeline held.
+// Drift-proof guard for the emit contract: the shipped bytes must retain the dynamic
+// import('os') and must not contain a downleveled require('os') — i.e. tsconfig's
+// `module: node16` must not regress to `commonjs`-style downleveling. The runtime checks above
+// cannot catch that regression, because real Node always has `require`, so a broken emit still
+// passes them; only the artifact text itself proves the emit contract held.
 const runtimeAdaptersEmit = await readFile(
   new URL('../lib/runtime_adapters.js', import.meta.url),
   'utf8'

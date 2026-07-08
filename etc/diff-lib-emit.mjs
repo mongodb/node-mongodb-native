@@ -1,54 +1,26 @@
 #!/usr/bin/env node
 /**
- * Migration diff gate (NODE-7603): builds lib/ with the old pipeline (tsc module: commonjs) and
- * the new pipeline (etc/build-lib.mjs), prettier-normalizes both, and diffs them.
+ * Migration diff gate (NODE-7603): builds lib/ with the previous compiler settings
+ * (`module: commonjs`) and with the current ones (`module: node16`), prettier-normalizes both,
+ * and diffs them, so reviewers can see exactly how the shipped emit changes.
  *
  * Run with: npm run check:lib-emit-diff
- * Output: a stat summary on stdout, the full normalized diff in .diff-gate/report.diff, the
- * unexplained remainder in .diff-gate/residual.diff (read that one — it's the review artifact),
- * plus
- * an AST-based classification (etc/lib-emit-classify.mjs) that mechanically checks the diff
- * instead of relying on the classes below being sampled correctly by a human. This is temporary
- * migration tooling — it verifies the esbuild-based pipeline against the old tsc-only emit and
- * is slated for removal after the release soak.
+ * Output: a stat summary on stdout and the full normalized diff in .diff-gate/report.diff.
+ * This is temporary migration tooling — it exists to make the emitter-settings change
+ * reviewable and is slated for removal after the release soak.
  *
- * Expected diff classes (anything else must be explained before merging):
- *   1. esbuild interop preamble (__toESM/__toCommonJS/__export helpers) replacing tsc's helpers
- *   2. getter-based export wiring instead of `exports.X = ...` assignments
- *   3. `import('os')` preserved in runtime_adapters.js instead of downleveled to require
- *   4. `0 && (module.exports = {...})` cjs-module-lexer annotations
- *   5. `undefined` rewritten to `void 0` (semantically identical esbuild output form)
- *   6. comments stripped from emitted js (esbuild keeps only license comments; types/IntelliSense
- *      are unaffected — mongodb.d.ts is tsc-generated)
- *   7. `@__PURE__` tree-shaking annotations added (additive hints for downstream bundlers)
- *   8. require-binding naming: tsc names them `foo_1`, esbuild names them `import_foo` (and wraps
- *      some, e.g. `dns`/`process`/`mongodb-connection-string-url`, in `__toESM(...)` for CJS/ESM
- *      interop), forcing local-variable-shadowing renames (`value` becomes `value2`) elsewhere
- *   9. esbuild syntax respelling with identical semantics: string-escape form (`'\x00'` vs
- *      `'\0'`), object shorthand (`{ payload: payload }` vs `{ payload }`), and `var` vs `const`
- *      on the require-binding statements themselves
- *
- * etc/lib-emit-classify.mjs verifies all of this mechanically per file: export-name-set equality
- * is the hard gate (exit 1 on any mismatch), and classes 1-5 and 8-9 are then normalized away
- * soundly (AST-level alpha-renaming of file-local bindings — never property names, exports,
- * globals, or literal contents — plus by-value literal comparison and counted `__toESM`
- * unwrapping) so the residual printed below contains ONLY differences no known-safe rule
- * explains. Read every residual line. The three shapes expected there today, all verified
- * semantics-preserving by eye (~150 lines total):
- *   - esbuild string-constant folding ('a' + 'b' emitted as 'ab', concatenated template
- *     literals merged), plus the prettier re-wraps the changed line lengths force,
- *   - canonical-numbering cascades where one side hoists a bare `var x;` declaration to a
- *     different position (declaration order, not content — the lines differ only in `$N`s),
- *   - call style for exported siblings: tsc's `(0, exports.fn)(...)` vs esbuild's local call.
- * Anything not matching those shapes is a genuine finding.
+ * Expected diff (anything else must be explained before merging): exactly one hunk — the
+ * dynamic `import('os')` in runtime_adapters.js preserved instead of downleveled to
+ * `Promise.resolve().then(() => require('os'))`, which is the change this migration exists
+ * for. Every other shipped file is byte-identical: `esModuleInterop: false` is pinned in
+ * tsconfig.json precisely so node16 changes nothing about the emit besides honoring dynamic
+ * import inside CJS.
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import * as process from 'node:process';
 import { fileURLToPath } from 'node:url';
-
-import { classifyEmitDiff } from './lib-emit-classify.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
@@ -58,18 +30,24 @@ const newDir = path.join(gateDir, 'new');
 
 const run = (cmd, args) => execFileSync(cmd, args, { cwd: rootDir, stdio: 'inherit' });
 
-// maxRetries/retryDelay: a recursive delete of a directory that recently had ~260 files written
+// maxRetries/retryDelay: a recursive delete of a directory that recently had many files written
 // into it can transiently fail with ENOTEMPTY (e.g. a filesystem indexer briefly touching the
-// directory) — retry a few times instead of crashing the whole gate. Observed directly in this
-// workspace; see etc/lib-emit-classify.mjs's history for the same pattern.
+// directory) — retry a few times instead of crashing the whole gate.
 await fs.rm(gateDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
 await fs.mkdir(gateDir, { recursive: true });
 
-// Old pipeline: plain tsc against the base config (module: commonjs), js only.
+// Old emit: the pre-migration compiler settings, overridden on the CLI so the base tsconfig
+// (now node16) still produces what we used to ship.
 run(process.execPath, [
   path.join(rootDir, 'node_modules', 'typescript', 'bin', 'tsc'),
   '-p',
   'tsconfig.json',
+  '--module',
+  'commonjs',
+  '--moduleResolution',
+  'node',
+  '--noEmitHelpers',
+  'true',
   '--outDir',
   oldDir,
   '--declaration',
@@ -80,12 +58,27 @@ run(process.execPath, [
   'false'
 ]);
 
-// New pipeline: whatever `npm run build:ts` ships today, copied out of lib/.
+// New emit: whatever `npm run build:ts` ships today, copied out of lib/.
 run('npm', ['run', 'build:ts']);
 await fs.cp(path.join(rootDir, 'lib'), newDir, {
   recursive: true,
   filter: src => !src.endsWith('.map') && !src.endsWith('.d.ts')
 });
+
+// The shipped files end with a sourceMappingURL pointer; the old-side build above omits
+// sourcemaps entirely, so strip the pointer line to keep the diff about code, not artifacts of
+// how the two trees were produced.
+async function stripSourceMapPointers(dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true, recursive: true });
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.js')) continue;
+    const filePath = path.join(entry.parentPath ?? entry.path, entry.name);
+    const text = await fs.readFile(filePath, 'utf8');
+    const stripped = text.replace(/^\/\/# sourceMappingURL=.*\n?/m, '');
+    if (stripped !== text) await fs.writeFile(filePath, stripped);
+  }
+}
+await stripSourceMapPointers(newDir);
 
 // Normalize formatting so the diff shows structure, not prettier-irrelevant layout.
 // --ignore-path overrides prettier 3's default of [.gitignore, .prettierignore]: .diff-gate/ is
@@ -129,65 +122,3 @@ await fs.writeFile(path.join(gateDir, 'report.diff'), full);
 console.log(report);
 // eslint-disable-next-line no-console
 console.log(`Full diff written to .diff-gate/report.diff (${full.split('\n').length} lines)`);
-
-// Mechanically classify the diff above instead of trusting that the "expected diff classes"
-// list in this file's header was sampled correctly: prove export-name-set equality per file
-// (hard gate) and report whatever's structurally left over after stripping known-safe shapes.
-const classification = await classifyEmitDiff(oldDir, newDir);
-
-const byResidualDesc = [...classification.files].sort(
-  (a, b) => b.residualLineCount - a.residualLineCount
-);
-const worthPrinting = byResidualDesc.filter(f => !f.exportCheck.ok || f.residualLineCount > 0);
-const cleanFileCount = classification.files.length - worthPrinting.length;
-
-for (const f of worthPrinting) {
-  const exportNote = f.exportCheck.ok
-    ? ''
-    : ` EXPORT MISMATCH missing=[${f.exportCheck.onlyInOld.join(', ')}] extra=[${f.exportCheck.onlyInNew.join(', ')}]`;
-  // eslint-disable-next-line no-console
-  console.log(`  ${f.file}: ${f.residualLineCount} residual line(s)${exportNote}`);
-}
-if (cleanFileCount > 0) {
-  // eslint-disable-next-line no-console
-  console.log(`  (+ ${cleanFileCount} file(s) with zero residual and a clean export-set check)`);
-}
-
-const totalFiles = classification.files.length;
-const passingFiles = classification.files.filter(f => f.exportCheck.ok).length;
-if (classification.allExportChecksPass) {
-  // eslint-disable-next-line no-console
-  console.log(`Export-set check: ${passingFiles}/${totalFiles} files OK`);
-} else {
-  const failures = classification.files.filter(f => !f.exportCheck.ok);
-  for (const f of failures) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Export-set check: FAILED — ${f.file}: missing [${f.exportCheck.onlyInOld.join(', ')}], extra [${f.exportCheck.onlyInNew.join(', ')}]`
-    );
-  }
-}
-// Persist the residual itself, not just its size — reviewers should be able to read every line.
-const residualDetail = classification.files
-  .filter(f => f.residualLineCount > 0)
-  .sort((a, b) => b.residualLineCount - a.residualLineCount)
-  .map(f => `=== ${f.file} (${f.residualLineCount} residual line(s)) ===\n${f.residualDiff}\n`)
-  .join('\n');
-await fs.writeFile(path.join(gateDir, 'residual.diff'), residualDetail);
-
-// eslint-disable-next-line no-console
-console.log(
-  `Explained mechanically before the residual: ${classification.totalRenamedBindings} local-binding renames (alpha-normalized) and ${classification.totalToEsmUnwraps} __toESM interop wraps.`
-);
-// eslint-disable-next-line no-console
-console.log(
-  `Residual after stripping known-safe transformations: ${classification.totalResidualLines} lines total (was ${full.split('\n').length} before classification)`
-);
-// eslint-disable-next-line no-console
-console.log('Residual detail written to .diff-gate/residual.diff');
-
-// The export-set check is the only thing here with real teeth: an unexplained residual is
-// reported for a human to read, but only a dropped/renamed export fails the build.
-if (!classification.allExportChecksPass) {
-  process.exit(1);
-}
