@@ -134,7 +134,6 @@
     "check:lambda:aws": "npm run build:bundle && nyc mocha --config test/mocha_lambda.js test/integration/node-specific/examples/aws_handler.test.js",
     "check:lint": "npm run build:dts && npm run check:lib-artifact && npm run check:dts && npm run check:eslint && npm run check:tsd",
     "check:lib-artifact": "node etc/check-lib-artifact.mjs",
-    "check:lib-emit-diff": "node etc/diff-lib-emit.mjs",
     "check:eslint": "npm run build:dts && ESLINT_USE_FLAT_CONFIG=false eslint -v && ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=0 --ext '.js,.ts' src test",
     "check:tsd": "tsd --version && tsd",
     "check:dependencies": "npm run build:bundle && mocha test/action/dependency.test.ts",
