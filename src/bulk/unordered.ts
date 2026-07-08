@@ -31,16 +31,28 @@ export class UnorderedBulkOperation extends BulkOperationBase {
     batchType: BatchType,
     document: Document | UpdateStatement | DeleteStatement
   ): this {
-    // Serialize the operation once here using the bulk op's resolved BSON
-    // options; reuse the bytes for both the size check/splitting and the wire
-    // message (via a DocumentSequence). Replaces the separate size pass.
-    const bson = this.s.bsonOptions;
-    const buffer = BSON.serialize(document, {
-      checkKeys: this.s.checkKeys,
-      ignoreUndefined: bson.ignoreUndefined,
-      serializeFunctions: bson.serializeFunctions
-    });
-    const bsonSize = buffer.length;
+    // Serialize the operation once here and reuse the bytes for both the size
+    // check/splitting and the wire message (via a DocumentSequence), replacing
+    // the separate size pass. Under auto-encryption the command is sent as a
+    // BSON array rather than a document sequence, so the buffer would never be
+    // reused; there we only measure the size (matching the previous behavior)
+    // and leave `buffer` undefined so nothing is retained on the batch.
+    let buffer: Uint8Array | undefined;
+    let bsonSize: number;
+    if (this.s.usingAutoEncryption) {
+      bsonSize = BSON.calculateObjectSize(document, {
+        checkKeys: false,
+        ignoreUndefined: false
+      } as any);
+    } else {
+      const bson = this.s.bsonOptions;
+      buffer = BSON.serialize(document, {
+        checkKeys: this.s.checkKeys,
+        ignoreUndefined: bson.ignoreUndefined,
+        serializeFunctions: bson.serializeFunctions
+      });
+      bsonSize = buffer.length;
+    }
 
     // Throw error if the doc is bigger than the max BSON size
     if (bsonSize >= this.s.maxBsonObjectSize) {
@@ -92,7 +104,7 @@ export class UnorderedBulkOperation extends BulkOperationBase {
     }
 
     this.s.currentBatch.operations.push(document);
-    this.s.currentBatch.serializedOperations.push(buffer);
+    if (buffer != null) this.s.currentBatch.serializedOperations.push(buffer);
     this.s.currentBatch.originalIndexes.push(this.s.currentIndex);
     this.s.currentIndex = this.s.currentIndex + 1;
 
