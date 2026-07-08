@@ -91,7 +91,7 @@ describe('package.json', function () {
             // here is no longer downleveled to `require` (tsconfig `module: node16`, NODE-7603),
             // and a genuine import() of a .ts path would go to Node's native ESM loader, which
             // cannot resolve the driver's extensionless internal imports — so load via require.
-            // @ts-expect-error: requiring a .ts path from the inside of the forked process
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { getSnappy } = require('./src/deps.ts');
             const snappyImport = getSnappy();
             expect(snappyImport).to.have.nested.property(
@@ -120,7 +120,7 @@ describe('package.json', function () {
         if (depName === 'snappy') {
           itInNodeProcess('getSnappy returns fulfilled import', async function ({ expect }) {
             // See the require() rationale on the rejected-import test above (NODE-7603).
-            // @ts-expect-error: requiring a .ts path from the inside of the forked process
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { getSnappy } = require('./src/deps.ts');
             const snappyImport = getSnappy();
             expect(snappyImport).to.have.property('compress').that.is.a('function');
