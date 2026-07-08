@@ -96,15 +96,29 @@ describe('Command Monitoring Events - unit/cmap', function () {
     });
   });
 
-  it('reconstructs documents/updates/deletes document sequences into arrays', function () {
-    const command = {
-      insert: 'coll',
-      documents: new DocumentSequence('documents', [{ _id: 1 }, { _id: 2 }]),
-      $db: 'test'
-    };
+  for (const { name, field, documents } of [
+    { name: 'insert', field: 'documents', documents: [{ _id: 1 }, { _id: 2 }] },
+    { name: 'update', field: 'updates', documents: [{ q: { _id: 1 }, u: { $set: { a: 1 } } }] },
+    { name: 'delete', field: 'deletes', documents: [{ q: { _id: 1 }, limit: 1 }] }
+  ]) {
+    it(`reconstructs the ${field} document sequence into an array (${name} command)`, function () {
+      const command = {
+        [name]: 'coll',
+        [field]: new DocumentSequence(field, documents),
+        $db: 'test'
+      };
+      const msg = new OpMsgRequest('test', command, {});
+      const event = new CommandStartedEvent({ id: 1, address: '127.0.0.1:27017' }, msg);
+      expect(event.command[field]).to.be.an('array').that.deep.equals(documents);
+    });
+  }
+
+  it('leaves non-document-sequence fields untouched', function () {
+    const pipeline = [{ $match: { a: 1 } }];
+    const command = { aggregate: 'coll', pipeline, cursor: {}, $db: 'test' };
     const msg = new OpMsgRequest('test', command, {});
     const event = new CommandStartedEvent({ id: 1, address: '127.0.0.1:27017' }, msg);
-    expect(Array.isArray(event.command.documents)).to.equal(true);
-    expect(event.command.documents).to.deep.equal([{ _id: 1 }, { _id: 2 }]);
+    expect(event.command.pipeline).to.be.an('array').that.deep.equals(pipeline);
+    expect(event.command.cursor).to.deep.equal({});
   });
 });
