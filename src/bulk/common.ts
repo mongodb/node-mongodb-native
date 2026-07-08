@@ -572,6 +572,14 @@ async function executeCommands(
       thrownError = error;
     }
 
+    // Release this batch's serialized buffers now that it has been sent. The
+    // operation keeps its own reference to the array for the duration of its
+    // execution and any retries, so reassigning here (rather than mutating the
+    // shared array) only drops the bulk operation's copy. This caps retained
+    // serialized bytes at roughly one in-flight batch instead of the whole
+    // bulk write's payload.
+    batch.serializedOperations = [];
+
     if (thrownError != null) {
       if (thrownError instanceof MongoWriteConcernError) {
         mergeBatchResults(batch, bulkOperation.s.bulkResult, thrownError, result);

@@ -1889,5 +1889,25 @@ describe('Bulk', function () {
         expect(commands[0].command.documents).to.be.an('array').with.lengthOf(2);
       });
     });
+
+    context('when the operation has been executed', function () {
+      it('releases the serialized operation buffers held on each batch', async function () {
+        const collection = client.db(DB_NAME).collection<{ _id: number }>('buffer_release');
+        const bulk = collection.initializeOrderedBulkOp();
+        bulk.insert({ _id: 1 });
+        bulk.insert({ _id: 2 });
+
+        // The getter returns a copy of the batches array, but the Batch objects
+        // themselves are the same instances the driver executes and survive the
+        // internal batches array being cleared after execution.
+        const batches = bulk.batches;
+        expect(batches).to.have.lengthOf(1);
+        expect(batches[0].serializedOperations).to.have.lengthOf(2);
+
+        await bulk.execute();
+
+        expect(batches[0].serializedOperations).to.have.lengthOf(0);
+      });
+    });
   });
 });
