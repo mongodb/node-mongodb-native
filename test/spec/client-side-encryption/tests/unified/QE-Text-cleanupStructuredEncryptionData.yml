@@ -1,11 +1,10 @@
 description: QE-Text-cleanupStructuredEncryptionData
 schemaVersion: "1.25"
 runOnRequirements:
-  - minServerVersion: "8.2.0" # Server 8.2.0 adds preview support for QE text queries.
-    maxServerVersion: "8.99.99" # Server 9.0.0-rc0 removes support for "prefixPreview" and "suffixPreview": SERVER-123416
+  - minServerVersion: "9.0.0" # Server 9.0.0 adds stable support for QE text prefix and suffix queries.
     topologies: ["replicaset", "sharded", "load-balanced"] # QE does not support standalone.
     csfle:
-      minLibmongocryptVersion: 1.15.0 # For SPM-4158.
+      minLibmongocryptVersion: 1.19.0 # For MONGOCRYPT-870.
 createEntities:
   - client:
       id: &client "client"
@@ -61,7 +60,7 @@ initialData:
                 "bsonType": "string",
                 "queries": [
                     {
-                      "queryType": "suffixPreview",
+                      "queryType": "suffix",
                       "contention": { "$numberLong": "0" },
                       "strMinQueryLength": { "$numberLong": "3" },
                       "strMaxQueryLength": { "$numberLong": "30" },

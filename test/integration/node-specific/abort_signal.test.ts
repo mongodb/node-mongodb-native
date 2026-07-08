@@ -501,15 +501,21 @@ describe('AbortSignal support', () => {
               }
             }
 
-            client.on('commandStarted', e => e.commandName === cursorName && controller.abort());
+            let abortedAt = 0;
+            client.on('commandStarted', e => {
+              if (e.commandName === cursorName) {
+                abortedAt = performance.now();
+                controller.abort();
+              }
+            });
             let commandFailed = false;
             client.on('commandFailed', e => e.commandName === cursorName && (commandFailed = true));
             const willBeResultBlocked = iterateUntilDocumentOrError(cursor, cursorAPI, args);
 
-            const start = performance.now();
             const result = await willBeResultBlocked;
             const end = performance.now();
-            expect(end - start).to.be.lessThan(10); // shouldn't wait for the blocked connection
+            expect(abortedAt, 'commandStarted handler did not fire').to.be.greaterThan(0);
+            expect(end - abortedAt).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
             expect(result).to.be.instanceOf(DOMException);
 
@@ -933,17 +939,22 @@ describe('AbortSignal support', () => {
     });
 
     it(`rejects findOne`, async () => {
+      let abortedAt = 0;
       client.on(
         'commandStarted',
         // Abort a bit after find has started:
-        ev => ev.commandName === 'find' && sleep(1).then(() => controller.abort())
+        ev =>
+          ev.commandName === 'find' &&
+          sleep(1).then(() => {
+            abortedAt = performance.now();
+            controller.abort();
+          })
       );
 
-      const start = performance.now();
       const result = await collection.findOne({}, { signal }).catch(error => error);
       const end = performance.now();
-      // TODO(NODE-6833): This duration was bumped from 10 to 40 to reduce flakiness, if this fails again investigate it.
-      expect(end - start).to.be.lessThan(40); // shouldn't wait for the blocked connection
+      expect(abortedAt, 'commandStarted handler did not fire').to.be.greaterThan(0);
+      expect(end - abortedAt).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
     });
@@ -974,16 +985,22 @@ describe('AbortSignal support', () => {
     });
 
     it(`rejects command`, async () => {
+      let abortedAt = 0;
       client.on(
         'commandStarted',
         // Abort a bit after ping has started:
-        ev => ev.commandName === 'ping' && sleep(1).then(() => controller.abort())
+        ev =>
+          ev.commandName === 'ping' &&
+          sleep(1).then(() => {
+            abortedAt = performance.now();
+            controller.abort();
+          })
       );
 
-      const start = performance.now();
       const result = await db.command({ ping: 1 }, { signal }).catch(error => error);
       const end = performance.now();
-      expect(end - start).to.be.lessThan(10); // shouldn't wait for the blocked connection
+      expect(abortedAt, 'commandStarted handler did not fire').to.be.greaterThan(0);
+      expect(end - abortedAt).to.be.lessThan(10); // shouldn't wait for the blocked connection
 
       expect(result).to.be.instanceOf(DOMException);
     });
