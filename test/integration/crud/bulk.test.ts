@@ -4,6 +4,7 @@ import { expect } from 'chai';
 
 import {
   type Collection,
+  type CommandStartedEvent,
   Double,
   Long,
   MongoBatchReExecutionError,
@@ -1858,6 +1859,35 @@ describe('Bulk', function () {
           'bulk operation writes were made outside of transaction'
         );
       }
+    });
+  });
+
+  describe('#insertMany', function () {
+    context('when a document field is set to undefined', function () {
+      it('inserts the field as null by default (ignoreUndefined defaults to false)', async function () {
+        const collection = client
+          .db(DB_NAME)
+          .collection<{ _id: number; a?: null }>('undefined_fields');
+        await collection.insertMany([{ _id: 1, a: undefined }]);
+
+        const doc = await collection.findOne({ _id: 1 });
+        expect(doc).to.have.property('a', null);
+      });
+    });
+
+    context('when monitoring commands', function () {
+      it('reports the documents field of the insert command as an array', async function () {
+        const collection = client.db(DB_NAME).collection<{ _id: number }>('command_events');
+        const commands: CommandStartedEvent[] = [];
+        client.on('commandStarted', event => {
+          if (event.commandName === 'insert') commands.push(event);
+        });
+
+        await collection.insertMany([{ _id: 1 }, { _id: 2 }]);
+
+        expect(commands).to.have.lengthOf(1);
+        expect(commands[0].command.documents).to.be.an('array').with.lengthOf(2);
+      });
     });
   });
 });

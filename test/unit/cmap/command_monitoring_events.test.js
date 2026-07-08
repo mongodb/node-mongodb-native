@@ -1,6 +1,11 @@
 'use strict';
 
-const { OpQueryRequest, OpMsgRequest, CommandStartedEvent } = require('../../mongodb');
+const {
+  OpQueryRequest,
+  OpMsgRequest,
+  CommandStartedEvent,
+  DocumentSequence
+} = require('../../mongodb');
 const { expect } = require('chai');
 
 describe('Command Monitoring Events - unit/cmap', function () {
@@ -89,5 +94,17 @@ describe('Command Monitoring Events - unit/cmap', function () {
       expect(startEvent).to.have.property('connectionId').that.is.a('string');
       expect(startEvent).to.have.property('command').that.deep.equals(query.query.$query);
     });
+  });
+
+  it('reconstructs documents/updates/deletes document sequences into arrays', function () {
+    const command = {
+      insert: 'coll',
+      documents: new DocumentSequence('documents', [{ _id: 1 }, { _id: 2 }]),
+      $db: 'test'
+    };
+    const msg = new OpMsgRequest('test', command, {});
+    const event = new CommandStartedEvent({ id: 1, address: '127.0.0.1:27017' }, msg);
+    expect(Array.isArray(event.command.documents)).to.equal(true);
+    expect(event.command.documents).to.deep.equal([{ _id: 1 }, { _id: 2 }]);
   });
 });

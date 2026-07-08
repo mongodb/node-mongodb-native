@@ -157,6 +157,7 @@ export class Batch<T = Document> {
   originalIndexes: number[];
   batchType: BatchType;
   operations: T[];
+  serializedOperations: Uint8Array[];
   size: number;
   sizeBytes: number;
 
@@ -166,6 +167,7 @@ export class Batch<T = Document> {
     this.originalIndexes = [];
     this.batchType = batchType;
     this.operations = [];
+    this.serializedOperations = [];
     this.size = 0;
     this.sizeBytes = 0;
   }
@@ -538,12 +540,22 @@ async function executeCommands(
       }
     }
 
+    // Reuse the per-operation buffers serialized during addToOperationsList,
+    // except under auto-encryption where libmongocrypt requires the plaintext
+    // command (document sequences are not permitted per the bulkWrite spec).
+    const serialized = bulkOperation.s.usingAutoEncryption ? undefined : batch.serializedOperations;
+
     const operation = isInsertBatch(batch)
-      ? new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+      ? new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions, serialized)
       : isUpdateBatch(batch)
-        ? new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+        ? new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions, serialized)
         : isDeleteBatch(batch)
-          ? new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+          ? new DeleteOperation(
+              bulkOperation.s.namespace,
+              batch.operations,
+              finalOptions,
+              serialized
+            )
           : null;
 
     if (operation == null) throw new MongoRuntimeError(`Unknown batchType: ${batch.batchType}`);
@@ -824,6 +836,7 @@ export interface BulkOperationPrivate {
   // check keys
   checkKeys: boolean;
   bypassDocumentValidation?: boolean;
+  usingAutoEncryption: boolean;
 }
 
 /** @public */
@@ -953,7 +966,8 @@ export abstract class BulkOperationBase {
       // Fundamental error
       err: undefined,
       // check keys
-      checkKeys: typeof options.checkKeys === 'boolean' ? options.checkKeys : false
+      checkKeys: typeof options.checkKeys === 'boolean' ? options.checkKeys : false,
+      usingAutoEncryption
     };
 
     // bypass Validation
