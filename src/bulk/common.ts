@@ -575,9 +575,10 @@ async function executeCommands(
     // Release this batch's serialized buffers now that it has been sent. The
     // operation keeps its own reference to the array for the duration of its
     // execution and any retries, so reassigning here (rather than mutating the
-    // shared array) only drops the bulk operation's copy. This caps retained
-    // serialized bytes at roughly one in-flight batch instead of the whole
-    // bulk write's payload.
+    // shared array) only drops the bulk operation's copy. All batches are built
+    // up front, so this does not lower the peak (reached before the first send);
+    // it frees each batch's buffers as that batch completes so they are not kept
+    // alive through the remaining batches' round trips.
     batch.serializedOperations = [];
 
     if (thrownError != null) {
