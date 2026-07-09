@@ -6,7 +6,6 @@ import * as path from 'path';
 import { ClientEncryption } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { dropCollection } from '../shared';
-import { getKmsProviders } from './client_side_encryption.prose.test';
 
 const LOCAL_KEY = Buffer.from(
   'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
@@ -74,7 +73,7 @@ describe('12. Explicit Encryption', eeMetadata, function () {
     //   }
     clientEncryption = new ClientEncryption(keyVaultClient, {
       keyVaultNamespace: 'keyvault.datakeys',
-      kmsProviders: getKmsProviders(LOCAL_KEY),
+      kmsProviders: { local: { key: LOCAL_KEY } },
       bson: BSON,
       extraOptions: getEncryptExtraOptions()
     });
@@ -90,7 +89,7 @@ describe('12. Explicit Encryption', eeMetadata, function () {
         autoEncryption: {
           bypassQueryAnalysis: true,
           keyVaultNamespace: 'keyvault.datakeys',
-          kmsProviders: getKmsProviders(LOCAL_KEY),
+          kmsProviders: { local: { key: LOCAL_KEY } },
           extraOptions: getEncryptExtraOptions()
         }
       }
