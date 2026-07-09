@@ -32,10 +32,10 @@ export class UnorderedBulkOperation extends BulkOperationBase {
     document: Document | UpdateStatement | DeleteStatement
   ): this {
     // Serialize the operation once here and reuse the bytes for both the size
-    // check/splitting and the wire message (via a DocumentSequence). Under 
-    // auto-encryption the command is sent as a BSON array rather than a 
+    // check/splitting and the wire message (via a DocumentSequence). Under
+    // auto-encryption the command is sent as a BSON array rather than a
     // document sequence, so the buffer would never be reused; there we only
-    // measure the size and leave `buffer` undefined so nothing is retained on 
+    // measure the size and leave `buffer` undefined so nothing is retained on
     // the batch.
     let buffer: Uint8Array | undefined;
     let bsonSize: number;
