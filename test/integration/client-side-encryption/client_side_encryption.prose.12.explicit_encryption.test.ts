@@ -21,19 +21,10 @@ const eeMetadata: MongoDBMetadataUI = {
   }
 };
 
-// TODO(NODE-7623): Case 2 explicitly inserts with contentionFactor:10 into a collection
-// configured with contention:0; SERVER-91887 now rejects this mismatch on 9.0+.
-const eeMetadataPre90: MongoDBMetadataUI = {
-  requires: {
-    clientSideEncryption: true,
-    mongodb: '>=7.0.0 <9.0.0',
-    topology: ['replicaset', 'sharded']
-  }
-};
-
 describe('12. Explicit Encryption', eeMetadata, function () {
   const data = path.join(__dirname, '..', '..', 'spec', 'client-side-encryption', 'etc', 'data');
   let encryptedFields;
+  let encryptedFieldsC10;
   let key1Document;
   let key1Id;
   let setupClient;
@@ -45,6 +36,11 @@ describe('12. Explicit Encryption', eeMetadata, function () {
     // Load the file encryptedFields.json as encryptedFields.
     encryptedFields = EJSON.parse(
       await fs.readFile(path.join(data, 'encryptedFields.json'), 'utf8'),
+      { relaxed: false }
+    );
+    // Load the file encryptedFields-c10.json as encryptedFields_c10.
+    encryptedFieldsC10 = EJSON.parse(
+      await fs.readFile(path.join(data, 'encryptedFields-c10.json'), 'utf8'),
       { relaxed: false }
     );
     // Load the file key1-document.json as key1Document.
@@ -59,6 +55,9 @@ describe('12. Explicit Encryption', eeMetadata, function () {
     const db = setupClient.db('db');
     await dropCollection(db, 'explicit_encryption', { encryptedFields });
     await db.createCollection('explicit_encryption', { encryptedFields });
+    // Drop and create the collection db.explicit_encryption_c10 using encryptedFields_c10 as an option.
+    await dropCollection(db, 'explicit_encryption_c10', { encryptedFields: encryptedFieldsC10 });
+    await db.createCollection('explicit_encryption_c10', { encryptedFields: encryptedFieldsC10 });
     // Drop and create the collection keyvault.datakeys.
     const kdb = setupClient.db('keyvault');
     await dropCollection(kdb, 'datakeys');
@@ -153,10 +152,9 @@ describe('12. Explicit Encryption', eeMetadata, function () {
 
   context(
     'Case 2: can insert encrypted indexed and find with non-zero contention',
-    eeMetadataPre90,
+    eeMetadata,
     function () {
       let findPayload;
-      let findPayload2;
 
       beforeEach(async function () {
         for (let i = 0; i < 10; i++) {
@@ -173,8 +171,8 @@ describe('12. Explicit Encryption', eeMetadata, function () {
             contentionFactor: 10
           });
           // Use encryptedClient to insert the document { "encryptedIndexed": <insertPayload> }
-          // into db.explicit_encryption.
-          await encryptedClient.db('db').collection('explicit_encryption').insertOne({
+          // into db.explicit_encryption_c10.
+          await encryptedClient.db('db').collection('explicit_encryption_c10').insertOne({
             encryptedIndexed: insertPayload
           });
           // Repeat the above steps 10 times to insert 10 total documents.
@@ -184,24 +182,11 @@ describe('12. Explicit Encryption', eeMetadata, function () {
         // class EncryptOpts {
         //    keyId : <key1ID>
         //    algorithm: "Indexed",
-        //    queryType: Equality
-        // }
-        // Store the result in findPayload.
-        findPayload = await clientEncryption.encrypt('encrypted indexed value', {
-          keyId: key1Id,
-          algorithm: 'Indexed',
-          queryType: 'equality',
-          contentionFactor: 0
-        });
-        // Use clientEncryption to encrypt the value "encrypted indexed value" with these EncryptOpts:
-        // class EncryptOpts {
-        //    keyId : <key1ID>
-        //    algorithm: "Indexed",
         //    queryType: Equality,
         //    contentionFactor: 10
         // }
-        // Store the result in findPayload2.
-        findPayload2 = await clientEncryption.encrypt('encrypted indexed value', {
+        // Store the result in findPayload.
+        findPayload = await clientEncryption.encrypt('encrypted indexed value', {
           keyId: key1Id,
           algorithm: 'Indexed',
           queryType: 'equality',
@@ -209,27 +194,13 @@ describe('12. Explicit Encryption', eeMetadata, function () {
         });
       });
 
-      it('returns less than the total documents with no contention', async function () {
-        // Use encryptedClient to run a "find" operation on the db.explicit_encryption
-        // collection with the filter { "encryptedIndexed": <findPayload> }.
-        // Assert less than 10 documents are returned. 0 documents may be returned.
-        // Assert each returned document contains the field
-        // { "encryptedIndexed": "encrypted indexed value" }.
-        const collection = encryptedClient.db('db').collection('explicit_encryption');
-        const result = await collection.find({ encryptedIndexed: findPayload }).toArray();
-        expect(result.length).to.be.below(10);
-        for (const doc of result) {
-          expect(doc).to.have.property('encryptedIndexed', 'encrypted indexed value');
-        }
-      });
-
       it('returns all documents with contention', async function () {
-        // Use encryptedClient to run a "find" operation on the db.explicit_encryption
-        // collection with the filter { "encryptedIndexed": <findPayload2> }.
+        // Use encryptedClient to run a "find" operation on the db.explicit_encryption_c10
+        // collection with the filter { "encryptedIndexed": <findPayload> }.
         // Assert 10 documents are returned. Assert each returned document contains the
         // field { "encryptedIndexed": "encrypted indexed value" }.
-        const collection = encryptedClient.db('db').collection('explicit_encryption');
-        const result = await collection.find({ encryptedIndexed: findPayload2 }).toArray();
+        const collection = encryptedClient.db('db').collection('explicit_encryption_c10');
+        const result = await collection.find({ encryptedIndexed: findPayload }).toArray();
         expect(result.length).to.equal(10);
         for (const doc of result) {
           expect(doc).to.have.property('encryptedIndexed', 'encrypted indexed value');
