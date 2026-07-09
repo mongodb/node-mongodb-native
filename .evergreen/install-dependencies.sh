@@ -7,9 +7,10 @@ set -o errexit  # Exit the script with error if any of the commands fail
 ## a full nodejs version, in the format v<major>.<minor>.patch
 if [ -z ${NODE_LTS_VERSION+omitted} ]; then echo "NODE_LTS_VERSION is unset" && exit 1; fi
 
-# npm version can be defined in the environment for cases where we need to install
-# a version lower than latest to support EOL Node versions. When not provided will
-# be handled by this script in drivers tools.
+# Use the npm bundled with the installed Node.js release instead of upgrading to
+# npm@latest. The bundled npm is version-matched to the Node release and avoids
+# pulling an npm@latest that no longer supports our (often pinned) Node version.
+export SKIP_NPM_UPGRADE=true
 source $DRIVERS_TOOLS/.evergreen/install-node.sh
 
 # On Windows, install-node.sh resolves SCRIPT_DIR via realpath which may follow an NTFS
