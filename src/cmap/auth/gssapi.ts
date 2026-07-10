@@ -69,10 +69,7 @@ export class GSSAPI extends AuthProvider {
 }
 
 async function makeKerberosClient({
-  options: {
-    hostAddress,
-    runtime: { os }
-  },
+  options: { hostAddress, runtime },
   credentials
 }: AuthContext): Promise<KerberosClient> {
   if (!hostAddress || typeof hostAddress.host !== 'string' || !credentials) {
@@ -80,6 +77,8 @@ async function makeKerberosClient({
       'Connection must have host and port and credentials defined.'
     );
   }
+
+  const { os } = await runtime;
 
   loadKrb();
   if ('kModuleError' in krb) {
