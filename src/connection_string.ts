@@ -544,6 +544,10 @@ export function parseOptions(
   );
 
   mongoOptions.runtime = resolveRuntimeAdapters(options);
+  // Mark the promise as handled so a rejection before any consumer awaits it (possible only in
+  // runtimes where the dynamic import of the default os adapter fails) cannot crash the process
+  // as an unhandled rejection; consumers awaiting `runtime` still observe the rejection.
+  mongoOptions.runtime.then(undefined, squashError);
 
   return mongoOptions;
 }

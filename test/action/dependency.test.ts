@@ -87,8 +87,12 @@ describe('package.json', function () {
 
         if (depName === 'snappy') {
           itInNodeProcess('getSnappy returns rejected import', async function ({ expect }) {
-            // @ts-expect-error: import from the inside forked process
-            const { getSnappy } = await import('./src/deps.ts');
+            // The forked script runs as CJS under ts-node's require hook. A dynamic `import()`
+            // here is no longer downleveled to `require` (tsconfig `module: node16`, NODE-7603),
+            // and a genuine import() of a .ts path would go to Node's native ESM loader, which
+            // cannot resolve the driver's extensionless internal imports — so load via require.
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const { getSnappy } = require('./src/deps.ts');
             const snappyImport = getSnappy();
             expect(snappyImport).to.have.nested.property(
               'kModuleError.name',
@@ -115,8 +119,9 @@ describe('package.json', function () {
 
         if (depName === 'snappy') {
           itInNodeProcess('getSnappy returns fulfilled import', async function ({ expect }) {
-            // @ts-expect-error: import from the inside forked process
-            const { getSnappy } = await import('./src/deps.ts');
+            // See the require() rationale on the rejected-import test above (NODE-7603).
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const { getSnappy } = require('./src/deps.ts');
             const snappyImport = getSnappy();
             expect(snappyImport).to.have.property('compress').that.is.a('function');
             expect(snappyImport).to.have.property('uncompress').that.is.a('function');

@@ -920,8 +920,6 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-        vars:
-          NPM_VERSION: 11.11.1
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -943,8 +941,6 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-        vars:
-          NPM_VERSION: 11.11.1
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
@@ -967,8 +963,6 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-        vars:
-          NPM_VERSION: 11.11.1
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
@@ -991,8 +985,6 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-        vars:
-          NPM_VERSION: 11.11.1
       - func: bootstrap mongo-orchestration
       - func: switch source
         vars:
@@ -1993,8 +1985,6 @@ tasks:
           updates:
             - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
-        vars:
-          NPM_VERSION: 11.11.1
       - func: run unit tests
   - name: run-unit-tests-node-24
     tags:
@@ -3578,7 +3568,6 @@ buildvariants:
     run_on: rhel80-large
     expansions:
       NODE_LTS_VERSION: 22
-      NPM_VERSION: 11.11.1
       CLIENT_ENCRYPTION: 'true'
       TEST_CSFLE: 'true'
     tasks:
@@ -3787,7 +3776,6 @@ buildvariants:
     run_on: windows-2022-latest-large
     expansions:
       NODE_LTS_VERSION: 22
-      NPM_VERSION: 11.11.1
       CLIENT_ENCRYPTION: 'false'
       TEST_CSFLE: 'false'
     tasks:

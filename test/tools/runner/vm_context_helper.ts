@@ -101,6 +101,18 @@ sandbox.globalThis = sandbox;
 export { sandbox };
 
 /**
+ * The set of dynamic-import specifiers the driver bundle is allowed to contain. The restricted
+ * `require` above blocks Node built-ins, and `import()` must not become an unaudited escape
+ * hatch around that contract (NODE-7603). A per-specifier runtime gate is not possible here
+ * without `--experimental-vm-modules` (a function `importModuleDynamically` callback throws
+ * `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING_FLAG` on plain Node; only
+ * `vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER` works flagless), so the contract is enforced
+ * statically instead: test/unit/nodeless.test.ts audits every dynamic-import specifier in the
+ * built bundle against this allowlist.
+ */
+export const ALLOWED_SANDBOX_DYNAMIC_IMPORTS = new Set(['os']);
+
+/**
  * Load the bundled MongoDB driver module in a VM context
  * This allows us to control the globals that the driver has access to
  */
@@ -119,7 +131,17 @@ export function loadContextifiedMongoDBModule(): typeof import('../../mongodb_al
   // Wrap the bundle in a CommonJS-style wrapper
   const wrapper = `(function(exports, module, require) {${bundleCode}})`;
 
-  const script = new vm.Script(wrapper, { filename: bundlePath });
+  // The driver loads Node built-ins (e.g. `os`) via a dynamic `import()` rather than `require`.
+  // vm scripts have no dynamic-import callback by default, so route `import()` in the sandbox
+  // through the main context's loader; otherwise it throws "A dynamic import callback was not
+  // specified". This loader resolves ANY specifier — the sandbox contract (only
+  // ALLOWED_SANDBOX_DYNAMIC_IMPORTS may be dynamically imported) is enforced statically by
+  // test/unit/nodeless.test.ts, because a gating function callback here would require the
+  // --experimental-vm-modules flag.
+  const script = new vm.Script(wrapper, {
+    filename: bundlePath,
+    importModuleDynamically: vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
+  });
   const fn = script.runInContext(sandbox);
 
   // Execute the bundle with the restricted require from the sandbox
