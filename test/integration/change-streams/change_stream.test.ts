@@ -37,9 +37,6 @@ const initIteratorMode = async (cs: ChangeStream) => {
   return;
 };
 
-const is4_2Server = (serverVersion: string) =>
-  gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
-
 // Define the pipeline processing changes
 const pipeline = [
   { $addFields: { addedField: 'This is a field added using $addFields' } },
@@ -1130,9 +1127,7 @@ describe('Change Streams', function () {
 
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
+              configureFailPoint: 'failGetMoreAfterCursorCheckout',
               mode: { times: 1 },
               data: {
                 failCommands: ['getMore'],
@@ -1947,9 +1942,7 @@ describe('Change Streams', function () {
 
     afterEach(async function () {
       await client.db('admin').command({
-        configureFailPoint: is4_2Server(this.configuration.version)
-          ? 'failCommand'
-          : 'failGetMoreAfterCursorCheckout',
+        configureFailPoint: 'failGetMoreAfterCursorCheckout',
         mode: 'off'
       } as FailCommandFailPoint);
 
@@ -1970,9 +1963,7 @@ describe('Change Streams', function () {
         });
 
         await client.db('admin').command({
-          configureFailPoint: is4_2Server(this.configuration.version)
-            ? 'failCommand'
-            : 'failGetMoreAfterCursorCheckout',
+          configureFailPoint: 'failGetMoreAfterCursorCheckout',
           mode: { times: 1 },
           data: {
             failCommands: ['getMore'],
@@ -2002,9 +1993,7 @@ describe('Change Streams', function () {
         });
 
         await client.db('admin').command({
-          configureFailPoint: is4_2Server(this.configuration.version)
-            ? 'failCommand'
-            : 'failGetMoreAfterCursorCheckout',
+          configureFailPoint: 'failGetMoreAfterCursorCheckout',
           mode: { times: 1 },
           data: {
             failCommands: ['getMore'],
@@ -2036,9 +2025,7 @@ describe('Change Streams', function () {
       });
 
       await client.db('admin').command({
-        configureFailPoint: is4_2Server(this.configuration.version)
-          ? 'failCommand'
-          : 'failGetMoreAfterCursorCheckout',
+        configureFailPoint: 'failGetMoreAfterCursorCheckout',
         mode: { times: 1 },
         data: {
           failCommands: ['getMore'],
@@ -2167,9 +2154,7 @@ describe('ChangeStream resumability', function () {
             await initIteratorMode(changeStream);
 
             await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
+              configureFailPoint: 'failGetMoreAfterCursorCheckout',
               mode: { times: 1 },
               data: {
                 failCommands: ['getMore'],
@@ -2195,9 +2180,7 @@ describe('ChangeStream resumability', function () {
             await initIteratorMode(changeStream);
 
             await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
+              configureFailPoint: 'failGetMoreAfterCursorCheckout',
               mode: { times: 5 },
               data: {
                 failCommands: ['getMore'],
@@ -2234,9 +2217,7 @@ describe('ChangeStream resumability', function () {
           await initIteratorMode(changeStream);
 
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2265,9 +2246,7 @@ describe('ChangeStream resumability', function () {
 
           const unresumableErrorCode = 1000;
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2353,9 +2332,7 @@ describe('ChangeStream resumability', function () {
             await initIteratorMode(changeStream);
 
             await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
+              configureFailPoint: 'failGetMoreAfterCursorCheckout',
               mode: { times: 1 },
               data: {
                 failCommands: ['getMore'],
@@ -2381,9 +2358,7 @@ describe('ChangeStream resumability', function () {
             await initIteratorMode(changeStream);
 
             await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
+              configureFailPoint: 'failGetMoreAfterCursorCheckout',
               mode: { times: 5 },
               data: {
                 failCommands: ['getMore'],
@@ -2420,9 +2395,7 @@ describe('ChangeStream resumability', function () {
           await initIteratorMode(changeStream);
 
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2451,9 +2424,7 @@ describe('ChangeStream resumability', function () {
 
           const unresumableErrorCode = 1000;
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2507,9 +2478,7 @@ describe('ChangeStream resumability', function () {
             await initIteratorMode(changeStream);
 
             await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
+              configureFailPoint: 'failGetMoreAfterCursorCheckout',
               mode: { times: 1 },
               data: {
                 failCommands: ['getMore'],
@@ -2542,9 +2511,7 @@ describe('ChangeStream resumability', function () {
             await initIteratorMode(changeStream);
 
             await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
+              configureFailPoint: 'failGetMoreAfterCursorCheckout',
               mode: { times: 5 },
               data: {
                 failCommands: ['getMore'],
@@ -2581,9 +2548,7 @@ describe('ChangeStream resumability', function () {
           await initIteratorMode(changeStream);
 
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2612,9 +2577,7 @@ describe('ChangeStream resumability', function () {
 
           const unresumableErrorCode = 1000;
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2700,9 +2663,7 @@ describe('ChangeStream resumability', function () {
             await collection.insertMany(docs);
 
             await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
+              configureFailPoint: 'failGetMoreAfterCursorCheckout',
               mode: { times: 1 },
               data: {
                 failCommands: ['getMore'],
@@ -2735,9 +2696,7 @@ describe('ChangeStream resumability', function () {
           const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2769,9 +2728,7 @@ describe('ChangeStream resumability', function () {
 
           const unresumableErrorCode = 1000;
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2868,9 +2825,7 @@ describe('ChangeStream resumability', function () {
           changeStream = collection.watch([]);
 
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 1 },
             data: {
               failCommands: ['getMore'],
@@ -2898,9 +2853,7 @@ describe('ChangeStream resumability', function () {
           changeStream = collection.watch([]);
 
           await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
+            configureFailPoint: 'failGetMoreAfterCursorCheckout',
             mode: { times: 5 },
             data: {
               failCommands: ['getMore'],
@@ -2938,9 +2891,7 @@ describe('ChangeStream resumability', function () {
         changeStream = collection.watch([], changeStreamResumeOptions);
 
         await client.db('admin').command({
-          configureFailPoint: is4_2Server(this.configuration.version)
-            ? 'failCommand'
-            : 'failGetMoreAfterCursorCheckout',
+          configureFailPoint: 'failGetMoreAfterCursorCheckout',
           mode: { times: 1 },
           data: {
             failCommands: ['getMore'],
@@ -2972,9 +2923,7 @@ describe('ChangeStream resumability', function () {
 
         const unresumableErrorCode = 1000;
         await client.db('admin').command({
-          configureFailPoint: is4_2Server(this.configuration.version)
-            ? 'failCommand'
-            : 'failGetMoreAfterCursorCheckout',
+          configureFailPoint: 'failGetMoreAfterCursorCheckout',
           mode: { times: 1 },
           data: {
             failCommands: ['getMore'],
@@ -2999,9 +2948,7 @@ describe('ChangeStream resumability', function () {
 
         const unresumableErrorCode = 237;
         await client.db('admin').command({
-          configureFailPoint: is4_2Server(this.configuration.version)
-            ? 'failCommand'
-            : 'failGetMoreAfterCursorCheckout',
+          configureFailPoint: 'failGetMoreAfterCursorCheckout',
           mode: { times: 1 },
           data: {
             failCommands: ['getMore'],

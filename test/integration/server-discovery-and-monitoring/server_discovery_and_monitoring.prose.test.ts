@@ -94,7 +94,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
   context('Connection Pool Management', function () {
     /*
       This test will be used to ensure monitors properly create and unpause connection pools when they discover servers.
-      This test requires failCommand appName support which is only available in MongoDB 4.2.9+.
+      This test requires failCommand appName support which is only available in MongoDB 4.4.0+.
       1. Create a client with directConnection=true, appName="SDAMPoolManagementTest", and heartbeatFrequencyMS=500 (or lower if possible).
       2. Verify via SDAM and CMAP event monitoring that a ConnectionPoolReadyEvent occurs after the first ServerHeartbeatSucceededEvent event does.
       3. Enable the following failpoint:
@@ -153,7 +153,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
     });
 
     it('ensure monitors properly create and unpause connection pools when they discover servers', {
-      metadata: { requires: { mongodb: '>=4.2.9', topology: '!load-balanced' } },
+      metadata: { requires: { mongodb: '>=4.4.0', topology: '!load-balanced' } },
       test: async function () {
         await client.connect();
         expect(events.shift()).to.equal(SERVER_HEARTBEAT_SUCCEEDED);

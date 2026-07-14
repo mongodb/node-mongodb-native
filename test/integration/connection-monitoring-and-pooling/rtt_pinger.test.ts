@@ -109,8 +109,8 @@ describe('class RTTPinger', () => {
         const rttPingers = await getRTTPingers(client);
 
         // Fake pre-hello server.
-        // Hello was back-ported to feature versions of the server so we would need to pin
-        // versions prior to 4.4.2, 4.2.10, 4.0.21, and 3.6.21 to integration test
+        // Hello was back-ported to feature versions of the server so we would need to pin patch
+        // versions prior to 4.4.2 to integration test
         for (const rtt of rttPingers) rtt.connection.helloOk = false;
 
         const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'command'));

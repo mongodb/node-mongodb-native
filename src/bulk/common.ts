@@ -1011,7 +1011,7 @@ export abstract class BulkOperationBase {
    * // Add a replaceOne
    * bulkOp.find({ i: 9 }).replaceOne({writeConcern: { j: 10 }});
    *
-   * // Update using a pipeline (requires Mongodb 4.2 or higher)
+   * // Update using a pipeline (requires Mongodb 4.4 or higher)
    * bulk.find({ k: 11, y: { $exists: true }, z: { $exists: true } }).updateOne([
    *   { $set: { total: { $sum: [ '$y', '$z' ] } } }
    * ]);

@@ -85,7 +85,7 @@ describe('Retryable Writes Spec Prose', () => {
 
   describe('2. Test that drivers properly retry after encountering PoolClearedErrors.', () => {
     // This test MUST be implemented by any driver that implements the CMAP specification.
-    // This test requires MongoDB 4.2.9+ for blockConnection support in the failpoint.
+    // This test requires MongoDB 4.4.+ for blockConnection support in the failpoint.
 
     let client: MongoClient;
     let failPointName: string | undefined;
@@ -151,7 +151,7 @@ describe('Retryable Writes Spec Prose', () => {
     });
 
     it('should emit events in the expected sequence', {
-      metadata: { requires: { mongodb: '>=4.2.9', topology: ['replicaset', 'sharded'] } },
+      metadata: { requires: { mongodb: '>=4.4.0', topology: ['replicaset', 'sharded'] } },
       test: async function () {
         // iii. Start two threads and attempt to perform an insertOne simultaneously on both.
         await Promise.all([
@@ -276,7 +276,7 @@ describe('Retryable Writes Spec Prose', () => {
      */
     it(
       'when a retry attempt fails with an error labeled NoWritesPerformed, drivers MUST return the original error',
-      { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
+      { requires: { topology: 'replicaset', mongodb: '>=4.4.0' } },
       async () => {
         const serverCommandStub = sinon.stub(Server.prototype, 'command');
         serverCommandStub.onCall(0).rejects(
@@ -310,7 +310,7 @@ describe('Retryable Writes Spec Prose', () => {
     // must succeed, we fail if any command failed event occurs on insert.
     it(
       'emits a command succeeded event for write concern errors with ok: 1',
-      { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
+      { requires: { topology: 'replicaset', mongodb: '>=4.4.0' } },
       async () => {
         // Generate a write concern error to assert that we get a command
         // suceeded event but the operation will retry because it was an
