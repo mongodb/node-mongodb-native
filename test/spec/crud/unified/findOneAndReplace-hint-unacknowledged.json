@@ -55,6 +55,76 @@
   ],
   "tests": [
     {
+      "description": "Unacknowledged findOneAndReplace with hint string fails with client-side error on pre-4.4 server",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "replacement": {
+              "x": 111
+            },
+            "hint": "_id_"
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "Unacknowledged findOneAndReplace with hint document fails with client-side error on pre-4.4 server",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "replacement": {
+              "x": 111
+            },
+            "hint": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    },
+    {
       "description": "Unacknowledged findOneAndReplace with hint string on 4.4+ server",
       "runOnRequirements": [
         {

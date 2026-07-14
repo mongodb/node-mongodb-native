@@ -135,6 +135,52 @@
           ]
         }
       ]
+    },
+    {
+      "description": "distinct with document comment - pre 4.4, server error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "maxServerVersion": "4.4.13"
+        }
+      ],
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {},
+            "comment": {
+              "key": "value"
+            }
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "coll0",
+                  "key": "x",
+                  "query": {},
+                  "comment": {
+                    "key": "value"
+                  }
+                },
+                "commandName": "distinct",
+                "databaseName": "distinct-comment-tests"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

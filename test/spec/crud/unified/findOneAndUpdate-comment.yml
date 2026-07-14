@@ -69,3 +69,27 @@ tests:
                 query: *filter
                 update: *update
                 comment: *comment
+
+  - description: "findOneAndUpdate with comment - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "4.2.0" # findAndModify option validation was introduced in 4.2
+        maxServerVersion: "4.2.99"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: *filter
+          update: *update
+          comment: "comment"
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *filter
+                update: *update
+                comment: "comment"
+    outcome: *initialData

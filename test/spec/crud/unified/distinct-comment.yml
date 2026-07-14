@@ -71,3 +71,28 @@ tests:
                 comment: *stringComment
               commandName: distinct
               databaseName: *database0Name
+
+  - description: "distinct with document comment - pre 4.4, server error"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.4.13"
+    operations:
+      - name: distinct
+        object: *collection0
+        arguments:
+          fieldName: *fieldName
+          filter: *filter
+          comment: *documentComment
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                distinct: *collection0Name
+                key: *fieldName
+                query: *filter
+                comment: *documentComment
+              commandName: distinct
+              databaseName: *database0Name

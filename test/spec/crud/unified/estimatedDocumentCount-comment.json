@@ -119,6 +119,52 @@
           ]
         }
       ]
+    },
+    {
+      "description": "estimatedDocumentCount with document comment - pre 4.4.14, server error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "maxServerVersion": "4.4.13",
+          "topologies": [
+            "single",
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "arguments": {
+            "comment": {
+              "key": "value"
+            }
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll0",
+                  "comment": {
+                    "key": "value"
+                  }
+                },
+                "commandName": "count",
+                "databaseName": "edc-comment-tests"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

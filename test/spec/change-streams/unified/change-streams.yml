@@ -140,6 +140,27 @@ tests:
                   - $changeStream: {}
                 comment: *comment0
 
+  - description: "Test with document comment - pre 4.4"
+    runOnRequirements:
+      - maxServerVersion: "4.2.99"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: &comment0 { name: "test1" }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: *comment0
+
   - description: "Test with string comment"
     operations:
       - name: createChangeStream
@@ -196,6 +217,46 @@ tests:
                 getMore: { $$type: [ int, long ] }
                 collection: *collection0
                 comment: *commentDoc
+              commandName: getMore
+              databaseName: *database0
+
+  - description: "Test that comment is not set on getMore - pre 4.4"
+    runOnRequirements:
+      - maxServerVersion: "4.3.99"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: "comment"
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &new_document
+            _id: 1
+            a: 1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: "comment"
+          - commandStartedEvent:
+              command:
+                insert: *collection0
+                documents:
+                  - *new_document
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0
+                comment: { $$exists: false }
               commandName: getMore
               databaseName: *database0
 
