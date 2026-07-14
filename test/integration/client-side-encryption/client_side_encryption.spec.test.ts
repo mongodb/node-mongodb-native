@@ -60,34 +60,6 @@ describe('Client Side Encryption (Legacy)', function () {
       if (typeof result === 'string') return result;
     }
 
-    // TODO(NODE-7623): fle2v2-BypassQueryAnalysis hardcoded payload has contentionFactor that
-    // exceeds the collection's configured contention; SERVER-91887 now validates this on 9.0+.
-    if (
-      description === 'BypassQueryAnalysis decrypts' &&
-      semver.satisfies(configuration.version, '>=9.0.0')
-    ) {
-      return 'TODO(NODE-7623): fle2v2-BypassQueryAnalysis hardcoded payload contentionFactor exceeds configured contention (SERVER-91887)';
-    }
-
-    // TODO(NODE-7623): fle2v2 equality spec tests insert with auto-encryption against a field
-    // configured with contention:0, but libmongocrypt generates random contentionFactor values.
-    // SERVER-91887 now rejects payloads whose contentionFactor exceeds configured contention on 9.0+.
-    if (
-      semver.satisfies(configuration.version, '>=9.0.0') &&
-      [
-        'Insert and find FLE2 indexed field',
-        'Delete can query an FLE2 indexed field',
-        'Update can query an FLE2 indexed field',
-        'Update can modify an FLE2 indexed field',
-        'findOneAndUpdate can query an FLE2 indexed field',
-        'findOneAndUpdate can modify an FLE2 indexed field',
-        'encryptedFieldsMap is preferred over remote encryptedFields',
-        'encryptedFields is preferred over jsonSchema'
-      ].includes(description)
-    ) {
-      return 'TODO(NODE-7623): fle2v2 equality auto-encryption generates contentionFactor that exceeds contention:0 (SERVER-91887)';
-    }
-
     return true;
   });
 });
@@ -133,24 +105,6 @@ describe('Client Side Encryption (Unified)', function () {
           metadata: { requires: { clientSideEncryption: '>=6.4.0' } }
         });
         if (typeof shouldSkip === 'string') return shouldSkip;
-      }
-
-      // TODO(NODE-7623): fle2v2-BypassQueryAnalysis hardcoded payload has contentionFactor that
-      // exceeds the collection's configured contention; SERVER-91887 now validates this on 9.0+.
-      if (
-        description === 'BypassQueryAnalysis decrypts' &&
-        semver.satisfies(configuration.version, '>=9.0.0')
-      ) {
-        return 'TODO(NODE-7623): fle2v2-BypassQueryAnalysis hardcoded payload contentionFactor exceeds configured contention (SERVER-91887)';
-      }
-
-      // TODO(NODE-7623): same as legacy runner — auto-encryption generates random contentionFactor
-      // that exceeds contention:0 on 9.0+ (SERVER-91887).
-      if (
-        description === 'encryptedFieldsMap is preferred over remote encryptedFields' &&
-        semver.satisfies(configuration.version, '>=9.0.0')
-      ) {
-        return 'TODO(NODE-7623): fle2v2 equality auto-encryption generates contentionFactor that exceeds contention:0 (SERVER-91887)';
       }
 
       return false;
