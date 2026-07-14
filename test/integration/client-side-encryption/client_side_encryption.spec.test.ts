@@ -1,5 +1,4 @@
 import * as path from 'path';
-import * as semver from 'semver';
 
 import { loadSpecTests } from '../../spec';
 import {
