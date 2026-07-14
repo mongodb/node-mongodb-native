@@ -191,13 +191,6 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     decorateWithCollation(command, options);
 
     if (options.hint) {
-      const unacknowledgedWrite = this.writeConcern?.w === 0;
-      if (unacknowledgedWrite) {
-        throw new MongoCompatibilityError(
-          'hint for the findAndModify command is only supported on MongoDB 4.4+'
-        );
-      }
-
       command.hint = options.hint;
     }
 
