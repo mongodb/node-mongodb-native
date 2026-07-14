@@ -149,6 +149,16 @@ BASE_TASKS.push({
   ]
 });
 
+BASE_TASKS.push({
+  name: `test-sfp`,
+  tags: ['latest', 'auth', 'sfp'],
+  commands: [
+    { func: 'install dependencies' },
+    { func: 'assume secrets manager role' },
+    { func: 'run sfp tests' }
+  ]
+});
+
 // manually added tasks
 TASKS.push(
   ...[
@@ -824,6 +834,7 @@ const commonNodelessTasks = [
   'test-rapid-sharded_cluster',
   'test-latest-server-v1-api',
   'test-x509-authentication',
+  'test-sfp',
   'test-atlas-connectivity',
   'test-auth-ldap',
   'test-socks5-csfle',

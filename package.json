@@ -157,6 +157,7 @@
     "check:csfle": "npm run build:bundle && nyc mocha --config test/mocha_mongodb.js test/integration/client-side-encryption",
     "check:snappy": "npm run build:bundle && nyc mocha test/unit/assorted/snappy.test.js",
     "check:x509": "npm run build:bundle && nyc mocha test/manual/x509_auth.test.ts",
+    "check:sfp": "npm run build:bundle && nyc mocha test/manual/sfp.test.ts",
     "mocha:debug": "npm run build:bundle && node --inspect --enable-source-maps --no-experimental-strip-types ./node_modules/mocha/bin/mocha.js",
     "build:bundle": "npm run bundle:driver && npm run bundle:types && npm run build:runtime-barrel",
     "build:runtime-barrel": "node etc/build-runtime-barrel.mjs",

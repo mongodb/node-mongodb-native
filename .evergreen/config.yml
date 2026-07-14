@@ -629,6 +629,20 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
+  run sfp tests:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        include_expansions_in_env:
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+          - PROJECT_DIRECTORY
+          - DRIVERS_TOOLS
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-sfp-tests.sh
   install mongodb-client-encryption from source:
     - command: subprocess.exec
       type: setup
@@ -1407,6 +1421,15 @@ tasks:
       - func: install dependencies
       - func: assume secrets manager role
       - func: run x509 auth tests
+  - name: test-sfp
+    tags:
+      - latest
+      - auth
+      - sfp
+    commands:
+      - func: install dependencies
+      - func: assume secrets manager role
+      - func: run sfp tests
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -3542,6 +3565,7 @@ buildvariants:
       - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
+      - test-sfp
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
@@ -3597,6 +3621,7 @@ buildvariants:
       - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
+      - test-sfp
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
@@ -3652,6 +3677,7 @@ buildvariants:
       - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
+      - test-sfp
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
@@ -3707,6 +3733,7 @@ buildvariants:
       - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
+      - test-sfp
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
@@ -4076,6 +4103,7 @@ buildvariants:
       - test-rapid-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
+      - test-sfp
       - test-atlas-connectivity
       - test-auth-ldap
       - test-socks5-csfle
@@ -4102,6 +4130,7 @@ buildvariants:
       - test-rapid-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
+      - test-sfp
       - test-atlas-connectivity
       - test-auth-ldap
       - test-socks5-csfle
