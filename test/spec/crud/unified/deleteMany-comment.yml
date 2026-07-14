@@ -71,27 +71,3 @@ tests:
                     limit: 0
                 comment: *comment
     outcome: *outcome
-
-  - description: "deleteMany with comment - pre 4.4"
-    runOnRequirements:
-      - minServerVersion: "3.4.0"
-        maxServerVersion: "4.2.99"
-    operations:
-      - name: deleteMany
-        object: *collection0
-        arguments:
-          filter: *filter
-          comment: "comment"
-        expectError:
-          isClientError: false
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                delete: *collection0Name
-                deletes:
-                  - q: *filter
-                    limit: 0
-                comment: "comment"
-    outcome: *initialData

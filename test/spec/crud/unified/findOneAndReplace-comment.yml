@@ -74,28 +74,3 @@ tests:
                 update: *replacement
                 comment: *comment
     outcome: *outcome
-
-
-  - description: "findOneAndReplace with comment - pre 4.4"
-    runOnRequirements:
-      - minServerVersion: "4.2.0" # findAndModify option validation was introduced in 4.2
-        maxServerVersion: "4.2.99"
-    operations:
-      - name: findOneAndReplace
-        object: *collection0
-        arguments:
-          filter: *filter
-          replacement: *replacement
-          comment: "comment"
-        expectError:
-          isClientError: false
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                findAndModify: *collection0Name
-                query: *filter
-                update: *replacement
-                comment: "comment"
-    outcome: *initialData

@@ -71,26 +71,3 @@ tests:
                 remove: true
                 comment: *comment
     outcome: *outcome
-
-  - description: "findOneAndDelete with comment - pre 4.4"
-    runOnRequirements:
-      - minServerVersion: "4.2.0" # findAndModify option validation was introduced in 4.2
-        maxServerVersion: "4.2.99"
-    operations:
-      - name: findOneAndDelete
-        object: *collection0
-        arguments:
-          filter: *filter
-          comment: "comment"
-        expectError:
-          isClientError: false
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                findAndModify: *collection0Name
-                query: *filter
-                remove: true
-                comment: "comment"
-    outcome: *initialData

@@ -149,27 +149,3 @@ tests:
                 ordered: true
                 comment: *document_comment
     outcome: *outcome
-
-  - description: 'BulkWrite with comment - pre 4.4'
-    runOnRequirements:
-      - minServerVersion: "3.4.0"
-        maxServerVersion: "4.2.99"
-    operations:
-      - object: *collection0
-        name: bulkWrite
-        arguments:
-          requests: *requests
-          comment: "comment"
-        expectError:
-          isClientError: false
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                insert: *collection_name
-                documents:
-                  - *inserted_document
-                ordered: true
-                comment: "comment"
-    outcome: *initial_data

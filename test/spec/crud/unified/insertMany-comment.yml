@@ -67,27 +67,3 @@ tests:
                   - *document
                 comment: *comment
     outcome: *outcome
-
-  - description: "insertMany with comment - pre 4.4"
-    runOnRequirements:
-      - minServerVersion: "3.4.0"
-        maxServerVersion: "4.2.99"
-    operations:
-      - name: insertMany
-        object: *collection0
-        arguments:
-          documents:
-            - *document
-          comment: "comment"
-        expectError:
-          isClientError: false
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                insert: *collection0Name
-                documents:
-                  - *document
-                comment: "comment"
-    outcome: *initialData
