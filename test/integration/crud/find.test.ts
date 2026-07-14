@@ -1,14 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  Code,
-  Long,
-  type MongoClient,
-  MongoServerError,
-  ObjectId,
-  ReturnDocument
-} from '../../mongodb';
+import { Long, type MongoClient, MongoServerError, ObjectId, ReturnDocument } from '../../mongodb';
 import { assert as test, filterForCommands } from '../shared';
 
 describe('Find', function () {

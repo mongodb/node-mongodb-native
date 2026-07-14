@@ -2,7 +2,7 @@ import { type Connection } from '..';
 import type { Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
