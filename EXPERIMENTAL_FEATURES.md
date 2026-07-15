@@ -1,6 +1,6 @@
 # MongoDB Node.js Driver - Experimental Features
 
-This file documents all experimental features in the MongoDB Node.js Driver. The driver contains **30 experimental annotations** across 7 major feature categories.
+This file documents all experimental features in the MongoDB Node.js Driver.
 
 > [!WARNING]
 > Experimental features may change in any release, including patches and minors, and are not covered by the driver's semver guarantees. Updates can change runtime behavior or break TypeScript compilation, and may require source changes before you can upgrade.
@@ -9,12 +9,12 @@ This file documents all experimental features in the MongoDB Node.js Driver. The
 
 ## Summary
 
-| Feature | Description | Introduced in |
-|---------|-------------|---------------|
-| [Runtime Adapters](#runtime-adapters) | Custom runtime module implementations | v7.2.0 |
-| [AbortSignal Support](#abortsignal-support) | Cancel operations using `AbortController` | v6.13.0 |
-| [Timeout Management](#timeout-management) | Control operation timeouts with `timeoutMS` | v6.6.0 |
-| [Strict TypeScript Types](#strict-typescript-types) | Enhanced type safety for filters and updates | v5.0.0 |
+| Feature                                             | Description                                  | Introduced in |
+| --------------------------------------------------- | -------------------------------------------- | ------------- |
+| [Runtime Adapters](#runtime-adapters)               | Custom runtime module implementations        | v7.2.0        |
+| [AbortSignal Support](#abortsignal-support)         | Cancel operations using `AbortController`    | v6.13.0       |
+| [Timeout Management](#timeout-management)           | Control operation timeouts with `timeoutMS`  | v6.6.0        |
+| [Strict TypeScript Types](#strict-typescript-types) | Enhanced type safety for filters and updates | v5.0.0        |
 
 ---
 
@@ -22,27 +22,22 @@ This file documents all experimental features in the MongoDB Node.js Driver. The
 
 ### Runtime Adapters
 
-**Description**: Allows providing custom implementations of Node.js runtime modules to the driver. This is useful both for customizing how the driver uses standard modules within a Node.js runtime (for example, supplying a custom DNS resolver) and for running the driver in non-Node.js JavaScript environments.
+Allows providing custom implementations of Node.js runtime modules to the driver. This is useful both for customizing how the driver uses standard modules within a Node.js runtime (for example, supplying a custom DNS resolver) and for running the driver in non-Node.js JavaScript environments.
 
 > [!NOTE]
 > We introduced this feature under an experimental stability guarantee becuase defining a universal I/O interface that works seamlessly across major JS runtimes is complex and we anticipate that the shape of these interfaces may need to evolve as we gather feedback from edge-case usages.
 
 #### Types:
 
-##### `RuntimeAdapters`
-**Source**: [src/runtime_adapters.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/runtime_adapters.ts)
-
-Interface for providing custom runtime module implementations.
-
-##### `OsAdapter`
-**Source**: [src/runtime_adapters.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/runtime_adapters.ts)
-
-Represents the required functionality from the Node.js `os` module.
+- [`RuntimeAdapters`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Aruntime_adapters.ts+RuntimeAdapters&type=code) – Interface for providing custom runtime module implementations.
+- [`OsAdapter`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Aruntime_adapters.ts+OsAdapter&type=code) – Represents the required functionality from the Node.js `os` module.
 
 **Available On**:
-- `MongoClientOptions.runtimeAdapters` - [src/mongo_client.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts)
+
+- [`MongoClientOptions.runtimeAdapters`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5EMongoClientOptions%24%2F&type=code)
 
 **Example**:
+
 ```typescript
 // Provide custom OS module implementation
 const client = new MongoClient(url, {
@@ -61,13 +56,12 @@ const client = new MongoClient(url, {
 
 ### AbortSignal Support
 
-**Type**: `Abortable`
+Allows using `AbortController` to abort asynchronous operations. The `signal.reason` value is used as the error thrown.
 
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
-
-**Description**: Allows using `AbortController` to abort asynchronous operations. The `signal.reason` value is used as the error thrown.
+**Type**: [`Abortable`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Amongo_types.ts+Abortable&type=code)
 
 **Example**:
+
 ```typescript
 const controller = new AbortController();
 const { signal } = controller;
@@ -88,9 +82,7 @@ await collection.find({}, { signal }).toArray();
 
 ### Timeout Management
 
-**Option**: `timeoutMS`
-
-**Description**: Specifies the Client-side operations timeout (CSOT) in milliseconds after which an operation will throw an error. `timeoutMS` can be configured at the client, database, collection, session, transaction, and per-operation levels, with narrower scopes overriding broader ones.
+Specifies the Client-side operations timeout (CSOT) in milliseconds after which an operation will throw an error. `timeoutMS` can be configured at the client, database, collection, session, transaction, and per-operation levels, with narrower scopes overriding broader ones.
 
 _See [Limit Server Execution Time](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/csot/) for the full inheritance/override rules, cursor-specific behavior, Client Encryption interactions, and code examples._
 
@@ -98,59 +90,77 @@ _See [Limit Server Execution Time](https://www.mongodb.com/docs/drivers/node/cur
 
 #### Cursor Timeout Modes
 
-> [!NOTE]
-> This configures how the CSOT `timeoutMS` above is applied to cursors.
+This configures how the CSOT `timeoutMS` above is applied to cursors.
 
-**Type**: `CursorTimeoutMode`
+**Type**: [`CursorTimeoutMode`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Aabstract_cursor.ts+CursorTimeoutMode&type=code)
 
-**Source**:
-- Constant definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
-- Type definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
-- Option in `AbstractCursorOptions` - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
-- Option in `RunCursorCommandOptions` - [src/cursor/run_command_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/run_command_cursor.ts)
+**Available on**:
+
+- [`AbstractCursorOptions.timeoutMode`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5EAbstractCursorOptions%24%2F&type=code)
+- [`RunCursorCommandOptions.timeoutMode`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5ERunCursorCommandOptions%24%2F&type=code)
 
 **Values**:
-- `'cursorLifetime'` - Timeout applies to the entire cursor lifetime
-- `'iteration'` - Timeout applies to each `cursor.next()` call
 
-**Default Behavior**:
-- **Non-tailable cursors**: `'cursorLifetime'`
-- **Tailable cursors**: `'iteration'` (since tailable cursors can have arbitrarily long lifetimes)
+- `'cursorLifetime'` — Timeout applies to the entire cursor lifetime (default for non-tailable cursors)
+- `'iteration'` — Timeout applies to each `cursor.next()` call (default for tailable cursors)
+
+**Example**:
+
+```typescript
+// timeoutMS applies to each next() call, not the whole cursor
+const cursor = collection.find(
+  {},
+  {
+    timeoutMS: 1_000,
+    timeoutMode: 'iteration'
+  }
+);
+
+for await (const doc of cursor) {
+  // each iteration gets its own 1s budget
+}
+```
 
 #### GridFS Streams
 
-> [!NOTE]
-> Applies the CSOT `timeoutMS` above to GridFS upload and download streams as a per-stream lifetime.
+Applies the CSOT `timeoutMS` above to GridFS upload and download streams as a per-stream lifetime.
 
 **Options**:
-- `timeoutMS` in `GridFSBucketReadStreamOptions` — [src/gridfs/download.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts). Limits the lifetime of a download stream; if any async operation is in progress when the timeout expires, the stream throws a timeout error.
-- `timeoutMS` in `GridFSBucketWriteStreamOptions` — [src/gridfs/upload.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts). Limits the lifetime of an upload stream.
+
+- [`GridFSBucketReadStreamOptions.timeoutMS`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5EGridFSBucketReadStreamOptions%24%2F&type=code) — Limits the lifetime of a download stream; if any async operation is in progress when the timeout expires, the stream throws a timeout error.
+- [`GridFSBucketWriteStreamOptions.timeoutMS`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5EGridFSBucketWriteStreamOptions%24%2F&type=code) — Limits the lifetime of an upload stream.
+
+**Example**:
+
+```typescript
+const bucket = new GridFSBucket(db);
+
+// Upload stream: fail if the whole upload takes longer than 30s
+const uploadStream = bucket.openUploadStream('report.pdf', { timeoutMS: 30_000 });
+await pipeline(fs.createReadStream('report.pdf'), uploadStream);
+
+// Download stream: fail if the whole download takes longer than 10s
+const downloadStream = bucket.openDownloadStream(uploadStream.id, { timeoutMS: 10_000 });
+await pipeline(downloadStream, fs.createWriteStream('out.pdf'));
+```
 
 ---
 
 ### Strict TypeScript Types
 
-**Description**: Provides stricter type checking for MongoDB operations with better TypeScript inference for nested paths and type safety.
+Provides stricter type checking for MongoDB operations with better TypeScript inference for nested paths and type safety.
 
 > [!NOTE]
 > The following type shapes use TypeScript inference to check nested-path filters. Because of that complexity, we may refine them without a major version bump, so their shape is not guaranteed to be stable.
 
 **Types**:
 
-#### `StrictFilter<TSchema>`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
-
-Provides strict type checking for filter predicates with proper nested path support.
-
-#### `StrictUpdateFilter<TSchema>`
-**Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
-
-Provides strict typing for update operators (`$set`, `$inc`, `$push`, etc.).
-
-> [!NOTE]
-> `StrictUpdateFilter` references `StrictMatchKeysAndValues` ([src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)), which is not intended for direct use.
+- [`StrictFilter<TSchema>`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Amongo_types.ts+StrictFilter&type=code) – Provides strict type checking for filter predicates with proper nested path support.
+- [`StrictUpdateFilter<TSchema>`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Amongo_types.ts+StrictUpdateFilter&type=code) – Provides strict typing for update operators (`$set`, `$inc`, `$push`, etc.).
+- [`StrictMatchKeysAndValues`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Amongo_types.ts+StrictMatchKeysAndValues&type=code) – Helper type for `StrictUpdateFilter` (not intended for public use).
 
 **Example**:
+
 ```typescript
 interface User {
   name: string;
@@ -171,7 +181,7 @@ const filter: StrictFilter<User> = {
 
 // Type-safe update
 const update: StrictUpdateFilter<User> = {
-  $set: { age: 30 }, // ✓ Valid
+  $set: { age: 30 } // ✓ Valid
   // $set: { age: 'thirty' } // ✗ Compile error
 };
 ```
