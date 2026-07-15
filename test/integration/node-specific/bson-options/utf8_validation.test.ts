@@ -14,11 +14,8 @@ import {
 import { runOnlyInNodeMetadata } from '../../../tools/utils';
 
 describe('class MongoDBResponse', runOnlyInNodeMetadata, () => {
-  let client;
-
   afterEach(async () => {
     sinon.restore();
-    if (client) await client.close();
   });
 
   context(

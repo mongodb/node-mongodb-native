@@ -3,23 +3,14 @@ import { once } from 'node:events';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  type ConnectionPoolCreatedEvent,
-  type Db,
-  type MongoClient,
-  type Server
-} from '../../mongodb';
+import { type ConnectionPoolCreatedEvent, type MongoClient, type Server } from '../../mongodb';
 import { clearFailPoint, configureFailPoint, sleep } from '../../tools/utils';
 
 describe('Connection Pool', function () {
   let client: MongoClient;
-  let db: Db;
 
   afterEach(async function () {
     if (client) {
-      if (db) {
-        await db.dropDatabase();
-      }
       await client.close();
     }
   });
