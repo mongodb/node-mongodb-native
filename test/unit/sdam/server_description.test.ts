@@ -7,6 +7,7 @@ import {
   ServerDescription,
   type TopologyVersion
 } from '../../mongodb';
+
 describe('ServerDescription', function () {
   describe('constructor()', () => {
     it('should throw if given a null address', () => {
@@ -208,12 +209,15 @@ describe('ServerDescription', function () {
         });
       }
     };
+
     context('should return that versions are equal', () => {
       makeTopologyVersionComparisonTests(compareTopologyVersionEqualTests);
     });
+
     context('should return that current version is less than', () => {
       makeTopologyVersionComparisonTests(compareTopologyVersionLessThanTests);
     });
+
     context('should return that current version is greater than', () => {
       makeTopologyVersionComparisonTests(compareTopologyVersionGreaterThanTests);
     });

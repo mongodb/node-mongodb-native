@@ -15,7 +15,8 @@ import {
 
 /** @public */
 export interface ClientBulkWriteCursorOptions
-  extends Omit<AbstractCursorOptions, 'maxAwaitTimeMS' | 'tailable' | 'awaitData'>,
+  extends
+    Omit<AbstractCursorOptions, 'maxAwaitTimeMS' | 'tailable' | 'awaitData'>,
     ClientBulkWriteOptions {}
 
 /**

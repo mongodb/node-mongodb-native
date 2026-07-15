@@ -8,6 +8,7 @@ import {
   MongoCryptInvalidArgumentError,
   MongoError
 } from '../../mongodb';
+
 describe('MongoCryptError', function () {
   const errors = [
     new MongoCryptAzureKMSRequestError(''),

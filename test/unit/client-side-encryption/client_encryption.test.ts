@@ -39,6 +39,7 @@ describe('ClientEncryption', function () {
         'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
         'base64'
       );
+
       context('when timeoutMS is provided in ClientEncryptionOptions and client', function () {
         it('sets clientEncryption._timeoutMS to ClientEncryptionOptions.timeoutMS value', function () {
           const client = new MongoClient('mongodb://a/', { timeoutMS: 100 });

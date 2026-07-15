@@ -357,13 +357,11 @@ export class Db {
   ): ListCollectionsCursor<CollectionInfo>;
   listCollections<
     T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
-      | Pick<CollectionInfo, 'name' | 'type'>
-      | CollectionInfo
+      Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo
   >(filter?: Document, options?: ListCollectionsOptions & Abortable): ListCollectionsCursor<T>;
   listCollections<
     T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
-      | Pick<CollectionInfo, 'name' | 'type'>
-      | CollectionInfo
+      Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo
   >(
     filter: Document = {},
     options: ListCollectionsOptions & Abortable = {}

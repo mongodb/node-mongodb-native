@@ -1722,6 +1722,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     context('Case 6: named KMS providers apply TLS options', kmsTlsMetadata, function () {
       afterEach(() => keyvaultClient?.close());
+
       beforeEach(async function () {
         const shouldSkip = this.configuration.filters.ClientSideEncryptionFilter.filter({
           metadata: {
@@ -1810,6 +1811,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           keyVaultNamespace: 'db.keys'
         });
       });
+
       it('Named AWS', async function () {
         {
           // NODE-6861: flakiness is caused by mock KMS servers

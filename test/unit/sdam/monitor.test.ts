@@ -327,6 +327,7 @@ describe('monitoring', function () {
         context(`when serverMonitoringMode = ${serverMonitoringMode}`, () => {
           context('when more than one heartbeatSucceededEvent has been captured', () => {
             let heartbeatDurationMS = 100;
+
             it('correctly returns the mean of the heartbeat durations', async () => {
               mockServer.setMessageHandler(request => {
                 setTimeout(
@@ -439,9 +440,11 @@ describe('monitoring', function () {
 
           executor.wake();
         });
+
         it('executes immediately', function () {
           expect(fnSpy.calledOnce).to.be.true;
         });
+
         it('schedules fn() for heartbeatFrequencyMS away', function () {
           // advance the clock almost heartbeatFrequencyMS away
           clock.tick(29);
@@ -466,6 +469,7 @@ describe('monitoring', function () {
           // advance to point of execution
           clock.tick(30);
         });
+
         it('does not trigger another call to fn()', function () {
           executor.wake();
           executor.wake();
@@ -494,9 +498,11 @@ describe('monitoring', function () {
 
           executor.wake();
         });
+
         it('executes fn() immediately', function () {
           expect(fnSpy.calledOnce).to.be.true;
         });
+
         it('schedules fn() for heartbeatFrequencyMS away', function () {
           clock.tick(29);
           expect(fnSpy.calledOnce).to.be.true;
@@ -590,6 +596,7 @@ describe('monitoring', function () {
 
           executor.stop();
         });
+
         it('does not reschedule fn() after fn() finishes executing', function () {
           // exhaust the spy fn
           clock.tick(5);
@@ -601,6 +608,7 @@ describe('monitoring', function () {
           expect(fnSpy.calledOnce).to.be.true;
         });
       });
+
       context('when fn() is not executing', function () {
         beforeEach(function () {
           executor = new MonitorInterval(fnSpy, {
@@ -613,6 +621,7 @@ describe('monitoring', function () {
           // advance heartbeatFrequencyMS
           clock.tick(30);
         });
+
         it('clears any scheduled executions of fn()', function () {
           expect(fnSpy.callCount).to.equal(0);
         });
@@ -621,6 +630,7 @@ describe('monitoring', function () {
 
     context('when fn() returns an error', function () {
       let uncaughtErrors = [];
+
       beforeEach(function () {
         uncaughtErrors = [];
         process.on('uncaughtException', e => uncaughtErrors.push(e));
@@ -640,6 +650,7 @@ describe('monitoring', function () {
       it('no error is thrown by the MonitorInterval', function () {
         expect(uncaughtErrors).to.have.lengthOf(0);
       });
+
       it('reschedules another call to fn() for heartbeatFrequencyMS in the future', function () {
         clock.tick(30);
         expect(fnSpy.calledTwice).to.be.true;
@@ -700,6 +711,7 @@ describe('monitoring', function () {
           expect(sampler).to.have.property('length', 1);
         });
       });
+
       context('when length === windowSize', () => {
         let sampler: RTTSampler;
         const size = 10;
@@ -746,6 +758,7 @@ describe('monitoring', function () {
 
       context('when 2 <= length < windowSize', () => {
         let sampler: RTTSampler;
+
         beforeEach(() => {
           sampler = new RTTSampler(10);
           for (let i = 1; i <= 3; i++) {

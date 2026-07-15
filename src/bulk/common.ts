@@ -619,9 +619,7 @@ export class MongoBulkWriteError extends MongoServerError {
    **/
   constructor(
     error:
-      | { message: string; code: number; writeErrors?: WriteError[] }
-      | WriteConcernError
-      | AnyError,
+      { message: string; code: number; writeErrors?: WriteError[] } | WriteConcernError | AnyError,
     result: BulkWriteResult
   ) {
     super(error);

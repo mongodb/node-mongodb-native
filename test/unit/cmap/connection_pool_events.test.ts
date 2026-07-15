@@ -27,6 +27,7 @@ describe('Connection Pool Events', function () {
           expect(event).to.have.deep.property('options', options);
         });
       });
+
       context('when provided unallowed fields', function () {
         it('only stores expected fields', function () {
           const options = {

@@ -197,6 +197,7 @@ describe('Transactions', function () {
   context('when completing a transaction', () => {
     let client: MongoClient;
     let commandsStarted: CommandStartedEvent[];
+
     beforeEach(async function () {
       client = this.configuration.newClient(undefined, { monitorCommands: true });
       commandsStarted = [];

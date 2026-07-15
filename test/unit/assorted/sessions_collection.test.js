@@ -6,6 +6,7 @@ const { isHello } = require('../../mongodb');
 const { MongoClient } = require('../../mongodb');
 
 const test = {};
+
 describe('Sessions - unit/sessions', function () {
   describe('Collection', function () {
     afterEach(() => mock.cleanup());

@@ -313,22 +313,20 @@ export class ClientEncryption {
       this._keyVaultNamespace
     );
 
-    const replacements = dataKeys.map(
-      (key: DataKey): AnyBulkWriteOperation<DataKey> => ({
-        updateOne: {
-          filter: { _id: key._id },
-          update: {
-            $set: {
-              masterKey: key.masterKey,
-              keyMaterial: key.keyMaterial
-            },
-            $currentDate: {
-              updateDate: true
-            }
+    const replacements = dataKeys.map((key: DataKey): AnyBulkWriteOperation<DataKey> => ({
+      updateOne: {
+        filter: { _id: key._id },
+        update: {
+          $set: {
+            masterKey: key.masterKey,
+            keyMaterial: key.keyMaterial
+          },
+          $currentDate: {
+            updateDate: true
           }
         }
-      })
-    );
+      }
+    }));
 
     const result = await this._keyVaultClient
       .db(dbName)

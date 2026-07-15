@@ -18,6 +18,7 @@ import {
   DEFAULT_PK_FACTORY,
   DocumentSequence
 } from '../../../mongodb';
+
 describe('ClientBulkWriteCommandBuilder', function () {
   describe('#buildBatch', function () {
     context('when custom options are provided', function () {

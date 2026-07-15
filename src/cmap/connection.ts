@@ -119,9 +119,7 @@ export interface ProxyOptions {
 
 /** @public */
 export interface ConnectionOptions
-  extends SupportedNodeConnectionOptions,
-    StreamDescriptionOptions,
-    ProxyOptions {
+  extends SupportedNodeConnectionOptions, StreamDescriptionOptions, ProxyOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;

@@ -4,6 +4,7 @@ const { expect } = require('chai');
 const { Long, isHello, MongoClient } = require('../../mongodb');
 
 const testContext = {};
+
 describe('Collation', function () {
   afterEach(() => mock.cleanup());
 

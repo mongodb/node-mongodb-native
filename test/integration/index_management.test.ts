@@ -720,6 +720,7 @@ describe('Indexes', function () {
 
   context('commitQuorum', function () {
     let client;
+
     beforeEach(async function () {
       client = this.configuration.newClient({ monitorCommands: true });
     });
@@ -741,16 +742,19 @@ describe('Indexes', function () {
         }
       };
     }
+
     it(
       'should throw an error if commitQuorum specified on db.createIndex',
       throwErrorTest((db, collection) =>
         db.createIndex(collection.collectionName, 'a', { commitQuorum: 'all' })
       )
     );
+
     it(
       'should throw an error if commitQuorum specified on collection.createIndex',
       throwErrorTest((db, collection) => collection.createIndex('a', { commitQuorum: 'all' }))
     );
+
     it(
       'should throw an error if commitQuorum specified on collection.createIndexes',
       throwErrorTest((db, collection) =>
@@ -780,6 +784,7 @@ describe('Indexes', function () {
         }
       };
     }
+
     it(
       'should run command with commitQuorum if specified on db.createIndex',
       commitQuorumTest(
@@ -791,6 +796,7 @@ describe('Indexes', function () {
           })
       )
     );
+
     it(
       'should run command with commitQuorum if specified on collection.createIndex',
       commitQuorumTest((db, collection) =>
@@ -798,6 +804,7 @@ describe('Indexes', function () {
         collection.createIndex('a', { writeConcern: { w: 'majority' }, commitQuorum: 0 })
       )
     );
+
     it(
       'should run command with commitQuorum if specified on collection.createIndexes',
       commitQuorumTest((db, collection) =>

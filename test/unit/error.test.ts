@@ -114,6 +114,7 @@ describe('MongoErrors', () => {
       expect(err.message).to.equal(errorMessage);
       expect(err.someData).to.equal(12345);
     });
+
     context('errorResponse property', function () {
       it(`should set errorResponse to raw results document passed in`, function () {
         const errorDoc = { message: 'A test error', someData: 12345 };
@@ -121,6 +122,7 @@ describe('MongoErrors', () => {
         expect(err).to.be.an.instanceof(Error);
         expect(err.errorResponse).to.deep.equal(errorDoc);
       });
+
       it(`should not construct enumerated key 'errorResponse' if present`, function () {
         const errorDoc = {
           message: 'A test error',
@@ -718,6 +720,7 @@ describe('MongoErrors', () => {
         });
       }
     );
+
     context('when passed an AggregateError with a non-empty message', function () {
       it('returns message field', function () {
         const aggErr = new AggregateError(
@@ -727,6 +730,7 @@ describe('MongoErrors', () => {
         expect(MongoError.buildErrorMessage(aggErr)).to.deep.equal(aggErr.message);
       });
     });
+
     context(
       'when passed an AggregateError with an empty errors array and empty message',
       function () {
@@ -738,6 +742,7 @@ describe('MongoErrors', () => {
         });
       }
     );
+
     context('when passed an Error that is not an AggregateError', function () {
       it("returns the Error's message property", function () {
         const err = new Error('error message');
@@ -765,6 +770,7 @@ describe('MongoErrors', () => {
         expect(new MongoWriteConcernError(res).code).to.equal(81);
       });
     });
+
     context('when top-level code is provided and  writeConcernError.code exists', function () {
       it('error.code equals the top-level code', function () {
         const topLevelCode = 10;

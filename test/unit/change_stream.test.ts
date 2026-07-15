@@ -118,6 +118,7 @@ describe('ChangeStreamCursor', function () {
 
       context('when the cursor was not initialized with startAfter set', function () {
         let cursor: ChangeStreamCursor;
+
         beforeEach(function () {
           cursor = new ChangeStreamCursor(
             new MongoClient('mongodb://localhost:27027'),
@@ -179,6 +180,7 @@ describe('ChangeStreamCursor', function () {
 
         context('when the maxWireVersion >= 7', function () {
           let cursor: ChangeStreamCursor;
+
           beforeEach(function () {
             cursor = new ChangeStreamCursor(
               new MongoClient('mongodb://localhost:27027'),
@@ -232,6 +234,7 @@ describe('ChangeStreamCursor', function () {
 
         context('when the maxWireVersion >= 7', function () {
           let cursor: ChangeStreamCursor;
+
           beforeEach(function () {
             cursor = new ChangeStreamCursor(
               new MongoClient('mongodb://localhost:27027'),

@@ -159,7 +159,9 @@ describe('#refreshKMSCredentials', function () {
           Expiration: new Date()
         });
       });
+
       afterEach(() => sinon.restore());
+
       it('only returns fields libmongocrypt expects', async function () {
         const credentials = await refreshKMSCredentials({ aws: {} });
         expect(credentials).to.deep.equal({
@@ -214,6 +216,7 @@ describe('#refreshKMSCredentials', function () {
 
       context('when metadata http response is 200 ok', () => {
         setupHttpServer(200);
+
         context('when the credentials are empty', function () {
           const kmsProviders = { gcp: {} };
 
@@ -230,6 +233,7 @@ describe('#refreshKMSCredentials', function () {
 
       context('when metadata http response is 401 bad', () => {
         setupHttpServer(401);
+
         context('when the credentials are empty', function () {
           const kmsProviders = { gcp: {} };
 
@@ -263,7 +267,9 @@ describe('#refreshKMSCredentials', function () {
 
   context('when using azure', () => {
     afterEach(() => tokenCache.resetCache());
+
     afterEach(() => sinon.restore());
+
     context('credential caching', () => {
       const cache = tokenCache;
 
@@ -283,9 +289,11 @@ describe('#refreshKMSCredentials', function () {
           sinon.stub(cache, '_getToken').resolves(mockToken);
           token = await cache.getToken();
         });
+
         it('fetches a token', async () => {
           expect(token).to.have.property('accessToken', mockToken.accessToken);
         });
+
         it('caches the token on the class', async () => {
           expect(cache.cachedToken).to.equal(mockToken);
         });
@@ -312,6 +320,7 @@ describe('#refreshKMSCredentials', function () {
           it('fetches a token', () => {
             expect(token).to.have.property('accessToken', mockToken.accessToken);
           });
+
           it('caches the token on the class', () => {
             expect(cache.cachedToken).to.equal(mockToken);
           });
@@ -335,6 +344,7 @@ describe('#refreshKMSCredentials', function () {
             sinon.stub(cache, '_getToken').resolves(expectedMockToken);
             token = await cache.getToken();
           });
+
           it('returns the cached token', () => {
             expect(token).to.have.property('accessToken', expectedMockToken.accessToken);
           });
@@ -417,6 +427,7 @@ describe('#refreshKMSCredentials', function () {
 
     context('error handling', () => {
       afterEach(() => sinon.restore());
+
       context('when the request times out', () => {
         before(() => {
           sinon.stub(utils, 'get').rejects(new MongoNetworkTimeoutError('request timed out'));

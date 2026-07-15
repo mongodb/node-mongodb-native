@@ -166,6 +166,7 @@ describe('Topology (unit)', function () {
             }
           });
         });
+
         context('when the topology originally only contained one server', function () {
           it('returns a MongoServerSelectionError', async function () {
             topology = topologyWithPlaceholderClient([mockServer.hostAddress()], {});

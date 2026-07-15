@@ -53,6 +53,7 @@ describe('class OpCompressedRequest', () => {
             zlibCompressionLevel: 0
           }).toBin();
         });
+
         afterEach(() => sinon.restore());
 
         it('returns an array of buffers', async () => {

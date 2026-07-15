@@ -1008,7 +1008,7 @@ function processWaitQueue(topology: Topology) {
               topology.description,
               topology.s.serverSelectionTimeoutMS !== 0
                 ? topology.s.serverSelectionTimeoutMS -
-                  (processTimeMS() - waitQueueMember.startTime)
+                    (processTimeMS() - waitQueueMember.startTime)
                 : -1,
               waitQueueMember.operationName
             )

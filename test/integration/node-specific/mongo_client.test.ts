@@ -484,6 +484,7 @@ describe('class MongoClient', function () {
 
   context('explict #connect()', () => {
     let client: MongoClient;
+
     beforeEach(function () {
       client = this.configuration.newClient(
         {},
@@ -526,6 +527,7 @@ describe('class MongoClient', function () {
 
   context('implicit #connect()', () => {
     let client: MongoClient;
+
     beforeEach(function () {
       client = this.configuration.newClient(
         {},
@@ -863,6 +865,7 @@ describe('class MongoClient', function () {
 
     context('concurrent calls', () => {
       let topologyClosedSpy;
+
       beforeEach(async function () {
         await client.connect();
         const coll = client.db('db').collection('concurrentCalls');

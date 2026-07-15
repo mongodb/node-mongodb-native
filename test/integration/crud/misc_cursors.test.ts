@@ -1672,13 +1672,19 @@ describe('Cursor', function () {
       };
 
     it('should use find options object', findSort({ alpha: 1 }, new Map([['alpha', 1]])));
+
     it('should use find options string', findSort('alpha', new Map([['alpha', 1]])));
+
     it('should use find options shallow array', findSort(['alpha', 1], new Map([['alpha', 1]])));
+
     it('should use find options deep array', findSort([['alpha', 1]], new Map([['alpha', 1]])));
 
     it('should use cursor.sort object', cursorSort({ alpha: 1 }, new Map([['alpha', 1]])));
+
     it('should use cursor.sort string', cursorSort('alpha', new Map([['alpha', 1]])));
+
     it('should use cursor.sort shallow array', cursorSort(['alpha', 1], new Map([['alpha', 1]])));
+
     it('should use cursor.sort deep array', cursorSort([['alpha', 1]], new Map([['alpha', 1]])));
 
     it('formatSort - one key', () => {

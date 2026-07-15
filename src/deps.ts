@@ -98,8 +98,7 @@ type CredentialProvider = {
 };
 
 export function getAwsCredentialProvider():
-  | CredentialProvider
-  | { kModuleError: MongoMissingDependencyError } {
+  CredentialProvider | { kModuleError: MongoMissingDependencyError } {
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -118,8 +117,7 @@ export function getAwsCredentialProvider():
 
 /** @internal */
 export type GcpMetadata =
-  | typeof import('gcp-metadata')
-  | { kModuleError: MongoMissingDependencyError };
+  typeof import('gcp-metadata') | { kModuleError: MongoMissingDependencyError };
 
 export function getGcpMetadata(): GcpMetadata {
   try {
@@ -205,8 +203,7 @@ export function getSocks(): SocksLib | { kModuleError: MongoMissingDependencyErr
 
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
 export function getMongoDBClientEncryption():
-  | typeof import('mongodb-client-encryption')
-  | { kModuleError: MongoMissingDependencyError } {
+  typeof import('mongodb-client-encryption') | { kModuleError: MongoMissingDependencyError } {
   let mongodbClientEncryption = null;
 
   try {

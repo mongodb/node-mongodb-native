@@ -22,6 +22,7 @@ import {
   parseOptions,
   resolveSRVRecord
 } from '../mongodb';
+
 describe('Connection String', function () {
   context('when serverMonitoringMode is set', function () {
     context('when it is valid', function () {

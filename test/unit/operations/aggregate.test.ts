@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import { AggregateOperation, MongoDBNamespace, WriteConcern } from '../../mongodb';
+
 describe('AggregateOperation', function () {
   const ns = new MongoDBNamespace('test', 'coll');
 

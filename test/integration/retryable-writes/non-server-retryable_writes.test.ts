@@ -8,6 +8,7 @@ import {
   PoolClearedError,
   Server
 } from '../../mongodb';
+
 describe('Non Server Retryable Writes', function () {
   let client: MongoClient;
   let collection: Collection<{ _id: 1 }>;
