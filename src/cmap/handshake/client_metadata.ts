@@ -107,8 +107,9 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
  */
 export async function makeClientMetadata(
   driverInfoList: DriverInfo[],
-  { appName = '', runtime: { os } }: MakeClientMetadataOptions
+  { appName = '', runtime }: MakeClientMetadataOptions
 ): Promise<ClientMetadata> {
+  const { os } = await runtime;
   const metadataDocument = new LimitedSizeDocument(512);
 
   // Add app name first, it must be sent

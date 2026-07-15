@@ -1,8 +1,9 @@
 /* eslint-disable no-restricted-imports*/
 
-// We squash the restricted import errors here because we are using type-only imports, which
-// do not impact the driver's actual runtime dependencies.
-// We also allow restricted imports in this file, because we expect this file to be the only place actually importing restricted Node APIs.
+// We squash the restricted import errors here: the module-scope imports are type-only, and the
+// one runtime dependency this file takes — the dynamic `import('os')` fallback in
+// resolveRuntimeAdapters — is deliberate: this file is expected to be the only place that loads
+// restricted Node APIs at runtime.
 
 import type * as os from 'os';
 
@@ -11,8 +12,9 @@ import { type MongoClientOptions } from './mongo_client';
 /**
  * @internal
  *
- * This propery can be set on the global object to allow the driver to require otherwise blocked modules.
- * This is used by our test suite to allow tests to access the `os` module without allowing user code to do so.
+ * Legacy escape hatch for the test sandbox's restricted `require`: the driver no longer sets this
+ * property (the os adapter loads via dynamic `import()`), but the vm test harness
+ * still checks it. Kept until the sandbox contract is revisited in a follow-up.
  */
 export const ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME = 'allowedDriverRequire';
 
@@ -47,18 +49,17 @@ export interface Runtime {
 /**
  * @internal
  *
- * Given a MongoClientOptions, this function resolves the set of runtime options, providing Nodejs implementations if
- * not provided by in `options`, and returns a `Runtime`.
+ * Given a MongoClientOptions, this function resolves the set of runtime options, providing Nodejs
+ * implementations if not provided in `options`, and returns a `Runtime`.
+ *
+ * Resolution is asynchronous because the default `os` adapter is loaded via a dynamic `import()`.
+ * Unlike `require`, dynamic import exists in every module system the driver ships into or is
+ * bundled into (CJS, ESM, and bundled ESM output), and the literal specifier keeps it
+ * statically analyzable for bundlers. The promise is created during synchronous
+ * options parsing and awaited later by consumers, so the public constructor stays synchronous.
  */
-export function resolveRuntimeAdapters(options: MongoClientOptions): Runtime {
-  (globalThis as any)[ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME] = true;
-  try {
-    const runtime = {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      os: options.runtimeAdapters?.os ?? require('os')
-    };
-    return runtime;
-  } finally {
-    (globalThis as any)[ALLOWED_DRIVER_REQUIRE_PROPERTY_NAME] = false;
-  }
+export async function resolveRuntimeAdapters(options: MongoClientOptions): Promise<Runtime> {
+  return {
+    os: options.runtimeAdapters?.os ?? (await import('os'))
+  };
 }

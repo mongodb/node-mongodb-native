@@ -1178,5 +1178,5 @@ export interface MongoOptions
   __skipPingOnConnect?: boolean;
 
   /** @internal */
-  runtime: Runtime;
+  runtime: Promise<Runtime>;
 }
