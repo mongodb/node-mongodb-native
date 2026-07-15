@@ -21,6 +21,14 @@ describe('Kerberos', function () {
   let lookupStub;
   let client;
 
+  // Skipped while we await migration of the underlying environment variable to point at a
+  // compatible server.
+  beforeEach(function () {
+    this.currentTest.skipReason =
+      'Awaiting migration of the underlying env var to aim at a compatible server';
+    this.skip();
+  });
+
   beforeEach(() => {
     lookupStub = sinon.stub(dns, 'lookup').callThrough();
     resolveStub = sinon.stub(dns, 'resolve').callThrough();
