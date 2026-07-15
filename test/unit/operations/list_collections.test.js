@@ -68,7 +68,6 @@ describe('ListCollectionsOperation', function () {
     const description = new StreamDescription();
 
     context('when comment is provided', function () {
-
       context('when the wireVersion >= 9', function () {
         it('sets a comment on the command', function () {
           const operation = new ListCollectionsOperation(
