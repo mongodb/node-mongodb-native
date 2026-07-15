@@ -24,14 +24,17 @@ This file documents all experimental features in the MongoDB Node.js Driver. The
 
 **Description**: Allows providing custom implementations of Node.js runtime modules to the driver. This is useful both for customizing how the driver uses standard modules within a Node.js runtime (for example, supplying a custom DNS resolver) and for running the driver in non-Node.js JavaScript environments.
 
-**Types**:
+> [!NOTE]
+> We introduced this feature under an experimental stability guarantee becuase defining a universal I/O interface that works seamlessly across major JS runtimes is complex and we anticipate that the shape of these interfaces may need to evolve as we gather feedback from edge-case usages.
 
-#### `RuntimeAdapters`
+#### Types:
+
+##### `RuntimeAdapters`
 **Source**: [src/runtime_adapters.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/runtime_adapters.ts)
 
 Interface for providing custom runtime module implementations.
 
-#### `OsAdapter`
+##### `OsAdapter`
 **Source**: [src/runtime_adapters.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/runtime_adapters.ts)
 
 Represents the required functionality from the Node.js `os` module.
@@ -59,6 +62,7 @@ const client = new MongoClient(url, {
 ### AbortSignal Support
 
 **Type**: `Abortable`
+
 **Source**: [src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)
 
 **Description**: Allows using `AbortController` to abort asynchronous operations. The `signal.reason` value is used as the error thrown.
@@ -75,7 +79,10 @@ await collection.find({}, { signal }).toArray();
 ```
 
 > [!WARNING]
-> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment — programmatically aborting hundreds of operations can empty the driver's connection pool. `AbortSignal` is best suited for human-interactive interruption (e.g., Ctrl-C) where the cancellation frequency is reasonably low.
+> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment, programmatically aborting hundreds of operations can empty the driver's connection pool. `AbortSignal` is best suited for human-interactive interruption (e.g., Ctrl-C) where the cancellation frequency is reasonably low.
+
+> [!NOTE]
+> The socket-teardown behavior described above is a driver implementation limitation. Making `AbortSignal` stable would require a project to cancel in-flight socket I/O without discarding the connection. Until that lands, the API is unsafe for high-frequency cancellation and will remain experimental.
 
 ---
 
@@ -85,7 +92,9 @@ await collection.find({}, { signal }).toArray();
 
 **Description**: Specifies the Client-side operations timeout (CSOT) in milliseconds after which an operation will throw an error. `timeoutMS` can be configured at the client, database, collection, session, transaction, and per-operation levels, with narrower scopes overriding broader ones.
 
-See [Limit Server Execution Time](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/csot/) for the full inheritance/override rules, cursor-specific behavior, Client Encryption interactions, and code examples.
+_See [Limit Server Execution Time](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/csot/) for the full inheritance/override rules, cursor-specific behavior, Client Encryption interactions, and code examples._
+
+> [!NOTE] This feature will remain experimental while the common driver specification for Client-Side Operations Timeout isn't finalized.
 
 #### Cursor Timeout Modes
 
@@ -93,6 +102,7 @@ See [Limit Server Execution Time](https://www.mongodb.com/docs/drivers/node/curr
 > This configures how the CSOT `timeoutMS` above is applied to cursors.
 
 **Type**: `CursorTimeoutMode`
+
 **Source**:
 - Constant definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
 - Type definition - [src/cursor/abstract_cursor.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts)
@@ -122,6 +132,9 @@ See [Limit Server Execution Time](https://www.mongodb.com/docs/drivers/node/curr
 
 **Description**: Provides stricter type checking for MongoDB operations with better TypeScript inference for nested paths and type safety.
 
+> [!NOTE]
+> The following type shapes use TypeScript inference to check nested-path filters. Because of that complexity, we may refine them without a major version bump, so their shape is not guaranteed to be stable.
+
 **Types**:
 
 #### `StrictFilter<TSchema>`
@@ -135,8 +148,7 @@ Provides strict type checking for filter predicates with proper nested path supp
 Provides strict typing for update operators (`$set`, `$inc`, `$push`, etc.).
 
 > [!NOTE]
-> `StrictUpdateFilter` references `StrictMatchKeysAndValues` ([src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)). 
-> `StrictMatchKeysAndValues` is not intended for direct use.
+> `StrictUpdateFilter` references `StrictMatchKeysAndValues` ([src/mongo_types.ts](https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts)), which is not intended for direct use.
 
 **Example**:
 ```typescript
