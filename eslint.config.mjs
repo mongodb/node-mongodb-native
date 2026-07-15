@@ -1,0 +1,366 @@
+import { defineConfig, globalIgnores } from 'eslint/config';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import typescriptEslint from '@typescript-eslint/eslint-plugin';
+import prettier from 'eslint-plugin-prettier';
+import unusedImports from 'eslint-plugin-unused-imports';
+import tsdoc from 'eslint-plugin-tsdoc';
+import mocha from 'eslint-plugin-mocha';
+import globals from 'globals';
+import tsParser from '@typescript-eslint/parser';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import js from '@eslint/js';
+import { FlatCompat } from '@eslint/eslintrc';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+  allConfig: js.configs.all
+});
+
+export default defineConfig([
+  globalIgnores(['test/tools/runner/bundle/**/*', 'docs', '**/lib', 'test/disabled', '!etc/docs']),
+  {
+    extends: compat.extends(
+      'eslint:recommended',
+      'plugin:@typescript-eslint/eslint-recommended',
+      'plugin:@typescript-eslint/recommended',
+      'plugin:prettier/recommended'
+    ),
+
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+      '@typescript-eslint': typescriptEslint,
+      prettier,
+      'unused-imports': unusedImports,
+      tsdoc,
+      mocha
+    },
+
+    linterOptions: {
+      reportUnusedDisableDirectives: true
+    },
+
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.mocha
+      },
+
+      parser: tsParser,
+      ecmaVersion: 2023
+    },
+
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'clearTimeout',
+          message: "Use `import { clearTimeout } from 'timers';` instead"
+        },
+        {
+          name: 'clearImmediate',
+          message: "Use `import { clearImmediate } from 'timers';` instead"
+        },
+        {
+          name: 'clearInterval',
+          message: "Use `import { clearInterval } from 'timers';` instead"
+        },
+        {
+          name: 'setTimeout',
+          message: "Use `import { setTimeout } from 'timers';` instead"
+        },
+        {
+          name: 'setImmediate',
+          message: "Use `import { setImmediate } from 'timers';` instead"
+        },
+        {
+          name: 'setInterval',
+          message: "Use `import { setInterval } from 'timers';` instead"
+        },
+        {
+          name: 'process',
+          message: "Use `import * as process from 'process';` instead"
+        }
+      ],
+
+      'prettier/prettier': 'error',
+      'tsdoc/syntax': 'warn',
+      'no-console': 'error',
+      'valid-typeof': 'error',
+
+      eqeqeq: [
+        'error',
+        'always',
+        {
+          null: 'ignore'
+        }
+      ],
+
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
+      strict: ['error', 'global'],
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-empty-function': 'error',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          disallowTypeAnnotations: false,
+          fixStyle: 'inline-type-imports'
+        }
+      ],
+
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '.',
+              message: 'Please import directly from the relevant file instead.'
+            },
+            {
+              name: '..',
+              message: 'Please import directly from the relevant file instead.'
+            },
+            {
+              name: 'node:*',
+              message: "Don't use `node:*`; use bare Node core module names instead."
+            }
+          ]
+        }
+      ],
+
+      'mocha/no-async-suite': 'error',
+      'mocha/no-exclusive-tests': 'error',
+      'mocha/consistent-spacing-between-blocks': 'error',
+
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration',
+          message: 'Do not declare enums'
+        },
+        {
+          selector: "BinaryExpression[operator=/[=!]==/] Identifier[name='undefined']",
+          message: 'Do not strictly check undefined'
+        },
+        {
+          selector: "BinaryExpression[operator=/[=!]==/] Literal[raw='null']",
+          message: 'Do not strictly check null'
+        },
+        {
+          selector: "BinaryExpression[operator=/[=!]==?/] Literal[value='undefined']",
+          message:
+            "Do not strictly check typeof undefined (NOTE: currently this rule only detects the usage of 'undefined' string literal so this could be a misfire)"
+        },
+        {
+          selector: "CallExpression[callee.property.name='removeAllListeners'][arguments.length=0]",
+          message: 'removeAllListeners can remove error listeners leading to uncaught errors'
+        }
+      ],
+
+      '@typescript-eslint/no-unused-vars': 'error',
+      'no-duplicate-imports': 'error'
+    }
+  },
+  {
+    files: ['**/*.d.ts'],
+
+    languageOptions: {
+      parser: tsParser
+    },
+
+    rules: {
+      'prettier/prettier': 'off',
+      strict: 'off',
+      '@typescript-eslint/no-empty-interface': 'off',
+      '@typescript-eslint/no-misused-new': 'off',
+      '@typescript-eslint/ban-types': 'off',
+      '@typescript-eslint/no-unused-vars': 'off'
+    }
+  },
+  {
+    files: ['**/*.mjs'],
+
+    languageOptions: {
+      ecmaVersion: 5,
+      sourceType: 'module'
+    }
+  },
+  {
+    files: ['test/**/*.js'],
+    extends: compat.extends('eslint:recommended', 'plugin:prettier/recommended'),
+
+    plugins: {
+      prettier
+    },
+
+    rules: {
+      '@typescript-eslint/no-var-requires': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-this-alias': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+
+      'no-restricted-modules': [
+        'error',
+        {
+          patterns: ['**/../lib/**', '**/../src/**', 'mongodb-mock-server']
+        }
+      ],
+
+      'no-console': 'off',
+      'tsdoc/syntax': 'off',
+      strict: ['off', 'global'],
+      'no-restricted-syntax': 'off'
+    }
+  },
+  {
+    files: ['test/**/*.ts'],
+
+    languageOptions: {
+      parser: tsParser
+    },
+
+    rules: {
+      'no-console': 'off',
+      'no-restricted-syntax': 'off',
+      'typescript-eslint/ban-ts-comment': 'off',
+      'no-restricted-imports': 'off',
+
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          varsIgnorePattern: '^_'
+        }
+      ],
+
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: ['**/../lib/**', 'mongodb-mock-server', '**/../src/**']
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/**/*.ts'],
+    extends: compat.extends('plugin:@typescript-eslint/recommended-requiring-type-checking'),
+
+    languageOptions: {
+      parser: tsParser,
+      ecmaVersion: 5,
+
+      parserOptions: {
+        project: ['./tsconfig.json']
+      }
+    },
+
+    rules: {
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/restrict-plus-operands': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-return-await': 'off',
+      '@typescript-eslint/return-await': ['error', 'always'],
+
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          varsIgnorePattern: '^_'
+        }
+      ],
+
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['**/../lib/**', 'mongodb-mock-server', 'node:*', 'os', 'crypto'],
+
+          paths: [
+            {
+              name: 'bson',
+              message: "Import from the driver's bson.ts file instead."
+            }
+          ]
+        }
+      ],
+
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'Buffer',
+          message: 'Use Uint8Array instead'
+        }
+      ]
+    }
+  },
+  {
+    files: ['**/*.test-d.ts'],
+
+    languageOptions: {
+      parser: tsParser
+    },
+
+    rules: {
+      'prettier/prettier': 'error',
+      'tsdoc/syntax': 'warn',
+      'no-console': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-empty-function': 'off'
+    }
+  },
+  {
+    files: ['**/*.d.ts', 'lib/*.d.ts'],
+
+    languageOptions: {
+      parser: tsParser
+    },
+
+    rules: {
+      'unused-imports/no-unused-imports': 'error',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/no-unsafe-declaration-merging': 'off',
+      'no-duplicate-imports': 'off',
+
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          disallowTypeAnnotations: false,
+          fixStyle: 'separate-type-imports'
+        }
+      ],
+
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['**/../lib/**', '**/../src/**']
+        }
+      ]
+    }
+  }
+]);
