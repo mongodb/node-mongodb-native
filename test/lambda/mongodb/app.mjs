@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- TODO(NODE-XXXX): console output is intentional for AWS Lambda function logging */
 import * as assert from 'node:assert/strict';
 
 import { MongoClient } from 'mongodb';
