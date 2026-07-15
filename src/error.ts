@@ -1400,7 +1400,7 @@ export function needsRetryableWriteLabel(error: Error): boolean {
     return true;
   }
   if (error instanceof MongoError) {
-    if (isRetryableWriteError(error) && !error.hasErrorLabel(MongoErrorLabel.HandshakeError)) {
+    if (!error.hasErrorLabel(MongoErrorLabel.HandshakeError)) {
       // If we already have the error label no need to add it again. 4.4+ servers add the label.
       // In the case where we have a handshake error, need to fall down to the logic checking
       // the codes.
