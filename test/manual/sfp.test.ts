@@ -126,7 +126,7 @@ describe('Atlas Secure Frontend Processor (SFP)', function () {
       authMechanism: 'SCRAM-SHA-256'
     });
     try {
-      await cleanup.db('test').collection(collectionName).drop();
+      await cleanup.db('db').collection(collectionName).drop();
     } finally {
       await cleanup.close();
     }
