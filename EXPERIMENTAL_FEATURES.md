@@ -25,14 +25,14 @@ This file documents all experimental features in the MongoDB Node.js Driver.
 Allows providing custom implementations of Node.js runtime modules to the driver. This is useful both for customizing how the driver uses standard modules within a Node.js runtime (for example, supplying a custom DNS resolver) and for running the driver in non-Node.js JavaScript environments.
 
 > [!NOTE]
-> We introduced this feature under an experimental stability guarantee becuase defining a universal I/O interface that works seamlessly across major JS runtimes is complex and we anticipate that the shape of these interfaces may need to evolve as we gather feedback from edge-case usages.
+> We introduced this feature under an experimental stability guarantee because defining a universal I/O interface that works seamlessly across major JS runtimes is complex and we anticipate that the shape of these interfaces may need to evolve as we gather feedback from edge-case usages.
 
-#### Types:
+**Types:**
 
 - [`RuntimeAdapters`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Aruntime_adapters.ts+RuntimeAdapters&type=code) – Interface for providing custom runtime module implementations.
 - [`OsAdapter`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Aruntime_adapters.ts+OsAdapter&type=code) – Represents the required functionality from the Node.js `os` module.
 
-**Available On**:
+**Available on**:
 
 - [`MongoClientOptions.runtimeAdapters`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5EMongoClientOptions%24%2F&type=code)
 
@@ -58,7 +58,9 @@ const client = new MongoClient(url, {
 
 Allows using `AbortController` to abort asynchronous operations. The `signal.reason` value is used as the error thrown.
 
-**Type**: [`Abortable`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Amongo_types.ts+Abortable&type=code)
+**Types**:
+
+- [`Abortable`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Amongo_types.ts+Abortable&type=code)
 
 **Example**:
 
@@ -73,7 +75,7 @@ await collection.find({}, { signal }).toArray();
 ```
 
 > [!WARNING]
-> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment, programmatically aborting hundreds of operations can empty the driver's connection pool. `AbortSignal` is best suited for human-interactive interruption (e.g., Ctrl-C) where the cancellation frequency is reasonably low.
+> If an abort signal aborts an operation while the driver is writing to the underlying socket or reading the response from the server, the socket will be closed. If signals are aborted at a high rate during socket read/writes, this can lead to a high rate of connection reestablishment; programmatically aborting hundreds of operations can empty the driver's connection pool. `AbortSignal` is best suited for human-interactive interruption (e.g., Ctrl-C) where the cancellation frequency is reasonably low.
 
 > [!NOTE]
 > The socket-teardown behavior described above is a driver implementation limitation. Making `AbortSignal` stable would require a project to cancel in-flight socket I/O without discarding the connection. Until that lands, the API is unsafe for high-frequency cancellation and will remain experimental.
@@ -86,7 +88,8 @@ Specifies the Client-side operations timeout (CSOT) in milliseconds after which 
 
 _See [Limit Server Execution Time](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/csot/) for the full inheritance/override rules, cursor-specific behavior, Client Encryption interactions, and code examples._
 
-> [!NOTE] This feature will remain experimental while the common driver specification for Client-Side Operations Timeout isn't finalized.
+> [!NOTE]
+> This feature will remain experimental while the common driver specification for Client-Side Operations Timeout isn't finalized.
 
 #### Cursor Timeout Modes
 

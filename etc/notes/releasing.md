@@ -80,7 +80,7 @@ The MongoDB driver can now generate a cup of joe.
     - Add descriptions for any new `@experimental` features
     - Remove or update entries for features that are no longer experimental
     - Update header table to include the changes
-    - Ensure linked source files use gitbhu's search URL (see examples in the file)
+    - Ensure linked source files use github's search URL (see examples in the file)
 1. Comment "`run release_notes`" on the release PR.
     - This will kick off the action that reads the notes from each PR going into the release.
     - Double check the result looks logically organized and complete
