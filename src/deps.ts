@@ -204,14 +204,12 @@ export function getSocks(): SocksLib | { kModuleError: MongoMissingDependencyErr
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
 export function getMongoDBClientEncryption():
   typeof import('mongodb-client-encryption') | { kModuleError: MongoMissingDependencyError } {
-  let mongodbClientEncryption = null;
-
   try {
     // NOTE(NODE-3199): Ensure you always wrap an optional require literally in the try block
     // Cannot be moved to helper utility function, bundlers search and replace the actual require call
     // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    mongodbClientEncryption = require('mongodb-client-encryption');
+    return require('mongodb-client-encryption');
   } catch (error) {
     const kModuleError = new MongoMissingDependencyError(
       'Optional module `mongodb-client-encryption` not found. Please install it to use auto encryption or ClientEncryption.',
@@ -219,6 +217,4 @@ export function getMongoDBClientEncryption():
     );
     return { kModuleError };
   }
-
-  return mongodbClientEncryption;
 }

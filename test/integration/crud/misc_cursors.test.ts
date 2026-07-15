@@ -982,13 +982,12 @@ describe('Cursor', function () {
 
     const docs = Array.from({ length: 30000 }, (_, i) => ({ a: i }));
     const allDocs = [];
-    let left = 0;
 
     while (docs.length > 0) {
       allDocs.push(docs.splice(0, 1000));
     }
     // Get all batches we must insert
-    left = allDocs.length;
+    const left = allDocs.length;
     let totalI = 0;
     let timeout = 0;
 

@@ -1759,9 +1759,7 @@ describe('Bulk', function () {
           writeConcern: { w: 'majority' }
         });
 
-        let bulk = undefined;
-
-        bulk = collection.initializeOrderedBulkOp({ session });
+        const bulk = collection.initializeOrderedBulkOp({ session });
         bulk.insert({ answer: 42 });
         await bulk.execute();
 
@@ -1786,9 +1784,7 @@ describe('Bulk', function () {
           writeConcern: { w: 'majority' }
         });
 
-        let bulk = undefined;
-
-        bulk = collection.initializeUnorderedBulkOp({ session });
+        const bulk = collection.initializeUnorderedBulkOp({ session });
         bulk.insert({ answer: 42 });
         await bulk.execute();
 
@@ -1811,9 +1807,7 @@ describe('Bulk', function () {
 
         await session.withTransaction(
           async () => {
-            let bulk = undefined;
-
-            bulk = collection.initializeUnorderedBulkOp({ session });
+            const bulk = collection.initializeUnorderedBulkOp({ session });
             bulk.insert({ answer: 42 });
             await bulk.execute();
             await session.abortTransaction();
@@ -1839,9 +1833,7 @@ describe('Bulk', function () {
 
         await session.withTransaction(
           async () => {
-            let bulk = undefined;
-
-            bulk = collection.initializeOrderedBulkOp({ session });
+            const bulk = collection.initializeOrderedBulkOp({ session });
             bulk.insert({ answer: 42 });
             await bulk.execute();
             await session.abortTransaction();

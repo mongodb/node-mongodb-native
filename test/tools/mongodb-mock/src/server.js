@@ -252,19 +252,13 @@ const protocol = function (self, message) {
   self.isCompressed = false;
   // Get the size for the message
   const size =
-    message[index++] |
-    (message[index++] << 8) |
-    (message[index++] << 16) |
-    (message[index++] << 24);
+    message[index++] | (message[index++] << 8) | (message[index++] << 16) | (message[index] << 24);
   if (size !== message.length) throw new Error('corrupt wire protocol message');
   // Adjust to opcode
   index = 12;
   // Get the opCode for the message
   let type =
-    message[index++] |
-    (message[index++] << 8) |
-    (message[index++] << 16) |
-    (message[index++] << 24);
+    message[index++] | (message[index++] << 8) | (message[index++] << 16) | (message[index] << 24);
 
   // Unpack and decompress if the message is OP_COMPRESSED
   if (type === opcodes.OP_COMPRESSED) {

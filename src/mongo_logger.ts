@@ -476,7 +476,7 @@ export function stringifyWithMaxLen(
   maxDocumentLength: number,
   options: EJSONOptions = {}
 ): string {
-  let strToTruncate = '';
+  let strToTruncate: string;
 
   let currentLength = 0;
   const maxDocumentLengthEnsurer = function maxDocumentLengthEnsurer(key: string, value: any) {
