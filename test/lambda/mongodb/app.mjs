@@ -87,10 +87,9 @@ function reset() {
  * The handler function itself performs an insert/delete and returns the
  * id of the document in play.
  *
- * @param event - API Gateway Lambda Proxy Input Format
  * @returns object - API Gateway Lambda Proxy Output Format
  */
-export const lambdaHandler = async event => {
+export const lambdaHandler = async () => {
   const db = mongoClient.db('lambdaTest');
   const collection = db.collection('test');
   const { insertedId } = await collection.insertOne({ n: 1 });
