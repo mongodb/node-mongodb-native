@@ -150,8 +150,10 @@ BASE_TASKS.push({
 });
 
 BASE_TASKS.push({
+  // No `auth` tag: that tag would exclude this task from the Windows variants (WINDOWS_SKIP_TAGS),
+  // but SFP is a transparent proxy we want to exercise on Windows too.
   name: `test-sfp`,
-  tags: ['latest', 'auth', 'sfp'],
+  tags: ['latest', 'sfp'],
   commands: [
     { func: 'install dependencies' },
     { func: 'assume secrets manager role' },
@@ -834,7 +836,6 @@ const commonNodelessTasks = [
   'test-rapid-sharded_cluster',
   'test-latest-server-v1-api',
   'test-x509-authentication',
-  'test-sfp',
   'test-atlas-connectivity',
   'test-auth-ldap',
   'test-socks5-csfle',
