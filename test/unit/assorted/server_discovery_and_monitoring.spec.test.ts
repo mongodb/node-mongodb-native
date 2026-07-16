@@ -57,20 +57,30 @@ const SDAM_EVENT_CLASSES = {
 
 const WIRE_VERSION_KEYS = new Set(['minWireVersion', 'maxWireVersion']);
 
-const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
-function collectTests(): Record<string, SDAMTest[]> {
-  const testTypes = fs
-    .readdirSync(specDir)
-    .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory())
-    .filter(d => d !== 'unified');
+// LEGACY spec tests, internally maintained, not vendored and as such, not subject to maintenance concerns surrounding maintaining vendored spec files
+const internalSpecDir = path.resolve(__dirname, '../spec/sdam');
 
+// Spec tests (vendored from our specifications repo)
+const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
+
+// Takes in a list of directories, outputs an array of files per directory key
+// Allows preprending prefixes to the directory keys for upstream readability and avoiding collisions
+const buildTestResults = (
+  dirs: Array<string>,
+  dir: string,
+  canonicalNamePrefix = ''
+): Record<string, SDAMTest[]> => {
+  if (canonicalNamePrefix) {
+    canonicalNamePrefix = canonicalNamePrefix + '-';
+  }
   const tests = {};
-  for (const testType of testTypes) {
-    tests[testType] = fs
-      .readdirSync(path.join(specDir, testType))
+  for (const childDir of dirs) {
+    const canonicalName = `${canonicalNamePrefix ?? ''}${childDir}`;
+    tests[canonicalName] = fs
+      .readdirSync(path.join(dir, childDir))
       .filter(f => path.extname(f) === '.json')
       .map(f => {
-        const filePath = path.join(specDir, testType, f);
+        const filePath = path.join(dir, childDir, f);
         const result = EJSON.parse(fs.readFileSync(filePath, { encoding: 'utf8' }), {
           relaxed: true
         });
@@ -79,11 +89,24 @@ function collectTests(): Record<string, SDAMTest[]> {
           throw new Error(`${filePath} did not contain a top-level object`);
         }
 
-        result.type = testType;
-        result.fileName = path.join(testType, f); // unused but helpful when debugging
+        result.type = childDir;
+        result.fileName = path.join(childDir, f); // unused but helpful when debugging
         return result;
       });
   }
+  return tests;
+};
+function collectTests(): Record<string, SDAMTest[]> {
+  const testTypes = fs
+    .readdirSync(specDir)
+    .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory())
+    .filter(d => d !== 'unified');
+
+  const additiveTestTypes = fs.readdirSync(internalSpecDir);
+  const tests = {
+    ...buildTestResults(testTypes, specDir),
+    ...buildTestResults(additiveTestTypes, internalSpecDir, 'INTERNAL')
+  };
 
   return tests;
 }
