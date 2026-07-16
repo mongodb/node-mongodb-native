@@ -75,7 +75,7 @@ const buildTestResults = (
   }
   const tests = {};
   for (const childDir of dirs) {
-    const canonicalName = `${canonicalNamePrefix ?? ''}${childDir}`;
+    const canonicalName = `${canonicalNamePrefix}${childDir}`;
     tests[canonicalName] = fs
       .readdirSync(path.join(dir, childDir))
       .filter(f => path.extname(f) === '.json')
