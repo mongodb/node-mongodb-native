@@ -47,19 +47,19 @@ export class DeleteOperation extends CommandOperation<Document> {
   override options: DeleteOptions;
   statements: DeleteStatement[];
   /** @internal */
-  serializedStatements?: Uint8Array[];
+  serializedOperations?: Uint8Array[];
 
   constructor(
     ns: MongoDBNamespace,
     statements: DeleteStatement[],
     options: DeleteOptions,
-    serializedStatements?: Uint8Array[]
+    serializedOperations?: Uint8Array[]
   ) {
     super(undefined, options);
     this.options = options;
     this.ns = ns;
     this.statements = statements;
-    this.serializedStatements = serializedStatements;
+    this.serializedOperations = serializedOperations;
   }
 
   override get commandName() {
@@ -80,8 +80,8 @@ export class DeleteOperation extends CommandOperation<Document> {
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
       delete: this.ns.collection,
-      deletes: this.serializedStatements
-        ? makeDocumentSequence('deletes', this.statements, this.serializedStatements)
+      deletes: this.serializedOperations
+        ? makeDocumentSequence('deletes', this.statements, this.serializedOperations)
         : this.statements,
       ordered
     };

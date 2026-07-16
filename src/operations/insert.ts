@@ -16,20 +16,20 @@ export class InsertOperation extends CommandOperation<Document> {
   override options: BulkWriteOptions;
 
   documents: Document[];
-  /** @internal Per-document pre-serialized BSON, reused to build a DocumentSequence. */
-  serializedDocuments?: Uint8Array[];
+  /** @internal Per-operation pre-serialized BSON, reused to build a DocumentSequence. */
+  serializedOperations?: Uint8Array[];
 
   constructor(
     ns: MongoDBNamespace,
     documents: Document[],
     options: BulkWriteOptions,
-    serializedDocuments?: Uint8Array[]
+    serializedOperations?: Uint8Array[]
   ) {
     super(undefined, options);
     this.options = { ...options, checkKeys: options.checkKeys ?? false };
     this.ns = ns;
     this.documents = documents;
-    this.serializedDocuments = serializedDocuments;
+    this.serializedOperations = serializedOperations;
   }
 
   override get commandName() {
@@ -41,8 +41,8 @@ export class InsertOperation extends CommandOperation<Document> {
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
       insert: this.ns.collection,
-      documents: this.serializedDocuments
-        ? makeDocumentSequence('documents', this.documents, this.serializedDocuments)
+      documents: this.serializedOperations
+        ? makeDocumentSequence('documents', this.documents, this.serializedOperations)
         : this.documents,
       ordered
     };

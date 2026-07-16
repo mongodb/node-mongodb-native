@@ -1910,4 +1910,49 @@ describe('Bulk', function () {
       });
     });
   });
+
+  describe('BSON options passed to #execute', function () {
+    // Documents are serialized once when added to the bulk operation, then the
+    // resulting bytes are reused as the wire command. BSON options supplied to
+    // execute() must still take effect, which requires falling back to
+    // re-serialization when they differ from the options used when the
+    // documents were added.
+    for (const ordered of [true, false]) {
+      context(`when the bulk operation is ${ordered ? 'ordered' : 'unordered'}`, function () {
+        context('when execute() overrides ignoreUndefined to true', function () {
+          it('omits undefined fields instead of writing them as null', async function () {
+            const collection = client
+              .db(DB_NAME)
+              .collection<{ _id: number; a?: null }>('execute_bson_options');
+            const bulk = ordered
+              ? collection.initializeOrderedBulkOp()
+              : collection.initializeUnorderedBulkOp();
+            bulk.insert({ _id: 1, a: undefined });
+
+            await bulk.execute({ ignoreUndefined: true });
+
+            const doc = await collection.findOne({ _id: 1 });
+            expect(doc).to.not.have.property('a');
+          });
+        });
+
+        context('when execute() does not override BSON options', function () {
+          it('serializes the undefined field as null (ignoreUndefined defaults to false)', async function () {
+            const collection = client
+              .db(DB_NAME)
+              .collection<{ _id: number; a?: null }>('execute_bson_options_default');
+            const bulk = ordered
+              ? collection.initializeOrderedBulkOp()
+              : collection.initializeUnorderedBulkOp();
+            bulk.insert({ _id: 1, a: undefined });
+
+            await bulk.execute();
+
+            const doc = await collection.findOne({ _id: 1 });
+            expect(doc).to.have.property('a', null);
+          });
+        });
+      });
+    }
+  });
 });

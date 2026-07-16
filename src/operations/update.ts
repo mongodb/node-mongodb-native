@@ -76,20 +76,20 @@ export class UpdateOperation extends CommandOperation<Document> {
   override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];
   /** @internal */
-  serializedStatements?: Uint8Array[];
+  serializedOperations?: Uint8Array[];
 
   constructor(
     ns: MongoDBNamespace,
     statements: UpdateStatement[],
     options: UpdateOptions & { ordered?: boolean },
-    serializedStatements?: Uint8Array[]
+    serializedOperations?: Uint8Array[]
   ) {
     super(undefined, options);
     this.options = options;
     this.ns = ns;
 
     this.statements = statements;
-    this.serializedStatements = serializedStatements;
+    this.serializedOperations = serializedOperations;
   }
 
   override get commandName() {
@@ -108,8 +108,8 @@ export class UpdateOperation extends CommandOperation<Document> {
     const options = this.options;
     const command: Document = {
       update: this.ns.collection,
-      updates: this.serializedStatements
-        ? makeDocumentSequence('updates', this.statements, this.serializedStatements)
+      updates: this.serializedOperations
+        ? makeDocumentSequence('updates', this.statements, this.serializedOperations)
         : this.statements,
       ordered: options.ordered ?? true
     };

@@ -540,10 +540,19 @@ async function executeCommands(
       }
     }
 
-    // Reuse the per-operation buffers serialized during addToOperationsList,
-    // except under auto-encryption where libmongocrypt requires the plaintext
-    // command (document sequences are not permitted per the bulkWrite spec).
-    const serialized = bulkOperation.s.usingAutoEncryption ? undefined : batch.serializedOperations;
+    // The per-operation buffers were serialized in addToOperationsList using the
+    // bulk operation's BSON options. Reuse them only when the serialization
+    // options in effect for this execution still match, so that BSON options
+    // supplied to execute() (e.g. `ignoreUndefined`) are honored. Also skip reuse
+    // under auto-encryption, where libmongocrypt requires the plaintext command
+    // (document sequences are not permitted per the bulkWrite spec).
+    const createdBsonOptions = bulkOperation.s.bsonOptions;
+    const canReuseSerialized =
+      !bulkOperation.s.usingAutoEncryption &&
+      finalOptions.ignoreUndefined === createdBsonOptions.ignoreUndefined &&
+      finalOptions.serializeFunctions === createdBsonOptions.serializeFunctions &&
+      (finalOptions.checkKeys ?? false) === bulkOperation.s.checkKeys;
+    const serialized = canReuseSerialized ? batch.serializedOperations : undefined;
 
     const operation = isInsertBatch(batch)
       ? new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions, serialized)
