@@ -987,7 +987,7 @@ describe('Cursor', function () {
       allDocs.push(docs.splice(0, 1000));
     }
     // Get all batches we must insert
-    const left = allDocs.length;
+    let left = allDocs.length;
     let totalI = 0;
     let timeout = 0;
 
