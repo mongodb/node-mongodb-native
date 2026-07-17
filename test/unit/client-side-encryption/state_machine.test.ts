@@ -160,6 +160,32 @@ describe('StateMachine', function () {
         expect(status).to.equal('resolved');
         expect(request.bytesNeeded).to.equal(0);
       });
+
+      it('resolves once the KMS response arrives when CSOT is enabled', async function () {
+        const stateMachine = new StateMachine({} as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        const timeoutContext = new CSOTTimeoutContext({
+          timeoutMS: 1000,
+          serverSelectionTimeoutMS: 30000
+        });
+        let status = 'pending';
+        stateMachine
+          .kmsRequest(request, { timeoutContext })
+          .then(
+            () => (status = 'resolved'),
+            () => (status = 'rejected')
+          )
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .catch(() => {});
+
+        this.fakeSocket.emit('connect');
+        this.fakeSocket.emit('data', Buffer.alloc(0));
+        await sleep();
+
+        // With CSOT enabled the request resolves as soon as the KMS response arrives, well within
+        // the configured timeout.
+        expect(status).to.equal('resolved');
+      });
     });
 
     context('when socket options are provided', function () {
@@ -183,6 +209,174 @@ describe('StateMachine', function () {
         await kmsRequestPromise;
         expect(connectOptions.autoSelectFamily).to.equal(true);
         expect(connectOptions.autoSelectFamilyAttemptTimeout).to.equal(300);
+      });
+    });
+
+    context('when a kmsConnectCallback is provided', function () {
+      it('invokes the callback with host/port and uses the returned socket', async function () {
+        let received;
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const providedSocket = new MockSocket(() => {});
+        // The test harness's EE checker requires an error listener added synchronously;
+        // production code only attaches one to the tls-wrapped socket, not the raw
+        // callback-provided socket, so the test adds a no-op listener here.
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        providedSocket.on('error', () => {});
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: async opts => {
+            received = opts;
+            return providedSocket as any;
+          }
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        let connectOptions;
+        sandbox.stub(tls, 'connect').callsFake((options, callback) => {
+          connectOptions = options;
+          this.fakeSocket = new MockSocket(callback);
+          return this.fakeSocket;
+        });
+
+        const kmsRequestPromise = stateMachine.kmsRequest(request);
+        await setTimeoutAsync(0);
+        this.fakeSocket.emit('data', Buffer.alloc(0));
+        await kmsRequestPromise;
+
+        expect(received).to.include({
+          host: 'some.fake.host.com',
+          port: 443,
+          timeoutMS: undefined
+        });
+        expect(received.signal).to.be.instanceOf(AbortSignal);
+        expect(connectOptions.socket).to.equal(providedSocket);
+      });
+
+      it('propagates a callback error wrapped in MongoCryptError with the original cause', async function () {
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: async () => {
+            throw new Error('Test Error');
+          }
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), 500);
+
+        const err = await stateMachine.kmsRequest(request).catch(e => e);
+        expect(err).to.have.property('name', 'MongoCryptError');
+        expect(err.cause).to.have.property('message', 'Test Error');
+      });
+
+      it('passes remaining timeoutMS to the callback when CSOT is enabled', async function () {
+        let received;
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const providedSocket = new MockSocket(() => {});
+        // The test harness's EE checker requires an error listener added synchronously;
+        // production code only attaches one to the tls-wrapped socket, not the raw
+        // callback-provided socket, so the test adds a no-op listener here.
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        providedSocket.on('error', () => {});
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: async opts => {
+            received = opts;
+            return providedSocket as any;
+          }
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        sandbox.stub(tls, 'connect').callsFake((options, callback) => {
+          this.fakeSocket = new MockSocket(callback);
+          return this.fakeSocket;
+        });
+        const timeoutContext = new CSOTTimeoutContext({
+          timeoutMS: 1000,
+          serverSelectionTimeoutMS: 30000
+        });
+
+        const kmsRequestPromise = stateMachine.kmsRequest(request, { timeoutContext });
+        await setTimeoutAsync(0);
+        this.fakeSocket.emit('data', Buffer.alloc(0));
+        await kmsRequestPromise;
+
+        expect(received.timeoutMS).to.be.a('number');
+        expect(received.timeoutMS).to.be.greaterThan(0);
+      });
+
+      it('rejects with MongoOperationTimeoutError without invoking the callback when the CSOT budget is already exhausted', async function () {
+        let called = false;
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const providedSocket = new MockSocket(() => {});
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        providedSocket.on('error', () => {});
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: async () => {
+            called = true;
+            return providedSocket as any;
+          }
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        const timeoutContext = new CSOTTimeoutContext({
+          timeoutMS: 50,
+          serverSelectionTimeoutMS: 30000
+        });
+        await sleep(60);
+
+        const err = await stateMachine.kmsRequest(request, { timeoutContext }).catch(e => e);
+
+        expect(err).to.have.property('name', 'MongoOperationTimeoutError');
+        expect(called).to.equal(false);
+      });
+
+      it('does not apply a timeout backstop or pass a timeoutMS to the callback when the CSOT budget is infinite (timeoutMS: 0)', async function () {
+        let received;
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const providedSocket = new MockSocket(() => {});
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        providedSocket.on('error', () => {});
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: async opts => {
+            received = opts;
+            return providedSocket as any;
+          }
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        sandbox.stub(tls, 'connect').callsFake((options, callback) => {
+          this.fakeSocket = new MockSocket(callback);
+          return this.fakeSocket;
+        });
+        const timeoutContext = new CSOTTimeoutContext({
+          timeoutMS: 0,
+          serverSelectionTimeoutMS: 30000
+        });
+
+        const kmsRequestPromise = stateMachine.kmsRequest(request, { timeoutContext });
+        await setTimeoutAsync(0);
+        this.fakeSocket.emit('data', Buffer.alloc(0));
+
+        await kmsRequestPromise;
+
+        expect(received.timeoutMS).to.equal(undefined);
+      });
+
+      it('aborts the callback signal and rejects with MongoOperationTimeoutError when the backstop timeout wins', async function () {
+        let capturedSignal: AbortSignal | undefined;
+        const neverResolvingCallback = ({ signal }) => {
+          capturedSignal = signal;
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          return new Promise(() => {});
+        };
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: neverResolvingCallback
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        const timeoutContext = new CSOTTimeoutContext({
+          timeoutMS: 20,
+          serverSelectionTimeoutMS: 30000
+        });
+
+        const kmsRequestPromise = stateMachine
+          .kmsRequest(request, { timeoutContext })
+          .catch(e => e);
+        await sleep(60);
+
+        const err = await kmsRequestPromise;
+        expect(err).to.have.property('name', 'MongoOperationTimeoutError');
+        expect(capturedSignal?.aborted).to.equal(true);
       });
     });
 

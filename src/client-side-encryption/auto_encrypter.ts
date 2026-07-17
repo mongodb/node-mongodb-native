@@ -11,6 +11,7 @@ import { type Abortable } from '../mongo_types';
 import { MongoDBCollectionNamespace } from '../utils';
 import { autoSelectSocketOptions } from './client_encryption';
 import { defaultErrorWrapper, MongoCryptInvalidArgumentError } from './errors';
+import { type CSFLEKMSTlsOptions, type KMSConnectCallback } from './kms_options';
 import { MongocryptdManager } from './mongocryptd_manager';
 import {
   type CredentialProviders,
@@ -18,7 +19,7 @@ import {
   type KMSProviders,
   refreshKMSCredentials
 } from './providers';
-import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
+import { StateMachine } from './state_machine';
 
 /** @public */
 export interface AutoEncryptionOptions {
@@ -110,6 +111,11 @@ export interface AutoEncryptionOptions {
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
   tlsOptions?: CSFLEKMSTlsOptions;
+  /**
+   * A callback that establishes the socket used to connect to a KMS host, e.g. to route KMS
+   * requests through an HTTP proxy via the HTTP CONNECT method. Mutually exclusive with `proxyOptions`.
+   */
+  kmsConnectCallback?: KMSConnectCallback;
 }
 
 /**
@@ -156,6 +162,7 @@ export class AutoEncrypter {
   _metaDataClient: MongoClient;
   _proxyOptions: ProxyOptions;
   _tlsOptions: CSFLEKMSTlsOptions;
+  _kmsConnectCallback?: KMSConnectCallback;
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
@@ -242,7 +249,13 @@ export class AutoEncrypter {
     this._keyVaultClient = options.keyVaultClient || client;
     this._metaDataClient = options.metadataClient || client;
     this._proxyOptions = options.proxyOptions || {};
+    if (this._proxyOptions.proxyHost && options.kmsConnectCallback) {
+      throw new MongoCryptInvalidArgumentError(
+        'Cannot set both proxyOptions and kmsConnectCallback'
+      );
+    }
     this._tlsOptions = options.tlsOptions || {};
+    this._kmsConnectCallback = options.kmsConnectCallback;
     this._kmsProviders = options.kmsProviders || {};
     this._credentialProviders = options.credentialProviders;
 
@@ -417,7 +430,8 @@ export class AutoEncrypter {
       promoteLongs: false,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options),
+      kmsConnectCallback: this._kmsConnectCallback
     });
 
     return deserialize(await stateMachine.execute(this, context, options), {
@@ -443,7 +457,8 @@ export class AutoEncrypter {
       ...options,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options),
+      kmsConnectCallback: this._kmsConnectCallback
     });
 
     return await stateMachine.execute(this, context, options);
