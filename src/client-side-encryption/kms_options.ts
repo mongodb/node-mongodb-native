@@ -1,4 +1,3 @@
-import type * as net from 'net';
 import { type Duplex } from 'stream';
 
 import { type MongoClientOptions } from '../mongo_client';
@@ -44,15 +43,17 @@ export type ClientEncryptionSocketOptions = Pick<
 /**
  * @public
  *
- * A callback that establishes the socket used to connect to a KMS host.
+ * A callback that establishes the connection to a KMS host.
  *
  * When provided on `AutoEncryptionOptions` or `ClientEncryptionOptions`, the driver invokes this
- * callback instead of opening the KMS socket itself, passing the target `host` and `port`. The
- * callback MUST return a socket-like object connected to the KMS host, either directly or tunneled
- * through a proxy. The driver then performs the TLS handshake to the KMS host over that socket, using
- * the KMS provider's configured TLS options, so the callback MUST NOT perform the KMS host's TLS
- * handshake itself. The callback MAY use TLS for its own transport, e.g. when connecting to an HTTPS
- * proxy. This enables routing KMS requests through an HTTP proxy via the HTTP CONNECT method.
+ * callback instead of connecting to the KMS host itself, passing the target `host` and `port`. The
+ * callback MUST return a `Duplex` stream connected to the KMS host, either directly or tunneled
+ * through a proxy; a `net.Socket` satisfies this, as does any other `Duplex`. The returned stream is
+ * passed to Node.js' `tls.connect()` as its `socket`, and the driver performs the KMS host's TLS
+ * handshake over it using the KMS provider's configured TLS options. The callback therefore MUST NOT
+ * perform the KMS host's TLS handshake itself, though it MAY use TLS for its own transport, e.g. when
+ * connecting to an HTTPS proxy. This enables routing KMS requests through an HTTP proxy via the HTTP
+ * CONNECT method.
  *
  * When the operation has a client-side operation timeout (CSOT) configured, `timeoutMS` is the
  * remaining time budget in milliseconds; it is `undefined` otherwise. The `signal` aborts when the
@@ -63,4 +64,4 @@ export type KMSConnectCallback = (options: {
   port: number;
   timeoutMS?: number;
   signal: AbortSignal;
-}) => Promise<net.Socket | Duplex>;
+}) => Promise<Duplex>;
