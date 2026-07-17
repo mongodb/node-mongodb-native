@@ -14,6 +14,7 @@ import {
   type KMSConnectCallback,
   type MongoClient
 } from '../../mongodb';
+import { getEncryptExtraOptions } from '../../tools/utils';
 
 // Prose test 28, "KMS Connect Callback": verifies that `kmsConnectCallback` is invoked when a driver
 // makes KMS requests and that the socket it returns is used for the KMS connection. All cases require
@@ -255,7 +256,8 @@ describe('28. KMS Connect Callback', function () {
       keyVaultNamespace,
       kmsProviders: { aws: getCSFLEKMSProviders().aws },
       schemaMap,
-      kmsConnectCallback: makeConnectCallback(false)
+      kmsConnectCallback: makeConnectCallback(false),
+      extraOptions: getEncryptExtraOptions()
     };
     const encryptedClient = this.configuration.newClient(
       {},

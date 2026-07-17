@@ -464,15 +464,14 @@ export class StateMachine {
             resolve();
           }
         });
-      if (
-        options?.timeoutContext?.csotEnabled() &&
-        Number.isFinite(options.timeoutContext.remainingTimeMS)
-      ) {
-        kmsRequestTimeout = Timeout.expires(options.timeoutContext.remainingTimeMS);
-        await Promise.race([willResolveKmsRequest, kmsRequestTimeout]);
-      } else {
-        await willResolveKmsRequest;
-      }
+      const remainingTimeMS = options?.timeoutContext?.csotEnabled()
+        ? options.timeoutContext.getRemainingTimeMSOrThrow('KMS request timed out')
+        : undefined;
+      const timeoutMS = Number.isFinite(remainingTimeMS) ? remainingTimeMS : undefined;
+      kmsRequestTimeout = timeoutMS ? Timeout.expires(timeoutMS) : undefined;
+      await (kmsRequestTimeout
+        ? Promise.race([willResolveKmsRequest, kmsRequestTimeout])
+        : willResolveKmsRequest);
     } catch (error) {
       if (TimeoutError.is(error)) throw new MongoOperationTimeoutError('KMS request timed out');
       throw error;

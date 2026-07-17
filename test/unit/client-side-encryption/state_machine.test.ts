@@ -186,6 +186,19 @@ describe('StateMachine', function () {
         // the configured timeout.
         expect(status).to.equal('resolved');
       });
+
+      it('rejects with MongoOperationTimeoutError when the CSOT budget is already exhausted', async function () {
+        const stateMachine = new StateMachine({} as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        const timeoutContext = new CSOTTimeoutContext({
+          timeoutMS: 50,
+          serverSelectionTimeoutMS: 30000
+        });
+        await sleep(60);
+
+        const err = await stateMachine.kmsRequest(request, { timeoutContext }).catch(e => e);
+        expect(err).to.have.property('name', 'MongoOperationTimeoutError');
+      });
     });
 
     context('when socket options are provided', function () {
