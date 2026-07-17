@@ -10,6 +10,7 @@ import {
   HEARTBEAT_EVENTS,
   isRecord,
   LEGACY_HELLO_COMMAND,
+  MIN_SUPPORTED_WIRE_VERSION,
   MongoClient,
   MongoCompatibilityError,
   MongoError,
@@ -191,19 +192,19 @@ function assertMonitoringOutcome(outcome: any): asserts outcome is MonitoringOut
   expect(outcome).to.have.property('events').that.is.an('array');
 }
 
-// These tests assert on Post-4.2 error handling using servers that report wire version 8
-// (MongoDB 4.2), which is below the driver's minimum supported wire version of 9 (MongoDB 4.4).
-// As a result the topology is reported as incompatible and the outcome assertions no longer hold.
-const SKIPPED_TESTS = new Set([
-  'Post-4.2 InterruptedAtShutdown error',
-  'Post-4.2 InterruptedDueToReplStateChange error',
-  'Post-4.2 LegacyNotPrimary error',
-  'Post-4.2 NotPrimaryNoSecondaryOk error',
-  'Post-4.2 NotPrimaryOrSecondary error',
-  'Post-4.2 NotWritablePrimary error',
-  'Post-4.2 PrimarySteppedDown error',
-  'Post-4.2 ShutdownInProgress error'
-]);
+/**
+ * Returns true if any hello response in the test reports a server with a
+ * maxWireVersion below the driver's minimum supported wire version.
+ */
+function reliesOnIncompatibleServer(testData: SDAMTest): boolean {
+  return testData.phases.some(
+    phase =>
+      'responses' in phase &&
+      (phase.responses || []).some(
+        ([, { maxWireVersion }]) => maxWireVersion < MIN_SUPPORTED_WIRE_VERSION
+      )
+  );
+}
 
 describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect: sinon.SinonStub;
@@ -249,7 +250,7 @@ describe('Server Discovery and Monitoring (spec)', function () {
 
       for (const testData of specTests[specTestName]) {
         it(testData.description, async function () {
-          if (SKIPPED_TESTS.has(testData.description)) {
+          if (reliesOnIncompatibleServer(testData)) {
             this.skip();
           }
           await executeSDAMTest(testData);
