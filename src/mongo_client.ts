@@ -5,7 +5,7 @@ import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from
 import { TopologyType } from '.';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
-import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
+import { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
@@ -25,7 +25,7 @@ import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { type AbstractCursor } from './cursor/abstract_cursor';
 import { Db, type DbOptions } from './db';
-import type { Encrypter } from './encrypter';
+import { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import { MongoClientAuthProviders } from './mongo_client_auth_providers';
 import {
@@ -423,6 +423,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
   private connectionLock?: Promise<this>;
   /** @internal */
   private closeLock?: Promise<void>;
+  /** @internal */
+  private encrypter?: Encrypter;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -441,7 +443,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     super();
     this.on('error', noop);
 
-    this.options = parseOptions(url, this, options);
+    this.options = parseOptions(url, options);
 
     this.appendMetadata(this.options.driverInfo);
 
@@ -543,7 +545,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
   /** @internal */
   get autoEncrypter(): AutoEncrypter | undefined {
-    return this.options.autoEncrypter;
+    if (this.options.autoEncryption && !this.encrypter) {
+      // Create on first access
+      this.encrypter = new Encrypter(this, this.s.url, this.options);
+    }
+    return this.encrypter?.autoEncrypter;
   }
 
   get readConcern(): ReadConcern | undefined {
@@ -689,9 +695,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     };
 
     if (this.autoEncrypter) {
-      await this.autoEncrypter?.init();
+      await this.autoEncrypter.init();
       await topologyConnect();
-      await options.encrypter.connectInternalClient();
+      await this.encrypter!.connectInternalClient();
     } else {
       await topologyConnect();
     }
@@ -798,9 +804,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
 
     topology.close();
 
-    const { encrypter } = this.options;
-    if (encrypter) {
-      await encrypter.close(this);
+    if (this.encrypter) {
+      await this.encrypter.close(this);
     }
 
     async function endSessions(
@@ -1054,41 +1059,41 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
  */
 export interface MongoOptions
   extends Required<
-      Pick<
-        MongoClientOptions,
-        | 'maxAdaptiveRetries'
-        | 'enableOverloadRetargeting'
-        | 'autoEncryption'
-        | 'connectTimeoutMS'
-        | 'directConnection'
-        | 'driverInfo'
-        | 'forceServerObjectId'
-        | 'minHeartbeatFrequencyMS'
-        | 'heartbeatFrequencyMS'
-        | 'localThresholdMS'
-        | 'maxConnecting'
-        | 'maxIdleTimeMS'
-        | 'maxPoolSize'
-        | 'minPoolSize'
-        | 'monitorCommands'
-        | 'noDelay'
-        | 'pkFactory'
-        | 'raw'
-        | 'replicaSet'
-        | 'retryReads'
-        | 'retryWrites'
-        | 'serverSelectionTimeoutMS'
-        | 'socketTimeoutMS'
-        | 'srvMaxHosts'
-        | 'srvServiceName'
-        | 'tlsAllowInvalidCertificates'
-        | 'tlsAllowInvalidHostnames'
-        | 'tlsInsecure'
-        | 'waitQueueTimeoutMS'
-        | 'zlibCompressionLevel'
-      >
-    >,
-    SupportedNodeConnectionOptions {
+    Pick<
+      MongoClientOptions,
+      | 'maxAdaptiveRetries'
+      | 'enableOverloadRetargeting'
+      | 'autoEncryption'
+      | 'connectTimeoutMS'
+      | 'directConnection'
+      | 'driverInfo'
+      | 'forceServerObjectId'
+      | 'minHeartbeatFrequencyMS'
+      | 'heartbeatFrequencyMS'
+      | 'localThresholdMS'
+      | 'maxConnecting'
+      | 'maxIdleTimeMS'
+      | 'maxPoolSize'
+      | 'minPoolSize'
+      | 'monitorCommands'
+      | 'noDelay'
+      | 'pkFactory'
+      | 'raw'
+      | 'replicaSet'
+      | 'retryReads'
+      | 'retryWrites'
+      | 'serverSelectionTimeoutMS'
+      | 'socketTimeoutMS'
+      | 'srvMaxHosts'
+      | 'srvServiceName'
+      | 'tlsAllowInvalidCertificates'
+      | 'tlsAllowInvalidHostnames'
+      | 'tlsInsecure'
+      | 'waitQueueTimeoutMS'
+      | 'zlibCompressionLevel'
+    >
+  >,
+  SupportedNodeConnectionOptions {
   appName?: string;
   hosts: HostAddress[];
   srvHost?: string;
@@ -1104,8 +1109,6 @@ export interface MongoOptions
   /** @internal */
   metadata: Promise<ClientMetadata>;
   /** @internal */
-  autoEncrypter?: AutoEncrypter;
-  /** @internal */
   tokenCache?: TokenCache;
   proxyHost?: string;
   proxyPort?: number;
@@ -1117,11 +1120,11 @@ export interface MongoOptions
   /** @internal */
   authProviders: MongoClientAuthProviders;
   /** @internal */
-  encrypter: Encrypter;
-  /** @internal */
   userSpecifiedAuthSource: boolean;
   /** @internal */
   userSpecifiedReplicaSet: boolean;
+  /** @internal */
+  useAutoEncryption: boolean;
 
   /**
    * # NOTE ABOUT TLS Options
