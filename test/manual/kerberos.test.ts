@@ -36,7 +36,7 @@ describe('Kerberos', function () {
   });
 
   const krb5Uri = process.env.MONGODB_URI;
-  const host = process.env.SASL_HOST;
+  const host = process.env.SASL_HOST_BUILD;
 
   if (!process.env.PRINCIPAL) {
     console.error('skipping Kerberos tests, PRINCIPAL environment variable is not defined');
@@ -222,7 +222,7 @@ describe('Kerberos', function () {
       it('authenticates', async function () {
         client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
           authMechanismProperties: {
-            SERVICE_HOST: 'ldaptest.10gen.cc'
+            SERVICE_HOST: 'ldaptest.build.10gen.cc'
           }
         });
 
