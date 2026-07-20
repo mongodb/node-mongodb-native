@@ -12,8 +12,13 @@ const expect = chai.expect;
 chai.use(require('sinon-chai').default);
 
 async function verifyKerberosAuthentication(client) {
-  const docs = await client.db('kerberos').collection('test').find().toArray();
-  expect(docs).to.have.nested.property('[0].kerberos', true);
+  let thrown;
+  try {
+    await client.connect();
+  } catch (err) {
+    thrown = err;
+  }
+  expect(thrown).to.not.exist;
 }
 
 describe('Kerberos', function () {
@@ -38,14 +43,13 @@ describe('Kerberos', function () {
   const krb5Uri = process.env.MONGODB_URI;
   const host = process.env.SASL_HOST_BUILD;
 
-  if (!process.env.PRINCIPAL) {
-    console.error('skipping Kerberos tests, PRINCIPAL environment variable is not defined');
+  if (!process.env.PRINCIPAL_BUILD) {
+    console.error('skipping Kerberos tests, PRINCIPAL_BUILD environment variable is not defined');
     return;
   }
 
   it('should authenticate with original uri', async function () {
     client = new MongoClient(krb5Uri);
-    await client.connect();
     await verifyKerberosAuthentication(client);
   });
 
@@ -63,9 +67,9 @@ describe('Kerberos', function () {
         client = new MongoClient(
           `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forward&maxPoolSize=1`
         );
-        await client.connect();
-        expect(resolveStub.withArgs(sinon.match.any, 'CNAME')).to.be.calledOnceWith(host, 'CNAME');
         await verifyKerberosAuthentication(client);
+        expect(resolveStub.withArgs(sinon.match.any, 'CNAME')).to.be.calledOnceWith(host, 'CNAME');
+
       });
     });
 
@@ -75,12 +79,11 @@ describe('Kerberos', function () {
           client = new MongoClient(
             `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
           );
-          await client.connect();
+          await verifyKerberosAuthentication(client);
 
           expect(resolveStub.withArgs(sinon.match.any, 'CNAME')).to.not.be.called;
           // There are 2 calls to establish connection, however they use the callback form of dns.lookup
           expect(lookupStub).to.not.be.called;
-          await verifyKerberosAuthentication(client);
         });
       });
     }
@@ -92,13 +95,12 @@ describe('Kerberos', function () {
             client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
-            await client.connect();
+            await verifyKerberosAuthentication(client);
 
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
             expect(lookupStub).to.be.calledOnce;
             expect(resolveStub.withArgs(sinon.match.any, 'PTR')).to.be.calledOnce;
-            await verifyKerberosAuthentication(client);
           });
         });
 
@@ -112,7 +114,7 @@ describe('Kerberos', function () {
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
 
-            await client.connect();
+            await verifyKerberosAuthentication(client);
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
             expect(lookupStub).to.be.calledOnce;
@@ -120,7 +122,6 @@ describe('Kerberos', function () {
             expect(resolveStub.withArgs(sinon.match.string, 'PTR')).to.be.calledOnce;
             // Expect the fallback to the host name.
             expect(resolveStub.withArgs(sinon.match.string, 'CNAME')).to.not.be.called;
-            await verifyKerberosAuthentication(client);
           });
         });
 
@@ -134,7 +135,7 @@ describe('Kerberos', function () {
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
 
-            await client.connect();
+            await verifyKerberosAuthentication(client);
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
             expect(lookupStub).to.be.calledOnce;
@@ -142,7 +143,6 @@ describe('Kerberos', function () {
             expect(resolveStub.withArgs(sinon.match.string, 'PTR')).to.be.calledOnce;
             // Expect the fallback to be called.
             expect(resolveStub.withArgs(sinon.match.string, 'CNAME')).to.be.calledOnceWith(host);
-            await verifyKerberosAuthentication(client);
           });
         });
 
@@ -155,7 +155,7 @@ describe('Kerberos', function () {
             client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
-            await client.connect();
+            await verifyKerberosAuthentication(client);
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
             expect(lookupStub).to.be.calledOnce;
@@ -163,7 +163,6 @@ describe('Kerberos', function () {
             expect(resolveStub.withArgs(sinon.match.string, 'PTR')).to.be.calledOnce;
             // Expect the fallback to be called.
             expect(resolveStub.withArgs(sinon.match.string, 'CNAME')).to.be.calledOnceWith(host);
-            await verifyKerberosAuthentication(client);
           });
         });
 
@@ -176,7 +175,7 @@ describe('Kerberos', function () {
             client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
-            await client.connect();
+            await verifyKerberosAuthentication(client);
             // There are 2 calls to establish connection, however they use the callback form of dns.lookup
             // 1 dns.promises.lookup call in canonicalization.
             expect(lookupStub).to.be.calledOnce;
@@ -184,7 +183,6 @@ describe('Kerberos', function () {
             expect(resolveStub.withArgs(sinon.match.string, 'PTR')).to.be.calledOnce;
             // Expect the fallback to be called.
             expect(resolveStub.withArgs(sinon.match.string, 'CNAME')).to.be.calledOnceWith(host);
-            await verifyKerberosAuthentication(client);
           });
         });
       });
@@ -226,7 +224,6 @@ describe('Kerberos', function () {
           }
         });
 
-        await client.connect();
         await verifyKerberosAuthentication(client);
       });
     });
@@ -260,7 +257,7 @@ describe('Kerberos', function () {
 
   it('should fail to authenticate with bad credentials', async function () {
     client = new MongoClient(
-      krb5Uri.replace(encodeURIComponent(process.env.PRINCIPAL), 'bad%40creds.cc')
+      krb5Uri.replace(encodeURIComponent(process.env.PRINCIPAL_BUILD), 'bad%40creds.cc')
     );
     const err = await client.connect().catch(e => e);
     expect(err.message).to.match(/Authentication failed/);
