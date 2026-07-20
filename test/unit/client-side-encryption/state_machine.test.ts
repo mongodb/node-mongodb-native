@@ -390,6 +390,7 @@ describe('StateMachine', function () {
         const err = await kmsRequestPromise;
         expect(err).to.have.property('name', 'MongoOperationTimeoutError');
         expect(capturedSignal?.aborted).to.equal(true);
+        expect(capturedSignal?.reason).to.have.property('name', 'MongoOperationTimeoutError');
       });
     });
 

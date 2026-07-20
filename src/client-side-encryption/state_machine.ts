@@ -382,8 +382,10 @@ export class StateMachine {
             : await connectPromise;
         } catch (err) {
           if (TimeoutError.is(err)) {
-            controller.abort();
-            throw new MongoOperationTimeoutError('KMS request timed out');
+            const timeoutError = new MongoOperationTimeoutError('KMS request timed out');
+            // Abort with the timeout error as the reason so the callback sees it on `signal.reason`.
+            controller.abort(timeoutError);
+            throw timeoutError;
           }
           throw onerror(err);
         } finally {
