@@ -69,7 +69,6 @@ describe('Kerberos', function () {
         );
         await verifyKerberosAuthentication(client);
         expect(resolveStub.withArgs(sinon.match.any, 'CNAME')).to.be.calledOnceWith(host, 'CNAME');
-
       });
     });
 
