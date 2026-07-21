@@ -13,8 +13,12 @@ export class OrderedBulkOperation extends BulkOperationBase {
     super(collection, options, true);
   }
 
-  addToOperationsList(
-    batchType: BatchType,
+
+
+
+
+
+  addToOperationsList(batchType: BatchType,
     document: Document | UpdateStatement | DeleteStatement
   ): this {
     // Get the bsonSize
