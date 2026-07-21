@@ -85,7 +85,7 @@ describe('Retryable Writes Spec Prose', () => {
 
   describe('2. Test that drivers properly retry after encountering PoolClearedErrors.', () => {
     // This test MUST be implemented by any driver that implements the CMAP specification.
-    // This test requires MongoDB 4.4.+ for blockConnection support in the failpoint.
+    // This test requires MongoDB 4.4.0+ for blockConnection support in the failpoint.
 
     let client: MongoClient;
     let failPointName: string | undefined;

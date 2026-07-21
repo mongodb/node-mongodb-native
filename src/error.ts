@@ -1394,8 +1394,6 @@ const RETRYABLE_READ_ERROR_CODES = new Set<number>([
 const RETRYABLE_WRITE_ERROR_CODES = RETRYABLE_READ_ERROR_CODES;
 
 export function needsRetryableWriteLabel(error: Error): boolean {
-  // pre-4.4 server, then the driver adds an error label for every valid case
-  // execute operation will only inspect the label, code/message logic is handled here
   if (error instanceof MongoNetworkError) {
     return true;
   }
