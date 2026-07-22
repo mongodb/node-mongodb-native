@@ -121,14 +121,22 @@ describe('Atlas Secure Frontend Processor (SFP)', function () {
   });
 
   after(async function () {
-    const cleanup = new MongoClient(required('SFP_ATLAS_URI'), {
+    // Both auth flows write to the same collection name, but the SCRAM and X.509 tests connect
+    // through different SFP endpoints, so drop the collection against each of them.
+    const scram = new MongoClient(required('SFP_ATLAS_URI'), {
       auth: { username: required('SFP_ATLAS_USER'), password: required('SFP_ATLAS_PASSWORD') },
       authMechanism: 'SCRAM-SHA-256'
     });
+    const x509 = new MongoClient(required('SFP_ATLAS_X509_URI'), {
+      tlsCertificateKeyFile: required('SFP_ATLAS_X509_CERT'),
+      authMechanism: 'MONGODB-X509'
+    });
     try {
-      await cleanup.db('db').collection(collectionName).drop();
+      await scram.db('db').collection(collectionName).drop();
+      await x509.db('db').collection(collectionName).drop();
     } finally {
-      await cleanup.close();
+      await scram.close();
+      await x509.close();
     }
   });
 });
