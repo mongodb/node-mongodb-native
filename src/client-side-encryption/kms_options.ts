@@ -58,6 +58,32 @@ export type ClientEncryptionSocketOptions = Pick<
  * When the operation has a client-side operation timeout (CSOT) configured, `timeoutMS` is the
  * remaining time budget in milliseconds; it is `undefined` otherwise. The `signal` aborts when the
  * connection attempt exceeds that budget; the callback should stop connecting and reject when it fires.
+ *
+ * @example <caption>Route KMS requests through an HTTP proxy using the HTTP CONNECT method</caption>
+ * ```ts
+ * import * as net from 'net';
+ *
+ * const kmsConnectCallback: KMSConnectCallback = ({ host, port, signal }) =>
+ *   new Promise((resolve, reject) => {
+ *     // Open a plain connection to the proxy, not to the KMS host.
+ *     const socket = net.connect({ host: 'proxy.example.com', port: 8080, signal });
+ *     socket.once('error', reject);
+ *     socket.once('connect', () => {
+ *       // Ask the proxy to tunnel to the KMS host, then hand the socket back for the driver's TLS.
+ *       socket.write(`CONNECT ${host}:${port} HTTP/1.1\r\nHost: ${host}:${port}\r\n\r\n`);
+ *       socket.once('data', chunk => {
+ *         if (chunk.toString('utf8').startsWith('HTTP/1.1 200')) resolve(socket);
+ *         else reject(new Error('Proxy refused the CONNECT request'));
+ *       });
+ *     });
+ *   });
+ *
+ * const clientEncryption = new ClientEncryption(keyVaultClient, {
+ *   keyVaultNamespace,
+ *   kmsProviders,
+ *   kmsConnectCallback
+ * });
+ * ```
  */
 export type KMSConnectCallback = (options: {
   host: string;

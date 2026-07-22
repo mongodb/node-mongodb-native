@@ -977,6 +977,7 @@ export interface ClientEncryptionOptions {
   /**
    * A callback that establishes the socket used to connect to a KMS host, e.g. to route KMS
    * requests through an HTTP proxy via the HTTP CONNECT method. Mutually exclusive with `proxyOptions`.
+   * See {@link KMSConnectCallback} for a usage example.
    */
   kmsConnectCallback?: KMSConnectCallback;
 

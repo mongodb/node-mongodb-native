@@ -369,12 +369,23 @@ export class StateMachine {
         // A non-finite budget (timeoutMS: 0) means no timeout; otherwise back the callback with one.
         const timeoutMS = Number.isFinite(remainingTimeMS) ? remainingTimeMS : undefined;
         const controller = new AbortController();
+        // Forward the operation's own abort signal so aborting the operation also aborts the callback.
+        const forwardAbort = addAbortListener(options?.signal, function () {
+          controller.abort(this.reason);
+        });
         const connectPromise = this.options.kmsConnectCallback({
           host: socketOptions.host,
           port: socketOptions.port,
           timeoutMS,
           signal: controller.signal
         });
+        // If the callback resolves a socket after we already aborted, close it so it does not leak.
+        connectPromise.then(
+          resolvedSocket => {
+            if (controller.signal.aborted) resolvedSocket.destroy();
+          },
+          () => null
+        );
         const timeout = timeoutMS ? Timeout.expires(timeoutMS) : undefined;
         try {
           socketOptions.socket = timeout
@@ -390,6 +401,7 @@ export class StateMachine {
           throw onerror(err);
         } finally {
           timeout?.clear();
+          forwardAbort?.[kDispose]();
         }
       } else if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
         netSocket = new net.Socket();

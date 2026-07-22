@@ -392,6 +392,56 @@ describe('StateMachine', function () {
         expect(capturedSignal?.aborted).to.equal(true);
         expect(capturedSignal?.reason).to.have.property('name', 'MongoOperationTimeoutError');
       });
+
+      it('forwards an operation abort on options.signal to the callback signal', async function () {
+        let capturedSignal: AbortSignal | undefined;
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: ({ signal }) =>
+            new Promise((_resolve, reject) => {
+              capturedSignal = signal;
+              signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+            })
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        const controller = new AbortController();
+        const abortReason = new Error('operation aborted');
+
+        const kmsRequestPromise = stateMachine
+          .kmsRequest(request, { signal: controller.signal })
+          .catch(e => e);
+        await setTimeoutAsync(0);
+        controller.abort(abortReason);
+
+        await kmsRequestPromise;
+        expect(capturedSignal?.aborted).to.equal(true);
+        expect(capturedSignal?.reason).to.equal(abortReason);
+      });
+
+      it('destroys a socket the callback resolves after the request has already been aborted', async function () {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const providedSocket = new MockSocket(() => {});
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        providedSocket.on('error', () => {});
+        const destroySpy = sandbox.spy(providedSocket, 'destroy');
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: async () => {
+            // Resolve only after the CSOT backstop has already fired.
+            await setTimeoutAsync(50);
+            return providedSocket as any;
+          }
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        const timeoutContext = new CSOTTimeoutContext({
+          timeoutMS: 20,
+          serverSelectionTimeoutMS: 30000
+        });
+
+        const err = await stateMachine.kmsRequest(request, { timeoutContext }).catch(e => e);
+        expect(err).to.have.property('name', 'MongoOperationTimeoutError');
+
+        await sleep(60);
+        expect(destroySpy.called).to.equal(true);
+      });
     });
 
     context('when tls options are provided', function () {
