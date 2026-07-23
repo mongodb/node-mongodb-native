@@ -287,7 +287,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return (
       this.description != null &&
       // TODO(NODE-6672,NODE-6287): This guard is primarily for maxWireVersion = 0
-      maxWireVersion(this) >= 6 &&
+      maxWireVersion(this) > 0 &&
       !this.description.__nodejs_mock_server__
     );
   }
