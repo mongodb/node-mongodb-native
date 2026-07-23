@@ -377,16 +377,14 @@ export class ListIndexesOperation extends CommandOperation<CursorResponse> {
     return 'listIndexes' as const;
   }
 
-  override buildCommandDocument(connection: Connection): Document {
-    const serverWireVersion = maxWireVersion(connection);
-
+  override buildCommandDocument(_connection: Connection): Document {
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
 
     const command: Document = { listIndexes: this.collectionNamespace.collection, cursor };
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (serverWireVersion >= 9 && this.options.comment !== undefined) {
+    if (this.options.comment !== undefined) {
       command.comment = this.options.comment;
     }
 
