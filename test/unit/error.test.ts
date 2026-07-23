@@ -572,11 +572,10 @@ describe('MongoErrors', () => {
         expect(isResumableError(mongoError, 8)).to.be.true;
       });
 
-      it('for resumable codes if wireVersion is below 9 or unspecified', () => {
+      it('for resumable codes if wireVersion is unspecified', () => {
         const mongoError = new MongoError('ah!');
         mongoError.code = MONGODB_ERROR_CODES.ShutdownInProgress; // Shutdown in progress is resumable
         expect(isResumableError(mongoError)).to.be.true;
-        expect(isResumableError(mongoError, 8)).to.be.true;
       });
 
       it('for labeled MongoError only if the wireVersion is at least 9', () => {
@@ -642,14 +641,6 @@ describe('MongoErrors', () => {
         expect(isResumableError(mongoError)).to.be.false;
         expect(isResumableError(mongoError, 8)).to.be.false;
         expect(isResumableError(mongoError, 9)).to.be.false;
-      });
-
-      it('for labeled error below wire version 9', () => {
-        const mongoError = new MongoError('ah!');
-        mongoError.addErrorLabel(MongoErrorLabel.ResumableChangeStreamError);
-        expect(mongoError.hasErrorLabel(MongoErrorLabel.ResumableChangeStreamError)).to.be.true;
-        expect(isResumableError(mongoError, 8)).to.be.false;
-        expect(isResumableError(mongoError)).to.be.false;
       });
     });
   });

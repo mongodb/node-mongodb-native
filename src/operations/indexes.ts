@@ -4,7 +4,7 @@ import { CursorResponse, MongoDBResponse } from '../cmap/wire_protocol/responses
 import type { Collection } from '../collection';
 import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
 import { type OneOrMore } from '../mongo_types';
-import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { isObject, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
   CommandOperation,
