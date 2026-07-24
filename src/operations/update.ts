@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { makeDocumentSequence } from '../cmap/commands';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { MongoInvalidArgumentError, MongoServerError } from '../error';
@@ -74,17 +75,21 @@ export class UpdateOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];
+  /** @internal */
+  serializedOperations?: Uint8Array[];
 
   constructor(
     ns: MongoDBNamespace,
     statements: UpdateStatement[],
-    options: UpdateOptions & { ordered?: boolean }
+    options: UpdateOptions & { ordered?: boolean },
+    serializedOperations?: Uint8Array[]
   ) {
     super(undefined, options);
     this.options = options;
     this.ns = ns;
 
     this.statements = statements;
+    this.serializedOperations = serializedOperations;
   }
 
   override get commandName() {
@@ -103,7 +108,9 @@ export class UpdateOperation extends CommandOperation<Document> {
     const options = this.options;
     const command: Document = {
       update: this.ns.collection,
-      updates: this.statements,
+      updates: this.serializedOperations
+        ? makeDocumentSequence('updates', this.statements, this.serializedOperations)
+        : this.statements,
       ordered: options.ordered ?? true
     };
 

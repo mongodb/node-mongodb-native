@@ -347,9 +347,15 @@ describe('Collation', function () {
         .then(() => {
           expect(commandResult).to.exist;
           expect(commandResult).to.have.property('updates');
-          expect(commandResult.updates).to.have.length.at.least(1);
-          expect(commandResult.updates[0]).to.have.property('collation');
-          expect(commandResult.updates[0].collation).to.eql({ caseLevel: true });
+          // `updates` is sent as an OP_MSG type-1 document sequence rather than an
+          // inline BSON array, so the mock server surfaces it as a DocumentSequence-like
+          // object with a `documents` array instead of a plain array.
+          const updates = Array.isArray(commandResult.updates)
+            ? commandResult.updates
+            : commandResult.updates.documents;
+          expect(updates).to.have.length.at.least(1);
+          expect(updates[0]).to.have.property('collation');
+          expect(updates[0].collation).to.eql({ caseLevel: true });
 
           return client.close();
         });
