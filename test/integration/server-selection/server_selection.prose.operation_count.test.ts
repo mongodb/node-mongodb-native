@@ -27,7 +27,7 @@ async function runTaskGroup(collection: Collection, count: 10 | 100 | 1000) {
   }
 }
 
-// Step 1: Configure a sharded cluster with two mongoses. Use a 4.4.0 or newer server version.
+// Step 1: Configure a sharded cluster with two mongoses.
 const TEST_METADATA: MongoDBMetadataUI = { requires: { mongodb: '>=4.4.0', topology: 'sharded' } };
 
 describe('operationCount-based Selection Within Latency Window - Prose Test', function () {

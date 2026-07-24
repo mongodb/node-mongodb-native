@@ -44,7 +44,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
   });
 
   context('getMore Iteration', { requires: { topology: ['replicaset'] } }, () => {
-    // This test requires a replica set with server version 4.4 or higher.
+    // This test requires a replica set.
 
     let cursor: FindCursor;
     afterEach(() => cursor.close());
@@ -91,7 +91,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
   });
 
   context('Not Primary - Keep Connection Pool', { requires: { topology: ['replicaset'] } }, () => {
-    // This test requires a replica set with server version 4.4 or higher.
+    // This test requires a replica set.
 
     // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 10107}}``
     const failPoint: FailCommandFailPoint = {

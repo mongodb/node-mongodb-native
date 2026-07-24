@@ -32,7 +32,7 @@ export class CommandStartedEvent {
   /**
    * Server generated connection id
    * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId"
-   * from the server on 4.4+.
+   * from the server.
    */
   serverConnectionId: bigint | null;
   serviceId?: ObjectId;
@@ -88,7 +88,7 @@ export class CommandSucceededEvent {
   connectionId?: string | number;
   /**
    * Server generated connection id
-   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server on 4.4+.
+   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server.
    */
   serverConnectionId: bigint | null;
   requestId: number;
@@ -148,7 +148,7 @@ export class CommandFailedEvent {
   connectionId?: string | number;
   /**
    * Server generated connection id
-   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server on 4.4+.
+   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server.
    */
   serverConnectionId: bigint | null;
   requestId: number;
