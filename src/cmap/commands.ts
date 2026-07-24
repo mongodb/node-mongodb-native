@@ -500,6 +500,23 @@ export class DocumentSequence {
   }
 }
 
+/**
+ * Build a DocumentSequence from documents that have already been serialized,
+ * reusing the provided buffers instead of re-serializing.
+ * @internal
+ */
+export function makeDocumentSequence(
+  field: string,
+  documents: Document[],
+  serialized: Uint8Array[]
+): DocumentSequence {
+  const sequence = new DocumentSequence(field);
+  for (let i = 0; i < documents.length; i++) {
+    sequence.push(documents[i], serialized[i]);
+  }
+  return sequence;
+}
+
 /** @internal */
 export class OpMsgRequest {
   requestId: number;

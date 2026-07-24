@@ -1,6 +1,11 @@
 'use strict';
 
-const { OpQueryRequest, OpMsgRequest, CommandStartedEvent } = require('../../mongodb');
+const {
+  OpQueryRequest,
+  OpMsgRequest,
+  CommandStartedEvent,
+  DocumentSequence
+} = require('../../mongodb');
 const { expect } = require('chai');
 
 describe('Command Monitoring Events - unit/cmap', function () {
@@ -89,5 +94,31 @@ describe('Command Monitoring Events - unit/cmap', function () {
       expect(startEvent).to.have.property('connectionId').that.is.a('string');
       expect(startEvent).to.have.property('command').that.deep.equals(query.query.$query);
     });
+  });
+
+  for (const { name, field, documents } of [
+    { name: 'insert', field: 'documents', documents: [{ _id: 1 }, { _id: 2 }] },
+    { name: 'update', field: 'updates', documents: [{ q: { _id: 1 }, u: { $set: { a: 1 } } }] },
+    { name: 'delete', field: 'deletes', documents: [{ q: { _id: 1 }, limit: 1 }] }
+  ]) {
+    it(`reconstructs the ${field} document sequence into an array (${name} command)`, function () {
+      const command = {
+        [name]: 'coll',
+        [field]: new DocumentSequence(field, documents),
+        $db: 'test'
+      };
+      const msg = new OpMsgRequest('test', command, {});
+      const event = new CommandStartedEvent({ id: 1, address: '127.0.0.1:27017' }, msg);
+      expect(event.command[field]).to.be.an('array').that.deep.equals(documents);
+    });
+  }
+
+  it('leaves non-document-sequence fields untouched', function () {
+    const pipeline = [{ $match: { a: 1 } }];
+    const command = { aggregate: 'coll', pipeline, cursor: {}, $db: 'test' };
+    const msg = new OpMsgRequest('test', command, {});
+    const event = new CommandStartedEvent({ id: 1, address: '127.0.0.1:27017' }, msg);
+    expect(event.command.pipeline).to.be.an('array').that.deep.equals(pipeline);
+    expect(event.command.cursor).to.deep.equal({});
   });
 });
