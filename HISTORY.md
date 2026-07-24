@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.5.1](https://github.com/mongodb/node-mongodb-native/compare/v7.5.0...v7.5.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **NODE-7603:** emit dynamic `import('os')` via `tsconfig`  ([#4992](https://github.com/mongodb/node-mongodb-native/issues/4992)) ([52f5e61](https://github.com/mongodb/node-mongodb-native/commit/52f5e61c8a439f9284c82f72357c376783f055b4))
+
+
+### Performance Improvements
+
+* **NODE-7660:** serialize bulk write documents a single time ([#4999](https://github.com/mongodb/node-mongodb-native/issues/4999)) ([1217aa1](https://github.com/mongodb/node-mongodb-native/commit/1217aa1c28a5071f765b69e98a0d6cc5fbc02c87))
+
 ## [7.5.0](https://github.com/mongodb/node-mongodb-native/compare/v7.4.0...v7.5.0) (2026-07-07)
 
 
