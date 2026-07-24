@@ -40,7 +40,8 @@ describe('Monitoring rtt tests', function () {
 
   for (const serverMonitoringMode of ['poll', 'stream']) {
     context(`when serverMonitoringMode is set to '${serverMonitoringMode}'`, function () {
-      context('after collecting a number of heartbeats', function () {
+      // TODO(NODE-7703): Unskip failing SDAM tests after server upgrade
+      context.skip('after collecting a number of heartbeats', function () {
         beforeEach(async function () {
           client = this.configuration.newClient({
             heartbeatFrequencyMS: 100,
