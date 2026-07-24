@@ -472,46 +472,6 @@ describe('Command Monitoring', function () {
     }
   });
 
-  it('should ensure killcursor commands are sent on 3.0 or earlier when APM is enabled', {
-    metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '<=3.0.x' } },
-
-    test: function () {
-      const client = this.configuration.newClient(
-        { writeConcern: { w: 1 } },
-        { maxPoolSize: 1, monitorCommands: true }
-      );
-
-      const db = client.db(this.configuration.db);
-      const admindb = db.admin();
-      let cursorCountBefore;
-      let cursorCountAfter;
-
-      const collection = db.collection('apm_killcursor_tests');
-
-      // make sure collection has records (more than 2)
-      return collection
-        .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }])
-        .then(r => {
-          expect(r).to.exist;
-          return admindb.serverStatus();
-        })
-        .then(result => {
-          cursorCountBefore = result.cursors.clientCursors_size;
-          const cursor = collection.find({}).limit(2);
-          return cursor.toArray().then(r => {
-            expect(r).to.exist;
-            return cursor.close();
-          });
-        })
-        .then(() => admindb.serverStatus())
-        .then(result => {
-          cursorCountAfter = result.cursors.clientCursors_size;
-          expect(cursorCountBefore).to.equal(cursorCountAfter);
-          return client.close();
-        });
-    }
-  });
-
   it('should correctly decorate the apm result for aggregation with cursorId', async function () {
     const started = [];
     const succeeded = [];
