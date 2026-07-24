@@ -120,9 +120,7 @@ export interface RunOnRequirement {
       };
 }
 export type ObservableCommandEventId =
-  | 'commandStartedEvent'
-  | 'commandSucceededEvent'
-  | 'commandFailedEvent';
+  'commandStartedEvent' | 'commandSucceededEvent' | 'commandFailedEvent';
 export type ObservableCmapEventId =
   | 'connectionPoolCreatedEvent'
   | 'connectionPoolClosedEvent'

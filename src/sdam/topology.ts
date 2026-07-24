@@ -755,7 +755,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   auth(credentials?: MongoCredentials, callback?: Callback): void {
-    if (typeof credentials === 'function') ((callback = credentials), (credentials = undefined));
+    if (typeof credentials === 'function') callback = credentials;
     if (typeof callback === 'function') callback(undefined, true);
   }
 
@@ -1008,7 +1008,7 @@ function processWaitQueue(topology: Topology) {
               topology.description,
               topology.s.serverSelectionTimeoutMS !== 0
                 ? topology.s.serverSelectionTimeoutMS -
-                  (processTimeMS() - waitQueueMember.startTime)
+                    (processTimeMS() - waitQueueMember.startTime)
                 : -1,
               waitQueueMember.operationName
             )

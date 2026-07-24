@@ -166,6 +166,7 @@ describe('Handshake Prose Tests', function () {
 
   context(`Test 2: Test that the driver accepts an arbitrary auth mechanism`, function () {
     let stubCalled = false;
+
     beforeEach(() => {
       // Mock the server response in a way that saslSupportedMechs array in the hello command response contains an arbitrary string.
       sinon

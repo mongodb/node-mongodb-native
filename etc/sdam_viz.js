@@ -1,11 +1,15 @@
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-var-requires */
 
 // run this file with ts-node:
 // npx ts-node etc/sdam_viz.js -h
 
 const { MongoClient } = require('../src');
-const { calculateDurationInMs, arrayStrictEqual, errorStrictEqual, processTimeMS } = require('../src/utils');
+const {
+  calculateDurationInMs,
+  arrayStrictEqual,
+  errorStrictEqual,
+  processTimeMS
+} = require('../src/utils');
 
 const util = require('util');
 const chalk = require('chalk');

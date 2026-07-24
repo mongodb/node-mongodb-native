@@ -144,11 +144,9 @@ describe('Connection', function () {
 
   describe('Connection - functional', function () {
     let client;
-    let testClient;
 
     afterEach(async () => {
       if (client) await client.close();
-      if (testClient) await testClient.close();
     });
 
     it('should correctly start monitoring for single server connection', {

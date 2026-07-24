@@ -150,6 +150,7 @@ describe('class RTTPinger', () => {
 
   context(`when the RTTPinger's hello command receives any error`, () => {
     let client: MongoClient;
+
     beforeEach(async function () {
       client = this.configuration.newClient({}, { heartbeatFrequencyMS: 10 });
     });

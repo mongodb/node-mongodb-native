@@ -221,6 +221,7 @@ describe('TLS Support', function () {
   context('when providing tlsCRLFile', () => {
     context('when the file will revoke the certificate', () => {
       let client: MongoClient;
+
       beforeEach(() => {
         client = new MongoClient(CONNECTION_STRING, {
           tls: true,
@@ -230,6 +231,7 @@ describe('TLS Support', function () {
           connectTimeoutMS: 5000
         });
       });
+
       afterEach(async () => {
         await client?.close();
       });
@@ -243,6 +245,7 @@ describe('TLS Support', function () {
 
   context('when tlsCertificateKeyFile is provided, but tlsCAFile is missing', () => {
     let client: MongoClient;
+
     beforeEach(() => {
       client = new MongoClient(CONNECTION_STRING, {
         tls: true,
@@ -251,6 +254,7 @@ describe('TLS Support', function () {
         connectTimeoutMS: 5000
       });
     });
+
     afterEach(async () => {
       if (client) await client.close();
     });
@@ -263,12 +267,14 @@ describe('TLS Support', function () {
 
   context('when tlsCAFile is provided, but tlsCertificateKeyFile is missing', () => {
     let client: MongoClient;
+
     beforeEach(() => {
       client = new MongoClient(CONNECTION_STRING, {
         tls: true,
         tlsCAFile: TLS_CA_FILE
       });
     });
+
     afterEach(async () => {
       if (client) await client.close();
     });

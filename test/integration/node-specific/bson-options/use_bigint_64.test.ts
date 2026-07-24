@@ -10,6 +10,7 @@ import {
   type MongoClient,
   type WithId
 } from '../../../mongodb';
+
 describe('useBigInt64 option', function () {
   let client: MongoClient;
   let db: Db;

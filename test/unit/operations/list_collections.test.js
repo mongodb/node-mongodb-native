@@ -98,6 +98,7 @@ describe('ListCollectionsOperation', function () {
         });
       });
     });
+
     context('when nameOnly is provided', function () {
       context('when nameOnly is true', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: true, dbName: db });

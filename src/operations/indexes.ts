@@ -49,14 +49,7 @@ const VALID_INDEX_OPTIONS = new Set([
 
 /** @public */
 export type IndexDirection =
-  | -1
-  | 1
-  | '2d'
-  | '2dsphere'
-  | 'text'
-  | 'geoHaystack'
-  | 'hashed'
-  | number;
+  -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | 'hashed' | number;
 
 function isIndexDirection(x: unknown): x is IndexDirection {
   return (
@@ -95,28 +88,27 @@ export interface IndexInformationOptions extends ListIndexesOptions {
 }
 
 /** @public */
-export interface IndexDescription
-  extends Pick<
-    CreateIndexesOptions,
-    | 'background'
-    | 'unique'
-    | 'partialFilterExpression'
-    | 'sparse'
-    | 'hidden'
-    | 'expireAfterSeconds'
-    | 'storageEngine'
-    | 'version'
-    | 'weights'
-    | 'default_language'
-    | 'language_override'
-    | 'textIndexVersion'
-    | '2dsphereIndexVersion'
-    | 'bits'
-    | 'min'
-    | 'max'
-    | 'bucketSize'
-    | 'wildcardProjection'
-  > {
+export interface IndexDescription extends Pick<
+  CreateIndexesOptions,
+  | 'background'
+  | 'unique'
+  | 'partialFilterExpression'
+  | 'sparse'
+  | 'hidden'
+  | 'expireAfterSeconds'
+  | 'storageEngine'
+  | 'version'
+  | 'weights'
+  | 'default_language'
+  | 'language_override'
+  | 'textIndexVersion'
+  | '2dsphereIndexVersion'
+  | 'bits'
+  | 'min'
+  | 'max'
+  | 'bucketSize'
+  | 'wildcardProjection'
+> {
   collation?: CollationOptions;
   name?: string;
   key: { [key: string]: IndexDirection } | Map<string, IndexDirection>;

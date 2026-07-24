@@ -706,6 +706,7 @@ describe('class MongoLogger', function () {
               return { sum: this.a + this.b };
             }
           };
+
           it('calls toLog and constructs log message with the result of toLog', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -723,6 +724,7 @@ describe('class MongoLogger', function () {
 
         context('when object without toLog method is being logged', function () {
           const obj = { a: 10, b: 12 };
+
           it('uses the existing fields to build the log message', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -744,6 +746,7 @@ describe('class MongoLogger', function () {
             B: null,
             C: 'Hello World!'
           };
+
           it('emits a log message that omits the nullish top-level fields by default', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -763,6 +766,7 @@ describe('class MongoLogger', function () {
 
         context('when string is being logged', function () {
           const message = 'Hello world';
+
           it('puts the string in the message field of the emitted log message', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
@@ -873,6 +877,7 @@ describe('class MongoLogger', function () {
               });
 
               commonCommandComponentAssertions();
+
               it('emits a log with field `message` = "Command succeeded"', function () {
                 expect(log).to.have.property('message', 'Command succeeded');
               });
@@ -896,6 +901,7 @@ describe('class MongoLogger', function () {
               });
 
               commonCommandComponentAssertions();
+
               it('emits a log with field `message` = "Command failed"', function () {
                 expect(log).to.have.property('message', 'Command failed');
               });
@@ -1000,21 +1006,27 @@ describe('class MongoLogger', function () {
                 log = stream.buffer[0];
               });
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection pool created"', function () {
                 expect(log).to.have.property('message', 'Connection pool created');
               });
+
               it('emits a log with field `maxIdleTimeMS` that is a number', function () {
                 expect(log).to.have.property('maxIdleTimeMS').that.is.a('number');
               });
+
               it('emits a log with field `minPoolSize` that is a number', function () {
                 expect(log).to.have.property('minPoolSize').that.is.a('number');
               });
+
               it('emits a log with field `maxPoolSize` that is a number', function () {
                 expect(log).to.have.property('maxPoolSize').that.is.a('number');
               });
+
               it('emits a log with field `maxConnecting` that is a number', function () {
                 expect(log).to.have.property('maxConnecting').that.is.a('number');
               });
+
               it('emits a log with field `waitQueueTimeoutMS` that is a number', function () {
                 expect(log).to.have.property('waitQueueTimeoutMS').that.is.a('number');
               });
@@ -1028,6 +1040,7 @@ describe('class MongoLogger', function () {
               });
 
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection pool ready"', function () {
                 expect(log).to.have.property('message', 'Connection pool ready');
               });
@@ -1042,6 +1055,7 @@ describe('class MongoLogger', function () {
                 });
 
                 commonConnectionComponentAssertions();
+
                 it('emits a log with field `message` = "Connection pool cleared"', function () {
                   expect(log).to.have.property('message', 'Connection pool cleared');
                 });
@@ -1061,6 +1075,7 @@ describe('class MongoLogger', function () {
                 });
 
                 commonConnectionComponentAssertions();
+
                 it('emits a log with field `message` = "Connection pool cleared"', function () {
                   expect(log).to.have.property('message', 'Connection pool cleared');
                 });
@@ -1079,6 +1094,7 @@ describe('class MongoLogger', function () {
               });
 
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection pool closed"', function () {
                 expect(log).to.have.property('message', 'Connection pool closed');
               });
@@ -1092,6 +1108,7 @@ describe('class MongoLogger', function () {
               });
 
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection created"', function () {
                 expect(log).to.have.property('message', 'Connection created');
               });
@@ -1158,6 +1175,7 @@ describe('class MongoLogger', function () {
               });
 
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection checked in"', function () {
                 expect(log).to.have.property('message', 'Connection checked in');
               });
@@ -1171,6 +1189,7 @@ describe('class MongoLogger', function () {
               });
 
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection checked out"', function () {
                 expect(log).to.have.property('message', 'Connection checked out');
               });
@@ -1184,6 +1203,7 @@ describe('class MongoLogger', function () {
               });
 
               commonConnectionComponentAssertions();
+
               it('emits a log with field `message` = "Connection checked out"', function () {
                 expect(log).to.have.property('message', 'Connection ready');
               });
@@ -1211,6 +1231,7 @@ describe('class MongoLogger', function () {
                   });
 
                   commonConnectionComponentAssertions();
+
                   it(`emits a log with field \`reason\` = "${message}"`, function () {
                     expect(log).to.have.property('reason', message);
                   });
@@ -1231,6 +1252,7 @@ describe('class MongoLogger', function () {
                 });
 
                 commonConnectionComponentAssertions();
+
                 it('emits a log with field `reason` prefixed by "Unknown close reason: "', function () {
                   expect(log).to.have.property('reason');
                   expect(log.reason).to.match(/^Unknown close reason: .*$/);
@@ -1280,7 +1302,8 @@ describe('class MongoLogger', function () {
         });
 
         context('when truncation occurs mid-multibyte codepoint', function () {
-          const multiByteCodePoint = '\ud83d\ude0d'; // heart eyes emoji
+          const multiByteCodePoint = '\ud83d\ude0d';
+          // heart eyes emoji
           context('when maxDocumentLength = 1 but greater than 0', function () {
             it('should return an empty string', function () {
               expect(stringifyWithMaxLen(multiByteCodePoint, 1, { relaxed: true })).to.equal('');
@@ -1305,11 +1328,13 @@ describe('class MongoLogger', function () {
             EJSON.stringify(smallDoc)
           );
         });
+
         it('does not end with "..."', function () {
           expect(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.not.match(
             /^.*\.\.\./
           );
         });
+
         it('produces valid relaxed EJSON', function () {
           expect(() => {
             EJSON.parse(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH));
@@ -1494,6 +1519,7 @@ describe('class MongoLogger', function () {
           beforeEach(function () {
             sinon.stub(process.stderr, 'write').throws(new Error('fake stderr failure'));
           });
+
           afterEach(function () {
             sinon.restore();
           });
@@ -1512,6 +1538,7 @@ describe('class MongoLogger', function () {
         });
       });
     });
+
     context('when async stream has multiple logs with different timeouts', function () {
       it('should preserve their order', async function () {
         const stream = {

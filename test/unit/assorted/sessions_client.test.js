@@ -6,6 +6,7 @@ const { ReplSetFixture } = require('../../tools/common');
 const { isHello, MongoClient } = require('../../mongodb');
 
 const test = {};
+
 describe('Sessions - client/unit', function () {
   describe('Client', function () {
     afterEach(async () => await mock.cleanup());

@@ -1053,7 +1053,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
  * @public
  */
 export interface MongoOptions
-  extends Required<
+  extends
+    Required<
       Pick<
         MongoClientOptions,
         | 'maxAdaptiveRetries'

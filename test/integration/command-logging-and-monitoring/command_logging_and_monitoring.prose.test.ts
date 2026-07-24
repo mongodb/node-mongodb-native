@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import { DEFAULT_MAX_DOCUMENT_LENGTH, type Document } from '../../mongodb';
+
 describe('Command Logging and Monitoring Prose Tests', function () {
   const ELLIPSES_LENGTH = 3;
   let client;
@@ -166,6 +167,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
     */
 
     const maxDocLength = 39;
+
     beforeEach(async function () {
       writable = {
         buffer: [],

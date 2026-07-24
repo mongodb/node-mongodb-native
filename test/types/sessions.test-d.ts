@@ -24,7 +24,7 @@ expectType<ClientSession>(
 );
 expectError(client.startSession({ defaultTransactionOptions: { readConcern: 1 } }));
 
-let something: any;
+declare const something: string;
 expectType<number>(await client.withSession(async () => 2));
 expectType<string>(await client.withSession<string>(async () => something));
 const untypedFn: any = () => 2;

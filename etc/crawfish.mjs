@@ -5,8 +5,8 @@ const { readFile } = promises;
 import { createInterface } from 'readline';
 import xml2js from 'xml2js';
 const { parseStringPromise } = xml2js;
-import yargs from 'yargs';
 import chalk from 'chalk';
+import yargs from 'yargs';
 
 let warnings = false;
 
