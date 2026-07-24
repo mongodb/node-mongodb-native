@@ -8,7 +8,7 @@ import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export interface ValidateCollectionOptions extends Omit<CommandOperationOptions, 'rawData'> {
-  /** Validates a collection in the background, without interrupting read or write traffic (only in MongoDB 4.4+) */
+  /** Validates a collection in the background, without interrupting read or write traffic */
   background?: boolean;
 }
 

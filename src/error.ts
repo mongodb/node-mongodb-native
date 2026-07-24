@@ -1399,7 +1399,7 @@ export function needsRetryableWriteLabel(error: Error): boolean {
   }
   if (error instanceof MongoError) {
     if (!error.hasErrorLabel(MongoErrorLabel.HandshakeError)) {
-      // If we already have the error label no need to add it again. 4.4+ servers add the label.
+      // If we already have the error label no need to add it again. servers add the label.
       // In the case where we have a handshake error, need to fall down to the logic checking
       // the codes.
       return false;
@@ -1537,7 +1537,7 @@ export function isResumableError(error?: Error, wireVersion?: number): boolean {
   }
 
   if (wireVersion != null) {
-    // DRIVERS-1308: For drivers running against >=4.4 servers, drivers will add a special case to treat the CursorNotFound error code as resumable
+    // DRIVERS-1308: Drivers will add a special case to treat the CursorNotFound error code as resumable
     if (error.code === MONGODB_ERROR_CODES.CursorNotFound) {
       return true;
     }

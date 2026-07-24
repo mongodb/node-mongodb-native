@@ -137,7 +137,7 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   expireAfterSeconds?: number;
   /** Allows users to configure the storage engine on a per-index basis when creating an index. (MongoDB 3.0 or higher) */
   storageEngine?: Document;
-  /** (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes. */
+  /** Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes. */
   commitQuorum?: number | string;
   /** Specifies the index version number, either 0 or 1. */
   version?: number;
@@ -158,7 +158,7 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   bucketSize?: number;
   // wildcard indexes
   wildcardProjection?: Document;
-  /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. (MongoDB 4.4 or higher) */
+  /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. */
   hidden?: boolean;
 }
 
