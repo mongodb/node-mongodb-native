@@ -405,6 +405,21 @@
     },
     {
       "description": "change stream can be iterated again if previous iteration times out",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.4",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "createChangeStream",

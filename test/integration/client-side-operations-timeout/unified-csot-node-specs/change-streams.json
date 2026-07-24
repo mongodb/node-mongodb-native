@@ -54,6 +54,21 @@
   "tests": [
     {
       "description": "timeoutMS is refreshed for getMore if maxAwaitTimeMS is set",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.4",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",

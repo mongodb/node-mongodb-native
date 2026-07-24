@@ -2626,7 +2626,17 @@
       "description": "operation is retried multiple times for non-zero timeoutMS - createChangeStream on client",
       "runOnRequirements": [
         {
-          "minServerVersion": "4.3.1"
+          "minServerVersion": "4.3.1",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.3.1",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
         }
       ],
       "operations": [
@@ -3531,7 +3541,17 @@
       "description": "operation is retried multiple times for non-zero timeoutMS - createChangeStream on database",
       "runOnRequirements": [
         {
-          "minServerVersion": "4.3.1"
+          "minServerVersion": "4.3.1",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.3.1",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
         }
       ],
       "operations": [
@@ -5513,7 +5533,17 @@
       "description": "operation is retried multiple times for non-zero timeoutMS - createChangeStream on collection",
       "runOnRequirements": [
         {
-          "minServerVersion": "4.3.1"
+          "minServerVersion": "4.3.1",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.3.1",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
         }
       ],
       "operations": [
