@@ -15,6 +15,7 @@ import {
 } from './operations/validate_collection';
 import { MongoDBNamespace } from './utils';
 
+
 /** @internal */
 export interface AdminPrivate {
   db: Db;
