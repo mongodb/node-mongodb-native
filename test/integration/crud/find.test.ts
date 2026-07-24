@@ -1,14 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  Code,
-  Long,
-  type MongoClient,
-  MongoServerError,
-  ObjectId,
-  ReturnDocument
-} from '../../mongodb';
+import { Long, type MongoClient, MongoServerError, ObjectId, ReturnDocument } from '../../mongodb';
 import { assert as test, filterForCommands } from '../shared';
 
 describe('Find', function () {
@@ -264,31 +257,6 @@ describe('Find', function () {
     const collection = db.collection('test_find_one_no_records');
     const documents = await collection.find({ a: 1 }, {}).toArray();
     test.equal(0, documents.length);
-  });
-
-  it('should correctly perform find by $where', {
-    metadata: { requires: { mongodb: '4.2.x' } },
-    test: async function () {
-      const db = client.db(this.configuration.db);
-      const collection = await db.createCollection('test_where');
-      await collection.insertMany(
-        [{ a: 1 }, { a: 2 }, { a: 3 }],
-        this.configuration.writeConcernMax()
-      );
-
-      const count = await collection.countDocuments();
-      test.equal(3, count);
-
-      // @ts-expect-error: $where no longer supports Code
-      const documentsGT2 = await collection.find({ $where: new Code('this.a > 2') }).toArray();
-      test.equal(1, documentsGT2.length);
-
-      const documentsGT1 = await collection
-        // @ts-expect-error: $where no longer supports Code
-        .find({ $where: new Code('this.a > i', { i: 1 }) })
-        .toArray();
-      test.equal(2, documentsGT1.length);
-    }
   });
 
   it('should correctly perform finds with hint turned on', async function () {

@@ -728,36 +728,6 @@ describe('Indexes', function () {
       await client.close();
     });
 
-    function throwErrorTest(testCommand: (db: Db, collection: Collection) => Promise<any>) {
-      return {
-        metadata: { requires: { mongodb: '<4.4' } },
-        test: async function () {
-          const db = client.db('test');
-          const collection = db.collection('commitQuorum');
-          const err = await testCommand(db, collection).catch(e => e);
-          expect(err.message).to.equal(
-            'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
-          );
-        }
-      };
-    }
-    it(
-      'should throw an error if commitQuorum specified on db.createIndex',
-      throwErrorTest((db, collection) =>
-        db.createIndex(collection.collectionName, 'a', { commitQuorum: 'all' })
-      )
-    );
-    it(
-      'should throw an error if commitQuorum specified on collection.createIndex',
-      throwErrorTest((db, collection) => collection.createIndex('a', { commitQuorum: 'all' }))
-    );
-    it(
-      'should throw an error if commitQuorum specified on collection.createIndexes',
-      throwErrorTest((db, collection) =>
-        collection.createIndexes([{ key: { a: 1 } }, { key: { b: 1 } }], { commitQuorum: 'all' })
-      )
-    );
-
     function commitQuorumTest(
       testCommand: (db: Db, collection: Collection) => Promise<unknown>
     ): any {

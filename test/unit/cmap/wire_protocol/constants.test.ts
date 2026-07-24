@@ -9,8 +9,8 @@ import {
 
 describe('Wire Protocol Constants', function () {
   describe('MIN_SUPPORTED_SERVER_VERSION', function () {
-    it('returns 4.2', function () {
-      expect(MIN_SUPPORTED_SERVER_VERSION).to.equal('4.2');
+    it('returns 4.4', function () {
+      expect(MIN_SUPPORTED_SERVER_VERSION).to.equal('4.4');
     });
   });
 
@@ -21,8 +21,8 @@ describe('Wire Protocol Constants', function () {
   });
 
   describe('MIN_SUPPORTED_WIRE_VERSION', function () {
-    it('returns 8', function () {
-      expect(MIN_SUPPORTED_WIRE_VERSION).to.equal(8);
+    it('returns 9', function () {
+      expect(MIN_SUPPORTED_WIRE_VERSION).to.equal(9);
     });
   });
 

@@ -30,7 +30,6 @@ describe('Retryable Reads Spec Prose', () => {
   describe('PoolClearedError Retryability Test', () => {
     // This test will be used to ensure drivers properly retry after encountering PoolClearedErrors.
     // It MUST be implemented by any driver that implements the CMAP specification.
-    // This test requires MongoDB 4.2.9+ for blockConnection support in the failpoint.
 
     let cmapEvents: Array<{ name: string; event: Record<string, any> }>;
     let commandStartedEvents: Array<Record<string, any>>;

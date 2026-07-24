@@ -18,8 +18,8 @@ const DEFAULT_HELLO = {
   ok: 1
 };
 
-const DEFAULT_HELLO_42 = Object.assign({}, DEFAULT_HELLO, {
-  maxWireVersion: 8,
+const DEFAULT_HELLO_44 = Object.assign({}, DEFAULT_HELLO, {
+  maxWireVersion: 9,
   logicalSessionTimeoutMinutes: 10
 });
 
@@ -93,5 +93,5 @@ function cleanup(spy, callback) {
 module.exports = {
   createServer,
   cleanup,
-  HELLO: DEFAULT_HELLO_42
+  HELLO: DEFAULT_HELLO_44
 };

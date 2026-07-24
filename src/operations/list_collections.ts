@@ -4,7 +4,6 @@ import { CursorResponse, ExplainedCursorResponse } from '../cmap/wire_protocol/r
 import { type CursorTimeoutContext, type CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import { type Abortable } from '../mongo_types';
-import { maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -63,7 +62,7 @@ export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
     return 'listCollections' as const;
   }
 
-  override buildCommandDocument(connection: Connection): Document {
+  override buildCommandDocument(_connection: Connection): Document {
     const command: Document = {
       listCollections: 1,
       filter: this.filter,
@@ -74,7 +73,7 @@ export class ListCollectionsOperation extends CommandOperation<CursorResponse> {
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (maxWireVersion(connection) >= 9 && this.options.comment !== undefined) {
+    if (this.options.comment !== undefined) {
       command.comment = this.options.comment;
     }
 

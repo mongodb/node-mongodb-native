@@ -129,7 +129,6 @@ describe('Sessions Prose Tests', () => {
     /**
      * Since all regular 3.6+ servers support sessions, the prose tests which test for
      * session non-support SHOULD use a mongocryptd server as the test server
-     * (available with server versions 4.2+)
      *
      * As part of the test setup for these cases, create a MongoClient pointed at the test server
      * with the options specified in the test case and verify that the test server does NOT define a

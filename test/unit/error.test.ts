@@ -460,7 +460,6 @@ describe('MongoErrors', () => {
       // 9 - above server version 4.4
 
       const ABOVE_4_4 = 9;
-      const BELOW_4_4 = 8;
 
       const tests: {
         description: string;
@@ -468,36 +467,6 @@ describe('MongoErrors', () => {
         error: Error;
         maxWireVersion: number;
       }[] = [
-        {
-          description: 'a plain error',
-          result: false,
-          error: new Error('do not retry me!'),
-          maxWireVersion: BELOW_4_4
-        },
-        {
-          description: 'a MongoError with no code nor label',
-          result: false,
-          error: new MongoError('do not retry me!'),
-          maxWireVersion: BELOW_4_4
-        },
-        {
-          description: 'network error',
-          result: true,
-          error: new MongoNetworkError('socket bad, try again'),
-          maxWireVersion: BELOW_4_4
-        },
-        {
-          description: 'a MongoWriteConcernError with a random label',
-          result: false,
-          error: new MongoWriteConcernError({
-            writeConcernError: {
-              errmsg: 'random label',
-              code: 1
-            },
-            errorLabels: ['myLabel']
-          }),
-          maxWireVersion: BELOW_4_4
-        },
         {
           description: 'a MongoWriteConcernError with a retryable code above server 4.4',
           result: false,
@@ -508,29 +477,6 @@ describe('MongoErrors', () => {
             }
           }),
           maxWireVersion: ABOVE_4_4
-        },
-        {
-          description: 'a MongoWriteConcernError with a retryable code below server 4.4',
-          result: true,
-          error: new MongoWriteConcernError({
-            writeConcernError: {
-              errmsg: 'code 262',
-              code: 262
-            }
-          }),
-          maxWireVersion: BELOW_4_4
-        },
-        {
-          description: 'a MongoWriteConcernError with a RetryableWriteError label below server 4.4',
-          result: false,
-          error: new MongoWriteConcernError({
-            writeConcernError: {
-              errmsg: 'code 1',
-              code: 1
-            },
-            errorLabels: ['RetryableWriteError']
-          }),
-          maxWireVersion: BELOW_4_4
         },
         {
           description: 'a MongoWriteConcernError with a RetryableWriteError label above server 4.4',
@@ -557,9 +503,9 @@ describe('MongoErrors', () => {
           maxWireVersion: ABOVE_4_4
         }
       ];
-      for (const { description, result, error, maxWireVersion } of tests) {
+      for (const { description, result, error } of tests) {
         it(`${description} ${result ? 'needs' : 'does not need'} a retryable write label`, () => {
-          expect(needsRetryableWriteLabel(error, maxWireVersion)).to.be.equal(result);
+          expect(needsRetryableWriteLabel(error)).to.be.equal(result);
         });
       }
     });
@@ -626,11 +572,10 @@ describe('MongoErrors', () => {
         expect(isResumableError(mongoError, 8)).to.be.true;
       });
 
-      it('for resumable codes if wireVersion is below 9 or unspecified', () => {
+      it('for resumable codes if wireVersion is unspecified', () => {
         const mongoError = new MongoError('ah!');
         mongoError.code = MONGODB_ERROR_CODES.ShutdownInProgress; // Shutdown in progress is resumable
         expect(isResumableError(mongoError)).to.be.true;
-        expect(isResumableError(mongoError, 8)).to.be.true;
       });
 
       it('for labeled MongoError only if the wireVersion is at least 9', () => {
@@ -696,14 +641,6 @@ describe('MongoErrors', () => {
         expect(isResumableError(mongoError)).to.be.false;
         expect(isResumableError(mongoError, 8)).to.be.false;
         expect(isResumableError(mongoError, 9)).to.be.false;
-      });
-
-      it('for labeled error below wire version 9', () => {
-        const mongoError = new MongoError('ah!');
-        mongoError.addErrorLabel(MongoErrorLabel.ResumableChangeStreamError);
-        expect(mongoError.hasErrorLabel(MongoErrorLabel.ResumableChangeStreamError)).to.be.true;
-        expect(isResumableError(mongoError, 8)).to.be.false;
-        expect(isResumableError(mongoError)).to.be.false;
       });
     });
   });

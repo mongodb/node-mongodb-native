@@ -78,7 +78,7 @@ Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mo
 
 ### Compatibility
 
-The driver currently supports 4.2+ servers.
+The driver currently supports 4.4+ servers.
 
 For exhaustive server and runtime version compatibility matrices, please refer to the following links:
 

@@ -2,9 +2,9 @@ import type { Document } from '../bson';
 import { makeDocumentSequence } from '../cmap/commands';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
-import { MongoCompatibilityError, MongoServerError } from '../error';
+import { MongoServerError } from '../error';
 import type { ClientSession } from '../sessions';
-import { maxWireVersion, type MongoDBCollectionNamespace, type MongoDBNamespace } from '../utils';
+import { type MongoDBCollectionNamespace, type MongoDBNamespace } from '../utils';
 import { type WriteConcernOptions } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -74,7 +74,7 @@ export class DeleteOperation extends CommandOperation<Document> {
     return this.statements.every(op => (op.limit != null ? op.limit > 0 : true));
   }
 
-  override buildCommandDocument(connection: Connection, _session?: ClientSession): Document {
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     const options = this.options;
 
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
@@ -94,15 +94,6 @@ export class DeleteOperation extends CommandOperation<Document> {
     // eslint-disable-next-line no-restricted-syntax
     if (options.comment !== undefined) {
       command.comment = options.comment;
-    }
-
-    const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
-    if (unacknowledgedWrite && maxWireVersion(connection) < 9) {
-      if (this.statements.find((o: Document) => o.hint)) {
-        throw new MongoCompatibilityError(
-          `hint for the delete command is only supported on MongoDB 4.4+`
-        );
-      }
     }
 
     return command;

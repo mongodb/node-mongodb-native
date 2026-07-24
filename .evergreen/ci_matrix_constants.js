@@ -1,4 +1,4 @@
-const MONGODB_VERSIONS = ['latest', 'rapid', '8.0', '7.0', '6.0', '5.0', '4.4', '4.2'];
+const MONGODB_VERSIONS = ['latest', 'rapid', '8.0', '7.0', '6.0', '5.0', '4.4'];
 const versions = [
   { codeName: 'iron', versionNumber: '20.19.0' },
   { codeName: 'jod', versionNumber: 22 },

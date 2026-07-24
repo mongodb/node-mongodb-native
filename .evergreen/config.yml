@@ -1330,54 +1330,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
-  - name: test-4.2-server
-    tags:
-      - '4.2'
-      - server
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: server}
-            - {key: SSL, value: nossl}
-            - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
-  - name: test-4.2-replica_set
-    tags:
-      - '4.2'
-      - replica_set
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: SSL, value: nossl}
-            - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
-  - name: test-4.2-sharded_cluster
-    tags:
-      - '4.2'
-      - sharded_cluster
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: SSL, value: nossl}
-            - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
   - name: test-latest-server-v1-api
     tags:
       - latest
@@ -1727,22 +1679,6 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: '4.4'}
-            - {key: SSL, value: ssl}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tls tests
-  - name: test-tls-support-4.2
-    tags:
-      - tls-support
-      - tls-support-4.2
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -2535,60 +2471,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
-  - name: test-4.2-server-noauth
-    tags:
-      - '4.2'
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: SSL, value: nossl}
-            - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
-  - name: test-4.2-replica_set-noauth
-    tags:
-      - '4.2'
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-            - {key: SSL, value: nossl}
-            - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
-  - name: test-4.2-sharded_cluster-noauth
-    tags:
-      - '4.2'
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-            - {key: SSL, value: nossl}
-            - {key: NODE_LTS_VERSION, value: 20.19.0}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
   - name: test-lambda-example
     tags:
       - latest
@@ -2728,22 +2610,6 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: '4.4'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: auth}
-            - {key: NODE_LTS_VERSION, value: '24'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
-  - name: test-4.2-csfle-mongocryptd
-    tags:
-      - '4.2'
-      - sharded_cluster
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
@@ -3170,66 +3036,6 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
-  - name: test-4.2-server-ssl
-    tags:
-      - '4.2'
-      - server
-      - ssl
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: auth}
-            - {key: SSL, value: ssl}
-            - {key: NODE_LTS_VERSION, value: '24'}
-            - {key: CLIENT_ENCRYPTION, value: 'true'}
-            - {key: TEST_CSFLE, value: 'true'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
-  - name: test-4.2-replica_set-ssl
-    tags:
-      - '4.2'
-      - replica_set
-      - ssl
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: auth}
-            - {key: SSL, value: ssl}
-            - {key: NODE_LTS_VERSION, value: '24'}
-            - {key: CLIENT_ENCRYPTION, value: 'true'}
-            - {key: TEST_CSFLE, value: 'true'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
-  - name: test-4.2-sharded_cluster-ssl
-    tags:
-      - '4.2'
-      - sharded_cluster
-      - ssl
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: auth}
-            - {key: SSL, value: ssl}
-            - {key: NODE_LTS_VERSION, value: '24'}
-            - {key: CLIENT_ENCRYPTION, value: 'true'}
-            - {key: TEST_CSFLE, value: 'true'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tests
 task_groups:
   - name: test_gcpkms_task_group
     setup_group_can_fail_task: true
@@ -3537,9 +3343,6 @@ buildvariants:
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
       - test-atlas-connectivity
@@ -3562,7 +3365,6 @@ buildvariants:
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: rhel80-large-Node22
     display_name: rhel8 Node22
     run_on: rhel80-large
@@ -3592,9 +3394,6 @@ buildvariants:
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
       - test-atlas-connectivity
@@ -3617,7 +3416,6 @@ buildvariants:
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: rhel80-large-Node24
     display_name: rhel8 Node24
     run_on: rhel80-large
@@ -3647,9 +3445,6 @@ buildvariants:
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
       - test-atlas-connectivity
@@ -3672,7 +3467,6 @@ buildvariants:
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: rhel80-large-node-latest
     display_name: rhel8 Node Latest
     run_on: rhel80-large
@@ -3702,9 +3496,6 @@ buildvariants:
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-x509-authentication
       - test-atlas-connectivity
@@ -3726,7 +3517,6 @@ buildvariants:
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: windows-2022-latest-large-iron
     display_name: Windows Node20.19.0
     run_on: windows-2022-latest-large
@@ -3756,9 +3546,6 @@ buildvariants:
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-socks5
       - test-socks5-tls
@@ -3770,7 +3557,6 @@ buildvariants:
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: windows-2022-latest-large-Node22
     display_name: Windows Node22
     run_on: windows-2022-latest-large
@@ -3800,9 +3586,6 @@ buildvariants:
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-socks5
       - test-socks5-tls
@@ -3814,7 +3597,6 @@ buildvariants:
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: windows-2022-latest-large-Node24
     display_name: Windows Node24
     run_on: windows-2022-latest-large
@@ -3844,9 +3626,6 @@ buildvariants:
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-socks5
       - test-socks5-tls
@@ -3858,7 +3637,6 @@ buildvariants:
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: windows-2022-latest-large-node-latest
     display_name: Windows Node Latest
     run_on: windows-2022-latest-large
@@ -3888,9 +3666,6 @@ buildvariants:
       - test-4.4-server
       - test-4.4-replica_set
       - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
       - test-latest-server-v1-api
       - test-socks5-tls
       - test-snappy-compression
@@ -3901,7 +3676,6 @@ buildvariants:
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: rhel8-node20.19.0-test-csfle-mongocryptd
     display_name: rhel 8 Node20.19.0 test mongocryptd
     run_on: rhel80-large
@@ -3917,7 +3691,6 @@ buildvariants:
       - test-6.0-csfle-mongocryptd
       - test-5.0-csfle-mongocryptd
       - test-4.4-csfle-mongocryptd
-      - test-4.2-csfle-mongocryptd
   - name: rhel8-node24-test-csfle-mongocryptd
     display_name: rhel 8 Node24 test mongocryptd
     run_on: rhel80-large
@@ -3933,7 +3706,6 @@ buildvariants:
       - test-6.0-csfle-mongocryptd
       - test-5.0-csfle-mongocryptd
       - test-4.4-csfle-mongocryptd
-      - test-4.2-csfle-mongocryptd
   - name: macos-14-arm64
     display_name: MacOS 14 ARM Node24
     run_on: macos-14-arm64
@@ -4040,9 +3812,6 @@ buildvariants:
       - test-4.4-server-noauth
       - test-4.4-replica_set-noauth
       - test-4.4-sharded_cluster-noauth
-      - test-4.2-server-noauth
-      - test-4.2-replica_set-noauth
-      - test-4.2-sharded_cluster-noauth
   - name: rhel8-test-lambda
     display_name: AWS Lambda handler tests
     run_on: rhel80-large
