@@ -32,17 +32,18 @@ import {
   MongoCryptInvalidArgumentError
 } from './errors';
 import {
+  type ClientEncryptionSocketOptions,
+  type CSFLEKMSTlsOptions,
+  type KMSConnectCallback
+} from './kms_options';
+import {
   type ClientEncryptionDataKeyProvider,
   type CredentialProviders,
   isEmptyCredentials,
   type KMSProviders,
   refreshKMSCredentials
 } from './providers/index';
-import {
-  type ClientEncryptionSocketOptions,
-  type CSFLEKMSTlsOptions,
-  StateMachine
-} from './state_machine';
+import { StateMachine } from './state_machine';
 
 /**
  * @public
@@ -74,6 +75,8 @@ export class ClientEncryption {
   _proxyOptions: ProxyOptions;
   /** @internal */
   _tlsOptions: CSFLEKMSTlsOptions;
+  /** @internal */
+  _kmsConnectCallback?: KMSConnectCallback;
   /** @internal */
   _kmsProviders: KMSProviders;
   /** @internal */
@@ -125,7 +128,13 @@ export class ClientEncryption {
   constructor(client: MongoClient, options: ClientEncryptionOptions) {
     this._client = client;
     this._proxyOptions = options.proxyOptions ?? {};
+    if (this._proxyOptions.proxyHost && options.kmsConnectCallback) {
+      throw new MongoCryptInvalidArgumentError(
+        'Cannot set both proxyOptions and kmsConnectCallback'
+      );
+    }
     this._tlsOptions = options.tlsOptions ?? {};
+    this._kmsConnectCallback = options.kmsConnectCallback;
     this._kmsProviders = options.kmsProviders || {};
     const { timeoutMS } = resolveTimeoutOptions(client, options);
     this._timeoutMS = timeoutMS;
@@ -226,7 +235,8 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options),
+      kmsConnectCallback: this._kmsConnectCallback
     });
 
     const timeoutContext =
@@ -295,7 +305,8 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options),
+      kmsConnectCallback: this._kmsConnectCallback
     });
 
     const timeoutContext = TimeoutContext.create(
@@ -699,7 +710,8 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options),
+      kmsConnectCallback: this._kmsConnectCallback
     });
 
     const timeoutContext =
@@ -797,7 +809,8 @@ export class ClientEncryption {
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions,
-      socketOptions: autoSelectSocketOptions(this._client.s.options)
+      socketOptions: autoSelectSocketOptions(this._client.s.options),
+      kmsConnectCallback: this._kmsConnectCallback
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
@@ -960,6 +973,13 @@ export interface ClientEncryptionOptions {
    * TLS options for kms providers to use.
    */
   tlsOptions?: CSFLEKMSTlsOptions;
+
+  /**
+   * A callback that establishes the socket used to connect to a KMS host, e.g. to route KMS
+   * requests through an HTTP proxy via the HTTP CONNECT method. Mutually exclusive with `proxyOptions`.
+   * See {@link KMSConnectCallback} for a usage example.
+   */
+  kmsConnectCallback?: KMSConnectCallback;
 
   /**
    * Sets the expiration time for the DEK in the cache in milliseconds. Defaults to 60000. 0 means no timeout.

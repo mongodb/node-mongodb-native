@@ -15,7 +15,7 @@ import { type ProxyOptions } from '../cmap/connection';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoOperationTimeoutError } from '../error';
-import { type MongoClient, type MongoClientOptions } from '../mongo_client';
+import { type MongoClient } from '../mongo_client';
 import { type Abortable } from '../mongo_types';
 import { type CollectionInfo } from '../operations/list_collections';
 import { Timeout, type TimeoutContext, TimeoutError } from '../timeout';
@@ -28,6 +28,12 @@ import {
 } from '../utils';
 import { autoSelectSocketOptions, type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
+import {
+  type ClientEncryptionSocketOptions,
+  type ClientEncryptionTlsOptions,
+  type CSFLEKMSTlsOptions,
+  type KMSConnectCallback
+} from './kms_options';
 import { type MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders } from './providers';
 
@@ -94,44 +100,6 @@ declare module 'mongodb-client-encryption' {
 }
 
 /**
- * @public
- *
- * TLS options to use when connecting. The spec specifically calls out which insecure
- * tls options are not allowed:
- *
- *  - tlsAllowInvalidCertificates
- *  - tlsAllowInvalidHostnames
- *  - tlsInsecure
- *
- * These options are not included in the type, and are ignored if provided.
- */
-export type ClientEncryptionTlsOptions = Pick<
-  MongoClientOptions,
-  'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword' | 'secureContext'
->;
-
-/** @public */
-export type CSFLEKMSTlsOptions = {
-  aws?: ClientEncryptionTlsOptions;
-  gcp?: ClientEncryptionTlsOptions;
-  kmip?: ClientEncryptionTlsOptions;
-  local?: ClientEncryptionTlsOptions;
-  azure?: ClientEncryptionTlsOptions;
-
-  [key: string]: ClientEncryptionTlsOptions | undefined;
-};
-
-/**
- * @public
- *
- * Socket options to use for KMS requests.
- */
-export type ClientEncryptionSocketOptions = Pick<
-  MongoClientOptions,
-  'autoSelectFamily' | 'autoSelectFamilyAttemptTimeout'
->;
-
-/**
  * This is kind of a hack.  For `rewrapManyDataKey`, we have tests that
  * guarantee that when there are no matching keys, `rewrapManyDataKey` returns
  * nothing.  We also have tests for auto encryption that guarantee for `encrypt`
@@ -173,6 +141,9 @@ export type StateMachineOptions = {
 
   /** Socket specific options we support. */
   socketOptions: ClientEncryptionSocketOptions;
+
+  /** Optional callback that establishes the KMS socket, if set. */
+  kmsConnectCallback?: KMSConnectCallback;
 } & Pick<BSONSerializeOptions, 'promoteLongs' | 'promoteValues'>;
 
 /**
@@ -388,9 +359,51 @@ export class StateMachine {
     }
 
     let abortListener;
+    let kmsRequestTimeout: Timeout | undefined;
 
     try {
-      if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
+      if (this.options.kmsConnectCallback) {
+        const remainingTimeMS = options?.timeoutContext?.csotEnabled()
+          ? options.timeoutContext.getRemainingTimeMSOrThrow('KMS request timed out')
+          : undefined;
+        // A non-finite budget (timeoutMS: 0) means no timeout; otherwise back the callback with one.
+        const timeoutMS = Number.isFinite(remainingTimeMS) ? remainingTimeMS : undefined;
+        const controller = new AbortController();
+        // Forward the operation's own abort signal so aborting the operation also aborts the callback.
+        const forwardAbort = addAbortListener(options?.signal, function () {
+          controller.abort(this.reason);
+        });
+        const connectPromise = this.options.kmsConnectCallback({
+          host: socketOptions.host,
+          port: socketOptions.port,
+          timeoutMS,
+          signal: controller.signal
+        });
+        // If the callback resolves a socket after we already aborted, close it so it does not leak.
+        connectPromise.then(
+          resolvedSocket => {
+            if (controller.signal.aborted) resolvedSocket.destroy();
+          },
+          () => null
+        );
+        const timeout = timeoutMS ? Timeout.expires(timeoutMS) : undefined;
+        try {
+          socketOptions.socket = timeout
+            ? await Promise.race([connectPromise, timeout])
+            : await connectPromise;
+        } catch (err) {
+          if (TimeoutError.is(err)) {
+            const timeoutError = new MongoOperationTimeoutError('KMS request timed out');
+            // Abort with the timeout error as the reason so the callback sees it on `signal.reason`.
+            controller.abort(timeoutError);
+            throw timeoutError;
+          }
+          throw onerror(err);
+        } finally {
+          timeout?.clear();
+          forwardAbort?.[kDispose]();
+        }
+      } else if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
         netSocket = new net.Socket();
 
         const {
@@ -465,20 +478,22 @@ export class StateMachine {
             resolve();
           }
         });
-      await (options?.timeoutContext?.csotEnabled()
-        ? Promise.all([
-            willResolveKmsRequest,
-            Timeout.expires(options.timeoutContext?.remainingTimeMS)
-          ])
+      const remainingTimeMS = options?.timeoutContext?.csotEnabled()
+        ? options.timeoutContext.getRemainingTimeMSOrThrow('KMS request timed out')
+        : undefined;
+      const timeoutMS = Number.isFinite(remainingTimeMS) ? remainingTimeMS : undefined;
+      kmsRequestTimeout = timeoutMS ? Timeout.expires(timeoutMS) : undefined;
+      await (kmsRequestTimeout
+        ? Promise.race([willResolveKmsRequest, kmsRequestTimeout])
         : willResolveKmsRequest);
     } catch (error) {
-      if (error instanceof TimeoutError)
-        throw new MongoOperationTimeoutError('KMS request timed out');
+      if (TimeoutError.is(error)) throw new MongoOperationTimeoutError('KMS request timed out');
       throw error;
     } finally {
       // There's no need for any more activity on this socket at this point.
       destroySockets();
       abortListener?.[kDispose]();
+      kmsRequestTimeout?.clear();
     }
   }
 
