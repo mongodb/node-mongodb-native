@@ -246,8 +246,7 @@ export type ArrayOperator<Type> = {
 /** @public */
 export type SetFields<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any> | undefined>]?:
-    | OptionalId<Flatten<TSchema[key]>>
-    | AddToSetOperators<Array<OptionalId<Flatten<TSchema[key]>>>>;
+    OptionalId<Flatten<TSchema[key]>> | AddToSetOperators<Array<OptionalId<Flatten<TSchema[key]>>>>;
 } & IsAny<
   TSchema[keyof TSchema],
   object,
@@ -259,8 +258,7 @@ export type SetFields<TSchema> = ({
 /** @public */
 export type PushOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
-    | Flatten<TSchema[key]>
-    | ArrayOperator<Array<Flatten<TSchema[key]>>>;
+    Flatten<TSchema[key]> | ArrayOperator<Array<Flatten<TSchema[key]>>>;
 } & NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
   readonly [key: string]: ArrayOperator<any> | any;
 };
@@ -268,8 +266,7 @@ export type PushOperator<TSchema> = ({
 /** @public */
 export type PullOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
-    | Partial<Flatten<TSchema[key]>>
-    | FilterOperations<Flatten<TSchema[key]>>;
+    Partial<Flatten<TSchema[key]>> | FilterOperations<Flatten<TSchema[key]>>;
 } & NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
   readonly [key: string]: FilterOperators<any> | any;
 };
@@ -461,9 +458,7 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     }
     if (connectionEstablished) {
       const loggableCommandEvent:
-        | CommandStartedEvent
-        | LoggableCommandFailedEvent
-        | LoggableCommandSucceededEvent = {
+        CommandStartedEvent | LoggableCommandFailedEvent | LoggableCommandSucceededEvent = {
         databaseName: databaseName,
         ...args[0]
       };
@@ -671,8 +666,9 @@ export type StrictMatchKeysAndValues<TSchema> = Readonly<
       PropertyType<TSchema, Property extends `${infer Key}.$${string}` ? Key : never>
     >;
   } & {
-    [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
-      | `[${string}]`
-      | ''}.${string}`]?: any; // Could be further narrowed
+    [
+      Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
+        `[${string}]` | ''}.${string}`
+    ]?: any; // Could be further narrowed
   } & Document
 >;

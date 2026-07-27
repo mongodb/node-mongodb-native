@@ -10,6 +10,7 @@ import {
   OpQueryRequest,
   ServerApiVersion
 } from '../../mongodb';
+
 describe('MongoDB Handshake', () => {
   let client;
 

@@ -6,6 +6,7 @@ const sinon = require('sinon');
 describe('Cursor Async Iterator Tests', function () {
   context('default promise library', function () {
     let client, collection;
+
     before(async function () {
       client = this.configuration.newClient();
 

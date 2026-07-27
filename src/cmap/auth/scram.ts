@@ -245,13 +245,13 @@ function passwordDigest(username: string, password: string) {
     const md5 = nodeCrypto.createHash('md5');
     md5.update(`${username}:mongo:${password}`, 'utf8');
     return md5.digest('hex');
-  } catch (err) {
+  } catch (cause) {
     if (nodeCrypto.getFips()) {
       // This error is (slightly) more helpful than what comes from OpenSSL directly, e.g.
       // 'Error: error:060800C8:digital envelope routines:EVP_DigestInit_ex:disabled for FIPS'
-      throw new Error('Auth mechanism SCRAM-SHA-1 is not supported in FIPS mode');
+      throw new Error('Auth mechanism SCRAM-SHA-1 is not supported in FIPS mode', { cause });
     }
-    throw err;
+    throw cause;
   }
 }
 

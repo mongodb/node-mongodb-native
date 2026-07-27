@@ -19,10 +19,12 @@ describe('Write Concern', function () {
   context('when the WriteConcern is set in the uri', function () {
     let client;
     const events: CommandStartedEvent[] = [];
+
     beforeEach(function () {
       client = this.configuration.newClient(`${this.configuration.url()}&w=0&monitorCommands=true`);
       client.on('commandStarted', filterForCommands(['insert'], events));
     });
+
     afterEach(() => client.close());
 
     it('respects the writeConcern from uri', async function () {
@@ -176,6 +178,7 @@ describe('Write Concern', function () {
   describe('fire-and-forget protocol', function () {
     const compressionPredicate = () =>
       process.env.COMPRESSOR ? 'Test requires that compression is disabled' : true;
+
     context('when writeConcern = 0 and OP_MSG is used', function () {
       const writeOperations: { name: string; command: any; expectedReturnVal: any }[] = [
         {

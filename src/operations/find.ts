@@ -14,8 +14,7 @@ import { Aspect, defineAspects, type Hint } from './operation';
  * @public
  */
 export interface FindOptions
-  extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'>,
-    AbstractCursorOptions {
+  extends Omit<CommandOperationOptions, 'writeConcern' | 'explain'>, AbstractCursorOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */

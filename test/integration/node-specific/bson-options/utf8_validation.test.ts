@@ -14,11 +14,8 @@ import {
 import { runOnlyInNodeMetadata } from '../../../tools/utils';
 
 describe('class MongoDBResponse', runOnlyInNodeMetadata, () => {
-  let client;
-
   afterEach(async () => {
     sinon.restore();
-    if (client) await client.close();
   });
 
   context(
@@ -139,6 +136,7 @@ describe('parsing of utf8-invalid documents with cursors', runOnlyInNodeMetadata
     it('documents can be read using a for-await loop without errors', async function () {
       for await (const _doc of collection.find({}, { enableUtf8Validation: false }));
     });
+
     it('documents can be read using next() without errors', async function () {
       const cursor = collection.find({}, { enableUtf8Validation: false });
 
@@ -182,6 +180,7 @@ describe('parsing of utf8-invalid documents with cursors', runOnlyInNodeMetadata
         for await (const _doc of collection.find({}, { enableUtf8Validation: true }));
       });
     });
+
     it('next() throws a BSON error', async function () {
       await expectReject(async () => {
         const cursor = collection.find({}, { enableUtf8Validation: true });
@@ -223,6 +222,7 @@ describe('parsing of utf8-invalid documents with cursors', runOnlyInNodeMetadata
         for await (const _doc of collection.find({}));
       });
     });
+
     it('next() throws a BSON error', async function () {
       await expectReject(async () => {
         const cursor = collection.find({});

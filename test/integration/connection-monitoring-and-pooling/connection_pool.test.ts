@@ -3,23 +3,14 @@ import { once } from 'node:events';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  type ConnectionPoolCreatedEvent,
-  type Db,
-  type MongoClient,
-  type Server
-} from '../../mongodb';
+import { type ConnectionPoolCreatedEvent, type MongoClient, type Server } from '../../mongodb';
 import { clearFailPoint, configureFailPoint, sleep } from '../../tools/utils';
 
 describe('Connection Pool', function () {
   let client: MongoClient;
-  let db: Db;
 
   afterEach(async function () {
     if (client) {
-      if (db) {
-        await db.dropDatabase();
-      }
       await client.close();
     }
   });
@@ -29,6 +20,7 @@ describe('Connection Pool', function () {
       context('when no connection pool options are passed in', function () {
         let pConnectionPoolCreated: Promise<ConnectionPoolCreatedEvent[]>;
         let connectionPoolCreated: ConnectionPoolCreatedEvent;
+
         beforeEach(async function () {
           client = this.configuration.newClient({}, {});
           pConnectionPoolCreated = once(client, 'connectionPoolCreated');
@@ -58,6 +50,7 @@ describe('Connection Pool', function () {
           minPoolSize: 1,
           maxPoolSize: 101
         };
+
         beforeEach(async function () {
           client = this.configuration.newClient({}, options);
           pConnectionPoolCreated = once(client, 'connectionPoolCreated');

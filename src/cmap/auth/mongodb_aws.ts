@@ -1,5 +1,5 @@
-import { type Binary, type BSONSerializeOptions, ByteUtils } from '../../bson';
 import * as BSON from '../../bson';
+import { type Binary, type BSONSerializeOptions, ByteUtils } from '../../bson';
 import {
   MongoCompatibilityError,
   MongoMissingCredentialsError,

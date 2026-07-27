@@ -77,7 +77,8 @@ export const setUint32LE = (destination: Uint8Array, offset: number, value: numb
  * @public
  */
 export interface BSONSerializeOptions
-  extends Omit<SerializeOptions, 'index'>,
+  extends
+    Omit<SerializeOptions, 'index'>,
     Omit<
       DeserializeOptions,
       | 'evalFunctions'

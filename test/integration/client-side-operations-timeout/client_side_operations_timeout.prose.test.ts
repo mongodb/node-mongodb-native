@@ -705,6 +705,7 @@ describe('CSOT spec prose tests', function () {
       );
       expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
     });
+
     it('Aborting an upload stream can be timed out', metadata, async function () {
       // 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
       // 2. Using `internalClient`, set the following fail point:

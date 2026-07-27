@@ -37,6 +37,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
     */
 
     let client: MongoClient;
+
     beforeEach(async function () {
       const utilClient = this.configuration.newClient({ directConnection: true });
 
@@ -115,6 +116,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
     let client: MongoClient;
     let utilClient: MongoClient;
     const events: string[] = [];
+
     beforeEach(async function () {
       client = this.configuration.newClient({
         directConnection: true,

@@ -4,10 +4,8 @@ type all = typeof import('./mongodb_all');
 let exportSource: all;
 try {
   exportSource = loadContextifiedMongoDBModule();
-} catch (error) {
-  throw new Error(
-    `Failed to load contextified MongoDB module: ${error instanceof Error ? error.message : String(error)}`
-  );
+} catch (cause) {
+  throw new Error('Failed to load contextified MongoDB module', { cause });
 }
 
 // Export public API from the contextified module

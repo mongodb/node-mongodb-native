@@ -2,13 +2,7 @@ import { MongoInvalidArgumentError } from './error';
 
 /** @public */
 export type SortDirection =
-  | 1
-  | -1
-  | 'asc'
-  | 'desc'
-  | 'ascending'
-  | 'descending'
-  | { readonly $meta: string };
+  1 | -1 | 'asc' | 'desc' | 'ascending' | 'descending' | { readonly $meta: string };
 
 /** @public */
 export type Sort =

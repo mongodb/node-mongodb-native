@@ -10,6 +10,7 @@ import {
   StateMachine,
   type UUID
 } from '../../mongodb';
+
 describe('mongocryptd auto spawn', function () {
   let client: MongoClient;
   const kmsProviders: KMSProviders = {

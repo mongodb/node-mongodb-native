@@ -769,6 +769,7 @@ describe('CSOT', function () {
       'when an auto encrypted client is not configured with timeoutMS and auto encryption is delayed',
       function () {
         let encryptedClient: MongoClient;
+
         beforeEach(async function () {
           encryptedClient = this.configuration.newClient(
             {},

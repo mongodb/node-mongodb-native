@@ -102,10 +102,9 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
 
-        let initialHelloSent = false;
+        const initialHelloSent = false;
         if (isHello(doc) && !initialHelloSent) {
           request.reply(mock.HELLO);
-          initialHelloSent = true;
         } else {
           // black hole all other operations
         }
@@ -166,6 +165,7 @@ describe('Topology (unit)', function () {
             }
           });
         });
+
         context('when the topology originally only contained one server', function () {
           it('returns a MongoServerSelectionError', async function () {
             topology = topologyWithPlaceholderClient([mockServer.hostAddress()], {});

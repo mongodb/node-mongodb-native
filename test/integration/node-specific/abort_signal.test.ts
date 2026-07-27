@@ -839,7 +839,6 @@ describe('AbortSignal support', () => {
 
     let controller: AbortController;
     let signal: AbortSignal;
-    let cursor: AbstractCursor<{ a: number }>;
 
     beforeEach(async function () {
       controller = new AbortController();
@@ -848,7 +847,6 @@ describe('AbortSignal support', () => {
 
     afterEach(async function () {
       sinon.restore();
-      await cursor?.close();
     });
 
     describe('when StateMachine.kmsRequest() is passed an AbortSignal', function () {

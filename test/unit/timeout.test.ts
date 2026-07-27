@@ -40,6 +40,7 @@ describe('Timeout', function () {
         const id = timeout.id;
         expect(id?.hasRef()).to.be.false;
       }).skipReason = 'Skipping until further work during CSOT implementation';
+
       it('throws a TimeoutError when it expires', async function () {
         try {
           await timeout;
@@ -67,6 +68,7 @@ describe('Timeout', function () {
       timeout = Timeout.expires(1000);
       expect(timeout).to.have.property('id').that.is.not.undefined;
     });
+
     context('when called on a non-expired timeout with a non-zero duration', function () {
       it('clears the underlying NodeJS.Timeout instance', function () {
         timeout.clear();

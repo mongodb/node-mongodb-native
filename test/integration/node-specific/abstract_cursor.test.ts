@@ -152,6 +152,7 @@ describe('class AbstractCursor', function () {
             expect(transformSpy).to.have.been.calledOnce;
             expect(doc.name).to.equal('JOHN DOE');
           });
+
           context('when the transform throws', function () {
             it(`the error is propagated to the user`, async () => {
               const cursor = collection.find().map(() => {

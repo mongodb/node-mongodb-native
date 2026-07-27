@@ -47,6 +47,7 @@ describe('Connections Survive Primary Step Down - prose', function () {
     // This test requires a replica set with server version 4.2 or higher.
 
     let cursor: FindCursor;
+
     afterEach(() => cursor.close());
 
     it('survives after primary step down', async () => {

@@ -119,9 +119,7 @@ export interface ProxyOptions {
 
 /** @public */
 export interface ConnectionOptions
-  extends SupportedNodeConnectionOptions,
-    StreamDescriptionOptions,
-    ProxyOptions {
+  extends SupportedNodeConnectionOptions, StreamDescriptionOptions, ProxyOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -538,7 +536,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     /** MongoDBResponse instance or subclass */
     let document: MongoDBResponse | undefined = undefined;
     /** Cached result of a toObject call */
-    let object: Document | undefined = undefined;
+    let object: Document | undefined;
     try {
       this.throwIfAborted();
       for await (document of this.sendWire(message, options, responseType)) {

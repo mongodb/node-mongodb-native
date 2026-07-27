@@ -99,6 +99,7 @@ describe('Driver Resources', () => {
     });
 
     let client;
+
     beforeEach(async function () {
       client = this.configuration.newClient();
     });

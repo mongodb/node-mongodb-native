@@ -894,6 +894,7 @@ describe('MongoClient', function () {
               ).to.throw(MongoAPIError);
             });
           });
+
           context('when option is not a valid MongoDBLogWritable stream', function () {
             it('should throw error at construction', function () {
               const writable = {
@@ -944,6 +945,7 @@ describe('MongoClient', function () {
         'MONGODB_LOG_CONNECTION',
         'MONGODB_LOG_CLIENT'
       ];
+
       context('when only client option is provided', function () {
         for (let i = 0; i < components.length; i++) {
           it(`it stores severity levels for ${components[i]} component correctly`, function () {
@@ -966,6 +968,7 @@ describe('MongoClient', function () {
           });
         }
       });
+
       context('when both client and environment option are provided', function () {
         for (let i = 0; i < components.length; i++) {
           it(`it stores severity level for ${components[i]} component correctly (client options have precedence)`, function () {
@@ -990,6 +993,7 @@ describe('MongoClient', function () {
           });
         }
       });
+
       context('when default is provided', function () {
         it('unspecified components have default value, while specified components retain value', function () {
           for (let i = 0; i < components.length; i++) {
@@ -1055,6 +1059,7 @@ describe('MongoClient', function () {
           beforeEach(async function () {
             process.env.MONGODB_LOG_ALL = 'imFakeToo';
           });
+
           afterEach(async function () {
             delete process.env.MONGODB_LOG_ALL;
           });
@@ -1073,6 +1078,7 @@ describe('MongoClient', function () {
               expect(client.mongoLogger?.componentSeverities.command).to.equal('off');
             });
           });
+
           context('when valid client option is provided', function () {
             it('should not throw error, and set component severity to client value', function () {
               expect(
@@ -1100,6 +1106,7 @@ describe('MongoClient', function () {
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
           });
+
           it('should throw error for negative input', function () {
             expect(
               () =>
@@ -1109,6 +1116,7 @@ describe('MongoClient', function () {
             ).to.throw(MongoParseError);
           });
         });
+
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
           beforeEach(function () {
             process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '155';
@@ -1124,6 +1132,7 @@ describe('MongoClient', function () {
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
           });
+
           it('should throw error for negative input', function () {
             expect(
               () =>
@@ -1134,6 +1143,7 @@ describe('MongoClient', function () {
           });
         });
       });
+
       context('when mongodbLogMaxDocumentLength is not in options', function () {
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
           it('should store value for default maxDocumentLength correctly', function () {
@@ -1141,6 +1151,7 @@ describe('MongoClient', function () {
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
           });
         });
+
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
           afterEach(function () {
             delete process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH;

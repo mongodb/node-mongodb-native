@@ -68,16 +68,17 @@ describe('StreamDescription - unit/cmap', function () {
 
   describe('serverConnectionId', function () {
     context('when serverConnectionId is in hello response', function () {
-      // eslint-disable-next-line no-undef
       const expectedServerConnectionId = BigInt(2);
+
       context('when serverConnectionId of type bigint', function () {
         it('should save serverConnectionID as a bigint on stream description', function () {
           const description = new StreamDescription('a:27017', {});
-          // eslint-disable-next-line no-undef
+
           description.receiveResponse({ connectionId: BigInt(2) });
           expect(description.serverConnectionId).to.equal(expectedServerConnectionId);
         });
       });
+
       context('when serverConnectionId is of type BSON Double', function () {
         it('should save serverConnectionID as a bigint on stream description', function () {
           const description = new StreamDescription('a:27017', {});
@@ -85,6 +86,7 @@ describe('StreamDescription - unit/cmap', function () {
           expect(description.serverConnectionId).to.equal(expectedServerConnectionId);
         });
       });
+
       context('when serverConnectionId is of type number', function () {
         it('should save serverConnectionID as a bigint on stream description', function () {
           const description = new StreamDescription('a:27017', {});
@@ -92,6 +94,7 @@ describe('StreamDescription - unit/cmap', function () {
           expect(description.serverConnectionId).to.equal(expectedServerConnectionId);
         });
       });
+
       context('when serverConnectionId is of type BSON Long', function () {
         it('should parse serverConnectionId properly', function () {
           const description = new StreamDescription('a:27017', {});
@@ -100,6 +103,7 @@ describe('StreamDescription - unit/cmap', function () {
         });
       });
     });
+
     context('when serverConnectionId is not in hello response', function () {
       it('should not throw an error and keep serverConnectionId undefined on stream description', function () {
         const description = new StreamDescription('a:27017', {});

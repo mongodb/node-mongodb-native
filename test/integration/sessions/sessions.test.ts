@@ -203,6 +203,7 @@ describe('Sessions Spec', function () {
         expect(event).nested.property('command.writeConcern.w').to.equal(0);
         expect(event).to.not.have.nested.property('command.lsid');
       });
+
       it('should throw error with explicit session', {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
         test: async function () {

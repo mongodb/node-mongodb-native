@@ -56,8 +56,10 @@ export interface MonitorPrivate {
 }
 
 /** @public */
-export interface MonitorOptions
-  extends Omit<ConnectionOptions, 'id' | 'generation' | 'hostAddress'> {
+export interface MonitorOptions extends Omit<
+  ConnectionOptions,
+  'id' | 'generation' | 'hostAddress'
+> {
   connectTimeoutMS: number;
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;

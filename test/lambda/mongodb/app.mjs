@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- console output is intentional for AWS Lambda function logging */
 import * as assert from 'node:assert/strict';
 
 import { MongoClient } from 'mongodb';
@@ -86,10 +87,9 @@ function reset() {
  * The handler function itself performs an insert/delete and returns the
  * id of the document in play.
  *
- * @param {Object} event - API Gateway Lambda Proxy Input Format
- * @returns {Object} object - API Gateway Lambda Proxy Output Format
+ * @returns object - API Gateway Lambda Proxy Output Format
  */
-export const lambdaHandler = async event => {
+export const lambdaHandler = async () => {
   const db = mongoClient.db('lambdaTest');
   const collection = db.collection('test');
   const { insertedId } = await collection.insertOne({ n: 1 });

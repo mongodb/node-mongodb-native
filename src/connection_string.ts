@@ -1235,15 +1235,13 @@ export const OPTIONS = {
   },
   mongodbLogPath: {
     transform({ values: [value] }) {
-      if (
-        !(
-          (typeof value === 'string' && ['stderr', 'stdout'].includes(value)) ||
-          (value &&
-            typeof value === 'object' &&
-            'write' in value &&
-            typeof value.write === 'function')
-        )
-      ) {
+      if (!(
+        (typeof value === 'string' && ['stderr', 'stdout'].includes(value)) ||
+        (value &&
+          typeof value === 'object' &&
+          'write' in value &&
+          typeof value.write === 'function')
+      )) {
         throw new MongoAPIError(
           `Option 'mongodbLogPath' must be of type 'stderr' | 'stdout' | MongoDBLogWritable`
         );

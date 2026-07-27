@@ -73,6 +73,7 @@ describe('parseOptions', function () {
       });
     });
   });
+
   context('local providers', function () {
     it('throws if none is given', function () {
       expect(() => {

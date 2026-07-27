@@ -230,7 +230,8 @@ export interface ChangeStreamDocumentOperationDescription {
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#insert-event
  */
 export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentKey<TSchema>,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentWallTime {
@@ -247,7 +248,8 @@ export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#update-event
  */
 export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentKey<TSchema>,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentWallTime {
@@ -279,7 +281,8 @@ export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#replace-event
  */
 export interface ChangeStreamReplaceDocument<TSchema extends Document = Document>
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentKey<TSchema>,
     ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
@@ -303,7 +306,8 @@ export interface ChangeStreamReplaceDocument<TSchema extends Document = Document
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#delete-event
  */
 export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentKey<TSchema>,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentWallTime {
@@ -326,7 +330,8 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#drop-event
  */
 export interface ChangeStreamDropDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
@@ -340,7 +345,8 @@ export interface ChangeStreamDropDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#rename-event
  */
 export interface ChangeStreamRenameDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
@@ -356,8 +362,7 @@ export interface ChangeStreamRenameDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#dropdatabase-event
  */
 export interface ChangeStreamDropDatabaseDocument
-  extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentWallTime {
+  extends ChangeStreamDocumentCommon, ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'dropDatabase';
   /** The database dropped */
@@ -369,8 +374,7 @@ export interface ChangeStreamDropDatabaseDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
  */
 export interface ChangeStreamInvalidateDocument
-  extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentWallTime {
+  extends ChangeStreamDocumentCommon, ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
   operationType: 'invalidate';
 }
@@ -381,7 +385,8 @@ export interface ChangeStreamInvalidateDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/createIndexes/#mongodb-data-createIndexes
  */
 export interface ChangeStreamCreateIndexDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentOperationDescription,
     ChangeStreamDocumentWallTime {
@@ -395,7 +400,8 @@ export interface ChangeStreamCreateIndexDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/dropIndexes/#mongodb-data-dropIndexes
  */
 export interface ChangeStreamDropIndexDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentOperationDescription,
     ChangeStreamDocumentWallTime {
@@ -409,7 +415,8 @@ export interface ChangeStreamDropIndexDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/modify/#mongodb-data-modify
  */
 export interface ChangeStreamCollModDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
@@ -421,7 +428,8 @@ export interface ChangeStreamCollModDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/create/#mongodb-data-create
  */
 export interface ChangeStreamCreateDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentWallTime {
   /** Describes the type of operation represented in this change notification */
@@ -440,7 +448,8 @@ export interface ChangeStreamCreateDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/shardCollection/#mongodb-data-shardCollection
  */
 export interface ChangeStreamShardCollectionDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentOperationDescription,
     ChangeStreamDocumentWallTime {
@@ -453,7 +462,8 @@ export interface ChangeStreamShardCollectionDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/reshardCollection/#mongodb-data-reshardCollection
  */
 export interface ChangeStreamReshardCollectionDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentOperationDescription {
   /** Describes the type of operation represented in this change notification */
@@ -465,7 +475,8 @@ export interface ChangeStreamReshardCollectionDocument
  * @see https://www.mongodb.com/docs/manual/reference/change-events/refineCollectionShardKey/#mongodb-data-refineCollectionShardKey
  */
 export interface ChangeStreamRefineCollectionShardKeyDocument
-  extends ChangeStreamDocumentCommon,
+  extends
+    ChangeStreamDocumentCommon,
     ChangeStreamDocumentCollectionUUID,
     ChangeStreamDocumentOperationDescription {
   /** Describes the type of operation represented in this change notification */
@@ -566,9 +577,9 @@ export type ChangeStreamEvents<
  * @public
  */
 export class ChangeStream<
-    TSchema extends Document = Document,
-    TChange extends Document = ChangeStreamDocument<TSchema>
-  >
+  TSchema extends Document = Document,
+  TChange extends Document = ChangeStreamDocument<TSchema>
+>
   extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>>
   implements AsyncDisposable
 {
@@ -1115,10 +1126,9 @@ function buildDisallowedChangeStreamOptions(): Set<string> {
    * instantiation of `denyList` below results in a TS error.
    */
   type DisallowedOptions = {
-    [k in Exclude<
-      keyof ChangeStreamOptions & { timeoutContext: TimeoutContext },
-      CSOptions
-    >]: string;
+    [
+      k in Exclude<keyof ChangeStreamOptions & { timeoutContext: TimeoutContext }, CSOptions>
+    ]: string;
   };
 
   const denyList: DisallowedOptions = {

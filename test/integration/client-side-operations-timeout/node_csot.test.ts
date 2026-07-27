@@ -546,6 +546,7 @@ describe('CSOT driver tests', metadata, () => {
         await internalClient.close();
         await client.close();
       });
+
       context('when executing a next call', () => {
         context(
           'when there are documents available from previously retrieved batch and timeout has expired',
@@ -572,6 +573,7 @@ describe('CSOT driver tests', metadata, () => {
             });
           }
         );
+
         context('when a getMore is required and the timeout has expired', () => {
           it('throws a MongoOperationTimeoutError', metadata, async function () {
             const cursor = client
@@ -676,6 +678,7 @@ describe('CSOT driver tests', metadata, () => {
     context('when in ITERATION mode', function () {
       context('awaitData cursors', function () {
         let cursor: FindCursor;
+
         afterEach(async function () {
           if (cursor) await cursor.close();
         });
@@ -808,6 +811,7 @@ describe('CSOT driver tests', metadata, () => {
           expect(finds[0].command.find).to.exist;
           expect(finds[0].command.maxTimeMS).to.not.exist;
         });
+
         it('does not append a maxTimeMS field to subsequent getMores', metadata, async function () {
           cursor = client
             .db('db')
@@ -903,6 +907,7 @@ describe('CSOT driver tests', metadata, () => {
 
       context('when the getMore times out', function () {
         let onSharded: boolean;
+
         beforeEach(async function () {
           onSharded =
             this.configuration.topologyType === TopologyType.LoadBalanced ||

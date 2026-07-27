@@ -522,6 +522,7 @@ describe('server selection', function () {
 
     context('localThresholdMS is respected as an option', function () {
       let serverDescription1, serverDescription2, serverDescription3, serverDescriptions;
+
       beforeEach(() => {
         serverDescription1 = new ServerDescription(
           '127.0.0.1:27017',
@@ -555,6 +556,7 @@ describe('server selection', function () {
         serverDescriptions.set(serverDescription2.address, serverDescription2);
         serverDescriptions.set(serverDescription3.address, serverDescription3);
       });
+
       it('includes servers inside the latency window with default localThresholdMS', function () {
         const topologyDescription = new TopologyDescription(
           TopologyType.Single,
@@ -627,6 +629,7 @@ describe('server selection', function () {
     context('when willLog returns false', function () {
       const original = Object.getPrototypeOf(ServerSelectionEvent);
       let serverSelectionEventStub;
+
       beforeEach(() => {
         sinon.stub(MongoLogger.prototype, 'willLog').callsFake((_v, _w) => false);
         serverSelectionEventStub = sinon.stub();

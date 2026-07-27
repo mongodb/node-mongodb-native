@@ -6,6 +6,7 @@ import {
   type IndexDirection,
   ns
 } from '../../mongodb';
+
 describe('class CreateIndexesOperation', () => {
   const testCases = [
     {

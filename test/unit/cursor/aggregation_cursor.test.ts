@@ -133,6 +133,7 @@ describe('class AggregationCursor', () => {
   context('when addStage, bespoke stage methods, or array is used to construct pipeline', () => {
     context('when CSOT is enabled', () => {
       let aggregationCursor: AggregationCursor;
+
       before(function () {
         aggregationCursor = client
           .db('test')
@@ -147,6 +148,7 @@ describe('class AggregationCursor', () => {
           }).to.throw(MongoAPIError);
         });
       });
+
       context('when a $merge stage is added with .addStage()', () => {
         it('throws a MongoAPIError', function () {
           expect(() => {
@@ -154,6 +156,7 @@ describe('class AggregationCursor', () => {
           }).to.throw(MongoAPIError);
         });
       });
+
       context('when a $out stage is added with .out()', () => {
         it('throws a MongoAPIError', function () {
           expect(() => {
@@ -208,6 +211,7 @@ describe('class AggregationCursor', () => {
           ).to.throw(MongoAPIError);
         });
       });
+
       context('when timeoutMode=ITERATION and a $merge stage is provided', function () {
         it('throws a MongoAPIError', function () {
           expect(

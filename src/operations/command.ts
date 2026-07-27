@@ -33,9 +33,7 @@ export interface CollationOptions {
 
 /** @public */
 export interface CommandOperationOptions
-  extends OperationOptions,
-    WriteConcernOptions,
-    ExplainOptions {
+  extends OperationOptions, WriteConcernOptions, ExplainOptions {
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** Collation */

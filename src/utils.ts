@@ -220,12 +220,7 @@ export function decorateWithReadConcern(
  * @internal
  */
 export type TopologyProvider =
-  | MongoClient
-  | ClientSession
-  | FindCursor
-  | AbstractCursor
-  | Collection<any>
-  | Db;
+  MongoClient | ClientSession | FindCursor | AbstractCursor | Collection<any> | Db;
 
 /**
  * A helper function to get the topology from a given provider. Throws
@@ -851,7 +846,7 @@ export class BufferPool {
     // TODO(NODE-4732): alloc API should change based on raw option
     const result = ByteUtils.allocateUnsafe(size);
 
-    for (let bytesRead = 0; bytesRead < size; ) {
+    for (let bytesRead = 0; bytesRead < size;) {
       const buffer = this.buffers.shift();
       if (buffer == null) {
         break;

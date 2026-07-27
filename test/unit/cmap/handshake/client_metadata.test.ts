@@ -14,6 +14,7 @@ import {
   runNodelessTests
 } from '../../../mongodb';
 import { runtime } from '../../../tools/utils';
+
 describe('client metadata module', () => {
   afterEach(() => sinon.restore());
 
@@ -50,9 +51,11 @@ describe('client metadata module', () => {
         before(() => {
           process.env[envVariable] = 'non_empty_string';
         });
+
         after(() => {
           delete process.env[envVariable];
         });
+
         it('determines the correct provider', () => {
           expect(getFAASEnv()?.get('name')).to.equal(provider);
         });
@@ -61,9 +64,11 @@ describe('client metadata module', () => {
           before(() => {
             process.env[envVariable] = '';
           });
+
           after(() => {
             delete process.env[envVariable];
           });
+
           it('returns null', () => {
             expect(getFAASEnv()).to.be.null;
           });
@@ -75,9 +80,11 @@ describe('client metadata module', () => {
       before(() => {
         process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_correctStartString';
       });
+
       after(() => {
         delete process.env.AWS_EXECUTION_ENV;
       });
+
       it('indicates the runtime is aws lambda', () => {
         expect(getFAASEnv()?.get('name')).to.equal('aws.lambda');
       });
@@ -87,9 +94,11 @@ describe('client metadata module', () => {
       before(() => {
         process.env.AWS_EXECUTION_ENV = 'AWS_LambdaIncorrectStartString';
       });
+
       after(() => {
         delete process.env.AWS_EXECUTION_ENV;
       });
+
       it('returns null', () => {
         expect(getFAASEnv()).to.be.null;
       });
@@ -109,10 +118,12 @@ describe('client metadata module', () => {
           // azure
           process.env.FUNCTIONS_WORKER_RUNTIME = 'non_empty_string';
         });
+
         after(() => {
           delete process.env.AWS_EXECUTION_ENV;
           delete process.env.FUNCTIONS_WORKER_RUNTIME;
         });
+
         it('returns null', () => {
           expect(getFAASEnv()).to.be.null;
         });
@@ -126,6 +137,7 @@ describe('client metadata module', () => {
           process.env.AWS_EXECUTION_ENV = 'non_empty_string';
           process.env.AWS_LAMBDA_RUNTIME_API = 'non_empty_string';
         });
+
         after(() => {
           delete process.env.VERCEL;
           delete process.env.AWS_EXECUTION_ENV;

@@ -279,7 +279,6 @@ export class OpQueryRequest {
     header[index + 2] = (this.numberToReturn >> 16) & 0xff;
     header[index + 1] = (this.numberToReturn >> 8) & 0xff;
     header[index] = this.numberToReturn & 0xff;
-    index = index + 4;
 
     // Return the buffers
     return buffers;
