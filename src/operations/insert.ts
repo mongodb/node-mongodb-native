@@ -1,6 +1,7 @@
 import { type Connection } from '..';
 import type { Document } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
+import { makeDocumentSequence } from '../cmap/commands';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { MongoServerError } from '../error';
@@ -15,12 +16,20 @@ export class InsertOperation extends CommandOperation<Document> {
   override options: BulkWriteOptions;
 
   documents: Document[];
+  /** @internal Per-operation pre-serialized BSON, reused to build a DocumentSequence. */
+  serializedOperations?: Uint8Array[];
 
-  constructor(ns: MongoDBNamespace, documents: Document[], options: BulkWriteOptions) {
+  constructor(
+    ns: MongoDBNamespace,
+    documents: Document[],
+    options: BulkWriteOptions,
+    serializedOperations?: Uint8Array[]
+  ) {
     super(undefined, options);
     this.options = { ...options, checkKeys: options.checkKeys ?? false };
     this.ns = ns;
     this.documents = documents;
+    this.serializedOperations = serializedOperations;
   }
 
   override get commandName() {
@@ -32,7 +41,9 @@ export class InsertOperation extends CommandOperation<Document> {
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
       insert: this.ns.collection,
-      documents: this.documents,
+      documents: this.serializedOperations
+        ? makeDocumentSequence('documents', this.documents, this.serializedOperations)
+        : this.documents,
       ordered
     };
 

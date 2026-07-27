@@ -249,13 +249,12 @@ const LEGACY_FIND_OPTIONS_MAP = {
 function extractCommand(command: WriteProtocolMessageType): Document {
   if (command instanceof OpMsgRequest) {
     const cmd = { ...command.command };
-    // For OP_MSG with payload type 1 we need to pull the documents
-    // array out of the document sequence for monitoring.
-    if (cmd.ops instanceof DocumentSequence) {
-      cmd.ops = cmd.ops.documents;
-    }
-    if (cmd.nsInfo instanceof DocumentSequence) {
-      cmd.nsInfo = cmd.nsInfo.documents;
+    // For OP_MSG payload type 1, replace any document-sequence field with its
+    // documents array for monitoring (ops, nsInfo, documents, updates, deletes).
+    for (const key of Object.keys(cmd)) {
+      if (cmd[key] instanceof DocumentSequence) {
+        cmd[key] = cmd[key].documents;
+      }
     }
     return cmd;
   }

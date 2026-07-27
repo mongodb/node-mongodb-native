@@ -157,6 +157,7 @@ export class Batch<T = Document> {
   originalIndexes: number[];
   batchType: BatchType;
   operations: T[];
+  serializedOperations: Uint8Array[];
   size: number;
   sizeBytes: number;
 
@@ -166,6 +167,7 @@ export class Batch<T = Document> {
     this.originalIndexes = [];
     this.batchType = batchType;
     this.operations = [];
+    this.serializedOperations = [];
     this.size = 0;
     this.sizeBytes = 0;
   }
@@ -538,12 +540,31 @@ async function executeCommands(
       }
     }
 
+    // The per-operation buffers were serialized in addToOperationsList using the
+    // bulk operation's BSON options. Reuse them only when the serialization
+    // options in effect for this execution still match, so that BSON options
+    // supplied to execute() (e.g. `ignoreUndefined`) are honored. Also skip reuse
+    // under auto-encryption, where libmongocrypt requires the plaintext command
+    // (document sequences are not permitted per the bulkWrite spec).
+    const createdBsonOptions = bulkOperation.s.bsonOptions;
+    const canReuseSerialized =
+      !bulkOperation.s.usingAutoEncryption &&
+      finalOptions.ignoreUndefined === createdBsonOptions.ignoreUndefined &&
+      finalOptions.serializeFunctions === createdBsonOptions.serializeFunctions &&
+      (finalOptions.checkKeys ?? false) === bulkOperation.s.checkKeys;
+    const serialized = canReuseSerialized ? batch.serializedOperations : undefined;
+
     const operation = isInsertBatch(batch)
-      ? new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+      ? new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions, serialized)
       : isUpdateBatch(batch)
-        ? new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+        ? new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions, serialized)
         : isDeleteBatch(batch)
-          ? new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+          ? new DeleteOperation(
+              bulkOperation.s.namespace,
+              batch.operations,
+              finalOptions,
+              serialized
+            )
           : null;
 
     if (operation == null) throw new MongoRuntimeError(`Unknown batchType: ${batch.batchType}`);
@@ -559,6 +580,15 @@ async function executeCommands(
     } catch (error) {
       thrownError = error;
     }
+
+    // Release this batch's serialized buffers now that it has been sent. The
+    // operation keeps its own reference to the array for the duration of its
+    // execution and any retries, so reassigning here (rather than mutating the
+    // shared array) only drops the bulk operation's copy. All batches are built
+    // up front, so this does not lower the peak (reached before the first send);
+    // it frees each batch's buffers as that batch completes so they are not kept
+    // alive through the remaining batches' round trips.
+    batch.serializedOperations = [];
 
     if (thrownError != null) {
       if (thrownError instanceof MongoWriteConcernError) {
@@ -824,6 +854,7 @@ export interface BulkOperationPrivate {
   // check keys
   checkKeys: boolean;
   bypassDocumentValidation?: boolean;
+  usingAutoEncryption: boolean;
 }
 
 /** @public */
@@ -953,7 +984,8 @@ export abstract class BulkOperationBase {
       // Fundamental error
       err: undefined,
       // check keys
-      checkKeys: typeof options.checkKeys === 'boolean' ? options.checkKeys : false
+      checkKeys: typeof options.checkKeys === 'boolean' ? options.checkKeys : false,
+      usingAutoEncryption
     };
 
     // bypass Validation

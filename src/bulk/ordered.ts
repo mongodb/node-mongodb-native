@@ -17,13 +17,28 @@ export class OrderedBulkOperation extends BulkOperationBase {
     batchType: BatchType,
     document: Document | UpdateStatement | DeleteStatement
   ): this {
-    // Get the bsonSize
-    const bsonSize = BSON.calculateObjectSize(document, {
-      checkKeys: false,
-      // Since we don't know what the user selected for BSON options here,
-      // err on the safe side, and check the size with ignoreUndefined: false.
-      ignoreUndefined: false
-    } as any);
+    // Serialize the operation once here and reuse the bytes for both the size
+    // check/splitting and the wire message (via a DocumentSequence). Under
+    // auto-encryption the command is sent as a BSON array rather than a
+    // document sequence, so the buffer would never be reused; there we only
+    // measure the size and leave `buffer` undefined so nothing is retained on
+    // the batch.
+    let buffer: Uint8Array | undefined;
+    let bsonSize: number;
+    if (this.s.usingAutoEncryption) {
+      bsonSize = BSON.calculateObjectSize(document, {
+        checkKeys: false,
+        ignoreUndefined: false
+      } as any);
+    } else {
+      const bson = this.s.bsonOptions;
+      buffer = BSON.serialize(document, {
+        checkKeys: this.s.checkKeys,
+        ignoreUndefined: bson.ignoreUndefined,
+        serializeFunctions: bson.serializeFunctions
+      });
+      bsonSize = buffer.length;
+    }
 
     // Throw error if the doc is bigger than the max BSON size
     if (bsonSize >= this.s.maxBsonObjectSize)
@@ -75,6 +90,7 @@ export class OrderedBulkOperation extends BulkOperationBase {
 
     this.s.currentBatch.originalIndexes.push(this.s.currentIndex);
     this.s.currentBatch.operations.push(document);
+    if (buffer != null) this.s.currentBatch.serializedOperations.push(buffer);
     this.s.currentBatchSize += 1;
     this.s.currentBatchSizeBytes += maxKeySize + bsonSize;
     this.s.currentIndex += 1;

@@ -226,6 +226,13 @@ tests:
                 maxTimeMS: { $$type: ["int", "long"] }
 
   - description: "change stream can be iterated again if previous iteration times out"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+        topologies: ["replicaset"]
+      - minServerVersion: "4.4"
+        maxServerVersion: "8.99" # Skip sharded 9.0+ due to reasons noted in DRIVERS-3556.
+        # Removing the skip may be desired in the future if this test migrates from timeoutMS to maxTimeMS. See DRIVERS-3556 for a suggested approach: add a unified test runner option to advance the config server's cluster time immediately before opening a change stream. Otherwise, existing tests using maxTimeMS < periodicNoopIntervalSecs on 9.0+ sharded clusters may unexpectedly fail with server timeouts.
+        topologies: ["sharded"]
     operations:
       - name: createChangeStream
         object: *collection

@@ -269,6 +269,21 @@
     },
     {
       "description": "timeoutMS can be configured for an operation - createChangeStream on client",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.4",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",
@@ -824,6 +839,21 @@
     },
     {
       "description": "timeoutMS can be configured for an operation - createChangeStream on database",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.4",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",
@@ -1890,6 +1920,21 @@
     },
     {
       "description": "timeoutMS can be configured for an operation - createChangeStream on collection",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.4",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",

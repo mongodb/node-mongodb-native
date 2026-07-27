@@ -4,6 +4,7 @@ import { expect } from 'chai';
 
 import {
   type Collection,
+  type CommandStartedEvent,
   Double,
   Long,
   MongoBatchReExecutionError,
@@ -1859,5 +1860,99 @@ describe('Bulk', function () {
         );
       }
     });
+  });
+
+  describe('#insertMany', function () {
+    context('when a document field is set to undefined', function () {
+      it('inserts the field as null by default (ignoreUndefined defaults to false)', async function () {
+        const collection = client
+          .db(DB_NAME)
+          .collection<{ _id: number; a?: null }>('undefined_fields');
+        await collection.insertMany([{ _id: 1, a: undefined }]);
+
+        const doc = await collection.findOne({ _id: 1 });
+        expect(doc).to.have.property('a', null);
+      });
+    });
+
+    context('when monitoring commands', function () {
+      it('reports the documents field of the insert command as an array', async function () {
+        const collection = client.db(DB_NAME).collection<{ _id: number }>('command_events');
+        const commands: CommandStartedEvent[] = [];
+        client.on('commandStarted', event => {
+          if (event.commandName === 'insert') commands.push(event);
+        });
+
+        await collection.insertMany([{ _id: 1 }, { _id: 2 }]);
+
+        expect(commands).to.have.lengthOf(1);
+        expect(commands[0].command.documents).to.be.an('array').with.lengthOf(2);
+      });
+    });
+
+    context('when the operation has been executed', function () {
+      it('releases the serialized operation buffers held on each batch', async function () {
+        const collection = client.db(DB_NAME).collection<{ _id: number }>('buffer_release');
+        const bulk = collection.initializeOrderedBulkOp();
+        bulk.insert({ _id: 1 });
+        bulk.insert({ _id: 2 });
+
+        // The getter returns a copy of the batches array, but the Batch objects
+        // themselves are the same instances the driver executes and survive the
+        // internal batches array being cleared after execution.
+        const batches = bulk.batches;
+        expect(batches).to.have.lengthOf(1);
+        expect(batches[0].serializedOperations).to.have.lengthOf(2);
+
+        await bulk.execute();
+
+        expect(batches[0].serializedOperations).to.have.lengthOf(0);
+      });
+    });
+  });
+
+  describe('BSON options passed to #execute', function () {
+    // Documents are serialized once when added to the bulk operation, then the
+    // resulting bytes are reused as the wire command. BSON options supplied to
+    // execute() must still take effect, which requires falling back to
+    // re-serialization when they differ from the options used when the
+    // documents were added.
+    for (const ordered of [true, false]) {
+      context(`when the bulk operation is ${ordered ? 'ordered' : 'unordered'}`, function () {
+        context('when execute() overrides ignoreUndefined to true', function () {
+          it('omits undefined fields instead of writing them as null', async function () {
+            const collection = client
+              .db(DB_NAME)
+              .collection<{ _id: number; a?: null }>('execute_bson_options');
+            const bulk = ordered
+              ? collection.initializeOrderedBulkOp()
+              : collection.initializeUnorderedBulkOp();
+            bulk.insert({ _id: 1, a: undefined });
+
+            await bulk.execute({ ignoreUndefined: true });
+
+            const doc = await collection.findOne({ _id: 1 });
+            expect(doc).to.not.have.property('a');
+          });
+        });
+
+        context('when execute() does not override BSON options', function () {
+          it('serializes the undefined field as null (ignoreUndefined defaults to false)', async function () {
+            const collection = client
+              .db(DB_NAME)
+              .collection<{ _id: number; a?: null }>('execute_bson_options_default');
+            const bulk = ordered
+              ? collection.initializeOrderedBulkOp()
+              : collection.initializeUnorderedBulkOp();
+            bulk.insert({ _id: 1, a: undefined });
+
+            await bulk.execute();
+
+            const doc = await collection.findOne({ _id: 1 });
+            expect(doc).to.have.property('a', null);
+          });
+        });
+      });
+    }
   });
 });

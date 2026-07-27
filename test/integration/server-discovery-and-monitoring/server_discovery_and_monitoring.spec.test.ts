@@ -15,6 +15,19 @@ const skipTable: { pattern: string; reason: string }[] = [
   {
     pattern: 'connect with serverMonitoringMode=auto >=4.4',
     reason: 'TODO(NODE-6045): Ensure that first server hearbeat does not report that it is awaited'
+  },
+  {
+    pattern: 'Driver extends timeout while streaming',
+    reason: 'TODO(NODE-7703): Unskip failing SDAM tests after server upgrade'
+  },
+  {
+    pattern:
+      'Error returned from connection pool clear with interruptInUseConnections=true is retryable',
+    reason: 'TODO(NODE-7703): Unskip failing SDAM tests after server upgrade'
+  },
+  {
+    pattern: 'Connection pool clear uses interruptInUseConnections=true after monitor timeout',
+    reason: 'TODO(NODE-7703): Unskip failing SDAM tests after server upgrade'
   }
 ];
 

@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { makeDocumentSequence } from '../cmap/commands';
 import { type Connection } from '../cmap/connection';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { MongoCompatibilityError, MongoServerError } from '../error';
@@ -45,12 +46,20 @@ export class DeleteOperation extends CommandOperation<Document> {
   override SERVER_COMMAND_RESPONSE_TYPE = MongoDBResponse;
   override options: DeleteOptions;
   statements: DeleteStatement[];
+  /** @internal */
+  serializedOperations?: Uint8Array[];
 
-  constructor(ns: MongoDBNamespace, statements: DeleteStatement[], options: DeleteOptions) {
+  constructor(
+    ns: MongoDBNamespace,
+    statements: DeleteStatement[],
+    options: DeleteOptions,
+    serializedOperations?: Uint8Array[]
+  ) {
     super(undefined, options);
     this.options = options;
     this.ns = ns;
     this.statements = statements;
+    this.serializedOperations = serializedOperations;
   }
 
   override get commandName() {
@@ -71,7 +80,9 @@ export class DeleteOperation extends CommandOperation<Document> {
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
       delete: this.ns.collection,
-      deletes: this.statements,
+      deletes: this.serializedOperations
+        ? makeDocumentSequence('deletes', this.statements, this.serializedOperations)
+        : this.statements,
       ordered
     };
 

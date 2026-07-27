@@ -1303,6 +1303,21 @@
     },
     {
       "description": "timeoutMS can be configured on a MongoCollection - createChangeStream on collection",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4",
+          "topologies": [
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.4",
+          "maxServerVersion": "8.99",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "createEntities",
