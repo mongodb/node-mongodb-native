@@ -286,8 +286,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private get supportsOpMsg(): boolean {
     return (
       this.description != null &&
-      // TODO(NODE-6672,NODE-6287): This guard is primarily for maxWireVersion = 0
-      maxWireVersion(this) > 0 &&
+      // OP_MSG was introduced in server 3.6 (wire version 6). This also guards
+      // against the pre-handshake case where maxWireVersion() returns 0.
+      // TODO(NODE-6672,NODE-6287): remove this helper once OP_QUERY support is dropped
+      maxWireVersion(this) >= 6 &&
       !this.description.__nodejs_mock_server__
     );
   }
