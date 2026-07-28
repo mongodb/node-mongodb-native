@@ -1536,6 +1536,9 @@ export function isResumableError(error?: Error, wireVersion?: number): boolean {
     return true;
   }
 
+  // wireVersion of 0 is possible when the server version is unknown (e.g heartbeat failure), so despite
+  // all supported servers being wire version 9+, the >= 9 bound must stay to route "unknown" to the
+  // code-list fallback below to maintain parity.
   if (wireVersion != null && wireVersion >= 9) {
     // DRIVERS-1308: Drivers will add a special case to treat the CursorNotFound error code as resumable
     if (error.code === MONGODB_ERROR_CODES.CursorNotFound) {
