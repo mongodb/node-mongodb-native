@@ -54,14 +54,17 @@ import {
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
 import {
+  type CreateIndexesCommandOptions,
   CreateIndexesOperation,
   type CreateIndexesOptions,
+  type CreateIndexOptions,
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
   type IndexDescriptionCompact,
   type IndexDescriptionInfo,
   type IndexInformationOptions,
+  type IndexOptions,
   type IndexSpecification,
   type ListIndexesOptions
 } from './operations/indexes';
@@ -94,6 +97,7 @@ import {
   DEFAULT_PK_FACTORY,
   MongoDBCollectionNamespace,
   normalizeHintField,
+  resolveCommandOptions,
   resolveOptions
 } from './utils';
 import { WriteConcern, type WriteConcernOptions } from './write_concern';
@@ -609,7 +613,7 @@ export class Collection<TSchema extends Document = Document> {
    * Creates an index on the db and collection collection.
    *
    * @param indexSpec - The field name or index specification to create an index for
-   * @param options - Optional settings for the command
+   * @param indexOptions - Optional settings for the command
    *
    * @example
    * ```ts
@@ -633,19 +637,51 @@ export class Collection<TSchema extends Document = Document> {
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    * ```
    */
+  createIndex(indexSpec: IndexSpecification, options?: CreateIndexesOptions): Promise<string>;
+
+  /**
+   * Creates an index on the db and collection collection.
+   *
+   * Options for the index itself are given in `indexOptions`, and options for the
+   * `createIndexes` command are given separately in `commandOptions`. Unknown fields in
+   * `indexOptions` are passed through to the server for validation rather than being dropped.
+   *
+   * @param keys - The field name or index specification to create an index for
+   * @param indexOptions - Optional settings for the index
+   * @param commandOptions - Optional settings for the `createIndexes` command
+   */
+  createIndex(
+    keys: IndexSpecification,
+    indexOptions?: IndexOptions,
+    commandOptions?: CreateIndexOptions
+  ): Promise<string>;
+
   async createIndex(
     indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
+    indexOptions?: CreateIndexesOptions | IndexOptions,
+    commandOptions?: CreateIndexOptions
   ): Promise<string> {
-    const indexes = await executeOperation(
-      this.client,
-      CreateIndexesOperation.fromIndexSpecification(
-        this,
-        this.collectionName,
-        indexSpec,
-        resolveOptions(this, options)
-      )
-    );
+    // When commandOptions is provided the caller has separated the two kinds of options, so the
+    // index options are forwarded as-is and only the command options inherit from the parent.
+    // Otherwise indexOptions is both, and it inherits from the parent as it always has.
+    const operation =
+      commandOptions == null
+        ? CreateIndexesOperation.fromIndexSpecification(
+            this,
+            this.collectionName,
+            indexSpec,
+            /*allowUnknownIndexOptions=*/ false,
+            resolveOptions(this, indexOptions) // at this point indexOptions is the combined index and command options
+          )
+        : CreateIndexesOperation.fromIndexSpecification(
+            this,
+            this.collectionName,
+            indexSpec,
+            /*allowUnknownIndexOptions=*/ true,
+            indexOptions,
+            resolveCommandOptions(this, commandOptions)
+          );
+    const indexes = await executeOperation(this.client, operation);
 
     return indexes[0];
   }
@@ -683,7 +719,8 @@ export class Collection<TSchema extends Document = Document> {
    */
   async createIndexes(
     indexSpecs: IndexDescription[],
-    options?: CreateIndexesOptions
+    options?: CreateIndexesOptions,
+    commandOptions?: CreateIndexesCommandOptions
   ): Promise<string[]> {
     return await executeOperation(
       this.client,
@@ -691,7 +728,8 @@ export class Collection<TSchema extends Document = Document> {
         this,
         this.collectionName,
         indexSpecs,
-        resolveOptions(this, { ...options, maxTimeMS: undefined })
+        resolveOptions(this, { ...options, maxTimeMS: undefined }),
+        commandOptions
       )
     );
   }

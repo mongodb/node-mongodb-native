@@ -454,7 +454,13 @@ export class Db {
   ): Promise<string> {
     const indexes = await executeOperation(
       this.client,
-      CreateIndexesOperation.fromIndexSpecification(this, name, indexSpec, options)
+      CreateIndexesOperation.fromIndexSpecification(
+        this,
+        name,
+        indexSpec,
+        /*allowUnknownIndexOptions=*/ false,
+        options ?? {}
+      )
     );
     return indexes[0];
   }
