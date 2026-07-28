@@ -149,6 +149,18 @@ BASE_TASKS.push({
   ]
 });
 
+BASE_TASKS.push({
+  // No `auth` tag: that tag would exclude this task from the Windows variants (WINDOWS_SKIP_TAGS),
+  // but SFP is a transparent proxy we want to exercise on Windows too.
+  name: `test-sfp`,
+  tags: ['latest', 'sfp'],
+  commands: [
+    { func: 'install dependencies' },
+    { func: 'assume secrets manager role' },
+    { func: 'run sfp tests' }
+  ]
+});
+
 // manually added tasks
 TASKS.push(
   ...[

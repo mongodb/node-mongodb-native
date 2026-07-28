@@ -695,6 +695,21 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
 
+  "run sfp tests":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        include_expansions_in_env:
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+          - PROJECT_DIRECTORY
+          - DRIVERS_TOOLS
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-sfp-tests.sh
+
   install mongodb-client-encryption from source:
     - command: subprocess.exec
       type: setup
