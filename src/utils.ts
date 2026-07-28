@@ -851,7 +851,7 @@ export class BufferPool {
     // TODO(NODE-4732): alloc API should change based on raw option
     const result = ByteUtils.allocateUnsafe(size);
 
-    for (let bytesRead = 0; bytesRead < size; ) {
+    for (let bytesRead = 0; bytesRead < size;) {
       const buffer = this.buffers.shift();
       if (buffer == null) {
         break;
@@ -1445,8 +1445,8 @@ export async function abortable<T>(
   const abortListener = signal.aborted
     ? reject(signal.reason)
     : addAbortListener(signal, function () {
-        reject(this.reason);
-      });
+      reject(this.reason);
+    });
 
   try {
     return await Promise.race([promise, aborted]);

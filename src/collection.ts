@@ -56,6 +56,7 @@ import {
 import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
+  type CreateIndexesCommandOptions,
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
@@ -609,7 +610,7 @@ export class Collection<TSchema extends Document = Document> {
    * Creates an index on the db and collection collection.
    *
    * @param indexSpec - The field name or index specification to create an index for
-   * @param options - Optional settings for the command
+   * @param indexOptions - Optional settings for the command
    *
    * @example
    * ```ts
@@ -635,16 +636,32 @@ export class Collection<TSchema extends Document = Document> {
    */
   async createIndex(
     indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
+    options?: CreateIndexesOptions,
+    commandOptions?: CreateIndexesCommandOptions
   ): Promise<string> {
-    const indexes = await executeOperation(
-      this.client,
-      CreateIndexesOperation.fromIndexSpecification(
+    let operation;
+    if (commandOptions) {
+      // v2 path: index and command options are separated
+      let indexOptions = options;
+      operation = CreateIndexesOperation.fromIndexSpecification(
+        this,
+        this.collectionName,
+        indexSpec,
+        indexOptions,
+        resolveOptions(this, commandOptions)
+      );
+    } else {
+      // v1 path: index and command options are merged in the indexOptions
+      operation = CreateIndexesOperation.fromIndexSpecification(
         this,
         this.collectionName,
         indexSpec,
         resolveOptions(this, options)
-      )
+      );
+    }
+    const indexes = await executeOperation(
+      this.client,
+      operation
     );
 
     return indexes[0];
@@ -683,7 +700,8 @@ export class Collection<TSchema extends Document = Document> {
    */
   async createIndexes(
     indexSpecs: IndexDescription[],
-    options?: CreateIndexesOptions
+    options?: CreateIndexesOptions,
+    commandOptions?: CreateIndexesCommandOptions
   ): Promise<string[]> {
     return await executeOperation(
       this.client,
@@ -691,7 +709,8 @@ export class Collection<TSchema extends Document = Document> {
         this,
         this.collectionName,
         indexSpecs,
-        resolveOptions(this, { ...options, maxTimeMS: undefined })
+        resolveOptions(this, { ...options, maxTimeMS: undefined }),
+        commandOptions
       )
     );
   }
