@@ -1536,7 +1536,7 @@ export function isResumableError(error?: Error, wireVersion?: number): boolean {
     return true;
   }
 
-  if (wireVersion != null) {
+  if (wireVersion != null && wireVersion >= 9) {
     // DRIVERS-1308: Drivers will add a special case to treat the CursorNotFound error code as resumable
     if (error.code === MONGODB_ERROR_CODES.CursorNotFound) {
       return true;
