@@ -11,11 +11,11 @@ import { Aspect, defineAspects } from './operation';
 export interface ListCollectionsOptions
   extends Omit<CommandOperationOptions, 'writeConcern'>,
     Abortable {
-  /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
+  /** If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
-  /** Since 4.0: If true and nameOnly is true, allows a user without the required privilege (i.e. listCollections action on the database) to run the command when access control is enforced. */
+  /** If true and nameOnly is true, allows a user without the required privilege (i.e. listCollections action on the database) to run the command when access control is enforced. */
   authorizedCollections?: boolean;
-  /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
+  /** The batchSize for the returned command cursor */
   batchSize?: number;
   /** @internal */
   timeoutMode?: CursorTimeoutMode;
