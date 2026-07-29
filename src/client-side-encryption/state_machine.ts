@@ -362,9 +362,13 @@ export class StateMachine {
     let kmsRequestTimeout: Timeout | undefined;
 
     try {
+      options?.signal?.throwIfAborted();
+
       if (this.options.kmsConnectCallback) {
         const remainingTimeMS = options?.timeoutContext?.csotEnabled()
-          ? options.timeoutContext.getRemainingTimeMSOrThrow('KMS request timed out')
+          ? options.timeoutContext.getRemainingTimeMSOrThrow(
+              `KMS request timed out after ${options.timeoutContext.timeoutMS}ms`
+            )
           : undefined;
         // A non-finite budget (timeoutMS: 0) means no timeout; otherwise back the callback with one.
         const timeoutMS = Number.isFinite(remainingTimeMS) ? remainingTimeMS : undefined;
@@ -479,7 +483,9 @@ export class StateMachine {
           }
         });
       const remainingTimeMS = options?.timeoutContext?.csotEnabled()
-        ? options.timeoutContext.getRemainingTimeMSOrThrow('KMS request timed out')
+        ? options.timeoutContext.getRemainingTimeMSOrThrow(
+            `KMS request timed out after ${options.timeoutContext.timeoutMS}ms`
+          )
         : undefined;
       const timeoutMS = Number.isFinite(remainingTimeMS) ? remainingTimeMS : undefined;
       kmsRequestTimeout = timeoutMS ? Timeout.expires(timeoutMS) : undefined;

@@ -332,6 +332,7 @@ describe('StateMachine', function () {
         const err = await stateMachine.kmsRequest(request, { timeoutContext }).catch(e => e);
 
         expect(err).to.have.property('name', 'MongoOperationTimeoutError');
+        expect(err).to.have.property('message', 'KMS request timed out after 50ms');
         expect(called).to.equal(false);
       });
 
@@ -415,6 +416,25 @@ describe('StateMachine', function () {
         await kmsRequestPromise;
         expect(capturedSignal?.aborted).to.equal(true);
         expect(capturedSignal?.reason).to.equal(abortReason);
+      });
+
+      it('does not invoke the callback when options.signal is already aborted', async function () {
+        let callbackInvoked = false;
+        const stateMachine = new StateMachine({
+          kmsConnectCallback: async () => {
+            callbackInvoked = true;
+            return new MockSocket(() => null) as any;
+          }
+        } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        const abortReason = new Error('operation aborted');
+
+        const err = await stateMachine
+          .kmsRequest(request, { signal: AbortSignal.abort(abortReason) })
+          .catch(e => e);
+
+        expect(err).to.equal(abortReason);
+        expect(callbackInvoked).to.equal(false);
       });
 
       it('destroys a socket the callback resolves after the request has already been aborted', async function () {
