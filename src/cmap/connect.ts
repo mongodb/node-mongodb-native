@@ -174,7 +174,7 @@ export async function performInitialHandshake(
 
       if (error instanceof MongoError) {
         error.addErrorLabel(MongoErrorLabel.HandshakeError);
-        if (needsRetryableWriteLabel(error, response.maxWireVersion, conn.description.type)) {
+        if (needsRetryableWriteLabel(error)) {
           error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
         }
       }

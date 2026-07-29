@@ -10,6 +10,7 @@ import {
   HEARTBEAT_EVENTS,
   isRecord,
   LEGACY_HELLO_COMMAND,
+  MIN_SUPPORTED_WIRE_VERSION,
   MongoClient,
   MongoCompatibilityError,
   MongoError,
@@ -191,6 +192,20 @@ function assertMonitoringOutcome(outcome: any): asserts outcome is MonitoringOut
   expect(outcome).to.have.property('events').that.is.an('array');
 }
 
+/**
+ * Returns true if any hello response in the test reports a server with a
+ * maxWireVersion below the driver's minimum supported wire version.
+ */
+function reliesOnIncompatibleServer(testData: SDAMTest): boolean {
+  return testData.phases.some(
+    phase =>
+      'responses' in phase &&
+      (phase.responses || []).some(
+        ([, { maxWireVersion }]) => maxWireVersion < MIN_SUPPORTED_WIRE_VERSION
+      )
+  );
+}
+
 describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect: sinon.SinonStub;
 
@@ -234,7 +249,10 @@ describe('Server Discovery and Monitoring (spec)', function () {
       });
 
       for (const testData of specTests[specTestName]) {
-        it(testData.description, async () => {
+        it(testData.description, async function () {
+          if (reliesOnIncompatibleServer(testData)) {
+            this.skip();
+          }
           await executeSDAMTest(testData);
         });
       }

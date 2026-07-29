@@ -25,7 +25,6 @@ function getDefaultAuthMechanism(hello: Document | null): AuthMechanism {
     }
   }
 
-  // Default auth mechanism for 4.0 and higher.
   return AuthMechanism.MONGODB_SCRAM_SHA256;
 }
 

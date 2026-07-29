@@ -3,9 +3,8 @@ import { type Connection } from '../cmap/connection';
 import { CursorResponse, MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
-import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
-import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { isObject, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
   CommandOperation,
@@ -138,7 +137,7 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   expireAfterSeconds?: number;
   /** Allows users to configure the storage engine on a per-index basis when creating an index. (MongoDB 3.0 or higher) */
   storageEngine?: Document;
-  /** (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes. */
+  /** Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes. */
   commitQuorum?: number | string;
   /** Specifies the index version number, either 0 or 1. */
   version?: number;
@@ -159,7 +158,7 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   bucketSize?: number;
   // wildcard indexes
   wildcardProjection?: Document;
-  /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. (MongoDB 4.4 or higher) */
+  /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. */
   hidden?: boolean;
 }
 
@@ -299,20 +298,13 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     return 'createIndexes';
   }
 
-  override buildCommandDocument(connection: Connection): Document {
+  override buildCommandDocument(_connection: Connection): Document {
     const options = this.options;
     const indexes = this.indexes;
-
-    const serverWireVersion = maxWireVersion(connection);
 
     const cmd: Document = { createIndexes: this.collectionName, indexes };
 
     if (options.commitQuorum != null) {
-      if (serverWireVersion < 9) {
-        throw new MongoCompatibilityError(
-          'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
-        );
-      }
       cmd.commitQuorum = options.commitQuorum;
     }
     return cmd;
@@ -385,16 +377,14 @@ export class ListIndexesOperation extends CommandOperation<CursorResponse> {
     return 'listIndexes' as const;
   }
 
-  override buildCommandDocument(connection: Connection): Document {
-    const serverWireVersion = maxWireVersion(connection);
-
+  override buildCommandDocument(_connection: Connection): Document {
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
 
     const command: Document = { listIndexes: this.collectionNamespace.collection, cursor };
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (serverWireVersion >= 9 && this.options.comment !== undefined) {
+    if (this.options.comment !== undefined) {
       command.comment = this.options.comment;
     }
 

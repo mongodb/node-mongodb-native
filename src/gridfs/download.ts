@@ -351,7 +351,7 @@ function init(stream: GridFSBucketReadStream): void {
 
     const filter: Document = { files_id: doc._id };
 
-    // Currently (MongoDB 3.4.4) skip function does not support the index,
+    // Currently the skip function does not support the index,
     // it needs to retrieve all the documents first and then skip them. (CS-25811)
     // As work around we use $gte on the "n" field.
     if (stream.s.options && stream.s.options.start != null) {

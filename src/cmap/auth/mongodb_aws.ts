@@ -1,11 +1,7 @@
 import { type Binary, type BSONSerializeOptions, ByteUtils } from '../../bson';
 import * as BSON from '../../bson';
-import {
-  MongoCompatibilityError,
-  MongoMissingCredentialsError,
-  MongoRuntimeError
-} from '../../error';
-import { maxWireVersion, ns, randomBytes } from '../../utils';
+import { MongoMissingCredentialsError, MongoRuntimeError } from '../../error';
+import { ns, randomBytes } from '../../utils';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import {
   type AWSCredentialProvider,
@@ -43,12 +39,6 @@ export class MongoDBAWS extends AuthProvider {
     const { connection } = authContext;
     if (!authContext.credentials) {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
-    }
-
-    if (maxWireVersion(connection) < 9) {
-      throw new MongoCompatibilityError(
-        'MONGODB-AWS authentication requires MongoDB version 4.4 or later'
-      );
     }
 
     authContext.credentials = await makeTempCredentials(

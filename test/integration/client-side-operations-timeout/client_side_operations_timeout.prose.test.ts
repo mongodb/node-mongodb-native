@@ -122,7 +122,7 @@ describe('CSOT spec prose tests', function () {
 
   context('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
     /**
-     * This test MUST only be run against enterprise server versions 4.2 and higher.
+     * This test MUST only be run against enterprise servers.
      *
      * 1. Launch a mongocryptd process on 23000.
      * 1. Create a MongoClient (referred to as `client`) using the URI `mongodb://localhost:23000/?timeoutMS=1000`.

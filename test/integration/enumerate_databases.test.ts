@@ -193,32 +193,6 @@ describe('listDatabases()', function () {
       documents: [{ _id: 1, x: 11 }]
     })
     .test(
-      new TestBuilder('listDatabases should not send comment for server versions < 4.4')
-        .runOnRequirement({ maxServerVersion: '4.3.99' })
-        .operation({
-          name: 'listDatabases',
-          arguments: {
-            filter: {},
-            comment: 'string value'
-          },
-          object: 'client0'
-        })
-        .expectEvents({
-          client: 'client0',
-          events: [
-            {
-              commandStartedEvent: {
-                command: {
-                  listDatabases: 1,
-                  comment: { $$exists: false }
-                }
-              }
-            }
-          ]
-        })
-        .toJSON()
-    )
-    .test(
       new TestBuilder('listDatabases should send string comment for server versions >= 4.4')
         .runOnRequirement({ minServerVersion: '4.4.0' })
         .operation({

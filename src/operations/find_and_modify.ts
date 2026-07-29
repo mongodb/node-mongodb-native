@@ -2,11 +2,11 @@ import { type Connection } from '..';
 import type { Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
-import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
-import { decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
+import { decorateWithCollation, hasAtomicOperators } from '../utils';
 import { type WriteConcern, type WriteConcernSettings } from '../write_concern';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -97,11 +97,6 @@ interface FindAndModifyCmdBase {
   writeConcern?: WriteConcern | WriteConcernSettings;
   /**
    * Comment to apply to the operation.
-   *
-   * In server versions pre-4.4, 'comment' must be string.  A server
-   * error will be thrown if any other type is provided.
-   *
-   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
   comment?: unknown;
 }
@@ -146,7 +141,7 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
   }
 
   override buildCommandDocument(
-    connection: Connection,
+    _connection: Connection,
     _session?: ClientSession
   ): Document & FindAndModifyCmdBase {
     const options = this.options;
@@ -191,13 +186,6 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     decorateWithCollation(command, options);
 
     if (options.hint) {
-      const unacknowledgedWrite = this.writeConcern?.w === 0;
-      if (unacknowledgedWrite && maxWireVersion(connection) < 9) {
-        throw new MongoCompatibilityError(
-          'hint for the findAndModify command is only supported on MongoDB 4.4+'
-        );
-      }
-
       command.hint = options.hint;
     }
 

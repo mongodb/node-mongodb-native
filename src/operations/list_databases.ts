@@ -3,7 +3,7 @@ import type { Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import type { Db } from '../db';
 import type { ClientSession } from '../sessions';
-import { maxWireVersion, MongoDBNamespace } from '../utils';
+import { MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -40,7 +40,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     return 'listDatabases' as const;
   }
 
-  override buildCommandDocument(connection: Connection, _session?: ClientSession): Document {
+  override buildCommandDocument(_connection: Connection, _session?: ClientSession): Document {
     const cmd: Document = { listDatabases: 1 };
 
     if (typeof this.options.nameOnly === 'boolean') {
@@ -57,7 +57,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
 
     // we check for undefined specifically here to allow falsy values
     // eslint-disable-next-line no-restricted-syntax
-    if (maxWireVersion(connection) >= 9 && this.options.comment !== undefined) {
+    if (this.options.comment !== undefined) {
       cmd.comment = this.options.comment;
     }
 
