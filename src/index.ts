@@ -252,6 +252,12 @@ export {
   MongoCryptInvalidArgumentError,
   MongoCryptKMSRequestNetworkTimeoutError
 } from './client-side-encryption/errors';
+export type {
+  ClientEncryptionSocketOptions,
+  ClientEncryptionTlsOptions,
+  CSFLEKMSTlsOptions,
+  KMSConnectCallback
+} from './client-side-encryption/kms_options';
 export type { MongocryptdManager } from './client-side-encryption/mongocryptd_manager';
 export type {
   AWSKMSProviderConfiguration,
@@ -263,12 +269,7 @@ export type {
   KMSProviders,
   LocalKMSProviderConfiguration
 } from './client-side-encryption/providers/index';
-export type {
-  ClientEncryptionSocketOptions,
-  ClientEncryptionTlsOptions,
-  CSFLEKMSTlsOptions,
-  StateMachineExecutable
-} from './client-side-encryption/state_machine';
+export type { StateMachineExecutable } from './client-side-encryption/state_machine';
 export type { AuthContext, AuthProvider } from './cmap/auth/auth_provider';
 export type {
   AuthMechanismProperties,

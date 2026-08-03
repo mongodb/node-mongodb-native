@@ -6,7 +6,8 @@ import {
   ClientEncryption,
   MongoClient,
   MongoCryptCreateDataKeyError,
-  MongoCryptCreateEncryptedCollectionError
+  MongoCryptCreateEncryptedCollectionError,
+  MongoCryptInvalidArgumentError
 } from '../../mongodb';
 import { ensureTypeByName } from '../../tools/utils';
 class MockClient {
@@ -72,6 +73,28 @@ describe('ClientEncryption', function () {
           });
           expect(clientEncryption._timeoutMS).to.equal(100);
         });
+      });
+    });
+
+    describe('kmsConnectCallback conflict', () => {
+      const LOCAL_KEY = Buffer.alloc(96, 0);
+
+      it('throws when both proxyOptions and kmsConnectCallback are set', () => {
+        const client = new MongoClient('mongodb://a/');
+        expect(
+          () =>
+            new ClientEncryption(client, {
+              keyVaultNamespace: 'keyvault.datakeys',
+              kmsProviders: { local: { key: LOCAL_KEY } },
+              proxyOptions: { proxyHost: 'localhost' },
+              kmsConnectCallback: async () => {
+                throw new Error('unused');
+              }
+            })
+        ).to.throw(
+          MongoCryptInvalidArgumentError,
+          /Cannot set both proxyOptions and kmsConnectCallback/
+        );
       });
     });
   });

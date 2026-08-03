@@ -10,6 +10,7 @@ import {
   type DataKey,
   MongoClient,
   MongocryptdManager,
+  MongoCryptInvalidArgumentError,
   StateMachine
 } from '../../mongodb';
 import * as requirements from './requirements.helper';
@@ -140,6 +141,26 @@ describe('AutoEncrypter', function () {
           expect(options).to.have.property('autoSelectFamily', true);
         });
       });
+    });
+  });
+
+  describe('constructor kmsConnectCallback conflict', () => {
+    it('throws when both proxyOptions and kmsConnectCallback are set', () => {
+      const client = new MongoClient('mongodb://a/');
+      expect(
+        () =>
+          new AutoEncrypter(client, {
+            keyVaultNamespace: 'keyvault.datakeys',
+            kmsProviders: { local: { key: Buffer.alloc(96, 0) } },
+            proxyOptions: { proxyHost: 'localhost' },
+            kmsConnectCallback: async () => {
+              throw new Error('unused');
+            }
+          })
+      ).to.throw(
+        MongoCryptInvalidArgumentError,
+        /Cannot set both proxyOptions and kmsConnectCallback/
+      );
     });
   });
 
