@@ -268,11 +268,10 @@ This variant pins two concepts for the app, and they need to be updated together
 - `VERSION` pins the MongoDB server that the tests run against
   - NOTE: value of "8.0" is not a pin, since it will resolve "8.0.x", and will be different depending on what versions are available. Use a full version like "8.0.26" or "v8.0-perf" to pin the server.
 
-The "BSON compatibility tests" variant DOES NOT run on pull requests. If you are making changes to the variant, they need to be tested with a manual patch:
+The "BSON compatibility tests" variant DOES NOT run on pull requests by default. If you are making changes to the variant, they need to be tested by explicitly running them in Evergreen or with a manual patch:
 ```sh
 evergreen patch -u -y -f --browse -d "NODE-XXXX: <what changed>" -v "BSON compatibility tests" -t all
 ```
-Link the patch in your PR, so a reviewer is able to verify that your changes are not breaking.
 
 ## Manually Testing the Driver
 
