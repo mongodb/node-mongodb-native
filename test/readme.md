@@ -266,7 +266,7 @@ We have a variant called "BSON compatibility tests", which checks out a released
 This variant pins two concepts for the app, and they need to be updated together:
 - `SOURCE_REV` pins the driver + test source
 - `VERSION` pins the MongoDB server that the tests run against
-  - NOTE: value of "8.0" is not a pin, since it will resolve "8.0.x", and will be different depending on what versions are available. Use a full version like "8.0.26" to pin the server.
+  - NOTE: value of "8.0" is not a pin, since it will resolve "8.0.x", and will be different depending on what versions are available. Use a full version like "8.0.26" or "v8.0-perf" to pin the server.
 
 The "BSON compatibility tests" variant DOES NOT run on pull requests. If you are making changes to the variant, they need to be tested with a manual patch:
 ```sh
