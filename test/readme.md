@@ -20,6 +20,7 @@ about the types of tests and how to run them.
         - [Setup](#setup)
         - [Running the Build](#running-the-build)
   - [Using a Pre-Release Version of a Dependent Library](#using-a-pre-release-version-of-a-dependent-library)
+    - [BSON Compatibility Variant](#bson-compatibility-variant)
   - [Manually Testing the Driver](#manually-testing-the-driver)
   - [Writing Tests](#writing-tests)
     - [Framework](#framework)
@@ -257,6 +258,20 @@ Follow the steps below to do so.
 
 Now you can run the automated tests, run manual tests, or kick off an Evergreen build from your local
 repository.
+
+### BSON Compatibility Variant
+
+We have a variant called "BSON compatibility tests", which checks out a released driver tag, installs `bson` from the tip of `js-bson`, then runs that tag's test suite. This is done to verify that the latest `bson` releases continue to work with an existing application, which in this case is Node Driver + Tests + MongoDB Server.
+
+This variant pins two concepts for the app, and they need to be updated together:
+- `SOURCE_REV` pins the driver + test source
+- `VERSION` pins the MongoDB server that the tests run against
+  - NOTE: value of "8.0" is not a pin, since it will resolve "8.0.x", and will be different depending on what versions are available. Use a full version like "8.0.26" or "v8.0-perf" to pin the server.
+
+The "BSON compatibility tests" variant DOES NOT run on pull requests by default. If you are making changes to the variant, they need to be tested by explicitly running them in Evergreen or with a manual patch:
+```sh
+evergreen patch -u -y -f --browse -d "NODE-XXXX: <what changed>" -v "BSON compatibility tests" -t all
+```
 
 ## Manually Testing the Driver
 

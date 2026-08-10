@@ -51,7 +51,13 @@ functions:
         file: src/expansion.yml
 
   "switch source":
-    # Checkout the desired source revision if specified
+    # Checkout the desired source revision if specified.
+    #
+    # This resets the ENTIRE working tree to SOURCE_REV, test files included, so the tests that run
+    # are the ones that shipped in that release. A test quarantined on main afterwards is therefore
+    # not quarantined here. Callers pin a server version alongside SOURCE_REV to keep the only
+    # moving input the thing actually under test -- see the bson compatibility tasks below and
+    # "BSON Compatibility Variant" in test/readme.md.
     - command: shell.exec
       params:
         working_dir: src
@@ -1026,12 +1032,9 @@ tasks:
         type: setup
         params:
           updates:
-            # This variant pins its working tree to a released tag, so it runs that tag's test
-            # files and cannot pick up a test quarantined on main afterwards. SERVER-132246 is
-            # fixed in master but its v8.0 backport (BACKPORT-29016) is still staged, so 8.0.x
-            # fails the streaming-hello SDAM tests here on every run.
-            # TODO(NODE-7703): revisit once that backport ships and 8.0.x carries the fix.
-            - { key: VERSION, value: "latest" }
+            # Pinned on purpose, and paired with SOURCE_REV below -- see "switch source".
+            # Bump this together with SOURCE_REV, not on its own.
+            - { key: VERSION, value: "v8.0-perf" }
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
@@ -1054,12 +1057,9 @@ tasks:
         type: setup
         params:
           updates:
-            # This variant pins its working tree to a released tag, so it runs that tag's test
-            # files and cannot pick up a test quarantined on main afterwards. SERVER-132246 is
-            # fixed in master but its v8.0 backport (BACKPORT-29016) is still staged, so 8.0.x
-            # fails the streaming-hello SDAM tests here on every run.
-            # TODO(NODE-7703): revisit once that backport ships and 8.0.x carries the fix.
-            - { key: VERSION, value: "latest" }
+            # Pinned on purpose, and paired with SOURCE_REV below -- see "switch source".
+            # Bump this together with SOURCE_REV, not on its own.
+            - { key: VERSION, value: "v8.0-perf" }
             - { key: TOPOLOGY, value: replica_set }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
@@ -1082,12 +1082,9 @@ tasks:
         type: setup
         params:
           updates:
-            # This variant pins its working tree to a released tag, so it runs that tag's test
-            # files and cannot pick up a test quarantined on main afterwards. SERVER-132246 is
-            # fixed in master but its v8.0 backport (BACKPORT-29016) is still staged, so 8.0.x
-            # fails the streaming-hello SDAM tests here on every run.
-            # TODO(NODE-7703): revisit once that backport ships and 8.0.x carries the fix.
-            - { key: VERSION, value: "latest" }
+            # Pinned on purpose, and paired with SOURCE_REV below -- see "switch source".
+            # Bump this together with SOURCE_REV, not on its own.
+            - { key: VERSION, value: "v8.0-perf" }
             - { key: TOPOLOGY, value: sharded_cluster }
             - { key: AUTH, value: auth }
             - { key: SSL, value: nossl }
