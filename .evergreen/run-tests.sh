@@ -60,6 +60,8 @@ if [ "$COMPRESSOR" != "" ]; then
 fi
 
 npm install @mongodb-js/zstd
+
+# // TODO: NODE-7766 remove this pin when snappy is fixed
 npm install snappy@7.3.3
 
 export AUTH=$AUTH
