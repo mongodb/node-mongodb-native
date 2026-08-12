@@ -39,6 +39,7 @@ export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSON
   return Array.isArray(res) ? res : [...res];
 }
 
+
 // validates buffer inputs, used for read operations
 const validateBufferInputs = (buffer: Uint8Array, offset: number, length: number) => {
   if (offset < 0 || offset + length > buffer.length) {
