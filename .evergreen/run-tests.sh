@@ -60,7 +60,7 @@ if [ "$COMPRESSOR" != "" ]; then
 fi
 
 npm install @mongodb-js/zstd
-npm install snappy
+npm install snappy@7.3.3
 
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}
