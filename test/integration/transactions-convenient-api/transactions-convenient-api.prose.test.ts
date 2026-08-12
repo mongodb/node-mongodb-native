@@ -328,11 +328,11 @@ describe('Retry Backoff is Enforced', function () {
       });
 
       // 5. Compare the durations of the two runs.
-      //    The sum of 13 backoffs is roughly 1.8 seconds. There is a half-second window to
+      //    The sum of 13 backoffs is roughly 2.3 seconds. There is a half-second window to
       //    account for potential variance between the two runs.
       expect(fullBackoffDuration).to.be.within(
-        noBackoffTime + 1800 - 500,
-        noBackoffTime + 1800 + 500
+        noBackoffTime + 2300 - 500,
+        noBackoffTime + 2300 + 500
       );
     }
   );

@@ -972,7 +972,7 @@ describe('Backpressure Metadata', function () {
     await client?.close();
   });
 
-  it('includes backpressure in the handshake document', function () {
+  it(`includes backpressure: '2' in the handshake document`, function () {
     const isHello = (cmd: Document): cmd is HandshakeDocument =>
       `hello` in cmd || LEGACY_HELLO_COMMAND in cmd;
 
@@ -981,8 +981,8 @@ describe('Backpressure Metadata', function () {
     expect(hellos.length).to.be.greaterThan(0);
 
     expect(
-      hellos.every(hello => hello.backpressure === true),
-      `some handshake documents did not specify backpressure: true`
-    );
+      hellos.every(hello => hello.backpressure === '2'),
+      `some handshake documents did not specify backpressure: '2'`
+    ).to.be.true;
   });
 });

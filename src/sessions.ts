@@ -771,7 +771,7 @@ export class ClientSession
       ) {
         // 2. If `transactionAttempt` > 0:
         if (isRetry) {
-          // 2.1 Calculate backoffMS to be jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt - 1), BACKOFF_MAX).
+          // 2.1 Calculate backoffMS to be jitter * min(BACKOFF_INITIAL * 1.5 ** (transactionAttempt), BACKOFF_MAX).
           //  If elapsed time + backoffMS > TIMEOUT_MS, then propagate the previously encountered error to the caller of
           //  withTransaction as per timeout error propagation and return immediately. Otherwise, sleep for backoffMS.
           //  2.1.1 jitter is a random float between [0, 1), optionally including 1, depending on what is most natural
@@ -785,10 +785,7 @@ export class ClientSession
           const jitter = Math.random();
           const backoffMS =
             jitter *
-            Math.min(
-              BACKOFF_INITIAL_MS * BACKOFF_GROWTH ** (transactionAttempt - 1),
-              BACKOFF_MAX_MS
-            );
+            Math.min(BACKOFF_INITIAL_MS * BACKOFF_GROWTH ** transactionAttempt, BACKOFF_MAX_MS);
 
           if (processTimeMS() + backoffMS >= deadline) {
             throw makeTimeoutError(

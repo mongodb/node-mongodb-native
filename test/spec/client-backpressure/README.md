@@ -53,11 +53,13 @@ executed against a MongoDB 4.4+ server that has enabled the `configureFailPoint`
     6. Compare the time between the two runs.
 
         ```python
-        assertTrue(absolute_value(with_backoff_time - (no_backoff_time + 0.3 seconds)) < 0.3 seconds)
+        assertTrue(absolute_value(with_backoff_time - (no_backoff_time + 0.6 seconds)) < 0.6 seconds)
         ```
 
-        The sum of 2 backoffs is 0.3 seconds. There is a 0.3-second window to account for potential variance between the
+        The sum of 2 backoffs is 0.6 seconds. There is a 0.6-second window to account for potential variance between the
         two runs.
+
+#### Test 2: REMOVED
 
 #### Test 3: Overload Errors are Retried a Maximum of MAX_RETRIES times
 
@@ -117,3 +119,66 @@ option.
 5. Assert that the raised error contains both the `RetryableError` and `SystemOverloadedError` error labels.
 
 6. Assert that the total number of started commands is `maxAdaptiveRetries` + 1 (2).
+
+#### Test 5: Overload Errors with baseBackoffMS override base backoff
+
+Drivers SHOULD test that overload errors with `baseBackoffMS` override the default backoff duration. This test MUST be
+executed against a MongoDB 9.0+ server that has enabled the `configureFailPoint` command with the `errorLabels` option.
+
+1. Let `client` be a `MongoClient`.
+
+2. Let `coll` be a collection.
+
+3. Configure the random number generator used for exponential backoff jitter to always return a number as close as
+    possible to `1`.
+
+4. Configure the following failPoint:
+
+    ```javascript
+        {
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+                failCommands: ['insert'],
+                errorCode: 462, // IngressRequestRateLimitExceeded
+                errorLabels: ['SystemOverloadedError', 'RetryableError']
+            }
+        }
+    ```
+
+5. Insert the document `{ a: 1 }`. Expect that the command errors. Measure the duration of the command execution.
+
+    ```javascript
+       const start = performance.now();
+       expect(
+        await coll.insertOne({ a: 1 }).catch(e => e)
+       ).to.be.an.instanceof(MongoServerError);
+       const end = performance.now();
+    ```
+
+6. Run the following command to set up `baseBackoffMS` on overload errors.
+
+    ```python
+    client.admin.command("setParameter", 1, externalClientBaseBackoffMS=50)
+    ```
+
+7. Execute step 5 again.
+
+8. Assert that the server attached `baseBackoffMS` to the error and that the driver parsed it.
+
+9. Run the following command to disable `baseBackoffMS` on overload errors.
+
+    ```python
+    client.admin.command("setParameter", 1, externalClientBaseBackoffMS=0)
+    ```
+
+10. Assert absolute bounds on each run's duration.
+
+    ```python
+    assertGreaterEqual(exponential_backoff_time, 0.6)
+    assertGreaterEqual(with_base_backoff_ms_time, 0.3)
+    assertLess(with_base_backoff_ms_time, 0.6)
+    ```
+
+    A run can never be faster than the sum of its backoffs. With jitter pinned to 1, the default backoffs are
+    `0.2 + 0.4 = 0.6s` and the `baseBackoffMS=50` backoffs are `0.1 + 0.2 = 0.3s`.
