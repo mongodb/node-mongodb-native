@@ -1104,6 +1104,54 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+  - name: test-9.0-server
+    tags:
+      - '9.0'
+      - server
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: SSL, value: nossl}
+            - {key: AUTH, value: auth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-9.0-replica_set
+    tags:
+      - '9.0'
+      - replica_set
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: SSL, value: nossl}
+            - {key: AUTH, value: auth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-9.0-sharded_cluster
+    tags:
+      - '9.0'
+      - sharded_cluster
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: SSL, value: nossl}
+            - {key: AUTH, value: auth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
   - name: test-8.0-server
     tags:
       - '8.0'
@@ -1471,6 +1519,27 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+  - name: test-9.0-load-balanced
+    tags:
+      - latest
+      - sharded_cluster
+      - load_balancer
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: LOAD_BALANCER, value: 'true'}
+            - {key: CLIENT_ENCRYPTION, value: 'false'}
+            - {key: TEST_CSFLE, value: 'false'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: start-load-balancer
+      - func: run-lb-tests
+      - func: stop-load-balancer
   - name: test-rapid-load-balanced
     tags:
       - latest
@@ -1621,6 +1690,22 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: latest}
+            - {key: SSL, value: ssl}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tls tests
+  - name: test-tls-support-9.0
+    tags:
+      - tls-support
+      - tls-support-9.0
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
             - {key: SSL, value: ssl}
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
@@ -2223,6 +2308,60 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+  - name: test-9.0-server-noauth
+    tags:
+      - '9.0'
+      - server
+      - noauth
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-9.0-replica_set-noauth
+    tags:
+      - '9.0'
+      - replica_set
+      - noauth
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-9.0-sharded_cluster-noauth
+    tags:
+      - '9.0'
+      - sharded_cluster
+      - noauth
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
+            - {key: NODE_LTS_VERSION, value: 20.19.0}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
   - name: test-8.0-server-noauth
     tags:
       - '8.0'
@@ -2558,6 +2697,22 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+  - name: test-9.0-csfle-mongocryptd
+    tags:
+      - '9.0'
+      - sharded_cluster
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: NODE_LTS_VERSION, value: '24'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
   - name: test-8.0-csfle-mongocryptd
     tags:
       - '8.0'
@@ -2749,6 +2904,66 @@ tasks:
         params:
           updates:
             - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-9.0-server-ssl
+    tags:
+      - '9.0'
+      - server
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-9.0-replica_set-ssl
+    tags:
+      - '9.0'
+      - replica_set
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: SSL, value: ssl}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: run tests
+  - name: test-9.0-sharded_cluster-ssl
+    tags:
+      - '9.0'
+      - sharded_cluster
+      - ssl
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '9.0'}
             - {key: TOPOLOGY, value: sharded_cluster}
             - {key: AUTH, value: auth}
             - {key: SSL, value: ssl}
@@ -3350,6 +3565,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-9.0-server
+      - test-9.0-replica_set
+      - test-9.0-sharded_cluster
       - test-8.0-server
       - test-8.0-replica_set
       - test-8.0-sharded_cluster
@@ -3373,6 +3591,7 @@ buildvariants:
       - test-6.0-load-balanced
       - test-7.0-load-balanced
       - test-8.0-load-balanced
+      - test-9.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
@@ -3383,6 +3602,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-tls-support-9.0
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3402,6 +3622,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-9.0-server
+      - test-9.0-replica_set
+      - test-9.0-sharded_cluster
       - test-8.0-server
       - test-8.0-replica_set
       - test-8.0-sharded_cluster
@@ -3425,6 +3648,7 @@ buildvariants:
       - test-6.0-load-balanced
       - test-7.0-load-balanced
       - test-8.0-load-balanced
+      - test-9.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
@@ -3435,6 +3659,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-tls-support-9.0
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3454,6 +3679,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-9.0-server
+      - test-9.0-replica_set
+      - test-9.0-sharded_cluster
       - test-8.0-server
       - test-8.0-replica_set
       - test-8.0-sharded_cluster
@@ -3477,6 +3705,7 @@ buildvariants:
       - test-6.0-load-balanced
       - test-7.0-load-balanced
       - test-8.0-load-balanced
+      - test-9.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
@@ -3487,6 +3716,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-tls-support-9.0
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3506,6 +3736,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-9.0-server
+      - test-9.0-replica_set
+      - test-9.0-sharded_cluster
       - test-8.0-server
       - test-8.0-replica_set
       - test-8.0-sharded_cluster
@@ -3529,6 +3762,7 @@ buildvariants:
       - test-6.0-load-balanced
       - test-7.0-load-balanced
       - test-8.0-load-balanced
+      - test-9.0-load-balanced
       - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
@@ -3538,6 +3772,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-tls-support-9.0
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3557,6 +3792,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-9.0-server
+      - test-9.0-replica_set
+      - test-9.0-sharded_cluster
       - test-8.0-server
       - test-8.0-replica_set
       - test-8.0-sharded_cluster
@@ -3579,6 +3817,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-tls-support-9.0
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3598,6 +3837,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-9.0-server
+      - test-9.0-replica_set
+      - test-9.0-sharded_cluster
       - test-8.0-server
       - test-8.0-replica_set
       - test-8.0-sharded_cluster
@@ -3620,6 +3862,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-tls-support-9.0
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3639,6 +3882,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-9.0-server
+      - test-9.0-replica_set
+      - test-9.0-sharded_cluster
       - test-8.0-server
       - test-8.0-replica_set
       - test-8.0-sharded_cluster
@@ -3661,6 +3907,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-tls-support-9.0
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3680,6 +3927,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-9.0-server
+      - test-9.0-replica_set
+      - test-9.0-sharded_cluster
       - test-8.0-server
       - test-8.0-replica_set
       - test-8.0-sharded_cluster
@@ -3701,6 +3951,7 @@ buildvariants:
       - test-snappy-compression
       - test-zstd-compression
       - test-tls-support-latest
+      - test-tls-support-9.0
       - test-tls-support-8.0
       - test-tls-support-7.0
       - test-tls-support-6.0
@@ -3716,6 +3967,7 @@ buildvariants:
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
+      - test-9.0-csfle-mongocryptd
       - test-8.0-csfle-mongocryptd
       - test-7.0-csfle-mongocryptd
       - test-6.0-csfle-mongocryptd
@@ -3731,6 +3983,7 @@ buildvariants:
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
+      - test-9.0-csfle-mongocryptd
       - test-8.0-csfle-mongocryptd
       - test-7.0-csfle-mongocryptd
       - test-6.0-csfle-mongocryptd
@@ -3827,6 +4080,9 @@ buildvariants:
       - test-rapid-server-noauth
       - test-rapid-replica_set-noauth
       - test-rapid-sharded_cluster-noauth
+      - test-9.0-server-noauth
+      - test-9.0-replica_set-noauth
+      - test-9.0-sharded_cluster-noauth
       - test-8.0-server-noauth
       - test-8.0-replica_set-noauth
       - test-8.0-sharded_cluster-noauth
