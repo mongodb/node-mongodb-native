@@ -40,6 +40,13 @@ functions:
           git fetch origin "${SOURCE_REV}:${SOURCE_REV}"
           git checkout "${SOURCE_REV}"
           npm i
+  NODE-7767 pin snappy:
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: |
+          source ${DRIVERS_TOOLS}/.evergreen/init-node-and-npm-env.sh
+          npm install snappy@7.3.3
   bootstrap mongo-orchestration:
     - command: subprocess.exec
       params:
@@ -962,6 +969,7 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
+      - func: NODE-7767 pin snappy
       - func: log state
       - func: run tests
   - name: test-bson-latest-driver-7.0.0-replica_set-tests
@@ -984,6 +992,7 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
+      - func: NODE-7767 pin snappy
       - func: log state
       - func: run tests
   - name: test-bson-latest-driver-7.0.0-sharded_cluster-tests
@@ -1006,6 +1015,7 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
+      - func: NODE-7767 pin snappy
       - func: log state
       - func: run tests
   - name: test-latest-server
