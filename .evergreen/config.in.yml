@@ -74,7 +74,7 @@ functions:
       params:
         working_dir: src
         script: |
-          # Strip any `npm install snappy` from the test runner so it cannot clobber the pin above.
+          # Strip any `npm install snappy` from the test runner so it cannot clobber v7.3.3.
           sed -i 's/npm install snappy//' .evergreen/run-tests.sh
   "bootstrap mongo-orchestration":
     - command: subprocess.exec
