@@ -61,9 +61,6 @@ fi
 
 npm install @mongodb-js/zstd
 
-# TODO: NODE-7766 remove this pin when snappy is fixed
-npm install snappy@7.3.3
-
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}
 export MULTI_MONGOS_LB_URI=${MULTI_MONGOS_LB_URI}
