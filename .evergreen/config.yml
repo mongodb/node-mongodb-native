@@ -40,13 +40,11 @@ functions:
           git fetch origin "${SOURCE_REV}:${SOURCE_REV}"
           git checkout "${SOURCE_REV}"
           npm i
-  NODE-7767 pin snappy:
+  NODE-7767 strip snappy install from test runner:
     - command: shell.exec
       params:
         working_dir: src
         script: |
-          source ${DRIVERS_TOOLS}/.evergreen/init-node-and-npm-env.sh
-          npm install snappy@7.3.3
           # Strip any `npm install snappy` from the test runner so it cannot clobber the pin above.
           sed -i 's/npm install snappy//' .evergreen/run-tests.sh
   bootstrap mongo-orchestration:
@@ -971,7 +969,7 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
-      - func: NODE-7767 pin snappy
+      - func: NODE-7767 strip snappy install from test runner
       - func: log state
       - func: run tests
   - name: test-bson-latest-driver-7.0.0-replica_set-tests
@@ -994,7 +992,7 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
-      - func: NODE-7767 pin snappy
+      - func: NODE-7767 strip snappy install from test runner
       - func: log state
       - func: run tests
   - name: test-bson-latest-driver-7.0.0-sharded_cluster-tests
@@ -1017,7 +1015,7 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
-      - func: NODE-7767 pin snappy
+      - func: NODE-7767 strip snappy install from test runner
       - func: log state
       - func: run tests
   - name: test-latest-server
