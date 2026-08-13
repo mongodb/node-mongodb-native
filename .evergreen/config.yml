@@ -47,6 +47,8 @@ functions:
         script: |
           source ${DRIVERS_TOOLS}/.evergreen/init-node-and-npm-env.sh
           npm install snappy@7.3.3
+          # Strip any `npm install snappy` from the test runner so it cannot clobber the pin above.
+          sed -i 's/npm install snappy//' .evergreen/run-tests.sh
   bootstrap mongo-orchestration:
     - command: subprocess.exec
       params:
