@@ -465,7 +465,7 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
     expansions: {
       CLIENT_ENCRYPTION: true,
       RUN_WITH_MONGOCRYPTD: true,
-      NODE_LTS_VERSION: LOWEST_LTS
+      NODE_LTS_VERSION: nodeVersion
     },
     tasks: MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
   });

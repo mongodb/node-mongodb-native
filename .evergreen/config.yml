@@ -3979,7 +3979,7 @@ buildvariants:
     expansions:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
-      NODE_LTS_VERSION: 20.19.0
+      NODE_LTS_VERSION: 24
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
