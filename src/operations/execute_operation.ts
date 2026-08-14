@@ -185,11 +185,13 @@ const MAX_BACKOFF_MS = 10_000;
 export function calculateBaseBackoffMS(error: MongoError): number {
   if (!(error instanceof MongoServerError)) return BASE_BACKOFF_MS;
 
-  // The server sends baseBackoffMS as an int64, so it arrives as a Long rather than a number when
-  // the client is configured with `promoteLongs: false`. Coerce rather than check for `number`.
+  // The server sends baseBackoffMS as an int64, so its runtime type depends on the client's BSON
+  // options: a number by default, a Long under `promoteLongs: false`, a bigint under
+  // `useBigInt64: true`. `Number()` handles all three, so coerce rather than check for `number`.
   // `errorResponse` is indexed as `any`; narrow to `unknown` so the checks below are real.
   const raw: unknown = error.errorResponse.baseBackoffMS;
-  const baseBackoffMS = typeof raw === 'number' || typeof raw === 'object' ? Number(raw) : NaN;
+  const isNumeric = typeof raw === 'number' || typeof raw === 'bigint' || typeof raw === 'object';
+  const baseBackoffMS = isNumeric ? Number(raw) : NaN;
   const useServerValue = Number.isFinite(baseBackoffMS) && baseBackoffMS > 0;
   const result = useServerValue ? baseBackoffMS : BASE_BACKOFF_MS;
   return result;

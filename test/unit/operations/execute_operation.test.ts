@@ -23,6 +23,10 @@ describe('executeOperation() backoff', function () {
           50
         );
       });
+
+      it('uses it when the int64 was deserialized as a bigint (useBigInt64)', function () {
+        expect(calculateBaseBackoffMS(makeError({ baseBackoffMS: 50n }))).to.equal(50);
+      });
     });
 
     context('when the error does not carry a usable baseBackoffMS', function () {
