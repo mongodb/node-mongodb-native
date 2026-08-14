@@ -203,14 +203,14 @@ describe('Client Backpressure (Prose)', function () {
         ({ duration: withBaseBackoffMSTime, result: baseBackoffError } = await measureDuration(() =>
           collection.insertOne({ a: 1 })
         ));
+
+        // 8. Assert that the server attached `baseBackoffMS` to the error and that the driver parsed it.
+        expect(baseBackoffError).to.be.instanceof(MongoServerError);
+        expect(baseBackoffError).to.have.nested.property('errorResponse.baseBackoffMS', 50);
       } finally {
         // 9. Run the following command to disable `baseBackoffMS` on overload errors.
         await admin.command({ setParameter: 1, externalClientBaseBackoffMS: 0 });
       }
-
-      // 8. Assert that the server attached `baseBackoffMS` to the error and that the driver parsed it.
-      expect(baseBackoffError).to.be.instanceof(MongoServerError);
-      expect(baseBackoffError).to.have.nested.property('errorResponse.baseBackoffMS', 50);
 
       // 10. Assert absolute bounds on each run's duration.
       //     A run can never be faster than the sum of its backoffs. With jitter pinned to 1, the
