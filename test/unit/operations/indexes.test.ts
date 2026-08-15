@@ -107,6 +107,14 @@ describe('class CreateIndexesOperation', () => {
       options
     );
 
+  const makeIndexesOperation = (indexes, options: CreateIndexesOptions = {}) =>
+    CreateIndexesOperation.fromIndexDescriptionArray(
+      { s: { namespace: ns('a.b') } },
+      'b',
+      indexes,
+      options
+    );
+
   describe('#constructor()', () => {
     for (const { description, input, mapData, name } of testCases) {
       it(`should create fieldHash correctly when input is: ${description}`, () => {
@@ -150,6 +158,55 @@ describe('class CreateIndexesOperation', () => {
         .to.have.property('storageEngine')
         .that.deep.equals({ iLoveJavascript: 1 });
       expect(indexOutput.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
+    });
+  });
+
+  describe('allowUnknownIndexOptions (createIndexes passthrough)', () => {
+    const indexDescription = () => ({
+      key: { a: 1 },
+      // @ts-expect-error: Testing that unknown options are passed through when enabled
+      finestIndexedLevel: 15,
+      randomOptionThatWillNeverBeAdded: true
+    });
+
+    it('drops unknown options when the flag is unset (default behavior)', () => {
+      const output = makeIndexesOperation([indexDescription()]);
+      expect(output.indexes[0]).to.not.have.property('finestIndexedLevel');
+      expect(output.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
+    });
+
+    it('drops unknown options when the flag is set to false', () => {
+      const output = makeIndexesOperation([indexDescription()], {
+        allowUnknownIndexOptions: false
+      });
+      expect(output.indexes[0]).to.not.have.property('finestIndexedLevel');
+      expect(output.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
+    });
+
+    it('retains unknown options when the flag is set to true', () => {
+      const output = makeIndexesOperation([indexDescription()], {
+        allowUnknownIndexOptions: true
+      });
+      expect(output.indexes[0]).to.have.property('finestIndexedLevel', 15);
+      expect(output.indexes[0]).to.have.property('randomOptionThatWillNeverBeAdded', true);
+    });
+
+    it('still maps `version` to `v` when the flag is set to true', () => {
+      const output = makeIndexesOperation([{ key: { a: 1 }, version: 1 }], {
+        allowUnknownIndexOptions: true
+      });
+      expect(output.indexes[0]).to.have.property('v', 1);
+      expect(output.indexes[0]).to.not.have.property('version');
+    });
+
+    it('does not enable passthrough for createIndex even when the flag is set to true', () => {
+      const output = makeIndexOperation(
+        { a: 1 },
+        // @ts-expect-error: Testing bad options get filtered
+        { allowUnknownIndexOptions: true, randomOptionThatWillNeverBeAdded: true }
+      );
+      expect(output.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
+      expect(output.indexes[0]).to.not.have.property('allowUnknownIndexOptions');
     });
   });
 });

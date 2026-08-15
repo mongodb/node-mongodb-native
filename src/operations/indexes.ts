@@ -160,6 +160,13 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   wildcardProjection?: Document;
   /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. */
   hidden?: boolean;
+  /**
+   * When `true`, index options that are unknown to the driver are passed through to the server
+   * for validation rather than being filtered out by the driver's allowlist. The server returns
+   * an error for any option it does not recognize. Only applies to {@link Collection#createIndexes}.
+   * @defaultValue false
+   */
+  allowUnknownIndexOptions?: boolean;
 }
 
 function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
@@ -197,19 +204,24 @@ function constructIndexDescriptionMap(indexSpec: IndexSpecification): Map<string
 }
 
 /**
- * Receives an index description and returns a modified index description which has had invalid options removed
- * from the description and has mapped the `version` option to the `v` option.
+ * Receives an index description and returns a modified index description which has mapped the
+ * `version` option to the `v` option.
+ *
+ * When `allowUnknownIndexOptions` is `false` (the default), options that are not in the driver's
+ * `VALID_INDEX_OPTIONS` allowlist are removed from the description. When `true`, all options are
+ * retained and passed through to the server for validation.
  */
 function resolveIndexDescription(
-  description: IndexDescription
+  description: IndexDescription,
+  allowUnknownIndexOptions: boolean
 ): Omit<ResolvedIndexDescription, 'key'> {
-  const validProvidedOptions = Object.entries(description).filter(([optionName]) =>
-    VALID_INDEX_OPTIONS.has(optionName)
+  const providedOptions = Object.entries(description).filter(
+    ([optionName]) => allowUnknownIndexOptions || VALID_INDEX_OPTIONS.has(optionName)
   );
 
   return Object.fromEntries(
     // we support the `version` option, but the `createIndexes` command expects it to be the `v`
-    validProvidedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
+    providedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
   );
 }
 
@@ -251,7 +263,8 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions
+    options: CreateIndexesOptions | undefined,
+    allowUnknownIndexOptions: boolean
   ) {
     super(parent, options);
 
@@ -264,9 +277,9 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
       const key =
         userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
       const name = userIndex.name ?? Array.from(key).flat().join('_');
-      const validIndexOptions = resolveIndexDescription(userIndex);
+      const indexOptions = resolveIndexDescription(userIndex, allowUnknownIndexOptions);
       return {
-        ...validIndexOptions,
+        ...indexOptions,
         name,
         key
       };
@@ -280,7 +293,15 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     indexes: IndexDescription[],
     options?: CreateIndexesOptions
   ): CreateIndexesOperation {
-    return new CreateIndexesOperation(parent, collectionName, indexes, options);
+    // `allowUnknownIndexOptions` passthrough is only supported via `createIndexes`, where each
+    // index is a user-provided description that does not carry command/driver-level options.
+    return new CreateIndexesOperation(
+      parent,
+      collectionName,
+      indexes,
+      options,
+      options?.allowUnknownIndexOptions ?? false
+    );
   }
 
   static fromIndexSpecification(
@@ -291,7 +312,9 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
   ): CreateIndexesOperation {
     const key = constructIndexDescriptionMap(indexSpec);
     const description: IndexDescription = { ...options, key };
-    return new CreateIndexesOperation(parent, collectionName, [description], options);
+    // The allowlist is always enforced for `createIndex` because command/driver-level options are
+    // merged into the index description above and must not be passed through to the server.
+    return new CreateIndexesOperation(parent, collectionName, [description], options, false);
   }
 
   override get commandName() {
