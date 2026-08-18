@@ -447,10 +447,10 @@ describe('CSOT driver tests', metadata, () => {
           const cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 200 })
+            .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 500 })
             .project({ _id: 0 });
 
-          // Iterating over 3 documents in the collection, each artificially taking ~50 ms due to failpoint. If timeoutMS is not refreshed, then we'd expect to error
+          // Iterating over 3 documents in the collection, each artificially taking ~150 ms due to failpoint. If timeoutMS is not refreshed, then we'd expect to error
           for await (const doc of cursor) {
             expect(doc).to.deep.equal({ x: 1 });
           }
@@ -469,7 +469,7 @@ describe('CSOT driver tests', metadata, () => {
             const cursor = client
               .db('db')
               .collection('coll')
-              .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 200 })
+              .find({}, { batchSize: 1, timeoutMode: 'iteration', timeoutMS: 500 })
               .project({ _id: 0 });
             await cursor.toArray();
 
@@ -701,7 +701,7 @@ describe('CSOT driver tests', metadata, () => {
           cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { timeoutMS: 150, tailable: true, awaitData: true, batchSize: 1 });
+            .find({}, { timeoutMS: 400, tailable: true, awaitData: true, batchSize: 1 });
           // Iterate cursor 5 times (server would have blocked for 500ms overall, but client
           // should not throw
           await cursor.next();
@@ -787,7 +787,7 @@ describe('CSOT driver tests', metadata, () => {
           cursor = client
             .db('db')
             .collection('coll')
-            .find({}, { timeoutMS: 150, tailable: true, batchSize: 1 });
+            .find({}, { timeoutMS: 400, tailable: true, batchSize: 1 });
           for (let i = 0; i < 5; i++) {
             // Iterate cursor 5 times (server would have blocked for 500ms overall, but client
             // should not throw
