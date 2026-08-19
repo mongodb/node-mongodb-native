@@ -170,9 +170,32 @@ type RetryOptions = {
   timeoutContext: TimeoutContext;
 };
 /** @internal The base backoff duration in milliseconds */
-const BASE_BACKOFF_MS = 100;
+export const BASE_BACKOFF_MS = 100;
 /** @internal The maximum backoff duration in milliseconds */
 const MAX_BACKOFF_MS = 10_000;
+
+/**
+ * @internal
+ * The server-supplied base backoff duration in milliseconds, if the error carries a usable one.
+ *
+ * The server may attach `baseBackoffMS` to an overload error to indicate how long clients should
+ * back off in place of the driver's default. Only a positive value is honoured: the server disables
+ * the behaviour by reporting `0`, in which case we fall back to `BASE_BACKOFF_MS`.
+ */
+export function calculateBaseBackoffMS(error: MongoError): number {
+  if (!(error instanceof MongoServerError)) return BASE_BACKOFF_MS;
+
+  // The server sends baseBackoffMS as an int64, so its runtime type depends on the client's BSON
+  // options: a number by default, a Long under `promoteLongs: false`, a bigint under
+  // `useBigInt64: true`. `Number()` handles all three, so coerce rather than check for `number`.
+  // `errorResponse` is indexed as `any`; narrow to `unknown` so the checks below are real.
+  const raw: unknown = error.errorResponse.baseBackoffMS;
+  const isNumeric = typeof raw === 'number' || typeof raw === 'bigint' || typeof raw === 'object';
+  const baseBackoffMS = isNumeric ? Number(raw) : NaN;
+  const useServerValue = Number.isFinite(baseBackoffMS) && baseBackoffMS > 0;
+  const result = useServerValue ? baseBackoffMS : BASE_BACKOFF_MS;
+  return result;
+}
 
 /**
  * Executes an operation and retries as appropriate
@@ -327,7 +350,11 @@ async function executeOperationWithRetries<
       }
 
       if (operationError.hasErrorLabel(MongoErrorLabel.SystemOverloadedError)) {
-        const backoffMS = Math.random() * Math.min(MAX_BACKOFF_MS, BASE_BACKOFF_MS * 2 ** attempt);
+        const baseBackoffMS = calculateBaseBackoffMS(operationError);
+        // The spec numbers the first retry as attempt 1, while `attempt` here is the zero-based
+        // index of the attempt that just failed -- hence the `+ 1`.
+        const backoffMS =
+          Math.random() * Math.min(MAX_BACKOFF_MS, baseBackoffMS * 2 ** (attempt + 1));
 
         // if the backoff would exhaust the CSOT timeout, short-circuit.
         if (timeoutContext.csotEnabled() && backoffMS > timeoutContext.remainingTimeMS) {
