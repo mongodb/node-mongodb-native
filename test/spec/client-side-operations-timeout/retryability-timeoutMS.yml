@@ -4,7 +4,6 @@ description: "timeoutMS behaves correctly for retryable operations"
 
 schemaVersion: "1.26"
 
-# failCommand is available on 4.0+ replica sets and 4.2+ sharded clusters.
 runOnRequirements:
   - minServerVersion: "4.0"
     topologies: ["replicaset"]

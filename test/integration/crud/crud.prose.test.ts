@@ -35,7 +35,7 @@ describe('CRUD Prose Spec Tests', () => {
   it.skip('1. WriteConcernError.details exposes writeConcernError.errInfo', async function () {
     /**
      * Test that writeConcernError.errInfo in a command response is propagated as WriteConcernError.details (or equivalent) in the driver.
-     * Using a 4.0+ server, set the following failpoint:
+     * Set the following failpoint:
      * @example
      * ```js
      * {

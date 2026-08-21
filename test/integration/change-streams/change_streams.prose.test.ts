@@ -608,7 +608,7 @@ describe('Change Stream prose tests', function () {
       await client.close();
     });
 
-    // 17. $changeStream stage for ChangeStream started with startAfter against a server >=4.1.1
+    // 17. $changeStream stage for ChangeStream started with startAfter
     // that has not received any results yet
     // - MUST include a startAfter option
     // - MUST NOT include a resumeAfter option
@@ -648,7 +648,7 @@ describe('Change Stream prose tests', function () {
       }
     });
 
-    // 18. $changeStream stage for ChangeStream started with startAfter against a server >=4.1.1
+    // 18. $changeStream stage for ChangeStream started with startAfter
     // that has received at least one result
     // - MUST include a resumeAfter option
     // - MUST NOT include a startAfter option

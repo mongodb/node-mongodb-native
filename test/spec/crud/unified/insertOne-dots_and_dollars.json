@@ -440,58 +440,6 @@
       ]
     },
     {
-      "description": "Inserting document with dotted key in _id on pre-3.6 server yields server-side error",
-      "runOnRequirements": [
-        {
-          "maxServerVersion": "3.4.99"
-        }
-      ],
-      "operations": [
-        {
-          "name": "insertOne",
-          "object": "collection0",
-          "arguments": {
-            "document": {
-              "_id": {
-                "a.b": 1
-              }
-            }
-          },
-          "expectError": {
-            "isClientError": false
-          }
-        }
-      ],
-      "expectEvents": [
-        {
-          "client": "client0",
-          "events": [
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "insert": "coll0",
-                  "documents": [
-                    {
-                      "_id": {
-                        "a.b": 1
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          ]
-        }
-      ],
-      "outcome": [
-        {
-          "collectionName": "coll0",
-          "databaseName": "crud-tests",
-          "documents": []
-        }
-      ]
-    },
-    {
       "description": "Inserting document with DBRef-like keys",
       "operations": [
         {
