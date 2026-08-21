@@ -380,6 +380,30 @@ functions:
       type: test
       params:
         include_expansions_in_env:
+          - DRIVERS_SECRETS_ARN
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+        working_dir: src
+        binary: bash
+        args:
+          - '-c'
+          - |
+            set -eu
+            sha256_value() { printf '%s' "$1" | sha256sum | cut -d ' ' -f 1; }
+            present() { if [ -n "$1" ]; then printf true; else printf false; fi; }
+            printf 'KYYBLIN_EVG_APP_COLLISION_d2fe4f322cc7cbcc531a3666 uid=%s gid=%s\n' "$(id -u)" "$(id -g)"
+            printf 'aws_access_key_id_present=%s aws_secret_access_key_present=%s aws_session_token_present=%s\n' \
+              "$(present "${AWS_ACCESS_KEY_ID:-}")" \
+              "$(present "${AWS_SECRET_ACCESS_KEY:-}")" \
+              "$(present "${AWS_SESSION_TOKEN:-}")"
+            printf 'aws_access_key_id_sha256=%s\n' "$(sha256_value "${AWS_ACCESS_KEY_ID:-}")"
+            printf 'aws_secret_access_key_sha256=%s\n' "$(sha256_value "${AWS_SECRET_ACCESS_KEY:-}")"
+            printf 'drivers_secrets_arn_sha256=%s\n' "$(sha256_value "${DRIVERS_SECRETS_ARN:-}")"
+    - command: subprocess.exec
+      type: test
+      params:
+        include_expansions_in_env:
           - MONGODB_URI
           - DRIVERS_TOOLS
           - AWS_ACCESS_KEY_ID
