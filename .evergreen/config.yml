@@ -97,12 +97,12 @@ functions:
         role_arn: ${DRIVERS_SECRETS_ARN}
     - command: subprocess.exec
       type: test
+      timeout_secs: 300
       params:
         env:
           TEST_CSFLE: 'true'
         add_expansions_to_env: true
         working_dir: src
-        timeout_secs: 300
         binary: bash
         args:
           - .evergreen/run-tests.sh
@@ -141,20 +141,20 @@ functions:
   run-lb-tests:
     - command: subprocess.exec
       type: test
+      timeout_secs: 300
       params:
         add_expansions_to_env: true
         binary: bash
         working_dir: src
-        timeout_secs: 300
         args:
           - .evergreen/run-tests.sh
   run-compression-tests:
     - command: subprocess.exec
       type: test
+      timeout_secs: 300
       params:
         binary: bash
         working_dir: src
-        timeout_secs: 300
         add_expansions_to_env: true
         args:
           - .evergreen/run-tests.sh
@@ -168,9 +168,9 @@ functions:
   run lint checks:
     - command: subprocess.exec
       type: test
+      timeout_secs: 60
       params:
         working_dir: src
-        timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
@@ -180,9 +180,9 @@ functions:
   run unit tests:
     - command: subprocess.exec
       type: test
+      timeout_secs: 60
       params:
         working_dir: src
-        timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
@@ -192,9 +192,9 @@ functions:
   check types:
     - command: subprocess.exec
       type: test
+      timeout_secs: 60
       params:
         working_dir: src
-        timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
@@ -207,9 +207,9 @@ functions:
   check resource management:
     - command: subprocess.exec
       type: test
+      timeout_secs: 60
       params:
         working_dir: src
-        timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
@@ -219,9 +219,9 @@ functions:
   check resource management feature integration:
     - command: subprocess.exec
       type: test
+      timeout_secs: 60
       params:
         working_dir: src
-        timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
@@ -232,9 +232,9 @@ functions:
   compile driver:
     - command: subprocess.exec
       type: test
+      timeout_secs: 60
       params:
         working_dir: src
-        timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
@@ -517,9 +517,9 @@ functions:
           - .evergreen/run-custom-csfle-tests.sh
   run lambda handler example tests:
     - command: subprocess.exec
+      timeout_secs: 60
       params:
         working_dir: src
-        timeout_secs: 60
         env:
           MONGODB_URI: ${MONGODB_URI}
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
