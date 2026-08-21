@@ -162,6 +162,17 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   hidden?: boolean;
 }
 
+/** @public */
+export interface DriverIndexesOptions {
+  /**
+   * Validate `CreateIndexesOptions` in the driver before passing them to the server.
+   * Setting to false allows new options supported by the server to be used right away,
+   * regardless of whether the driver has added support for them yet.
+   * This will be set to false by default in a future release.
+   * */
+  validateOptions: boolean;
+}
+
 function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
   return Array.isArray(t) && t.length === 2 && isIndexDirection(t[1]);
 }
@@ -201,15 +212,22 @@ function constructIndexDescriptionMap(indexSpec: IndexSpecification): Map<string
  * from the description and has mapped the `version` option to the `v` option.
  */
 function resolveIndexDescription(
-  description: IndexDescription
+  description: IndexDescription,
+  validateOptions: boolean
 ): Omit<ResolvedIndexDescription, 'key'> {
-  const validProvidedOptions = Object.entries(description).filter(([optionName]) =>
-    VALID_INDEX_OPTIONS.has(optionName)
-  );
+  let options: [string, any][];
+
+  if (validateOptions) {
+    options = Object.entries(description).filter(([optionName]) =>
+      VALID_INDEX_OPTIONS.has(optionName)
+    );
+  } else {
+    options = Object.entries(description);
+  }
 
   return Object.fromEntries(
-    // we support the `version` option, but the `createIndexes` command expects it to be the `v`
-    validProvidedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
+    // we support the `version` option, but the `createIndexes` command expects it to be `v`
+    options.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
   );
 }
 
@@ -251,7 +269,8 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions
+    options?: CreateIndexesOptions,
+    driverOptions?: DriverIndexesOptions
   ) {
     super(parent, options);
 
@@ -264,7 +283,11 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
       const key =
         userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
       const name = userIndex.name ?? Array.from(key).flat().join('_');
-      const validIndexOptions = resolveIndexDescription(userIndex);
+      const validIndexOptions = resolveIndexDescription(
+        userIndex,
+        // TODO(seanrmilligan): set to false in a future release
+        driverOptions?.validateOptions ?? true
+      );
       return {
         ...validIndexOptions,
         name,
@@ -278,20 +301,28 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions
+    options?: CreateIndexesOptions,
+    driverOptions?: DriverIndexesOptions
   ): CreateIndexesOperation {
-    return new CreateIndexesOperation(parent, collectionName, indexes, options);
+    return new CreateIndexesOperation(parent, collectionName, indexes, options, driverOptions);
   }
 
   static fromIndexSpecification(
     parent: OperationParent,
     collectionName: string,
     indexSpec: IndexSpecification,
-    options: CreateIndexesOptions = {}
+    options: CreateIndexesOptions = {},
+    driverOptions?: DriverIndexesOptions
   ): CreateIndexesOperation {
     const key = constructIndexDescriptionMap(indexSpec);
     const description: IndexDescription = { ...options, key };
-    return new CreateIndexesOperation(parent, collectionName, [description], options);
+    return new CreateIndexesOperation(
+      parent,
+      collectionName,
+      [description],
+      options,
+      driverOptions
+    );
   }
 
   override get commandName() {
