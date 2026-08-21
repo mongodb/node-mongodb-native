@@ -75,7 +75,6 @@ tests:
             x: "foo"
         expectError:
           # This error message is consistent between 4.2.x and 4.4.x servers.
-          # Older servers return a different error message.
           errorContains: "field 'let' is an unknown field"
           isClientError: false
     expectEvents:
