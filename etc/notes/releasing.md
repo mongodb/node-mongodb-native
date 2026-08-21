@@ -75,7 +75,7 @@ The MongoDB driver can now generate a cup of joe.
 ## Release Instructions
 
 1. Verify that the release is ready.
-    - Check the Jira release to make sure all worked tagged for this release has been completed.
+    - Check the JIRA release to make sure all work tagged for this release has been completed.
     - Check CI for failures.
     - Check the performance metrics to make sure there are no regressions.
 1. On slack notify `#node-driver-docs`, `#nodejs-devtools`, and `#mongoose` that we intend to publish a release.
