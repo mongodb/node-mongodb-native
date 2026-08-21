@@ -62,4 +62,5 @@ describe('Transactions Spec Prose', function () {
       }
     );
   });
+  
 });
