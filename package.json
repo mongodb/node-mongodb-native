@@ -25,9 +25,9 @@
     "email": "dbx-node@mongodb.com"
   },
   "dependencies": {
-    "@mongodb-js/saslprep": "^1.4.11",
-    "bson": "^7.2.0",
-    "mongodb-connection-string-url": "^7.0.1"
+    "@mongodb-js/saslprep": "^1.5.0",
+    "bson": "^7.3.2",
+    "mongodb-connection-string-url": "^7.0.2"
   },
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.806.0",
