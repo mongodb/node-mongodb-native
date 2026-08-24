@@ -136,17 +136,6 @@ def create_stale_generation_tests():
         data = tmp.format(**locals())
         write_test(test_name, data)
 
-
-def create_pre_42_tests():
-    tmp = template('pre-42.yml.template')
-    # All "not writable primary"/"node is recovering" clear the pool on <4.2
-    for error_name in ERR_CODES:
-        test_name = f'pre-42-{error_name}'
-        error_code, = ERR_CODES[error_name]
-        data = tmp.format(**locals())
-        write_test(test_name, data)
-
-
 def create_post_42_tests():
     tmp = template('post-42.yml.template')
     for error_name in ERR_CODES:
@@ -165,7 +154,6 @@ def create_post_42_tests():
 create_stale_tests()
 create_non_stale_tests()
 create_stale_generation_tests()
-create_pre_42_tests()
 create_post_42_tests()
 
 print('Running make')
