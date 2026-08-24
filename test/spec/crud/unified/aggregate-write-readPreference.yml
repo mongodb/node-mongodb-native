@@ -3,7 +3,7 @@ description: aggregate-write-readPreference
 schemaVersion: '1.4'
 
 runOnRequirements:
-  # 3.6+ non-standalone is needed to utilize $readPreference in OP_MSG
+  # A non-standalone topology is needed to utilize $readPreference in OP_MSG.
   - minServerVersion: "3.6"
     topologies: [ replicaset, sharded, load-balanced ]
 
@@ -78,9 +78,8 @@ tests:
 
   - description: "Aggregate with $out omits read preference for pre-5.0 server"
     runOnRequirements:
-      # MongoDB 4.2 introduced support for read concerns and write stages.
-      # Pre-4.2 servers may allow a "local" read concern anyway, but some
-      # drivers may avoid inheriting a client-level read concern for pre-4.2.
+      # MongoDB 4.2 introduced support for read concerns and write stages. Servers before 5.0 do not forward the read
+      # preference for aggregate commands with a write stage.
       - minServerVersion: "4.2"
         maxServerVersion: "4.4.99"
         serverless: "forbid"
@@ -141,3 +140,4 @@ tests:
                 $readPreference: { $$exists: false }
                 readConcern: *readConcern
                 writeConcern: *writeConcern
+

@@ -74,8 +74,6 @@ tests:
           let: &let1
             x: foo
         expectError:
-          # Older server versions may not report an error code, but the error
-          # message is consistent between 2.6.x and 4.4.x server versions.
           errorContains: "unrecognized field 'let'"
           isClientError: false
     expectEvents:
