@@ -13,28 +13,33 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
+    ignore:
+      # We intentionally track the floating v4 tag so CodeQL CLI updates and
+      # server-side flag changes are picked up automatically. Pinning to an exact
+      # patch makes this a recurring manual chore and risks breaking when a
+      # server-side flag is removed. Major bumps are still surfaced; update this
+      # range when we move to v5.
+      - dependency-name: "github/codeql-action"
+        versions: ["4.x"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
     ignore:
-      # chai is esmodule only.
+      # NODE-7473 moved us to chai 5; chai 6 is not yet evaluated.
       - dependency-name: "chai"
-        versions: [">=5.0.0"]
-      # sinon-chai 4.x+ supports chai 5.x+.
+        versions: [">=6.0.0"]
+      # sinon-chai 5.x+ is not yet evaluated against our chai version.
       - dependency-name: "sinon-chai"
-        versions: [">=4.0.0"]
-      # chai-subset requires @types/chai 4.x.
-      - dependency-name: "@types/chai"
-        versions: [">=4.0.0"]
-      # mocha-plugin-eslint breaks our lint configuration
-      - dependency-name: "mocha-plugin-eslint"
-        versions: [">=10.0.0"]
+        versions: [">=5.0.0"]
+      # NODE-7616: eslint-plugin-mocha 11+ requires eslint 10 (NODE-7615).
+      - dependency-name: "eslint-plugin-mocha"
+        versions: [">=11.0.0"]
       # we ignore TS as a part of quarterly dependency updates.
       - dependency-name: "typescript"
       # NODE-3773: sinon 19+ breaks the srv polling unit tests
       - dependency-name: "sinon"
-        versions: ["18.x"]
+        versions: [">=19.0.0"]
 
       # ignore all peer dependencies
       - dependency-name: "@aws-sdk/credential-providers"
