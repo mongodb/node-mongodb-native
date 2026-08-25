@@ -26,40 +26,6 @@ initialData:
       - { _id: 2, x: 22 }
 
 tests:
-  - description: "Unacknowledged replaceOne with hint string fails with client-side error on pre-4.2 server"
-    runOnRequirements:
-      - maxServerVersion: "4.0.99"
-    operations:
-      - object: *collection0
-        name: bulkWrite
-        arguments:
-          requests:
-            - replaceOne:
-                filter: &filter { _id: { $gt: 1 } }
-                replacement: &replacement { x: 111 }
-                hint: _id_
-        expectError:
-          isClientError: true
-    expectEvents: &noEvents
-      - client: *client0
-        events: []
-
-  - description: "Unacknowledged replaceOne with hint document fails with client-side error on pre-4.2 server"
-    runOnRequirements:
-      - maxServerVersion: "4.0.99"
-    operations:
-      - object: *collection0
-        name: bulkWrite
-        arguments:
-          requests:
-            - replaceOne:
-                filter: *filter
-                replacement: *replacement
-                hint: { _id: 1 }
-        expectError:
-          isClientError: true
-    expectEvents: *noEvents
-
   - description: "Unacknowledged replaceOne with hint string on 4.2+ server"
     runOnRequirements:
       - minServerVersion: "4.2.0"
@@ -69,8 +35,8 @@ tests:
         arguments:
           requests:
             - replaceOne:
-                filter: *filter
-                replacement: *replacement
+                filter: &filter { _id: { $gt: 1 } }
+                replacement: &replacement { x: 111 }
                 hint: _id_
         expectResult: &unacknowledgedResult { $$unsetOrMatches: { acknowledged: { $$unsetOrMatches: false } } }
     expectEvents: &events

@@ -100,67 +100,6 @@
       ]
     },
     {
-      "description": "Replacing document with top-level dotted key on pre-3.6 server yields server-side error",
-      "runOnRequirements": [
-        {
-          "maxServerVersion": "3.4.99"
-        }
-      ],
-      "operations": [
-        {
-          "name": "findOneAndReplace",
-          "object": "collection0",
-          "arguments": {
-            "filter": {
-              "_id": 1
-            },
-            "replacement": {
-              "_id": 1,
-              "a.b": 1
-            }
-          },
-          "expectError": {
-            "isClientError": false
-          }
-        }
-      ],
-      "expectEvents": [
-        {
-          "client": "client0",
-          "events": [
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "findAndModify": "coll0",
-                  "query": {
-                    "_id": 1
-                  },
-                  "update": {
-                    "_id": 1,
-                    "a.b": 1
-                  },
-                  "new": {
-                    "$$unsetOrMatches": false
-                  }
-                }
-              }
-            }
-          ]
-        }
-      ],
-      "outcome": [
-        {
-          "collectionName": "coll0",
-          "databaseName": "crud-tests",
-          "documents": [
-            {
-              "_id": 1
-            }
-          ]
-        }
-      ]
-    },
-    {
       "description": "Replacing document with dollar-prefixed key in embedded doc on 5.0+ server",
       "runOnRequirements": [
         {
@@ -356,71 +295,6 @@
               "a": {
                 "b.c": 1
               }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "description": "Replacing document with dotted key in embedded doc on pre-3.6 server yields server-side error",
-      "runOnRequirements": [
-        {
-          "maxServerVersion": "3.4.99"
-        }
-      ],
-      "operations": [
-        {
-          "name": "findOneAndReplace",
-          "object": "collection0",
-          "arguments": {
-            "filter": {
-              "_id": 1
-            },
-            "replacement": {
-              "_id": 1,
-              "a": {
-                "b.c": 1
-              }
-            }
-          },
-          "expectError": {
-            "isClientError": false
-          }
-        }
-      ],
-      "expectEvents": [
-        {
-          "client": "client0",
-          "events": [
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "findAndModify": "coll0",
-                  "query": {
-                    "_id": 1
-                  },
-                  "update": {
-                    "_id": 1,
-                    "a": {
-                      "b.c": 1
-                    }
-                  },
-                  "new": {
-                    "$$unsetOrMatches": false
-                  }
-                }
-              }
-            }
-          ]
-        }
-      ],
-      "outcome": [
-        {
-          "collectionName": "coll0",
-          "databaseName": "crud-tests",
-          "documents": [
-            {
-              "_id": 1
             }
           ]
         }

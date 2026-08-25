@@ -118,8 +118,6 @@ describe('Connections Survive Primary Step Down - prose', function () {
     'Shutdown in progress - Reset Connection Pool',
     { requires: { topology: ['replicaset'] } },
     () => {
-      // This test should be run on all server versions >= 4.0.
-
       // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 91}}``
       const failPoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',
@@ -146,8 +144,6 @@ describe('Connections Survive Primary Step Down - prose', function () {
     'Interrupted at shutdown - Reset Connection Pool',
     { requires: { topology: ['replicaset'] } },
     () => {
-      // This test should be run on all server versions >= 4.0.
-
       // - Set the following fail point: ``{configureFailPoint: "failCommand", mode: {times: 1}, data: {failCommands: ["insert"], errorCode: 11600}}``
       const failPoint: FailCommandFailPoint = {
         configureFailPoint: 'failCommand',

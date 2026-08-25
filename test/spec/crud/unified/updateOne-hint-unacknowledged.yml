@@ -26,36 +26,6 @@ initialData:
       - { _id: 2, x: 22 }
 
 tests:
-  - description: "Unacknowledged updateOne with hint string fails with client-side error on pre-4.2 server"
-    runOnRequirements:
-      - maxServerVersion: "4.0.99"
-    operations:
-      - object: *collection0
-        name: updateOne
-        arguments:
-          filter: &filter { _id: { $gt: 1 } }
-          update: &update { $inc: { x: 1 } }
-          hint: _id_
-        expectError:
-          isClientError: true
-    expectEvents: &noEvents
-      - client: *client0
-        events: []
-
-  - description: "Unacknowledged updateOne with hint document fails with client-side error on pre-4.2 server"
-    runOnRequirements:
-      - maxServerVersion: "4.0.99"
-    operations:
-      - object: *collection0
-        name: updateOne
-        arguments:
-          filter: *filter
-          update: *update
-          hint: { _id: 1 }
-        expectError:
-          isClientError: true
-    expectEvents: *noEvents
-
   - description: "Unacknowledged updateOne with hint string on 4.2+ server"
     runOnRequirements:
       - minServerVersion: "4.2.0"
@@ -63,8 +33,8 @@ tests:
       - object: *collection0
         name: updateOne
         arguments:
-          filter: *filter
-          update: *update
+          filter: &filter { _id: { $gt: 1 } }
+          update: &update { $inc: { x: 1 } }
           hint: _id_
         expectResult: &unacknowledgedResult { $$unsetOrMatches: { acknowledged: { $$unsetOrMatches: false } } }
     expectEvents: &events

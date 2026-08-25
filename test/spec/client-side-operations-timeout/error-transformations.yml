@@ -2,7 +2,6 @@ description: "MaxTimeMSExpired server errors are transformed into a custom timeo
 
 schemaVersion: "1.26"
 
-# failCommand is available on 4.0 for replica sets and 4.2 for sharded clusters.
 runOnRequirements:
   - minServerVersion: "4.0"
     topologies: ["replicaset"]

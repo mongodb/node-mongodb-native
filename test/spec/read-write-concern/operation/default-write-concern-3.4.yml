@@ -1,5 +1,4 @@
 # Test that setting a default write concern does not add a write concern to the command sent over the wire.
-# Test operations that require 3.4+ server, where all commands started to accept a write concern.
 
 description: default-write-concern-3.4
 

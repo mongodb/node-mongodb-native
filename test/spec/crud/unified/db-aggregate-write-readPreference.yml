@@ -3,7 +3,7 @@ description: db-aggregate-write-readPreference
 schemaVersion: '1.4'
 
 runOnRequirements:
-  # 3.6+ non-standalone is needed to utilize $readPreference in OP_MSG.
+  # A non-standalone topology is needed to utilize $readPreference in OP_MSG.
   # Serverless does not support $listLocalSessions and $currentOp stages, and
   # mongos does not allow combining them with $out or $merge.
   - minServerVersion: "3.6"
@@ -71,9 +71,7 @@ tests:
 
   - description: "Database-level aggregate with $out omits read preference for pre-5.0 server"
     runOnRequirements:
-      # MongoDB 4.2 introduced support for read concerns and write stages.
-      # Pre-4.2 servers may allow a "local" read concern anyway, but some
-      # drivers may avoid inheriting a client-level read concern for pre-4.2.
+      # Servers before 5.0 do not forward the read preference for aggregate commands with a write stage.
       - minServerVersion: "4.2"
         maxServerVersion: "4.4.99"
         serverless: "forbid"
