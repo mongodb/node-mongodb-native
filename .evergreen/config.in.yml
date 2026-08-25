@@ -21,7 +21,8 @@ timeout_secs: 300
 # A stalled task is usually a leaked child process still holding the command's
 # stdout open, so dump the process tables before the host is reclaimed. On Windows
 # `ps` only lists cygwin processes, hence `tasklist` for native ones. Every command
-# is guarded so the handler cannot itself fail or hang.
+# is `|| true` so a missing tool does not fail the handler; evergreen bounds the block
+# as a whole with its 15 minute callback timeout.
 timeout:
   - command: shell.exec
     params:
