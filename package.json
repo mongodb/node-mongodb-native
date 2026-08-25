@@ -98,7 +98,7 @@
     "mocha-sinon": "^2.1.2",
     "mongodb-client-encryption": "^7.2.1",
     "nyc": "^17.1.0",
-    "prettier": "^3.6.2",
+    "prettier": "3.6.2",
     "semver": "^7.8.5",
     "sinon": "^18.0.1",
     "sinon-chai": "^4.0.1",
