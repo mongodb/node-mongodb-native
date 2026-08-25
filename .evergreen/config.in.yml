@@ -13,13 +13,28 @@ command_type: system
 # That roughly accounts for variable system performance for various buildvariants
 exec_timeout_secs: 7200
 
+# Default idle timeout for every command that does not set its own `timeout_secs`.
+# Commands that need something tighter set `timeout_secs` next to `command:`, which wins.
+timeout_secs: 300
+
 # What to do when evergreen hits the timeout (`post:` tasks are run automatically)
+# A stalled task is usually a leaked child process still holding the command's
+# stdout open, so dump the process tables before the host is reclaimed. On Windows
+# `ps` only lists cygwin processes, hence `tasklist` for native ones. Every command
+# is guarded so the handler cannot itself fail or hang.
 timeout:
-  - command: subprocess.exec
+  - command: shell.exec
     params:
-      binary: ls
-      args:
-        - "-la"
+      shell: bash
+      script: |
+        echo "--- task directory ---"
+        ls -la || true
+        echo "--- unix/cygwin process table ---"
+        ps -ef || true
+        echo "--- windows process table ---"
+        tasklist //V || true
+        echo "--- listening sockets ---"
+        netstat -an || ss -tuna || true
 
 functions:
   "assume secrets manager role": &assume_secrets_manager_role
@@ -129,7 +144,6 @@ functions:
     - <<: *assume_secrets_manager_role
     - command: subprocess.exec
       type: test
-      timeout_secs: 300
       params:
         env:
           TEST_CSFLE: "true"
@@ -178,7 +192,6 @@ functions:
   "run-lb-tests":
     - command: subprocess.exec
       type: test
-      timeout_secs: 300
       params:
         add_expansions_to_env: true
         binary: bash
@@ -189,7 +202,6 @@ functions:
   "run-compression-tests":
     - command: subprocess.exec
       type: test
-      timeout_secs: 300
       params:
         binary: bash
         working_dir: src
@@ -682,6 +694,11 @@ functions:
   "run spec driver benchmarks":
     - command: subprocess.exec
       type: test
+      # The benchmark runner prints one line per benchmark, only once that benchmark
+      # finishes, and each one runs until it accumulates 5 minutes of task time or
+      # 100 iterations (test/benchmarks/driver_bench/src/runner.mts). So a single
+      # benchmark is legitimately silent for longer than the project-wide default.
+      timeout_secs: 600
       params:
         working_dir: "src"
         env:
