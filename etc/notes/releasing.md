@@ -80,7 +80,7 @@ The MongoDB driver can now generate a cup of joe.
     - Check the performance metrics to make sure there are no regressions.
 1. On slack notify `#node-driver-docs`, `#nodejs-devtools`, and `#mongoose` that we intend to publish a release.
     - You may skip this step if you are releasing a package other than the driver.
-1. Add the `Team Review` label to the release PR. This is a grace period before release that prompts other
+1. Add the `Team Review` label to the release PR. This encourages a grace period before release that prompts other
    engineers to contribute their review, and requires sign-off from another team member before merge.
 1. **If there are new or changed experimental features**, update `EXPERIMENTAL_FEATURES.md`
     - Add descriptions for any new `@experimental` features
