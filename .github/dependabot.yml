@@ -14,11 +14,11 @@ updates:
     schedule:
       interval: "monthly"
     ignore:
-      # We intentionally track the floating v4 tag so CodeQL CLI updates and
-      # server-side flag changes are picked up automatically. Pinning to an exact
-      # patch makes this a recurring manual chore and risks breaking when a
-      # server-side flag is removed. Major bumps are still surfaced; update this
-      # range when we move to v5.
+      # Interim rule: suppress patch-level pin PRs (e.g. v4 -> 4.37.3) for as long as
+      # we reference the floating v4 tag, which GitHub recommends so that CodeQL CLI
+      # updates and server-side flag changes are picked up automatically.
+      # REMOVE THIS RULE when NODE-7721 pins our actions to commit SHAs: dependabot
+      # must then be free to advance the pinned SHA within the v4 line.
       - dependency-name: "github/codeql-action"
         versions: ["4.x"]
   - package-ecosystem: "npm" # See documentation for possible values
@@ -26,12 +26,6 @@ updates:
     schedule:
       interval: "monthly"
     ignore:
-      # NODE-7473 moved us to chai 5; chai 6 is not yet evaluated.
-      - dependency-name: "chai"
-        versions: [">=6.0.0"]
-      # sinon-chai 5.x+ is not yet evaluated against our chai version.
-      - dependency-name: "sinon-chai"
-        versions: [">=5.0.0"]
       # NODE-7616: eslint-plugin-mocha 11+ requires eslint 10 (NODE-7615).
       - dependency-name: "eslint-plugin-mocha"
         versions: [">=11.0.0"]
