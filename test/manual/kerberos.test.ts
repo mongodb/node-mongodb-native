@@ -41,10 +41,10 @@ describe('Kerberos', function () {
   });
 
   const krb5Uri = process.env.MONGODB_URI;
-  const host = process.env.SASL_HOST_BUILD;
+  const host = process.env.SASL_HOST;
 
-  if (!process.env.PRINCIPAL_BUILD) {
-    console.error('skipping Kerberos tests, PRINCIPAL_BUILD environment variable is not defined');
+  if (!process.env.PRINCIPAL) {
+    console.error('skipping Kerberos tests, PRINCIPAL environment variable is not defined');
     return;
   }
 
@@ -219,7 +219,7 @@ describe('Kerberos', function () {
       it('authenticates', async function () {
         client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
           authMechanismProperties: {
-            SERVICE_HOST: 'ldaptest.build.10gen.cc'
+            SERVICE_HOST: 'ldaptest.10gen.cc'
           }
         });
 
@@ -256,7 +256,7 @@ describe('Kerberos', function () {
 
   it('should fail to authenticate with bad credentials', async function () {
     client = new MongoClient(
-      krb5Uri.replace(encodeURIComponent(process.env.PRINCIPAL_BUILD), 'bad%40creds.cc')
+      krb5Uri.replace(encodeURIComponent(process.env.PRINCIPAL), 'bad%40creds.cc')
     );
     const err = await client.connect().catch(e => e);
     expect(err.message).to.match(/Authentication failed/);
