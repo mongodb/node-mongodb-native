@@ -219,7 +219,7 @@ describe('Kerberos', function () {
       it('authenticates', async function () {
         client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
           authMechanismProperties: {
-            SERVICE_HOST: 'ldaptest.10gen.cc'
+            SERVICE_HOST: 'ldaptest.build.10gen.cc'
           }
         });
 
