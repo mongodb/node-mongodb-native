@@ -56,6 +56,7 @@ import {
 import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
+  type DriverIndexesOptions,
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
@@ -635,7 +636,8 @@ export class Collection<TSchema extends Document = Document> {
    */
   async createIndex(
     indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
+    options?: CreateIndexesOptions,
+    driverOptions?: DriverIndexesOptions
   ): Promise<string> {
     const indexes = await executeOperation(
       this.client,
@@ -643,7 +645,8 @@ export class Collection<TSchema extends Document = Document> {
         this,
         this.collectionName,
         indexSpec,
-        resolveOptions(this, options)
+        resolveOptions(this, options),
+        driverOptions
       )
     );
 
@@ -683,7 +686,8 @@ export class Collection<TSchema extends Document = Document> {
    */
   async createIndexes(
     indexSpecs: IndexDescription[],
-    options?: CreateIndexesOptions
+    options?: CreateIndexesOptions,
+    driverOptions?: DriverIndexesOptions
   ): Promise<string[]> {
     return await executeOperation(
       this.client,
@@ -691,7 +695,8 @@ export class Collection<TSchema extends Document = Document> {
         this,
         this.collectionName,
         indexSpecs,
-        resolveOptions(this, { ...options, maxTimeMS: undefined })
+        resolveOptions(this, { ...options, maxTimeMS: undefined }),
+        driverOptions
       )
     );
   }
