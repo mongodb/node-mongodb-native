@@ -38,6 +38,23 @@ jobs:
             echo "$COMMENTER not permitted to trigger notes" && exit 1
           fi
 
+      # Release PRs are always branches in this repository, so refuse to check
+      # out and run code from a fork
+      - name: check if the PR comes from this repository
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event_name == 'issue_comment' && github.event.issue.number || inputs.releasePr }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -o pipefail
+          HEAD_REPOSITORY=$(gh api "/repos/$REPOSITORY/pulls/$PR_NUMBER" --jq ".head.repo.full_name")
+          if [ "$HEAD_REPOSITORY" = "$REPOSITORY" ]; then
+            echo "PR #$PR_NUMBER is from $REPOSITORY!" && exit 0
+          else
+            echo "PR #$PR_NUMBER is from $HEAD_REPOSITORY, not $REPOSITORY" && exit 1
+          fi
+
       # checkout the HEAD ref from prNumber
       - uses: actions/checkout@v7
         with:
