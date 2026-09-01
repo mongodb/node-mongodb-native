@@ -21,7 +21,7 @@ information explaining why this change is valuable.
 
 #### For bug fixes
 
-<!-- Delete this section if this PR is not a bug fix. -->
+<!-- Remove this section if this PR is not a bug fix. -->
 
 **Current (incorrect) behaviour:**
 
