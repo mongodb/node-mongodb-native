@@ -19,6 +19,22 @@ Remove this section if there is an associated Jira ticket explaining the motivat
 information explaining why this change is valuable.
 -->
 
+#### For bug fixes
+
+<!-- Delete this section if this PR is not a bug fix. -->
+
+**Current (incorrect) behaviour:**
+
+**Expected behaviour:**
+
+**How to reproduce:**
+
+<!-- Minimal code sample or the failing test, plus any relevant configuration. -->
+
+**Affected versions:**
+
+<!-- Driver version(s) where the bug appears, plus Node.js and MongoDB server versions and topology if they matter. -->
+
 ### Release Highlight
 
 <!-- 
