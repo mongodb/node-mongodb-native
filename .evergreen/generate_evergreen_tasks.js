@@ -715,8 +715,6 @@ function addPerformanceTasks() {
 
   const tasks = [
     makePerfTask('run-spec-benchmark-tests-node-server', {}),
-    makePerfTask('run-spec-benchmark-tests-node-server-timeoutMS-120000', { timeoutMS: 120000 }),
-    makePerfTask('run-spec-benchmark-tests-node-server-timeoutMS-0', { timeoutMS: 0 }),
     makePerfTask('run-spec-benchmark-tests-node-server-monitorCommands-true', {
       monitorCommands: true
     }),
