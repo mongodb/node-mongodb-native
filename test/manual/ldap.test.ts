@@ -11,7 +11,7 @@ describe('LDAP', function () {
   it('Should correctly authenticate against ldap', async function () {
     const client = new MongoClient(MONGODB_URI);
 
-    let thrown: Error;
+    let thrown: Error | undefined;
     try {
       await client.connect();
     } catch (error) {
