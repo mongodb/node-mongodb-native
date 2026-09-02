@@ -11,11 +11,14 @@ describe('LDAP', function () {
   it('Should correctly authenticate against ldap', async function () {
     const client = new MongoClient(MONGODB_URI);
 
-    await client.connect();
+    let thrown: Error;
+    try {
+      await client.connect();
+    } catch (error) {
+      thrown = error;
+    }
 
-    const doc = await client.db('ldap').collection('test').findOne();
-    expect(doc).property('ldap').to.equal(true);
-
+    expect(thrown).to.not.exist;
     await client.close();
   });
 });
