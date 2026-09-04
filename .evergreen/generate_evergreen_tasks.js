@@ -916,7 +916,7 @@ fileData.tasks = [
 fileData.buildvariants = [...(fileData.buildvariants ?? []), ...BUILD_VARIANTS];
 
 // gate everything on lint
-const LINT_GATE_TASK = 'run-lint-checks';
+const    LINT_GATE_TASK    =    'run-lint-checks';
 const LINT_GATE = { name: LINT_GATE_TASK, variant: 'lint', patch_optional: true };
 for (const task of fileData.tasks) {
   if (task.name === LINT_GATE_TASK) continue;
