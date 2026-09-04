@@ -713,6 +713,10 @@ tasks:
           add_expansions_to_env: true
           args:
             - src/.evergreen/run-deployed-gcp-kms-tests.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-gcpkms-fail-task
     commands:
       - command: expansions.update
@@ -734,6 +738,10 @@ tasks:
             NODE_LTS_VERSION: ${NODE_LTS_VERSION}
           args:
             - src/.evergreen/run-gcp-kms-tests.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-azurekms-task
     commands:
       - command: expansions.update
@@ -750,6 +758,10 @@ tasks:
           add_expansions_to_env: true
           args:
             - src/.evergreen/run-deployed-azure-kms-tests.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-azurekms-fail-task
     commands:
       - command: expansions.update
@@ -771,6 +783,10 @@ tasks:
             NODE_LTS_VERSION: ${NODE_LTS_VERSION}
           args:
             - src/.evergreen/run-azure-kms-tests.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: oidc-auth-test-k8s-latest-eks
     commands:
       - func: install dependencies
@@ -791,6 +807,10 @@ tasks:
             - AWS_SESSION_TOKEN
           args:
             - .evergreen/run-oidc-tests-k8s.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: oidc-auth-test-k8s-latest-gke
     commands:
       - func: install dependencies
@@ -811,6 +831,10 @@ tasks:
             - AWS_SESSION_TOKEN
           args:
             - .evergreen/run-oidc-tests-k8s.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: oidc-auth-test-k8s-latest-aks
     commands:
       - func: install dependencies
@@ -831,6 +855,10 @@ tasks:
             - AWS_SESSION_TOKEN
           args:
             - .evergreen/run-oidc-tests-k8s.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: oidc-auth-test-azure-latest
     commands:
       - func: install dependencies
@@ -858,6 +886,10 @@ tasks:
             SCRIPT: run-oidc-unified-tests.sh
           args:
             - .evergreen/run-oidc-tests-azure.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: oidc-auth-test-test-latest
     commands:
       - func: install dependencies
@@ -885,6 +917,10 @@ tasks:
             SCRIPT: run-oidc-unified-tests.sh
           args:
             - .evergreen/run-oidc-tests-test.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: oidc-auth-test-gcp-latest
     commands:
       - func: install dependencies
@@ -900,6 +936,10 @@ tasks:
             SCRIPT: run-oidc-prose-tests.sh
           args:
             - .evergreen/run-oidc-tests-gcp.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-aws-lambda-deployed
     commands:
       - command: expansions.update
@@ -923,6 +963,10 @@ tasks:
             AWS_REGION: us-east-1
           args:
             - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/run-deployed-lambda-aws-tests.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-search-index-helpers
     commands:
       - command: expansions.update
@@ -939,6 +983,10 @@ tasks:
           add_expansions_to_env: true
           args:
             - .evergreen/run-search-index-management-tests.sh
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-bson-latest-driver-7.0.0-unit-tests
     commands:
       - command: expansions.update
@@ -955,6 +1003,10 @@ tasks:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
       - func: log state
       - func: run unit tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-bson-latest-driver-7.0.0-server-tests
     commands:
       - command: expansions.update
@@ -978,6 +1030,10 @@ tasks:
       - func: strip snappy install from test runner
       - func: log state
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-bson-latest-driver-7.0.0-replica_set-tests
     commands:
       - command: expansions.update
@@ -1001,6 +1057,10 @@ tasks:
       - func: strip snappy install from test runner
       - func: log state
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-bson-latest-driver-7.0.0-sharded_cluster-tests
     commands:
       - command: expansions.update
@@ -1024,6 +1084,10 @@ tasks:
       - func: strip snappy install from test runner
       - func: log state
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-server
     tags:
       - latest
@@ -1040,6 +1104,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-replica_set
     tags:
       - latest
@@ -1056,6 +1124,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-sharded_cluster
     tags:
       - latest
@@ -1072,6 +1144,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-server
     tags:
       - rapid
@@ -1088,6 +1164,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-replica_set
     tags:
       - rapid
@@ -1104,6 +1184,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-sharded_cluster
     tags:
       - rapid
@@ -1120,6 +1204,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-server
     tags:
       - '9.0'
@@ -1136,6 +1224,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-replica_set
     tags:
       - '9.0'
@@ -1152,6 +1244,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-sharded_cluster
     tags:
       - '9.0'
@@ -1168,6 +1264,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-server
     tags:
       - '8.0'
@@ -1184,6 +1284,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-replica_set
     tags:
       - '8.0'
@@ -1200,6 +1304,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-sharded_cluster
     tags:
       - '8.0'
@@ -1216,6 +1324,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-server
     tags:
       - '7.0'
@@ -1232,6 +1344,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-replica_set
     tags:
       - '7.0'
@@ -1248,6 +1364,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-sharded_cluster
     tags:
       - '7.0'
@@ -1264,6 +1384,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-server
     tags:
       - '6.0'
@@ -1280,6 +1404,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-replica_set
     tags:
       - '6.0'
@@ -1296,6 +1424,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-sharded_cluster
     tags:
       - '6.0'
@@ -1312,6 +1444,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-server
     tags:
       - '5.0'
@@ -1328,6 +1464,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-replica_set
     tags:
       - '5.0'
@@ -1344,6 +1484,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-sharded_cluster
     tags:
       - '5.0'
@@ -1360,6 +1504,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-server
     tags:
       - '4.4'
@@ -1376,6 +1524,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-replica_set
     tags:
       - '4.4'
@@ -1392,6 +1544,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-sharded_cluster
     tags:
       - '4.4'
@@ -1408,6 +1564,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-server-v1-api
     tags:
       - latest
@@ -1428,6 +1588,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-x509-authentication
     tags:
       - latest
@@ -1437,6 +1601,10 @@ tasks:
       - func: install dependencies
       - func: assume secrets manager role
       - func: run x509 auth tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-sfp
     tags:
       - latest
@@ -1445,12 +1613,20 @@ tasks:
       - func: install dependencies
       - func: assume secrets manager role
       - func: run sfp tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
     commands:
       - func: install dependencies
       - func: run atlas tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-load-balanced
     tags:
       - latest
@@ -1472,6 +1648,10 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-load-balanced
     tags:
       - latest
@@ -1493,6 +1673,10 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-load-balanced
     tags:
       - latest
@@ -1514,6 +1698,10 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-load-balanced
     tags:
       - latest
@@ -1535,6 +1723,10 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-load-balanced
     tags:
       - latest
@@ -1556,6 +1748,10 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-load-balanced
     tags:
       - latest
@@ -1577,6 +1773,10 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-load-balanced
     tags:
       - latest
@@ -1598,6 +1798,10 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-auth-kerberos
     tags:
       - auth
@@ -1611,6 +1815,10 @@ tasks:
       - func: install dependencies
       - func: assume secrets manager role
       - func: run kerberos tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-auth-ldap
     tags:
       - auth
@@ -1619,6 +1827,10 @@ tasks:
       - func: install dependencies
       - func: assume secrets manager role
       - func: run ldap tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-socks5
     tags:
       - socks5
@@ -1632,6 +1844,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run socks5 tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-socks5-csfle
     tags:
       - socks5-csfle
@@ -1646,6 +1862,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run socks5 tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-socks5-tls
     tags:
       - socks5-tls
@@ -1660,6 +1880,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run socks5 tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-snappy-compression
     tags:
       - latest
@@ -1678,6 +1902,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run-compression-tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-zstd-compression
     tags:
       - latest
@@ -1696,6 +1924,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run-compression-tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-tls-support-latest
     tags:
       - tls-support
@@ -1712,6 +1944,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-tls-support-9.0
     tags:
       - tls-support
@@ -1728,6 +1964,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-tls-support-8.0
     tags:
       - tls-support
@@ -1744,6 +1984,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-tls-support-7.0
     tags:
       - tls-support
@@ -1760,6 +2004,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-tls-support-6.0
     tags:
       - tls-support
@@ -1776,6 +2024,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-tls-support-5.0
     tags:
       - tls-support
@@ -1792,6 +2044,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-tls-support-4.4
     tags:
       - tls-support
@@ -1808,6 +2064,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - command: expansions.update
@@ -1823,6 +2083,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test with regular aws credentials
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - command: expansions.update
@@ -1838,6 +2102,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test with assume role credentials
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - command: expansions.update
@@ -1853,6 +2121,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test with aws EC2 credentials
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - command: expansions.update
@@ -1868,6 +2140,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test with aws credentials as environment variables
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - command: expansions.update
@@ -1883,6 +2159,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test with aws credentials and session token as environment variables
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: aws-latest-auth-test-run-aws-ECS-auth-test
     commands:
       - command: expansions.update
@@ -1898,6 +2178,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws ECS auth test
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
     commands:
       - command: expansions.update
@@ -1913,6 +2197,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
     commands:
       - command: expansions.update
@@ -1928,6 +2216,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-spec-benchmark-tests-node-server
     tags:
       - run-spec-benchmark-tests
@@ -1947,6 +2239,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
       - func: perf send
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-spec-benchmark-tests-node-server-monitorCommands-true
     tags:
       - run-spec-benchmark-tests
@@ -1966,6 +2262,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
       - func: perf send
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-spec-benchmark-tests-node-server-logging
     tags:
       - run-spec-benchmark-tests
@@ -1985,6 +2285,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
       - func: perf send
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-unit-tests-node-20.19.0
     tags:
       - unit-tests
@@ -1996,6 +2300,10 @@ tasks:
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
       - func: run unit tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-unit-tests-node-22
     tags:
       - unit-tests
@@ -2007,6 +2315,10 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '22'}
       - func: install dependencies
       - func: run unit tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-unit-tests-node-24
     tags:
       - unit-tests
@@ -2018,6 +2330,10 @@ tasks:
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
       - func: run unit tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-lint-checks
     tags:
       - lint-checks
@@ -2043,6 +2359,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: check resource management feature integration
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: check-types-typescript-current
     tags:
       - check-types-typescript-current
@@ -2056,6 +2376,10 @@ tasks:
             - {key: TS_VERSION, value: current}
       - func: install dependencies
       - func: check types
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: check-types-typescript-5.6
     tags:
       - check-types-typescript-5.6
@@ -2069,6 +2393,10 @@ tasks:
             - {key: TS_VERSION, value: '5.6'}
       - func: install dependencies
       - func: check types
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: compile-driver-typescript-current
     tags:
       - compile-driver-typescript-current
@@ -2082,6 +2410,10 @@ tasks:
             - {key: TS_VERSION, value: current}
       - func: install dependencies
       - func: compile driver
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: download-and-merge-coverage
     tags: []
     commands:
@@ -2090,6 +2422,9 @@ tasks:
       - name: '*'
         variant: '* !performance-tests'
         status: '*'
+        patch_optional: true
+      - name: run-lint-checks
+        variant: lint
         patch_optional: true
   - name: run-custom-csfle-tests-5.0
     tags:
@@ -2108,6 +2443,10 @@ tasks:
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-custom-csfle-tests-rapid
     tags:
       - run-custom-dependency-tests
@@ -2125,6 +2464,10 @@ tasks:
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: run-custom-csfle-tests-latest
     tags:
       - run-custom-dependency-tests
@@ -2142,6 +2485,10 @@ tasks:
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-driver-mongodb-client-encryption-7.0.0
     tags:
       - run-custom-dependency-tests
@@ -2160,6 +2507,10 @@ tasks:
         vars:
           PACKAGE: mongodb-client-encryption@7.0.0
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-alpine-fle
     tags:
       - alpine-fle
@@ -2178,6 +2529,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: build and test alpine FLE
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -2196,6 +2551,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-replica_set-noauth
     tags:
       - latest
@@ -2214,6 +2573,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-sharded_cluster-noauth
     tags:
       - latest
@@ -2232,6 +2595,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-server-noauth
     tags:
       - rapid
@@ -2250,6 +2617,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-replica_set-noauth
     tags:
       - rapid
@@ -2268,6 +2639,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-sharded_cluster-noauth
     tags:
       - rapid
@@ -2286,6 +2661,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-server-noauth
     tags:
       - '9.0'
@@ -2304,6 +2683,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-replica_set-noauth
     tags:
       - '9.0'
@@ -2322,6 +2705,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-sharded_cluster-noauth
     tags:
       - '9.0'
@@ -2340,6 +2727,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-server-noauth
     tags:
       - '8.0'
@@ -2358,6 +2749,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-replica_set-noauth
     tags:
       - '8.0'
@@ -2376,6 +2771,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-sharded_cluster-noauth
     tags:
       - '8.0'
@@ -2394,6 +2793,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-server-noauth
     tags:
       - '7.0'
@@ -2412,6 +2815,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-replica_set-noauth
     tags:
       - '7.0'
@@ -2430,6 +2837,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-sharded_cluster-noauth
     tags:
       - '7.0'
@@ -2448,6 +2859,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-server-noauth
     tags:
       - '6.0'
@@ -2466,6 +2881,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-replica_set-noauth
     tags:
       - '6.0'
@@ -2484,6 +2903,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-sharded_cluster-noauth
     tags:
       - '6.0'
@@ -2502,6 +2925,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-server-noauth
     tags:
       - '5.0'
@@ -2520,6 +2947,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-replica_set-noauth
     tags:
       - '5.0'
@@ -2538,6 +2969,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-sharded_cluster-noauth
     tags:
       - '5.0'
@@ -2556,6 +2991,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-server-noauth
     tags:
       - '4.4'
@@ -2574,6 +3013,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-replica_set-noauth
     tags:
       - '4.4'
@@ -2592,6 +3035,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-sharded_cluster-noauth
     tags:
       - '4.4'
@@ -2610,6 +3057,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-lambda-example
     tags:
       - latest
@@ -2625,6 +3076,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run lambda handler example tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-lambda-aws-auth-example
     tags:
       - latest
@@ -2643,6 +3098,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run lambda handler example tests with aws auth
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-csfle-mongocryptd
     tags:
       - latest
@@ -2659,6 +3118,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-csfle-mongocryptd
     tags:
       - rapid
@@ -2675,6 +3138,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-csfle-mongocryptd
     tags:
       - '9.0'
@@ -2691,6 +3158,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-csfle-mongocryptd
     tags:
       - '8.0'
@@ -2707,6 +3178,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-csfle-mongocryptd
     tags:
       - '7.0'
@@ -2723,6 +3198,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-csfle-mongocryptd
     tags:
       - '6.0'
@@ -2739,6 +3218,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-csfle-mongocryptd
     tags:
       - '5.0'
@@ -2755,6 +3238,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-csfle-mongocryptd
     tags:
       - '4.4'
@@ -2771,6 +3258,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-server-ssl
     tags:
       - latest
@@ -2791,6 +3282,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-replica_set-ssl
     tags:
       - latest
@@ -2811,6 +3306,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-sharded_cluster-ssl
     tags:
       - latest
@@ -2831,6 +3330,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-server-ssl
     tags:
       - rapid
@@ -2851,6 +3354,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-replica_set-ssl
     tags:
       - rapid
@@ -2871,6 +3378,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-rapid-sharded_cluster-ssl
     tags:
       - rapid
@@ -2891,6 +3402,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-server-ssl
     tags:
       - '9.0'
@@ -2911,6 +3426,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-replica_set-ssl
     tags:
       - '9.0'
@@ -2931,6 +3450,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-9.0-sharded_cluster-ssl
     tags:
       - '9.0'
@@ -2951,6 +3474,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-server-ssl
     tags:
       - '8.0'
@@ -2971,6 +3498,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-replica_set-ssl
     tags:
       - '8.0'
@@ -2991,6 +3522,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-8.0-sharded_cluster-ssl
     tags:
       - '8.0'
@@ -3011,6 +3546,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-server-ssl
     tags:
       - '7.0'
@@ -3031,6 +3570,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-replica_set-ssl
     tags:
       - '7.0'
@@ -3051,6 +3594,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-7.0-sharded_cluster-ssl
     tags:
       - '7.0'
@@ -3071,6 +3618,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-server-ssl
     tags:
       - '6.0'
@@ -3091,6 +3642,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-replica_set-ssl
     tags:
       - '6.0'
@@ -3111,6 +3666,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-6.0-sharded_cluster-ssl
     tags:
       - '6.0'
@@ -3131,6 +3690,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-server-ssl
     tags:
       - '5.0'
@@ -3151,6 +3714,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-replica_set-ssl
     tags:
       - '5.0'
@@ -3171,6 +3738,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-5.0-sharded_cluster-ssl
     tags:
       - '5.0'
@@ -3191,6 +3762,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-server-ssl
     tags:
       - '4.4'
@@ -3211,6 +3786,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-replica_set-ssl
     tags:
       - '4.4'
@@ -3231,6 +3810,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-4.4-sharded_cluster-ssl
     tags:
       - '4.4'
@@ -3251,6 +3834,10 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
 task_groups:
   - name: test_gcpkms_task_group
     setup_group_can_fail_task: true
