@@ -272,6 +272,10 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
     remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
       `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
     );
+    // TODO(NODE-6893): this is a mixed bag of index options (background, unique) and command
+    // options (the write concern fields, timeoutMS), which the two parameter overload sorts via
+    // the index option allowlist. When validateOptions defaults to false, move the command
+    // options into the third parameter.
     await stream.chunks.createIndex(index, {
       ...stream.writeConcern,
       background: true,
@@ -379,6 +383,8 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
       `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
     );
 
+    // TODO(NODE-6893): timeoutMS is a command option; move it into the third parameter when
+    // validateOptions defaults to false.
     await stream.files.createIndex(index, { background: false, timeoutMS: remainingTimeMS });
   }
 

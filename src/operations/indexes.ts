@@ -162,6 +162,15 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   hidden?: boolean;
 }
 
+/** @public */
+export interface CreateIndexesCommandOptions
+  extends Omit<CommandOperationOptions, 'collation' | 'maxTimeMS' | 'explain'> {
+  /** ...votingMembers etc. */
+  commitQuorum?: number | string;
+  /** @deprecated will default to false in a future release */
+  validateOptions?: boolean;
+}
+
 function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
   return Array.isArray(t) && t.length === 2 && isIndexDirection(t[1]);
 }
@@ -197,19 +206,24 @@ function constructIndexDescriptionMap(indexSpec: IndexSpecification): Map<string
 }
 
 /**
- * Receives an index description and returns a modified index description which has had invalid options removed
- * from the description and has mapped the `version` option to the `v` option.
+ * Receives an index description and returns a modified index description which has mapped the
+ * `version` option to the `v` option.
+ *
+ * When `allowUnknownIndexOptions` is `false` (the default), options that are not in the driver's
+ * `VALID_INDEX_OPTIONS` allowlist are removed from the description. When `true`, all options are
+ * retained and passed through to the server for validation.
  */
 function resolveIndexDescription(
-  description: IndexDescription
+  description: IndexDescription,
+  allowUnknownIndexOptions: boolean
 ): Omit<ResolvedIndexDescription, 'key'> {
-  const validProvidedOptions = Object.entries(description).filter(([optionName]) =>
-    VALID_INDEX_OPTIONS.has(optionName)
+  const providedOptions = Object.entries(description).filter(
+    ([optionName]) => allowUnknownIndexOptions || VALID_INDEX_OPTIONS.has(optionName)
   );
 
   return Object.fromEntries(
     // we support the `version` option, but the `createIndexes` command expects it to be the `v`
-    validProvidedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
+    providedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
   );
 }
 
@@ -251,11 +265,17 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions
+    indexOptions?: CreateIndexesOptions,
+    commandOptions?: CreateIndexesCommandOptions
   ) {
-    super(parent, options);
+    // When commandOptions is supplied the caller has separated the two kinds of options, so the
+    // command reads from it exclusively. Otherwise indexOptions is both, and the command reads
+    // from it as it always has. There is deliberately no fallback between the two.
+    const optionsForCommand: CreateIndexesOptions = commandOptions ?? indexOptions ?? {};
 
-    this.options = options ?? {};
+    super(parent, optionsForCommand);
+
+    this.options = { ...optionsForCommand };
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
     this.collectionName = collectionName;
@@ -264,9 +284,13 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
       const key =
         userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
       const name = userIndex.name ?? Array.from(key).flat().join('_');
-      const validIndexOptions = resolveIndexDescription(userIndex);
+      const validIndexOptions = resolveIndexDescription(
+        userIndex,
+        // TODO(seanrmilligan): set to false in a future release
+        commandOptions?.validateOptions ?? true
+      );
       return {
-        ...validIndexOptions,
+        ...indexOptions,
         name,
         key
       };
@@ -278,20 +302,28 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions
+    indexOptions?: CreateIndexesOptions,
+    commandOptions?: CreateIndexesCommandOptions
   ): CreateIndexesOperation {
-    return new CreateIndexesOperation(parent, collectionName, indexes, options);
+    return new CreateIndexesOperation(parent, collectionName, indexes, indexOptions, commandOptions);
   }
 
   static fromIndexSpecification(
     parent: OperationParent,
     collectionName: string,
     indexSpec: IndexSpecification,
-    options: CreateIndexesOptions = {}
+    indexOptions: CreateIndexesOptions = {},
+    commandOptions?: CreateIndexesCommandOptions
   ): CreateIndexesOperation {
     const key = constructIndexDescriptionMap(indexSpec);
-    const description: IndexDescription = { ...options, key };
-    return new CreateIndexesOperation(parent, collectionName, [description], options);
+    const description: IndexDescription = { ...indexOptions, key };
+    return new CreateIndexesOperation(
+      parent,
+      collectionName,
+      [description],
+      indexOptions,
+      commandOptions
+    );
   }
 
   override get commandName() {
