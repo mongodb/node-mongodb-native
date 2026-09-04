@@ -23,9 +23,9 @@ information explaining why this change is valuable.
 
 <!-- Remove this section if this PR is not a bug fix. -->
 
-**Current (incorrect) behaviour:**
+**Current (incorrect) behavior:**
 
-**Expected behaviour:**
+**Expected behavior:**
 
 **How to reproduce:**
 
