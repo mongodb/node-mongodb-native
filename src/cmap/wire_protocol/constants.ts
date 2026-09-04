@@ -14,4 +14,4 @@ export const OP_INSERT = 2002;
 export const OP_QUERY = 2004;
 export const OP_DELETE = 2006;
 export const OP_COMPRESSED = 2012;
-export const OP_MSG = 2013;
+export const    OP_MSG    =    2013;
