@@ -141,7 +141,7 @@ BASE_TASKS.push({
 
 BASE_TASKS.push({
   name: `test-x509-authentication`,
-  tags: ['latest', 'auth', 'x509'],
+  tags: ['auth', 'x509'],
   commands: [
     { func: 'install dependencies' },
     { func: 'assume secrets manager role' },
@@ -153,7 +153,7 @@ BASE_TASKS.push({
   // No `auth` tag: that tag would exclude this task from the Windows variants (WINDOWS_SKIP_TAGS),
   // but SFP is a transparent proxy we want to exercise on Windows too.
   name: `test-sfp`,
-  tags: ['latest', 'sfp'],
+  tags: ['sfp'],
   commands: [
     { func: 'install dependencies' },
     { func: 'assume secrets manager role' },
@@ -171,7 +171,7 @@ TASKS.push(
     },
     ...LB_VERSIONS.map(ver => ({
       name: `test-${ver}-load-balanced`,
-      tags: ['latest', 'sharded_cluster', 'load_balancer'],
+      tags: [ver, 'sharded_cluster', 'load_balancer'],
       commands: [
         updateExpansions({
           VERSION: ver,
@@ -211,7 +211,7 @@ TASKS.push(
     },
     {
       name: 'test-socks5',
-      tags: ['socks5'],
+      tags: ['latest', 'socks5'],
       commands: [
         updateExpansions({
           VERSION: 'latest',
@@ -224,7 +224,7 @@ TASKS.push(
     },
     {
       name: 'test-socks5-csfle',
-      tags: ['socks5-csfle'],
+      tags: ['latest', 'socks5-csfle'],
       commands: [
         updateExpansions({
           VERSION: 'latest',
@@ -238,7 +238,7 @@ TASKS.push(
     },
     {
       name: 'test-socks5-tls',
-      tags: ['socks5-tls'],
+      tags: ['latest', 'socks5-tls'],
       commands: [
         updateExpansions({
           SSL: 'ssl',
@@ -293,7 +293,7 @@ const AWS_LAMBDA_HANDLER_TASKS = [];
 // Add task for testing lambda example without aws auth.
 AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-example',
-  tags: ['latest', 'lambda'],
+  tags: ['rapid', 'lambda'],
   commands: [
     updateExpansions({
       NODE_LTS_VERSION: LOWEST_LTS,
@@ -309,7 +309,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
 // Add task for testing lambda example with aws auth.
 AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-aws-auth-example',
-  tags: ['latest', 'lambda'],
+  tags: ['rapid', 'lambda'],
   commands: [
     updateExpansions({
       NODE_LTS_VERSION: LOWEST_LTS,
@@ -328,7 +328,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
 for (const VERSION of TLS_VERSIONS) {
   TASKS.push({
     name: `test-tls-support-${VERSION}`,
-    tags: ['tls-support', `tls-support-${VERSION}`],
+    tags: [VERSION, 'tls-support', `tls-support-${VERSION}`],
     commands: [
       updateExpansions({
         VERSION,
@@ -360,6 +360,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
 
   const awsTasks = awsFuncs.map(fn => ({
     name: name(fn.func),
+    tags: [VERSION],
     commands: [
       updateExpansions({
         VERSION,
@@ -528,7 +529,7 @@ SINGLETON_TASKS.push(
     },
     {
       name: 'test-explicit-resource-management-feature-integration',
-      tags: ['resource-management'],
+      tags: ['latest', 'resource-management'],
       commands: [
         updateExpansions({
           VERSION: 'latest',
@@ -612,7 +613,7 @@ const customDependencyTests = [];
 for (const serverVersion of ['5.0', 'rapid', 'latest']) {
   customDependencyTests.push({
     name: `run-custom-csfle-tests-${serverVersion}`,
-    tags: ['run-custom-dependency-tests'],
+    tags: [serverVersion, 'run-custom-dependency-tests'],
     commands: [
       updateExpansions({
         NODE_LTS_VERSION: LOWEST_LTS,
@@ -631,7 +632,7 @@ for (const serverVersion of ['5.0', 'rapid', 'latest']) {
 
 customDependencyTests.push({
   name: `test-latest-driver-mongodb-client-encryption-7.0.0`,
-  tags: ['run-custom-dependency-tests'],
+  tags: ['7.0', 'run-custom-dependency-tests'],
   commands: [
     updateExpansions({
       NODE_LTS_VERSION: LOWEST_LTS,
@@ -674,7 +675,7 @@ SINGLETON_TASKS.push(...customDependencyTests);
 
 SINGLETON_TASKS.push({
   name: `test-alpine-fle`,
-  tags: ['alpine-fle'],
+  tags: ['latest', 'alpine-fle'],
   commands: [
     updateExpansions({
       NODE_LTS_VERSION: LOWEST_LTS,
@@ -694,7 +695,7 @@ SINGLETON_TASKS.push({
 function addPerformanceTasks() {
   const makePerfTask = (name, MONGODB_CLIENT_OPTIONS) => ({
     name,
-    tags: ['run-spec-benchmark-tests', 'performance'],
+    tags: ['v6.0-perf', 'run-spec-benchmark-tests', 'performance'],
     exec_timeout_secs: 7200,
     commands: [
       updateExpansions({
