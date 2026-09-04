@@ -915,6 +915,17 @@ fileData.tasks = [
 
 fileData.buildvariants = [...(fileData.buildvariants ?? []), ...BUILD_VARIANTS];
 
+// gate everything on lint
+const LINT_GATE_TASK = 'run-lint-checks';
+const LINT_GATE = { name: LINT_GATE_TASK, variant: 'lint', patch_optional: true };
+for (const task of fileData.tasks) {
+  if (task.name === LINT_GATE_TASK) continue;
+  // Appended, not assigned: download-and-merge-coverage fans in on `status: '*'`, which is
+  // satisfied by blocked tasks, so without its own gate it gets dispatched and fails with
+  // nothing to merge. Keep its fan-in and let the gate block it too.
+  task.depends_on = [...(task.depends_on ?? []), LINT_GATE];
+}
+
 fs.writeFileSync(
   `${__dirname}/config.yml`,
   yaml.dump(fileData, { lineWidth: 120, noRefs: true, flowLevel: 7, condenseFlow: false }),
