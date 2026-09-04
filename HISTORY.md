@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.7.0](https://github.com/mongodb/node-mongodb-native/compare/v7.6.0...v7.7.0) (2026-09-04)
+
+
+### Features
+
+* **NODE-7670:** update dependencies, including next BSON minor ([#5034](https://github.com/mongodb/node-mongodb-native/issues/5034)) ([995edbf](https://github.com/mongodb/node-mongodb-native/commit/995edbf636bb449c3041a15edda9f9fbd88fb939))
+
 ## [7.6.0](https://github.com/mongodb/node-mongodb-native/compare/v7.5.0...v7.6.0) (2026-08-21)
 
 
