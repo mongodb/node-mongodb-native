@@ -2243,52 +2243,6 @@ tasks:
       - name: run-lint-checks
         variant: lint
         patch_optional: true
-  - name: run-spec-benchmark-tests-node-server-timeoutMS-120000
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 7200
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: MONGODB_CLIENT_OPTIONS, value: '{"timeoutMS":120000}'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - func: perf send
-    depends_on:
-      - name: run-lint-checks
-        variant: lint
-        patch_optional: true
-  - name: run-spec-benchmark-tests-node-server-timeoutMS-0
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 7200
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v22.11.0}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-            - {key: MONGODB_CLIENT_OPTIONS, value: '{"timeoutMS":0}'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - func: perf send
-    depends_on:
-      - name: run-lint-checks
-        variant: lint
-        patch_optional: true
   - name: run-spec-benchmark-tests-node-server-monitorCommands-true
     tags:
       - run-spec-benchmark-tests
@@ -4639,8 +4593,6 @@ buildvariants:
     run_on: rhel90-dbx-perf-large
     tasks:
       - run-spec-benchmark-tests-node-server
-      - run-spec-benchmark-tests-node-server-timeoutMS-120000
-      - run-spec-benchmark-tests-node-server-timeoutMS-0
       - run-spec-benchmark-tests-node-server-monitorCommands-true
       - run-spec-benchmark-tests-node-server-logging
     tags:
