@@ -802,6 +802,9 @@ tasks:
             - src/.evergreen/run-deployed-gcp-kms-tests.sh
 
   - name: "test-gcpkms-fail-task"
+    tags:
+      - latest
+      - server
     # test-gcpkms-fail-task runs in a non-GCE environment.
     # It is expected to fail to obtain GCE credentials.
     commands:
@@ -843,6 +846,9 @@ tasks:
             - src/.evergreen/run-deployed-azure-kms-tests.sh
 
   - name: "test-azurekms-fail-task"
+    tags:
+      - latest
+      - server
     commands:
       - command: expansions.update
         type: setup
@@ -1052,6 +1058,9 @@ tasks:
       - func: run unit tests
 
   - name: test-bson-latest-driver-7.0.0-server-tests
+    tags:
+      - "v8.0-perf"
+      - server
     commands:
       - command: expansions.update
         type: setup
@@ -1078,6 +1087,9 @@ tasks:
       - func: run tests
 
   - name: test-bson-latest-driver-7.0.0-replica_set-tests
+    tags:
+      - "v8.0-perf"
+      - replica_set
     commands:
       - command: expansions.update
         type: setup
@@ -1104,6 +1116,9 @@ tasks:
       - func: run tests
 
   - name: test-bson-latest-driver-7.0.0-sharded_cluster-tests
+    tags:
+      - "v8.0-perf"
+      - sharded_cluster
     commands:
       - command: expansions.update
         type: setup
