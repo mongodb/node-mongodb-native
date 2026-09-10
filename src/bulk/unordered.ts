@@ -112,7 +112,7 @@ export class UnorderedBulkOperation extends BulkOperationBase {
     if (batchType === BatchType.INSERT) {
       this.s.currentInsertBatch = this.s.currentBatch;
       this.s.bulkResult.insertedIds.push({
-        index: this.s.bulkResult.insertedIds.length,
+        index: this.s.currentIndex - 1,
         _id: (document as Document)._id
       });
     } else if (batchType === BatchType.UPDATE) {
