@@ -556,6 +556,72 @@ export function resolveOptions<T extends CommandOperationOptions>(
   return result;
 }
 
+/**
+ * Merge inherited properties from parent into options, prioritizing values from options,
+ * then values from parent.
+ *
+ * Behaves identically to {@link resolveOptions}, but does not require `T` to inherit from
+ * `CommandOperationOptions`. The command-level fields this resolves (read/write concern,
+ * read preference, timeoutMS, BSON serialization) are added to the return type, and any
+ * field `T` declares itself takes precedence -- so an option type that narrows a field
+ * (ex. `CreateIndexOptions.maxTimeMS`, which is a `bigint`) keeps its own declaration.
+ *
+ * @param parent - An optional owning class of the operation being run. ex. Db/Collection/MongoClient.
+ * @param options - The options passed to the operation method.
+ *
+ * @internal
+ */
+export function resolveCommandOptions<T extends Document>(
+  parent: OperationParent | undefined,
+  options?: T
+): T & Omit<CommandOperationOptions, keyof T> {
+  // `T` is not constrained to `CommandOperationOptions`, but the command-level fields read
+  // below may still be present on it, so read them through a single widened view.
+  const commandOptions = options as CommandOperationOptions | undefined;
+  const resolved: CommandOperationOptions = {};
+
+  const timeoutMS = commandOptions?.timeoutMS ?? parent?.timeoutMS;
+  // Users cannot pass a readConcern/writeConcern to operations in a transaction
+  const session = commandOptions?.session;
+
+  if (!session?.inTransaction()) {
+    const readConcern = ReadConcern.fromOptions(commandOptions) ?? parent?.readConcern;
+    if (readConcern) {
+      resolved.readConcern = readConcern;
+    }
+
+    let writeConcern = WriteConcern.fromOptions(commandOptions) ?? parent?.writeConcern;
+    if (writeConcern) {
+      if (timeoutMS != null) {
+        writeConcern = WriteConcern.fromOptions({
+          writeConcern: {
+            ...writeConcern,
+            wtimeout: undefined,
+            wtimeoutMS: undefined
+          }
+        });
+      }
+      resolved.writeConcern = writeConcern;
+    }
+  }
+
+  resolved.timeoutMS = timeoutMS;
+
+  const readPreference = ReadPreference.fromOptions(commandOptions) ?? parent?.readPreference;
+  if (readPreference) {
+    resolved.readPreference = readPreference;
+  }
+
+  const isConvenientTransaction = session?.explicit && session?.timeoutContext != null;
+  if (isConvenientTransaction && commandOptions?.timeoutMS != null) {
+    throw new MongoInvalidArgumentError(
+      'An operation cannot be given a timeoutMS setting when inside a withTransaction call that has a timeoutMS setting'
+    );
+  }
+
+  return Object.assign({}, options, resolveBSONOptions(commandOptions, parent), resolved);
+}
+
 export function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]): boolean {
   set = Array.isArray(set) ? new Set(set) : set;
   subset = Array.isArray(subset) ? new Set(subset) : subset;
