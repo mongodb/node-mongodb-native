@@ -202,6 +202,93 @@ describe('Handshake Prose Tests', function () {
       await client.close();
     });
   });
+
+  context(`Test 3: Test that agent metadata is properly captured`, function () {
+    const agentEnvs: Array<{
+      expectEnv: Object;
+      env?: EnvironmentVariables;
+    }> = [
+      {
+        env: [
+          ['AI_AGENT', 'custom-agent'],
+        ],
+        expectEnv: {
+          agent: 'custom-agent'
+        }
+      },
+      {
+        env: [['AGENT', 'custom-agent']],
+        expectEnv: {
+          agent: 'custom-agent'
+        }
+      },
+      {
+        env: [
+          ['CLAUDE_CODE', '1'],
+        ],
+        expectEnv: {
+          agent: 'claude-code'
+        }
+      },
+      {
+        env: [
+          ['AI_AGENT', 'custom-agent'],
+          ['CLAUDECODE', '1']
+        ],
+        expectEnv: {
+          agent: 'custom-agent'
+        }
+      },
+      {
+        env: [
+          ['CURSOR_AGENT', '1'],
+          ['GEMINI_CLI', '1']
+        ],
+        expectEnv: {
+          agent: 'cursor'
+        }
+      },
+      {
+        env: [
+          ['AI_AGENT', ''],
+        ],
+        expectEnv: null
+      },
+      {
+        env: [
+          ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
+          ['AWS_REGION', 'us-east-2'],
+          ['CLAUDECODE', '1']
+        ],
+        expectEnv: {
+          agent: 'claude-code',
+          region: 'us-east-2',
+          name: 'aws.lambda',
+        }
+      }
+    ];
+
+    for (const [i, { env, expectEnv }] of agentEnvs.entries()) {
+      context(`Test 3: Test that agent metadata is properly captured #${i}`, function () {
+        stubEnv(env);
+
+        it('runs a hello successfully', async function () {
+          client = this.configuration.newClient({
+            serverSelectionTimeoutMS: 3000
+          });
+          // Facilitates hello via connect()
+          await client.connect();
+
+          expect(client.topology?.s.options.metadata).to.exist;
+          const { env } = await client.topology.s.options.metadata;
+
+          expect(env).to.deep.equal(expectEnv);
+
+        });
+      });
+    }
+  });
+
 });
 
 describe('Client Metadata Update Prose Tests', function () {
