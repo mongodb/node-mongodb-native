@@ -1,3 +1,5 @@
+import * as zlib from 'zlib';
+
 import { type Stream } from './cmap/connect';
 import { MongoMissingDependencyError } from './error';
 import type { Callback } from './utils';
@@ -60,7 +62,41 @@ type ZStandardLib = {
 
 export type ZStandard = ZStandardLib | { kModuleError: MongoMissingDependencyError };
 
+function getBuiltInZstdLibrary(): ZStandardLib | null {
+  if (typeof zlib.zstdCompress !== 'function' || typeof zlib.zstdDecompress !== 'function') {
+    return null;
+  }
+
+  return {
+    compress(buf: Uint8Array, level?: number): Promise<Uint8Array> {
+      return new Promise((resolve, reject) => {
+        zlib.zstdCompress(
+          buf,
+          level == null ? {} : { params: { [zlib.constants.ZSTD_c_compressionLevel]: level } },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+      });
+    },
+    decompress(buf: Uint8Array): Promise<Uint8Array> {
+      return new Promise((resolve, reject) => {
+        zlib.zstdDecompress(buf, (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        });
+      });
+    }
+  };
+}
+
 export function getZstdLibrary(): ZStandardLib | { kModuleError: MongoMissingDependencyError } {
+  const builtInZstdLibrary = getBuiltInZstdLibrary();
+  if (builtInZstdLibrary != null) {
+    return builtInZstdLibrary;
+  }
+
   let ZStandard: ZStandardLib | { kModuleError: MongoMissingDependencyError };
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -68,7 +104,7 @@ export function getZstdLibrary(): ZStandardLib | { kModuleError: MongoMissingDep
   } catch (error) {
     ZStandard = makeErrorModule(
       new MongoMissingDependencyError(
-        'Optional module `@mongodb-js/zstd` not found. Please install it to enable zstd compression',
+        'Built-in zstd support is unavailable and optional module `@mongodb-js/zstd` not found. Please use Node.js 22.15.0+ or install `@mongodb-js/zstd` to enable zstd compression',
         { cause: error, dependencyName: 'zstd' }
       )
     );
