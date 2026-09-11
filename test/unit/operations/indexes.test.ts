@@ -108,13 +108,19 @@ describe('class CreateIndexesOperation', () => {
       options
     );
 
-  const makeIndexesOperation = (indexes, options: CreateIndexesOptions = {}) =>
-    CreateIndexesOperation.fromIndexDescriptionArray(
+  const makeIndexesOperation = (
+    indexes,
+    options: CreateIndexesOptions & { allowUnknownIndexOptions?: boolean } = {}
+  ) => {
+    const { allowUnknownIndexOptions = false, ...commandOptions } = options;
+    return CreateIndexesOperation.fromIndexDescriptionArray(
       { s: { namespace: ns('a.b') } },
       'b',
       indexes,
-      options
+      allowUnknownIndexOptions,
+      commandOptions
     );
+  };
 
   describe('#constructor()', () => {
     for (const { description, input, mapData, name } of testCases) {

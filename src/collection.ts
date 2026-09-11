@@ -54,7 +54,6 @@ import {
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
 import {
-  type CreateIndexesCommandOptions,
   CreateIndexesOperation,
   type CreateIndexesOptions,
   type CreateIndexOptions,
@@ -716,11 +715,17 @@ export class Collection<TSchema extends Document = Document> {
    *   }
    * ]);
    * ```
+   *
+   * @param indexSpecs - An array of index specifications to be created
+   * @param commandOptions - Optional settings for the `createIndexes` command
+   * @param allowUnknownIndexOptions - When `true`, index options the driver does not recognise are
+   *   sent to the server instead of being dropped. Defaults to `false`; this will become the only
+   *   behaviour in a future major release.
    */
   async createIndexes(
     indexSpecs: IndexDescription[],
-    options?: CreateIndexesOptions,
-    commandOptions?: CreateIndexesCommandOptions
+    commandOptions?: CreateIndexesOptions,
+    allowUnknownIndexOptions = false
   ): Promise<string[]> {
     return await executeOperation(
       this.client,
@@ -728,8 +733,12 @@ export class Collection<TSchema extends Document = Document> {
         this,
         this.collectionName,
         indexSpecs,
-        resolveOptions(this, { ...options, maxTimeMS: undefined }),
-        commandOptions
+        // TODO(seanrmilligan): default this to true and remove the parameter in a future major
+        // release. Index options live on each index description, so nothing on this path
+        // contaminates them -- but flipping it turns today's silently dropped unknown option into
+        // a server error.
+        allowUnknownIndexOptions,
+        resolveOptions(this, { ...commandOptions, maxTimeMS: undefined })
       )
     );
   }

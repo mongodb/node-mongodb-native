@@ -328,9 +328,9 @@ describe('createIndexes option validation', function () {
     });
   });
 
-  describe('when command options are given (three parameter form)', function () {
+  describe('when command options are given', function () {
     it('does not send driver options the user never supplied', async function () {
-      await collection.createIndexes([{ key: { a: 1 } }], {}, {});
+      await collection.createIndexes([{ key: { a: 1 } }], {});
 
       expect(sentIndexes()).to.deep.equal([{ key: { a: 1 }, name: 'a_1' }]);
     });
@@ -341,7 +341,7 @@ describe('createIndexes option validation', function () {
           // @ts-expect-error IndexDescription is a closed interface
           [{ key: { d: 1 }, name: 'd_1', notARealOption: true }],
           {},
-          {}
+          /*allowUnknownIndexOptions=*/ true
         )
         .catch(error => error);
 
@@ -358,7 +358,7 @@ describe('createIndexes option validation', function () {
           // @ts-expect-error IndexDescription is a closed interface
           [{ key: { e: 1 }, name: 'e_1', prepareUnique: true }],
           {},
-          {}
+          /*allowUnknownIndexOptions=*/ true
         );
 
         expect(sentIndexes()[0]).to.have.property('prepareUnique', true);
@@ -370,7 +370,6 @@ describe('createIndexes option validation', function () {
     it('sends index options as normal', async function () {
       await collection.createIndexes(
         [{ key: { f: 1 }, unique: true, sparse: true, version: 2 }],
-        {},
         {}
       );
 
@@ -380,11 +379,7 @@ describe('createIndexes option validation', function () {
     });
 
     it('keeps user-supplied command options out of the index description', async function () {
-      await collection.createIndexes(
-        [{ key: { g: 1 }, unique: true }],
-        { writeConcern: { w: 1 } },
-        {}
-      );
+      await collection.createIndexes([{ key: { g: 1 }, unique: true }], { writeConcern: { w: 1 } });
 
       expect(sentIndexes()).to.deep.equal([{ unique: true, name: 'g_1', key: { g: 1 } }]);
       expect(sentCommand()).to.have.property('writeConcern');
@@ -393,7 +388,7 @@ describe('createIndexes option validation', function () {
     it('keeps a user-supplied session out of the index description', async function () {
       const session = client.startSession();
       try {
-        await collection.createIndexes([{ key: { i: 1 }, unique: true }], { session }, {});
+        await collection.createIndexes([{ key: { i: 1 }, unique: true }], { session });
 
         expect(sentIndexes()).to.deep.equal([{ unique: true, name: 'i_1', key: { i: 1 } }]);
         expect(sentCommand()).to.have.property('lsid');

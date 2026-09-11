@@ -529,7 +529,6 @@ export type {
 } from './operations/find_and_modify';
 export type { IndexInformationOptions } from './operations/indexes';
 export type {
-  CreateIndexesCommandOptions,
   CreateIndexesOptions,
   CreateIndexOptions,
   DropIndexesOptions,

@@ -271,7 +271,8 @@ describe('Indexes', function () {
           const [name] = await collection.createIndexes(
             // @ts-expect-error: intentionally providing an unknown option
             [{ key: { loc: '2dsphere' }, thisOptionDoesNotExist: true }],
-            { allowUnknownIndexOptions: false }
+            {},
+            /*allowUnknownIndexOptions=*/ false
           );
           expect(started[0].command.indexes[0]).to.not.have.property('thisOptionDoesNotExist');
           const indexes = await collection.listIndexes().toArray();
@@ -285,7 +286,8 @@ describe('Indexes', function () {
             .createIndexes(
               // @ts-expect-error: intentionally providing an unknown option
               [{ key: { loc: '2dsphere' }, thisOptionDoesNotExist: true }],
-              { allowUnknownIndexOptions: true }
+              {},
+              /*allowUnknownIndexOptions=*/ true
             )
             .catch(error => error);
           expect(error).to.be.instanceOf(MongoServerError);
