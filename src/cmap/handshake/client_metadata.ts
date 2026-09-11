@@ -44,16 +44,17 @@ export interface ClientMetadata {
   application?: {
     name: string;
   };
-  /** FaaS environment information */
   env?: {
-    name?: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
-    timeout_sec?: Int32;
-    memory_mb?: Int32;
-    region?: string;
+    agent?: string;
     container?: {
       runtime?: string;
       orchestrator?: string;
     };
+    /** FaaS environment information */
+    name?: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
+    timeout_sec?: Int32;
+    memory_mb?: Int32;
+    region?: string;
   };
 }
 
@@ -100,7 +101,7 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
- * 1. Omit fields from `env` except `env.name`.
+ * 1. Omit fields from `env` except `env.name` & `env.agent`.
  * 2. Omit fields from `os` except `os.type`.
  * 3. Omit the `env` document entirely.
  * 4. Truncate `platform`. -- special we do not truncate this field
@@ -181,7 +182,9 @@ export async function makeClientMetadata(
       }
     }
   }
-  return await addContainerMetadata(metadataDocument.toObject() as ClientMetadata);
+
+  const metadata = await addContainerMetadata(metadataDocument.toObject() as ClientMetadata);
+  return addAgentMetadata(metadata);
 }
 
 let dockerPromise: Promise<boolean>;
@@ -204,18 +207,33 @@ async function getContainerMetadata(): Promise<ContainerMetadata> {
 
 /**
  * @internal
- * Re-add each metadata value.
  * Attempt to add new env container metadata, but keep old data if it does not fit.
  */
 async function addContainerMetadata(originalMetadata: ClientMetadata): Promise<ClientMetadata> {
-  const containerMetadata = await getContainerMetadata();
-  if (Object.keys(containerMetadata).length === 0) return originalMetadata;
+  return extendEnvMetadata(originalMetadata, 'container', await getContainerMetadata());
+}
+
+/**
+ * @internal
+ * Re-add each metadata value.
+ * Attempt to add `env[metadataKey]`, but keep old data if it does not fit.
+ */
+function extendEnvMetadata(
+  originalMetadata: ClientMetadata,
+  metadataKey: 'container' | 'agent',
+  metadataValue: ContainerMetadata | string
+): ClientMetadata {
+  const isEmpty =
+    typeof metadataValue === 'string'
+      ? metadataValue.length === 0
+      : Object.keys(metadataValue).length === 0;
+  if (isEmpty) return originalMetadata;
 
   const extendedMetadata = new LimitedSizeDocument(512);
 
   const extendedEnvMetadata: NonNullable<ClientMetadata['env']> = {
     ...originalMetadata?.env,
-    container: containerMetadata
+    [metadataKey]: metadataValue
   };
 
   for (const [key, val] of Object.entries(originalMetadata)) {
@@ -234,6 +252,45 @@ async function addContainerMetadata(originalMetadata: ClientMetadata): Promise<C
   }
 
   return extendedMetadata.toObject() as ClientMetadata;
+}
+
+/**
+ * Environment variables that indicate the driver is being used by an AI agent, in the order the
+ * spec requires them to be evaluated. A `null` value means the agent name is the value of the
+ * environment variable itself.
+ */
+const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
+  ['AI_AGENT', null],
+  ['AGENT', null],
+  ['CLAUDECODE', 'claude-code'],
+  ['CURSOR_AGENT', 'cursor'],
+  ['GEMINI_CLI', 'gemini-cli'],
+  ['CODEX_SANDBOX', 'codex'],
+  ['AUGMENT_AGENT', 'augment'],
+  ['OPENCODE_CLIENT', 'opencode']
+];
+
+/**
+ * @internal
+ * Attempt to add new env agent metadata, but keep old data if it does not fit.
+ *
+ * From the spec:
+ * client.env.agent is a single string. Its value is determined by the environment variables below.
+ * Drivers MUST evaluate the list in order. The first populated variable determines the value, and
+ * subsequent entries MUST NOT be considered.
+ */
+function addAgentMetadata(originalMetadata: ClientMetadata): ClientMetadata {
+  let agent = '';
+
+  for (const [key, value] of AGENT_ENV_VARIABLES) {
+    const envValue = process.env[key] ?? '';
+    if (envValue.length > 0) {
+      agent = value ?? envValue;
+      break;
+    }
+  }
+
+  return extendEnvMetadata(originalMetadata, 'agent', agent);
 }
 
 /**
