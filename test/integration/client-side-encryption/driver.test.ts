@@ -436,7 +436,10 @@ describe('Client Side Encryption Functional', function () {
         } else {
           expect(error).to.be.instanceOf(MongoOperationTimeoutError);
         }
-        expect(end - start).to.be.within(498, 1000);
+        // timeoutMS is 500, but the driver's CSOT bookkeeping truncates timestamps to whole
+        // milliseconds and timers run on a millisecond-granularity clock, so the timeout can fire
+        // a few milliseconds early when measured with performance.now().
+        expect(end - start).to.be.within(495, 1000);
       };
     }
 
