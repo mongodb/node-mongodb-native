@@ -215,13 +215,18 @@ async function addContainerMetadata(originalMetadata: ClientMetadata): Promise<C
 
 /**
  * @internal
+ * The `env` key to extend, paired with the only value type valid for that key.
+ */
+type EnvMetadataEntry = ['container', ContainerMetadata] | ['agent', string];
+
+/**
+ * @internal
  * Re-add each metadata value.
  * Attempt to add `env[metadataKey]`, but keep old data if it does not fit.
  */
 function extendEnvMetadata(
   originalMetadata: ClientMetadata,
-  metadataKey: 'container' | 'agent',
-  metadataValue: ContainerMetadata | string
+  ...[metadataKey, metadataValue]: EnvMetadataEntry
 ): ClientMetadata {
   const isEmpty =
     typeof metadataValue === 'string'
@@ -255,9 +260,10 @@ function extendEnvMetadata(
 }
 
 /**
+ * @internal
  * Environment variables that indicate the driver is being used by an AI agent, in the order the
- * spec requires them to be evaluated. A `null` value means the agent name is the value of the
- * environment variable itself.
+ * spec requires them to be evaluated. [0] is the environment variable, [1] is the value to set
+ * when that environment variable is encountered. If [1] is null, use the environment variable value.
  */
 const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
   ['AI_AGENT', null],
