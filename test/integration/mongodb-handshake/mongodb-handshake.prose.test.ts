@@ -207,14 +207,12 @@ describe('Handshake Prose Tests', function () {
   // TODO: Update link when fixed to main branch
   context(`Test 3: Test that agent metadata is properly captured`, function () {
     const agentEnvs: Array<{
-      expectEnv: Object;
+      expectEnv: object;
       env?: EnvironmentVariables;
     }> = [
       // 1. Generic agent via AI_AGENT. client.env.agent MUST equal custom-agent.
       {
-        env: [
-          ['AI_AGENT', 'custom-agent'],
-        ],
+        env: [['AI_AGENT', 'custom-agent']],
         expectEnv: {
           agent: 'custom-agent'
         }
@@ -228,9 +226,7 @@ describe('Handshake Prose Tests', function () {
       },
       // 3. Known agent. client.env.agent MUST equal claude-code.
       {
-        env: [
-          ['CLAUDECODE', '1'],
-        ],
+        env: [['CLAUDECODE', '1']],
         expectEnv: {
           agent: 'claude-code'
         }
@@ -257,15 +253,13 @@ describe('Handshake Prose Tests', function () {
       },
       // 6. Empty value is treated as unset. client.env.agent MUST be omitted. If no other client.env fields are populated, client.env MUST be entirely omitted.
       {
-        env: [
-          ['AI_AGENT', ''],
-        ],
-        expectEnv: undefined, 
+        env: [['AI_AGENT', '']],
+        expectEnv: undefined
       },
       // 7. No agent variables. None of the environment variables in the client.env.agent table are set. client.env.agent MUST be omitted.
       {
         env: [],
-        expectEnv: undefined,
+        expectEnv: undefined
       },
       // 8. Agent alongside FaaS. This test MUST verify that both the AWS Lambda metadata and client.env.agent (equal to claude-code) are present in client.env.
       {
@@ -277,13 +271,13 @@ describe('Handshake Prose Tests', function () {
         expectEnv: {
           agent: 'claude-code',
           region: 'us-east-2',
-          name: 'aws.lambda',
+          name: 'aws.lambda'
         }
       }
     ];
 
     for (const [i, { env, expectEnv }] of agentEnvs.entries()) {
-      context(`Test 3: Test that agent metadata is properly captured #${i+1}`, function () {
+      context(`Test 3: Test that agent metadata is properly captured #${i + 1}`, function () {
         stubEnv(env);
 
         it('runs a hello successfully', async function () {
@@ -297,12 +291,10 @@ describe('Handshake Prose Tests', function () {
           const { env } = await client.topology.s.options.metadata;
 
           expect(env).to.deep.equal(expectEnv);
-
         });
       });
     }
   });
-
 });
 
 describe('Client Metadata Update Prose Tests', function () {
