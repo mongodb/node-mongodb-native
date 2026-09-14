@@ -7,6 +7,7 @@ import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
+  getAgentEnv,
   getFAASEnv,
   LimitedSizeDocument,
   makeClientMetadata,
@@ -64,8 +65,8 @@ describe('client metadata module', () => {
           after(() => {
             delete process.env[envVariable];
           });
-          it('returns null', () => {
-            expect(getFAASEnv()).to.be.null;
+          it('returns an empty map', () => {
+            expect(getFAASEnv()).to.have.property('size', 0);
           });
         });
       });
@@ -90,14 +91,14 @@ describe('client metadata module', () => {
       after(() => {
         delete process.env.AWS_EXECUTION_ENV;
       });
-      it('returns null', () => {
-        expect(getFAASEnv()).to.be.null;
+      it('returns an empty map', () => {
+        expect(getFAASEnv()).to.have.property('size', 0);
       });
     });
 
     context('when there is no FAAS provider data in the env', () => {
-      it('returns null', () => {
-        expect(getFAASEnv()).to.be.null;
+      it('returns an empty map', () => {
+        expect(getFAASEnv()).to.have.property('size', 0);
       });
     });
 
@@ -113,8 +114,8 @@ describe('client metadata module', () => {
           delete process.env.AWS_EXECUTION_ENV;
           delete process.env.FUNCTIONS_WORKER_RUNTIME;
         });
-        it('returns null', () => {
-          expect(getFAASEnv()).to.be.null;
+        it('returns an empty map', () => {
+          expect(getFAASEnv()).to.have.property('size', 0);
         });
       });
 
@@ -622,5 +623,69 @@ describe('client metadata module', () => {
         expect(metadata).to.not.have.property('env');
       });
     });
+
+    context('when the faas env is too large and an agent is set', () => {
+      beforeEach('1. Omit fields from `env` except `env.name` & `env.agent`.', () => {
+        sinon.stub(process, 'env').get(() => ({
+          AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
+          AWS_REGION: 'a'.repeat(512),
+          CLAUDECODE: '1'
+        }));
+      });
+
+      it('keeps env.name and env.agent', async () => {
+        const metadata = await makeClientMetadata([], { runtime });
+        expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude-code' });
+      });
+    });
+  });
+
+  describe('getAgentEnv()', function () {
+    const stubEnv = (env: NodeJS.ProcessEnv) => {
+      beforeEach(function () {
+        sinon.stub(process, 'env').get(() => env);
+      });
+    };
+
+    context('when a fixed-value agent variable is set to an arbitrary value', function () {
+      stubEnv({ GEMINI_CLI: 'some-other-value' });
+
+      it('returns the value from the agent table, not the environment', function () {
+        expect(getAgentEnv()).to.equal('gemini-cli');
+      });
+    });
+
+    context('when a generic agent variable is padded with whitespace', function () {
+      stubEnv({ AI_AGENT: '  custom-agent  ' });
+
+      it('returns the value verbatim', function () {
+        expect(getAgentEnv()).to.equal('  custom-agent  ');
+      });
+    });
+
+    // 'A variable is considered populated if it is present in the environment with a non-empty
+    // value.' & 'The first populated variable determines the value, and subsequent entries MUST NOT be considered.'
+    const unpopulated: Array<string | undefined> = ['', ' ', undefined];
+
+    for (const value of unpopulated) {
+      // A generic and a literal
+      for (const key of ['AI_AGENT', 'CLAUDECODE']) {
+        context(`when ${key} is set to "${value}"`, function () {
+          stubEnv({ [key]: value });
+
+          it('treats the variable as unpopulated', function () {
+            expect(getAgentEnv()).to.equal('');
+          });
+        });
+      }
+
+      context(`when an earlier variable is set to "${value}"`, function () {
+        stubEnv({ AI_AGENT: value, CLAUDECODE: '1' });
+
+        it('skips it and considers the next variable', function () {
+          expect(getAgentEnv()).to.equal('claude-code');
+        });
+      });
+    }
   });
 });

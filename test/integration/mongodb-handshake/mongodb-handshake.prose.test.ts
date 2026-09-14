@@ -202,6 +202,99 @@ describe('Handshake Prose Tests', function () {
       await client.close();
     });
   });
+
+  // Ref: https://github.com/aclark4life/specifications/blob/feaec8d0ca332a80f457f75c6ef1600267e61d64/source/mongodb-handshake/tests/README.md#test-3-test-that-agent-metadata-is-properly-captured
+  // TODO: Update link when fixed to main branch
+  context(`Test 3: Test that agent metadata is properly captured`, function () {
+    const agentEnvs: Array<{
+      expectEnv: object;
+      env?: EnvironmentVariables;
+    }> = [
+      // 1. Generic agent via AI_AGENT. client.env.agent MUST equal custom-agent.
+      {
+        env: [['AI_AGENT', 'custom-agent']],
+        expectEnv: {
+          agent: 'custom-agent'
+        }
+      },
+      // 2. Generic agent via AGENT. client.env.agent MUST equal custom-agent.
+      {
+        env: [['AGENT', 'custom-agent']],
+        expectEnv: {
+          agent: 'custom-agent'
+        }
+      },
+      // 3. Known agent. client.env.agent MUST equal claude-code.
+      {
+        env: [['CLAUDECODE', '1']],
+        expectEnv: {
+          agent: 'claude-code'
+        }
+      },
+      // 4. Precedence - generic wins over known. client.env.agent MUST equal custom-agent (the value of AI_AGENT), not claude-code.
+      {
+        env: [
+          ['AI_AGENT', 'custom-agent'],
+          ['CLAUDECODE', '1']
+        ],
+        expectEnv: {
+          agent: 'custom-agent'
+        }
+      },
+      // 5. Precedence - first known wins. client.env.agent MUST equal cursor.
+      {
+        env: [
+          ['CURSOR_AGENT', '1'],
+          ['GEMINI_CLI', '1']
+        ],
+        expectEnv: {
+          agent: 'cursor'
+        }
+      },
+      // 6. Empty value is treated as unset. client.env.agent MUST be omitted. If no other client.env fields are populated, client.env MUST be entirely omitted.
+      {
+        env: [['AI_AGENT', '']],
+        expectEnv: undefined
+      },
+      // 7. No agent variables. None of the environment variables in the client.env.agent table are set. client.env.agent MUST be omitted.
+      {
+        env: [],
+        expectEnv: undefined
+      },
+      // 8. Agent alongside FaaS. This test MUST verify that both the AWS Lambda metadata and client.env.agent (equal to claude-code) are present in client.env.
+      {
+        env: [
+          ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
+          ['AWS_REGION', 'us-east-2'],
+          ['CLAUDECODE', '1']
+        ],
+        expectEnv: {
+          agent: 'claude-code',
+          region: 'us-east-2',
+          name: 'aws.lambda'
+        }
+      }
+    ];
+
+    for (const [i, { env, expectEnv }] of agentEnvs.entries()) {
+      context(`Test 3: Test that agent metadata is properly captured #${i + 1}`, function () {
+        stubEnv(env);
+
+        it('runs a hello successfully', async function () {
+          client = this.configuration.newClient({
+            serverSelectionTimeoutMS: 3000
+          });
+          // Facilitates hello via connect()
+          await client.connect();
+
+          expect(client.topology?.s.options.metadata).to.exist;
+          const { env } = await client.topology.s.options.metadata;
+
+          expect(env).to.deep.equal(expectEnv);
+        });
+      });
+    }
+  });
 });
 
 describe('Client Metadata Update Prose Tests', function () {
