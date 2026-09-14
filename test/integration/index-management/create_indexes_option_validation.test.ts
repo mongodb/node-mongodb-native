@@ -67,7 +67,7 @@ describe('createIndex option validation', function () {
     client.on('commandStarted', ev => {
       if (ev.commandName === 'createIndexes') commands.push(ev);
     });
-    db = client.db('node6893_create_index');
+    db = client.db('create_index_option_validation');
     collection = db.collection('c');
   });
 
@@ -283,7 +283,7 @@ describe('createIndexes option validation', function () {
     client.on('commandStarted', ev => {
       if (ev.commandName === 'createIndexes') commands.push(ev);
     });
-    db = client.db('node6893_create_indexes');
+    db = client.db('create_indexes_option_validation');
     collection = db.collection('c');
   });
 
