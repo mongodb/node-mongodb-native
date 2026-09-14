@@ -290,7 +290,7 @@ function addAgentMetadata(originalMetadata: ClientMetadata): ClientMetadata {
 
   for (const [key, value] of AGENT_ENV_VARIABLES) {
     const envValue = process.env[key] ?? '';
-    if (envValue.length > 0) {
+    if (envValue.trim().length > 0) {
       agent = value ?? envValue;
       break;
     }
