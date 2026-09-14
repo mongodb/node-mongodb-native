@@ -7,6 +7,9 @@ import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
+  type ClientMetadata,
+  extendEnvMetadata,
+  getAgentEnv,
   getFAASEnv,
   LimitedSizeDocument,
   makeClientMetadata,
@@ -624,81 +627,108 @@ describe('client metadata module', () => {
     });
   });
 
-  describe('agent metadata', function () {
-    context('when a known agent variable is set to an arbitrary value', function () {
+  describe('getAgentEnv()', function () {
+    const stubEnv = (env: NodeJS.ProcessEnv) => {
       beforeEach(function () {
-        sinon.stub(process, 'env').get(() => ({ GEMINI_CLI: 'some-other-value' }));
+        sinon.stub(process, 'env').get(() => env);
       });
+    };
 
-      it('ignores the value and uses the value from the agent table', async function () {
-        const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata).to.have.nested.property('env.agent', 'gemini-cli');
+    context('when a fixed-value agent variable is set to an arbitrary value', function () {
+      stubEnv({ GEMINI_CLI: 'some-other-value' });
+
+      it('returns the value from the agent table, not the environment', function () {
+        expect(getAgentEnv()).to.equal('gemini-cli');
       });
     });
 
-    context('when AI_AGENT is set to a whitespace-only string', function () {
-      beforeEach(function () {
-        sinon.stub(process, 'env').get(() => ({ AI_AGENT: ' ' }));
-      });
+    context('when a generic agent variable is padded with whitespace', function () {
+      stubEnv({ AI_AGENT: '  custom-agent  ' });
 
-      it('treats the variable as unpopulated', async function () {
-        const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata).to.not.have.property('env');
+      it('returns the value verbatim', function () {
+        expect(getAgentEnv()).to.equal('  custom-agent  ');
       });
     });
+
+    // 'A variable is considered populated if it is present in the environment with a non-empty
+    // value.' & 'The first populated variable determines the value, and subsequent entries MUST NOT be considered.'
+    const unpopulated: Array<string | undefined> = ['', ' ', undefined];
+
+    for (const value of unpopulated) {
+      // A generic and a literal
+      for (const key of ['AI_AGENT', 'CLAUDECODE']) {
+        context(`when ${key} is set to "${value}"`, function () {
+          stubEnv({ [key]: value });
+
+          it('treats the variable as unpopulated', function () {
+            expect(getAgentEnv()).to.equal('');
+          });
+        });
+      }
+
+      context(`when an earlier variable is set to "${value}"`, function () {
+        stubEnv({ AI_AGENT: value, CLAUDECODE: '1' });
+
+        it('skips it and considers the next variable', function () {
+          expect(getAgentEnv()).to.equal('claude-code');
+        });
+      });
+    }
   });
 
-  describe('env metadata extension', function () {
-    context('when the agent is added to metadata without an env document', function () {
-      beforeEach(function () {
-        sinon.stub(process, 'env').get(() => ({ AI_AGENT: 'custom-agent' }));
+  describe('extendEnvMetadata()', function () {
+    const metadata: ClientMetadata = {
+      driver: { name: 'nodejs', version: NODE_DRIVER_VERSION },
+      os: { type: 'Linux' },
+      platform: 'Node.js v20.0.0, LE'
+    };
+
+    // 'If none of the variables above are populated, client.env.agent MUST be entirely omitted.'
+    context('when the value is empty', function () {
+      it('returns the metadata unchanged for a string value', function () {
+        expect(extendEnvMetadata(metadata, 'agent', '')).to.deep.equal(metadata);
       });
 
-      it('leaves the non-env metadata fields untouched', async function () {
-        const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata).to.deep.equal({
-          driver: {
-            name: 'nodejs',
-            version: NODE_DRIVER_VERSION
-          },
-          os: {
-            type: os.type(),
-            name: os.platform(),
-            architecture: os.arch(),
-            version: os.release()
-          },
-          platform: `Node.js ${process.version}, ${os.endianness()}`,
+      it('returns the metadata unchanged for a document value', function () {
+        expect(extendEnvMetadata(metadata, 'container', {})).to.deep.equal(metadata);
+      });
+    });
+
+    context('when the metadata has no env document', function () {
+      it('adds the env document and leaves the other fields untouched', function () {
+        expect(extendEnvMetadata(metadata, 'agent', 'custom-agent')).to.deep.equal({
+          ...metadata,
           env: { agent: 'custom-agent' }
         });
       });
     });
 
-    context('when the agent does not fit and there is an existing env document', function () {
-      beforeEach(function () {
-        sinon.stub(process, 'env').get(() => ({
-          AWS_EXECUTION_ENV: 'AWS_Lambda_java8',
-          AWS_REGION: 'us-east-2',
-          AI_AGENT: 'a'.repeat(512)
-        }));
+    context('when the metadata has an existing env document', function () {
+      it('merges the new key into the existing env document', function () {
+        const withAgent: ClientMetadata = { ...metadata, env: { agent: 'custom-agent' } };
+        expect(extendEnvMetadata(withAgent, 'container', { runtime: 'docker' })).to.deep.equal({
+          ...metadata,
+          env: { agent: 'custom-agent', container: { runtime: 'docker' } }
+        });
       });
+    });
 
-      it('keeps the original env document', async function () {
-        const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata.env).to.deep.equal({
+    context('when the new value does not fit and there is an existing env document', function () {
+      it('keeps the original env document', function () {
+        const withEnv: ClientMetadata = {
+          ...metadata,
+          env: { name: 'aws.lambda', region: 'us-east-2' }
+        };
+        expect(extendEnvMetadata(withEnv, 'agent', 'a'.repeat(512)).env).to.deep.equal({
           name: 'aws.lambda',
           region: 'us-east-2'
         });
       });
     });
 
-    context('when the agent does not fit and there is no existing env document', function () {
-      beforeEach(function () {
-        sinon.stub(process, 'env').get(() => ({ AI_AGENT: 'a'.repeat(512) }));
-      });
-
-      it('omits the env document entirely', async function () {
-        const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata).to.not.have.property('env');
+    context('when the new value does not fit and there is no existing env document', function () {
+      it('omits the env document entirely', function () {
+        expect(extendEnvMetadata(metadata, 'agent', 'a'.repeat(512))).to.not.have.property('env');
       });
     });
   });

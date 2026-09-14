@@ -224,7 +224,7 @@ type EnvMetadataEntry = ['container', ContainerMetadata] | ['agent', string];
  * Re-add each metadata value.
  * Attempt to add `env[metadataKey]`, but keep old data if it does not fit.
  */
-function extendEnvMetadata(
+export function extendEnvMetadata(
   originalMetadata: ClientMetadata,
   ...[metadataKey, metadataValue]: EnvMetadataEntry
 ): ClientMetadata {
@@ -263,7 +263,12 @@ function extendEnvMetadata(
  * @internal
  * Environment variables that indicate the driver is being used by an AI agent, in the order the
  * spec requires them to be evaluated. [0] is the environment variable, [1] is the value to set
- * when that environment variable is encountered. If [1] is null, use the environment variable value.
+ * when that environment variable is encountered. If [1] is null, use the (trimmed) environment variable value.
+ *
+ * From the spec:
+ * client.env.agent is a single string. Its value is determined by the environment variables below.
+ * Drivers MUST evaluate the list in order. The first populated variable determines the value, and
+ * subsequent entries MUST NOT be considered.
  */
 const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
   ['AI_AGENT', null],
@@ -279,24 +284,28 @@ const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
 /**
  * @internal
  * Attempt to add new env agent metadata, but keep old data if it does not fit.
- *
- * From the spec:
- * client.env.agent is a single string. Its value is determined by the environment variables below.
- * Drivers MUST evaluate the list in order. The first populated variable determines the value, and
- * subsequent entries MUST NOT be considered.
  */
 function addAgentMetadata(originalMetadata: ClientMetadata): ClientMetadata {
-  let agent = '';
+  return extendEnvMetadata(originalMetadata, 'agent', getAgentEnv());
+}
 
-  for (const [key, value] of AGENT_ENV_VARIABLES) {
+/**
+ * @internal
+ * Resolves `env.agent` from the environment, or an empty string when no agent variable is
+ * populated. Returns the value of the first populated variable in `AGENT_ENV_VARIABLES`.
+ */
+export function getAgentEnv(): string {
+  for (const [key, literal] of AGENT_ENV_VARIABLES) {
+    // A variable is only populated if it is present with a non-empty value, so an empty or
+    // whitespace-only value never selects an entry, even one with a fixed table value.
+    // A populated value is reported verbatim; only the populated check ignores whitespace.
     const envValue = process.env[key] ?? '';
     if (envValue.trim().length > 0) {
-      agent = value ?? envValue;
-      break;
+      return literal ?? envValue;
     }
   }
 
-  return extendEnvMetadata(originalMetadata, 'agent', agent);
+  return '';
 }
 
 /**
