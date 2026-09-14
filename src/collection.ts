@@ -96,7 +96,6 @@ import {
   DEFAULT_PK_FACTORY,
   MongoDBCollectionNamespace,
   normalizeHintField,
-  resolveCommandOptions,
   resolveOptions
 } from './utils';
 import { WriteConcern, type WriteConcernOptions } from './write_concern';
@@ -678,7 +677,7 @@ export class Collection<TSchema extends Document = Document> {
             indexSpec,
             /*allowUnknownIndexOptions=*/ true,
             indexOptions,
-            resolveCommandOptions(this, commandOptions)
+            resolveOptions(this, commandOptions)
           );
     const indexes = await executeOperation(this.client, operation);
 

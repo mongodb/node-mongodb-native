@@ -427,7 +427,7 @@ export interface IndexOptions {
 }
 
 /** @public */
-export interface CreateIndexOptions {
+export interface CreateIndexOptions extends Omit<CommandOperationOptions, 'collation' | 'explain'> {
   /**
    * Specifies how many data-bearing members of a replica set, including the primary, must
    * complete the index builds successfully before the primary marks the indexes as ready.
@@ -443,40 +443,6 @@ export interface CreateIndexOptions {
    * @sinceServerVersion 4.4
    */
   commitQuorum?: number | string;
-
-  /**
-   * The maximum amount of time to allow the index build to take before returning an error.
-   *
-   * @remarks This option is sent only if the caller explicitly provides a value. The default is to not send a value.
-   */
-  maxTimeMS?: number;
-
-  /**
-   * This option MAY be implemented by drivers that need to grant access to underlying namespaces
-   * for time-series collections. Drivers SHOULD NOT implement this option unless asked to do so.
-   *
-   * This option is intended for internal use by MongoDB teams and should be discouraged for
-   * general application use. It may be changed or removed in any release without notice.
-   *
-   * Drivers SHOULD implement this option in a way that discourages customer use, such as:
-   *   - Marking it as deprecated, experimental, or internal in their language's idioms
-   *   - Excluding it from primary documentation
-   *
-   * @remarks This option MUST NOT be sent when connected to pre-8.2 servers.
-   *
-   * @sinceServerVersion 8.2
-   */
-  rawData?: boolean;
-
-  /**
-   * Enables users to specify an arbitrary comment to help trace the operation through
-   * the database profiler, currentOp and logs. The default is to not send a value.
-   *
-   * @see https://www.mongodb.com/docs/manual/reference/command/createIndexes/
-   *
-   * @sinceServerVersion 4.4
-   */
-  comment?: Document;
 }
 
 function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
