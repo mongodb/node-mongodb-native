@@ -7,8 +7,6 @@ import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
-  type ClientMetadata,
-  extendEnvMetadata,
   getAgentEnv,
   getFAASEnv,
   LimitedSizeDocument,
@@ -67,8 +65,8 @@ describe('client metadata module', () => {
           after(() => {
             delete process.env[envVariable];
           });
-          it('returns null', () => {
-            expect(getFAASEnv()).to.be.null;
+          it('returns an empty map', () => {
+            expect(getFAASEnv()).to.have.property('size', 0);
           });
         });
       });
@@ -93,14 +91,14 @@ describe('client metadata module', () => {
       after(() => {
         delete process.env.AWS_EXECUTION_ENV;
       });
-      it('returns null', () => {
-        expect(getFAASEnv()).to.be.null;
+      it('returns an empty map', () => {
+        expect(getFAASEnv()).to.have.property('size', 0);
       });
     });
 
     context('when there is no FAAS provider data in the env', () => {
-      it('returns null', () => {
-        expect(getFAASEnv()).to.be.null;
+      it('returns an empty map', () => {
+        expect(getFAASEnv()).to.have.property('size', 0);
       });
     });
 
@@ -116,8 +114,8 @@ describe('client metadata module', () => {
           delete process.env.AWS_EXECUTION_ENV;
           delete process.env.FUNCTIONS_WORKER_RUNTIME;
         });
-        it('returns null', () => {
-          expect(getFAASEnv()).to.be.null;
+        it('returns an empty map', () => {
+          expect(getFAASEnv()).to.have.property('size', 0);
         });
       });
 
@@ -625,6 +623,21 @@ describe('client metadata module', () => {
         expect(metadata).to.not.have.property('env');
       });
     });
+
+    context('when the faas env is too large and an agent is set', () => {
+      beforeEach('1. Omit fields from `env` except `env.name` & `env.agent`.', () => {
+        sinon.stub(process, 'env').get(() => ({
+          AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
+          AWS_REGION: 'a'.repeat(512),
+          CLAUDECODE: '1'
+        }));
+      });
+
+      it('keeps env.name and env.agent', async () => {
+        const metadata = await makeClientMetadata([], { runtime });
+        expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude-code' });
+      });
+    });
   });
 
   describe('getAgentEnv()', function () {
@@ -674,62 +687,5 @@ describe('client metadata module', () => {
         });
       });
     }
-  });
-
-  describe('extendEnvMetadata()', function () {
-    const metadata: ClientMetadata = {
-      driver: { name: 'nodejs', version: NODE_DRIVER_VERSION },
-      os: { type: 'Linux' },
-      platform: 'Node.js v20.0.0, LE'
-    };
-
-    // 'If none of the variables above are populated, client.env.agent MUST be entirely omitted.'
-    context('when the value is empty', function () {
-      it('returns the metadata unchanged for a string value', function () {
-        expect(extendEnvMetadata(metadata, 'agent', '')).to.deep.equal(metadata);
-      });
-
-      it('returns the metadata unchanged for a document value', function () {
-        expect(extendEnvMetadata(metadata, 'container', {})).to.deep.equal(metadata);
-      });
-    });
-
-    context('when the metadata has no env document', function () {
-      it('adds the env document and leaves the other fields untouched', function () {
-        expect(extendEnvMetadata(metadata, 'agent', 'custom-agent')).to.deep.equal({
-          ...metadata,
-          env: { agent: 'custom-agent' }
-        });
-      });
-    });
-
-    context('when the metadata has an existing env document', function () {
-      it('merges the new key into the existing env document', function () {
-        const withAgent: ClientMetadata = { ...metadata, env: { agent: 'custom-agent' } };
-        expect(extendEnvMetadata(withAgent, 'container', { runtime: 'docker' })).to.deep.equal({
-          ...metadata,
-          env: { agent: 'custom-agent', container: { runtime: 'docker' } }
-        });
-      });
-    });
-
-    context('when the new value does not fit and there is an existing env document', function () {
-      it('keeps the original env document', function () {
-        const withEnv: ClientMetadata = {
-          ...metadata,
-          env: { name: 'aws.lambda', region: 'us-east-2' }
-        };
-        expect(extendEnvMetadata(withEnv, 'agent', 'a'.repeat(512)).env).to.deep.equal({
-          name: 'aws.lambda',
-          region: 'us-east-2'
-        });
-      });
-    });
-
-    context('when the new value does not fit and there is no existing env document', function () {
-      it('omits the env document entirely', function () {
-        expect(extendEnvMetadata(metadata, 'agent', 'a'.repeat(512))).to.not.have.property('env');
-      });
-    });
   });
 });

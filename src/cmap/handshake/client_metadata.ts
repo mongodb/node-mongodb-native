@@ -172,98 +172,53 @@ export async function makeClientMetadata(
     }
   }
 
+  // Env has an order of precedence for data truncation, and order matters.
+  // We append in the order of delete preference. 'name' is appended at the end of
+  // faasEnv, and is preference-agnostic with 'agent'. So we'll prefer keeping
+  // 'agent' over 'name', and 'name' over all FAAS props, and all FAAS props
+  // over 'container' (since FAAS props and 'container' are preference-agnostic as well)
+  const containerMetadata = await getContainerMetadata();
   const faasEnv = getFAASEnv();
-  if (faasEnv != null) {
-    if (!metadataDocument.ifItFitsItSits('env', faasEnv)) {
-      for (const key of faasEnv.keys()) {
-        faasEnv.delete(key);
-        if (faasEnv.size === 0) break;
-        if (metadataDocument.ifItFitsItSits('env', faasEnv)) break;
-      }
+  const agentEnv = getAgentEnv();
+
+  const fullEnv = new Map<string, unknown>();
+  if (containerMetadata.size > 0) fullEnv.set('container', containerMetadata);
+  for (const [k, v] of faasEnv) fullEnv.set(k, v);
+  if (agentEnv.length > 0) fullEnv.set('agent', agentEnv);
+
+  if (fullEnv.size > 0 && !metadataDocument.ifItFitsItSits('env', fullEnv)) {
+    for (const key of fullEnv.keys()) {
+      fullEnv.delete(key);
+      if (fullEnv.size === 0) break;
+      if (metadataDocument.ifItFitsItSits('env', fullEnv)) break;
     }
   }
 
-  const metadata = await addContainerMetadata(metadataDocument.toObject() as ClientMetadata);
-  return addAgentMetadata(metadata);
+  return metadataDocument.toObject() as ClientMetadata;
 }
 
 let dockerPromise: Promise<boolean>;
-type ContainerMetadata = NonNullable<NonNullable<ClientMetadata['env']>['container']>;
 /** @internal */
-async function getContainerMetadata(): Promise<ContainerMetadata> {
+async function getContainerMetadata(): Promise<Map<string, string>> {
   dockerPromise ??= fileIsAccessible('/.dockerenv');
   const isDocker = await dockerPromise;
 
   const { KUBERNETES_SERVICE_HOST = '' } = process.env;
   const isKubernetes = KUBERNETES_SERVICE_HOST.length > 0 ? true : false;
 
-  const containerMetadata: ContainerMetadata = {};
+  const containerMetadata = new Map<string, string>();
 
-  if (isDocker) containerMetadata.runtime = 'docker';
-  if (isKubernetes) containerMetadata.orchestrator = 'kubernetes';
+  if (isDocker) containerMetadata.set('runtime', 'docker');
+  if (isKubernetes) containerMetadata.set('orchestrator', 'kubernetes');
 
   return containerMetadata;
 }
 
 /**
  * @internal
- * Attempt to add new env container metadata, but keep old data if it does not fit.
- */
-async function addContainerMetadata(originalMetadata: ClientMetadata): Promise<ClientMetadata> {
-  return extendEnvMetadata(originalMetadata, 'container', await getContainerMetadata());
-}
-
-/**
- * @internal
- * The `env` key to extend, paired with the only value type valid for that key.
- */
-type EnvMetadataEntry = ['container', ContainerMetadata] | ['agent', string];
-
-/**
- * @internal
- * Re-add each metadata value.
- * Attempt to add `env[metadataKey]`, but keep old data if it does not fit.
- */
-export function extendEnvMetadata(
-  originalMetadata: ClientMetadata,
-  ...[metadataKey, metadataValue]: EnvMetadataEntry
-): ClientMetadata {
-  const isEmpty =
-    typeof metadataValue === 'string'
-      ? metadataValue.length === 0
-      : Object.keys(metadataValue).length === 0;
-  if (isEmpty) return originalMetadata;
-
-  const extendedMetadata = new LimitedSizeDocument(512);
-
-  const extendedEnvMetadata: NonNullable<ClientMetadata['env']> = {
-    ...originalMetadata?.env,
-    [metadataKey]: metadataValue
-  };
-
-  for (const [key, val] of Object.entries(originalMetadata)) {
-    if (key !== 'env') {
-      extendedMetadata.ifItFitsItSits(key, val);
-    } else {
-      if (!extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata)) {
-        // add in old data if newer / extended metadata does not fit
-        extendedMetadata.ifItFitsItSits('env', val);
-      }
-    }
-  }
-
-  if (!('env' in originalMetadata)) {
-    extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata);
-  }
-
-  return extendedMetadata.toObject() as ClientMetadata;
-}
-
-/**
- * @internal
  * Environment variables that indicate the driver is being used by an AI agent, in the order the
  * spec requires them to be evaluated. [0] is the environment variable, [1] is the value to set
- * when that environment variable is encountered. If [1] is null, use the (trimmed) environment variable value.
+ * when that environment variable is encountered. If [1] is null, use the environment variable value.
  *
  * From the spec:
  * client.env.agent is a single string. Its value is determined by the environment variables below.
@@ -280,14 +235,6 @@ const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
   ['AUGMENT_AGENT', 'augment'],
   ['OPENCODE_CLIENT', 'opencode']
 ];
-
-/**
- * @internal
- * Attempt to add new env agent metadata, but keep old data if it does not fit.
- */
-function addAgentMetadata(originalMetadata: ClientMetadata): ClientMetadata {
-  return extendEnvMetadata(originalMetadata, 'agent', getAgentEnv());
-}
 
 /**
  * @internal
@@ -312,7 +259,7 @@ export function getAgentEnv(): string {
  * Collects FaaS metadata.
  * - `name` MUST be the last key in the Map returned.
  */
-export function getFAASEnv(): Map<string, string | Int32> | null {
+export function getFAASEnv(): Map<string, string | Int32> {
   const {
     AWS_EXECUTION_ENV = '',
     AWS_LAMBDA_RUNTIME_API = '',
@@ -385,7 +332,7 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
     return faasEnv;
   }
 
-  return null;
+  return faasEnv;
 }
 
 /**
