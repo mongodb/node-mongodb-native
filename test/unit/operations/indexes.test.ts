@@ -198,6 +198,17 @@ describe('class CreateIndexesOperation', () => {
       expect(output.indexes[0]).to.have.property('randomOptionThatWillNeverBeAdded', true);
     });
 
+    it('renames the text index language options the server expects in snake_case', () => {
+      const output = makeIndexesOperation(
+        [{ key: { a: 'text' }, defaultLanguage: 'spanish', languageOverride: 'lang' }],
+        { allowUnknownIndexOptions: true }
+      );
+      expect(output.indexes[0]).to.have.property('default_language', 'spanish');
+      expect(output.indexes[0]).to.have.property('language_override', 'lang');
+      expect(output.indexes[0]).to.not.have.property('defaultLanguage');
+      expect(output.indexes[0]).to.not.have.property('languageOverride');
+    });
+
     it('still maps `version` to `v` when the flag is set to true', () => {
       const output = makeIndexesOperation([{ key: { a: 1 }, version: 1 }], {
         allowUnknownIndexOptions: true

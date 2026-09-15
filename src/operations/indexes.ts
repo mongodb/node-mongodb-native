@@ -480,8 +480,18 @@ function constructIndexDescriptionMap(indexSpec: IndexSpecification): Map<string
 }
 
 /**
+ * Index options whose public name on {@link IndexOptions} differs from the field name the
+ * `createIndexes` command expects.
+ */
+const INDEX_OPTION_RENAMES = new Map([
+  ['version', 'v'],
+  ['defaultLanguage', 'default_language'],
+  ['languageOverride', 'language_override']
+]);
+
+/**
  * Receives an index description and returns a modified index description which has mapped the
- * `version` option to the `v` option.
+ * options in {@link INDEX_OPTION_RENAMES} to the field names the `createIndexes` command expects.
  *
  * When `allowUnknownIndexOptions` is `false` (the default), options that are not in the driver's
  * `VALID_INDEX_OPTIONS` allowlist are removed from the description. When `true`, all options are
@@ -496,8 +506,7 @@ function resolveIndexDescription(
   );
 
   return Object.fromEntries(
-    // we support the `version` option, but the `createIndexes` command expects it to be the `v`
-    providedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
+    providedOptions.map(([name, value]) => [INDEX_OPTION_RENAMES.get(name) ?? name, value])
   );
 }
 
