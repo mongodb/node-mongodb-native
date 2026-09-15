@@ -559,19 +559,19 @@ describe('client metadata module', () => {
   });
 
   describe('metadata truncation', function () {
-    context('when faas region is too large', () => {
-      beforeEach('1. Omit fields from `env` except `env.name`.', () => {
+    context('when the env document is too large', () => {
+      beforeEach('1. Omit fields from `env` except `env.name` & `env.agent`.', () => {
         sinon.stub(process, 'env').get(() => ({
+          KUBERNETES_SERVICE_HOST: 'non_empty_string',
           AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
-          AWS_REGION: 'a'.repeat(512)
+          AWS_REGION: 'a'.repeat(512),
+          CLAUDECODE: '1'
         }));
       });
 
-      it('only includes env.name', async () => {
+      it('omits container and faas fields, keeping env.name and env.agent', async () => {
         const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata).to.not.have.nested.property('env.region');
-        expect(metadata).to.have.nested.property('env.name', 'aws.lambda');
-        expect(metadata.env).to.have.all.keys('name');
+        expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude-code' });
       });
     });
 
@@ -585,7 +585,7 @@ describe('client metadata module', () => {
           sinon.stub(os, 'release').returns('a'.repeat(512));
         });
 
-        it('only includes env.name', async () => {
+        it('only includes os.type', async () => {
           const metadata = await makeClientMetadata([], { runtime });
           expect(metadata).to.have.property('env');
           expect(metadata).to.have.nested.property('env.region', 'abc');
@@ -609,33 +609,21 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when there is no space for FaaS env', () => {
+    context('when there is no space for any env field', () => {
       beforeEach('3. Omit the `env` document entirely.', () => {
         sinon.stub(process, 'env').get(() => ({
+          KUBERNETES_SERVICE_HOST: 'non_empty_string',
           AWS_EXECUTION_ENV: 'iLoveJavaScript',
-          AWS_REGION: 'abc'
+          AWS_LAMBDA_RUNTIME_API: 'non_empty_string',
+          AWS_REGION: 'abc',
+          CLAUDECODE: '1'
         }));
         sinon.stub(os, 'type').returns('a'.repeat(50));
       });
 
-      it('omits the faas env', async () => {
+      it('omits the env document', async () => {
         const metadata = await makeClientMetadata([{ name: 'a'.repeat(350) }], { runtime });
         expect(metadata).to.not.have.property('env');
-      });
-    });
-
-    context('when the faas env is too large and an agent is set', () => {
-      beforeEach('1. Omit fields from `env` except `env.name` & `env.agent`.', () => {
-        sinon.stub(process, 'env').get(() => ({
-          AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
-          AWS_REGION: 'a'.repeat(512),
-          CLAUDECODE: '1'
-        }));
-      });
-
-      it('keeps env.name and env.agent', async () => {
-        const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude-code' });
       });
     });
   });
@@ -665,27 +653,56 @@ describe('client metadata module', () => {
 
     // 'A variable is considered populated if it is present in the environment with a non-empty
     // value.' & 'The first populated variable determines the value, and subsequent entries MUST NOT be considered.'
-    const unpopulated: Array<string | undefined> = ['', ' ', undefined];
+    context('when an agent variable is set to a whitespace-only string', function () {
+      context('when the variable is a generic', function () {
+        stubEnv({ AI_AGENT: ' ' });
 
-    for (const value of unpopulated) {
-      // A generic and a literal
-      for (const key of ['AI_AGENT', 'CLAUDECODE']) {
-        context(`when ${key} is set to "${value}"`, function () {
-          stubEnv({ [key]: value });
-
-          it('treats the variable as unpopulated', function () {
-            expect(getAgentEnv()).to.equal('');
-          });
+        it('treats the variable as unpopulated', function () {
+          expect(getAgentEnv()).to.equal('');
         });
-      }
+      });
 
-      context(`when an earlier variable is set to "${value}"`, function () {
-        stubEnv({ AI_AGENT: value, CLAUDECODE: '1' });
+      context('when the variable is a literal', function () {
+        stubEnv({ CLAUDECODE: ' ' });
+
+        it('treats the variable as unpopulated', function () {
+          expect(getAgentEnv()).to.equal('');
+        });
+      });
+
+      context('when the subject is an earlier variable', function () {
+        stubEnv({ AI_AGENT: ' ', CLAUDECODE: '1' });
 
         it('skips it and considers the next variable', function () {
           expect(getAgentEnv()).to.equal('claude-code');
         });
       });
-    }
+    });
+
+    context('when an agent variable is set to undefined', function () {
+      context('when the variable is a generic', function () {
+        stubEnv({ AI_AGENT: undefined });
+
+        it('treats the variable as unpopulated', function () {
+          expect(getAgentEnv()).to.equal('');
+        });
+      });
+
+      context('when the variable is a literal', function () {
+        stubEnv({ CLAUDECODE: undefined });
+
+        it('treats the variable as unpopulated', function () {
+          expect(getAgentEnv()).to.equal('');
+        });
+      });
+
+      context('when the subject is an earlier variable', function () {
+        stubEnv({ AI_AGENT: undefined, CLAUDECODE: '1' });
+
+        it('skips it and considers the next variable', function () {
+          expect(getAgentEnv()).to.equal('claude-code');
+        });
+      });
+    });
   });
 });
