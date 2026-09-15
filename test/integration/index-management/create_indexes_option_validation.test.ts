@@ -160,12 +160,14 @@ describe('createIndex option validation', function () {
 
     it(
       'creates an index using a server option the driver does not know about',
-      { metadata: { requires: { mongodb: '>=5.3' } } },
+      // `prepareUnique` was introduced in server 6.0; on older servers it is not a valid index
+      // option and the server rejects the command, so this test cannot run there.
+      { metadata: { requires: { mongodb: '>=6.0' } } },
       async function () {
         // `prepareUnique` is supported by the server but is not in the driver's allowlist
         await collection.createIndex(
           { e: 1 },
-          // @ts-expect-error CreateIndexesOptions is a closed interface
+          // @ts-expect-error IndexOptions is a closed interface
           { prepareUnique: true },
           {}
         );
@@ -352,7 +354,9 @@ describe('createIndexes option validation', function () {
 
     it(
       'creates an index using a server option the driver does not know about',
-      { metadata: { requires: { mongodb: '>=5.3' } } },
+      // `prepareUnique` was introduced in server 6.0; on older servers it is not a valid index
+      // option and the server rejects the command, so this test cannot run there.
+      { metadata: { requires: { mongodb: '>=6.0' } } },
       async function () {
         await collection.createIndexes(
           // @ts-expect-error IndexDescription is a closed interface
