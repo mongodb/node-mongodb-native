@@ -272,12 +272,11 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
     remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
       `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
     );
-    await stream.chunks.createIndex(index, {
-      ...stream.writeConcern,
-      background: true,
-      unique: true,
-      timeoutMS: remainingTimeMS
-    });
+    await stream.chunks.createIndex(
+      index,
+      { background: true, unique: true },
+      { timeoutMS: remainingTimeMS }
+    );
   }
 }
 
@@ -379,7 +378,7 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
       `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
     );
 
-    await stream.files.createIndex(index, { background: false, timeoutMS: remainingTimeMS });
+    await stream.files.createIndex(index, { background: false }, { timeoutMS: remainingTimeMS });
   }
 
   await checkChunksIndex(stream);
