@@ -182,9 +182,9 @@ export async function makeClientMetadata(
   const agentEnv = getAgentEnv();
 
   const fullEnv = new Map<string, unknown>();
-  if (containerMetadata.size > 0) fullEnv.set('container', containerMetadata);
   for (const [k, v] of faasEnv) fullEnv.set(k, v);
   if (agentEnv.length > 0) fullEnv.set('agent', agentEnv);
+  if (containerMetadata.size > 0) fullEnv.set('container', containerMetadata);
 
   if (fullEnv.size > 0 && !metadataDocument.ifItFitsItSits('env', fullEnv)) {
     for (const key of fullEnv.keys()) {
