@@ -23,7 +23,6 @@ function stubEnv(env: EnvironmentVariables) {
   before(function () {
     cachedEnv = process.env;
     process.env = {
-      ...process.env,
       ...Object.fromEntries(env)
     };
   });
