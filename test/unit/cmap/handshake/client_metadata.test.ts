@@ -569,7 +569,7 @@ describe('client metadata module', () => {
         }));
       });
 
-      it('omits container and faas fields, keeping env.name and env.agent', async () => {
+      it('faas fields, keeping env.name and env.agent', async () => {
         const metadata = await makeClientMetadata([], { runtime });
         expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude-code' });
       });
