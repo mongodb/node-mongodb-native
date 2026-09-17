@@ -255,6 +255,11 @@ export function getAgentEnv(): string {
   return '';
 }
 
+/**
+ * @internal
+ * Environment variables relevant to FaaS runtimes, governed by the spec:
+ * https://github.com/mongodb/specifications/blob/9cfe388c7d2ce1e02b24b53606e97ce7b73ebb7d/source/mongodb-handshake/handshake.md#faas
+ */
 export const FAAS_ENV_VARIABLES = [
   'AWS_EXECUTION_ENV',
   'AWS_LAMBDA_RUNTIME_API',
