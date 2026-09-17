@@ -3,10 +3,12 @@ import * as process from 'process';
 import * as sinon from 'sinon';
 
 import {
+  AGENT_ENV_VARIABLES,
   type ClientMetadata,
   Connection,
   type Document,
   type DriverInfo,
+  FAAS_ENV_VARIABLES,
   getFAASEnv,
   type HandshakeDocument,
   Int32,
@@ -18,11 +20,21 @@ import { sleep } from '../../tools/utils';
 
 type EnvironmentVariables = Array<[string, string]>;
 
+const handshakeEnvVars: string[] = [
+  ...FAAS_ENV_VARIABLES,
+  ...AGENT_ENV_VARIABLES.map(([key]) => key)
+];
+
 function stubEnv(env: EnvironmentVariables) {
   let cachedEnv: NodeJS.ProcessEnv;
   before(function () {
     cachedEnv = process.env;
+
+    const cleanedEnv = { ...cachedEnv };
+    for (const key of handshakeEnvVars) delete cleanedEnv[key];
+
     process.env = {
+      ...cleanedEnv,
       ...Object.fromEntries(env)
     };
   });

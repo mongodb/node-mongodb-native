@@ -7,6 +7,8 @@ import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
+  AGENT_ENV_VARIABLES,
+  FAAS_ENV_VARIABLES,
   getAgentEnv,
   getFAASEnv,
   LimitedSizeDocument,
@@ -15,7 +17,26 @@ import {
   runNodelessTests
 } from '../../../mongodb';
 import { runtime } from '../../../tools/utils';
+
+const handshakeEnvVars: string[] = [
+  ...FAAS_ENV_VARIABLES,
+  ...AGENT_ENV_VARIABLES.map(([key]) => key)
+];
+
 describe('client metadata module', () => {
+  let cachedEnv: NodeJS.ProcessEnv;
+
+  before(() => {
+    cachedEnv = process.env;
+    const cleanedEnv = { ...cachedEnv };
+    for (const key of handshakeEnvVars) delete cleanedEnv[key];
+    process.env = cleanedEnv;
+  });
+
+  after(() => {
+    process.env = cachedEnv;
+  });
+
   afterEach(() => sinon.restore());
 
   describe('new LimitedSizeDocument()', () => {
@@ -562,7 +583,6 @@ describe('client metadata module', () => {
     context('when the env document is too large', () => {
       beforeEach('1. Omit fields from `env` except `env.name` & `env.agent`.', () => {
         sinon.stub(process, 'env').get(() => ({
-          KUBERNETES_SERVICE_HOST: 'non_empty_string',
           AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
           AWS_REGION: 'a'.repeat(512),
           CLAUDECODE: '1'

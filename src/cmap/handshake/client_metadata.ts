@@ -225,7 +225,7 @@ async function getContainerMetadata(): Promise<Map<string, string>> {
  * Drivers MUST evaluate the list in order. The first populated variable determines the value, and
  * subsequent entries MUST NOT be considered.
  */
-const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
+export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
   ['AI_AGENT', null],
   ['AGENT', null],
   ['CLAUDECODE', 'claude-code'],
@@ -254,6 +254,22 @@ export function getAgentEnv(): string {
 
   return '';
 }
+
+export const FAAS_ENV_VARIABLES = [
+  'AWS_EXECUTION_ENV',
+  'AWS_LAMBDA_RUNTIME_API',
+  'AWS_LAMBDA_FUNCTION_MEMORY_SIZE',
+  'AWS_REGION',
+  'FUNCTIONS_WORKER_RUNTIME',
+  'K_SERVICE',
+  'FUNCTION_NAME',
+  'FUNCTION_MEMORY_MB',
+  'FUNCTION_REGION',
+  'FUNCTION_TIMEOUT_SEC',
+  'VERCEL',
+  'VERCEL_REGION',
+  'KUBERNETES_SERVICE_HOST'
+] as const;
 
 /**
  * Collects FaaS metadata.
