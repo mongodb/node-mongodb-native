@@ -93,7 +93,11 @@ export interface IndexInformationOptions extends ListIndexesOptions {
   full?: boolean;
 }
 
-/** @public */
+/**
+ * @public
+ *
+ * Loosely aligns with `IndexModel` from the spec.
+ * */
 export interface IndexDescription
   extends Pick<
     CreateIndexesOptions,
@@ -502,7 +506,9 @@ function resolveIndexDescription(
   allowUnknownIndexOptions: boolean
 ): Omit<ResolvedIndexDescription, 'key'> {
   const providedOptions = Object.entries(description).filter(
-    ([optionName]) => allowUnknownIndexOptions || VALID_INDEX_OPTIONS.has(optionName)
+    ([optionName]) =>
+      // Ensure `key` is removed, even when `allowUnknownIndexOptions` is true
+      optionName !== 'key' && (allowUnknownIndexOptions || VALID_INDEX_OPTIONS.has(optionName))
   );
 
   return Object.fromEntries(

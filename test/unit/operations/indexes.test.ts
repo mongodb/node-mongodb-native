@@ -198,6 +198,22 @@ describe('class CreateIndexesOperation', () => {
       expect(output.indexes[0]).to.have.property('randomOptionThatWillNeverBeAdded', true);
     });
 
+    it('rebuilds `key` as a Map even when unknown options are passed through', () => {
+      const output = makeIndexesOperation([{ key: { a: 1, b: -1 } }], {
+        allowUnknownIndexOptions: true
+      });
+
+      // `key` must not survive the option filter: the operation rebuilds it as a Map so that
+      // index key ordering is preserved, and re-adds it after the filtered options.
+      expect(output.indexes[0].key).to.be.instanceOf(Map);
+      expect(output.indexes[0].key).to.deep.equal(
+        new Map([
+          ['a', 1],
+          ['b', -1]
+        ])
+      );
+    });
+
     it('renames the text index language options the server expects in snake_case', () => {
       const output = makeIndexesOperation(
         [{ key: { a: 'text' }, defaultLanguage: 'spanish', languageOverride: 'lang' }],
