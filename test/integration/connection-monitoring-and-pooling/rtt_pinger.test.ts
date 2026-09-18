@@ -175,4 +175,51 @@ describe('class RTTPinger', () => {
       }
     });
   });
+  context('when the RTT connection is interrupted', () => {
+    const heartbeatFrequencyMS = 10;
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { heartbeatFrequencyMS });
+    });
+
+    afterEach(async () => {
+      await client?.close();
+    });
+
+    it('re-establishes the connection', async function () {
+      await client.connect();
+      const rttPingers = await getRTTPingers(client);
+
+      for (const rtt of rttPingers) rtt.connection.destroy();
+
+      await sleep(heartbeatFrequencyMS * 20);
+
+      for (const rtt of rttPingers) {
+        expect(rtt.closed, 'RTTPinger should not have been closed').to.be.false;
+        expect(rtt.connection, 'RTTPinger should have re-established its connection').to.not.be
+          .undefined;
+      }
+    });
+
+    it('resumes taking measurements rather than serving a stale latestRtt', async function () {
+      await client.connect();
+      const rttPingers = await getRTTPingers(client);
+
+      // Sentinel value: any subsequent measurement will overwrite it.
+      const STALE = -1;
+      for (const rtt of rttPingers) rtt.latestRtt = STALE;
+
+      for (const rtt of rttPingers) rtt.connection.destroy();
+
+      await sleep(heartbeatFrequencyMS * 20);
+
+      for (const rtt of rttPingers) {
+        expect(
+          rtt.latestRtt,
+          'latestRtt is frozen at a stale value - no new measurement was taken'
+        ).to.not.equal(STALE);
+      }
+    });
+  });
 });
