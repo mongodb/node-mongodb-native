@@ -57,6 +57,15 @@ describe('client metadata module', () => {
       expect(doc.ifItFitsItSits('_id2', '')).to.be.false;
       expect(doc.toObject()).to.have.all.keys('_id');
     });
+
+    it('does not double-count incoming value sizes into the document', () => {
+      const doc = new LimitedSizeDocument(22);
+      // A replacement op with the same byte length does not exceed the size limit
+      expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
+      expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
+      // But a new op does
+      expect(doc.ifItFitsItSits('_id2', new ObjectId())).to.be.false;
+    });
   });
 
   describe('getFAASEnv()', function () {

@@ -74,12 +74,19 @@ export class LimitedSizeDocument {
     // The BSON byteLength of the new element is the same as serializing it to its own document
     // subtracting the document size int32 and the null terminator.
     const newElementSize = BSON.serialize(new Map().set(key, value)).byteLength - 5;
+    
+    let baseDocumentSize = this.documentSize;
+    // If the incoming key is a replace op, don't double-count the size
+    if (this.document.has(key)) {
+      // new document size = current size - existing value, prepping for replacement
+      baseDocumentSize -= BSON.serialize(new Map().set(key, this.document.get(key))).byteLength - 5;
+    }
 
-    if (newElementSize + this.documentSize > this.maxSize) {
+    if (newElementSize + baseDocumentSize > this.maxSize) {
       return false;
     }
 
-    this.documentSize += newElementSize;
+    this.documentSize = baseDocumentSize + newElementSize;
 
     this.document.set(key, value);
 
@@ -184,14 +191,16 @@ export async function makeClientMetadata(
   const fullEnv = new Map<string, unknown>();
   for (const [k, v] of faasEnv) fullEnv.set(k, v);
   if (agentEnv.length > 0) fullEnv.set('agent', agentEnv);
-  if (containerMetadata.size > 0) fullEnv.set('container', containerMetadata);
-
   if (fullEnv.size > 0 && !metadataDocument.ifItFitsItSits('env', fullEnv)) {
     for (const key of fullEnv.keys()) {
       fullEnv.delete(key);
       if (fullEnv.size === 0) break;
       if (metadataDocument.ifItFitsItSits('env', fullEnv)) break;
     }
+  }
+  if (containerMetadata.size > 0) {
+    const newEnv = { ...Object.fromEntries(fullEnv), 'container': containerMetadata };
+    metadataDocument.ifItFitsItSits('env', newEnv)
   }
 
   return metadataDocument.toObject() as ClientMetadata;
