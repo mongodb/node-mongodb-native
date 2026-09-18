@@ -95,7 +95,6 @@ export interface CreateCollectionOptions extends Omit<CommandOperationOptions, '
   clusteredIndex?: ClusteredCollectionOptions;
   /** The number of seconds after which a document in a timeseries or clustered collection expires. */
   expireAfterSeconds?: number;
-  /** @experimental */
   encryptedFields?: Document;
   /**
    * If set, enables pre-update and post-update document events to be included for any
