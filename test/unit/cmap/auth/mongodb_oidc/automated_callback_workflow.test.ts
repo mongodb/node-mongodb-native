@@ -7,6 +7,8 @@ import {
   Connection,
   gcpCallback,
   MongoCredentials,
+  type OIDCCallbackParams,
+  type OIDCResponse,
   TokenCache
 } from '../../../../mongodb';
 import { sleep } from '../../../../tools/utils';
@@ -48,48 +50,30 @@ describe('AutomatedCallbackWorkflow', function () {
     // caller's error and the callback was never invoked again.
     const params = { timeoutContext: new AbortController().signal, version: 1 as const };
 
-    function countingCallback(failOn: number[]) {
-      let invocations = 0;
-      const callback = async () => {
-        invocations += 1;
-        if (failOn.includes(invocations)) {
-          throw new Error(`rejected on invocation ${invocations}`);
-        }
-        return { accessToken: `token-${invocations}` };
-      };
-      return {
-        callback,
-        get invocations() {
-          return invocations;
-        }
-      };
-    }
-
     context('when a lone callback invocation rejects', function () {
       it('invokes the callback again for the next caller', async function () {
-        const spy = countingCallback([1]);
-        const locked = new AutomatedCallbackWorkflow(new TokenCache(), spy.callback).callback;
+        const callback = sinon.stub<[OIDCCallbackParams], Promise<OIDCResponse>>();
+        callback.onFirstCall().rejects(new Error('metadata timed out'));
+        callback.resolves({ accessToken: 'token' });
+        const locked = new AutomatedCallbackWorkflow(new TokenCache(), callback).callback;
 
         const error = await locked(params).catch(error => error);
-        expect(error).to.match(/rejected on invocation 1/);
+        expect(error).to.match(/metadata timed out/);
 
         const result = await locked(params);
-        expect(result).to.deep.equal({ accessToken: 'token-2' });
-        expect(spy.invocations).to.equal(2);
+        expect(result).to.deep.equal({ accessToken: 'token' });
+        expect(callback).to.have.been.calledTwice;
       });
     });
 
     context('when a caller is queued behind a rejecting callback', function () {
       it('invokes the callback for the queued caller instead of reusing the error', async function () {
-        let invocations = 0;
-        const callback = async () => {
-          invocations += 1;
-          if (invocations === 1) {
-            await sleep(50);
-            throw new Error('rejected on invocation 1');
-          }
-          return { accessToken: `token-${invocations}` };
-        };
+        const callback = sinon.stub<[OIDCCallbackParams], Promise<OIDCResponse>>();
+        callback.onFirstCall().callsFake(async () => {
+          await sleep(50);
+          throw new Error('metadata timed out');
+        });
+        callback.resolves({ accessToken: 'token' });
         const locked = new AutomatedCallbackWorkflow(new TokenCache(), callback).callback;
 
         const first = locked(params).catch(error => error);
@@ -98,8 +82,8 @@ describe('AutomatedCallbackWorkflow', function () {
         await sleep(10);
         const queued = locked(params).catch(error => error);
 
-        expect(await first).to.match(/rejected on invocation 1/);
-        expect(await queued).to.deep.equal({ accessToken: 'token-2' });
+        expect(await first).to.match(/metadata timed out/);
+        expect(await queued).to.deep.equal({ accessToken: 'token' });
       });
     });
 
@@ -107,35 +91,41 @@ describe('AutomatedCallbackWorkflow', function () {
       it('never runs the callback concurrently', async function () {
         let running = 0;
         let maxRunning = 0;
-        const callback = async () => {
-          running += 1;
-          maxRunning = Math.max(maxRunning, running);
-          await sleep(10);
-          running -= 1;
-          return { accessToken: 'token' };
-        };
+        const callback = sinon
+          .stub<[OIDCCallbackParams], Promise<OIDCResponse>>()
+          .callsFake(async () => {
+            running += 1;
+            maxRunning = Math.max(maxRunning, running);
+            await sleep(10);
+            running -= 1;
+            return { accessToken: 'token' };
+          });
         const locked = new AutomatedCallbackWorkflow(new TokenCache(), callback).callback;
 
         await Promise.all([locked(params), locked(params), locked(params)]);
 
         expect(maxRunning).to.equal(1);
+        expect(callback).to.have.been.calledThrice;
       });
     });
 
     context('when a callback rejects', function () {
       it('still throttles the next invocation', async function () {
-        const timestamps: number[] = [];
-        const callback = async () => {
-          timestamps.push(Date.now());
-          throw new Error('rejected');
-        };
+        const invokedAt: number[] = [];
+        const callback = sinon
+          .stub<[OIDCCallbackParams], Promise<OIDCResponse>>()
+          .callsFake(async () => {
+            invokedAt.push(Date.now());
+            throw new Error('metadata timed out');
+          });
         const locked = new AutomatedCallbackWorkflow(new TokenCache(), callback).callback;
 
         await locked(params).catch(() => null);
         await locked(params).catch(() => null);
 
-        expect(timestamps).to.have.lengthOf(2);
-        expect(timestamps[1] - timestamps[0]).to.be.at.least(90);
+        expect(callback).to.have.been.calledTwice;
+        // withLock throttles invocations to one per 100ms.
+        expect(invokedAt[1] - invokedAt[0]).to.be.at.least(90);
       });
     });
   });
