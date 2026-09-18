@@ -74,7 +74,7 @@ export class LimitedSizeDocument {
     // The BSON byteLength of the new element is the same as serializing it to its own document
     // subtracting the document size int32 and the null terminator.
     const newElementSize = BSON.serialize(new Map().set(key, value)).byteLength - 5;
-    
+
     let baseDocumentSize = this.documentSize;
     // If the incoming key is a replace op, don't double-count the size
     if (this.document.has(key)) {
@@ -199,8 +199,8 @@ export async function makeClientMetadata(
     }
   }
   if (containerMetadata.size > 0) {
-    const newEnv = { ...Object.fromEntries(fullEnv), 'container': containerMetadata };
-    metadataDocument.ifItFitsItSits('env', newEnv)
+    const newEnv = { ...Object.fromEntries(fullEnv), container: containerMetadata };
+    metadataDocument.ifItFitsItSits('env', newEnv);
   }
 
   return metadataDocument.toObject() as ClientMetadata;
