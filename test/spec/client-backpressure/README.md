@@ -175,10 +175,14 @@ executed against a MongoDB 9.0+ server that has enabled the `configureFailPoint`
 10. Assert absolute bounds on each run's duration.
 
     ```python
-    assertGreaterEqual(exponential_backoff_time, 0.6)
-    assertGreaterEqual(with_base_backoff_ms_time, 0.3)
+    TOLERANCE = 0.005  # 5ms
+    assertGreaterEqual(exponential_backoff_time, 0.6 - TOLERANCE)
+    assertGreaterEqual(with_base_backoff_ms_time, 0.3 - TOLERANCE)
     assertLess(with_base_backoff_ms_time, 0.6)
     ```
 
-    A run can never be faster than the sum of its backoffs. With jitter pinned to 1, the default backoffs are
-    `0.2 + 0.4 = 0.6s` and the `baseBackoffMS=50` backoffs are `0.1 + 0.2 = 0.3s`.
+    A run cannot be meaningfully faster than the sum of its backoffs. With jitter pinned to 1, the default backoffs are
+    `0.2 + 0.4 = 0.6s` and the `baseBackoffMS=50` backoffs are `0.1 + 0.2 = 0.3s`. The lower bounds include a small
+    tolerance because on some platforms sleep timers run on a millisecond-granularity clock, so a sleep can complete
+    marginally earlier than the requested duration when measured with a higher-resolution clock. Drivers MAY adjust
+    the tolerance to fit the timing behavior of their platform.
