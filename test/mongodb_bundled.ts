@@ -142,6 +142,7 @@ export const {
   gcpCallback,
   getAwsCredentialProvider,
   getFAASEnv,
+  getAgentEnv,
   getGcpMetadata,
   getMongoDBClientEncryption,
   GetMoreOperation,

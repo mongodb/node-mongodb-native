@@ -44,16 +44,17 @@ export interface ClientMetadata {
   application?: {
     name: string;
   };
-  /** FaaS environment information */
   env?: {
-    name?: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
-    timeout_sec?: Int32;
-    memory_mb?: Int32;
-    region?: string;
+    agent?: string;
     container?: {
       runtime?: string;
       orchestrator?: string;
     };
+    /** FaaS environment information */
+    name?: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
+    timeout_sec?: Int32;
+    memory_mb?: Int32;
+    region?: string;
   };
 }
 
@@ -74,11 +75,18 @@ export class LimitedSizeDocument {
     // subtracting the document size int32 and the null terminator.
     const newElementSize = BSON.serialize(new Map().set(key, value)).byteLength - 5;
 
-    if (newElementSize + this.documentSize > this.maxSize) {
+    let baseDocumentSize = this.documentSize;
+    // If the incoming key is a replace op, don't double-count the size
+    if (this.document.has(key)) {
+      // new document size = current size - existing value, prepping for replacement
+      baseDocumentSize -= BSON.serialize(new Map().set(key, this.document.get(key))).byteLength - 5;
+    }
+
+    if (newElementSize + baseDocumentSize > this.maxSize) {
       return false;
     }
 
-    this.documentSize += newElementSize;
+    this.documentSize = baseDocumentSize + newElementSize;
 
     this.document.set(key, value);
 
@@ -100,7 +108,7 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
- * 1. Omit fields from `env` except `env.name`.
+ * 1. Omit fields from `env` except `env.name` & `env.agent`.
  * 2. Omit fields from `os` except `os.type`.
  * 3. Omit the `env` document entirely.
  * 4. Truncate `platform`. -- special we do not truncate this field
@@ -171,76 +179,117 @@ export async function makeClientMetadata(
     }
   }
 
+  // Env has an order of precedence for data truncation, and order matters.
+  // We append in the order of delete preference. 'name' is appended at the end of
+  // faasEnv, and is preference-agnostic with 'agent'. So we'll prefer keeping
+  // 'agent' over 'name', and 'name' over all FAAS props, and all FAAS props
+  // over 'container' (since FAAS props and 'container' are preference-agnostic as well)
+  const containerMetadata = await getContainerMetadata();
   const faasEnv = getFAASEnv();
-  if (faasEnv != null) {
-    if (!metadataDocument.ifItFitsItSits('env', faasEnv)) {
-      for (const key of faasEnv.keys()) {
-        faasEnv.delete(key);
-        if (faasEnv.size === 0) break;
-        if (metadataDocument.ifItFitsItSits('env', faasEnv)) break;
-      }
+  const agentEnv = getAgentEnv();
+
+  const fullEnv = new Map<string, unknown>();
+  for (const [k, v] of faasEnv) fullEnv.set(k, v);
+  if (agentEnv.length > 0) fullEnv.set('agent', agentEnv);
+  if (fullEnv.size > 0 && !metadataDocument.ifItFitsItSits('env', fullEnv)) {
+    for (const key of fullEnv.keys()) {
+      fullEnv.delete(key);
+      if (fullEnv.size === 0) break;
+      if (metadataDocument.ifItFitsItSits('env', fullEnv)) break;
     }
   }
-  return await addContainerMetadata(metadataDocument.toObject() as ClientMetadata);
+  if (containerMetadata.size > 0) {
+    const newEnv = { ...Object.fromEntries(fullEnv), container: containerMetadata };
+    metadataDocument.ifItFitsItSits('env', newEnv);
+  }
+
+  return metadataDocument.toObject() as ClientMetadata;
 }
 
 let dockerPromise: Promise<boolean>;
-type ContainerMetadata = NonNullable<NonNullable<ClientMetadata['env']>['container']>;
 /** @internal */
-async function getContainerMetadata(): Promise<ContainerMetadata> {
+async function getContainerMetadata(): Promise<Map<string, string>> {
   dockerPromise ??= fileIsAccessible('/.dockerenv');
   const isDocker = await dockerPromise;
 
   const { KUBERNETES_SERVICE_HOST = '' } = process.env;
   const isKubernetes = KUBERNETES_SERVICE_HOST.length > 0 ? true : false;
 
-  const containerMetadata: ContainerMetadata = {};
+  const containerMetadata = new Map<string, string>();
 
-  if (isDocker) containerMetadata.runtime = 'docker';
-  if (isKubernetes) containerMetadata.orchestrator = 'kubernetes';
+  if (isDocker) containerMetadata.set('runtime', 'docker');
+  if (isKubernetes) containerMetadata.set('orchestrator', 'kubernetes');
 
   return containerMetadata;
 }
 
 /**
  * @internal
- * Re-add each metadata value.
- * Attempt to add new env container metadata, but keep old data if it does not fit.
+ * Environment variables that indicate the driver is being used by an AI agent, in the order the
+ * spec requires them to be evaluated. [0] is the environment variable, [1] is the value to set
+ * when that environment variable is encountered. If [1] is null, use the environment variable value.
+ *
+ * From the spec:
+ * client.env.agent is a single string. Its value is determined by the environment variables below.
+ * Drivers MUST evaluate the list in order. The first populated variable determines the value, and
+ * subsequent entries MUST NOT be considered.
  */
-async function addContainerMetadata(originalMetadata: ClientMetadata): Promise<ClientMetadata> {
-  const containerMetadata = await getContainerMetadata();
-  if (Object.keys(containerMetadata).length === 0) return originalMetadata;
+export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
+  ['AI_AGENT', null],
+  ['AGENT', null],
+  ['CLAUDECODE', 'claude-code'],
+  ['CURSOR_AGENT', 'cursor'],
+  ['GEMINI_CLI', 'gemini-cli'],
+  ['CODEX_SANDBOX', 'codex'],
+  ['AUGMENT_AGENT', 'augment'],
+  ['OPENCODE_CLIENT', 'opencode']
+];
 
-  const extendedMetadata = new LimitedSizeDocument(512);
-
-  const extendedEnvMetadata: NonNullable<ClientMetadata['env']> = {
-    ...originalMetadata?.env,
-    container: containerMetadata
-  };
-
-  for (const [key, val] of Object.entries(originalMetadata)) {
-    if (key !== 'env') {
-      extendedMetadata.ifItFitsItSits(key, val);
-    } else {
-      if (!extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata)) {
-        // add in old data if newer / extended metadata does not fit
-        extendedMetadata.ifItFitsItSits('env', val);
-      }
+/**
+ * @internal
+ * Resolves `env.agent` from the environment, or an empty string when no agent variable is
+ * populated. Returns the value of the first populated variable in `AGENT_ENV_VARIABLES`.
+ */
+export function getAgentEnv(): string {
+  for (const [key, literal] of AGENT_ENV_VARIABLES) {
+    // A variable is only populated if it is present with a non-empty value, so an empty or
+    // whitespace-only value never selects an entry, even one with a fixed table value.
+    // A populated value is reported verbatim; only the populated check ignores whitespace.
+    const envValue = process.env[key] ?? '';
+    if (envValue.trim().length > 0) {
+      return literal ?? envValue;
     }
   }
 
-  if (!('env' in originalMetadata)) {
-    extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata);
-  }
-
-  return extendedMetadata.toObject() as ClientMetadata;
+  return '';
 }
+
+/**
+ * @internal
+ * Environment variables relevant to FaaS runtimes, governed by the spec:
+ * https://github.com/mongodb/specifications/blob/9cfe388c7d2ce1e02b24b53606e97ce7b73ebb7d/source/mongodb-handshake/handshake.md#faas
+ */
+export const FAAS_ENV_VARIABLES = [
+  'AWS_EXECUTION_ENV',
+  'AWS_LAMBDA_RUNTIME_API',
+  'AWS_LAMBDA_FUNCTION_MEMORY_SIZE',
+  'AWS_REGION',
+  'FUNCTIONS_WORKER_RUNTIME',
+  'K_SERVICE',
+  'FUNCTION_NAME',
+  'FUNCTION_MEMORY_MB',
+  'FUNCTION_REGION',
+  'FUNCTION_TIMEOUT_SEC',
+  'VERCEL',
+  'VERCEL_REGION',
+  'KUBERNETES_SERVICE_HOST'
+] as const;
 
 /**
  * Collects FaaS metadata.
  * - `name` MUST be the last key in the Map returned.
  */
-export function getFAASEnv(): Map<string, string | Int32> | null {
+export function getFAASEnv(): Map<string, string | Int32> {
   const {
     AWS_EXECUTION_ENV = '',
     AWS_LAMBDA_RUNTIME_API = '',
@@ -313,7 +362,7 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
     return faasEnv;
   }
 
-  return null;
+  return faasEnv;
 }
 
 /**
