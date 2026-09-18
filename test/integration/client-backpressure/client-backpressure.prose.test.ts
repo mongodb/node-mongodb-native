@@ -213,11 +213,14 @@ describe('Client Backpressure (Prose)', function () {
       }
 
       // 10. Assert absolute bounds on each run's duration.
-      //     A run can never be faster than the sum of its backoffs. With jitter pinned to 1, the
-      //     default backoffs are `0.2 + 0.4 = 0.6s` and the `baseBackoffMS=50` backoffs are
-      //     `0.1 + 0.2 = 0.3s`.
-      expect(exponentialBackoffTime).to.be.at.least(600);
-      expect(withBaseBackoffMSTime).to.be.at.least(300);
+      //     A run cannot be meaningfully faster than the sum of its backoffs. With jitter pinned
+      //     to 1, the default backoffs are `0.2 + 0.4 = 0.6s` and the `baseBackoffMS=50` backoffs
+      //     are `0.1 + 0.2 = 0.3s`. The lower bounds include a small tolerance because sleep
+      //     timers run on a millisecond-granularity clock, so a sleep can complete marginally
+      //     earlier than the requested duration when measured with a higher-resolution clock.
+      const TOLERANCE_MS = 5;
+      expect(exponentialBackoffTime).to.be.at.least(600 - TOLERANCE_MS);
+      expect(withBaseBackoffMSTime).to.be.at.least(300 - TOLERANCE_MS);
       expect(withBaseBackoffMSTime).to.be.lessThan(600);
     }
   );
