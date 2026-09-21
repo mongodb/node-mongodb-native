@@ -145,6 +145,8 @@ export const {
   getAgentEnv,
   getGcpMetadata,
   getMongoDBClientEncryption,
+  AGENT_ENV_VARIABLES,
+  FAAS_ENV_VARIABLES,
   GetMoreOperation,
   getTopology,
   GridFSBucket,
