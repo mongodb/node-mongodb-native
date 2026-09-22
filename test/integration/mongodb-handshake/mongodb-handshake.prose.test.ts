@@ -221,11 +221,11 @@ describe('Handshake Prose Tests', function () {
       expectEnv: object;
       env?: EnvironmentVariables;
     }> = [
-      // 1. Known agent. client.env.agent MUST equal claude-code.
+      // 1. Known agent. client.env.agent MUST equal claude_code.
       {
         env: [['CLAUDECODE', '1']],
         expectEnv: {
-          agent: 'claude-code'
+          agent: 'claude_code'
         }
       },
       // 2. Known agent, fixed name. client.env.agent MUST equal 'cursor', regardless of the value of the enviornment variable.
@@ -253,7 +253,7 @@ describe('Handshake Prose Tests', function () {
           ['CLAUDECODE', '1']
         ],
         expectEnv: {
-          agent: 'cursor'
+          agent: 'claude_code'
         }
       },
       // 5. Generic agent with a descriptive value. `client.env.agent` MUST equal `custom-agent`.
@@ -265,18 +265,18 @@ describe('Handshake Prose Tests', function () {
       },
       // 6. Generic agent with a boolean value. `client.env.agent` MUST equal `ai_agent`.
       {
-        env: [['AI_AGENT', '-agent']],
+        env: [['AI_AGENT', 'true']],
         expectEnv: {
-          agent: 'custom-agent'
+          agent: 'ai_agent'
         }
       },
-      // 7. Generic agent, normalization. `AI_AGENT` is set to `Claude-Code_2-1-238_Agent` with one leading space and one
+      // 7. Generic agent, normalization. `AI_AGENT` is set to `claude_code_2-1-238_Agent` with one leading space and one
       // trailing space. The value is converted to lowercase and leading and trailing whitespace is removed, so
-      // `client.env.agent` MUST equal `claude-code_2-1-238_agent`.
+      // `client.env.agent` MUST equal `claude_code_2-1-238_agent`.
       {
-        env: [['AI_AGENT', ' Claude-Code_2-1-238_Agent ']],
+        env: [['AI_AGENT', ' claude_code_2-1-238_Agent ']],
         expectEnv: {
-          agent: 'claude-code_2-1-238_agent'
+          agent: 'claude_code_2-1-238_agent'
         }
       },
       // 8. Generic agent, truncation. `AI_AGENT` is set to a value of 100 characters. `client.env.agent` MUST equal the first
@@ -314,7 +314,7 @@ describe('Handshake Prose Tests', function () {
           ['CLAUDECODE', '1']
         ],
         expectEnv: {
-          agent: 'claude-code',
+          agent: 'claude_code',
           region: 'us-east-2',
           name: 'aws.lambda'
         }

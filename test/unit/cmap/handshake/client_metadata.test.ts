@@ -602,7 +602,7 @@ describe('client metadata module', () => {
 
       it('faas fields, keeping env.name and env.agent', async () => {
         const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude-code' });
+        expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude_code' });
       });
     });
 
@@ -741,7 +741,7 @@ describe('client metadata module', () => {
         stubEnvBefore({ AI_AGENT: undefined, CLAUDECODE: '1' });
 
         it('skips it and considers the next variable', function () {
-          expect(getAgentEnv()).to.equal('claude-code');
+          expect(getAgentEnv()).to.equal('claude_code');
         });
       });
     });

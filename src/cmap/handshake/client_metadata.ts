@@ -235,7 +235,7 @@ async function getContainerMetadata(): Promise<Map<string, string>> {
  * subsequent entries MUST NOT be considered.
  */
 export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
-  ['CLAUDECODE', 'claude-code'],
+  ['CLAUDECODE', 'claude_code'],
   ['CLAUDE_CODE_ENTRYPOINT', 'claude_code'],
   ['CURSOR_AGENT', 'cursor'],
   ['CODEX_SANDBOX', 'codex'],
