@@ -7,6 +7,11 @@ import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
+  AGENT_ENV_LIMIT,
+  AGENT_ENV_UNIDENTIFYING,
+  AGENT_ENV_VARIABLES,
+  FAAS_ENV_VARIABLES,
+  getAgentEnv,
   getFAASEnv,
   LimitedSizeDocument,
   makeClientMetadata,
@@ -14,7 +19,26 @@ import {
   runNodelessTests
 } from '../../../mongodb';
 import { runtime } from '../../../tools/utils';
+
+const handshakeEnvVars: string[] = [
+  ...FAAS_ENV_VARIABLES,
+  ...AGENT_ENV_VARIABLES.map(([key]) => key)
+];
+
 describe('client metadata module', () => {
+  let cachedEnv: NodeJS.ProcessEnv;
+
+  before(() => {
+    cachedEnv = process.env;
+    const cleanedEnv = { ...cachedEnv };
+    for (const key of handshakeEnvVars) delete cleanedEnv[key];
+    process.env = cleanedEnv;
+  });
+
+  after(() => {
+    process.env = cachedEnv;
+  });
+
   afterEach(() => sinon.restore());
 
   describe('new LimitedSizeDocument()', () => {
@@ -34,6 +58,15 @@ describe('client metadata module', () => {
       expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
       expect(doc.ifItFitsItSits('_id2', '')).to.be.false;
       expect(doc.toObject()).to.have.all.keys('_id');
+    });
+
+    it('does not double-count incoming value sizes into the document', () => {
+      const doc = new LimitedSizeDocument(22);
+      // A replacement op with the same byte length does not exceed the size limit
+      expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
+      expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
+      // But a new op does
+      expect(doc.ifItFitsItSits('_id2', new ObjectId())).to.be.false;
     });
   });
 
@@ -64,8 +97,8 @@ describe('client metadata module', () => {
           after(() => {
             delete process.env[envVariable];
           });
-          it('returns null', () => {
-            expect(getFAASEnv()).to.be.null;
+          it('returns an empty map', () => {
+            expect(getFAASEnv()).to.have.property('size', 0);
           });
         });
       });
@@ -90,14 +123,14 @@ describe('client metadata module', () => {
       after(() => {
         delete process.env.AWS_EXECUTION_ENV;
       });
-      it('returns null', () => {
-        expect(getFAASEnv()).to.be.null;
+      it('returns an empty map', () => {
+        expect(getFAASEnv()).to.have.property('size', 0);
       });
     });
 
     context('when there is no FAAS provider data in the env', () => {
-      it('returns null', () => {
-        expect(getFAASEnv()).to.be.null;
+      it('returns an empty map', () => {
+        expect(getFAASEnv()).to.have.property('size', 0);
       });
     });
 
@@ -113,8 +146,8 @@ describe('client metadata module', () => {
           delete process.env.AWS_EXECUTION_ENV;
           delete process.env.FUNCTIONS_WORKER_RUNTIME;
         });
-        it('returns null', () => {
-          expect(getFAASEnv()).to.be.null;
+        it('returns an empty map', () => {
+          expect(getFAASEnv()).to.have.property('size', 0);
         });
       });
 
@@ -558,19 +591,18 @@ describe('client metadata module', () => {
   });
 
   describe('metadata truncation', function () {
-    context('when faas region is too large', () => {
-      beforeEach('1. Omit fields from `env` except `env.name`.', () => {
+    context('when the env document is too large', () => {
+      beforeEach('1. Omit fields from `env` except `env.name` & `env.agent`.', () => {
         sinon.stub(process, 'env').get(() => ({
           AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
-          AWS_REGION: 'a'.repeat(512)
+          AWS_REGION: 'a'.repeat(512),
+          CLAUDECODE: '1'
         }));
       });
 
-      it('only includes env.name', async () => {
+      it('faas fields, keeping env.name and env.agent', async () => {
         const metadata = await makeClientMetadata([], { runtime });
-        expect(metadata).to.not.have.nested.property('env.region');
-        expect(metadata).to.have.nested.property('env.name', 'aws.lambda');
-        expect(metadata.env).to.have.all.keys('name');
+        expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude_code' });
       });
     });
 
@@ -584,7 +616,7 @@ describe('client metadata module', () => {
           sinon.stub(os, 'release').returns('a'.repeat(512));
         });
 
-        it('only includes env.name', async () => {
+        it('only includes os.type', async () => {
           const metadata = await makeClientMetadata([], { runtime });
           expect(metadata).to.have.property('env');
           expect(metadata).to.have.nested.property('env.region', 'abc');
@@ -608,18 +640,109 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when there is no space for FaaS env', () => {
+    context('when there is no space for any env field', () => {
       beforeEach('3. Omit the `env` document entirely.', () => {
         sinon.stub(process, 'env').get(() => ({
+          KUBERNETES_SERVICE_HOST: 'non_empty_string',
           AWS_EXECUTION_ENV: 'iLoveJavaScript',
-          AWS_REGION: 'abc'
+          AWS_LAMBDA_RUNTIME_API: 'non_empty_string',
+          AWS_REGION: 'abc',
+          CLAUDECODE: '1'
         }));
         sinon.stub(os, 'type').returns('a'.repeat(50));
       });
 
-      it('omits the faas env', async () => {
+      it('omits the env document', async () => {
         const metadata = await makeClientMetadata([{ name: 'a'.repeat(350) }], { runtime });
         expect(metadata).to.not.have.property('env');
+      });
+    });
+  });
+
+  describe('getAgentEnv()', function () {
+    const stubEnv = (env: NodeJS.ProcessEnv) => {
+      sinon.stub(process, 'env').get(() => env);
+    };
+    const stubEnvBefore = (env: NodeJS.ProcessEnv) => {
+      beforeEach(function () {
+        stubEnv(env);
+      });
+    };
+
+    context('when a fixed-value is used', function () {
+      stubEnvBefore({ GEMINI_CLI: 'some-other-value' });
+      it('returns the value from the agent table, not the environment', function () {
+        expect(getAgentEnv()).to.equal('gemini_cli');
+      });
+      context('and normalization results in an empty value', function () {
+        stubEnvBefore({ GEMINI_CLI: ` ` });
+        it('it skips literals', function () {
+          expect(getAgentEnv()).to.equal('');
+        });
+      });
+    });
+
+    context('when a generic agent variable is used', function () {
+      context('and the value is already normalized', function () {
+        stubEnvBefore({ AI_AGENT: 'custom-agent' });
+        it('returns the provided value', function () {
+          expect(getAgentEnv()).to.equal('custom-agent');
+        });
+      });
+
+      context('and the value needs to be normalized', function () {
+        it('whitespace is stripped', function () {
+          stubEnv({ AI_AGENT: '  custom-agent  ' });
+          expect(getAgentEnv()).to.equal('custom-agent');
+        });
+        it('ucase is flipped', function () {
+          stubEnv({ AI_AGENT: 'cUsToM-aGeNt' });
+          expect(getAgentEnv()).to.equal('custom-agent');
+        });
+        it('truncation is tripped', function () {
+          stubEnv({ AI_AGENT: 'a'.repeat(100) });
+          expect(getAgentEnv()).to.equal('a'.repeat(AGENT_ENV_LIMIT));
+        });
+      });
+
+      context('and the normalized value resolves to a non-identfying presence', function () {
+        Array.from(AGENT_ENV_UNIDENTIFYING).forEach(val => {
+          it(`should map '${val}' to 'ai-agent'`, function () {
+            stubEnv({ AI_AGENT: val });
+            expect(getAgentEnv()).to.equal('ai_agent');
+          });
+        });
+      });
+
+      context('and normalization results in an empty value', function () {
+        stubEnvBefore({ AI_AGENT: ' ' });
+        it('skips fixed values', function () {
+          expect(getAgentEnv()).to.equal('');
+        });
+      });
+    });
+
+    context('when an agent variable is set to undefined', function () {
+      context('and the variable is a generic', function () {
+        stubEnvBefore({ AI_AGENT: undefined });
+        it('treats the variable as unpopulated', function () {
+          expect(getAgentEnv()).to.equal('');
+        });
+      });
+
+      context('and the variable is a literal', function () {
+        stubEnvBefore({ CLAUDECODE: undefined });
+        it('treats the variable as unpopulated', function () {
+          expect(getAgentEnv()).to.equal('');
+        });
+      });
+
+      context('and the subject is an earlier variable', function () {
+        stubEnvBefore({ AI_AGENT: undefined, CLAUDECODE: '1' });
+
+        it('skips it and considers the next variable', function () {
+          expect(getAgentEnv()).to.equal('claude_code');
+        });
       });
     });
   });
