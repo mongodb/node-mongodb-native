@@ -221,38 +221,21 @@ describe('Handshake Prose Tests', function () {
       expectEnv: object;
       env?: EnvironmentVariables;
     }> = [
-      // 1. Generic agent via AI_AGENT. client.env.agent MUST equal custom-agent.
-      {
-        env: [['AI_AGENT', 'custom-agent']],
-        expectEnv: {
-          agent: 'custom-agent'
-        }
-      },
-      // 2. Generic agent via AGENT. client.env.agent MUST equal custom-agent.
-      {
-        env: [['AGENT', 'custom-agent']],
-        expectEnv: {
-          agent: 'custom-agent'
-        }
-      },
-      // 3. Known agent. client.env.agent MUST equal claude-code.
+      // 1. Known agent. client.env.agent MUST equal claude-code.
       {
         env: [['CLAUDECODE', '1']],
         expectEnv: {
           agent: 'claude-code'
         }
       },
-      // 4. Precedence - generic wins over known. client.env.agent MUST equal custom-agent (the value of AI_AGENT), not claude-code.
+      // 2. Known agent, fixed name. client.env.agent MUST equal 'cursor', regardless of the value of the enviornment variable.
       {
-        env: [
-          ['AI_AGENT', 'custom-agent'],
-          ['CLAUDECODE', '1']
-        ],
+        env: [['CURSOR_AGENT', 'some-value-42']],
         expectEnv: {
-          agent: 'custom-agent'
+          agent: 'cursor'
         }
       },
-      // 5. Precedence - first known wins. client.env.agent MUST equal cursor.
+      // 3. Precedence - first known agent wins. `client.env.agent` MUST equal `cursor`, not `gemini_cli`.
       {
         env: [
           ['CURSOR_AGENT', '1'],
@@ -262,17 +245,68 @@ describe('Handshake Prose Tests', function () {
           agent: 'cursor'
         }
       },
-      // 6. Empty value is treated as unset. client.env.agent MUST be omitted. If no other client.env fields are populated, client.env MUST be entirely omitted.
+      // 4. Precedence - a known agent wins over the generic variable. `client.env.agent` MUST equal `claude_code`, not
+      // `custom-agent`.
+      {
+        env: [
+          ['AI_AGENT', 'custom-agent'],
+          ['CLAUDECODE', '1']
+        ],
+        expectEnv: {
+          agent: 'cursor'
+        }
+      },
+      // 5. Generic agent with a descriptive value. `client.env.agent` MUST equal `custom-agent`.
+      {
+        env: [['AI_AGENT', 'custom-agent']],
+        expectEnv: {
+          agent: 'custom-agent'
+        }
+      },
+      // 6. Generic agent with a boolean value. `client.env.agent` MUST equal `ai_agent`.
+      {
+        env: [['AI_AGENT', '-agent']],
+        expectEnv: {
+          agent: 'custom-agent'
+        }
+      },
+      // 7. Generic agent, normalization. `AI_AGENT` is set to `Claude-Code_2-1-238_Agent` with one leading space and one
+      // trailing space. The value is converted to lowercase and leading and trailing whitespace is removed, so
+      // `client.env.agent` MUST equal `claude-code_2-1-238_agent`.
+      {
+        env: [['AI_AGENT', ' Claude-Code_2-1-238_Agent ']],
+        expectEnv: {
+          agent: 'claude-code_2-1-238_agent'
+        }
+      },
+      // 8. Generic agent, truncation. `AI_AGENT` is set to a value of 100 characters. `client.env.agent` MUST equal the first
+      // 64 characters of that value.
+      {
+        env: [['AI_AGENT', 'a'.repeat(100)]],
+        expectEnv: {
+          agent: 'a'.repeat(64),
+        }
+      },
+      // 9. Empty value is treated as unset. `AI_AGENT` is set to an empty string. `client.env.agent` MUST be omitted. If no
+      // other `client.env` fields are populated, `client.env` MUST be entirely omitted.
       {
         env: [['AI_AGENT', '']],
         expectEnv: undefined
       },
-      // 7. No agent variables. None of the environment variables in the client.env.agent table are set. client.env.agent MUST be omitted.
+      // 10. Whitespace-only value is treated as unset. `AI_AGENT` is set to `"   "` (three space characters). `client.env.agent`
+      // MUST be omitted.
+      {
+        env: [['AI_AGENT', '   ']],
+        expectEnv: undefined
+      },
+      // 11. No agent variables. None of the environment variables in the `client.env.agent` table are set. `client.env.agent`
+      // MUST be omitted.
       {
         env: [],
         expectEnv: undefined
       },
-      // 8. Agent alongside FaaS. This test MUST verify that both the AWS Lambda metadata and client.env.agent (equal to claude-code) are present in client.env.
+      // 12. Agent alongside FaaS. This test MUST verify that both the AWS Lambda metadata and `client.env.agent` (equal to
+      // `claude_code`) are present in `client.env`.
       {
         env: [
           ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],

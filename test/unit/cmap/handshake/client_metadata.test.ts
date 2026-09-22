@@ -8,6 +8,8 @@ import { inspect } from 'util';
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
   AGENT_ENV_VARIABLES,
+  AGENT_ENV_LIMIT,
+  AGENT_ENV_UNIDENTIFYING,
   FAAS_ENV_VARIABLES,
   getAgentEnv,
   getFAASEnv,
@@ -659,74 +661,84 @@ describe('client metadata module', () => {
 
   describe('getAgentEnv()', function () {
     const stubEnv = (env: NodeJS.ProcessEnv) => {
-      beforeEach(function () {
-        sinon.stub(process, 'env').get(() => env);
+      sinon.stub(process, 'env').get(() => env);
+    }
+    const stubEnvBefore = (env: NodeJS.ProcessEnv) => {
+      beforeEach(function() {
+        stubEnv(env);
       });
     };
 
-    context('when a fixed-value agent variable is set to an arbitrary value', function () {
-      stubEnv({ GEMINI_CLI: 'some-other-value' });
-
+    context('when a fixed-value is used', function () {
+      stubEnvBefore({ GEMINI_CLI: 'some-other-value' });
       it('returns the value from the agent table, not the environment', function () {
-        expect(getAgentEnv()).to.equal('gemini-cli');
+        expect(getAgentEnv()).to.equal('gemini_cli');
       });
-    });
-
-    context('when a generic agent variable is padded with whitespace', function () {
-      stubEnv({ AI_AGENT: '  custom-agent  ' });
-
-      it('returns the value verbatim', function () {
-        expect(getAgentEnv()).to.equal('  custom-agent  ');
-      });
-    });
-
-    // 'A variable is considered populated if it is present in the environment with a non-empty
-    // value.' & 'The first populated variable determines the value, and subsequent entries MUST NOT be considered.'
-    context('when an agent variable is set to a whitespace-only string', function () {
-      context('when the variable is a generic', function () {
-        stubEnv({ AI_AGENT: ' ' });
-
-        it('treats the variable as unpopulated', function () {
+      context('and normalization results in an empty value', function () {
+        stubEnvBefore({ GEMINI_CLI: ` ` });
+        it('it skips literals', function () {
           expect(getAgentEnv()).to.equal('');
         });
+      })
+    });
+
+    context('when a generic agent variable is used', function () {
+      context('and the value is already normalized', function () {
+        stubEnvBefore({ AI_AGENT: 'custom-agent' });
+        it('returns the provided value', function () {
+          expect(getAgentEnv()).to.equal('custom-agent');
+        });
       });
 
-      context('when the variable is a literal', function () {
-        stubEnv({ CLAUDECODE: ' ' });
+      context('and the value needs to be normalized', function () {
+        it('whitespace is stripped', function () {
+          stubEnv({ AI_AGENT: '  custom-agent  ' });
+          expect(getAgentEnv()).to.equal('custom-agent');
+        });
+        it('ucase is flipped', function () {
+          stubEnv({ AI_AGENT: 'cUsToM-aGeNt' });
+          expect(getAgentEnv()).to.equal('custom-agent');
+        });
+        it('truncation is tripped', function () {
+          stubEnv({ AI_AGENT: 'a'.repeat(100) });
+          expect(getAgentEnv()).to.equal('a'.repeat(AGENT_ENV_LIMIT));
+        });
+      })
 
-        it('treats the variable as unpopulated', function () {
+      context('and the normalized value resolves to a non-identfying presence', function () {
+        Array.from(AGENT_ENV_UNIDENTIFYING).forEach((val) => {
+          it(`should map '${val}' to 'ai-agent'`, function () {
+            stubEnv({ AI_AGENT: val });
+            expect(getAgentEnv()).to.equal('ai_agent');
+          })
+        })
+      });
+    
+      context('and normalization results in an empty value', function () {
+        stubEnvBefore({ AI_AGENT: ' ' });
+        it('skips fixed values', function () {
           expect(getAgentEnv()).to.equal('');
         });
-      });
-
-      context('when the subject is an earlier variable', function () {
-        stubEnv({ AI_AGENT: ' ', CLAUDECODE: '1' });
-
-        it('skips it and considers the next variable', function () {
-          expect(getAgentEnv()).to.equal('claude-code');
-        });
-      });
+      })
     });
 
     context('when an agent variable is set to undefined', function () {
-      context('when the variable is a generic', function () {
-        stubEnv({ AI_AGENT: undefined });
-
+      context('and the variable is a generic', function () {
+        stubEnvBefore({ AI_AGENT: undefined });
         it('treats the variable as unpopulated', function () {
           expect(getAgentEnv()).to.equal('');
         });
       });
 
-      context('when the variable is a literal', function () {
-        stubEnv({ CLAUDECODE: undefined });
-
+      context('and the variable is a literal', function () {
+        stubEnvBefore({ CLAUDECODE: undefined });
         it('treats the variable as unpopulated', function () {
           expect(getAgentEnv()).to.equal('');
         });
       });
 
-      context('when the subject is an earlier variable', function () {
-        stubEnv({ AI_AGENT: undefined, CLAUDECODE: '1' });
+      context('and the subject is an earlier variable', function () {
+        stubEnvBefore({ AI_AGENT: undefined, CLAUDECODE: '1' });
 
         it('skips it and considers the next variable', function () {
           expect(getAgentEnv()).to.equal('claude-code');

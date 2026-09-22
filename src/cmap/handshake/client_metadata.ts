@@ -235,29 +235,50 @@ async function getContainerMetadata(): Promise<Map<string, string>> {
  * subsequent entries MUST NOT be considered.
  */
 export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]> = [
-  ['AI_AGENT', null],
-  ['AGENT', null],
   ['CLAUDECODE', 'claude-code'],
+  ['CLAUDE_CODE_ENTRYPOINT', 'claude_code'],
   ['CURSOR_AGENT', 'cursor'],
-  ['GEMINI_CLI', 'gemini-cli'],
   ['CODEX_SANDBOX', 'codex'],
-  ['AUGMENT_AGENT', 'augment'],
-  ['OPENCODE_CLIENT', 'opencode']
+  ['CLINE_ACTIVE', 'cline'], 
+  ['GEMINI_CLI', 'gemini_cli'],
+  ['AUGMENT_AGENT', 'auggie_cli'],
+  ['OPENCODE_CLIENT', 'opencode_client'],
+  ['TRAE_AI_SHELL_ID', 'trae_ai'],
+  ['GOOSE_TERMINAL', 'goose'],
+  ['GOOSE_AGENT', 'goose'],
+  ['AI_AGENT', null]
 ];
 
+/**
+ * @internal
+ * Env var value length after first 2 forms of normalization
+ */
+export const AGENT_ENV_LIMIT = 64;
+/**
+ * @internal
+ * Values used in AI_AGENT to indicate an agent is being used but are non-identifying
+ */
+export const AGENT_ENV_UNIDENTIFYING = new Set(['1', 'true'])
 /**
  * @internal
  * Resolves `env.agent` from the environment, or an empty string when no agent variable is
  * populated. Returns the value of the first populated variable in `AGENT_ENV_VARIABLES`.
  */
 export function getAgentEnv(): string {
+
   for (const [key, literal] of AGENT_ENV_VARIABLES) {
-    // A variable is only populated if it is present with a non-empty value, so an empty or
+    // A variable is only populated if it is present with a non-empty normalized value, so an empty or
     // whitespace-only value never selects an entry, even one with a fixed table value.
-    // A populated value is reported verbatim; only the populated check ignores whitespace.
-    const envValue = process.env[key] ?? '';
-    if (envValue.trim().length > 0) {
-      return literal ?? envValue;
+    const envValue = (process.env[key] ?? '')
+      .trim()
+      .toLowerCase()
+      .substring(0, AGENT_ENV_LIMIT);
+
+    if (envValue.length > 0) {
+      if (!literal) {
+        return AGENT_ENV_UNIDENTIFYING.has(envValue) ? 'ai_agent' : envValue;
+      }
+      return literal;
     }
   }
 
