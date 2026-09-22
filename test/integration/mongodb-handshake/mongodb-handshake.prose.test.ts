@@ -284,7 +284,7 @@ describe('Handshake Prose Tests', function () {
       {
         env: [['AI_AGENT', 'a'.repeat(100)]],
         expectEnv: {
-          agent: 'a'.repeat(64),
+          agent: 'a'.repeat(64)
         }
       },
       // 9. Empty value is treated as unset. `AI_AGENT` is set to an empty string. `client.env.agent` MUST be omitted. If no

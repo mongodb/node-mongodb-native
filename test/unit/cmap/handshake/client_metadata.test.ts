@@ -7,9 +7,9 @@ import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
-  AGENT_ENV_VARIABLES,
   AGENT_ENV_LIMIT,
   AGENT_ENV_UNIDENTIFYING,
+  AGENT_ENV_VARIABLES,
   FAAS_ENV_VARIABLES,
   getAgentEnv,
   getFAASEnv,
@@ -662,9 +662,9 @@ describe('client metadata module', () => {
   describe('getAgentEnv()', function () {
     const stubEnv = (env: NodeJS.ProcessEnv) => {
       sinon.stub(process, 'env').get(() => env);
-    }
+    };
     const stubEnvBefore = (env: NodeJS.ProcessEnv) => {
-      beforeEach(function() {
+      beforeEach(function () {
         stubEnv(env);
       });
     };
@@ -679,7 +679,7 @@ describe('client metadata module', () => {
         it('it skips literals', function () {
           expect(getAgentEnv()).to.equal('');
         });
-      })
+      });
     });
 
     context('when a generic agent variable is used', function () {
@@ -703,23 +703,23 @@ describe('client metadata module', () => {
           stubEnv({ AI_AGENT: 'a'.repeat(100) });
           expect(getAgentEnv()).to.equal('a'.repeat(AGENT_ENV_LIMIT));
         });
-      })
+      });
 
       context('and the normalized value resolves to a non-identfying presence', function () {
-        Array.from(AGENT_ENV_UNIDENTIFYING).forEach((val) => {
+        Array.from(AGENT_ENV_UNIDENTIFYING).forEach(val => {
           it(`should map '${val}' to 'ai-agent'`, function () {
             stubEnv({ AI_AGENT: val });
             expect(getAgentEnv()).to.equal('ai_agent');
-          })
-        })
+          });
+        });
       });
-    
+
       context('and normalization results in an empty value', function () {
         stubEnvBefore({ AI_AGENT: ' ' });
         it('skips fixed values', function () {
           expect(getAgentEnv()).to.equal('');
         });
-      })
+      });
     });
 
     context('when an agent variable is set to undefined', function () {
