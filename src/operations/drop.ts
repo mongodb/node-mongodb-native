@@ -12,6 +12,7 @@ import { Aspect, defineAspects } from './operation';
 
 /** @public */
 export interface DropCollectionOptions extends Omit<CommandOperationOptions, 'rawData'> {
+  /** Queryable Encryption field schema used during collection drop so associated state collections are dropped too. **/
   encryptedFields?: Document;
 }
 
