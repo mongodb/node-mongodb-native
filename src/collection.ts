@@ -717,8 +717,10 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param indexSpecs - An array of index specifications to be created
    * @param commandOptions - Optional settings for the `createIndexes` command
-   * @param allowUnknownIndexOptions - When `true`, index options the driver does not recognise are
-   *   sent to the server instead of being dropped. Defaults to `false`; this will become the only
+   * @deprecated Used to opt into "pass through" behavior, where options will be validated by the server rather than the driver.
+   *   In a future release, this will be removed and the default behavior will change from false to true.
+   * @param allowUnknownIndexOptions - When `true`, index options the driver does not recognise
+   *   are sent to the server instead of being dropped. Defaults to `false`; this will become the only
    *   behaviour in a future major release.
    */
   async createIndexes(
