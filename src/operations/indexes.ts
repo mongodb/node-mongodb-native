@@ -555,9 +555,25 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
+    allowUnknownIndexOptions: boolean,
+    options?: CreateIndexesOptions
+  );
+
+  private constructor(
+    parent: OperationParent,
+    collectionName: string,
+    indexes: IndexDescription[],
+    allowUnknownIndexOptions: boolean,
+    commandOptions?: CreateIndexOptions
+  );
+
+  private constructor(
+    parent: OperationParent,
+    collectionName: string,
+    indexes: IndexDescription[],
     // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
     allowUnknownIndexOptions: boolean,
-    commandOptions: CreateIndexesOptions | CreateIndexOptions | undefined
+    commandOptions?: CreateIndexesOptions | CreateIndexOptions
   ) {
     super(parent, commandOptions);
 
