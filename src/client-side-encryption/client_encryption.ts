@@ -1143,6 +1143,7 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
    */
   keyAltNames?: string[] | undefined;
 
+  /** Optional 96-byte custom key material used when creating a data key instead of libmongocrypt’s random material. **/
   keyMaterial?: Buffer | Binary;
 
   /** @internal */
