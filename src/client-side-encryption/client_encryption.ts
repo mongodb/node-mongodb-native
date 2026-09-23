@@ -1152,6 +1152,7 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
 
 /**
  * @public
+ * Public result shape describing the `bulkWriteResult` produced by `rewrapManyDataKey`.
  */
 export interface ClientEncryptionRewrapManyDataKeyResult {
   /** The result of rewrapping data keys. If unset, no keys matched the filter. */
