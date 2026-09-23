@@ -724,6 +724,7 @@ export class Collection<TSchema extends Document = Document> {
   async createIndexes(
     indexSpecs: IndexDescription[],
     commandOptions?: CreateIndexesOptions,
+    // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
     allowUnknownIndexOptions = false
   ): Promise<string[]> {
     return await executeOperation(

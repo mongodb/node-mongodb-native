@@ -503,6 +503,7 @@ const INDEX_OPTION_RENAMES = new Map([
  */
 function resolveIndexDescription(
   description: IndexDescription,
+  // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
   allowUnknownIndexOptions: boolean
 ): Omit<ResolvedIndexDescription, 'key'> {
   const providedOptions = Object.entries(description).filter(
@@ -554,24 +555,9 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
+    // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
     allowUnknownIndexOptions: boolean,
-    options?: CreateIndexesOptions
-  );
-
-  private constructor(
-    parent: OperationParent,
-    collectionName: string,
-    indexes: IndexDescription[],
-    allowUnknownIndexOptions: boolean,
-    commandOptions?: CreateIndexOptions
-  );
-
-  private constructor(
-    parent: OperationParent,
-    collectionName: string,
-    indexes: IndexDescription[],
-    allowUnknownIndexOptions: boolean,
-    commandOptions?: CreateIndexesOptions | CreateIndexOptions
+    commandOptions: CreateIndexesOptions | CreateIndexOptions | undefined
   ) {
     super(parent, commandOptions);
 
@@ -585,12 +571,7 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
         userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
       const name = userIndex.name ?? Array.from(key).flat().join('_');
 
-      const validIndexOptions = resolveIndexDescription(
-        userIndex,
-        // TODO(seanrmilligan): Add NODE ticket to set to remove allowUnknownIndexOptions with
-        // a default behavior of true in a future 8.0.0 release
-        allowUnknownIndexOptions
-      );
+      const validIndexOptions = resolveIndexDescription(userIndex, allowUnknownIndexOptions);
       return {
         ...validIndexOptions,
         name,
@@ -608,6 +589,7 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
+    // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
     allowUnknownIndexOptions: boolean,
     commandOptions?: CreateIndexesOptions
   ): CreateIndexesOperation {
