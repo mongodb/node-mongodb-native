@@ -927,6 +927,7 @@ export type TextQueryOptions = StringQueryOptions;
 
 /**
  * @public
+ * Options interface for `rewrapManyDataKey`; selects the new KMS provider/masterKey for bulk key rotation.
  */
 export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
   provider: ClientEncryptionDataKeyProvider;
