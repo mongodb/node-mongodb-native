@@ -986,6 +986,7 @@ export interface ClientEncryptionOptions {
   keyExpirationMS?: number;
 
   /**
+   * @experimental
    * The timeout setting to be used for all the operations on ClientEncryption.
    *
    * When provided, `timeoutMS` is used as the timeout for each operation executed on
