@@ -739,8 +739,7 @@ export const OPTIONS = {
     type: 'record'
   },
   autoSelectFamily: {
-    type: 'boolean',
-    default: true
+    type: 'boolean'
   },
   autoSelectFamilyAttemptTimeout: {
     type: 'uint'
