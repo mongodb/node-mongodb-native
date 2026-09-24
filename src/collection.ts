@@ -56,12 +56,14 @@ import {
 import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
+  type CreateIndexOptions,
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
   type IndexDescriptionCompact,
   type IndexDescriptionInfo,
   type IndexInformationOptions,
+  type IndexOptions,
   type IndexSpecification,
   type ListIndexesOptions
 } from './operations/indexes';
@@ -609,7 +611,7 @@ export class Collection<TSchema extends Document = Document> {
    * Creates an index on the db and collection collection.
    *
    * @param indexSpec - The field name or index specification to create an index for
-   * @param options - Optional settings for the command
+   * @param indexOptions - Optional settings for the command
    *
    * @example
    * ```ts
@@ -632,20 +634,54 @@ export class Collection<TSchema extends Document = Document> {
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    * ```
+   * @deprecated Use the three parameter overload, which separates index options from
+   *   command options. This overload will be removed in a future major release.
    */
+  createIndex(indexSpec: IndexSpecification, options?: CreateIndexesOptions): Promise<string>;
+
+  /**
+   * Creates an index on the db and collection collection.
+   *
+   * Options for the index itself are given in `indexOptions`, and options for the
+   * `createIndexes` command are given separately in `commandOptions`. Unknown fields in
+   * `indexOptions` are passed through to the server for validation rather than being dropped.
+   *
+   * @param keys - The field name or index specification to create an index for
+   * @param indexOptions - Optional settings for the index
+   * @param commandOptions - Optional settings for the `createIndexes` command
+   */
+  createIndex(
+    keys: IndexSpecification,
+    indexOptions?: IndexOptions,
+    commandOptions?: CreateIndexOptions
+  ): Promise<string>;
+
   async createIndex(
     indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
+    indexOptions?: CreateIndexesOptions | IndexOptions,
+    commandOptions?: CreateIndexOptions
   ): Promise<string> {
-    const indexes = await executeOperation(
-      this.client,
-      CreateIndexesOperation.fromIndexSpecification(
-        this,
-        this.collectionName,
-        indexSpec,
-        resolveOptions(this, options)
-      )
-    );
+    // When commandOptions is provided the caller has separated the two kinds of options, so the
+    // index options are forwarded as-is and only the command options inherit from the parent.
+    // Otherwise indexOptions is both, and it inherits from the parent as it always has.
+    const operation =
+      commandOptions == null
+        ? CreateIndexesOperation.fromIndexSpecification(
+            this,
+            this.collectionName,
+            indexSpec,
+            /*allowUnknownIndexOptions=*/ false,
+            resolveOptions(this, indexOptions) // at this point indexOptions is the combined index and command options
+          )
+        : CreateIndexesOperation.fromIndexSpecification(
+            this,
+            this.collectionName,
+            indexSpec,
+            /*allowUnknownIndexOptions=*/ true,
+            indexOptions,
+            resolveOptions(this, commandOptions)
+          );
+    const indexes = await executeOperation(this.client, operation);
 
     return indexes[0];
   }
@@ -659,7 +695,7 @@ export class Collection<TSchema extends Document = Document> {
    * Index specifications are defined {@link https://www.mongodb.com/docs/manual/reference/command/createIndexes/| here}.
    *
    * @param indexSpecs - An array of index specifications to be created
-   * @param options - Optional settings for the command
+   * @param commandOptions - Optional settings for the `createIndexes` command
    *
    * @example
    * ```ts
@@ -681,9 +717,35 @@ export class Collection<TSchema extends Document = Document> {
    * ]);
    * ```
    */
+  createIndexes(
+    indexSpecs: IndexDescription[],
+    commandOptions?: CreateIndexesOptions
+  ): Promise<string[]>;
+
+  /**
+   * Creates multiple indexes in the collection, opting into "pass through" behavior for index
+   * options the driver does not recognise.
+   *
+   * @param indexSpecs - An array of index specifications to be created
+   * @param commandOptions - Optional settings for the `createIndexes` command
+   * @param allowUnknownIndexOptions - When `true`, index options the driver does not recognise are
+   *   sent to the server instead of being dropped, for the server to validate.
+   *
+   * @deprecated Used to opt into "pass through" behavior, where options will be validated by the
+   *   server rather than the driver. In a future release this overload will be removed and the
+   *   default behavior will change from `false` to `true`.
+   */
+  createIndexes(
+    indexSpecs: IndexDescription[],
+    commandOptions: CreateIndexesOptions | undefined,
+    allowUnknownIndexOptions: boolean
+  ): Promise<string[]>;
+
   async createIndexes(
     indexSpecs: IndexDescription[],
-    options?: CreateIndexesOptions
+    commandOptions?: CreateIndexesOptions,
+    // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
+    allowUnknownIndexOptions = false
   ): Promise<string[]> {
     return await executeOperation(
       this.client,
@@ -691,7 +753,12 @@ export class Collection<TSchema extends Document = Document> {
         this,
         this.collectionName,
         indexSpecs,
-        resolveOptions(this, { ...options, maxTimeMS: undefined })
+        // TODO(seanrmilligan): default this to true and remove the parameter in a future major
+        // release. Index options live on each index description, so nothing on this path
+        // contaminates them -- but flipping it turns today's silently dropped unknown option into
+        // a server error.
+        allowUnknownIndexOptions,
+        resolveOptions(this, { ...commandOptions, maxTimeMS: undefined })
       )
     );
   }
