@@ -695,7 +695,7 @@ export class Collection<TSchema extends Document = Document> {
    * Index specifications are defined {@link https://www.mongodb.com/docs/manual/reference/command/createIndexes/| here}.
    *
    * @param indexSpecs - An array of index specifications to be created
-   * @param options - Optional settings for the command
+   * @param commandOptions - Optional settings for the `createIndexes` command
    *
    * @example
    * ```ts
@@ -716,15 +716,31 @@ export class Collection<TSchema extends Document = Document> {
    *   }
    * ]);
    * ```
+   */
+  createIndexes(
+    indexSpecs: IndexDescription[],
+    commandOptions?: CreateIndexesOptions
+  ): Promise<string[]>;
+
+  /**
+   * Creates multiple indexes in the collection, opting into "pass through" behavior for index
+   * options the driver does not recognise.
    *
    * @param indexSpecs - An array of index specifications to be created
    * @param commandOptions - Optional settings for the `createIndexes` command
-   * @deprecated Used to opt into "pass through" behavior, where options will be validated by the server rather than the driver.
-   *   In a future release, this will be removed and the default behavior will change from false to true.
-   * @param allowUnknownIndexOptions - When `true`, index options the driver does not recognise
-   *   are sent to the server instead of being dropped. Defaults to `false`; this will become the only
-   *   behaviour in a future major release.
+   * @param allowUnknownIndexOptions - When `true`, index options the driver does not recognise are
+   *   sent to the server instead of being dropped, for the server to validate.
+   *
+   * @deprecated Used to opt into "pass through" behavior, where options will be validated by the
+   *   server rather than the driver. In a future release this overload will be removed and the
+   *   default behavior will change from `false` to `true`.
    */
+  createIndexes(
+    indexSpecs: IndexDescription[],
+    commandOptions: CreateIndexesOptions | undefined,
+    allowUnknownIndexOptions: boolean
+  ): Promise<string[]>;
+
   async createIndexes(
     indexSpecs: IndexDescription[],
     commandOptions?: CreateIndexesOptions,
