@@ -634,6 +634,8 @@ export class Collection<TSchema extends Document = Document> {
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    * ```
+   * @deprecated Use the three parameter overload, which separates index options from
+   *   command options. This overload will be removed in a future major release.
    */
   createIndex(indexSpec: IndexSpecification, options?: CreateIndexesOptions): Promise<string>;
 
