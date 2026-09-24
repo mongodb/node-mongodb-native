@@ -1,6 +1,10 @@
+import * as fs from 'node:fs';
 import * as os from 'node:os';
+import * as path from 'node:path';
+import * as vm from 'node:vm';
 
 import { expect } from 'chai';
+import * as ts from 'typescript';
 
 import { MongoClient, type OsAdapter } from '../../src';
 
@@ -33,6 +37,37 @@ describe('Runtime Adapters tests', function () {
 
         const { os: resolved } = await client.options.runtime;
         expect(resolved).to.equal(osAdapter);
+      });
+    });
+
+    describe('when dynamic import is unavailable', function () {
+      it('uses require when it is available', async function () {
+        const source = fs.readFileSync(
+          path.resolve(__dirname, '../../src/runtime_adapters.ts'),
+          'utf8'
+        );
+        const { outputText } = ts.transpileModule(source, {
+          compilerOptions: {
+            module: ts.ModuleKind.Node16,
+            target: ts.ScriptTarget.ES2023
+          }
+        });
+        const module = { exports: {} as Record<string, unknown> };
+        new vm.Script(
+          `(function (exports, require, module) {${outputText}\n})(exports, require, module)`
+        ).runInNewContext({
+          exports: module.exports,
+          require: () => os,
+          module
+        });
+        const resolveRuntimeAdapters = module.exports.resolveRuntimeAdapters as (
+          options: Record<string, unknown>
+        ) => Promise<{ os: typeof os }>;
+
+        const { os: resolved } = await resolveRuntimeAdapters({});
+
+        expect(resolved.platform()).to.equal(os.platform());
+        expect(resolved.arch()).to.equal(os.arch());
       });
     });
   });
