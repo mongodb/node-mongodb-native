@@ -297,7 +297,7 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
 // Maps to `IndexOptions` in
 // https://github.com/mongodb/specifications/blob/6f64d0ee3ae49edbdb30eb995f3e29549e8cfa6a/source/index-management/index-management.md#common-api-components
 /** @public */
-export interface IndexOptions {
+export interface IndexOptions extends Document {
   /**
    * Optionally tells the server to build the index in the background and not block
    * other tasks.
