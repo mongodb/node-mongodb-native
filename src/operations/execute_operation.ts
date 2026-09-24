@@ -308,7 +308,11 @@ async function executeOperationWithRetries<
       // Reset timeouts
       timeoutContext.clear();
 
-      if (hasWriteAspect && operationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
+      if (
+        hasWriteAspect &&
+        operationError.code === MMAPv1_RETRY_WRITES_ERROR_CODE &&
+        operationError.errmsg.startsWith('Transaction numbers')
+      ) {
         throw new MongoServerError({
           message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
           errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,

@@ -157,4 +157,34 @@ describe('Collection', function () {
       await testBulkWrite({ expected: undefined, actual: false, ordered: false });
     });
   });
+
+  context('#write errors', () => {
+    it('preserves generic IllegalOperation error messages', async function () {
+      const client = new MongoClient(`mongodb://${server.uri()}/test`);
+
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.insert) {
+          request.reply({ ok: 0, code: 20, errmsg: 'Namespace already exists' });
+        }
+
+        if (isHello(doc)) {
+          request.reply(Object.assign({}, HELLO));
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      await client.connect();
+      const error = await client
+        .db('test')
+        .collection('test_c')
+        .insertOne({ a: 1 })
+        .catch(error => error);
+
+      expect(error).to.have.property('code', 20);
+      expect(error).to.have.property('message', 'Namespace already exists');
+      await client.close();
+    });
+  });
 });
