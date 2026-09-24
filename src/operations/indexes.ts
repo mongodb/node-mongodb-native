@@ -374,6 +374,16 @@ export interface IndexOptions extends Document {
   '2dsphereIndexVersion'?: number;
 
   /**
+   * Optionally specifies the finest S2 cell level indexed by a 2dsphere index.
+   */
+  finestIndexedLevel?: number;
+
+  /**
+   * Optionally specifies the coarsest S2 cell level indexed by a 2dsphere index.
+   */
+  coarsestIndexedLevel?: number;
+
+  /**
    * Optionally specifies the precision of the stored geo hash in the 2d index, from 1 to 32.
    */
   bits?: number;
