@@ -237,7 +237,6 @@ describe('Collection', function () {
 
       it('drops unknown index options on the two parameter path', async () => {
         const command = await captureCreateIndexes(collection =>
-          // @ts-expect-error: unknown index options are filtered on the legacy path
           collection.createIndex({ a: 1 }, { unique: true, notARealIndexOption: true })
         );
 
@@ -261,7 +260,6 @@ describe('Collection', function () {
         const command = await captureCreateIndexes(collection =>
           collection.createIndex(
             { a: 1 },
-            // @ts-expect-error: unknown index options are passed through to the server
             { unique: true, finestIndexedLevel: 15 },
             { commitQuorum: 2 }
           )

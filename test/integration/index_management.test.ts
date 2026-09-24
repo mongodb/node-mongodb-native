@@ -807,7 +807,6 @@ describe('Indexes', function () {
     it(
       'should run command with commitQuorum if specified on collection.createIndex',
       commitQuorumTest((db, collection) =>
-        // @ts-expect-error revaluate this?
         collection.createIndex('a', { writeConcern: { w: 'majority' }, commitQuorum: 0 })
       )
     );

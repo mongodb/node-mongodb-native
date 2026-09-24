@@ -171,7 +171,6 @@ describe('class CreateIndexesOperation', () => {
   describe('allowUnknownIndexOptions (createIndexes passthrough)', () => {
     const indexDescription = () => ({
       key: { a: 1 },
-      // @ts-expect-error: Testing that unknown options are passed through when enabled
       finestIndexedLevel: 15,
       randomOptionThatWillNeverBeAdded: true
     });

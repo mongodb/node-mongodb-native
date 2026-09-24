@@ -114,7 +114,6 @@ describe('createIndex option validation', function () {
     });
 
     it('drops an unknown option from the options bag', async function () {
-      // @ts-expect-error CreateIndexesOptions is a closed interface
       await collection.createIndex({ d: 1 }, { unique: true, notARealOption: true });
 
       expect(sentIndexes()).to.deep.equal([{ unique: true, name: 'd_1', key: { d: 1 } }]);
@@ -148,7 +147,6 @@ describe('createIndex option validation', function () {
 
     it('sends an unknown option to the server', async function () {
       const error = await collection
-        // @ts-expect-error CreateIndexesOptions is a closed interface
         .createIndex({ d: 1 }, { notARealOption: true }, {})
         .catch(error => error);
 
@@ -165,12 +163,7 @@ describe('createIndex option validation', function () {
       { requires: { mongodb: '>=6.0' } },
       async function () {
         // `prepareUnique` is supported by the server but is not in the driver's allowlist
-        await collection.createIndex(
-          { e: 1 },
-          // @ts-expect-error IndexOptions is a closed interface
-          { prepareUnique: true },
-          {}
-        );
+        await collection.createIndex({ e: 1 }, { prepareUnique: true }, {});
 
         expect(sentIndexes()[0]).to.have.property('prepareUnique', true);
         const indexes = await collection.listIndexes().toArray();
