@@ -753,10 +753,7 @@ export class Collection<TSchema extends Document = Document> {
         this,
         this.collectionName,
         indexSpecs,
-        // TODO(seanrmilligan): default this to true and remove the parameter in a future major
-        // release. Index options live on each index description, so nothing on this path
-        // contaminates them -- but flipping it turns today's silently dropped unknown option into
-        // a server error.
+        // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
         allowUnknownIndexOptions,
         resolveOptions(this, { ...commandOptions, maxTimeMS: undefined })
       )

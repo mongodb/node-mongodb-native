@@ -663,8 +663,8 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
       collectionName,
       [description],
       allowUnknownIndexOptions,
-      // TODO(seanrmilligan): remove the `?? indexOptions` fallback when the two parameter path is
-      // deprecated. Once `indexOptions` is index options only it must not reach the command root.
+      // TODO(NODE-7868): Remove the `?? indexOptions` fallback along with the two parameter path.
+      // Once `indexOptions` is index options only it must not reach the command root.
       commandOptions ?? indexOptions
     );
   }
