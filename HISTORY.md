@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.7.0](https://github.com/mongodb/node-mongodb-native/compare/v7.6.0...v7.7.0) (2026-09-18)
+
+
+### Features
+
+* **NODE-7670:** update dependencies, including next BSON minor ([#5034](https://github.com/mongodb/node-mongodb-native/issues/5034)) ([995edbf](https://github.com/mongodb/node-mongodb-native/commit/995edbf636bb449c3041a15edda9f9fbd88fb939))
+
+
+### Bug Fixes
+
+* **NODE-7858:** re-arm OIDC callback lock after a rejection ([#5056](https://github.com/mongodb/node-mongodb-native/issues/5056)) ([7e953ed](https://github.com/mongodb/node-mongodb-native/commit/7e953ed5c5d02af5d732e0be6980ad6c5692a08c))
+
 ## [7.6.0](https://github.com/mongodb/node-mongodb-native/compare/v7.5.0...v7.6.0) (2026-08-21)
 
 
