@@ -11,6 +11,7 @@ import {
   compareObjectId,
   decorateWithExplain,
   DEFAULT_ALLOWED_HOSTS,
+  DriverStringUtils,
   Explain,
   hasAtomicOperators,
   HostAddress,
@@ -1323,6 +1324,39 @@ describe('driver utils', function () {
         const result = await abortable(new Promise(() => null), { signal }).catch(e => e);
         expect(result).to.deep.equal(goodError);
       });
+    });
+  });
+
+  describe('DriverStringUtils.truncateStringBytes()', function () {
+    const { truncateStringBytes } = DriverStringUtils;
+
+    it('returns the string unchanged when it is under or exactly the limit', function () {
+      expect(truncateStringBytes('abc', 10)).to.equal('abc');
+      expect(truncateStringBytes('abcdefghij', 10)).to.equal('abcdefghij');
+    });
+
+    it('truncates to the first limit bytes when over the limit', function () {
+      expect(truncateStringBytes('abcdefghijklmnop', 10)).to.equal('abcdefghij');
+    });
+
+    it('returns an empty string when the limit is 0', function () {
+      expect(truncateStringBytes('abc', 0)).to.equal('');
+    });
+
+    it('drops a multi-byte character which is split at the limit', function () {
+      expect(truncateStringBytes('abcdefghi' + 'é', 10)).to.equal('abcdefghi');
+    });
+
+    it('throws when the limit is negative', function () {
+      expect(() => truncateStringBytes('abc', -1)).to.throw();
+    });
+
+    it('throws when the limit is not an integer', function () {
+      expect(() => truncateStringBytes('abc', 1.5)).to.throw();
+    });
+
+    it('throws when the limit is NaN', function () {
+      expect(() => truncateStringBytes('abc', NaN)).to.throw();
     });
   });
 });

@@ -1,9 +1,9 @@
 import * as process from 'process';
 
-import { BSON, ByteUtils, type Document, Int32, NumberUtils } from '../../bson';
+import { BSON, type Document, Int32, NumberUtils } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { DriverInfo, MongoOptions } from '../../mongo_client';
-import { fileIsAccessible } from '../../utils';
+import { DriverStringUtils, fileIsAccessible } from '../../utils';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const NODE_DRIVER_VERSION = require('../../../package.json').version;
@@ -103,6 +103,8 @@ export class LimitedSizeDocument {
   }
 }
 
+const APP_NAME_TRUNCATION_LIMIT_BYTES = 128;
+
 type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
 
 /**
@@ -122,10 +124,7 @@ export async function makeClientMetadata(
 
   // Add app name first, it must be sent
   if (appName.length > 0) {
-    const name =
-      ByteUtils.utf8ByteLength(appName) <= 128
-        ? appName
-        : ByteUtils.toUTF8(ByteUtils.fromUTF8(appName), 0, 128, false);
+    const name = DriverStringUtils.truncateStringBytes(appName, APP_NAME_TRUNCATION_LIMIT_BYTES);
     metadataDocument.ifItFitsItSits('application', { name });
   }
 
@@ -238,7 +237,7 @@ export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]
   ['CLAUDECODE', 'claude_code'],
   ['CLAUDE_CODE_ENTRYPOINT', 'claude_code'],
   ['CURSOR_AGENT', 'cursor'],
-  ['CODEX_SANDBOX', 'codex'],
+  ['CODEX_SANDBOX', 'codex_cli'],
   ['CLINE_ACTIVE', 'cline'],
   ['GEMINI_CLI', 'gemini_cli'],
   ['AUGMENT_AGENT', 'auggie_cli'],
@@ -253,12 +252,13 @@ export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]
  * @internal
  * Env var value length after first 2 forms of normalization
  */
-export const AGENT_ENV_LIMIT = 64;
+export const AGENT_ENV_LIMIT_BYTES = 64;
 /**
  * @internal
  * Values used in AI_AGENT to indicate an agent is being used but are non-identifying
  */
 export const AGENT_ENV_UNIDENTIFYING = new Set(['1', 'true']);
+
 /**
  * @internal
  * Resolves `env.agent` from the environment, or an empty string when no agent variable is
@@ -268,9 +268,10 @@ export function getAgentEnv(): string {
   for (const [key, literal] of AGENT_ENV_VARIABLES) {
     // A variable is only populated if it is present with a non-empty normalized value, so an empty or
     // whitespace-only value never selects an entry, even one with a fixed table value.
-    const envValue = (process.env[key] ?? '').trim().toLowerCase().substring(0, AGENT_ENV_LIMIT);
+    let envValue = (process.env[key] ?? '').trim().toLowerCase();
 
     if (envValue.length > 0) {
+      envValue = DriverStringUtils.truncateStringBytes(envValue, AGENT_ENV_LIMIT_BYTES);
       if (!literal) {
         return AGENT_ENV_UNIDENTIFYING.has(envValue) ? 'ai_agent' : envValue;
       }

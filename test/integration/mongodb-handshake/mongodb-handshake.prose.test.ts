@@ -270,16 +270,24 @@ describe('Handshake Prose Tests', function () {
           agent: 'ai_agent'
         }
       },
-      // 7. Generic agent, normalization. `AI_AGENT` is set to `claude_code_2-1-238_Agent` with one leading space and one
-      // trailing space. The value is converted to lowercase and leading and trailing whitespace is removed, so
-      // `client.env.agent` MUST equal `claude_code_2-1-238_agent`.
+      // 7. Generic agent, boolean value with whitespace. `AI_AGENT` is set to `true` with one leading and one trailing space.
+      // The value is normalized before it is compared, so `client.env.agent` MUST equal `ai_agent`.
+      {
+        env: [['AI_AGENT', ' true ']],
+        expectEnv: {
+          agent: 'ai_agent'
+        }
+      },
+      // 8. Generic agent, normalization. `AI_AGENT` is set to `Claude-Code_2-1-238_Agent` with one leading and one trailing
+      // space. `client.env.agent` MUST equal `claude-code_2-1-238_agent`.
       {
         env: [['AI_AGENT', ' claude_code_2-1-238_Agent ']],
         expectEnv: {
           agent: 'claude_code_2-1-238_agent'
         }
       },
-      // 8. Generic agent, truncation. `AI_AGENT` is set to a value of 100 characters. `client.env.agent` MUST equal the first
+
+      // 9. Generic agent, truncation. `AI_AGENT` is set to a value of 100 characters. `client.env.agent` MUST equal the first
       // 64 characters of that value.
       {
         env: [['AI_AGENT', 'a'.repeat(100)]],
@@ -287,26 +295,36 @@ describe('Handshake Prose Tests', function () {
           agent: 'a'.repeat(64)
         }
       },
-      // 9. Empty value is treated as unset. `AI_AGENT` is set to an empty string. `client.env.agent` MUST be omitted. If no
-      // other `client.env` fields are populated, `client.env` MUST be entirely omitted.
+      // 10. Generic agent, truncation on a character boundary. `AI_AGENT` is set to 63 `a` characters followed by `é` (U+00E9),
+      // two bytes in UTF-8. The 64-byte limit falls inside `é`, so `client.env.agent` MUST equal the 63 `a` characters. It
+      // MUST NOT contain any part of `é` or a replacement character (U+FFFD).
+      {
+        env: [['AI_AGENT', 'a'.repeat(63) + 'é']],
+        expectEnv: {
+          agent: 'a'.repeat(63)
+        }
+      },
+      // 11. Empty value is unset. `AI_AGENT` is set to an empty string. `client.env.agent` MUST be omitted. If no other
+      //`client.env` fields are populated, `client.env` MUST be omitted entirely.
       {
         env: [['AI_AGENT', '']],
         expectEnv: undefined
       },
-      // 10. Whitespace-only value is treated as unset. `AI_AGENT` is set to `"   "` (three space characters). `client.env.agent`
+
+      // 12. Whitespace-only value is treated as unset. `AI_AGENT` is set to `"   "` (three space characters). `client.env.agent`
       // MUST be omitted.
       {
         env: [['AI_AGENT', '   ']],
         expectEnv: undefined
       },
-      // 11. No agent variables. None of the environment variables in the `client.env.agent` table are set. `client.env.agent`
+      // 13. No agent variables. None of the environment variables in the `client.env.agent` table are set. `client.env.agent`
       // MUST be omitted.
       {
         env: [],
         expectEnv: undefined
       },
-      // 12. Agent alongside FaaS. This test MUST verify that both the AWS Lambda metadata and `client.env.agent` (equal to
-      // `claude_code`) are present in `client.env`.
+      // 14. Agent alongside FaaS. This test MUST verify that the AWS Lambda metadata and `client.env.agent` (equal to
+      // `claude_code`) are both present in `client.env`.
       {
         env: [
           ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],

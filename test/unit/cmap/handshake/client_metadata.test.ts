@@ -7,9 +7,10 @@ import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
-  AGENT_ENV_LIMIT,
+  AGENT_ENV_LIMIT_BYTES,
   AGENT_ENV_UNIDENTIFYING,
   AGENT_ENV_VARIABLES,
+  DriverStringUtils,
   FAAS_ENV_VARIABLES,
   getAgentEnv,
   getFAASEnv,
@@ -303,39 +304,11 @@ describe('client metadata module', () => {
     });
 
     context('when app name is provided', () => {
-      context('when the app name is over 128 bytes', () => {
-        it('truncates the application name to <=128 bytes', async () => {
-          const longString = 'a'.repeat(300);
-          const metadata = await makeClientMetadata([], {
-            runtime,
-            appName: longString
-          });
-          expect(metadata.application?.name).to.be.a('string');
-          // the above assertion fails if `metadata.application?.name` is undefined, so
-          // we can safely assert that it exists
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          expect(Buffer.byteLength(metadata.application!.name, 'utf8')).to.equal(128);
-        });
+      it('truncates the application name with truncateStringBytes', async () => {
+        const spy = sinon.spy(DriverStringUtils, 'truncateStringBytes');
+        await makeClientMetadata([], { runtime, appName: 'myApplication' });
+        expect(spy).to.have.been.calledOnceWithExactly('myApplication', 128);
       });
-
-      context(
-        'TODO(NODE-5150): fix appName truncation when multi-byte unicode charaters straddle byte 128',
-        () => {
-          it('truncates the application name to 129 bytes', async () => {
-            const longString = '€'.repeat(300);
-            const metadata = await makeClientMetadata([], {
-              runtime,
-              appName: longString
-            });
-
-            expect(metadata.application?.name).to.be.a('string');
-            // the above assertion fails if `metadata.application?.name` is undefined, so
-            // we can safely assert that it exists
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            expect(Buffer.byteLength(metadata.application!.name, 'utf8')).to.equal(129);
-          });
-        }
-      );
 
       context('when the app name is under 128 bytes', () => {
         it('sets the application name to the value', async () => {
@@ -699,9 +672,11 @@ describe('client metadata module', () => {
           stubEnv({ AI_AGENT: 'cUsToM-aGeNt' });
           expect(getAgentEnv()).to.equal('custom-agent');
         });
-        it('truncation is tripped', function () {
-          stubEnv({ AI_AGENT: 'a'.repeat(100) });
-          expect(getAgentEnv()).to.equal('a'.repeat(AGENT_ENV_LIMIT));
+        it('truncates the normalized value with truncateStringBytes', function () {
+          const spy = sinon.spy(DriverStringUtils, 'truncateStringBytes');
+          stubEnv({ AI_AGENT: '  CUSTOM-AGENT  ' });
+          getAgentEnv();
+          expect(spy).to.have.been.calledOnceWithExactly('custom-agent', AGENT_ENV_LIMIT_BYTES);
         });
       });
 
@@ -744,6 +719,38 @@ describe('client metadata module', () => {
           expect(getAgentEnv()).to.equal('claude_code');
         });
       });
+    });
+
+    context('each agent variable maps to its expected value', function () {
+      // Hardcoded copy of the spec's `client.env.agent` table. Intentionally not derived from
+      // AGENT_ENV_VARIABLES so that changes to the driver's table are caught here.
+      const agentTable: Array<{ variable: string; value: string; expected: string }> = [
+        { variable: 'CLAUDECODE', value: '1', expected: 'claude_code' },
+        { variable: 'CLAUDE_CODE_ENTRYPOINT', value: 'cli', expected: 'claude_code' },
+        { variable: 'CURSOR_AGENT', value: '1', expected: 'cursor' },
+        { variable: 'CODEX_SANDBOX', value: 'seatbelt', expected: 'codex_cli' },
+        { variable: 'CLINE_ACTIVE', value: 'true', expected: 'cline' },
+        { variable: 'GEMINI_CLI', value: '1', expected: 'gemini_cli' },
+        { variable: 'AUGMENT_AGENT', value: '1', expected: 'auggie_cli' },
+        { variable: 'OPENCODE_CLIENT', value: 'cli', expected: 'opencode_client' },
+        { variable: 'TRAE_AI_SHELL_ID', value: 'some-id', expected: 'trae_ai' },
+        { variable: 'GOOSE_TERMINAL', value: '1', expected: 'goose' },
+        { variable: 'GOOSE_AGENT', value: '1', expected: 'goose' },
+        { variable: 'AI_AGENT', value: 'custom-agent', expected: 'custom-agent' }
+      ];
+
+      it('the driver table contains exactly the expected variables, in order', function () {
+        expect(AGENT_ENV_VARIABLES.map(([key]) => key)).to.deep.equal(
+          agentTable.map(({ variable }) => variable)
+        );
+      });
+
+      for (const { variable, value, expected } of agentTable) {
+        it(`maps ${variable}=${value} to '${expected}'`, function () {
+          stubEnv({ [variable]: value });
+          expect(getAgentEnv()).to.equal(expected);
+        });
+      }
     });
   });
 });
