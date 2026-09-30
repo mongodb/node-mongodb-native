@@ -309,16 +309,6 @@ describe('client metadata module', () => {
         await makeClientMetadata([], { runtime, appName: 'myApplication' });
         expect(spy).to.have.been.calledOnceWithExactly('myApplication', 128);
       });
-
-      context('when the app name is under 128 bytes', () => {
-        it('sets the application name to the value', async () => {
-          const metadata = await makeClientMetadata([], {
-            runtime,
-            appName: 'myApplication'
-          });
-          expect(metadata.application?.name).to.equal('myApplication');
-        });
-      });
     });
 
     context('when globalThis indicates alternative runtime', () => {

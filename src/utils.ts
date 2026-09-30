@@ -1149,10 +1149,11 @@ export const DriverStringUtils = {
   /**
    * Truncates a string to a specified byte length. Multi-byte characters which are bisected by the byte truncation
    * are considered, ensuring incomplete multi-byte characters are omitted from the result entirely.
+   * @throws MongoRuntimeError on a malformed limit
    */
   truncateStringBytes(str: string, limit: number, encoding: BufferEncoding = 'utf8'): string {
     if (!Number.isInteger(limit) || limit < 0) {
-      throw new Error('bad argument');
+      throw new MongoRuntimeError('provided limit must be a positive integer');
     }
     const buf = Buffer.from(str, encoding);
     if (buf.length <= limit) return str;
