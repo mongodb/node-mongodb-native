@@ -353,4 +353,44 @@ export class OnDemandDocument {
     const size = NumberUtils.getInt32LE(this.bson, this.offset);
     return this.bson.subarray(this.offset, this.offset + size);
   }
+
+  /**
+   * Deserialize the embedded document at `index` of this BSON array.
+   *
+   * @remarks
+   * Unlike `get(index, BSONType.object)`, this DOES NOT populate any caches or construct an
+   * OnDemandDocument for the element. Intended for one-pass iteration (e.g. cursor batches),
+   * where caching would retain every element already read for the lifetime of this document.
+   *
+   * @param index - the array index of the embedded document
+   * @param options - BSON deserialization options
+   */
+  public toObjectAt(index: number, options?: OnDemandDocumentDeserializeOptions) {
+    return deserialize(this.bson, {
+      ...options,
+      index: this.embeddedDocumentOffset(index),
+      allowObjectSmallerThanBufferSize: true
+    });
+  }
+
+  /**
+   * Returns the bytes of the embedded document at `index` of this BSON array.
+   * Like `toObjectAt`, this DOES NOT populate any caches.
+   *
+   * @param index - the array index of the embedded document
+   */
+  public toBytesAt(index: number) {
+    const offset = this.embeddedDocumentOffset(index);
+    const size = NumberUtils.getInt32LE(this.bson, offset);
+    return this.bson.subarray(offset, offset + size);
+  }
+
+  /** Throws the same error as `get(index, BSONType.object, true)` if there is no document at `index` */
+  private embeddedDocumentOffset(index: number): number {
+    const element = this.isArray ? this.elements[index] : undefined;
+    if (element == null || element[BSONElementOffset.type] !== BSONType.object) {
+      throw new BSONError(`BSON element "${index}" is missing`);
+    }
+    return element[BSONElementOffset.offset];
+  }
 }

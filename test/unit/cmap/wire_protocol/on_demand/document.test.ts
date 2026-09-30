@@ -323,4 +323,50 @@ describe('class OnDemandDocument', () => {
       expect(document.getNumber('boolTrue')).to.equal(1);
     });
   });
+
+  context('toObjectAt() and toBytesAt()', () => {
+    const documents = [{ a: 1 }, { b: 'two' }];
+    let array: OnDemandDocument;
+
+    beforeEach(() => {
+      const bson = BSON.serialize({ batch: [...documents, 3] });
+      array = new OnDemandDocument(bson).get('batch', BSONType.array, true);
+    });
+
+    it('returns the embedded document at the given index', () => {
+      expect(array.toObjectAt(0)).to.deep.equal(documents[0]);
+      expect(array.toObjectAt(1)).to.deep.equal(documents[1]);
+    });
+
+    it('returns the bytes of the embedded document at the given index', () => {
+      expect(BSON.deserialize(array.toBytesAt(1))).to.deep.equal(documents[1]);
+    });
+
+    it('passes BSON options to deserialization', () => {
+      const { a } = array.toObjectAt(0, { promoteValues: false, validation: { utf8: true } });
+      expect(a).to.have.property('_bsontype', 'Int32');
+    });
+
+    it('does not populate the element cache', () => {
+      array.toObjectAt(0);
+      array.toBytesAt(1);
+      expect(array).to.have.property('cache').that.is.empty;
+      expect(array).to.have.property('indexFound').that.is.empty;
+    });
+
+    it('throws if the element at the given index is not a document', () => {
+      expect(() => array.toObjectAt(2)).to.throw(BSONError, /"2" is missing/);
+      expect(() => array.toBytesAt(2)).to.throw(BSONError, /"2" is missing/);
+    });
+
+    it('throws if the index is out of range', () => {
+      expect(() => array.toObjectAt(3)).to.throw(BSONError, /"3" is missing/);
+      expect(() => array.toBytesAt(3)).to.throw(BSONError, /"3" is missing/);
+    });
+
+    it('throws if called on a document that is not an array', () => {
+      const document = new OnDemandDocument(BSON.serialize({ 0: { a: 1 } }));
+      expect(() => document.toObjectAt(0)).to.throw(BSONError, /"0" is missing/);
+    });
+  });
 });

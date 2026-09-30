@@ -308,20 +308,23 @@ export class CursorResponse extends MongoDBResponse {
       return null;
     }
 
-    const result = this.batch.get(this.iterated, BSONType.object, true) ?? null;
-    const encryptedResult = this.encryptedBatch?.get(this.iterated, BSONType.object, true) ?? null;
-
-    this.iterated += 1;
+    // Batches are read once, in order: use the non-caching accessors so that documents already
+    // returned are not retained until the whole batch is replaced (NODE-7863)
+    const index = this.iterated;
 
     if (options?.raw) {
-      return result.toBytes();
-    } else {
-      const object = result.toObject(options);
-      if (encryptedResult) {
-        decorateDecryptionResult(object, encryptedResult.toObject(options), true);
-      }
-      return object;
+      const bytes = this.batch.toBytesAt(index);
+      this.iterated += 1;
+      return bytes;
     }
+
+    const object = this.batch.toObjectAt(index, options);
+    const encryptedBatch = this.encryptedBatch;
+    if (encryptedBatch != null) {
+      decorateDecryptionResult(object, encryptedBatch.toObjectAt(index, options), true);
+    }
+    this.iterated += 1;
+    return object;
   }
 
   public clear() {
