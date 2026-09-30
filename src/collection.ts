@@ -647,13 +647,13 @@ export class Collection<TSchema extends Document = Document> {
    * `indexOptions` are passed through to the server for validation rather than being dropped.
    *
    * @param keys - The field name or index specification to create an index for
-   * @param indexOptions - Optional settings for the index
-   * @param commandOptions - Optional settings for the `createIndexes` command
+   * @param indexOptions - Settings for the index, or `undefined` if there are none
+   * @param commandOptions - Settings for the `createIndexes` command, or `undefined` if there are none
    */
   createIndex(
     keys: IndexSpecification,
-    indexOptions?: IndexOptions,
-    commandOptions?: CreateIndexOptions
+    indexOptions: IndexOptions | undefined,
+    commandOptions: CreateIndexOptions | undefined
   ): Promise<string>;
 
   async createIndex(

@@ -114,6 +114,7 @@ describe('createIndex option validation', function () {
     });
 
     it('drops an unknown option from the options bag', async function () {
+      // @ts-expect-error: the legacy options type is closed; the unknown option is dropped at runtime
       await collection.createIndex({ d: 1 }, { unique: true, notARealOption: true });
 
       expect(sentIndexes()).to.deep.equal([{ unique: true, name: 'd_1', key: { d: 1 } }]);

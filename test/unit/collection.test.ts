@@ -237,6 +237,7 @@ describe('Collection', function () {
 
       it('drops unknown index options on the two parameter path', async () => {
         const command = await captureCreateIndexes(collection =>
+          // @ts-expect-error: the legacy options type is closed; the unknown option is dropped at runtime
           collection.createIndex({ a: 1 }, { unique: true, notARealIndexOption: true })
         );
 
