@@ -208,7 +208,8 @@ export async function createCollections<TSchema extends Document>(
       name,
       { __safeContent__: 1 },
       /*allowUnknownIndexOptions=*/ false,
-      { session: options.session }
+      { session: options.session },
+      undefined
     );
     await executeOperation(db.client, createIndexOp, timeoutContext);
   }

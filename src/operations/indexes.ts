@@ -565,25 +565,9 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    allowUnknownIndexOptions: boolean,
-    options?: CreateIndexesOptions
-  );
-
-  private constructor(
-    parent: OperationParent,
-    collectionName: string,
-    indexes: IndexDescription[],
-    allowUnknownIndexOptions: boolean,
-    commandOptions?: CreateIndexOptions
-  );
-
-  private constructor(
-    parent: OperationParent,
-    collectionName: string,
-    indexes: IndexDescription[],
     // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
     allowUnknownIndexOptions: boolean,
-    commandOptions?: CreateIndexesOptions | CreateIndexOptions
+    commandOptions: CreateIndexesOptions | CreateIndexOptions | undefined
   ) {
     super(parent, commandOptions);
 
@@ -617,7 +601,7 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     indexes: IndexDescription[],
     // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
     allowUnknownIndexOptions: boolean,
-    commandOptions?: CreateIndexesOptions
+    commandOptions: CreateIndexesOptions | undefined
   ): CreateIndexesOperation {
     return new CreateIndexesOperation(
       parent,
@@ -633,7 +617,8 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     collectionName: string,
     indexSpec: IndexSpecification,
     allowUnknownIndexOptions: boolean,
-    options: CreateIndexesOptions
+    indexOptions: IndexOptions | undefined,
+    commandOptions: CreateIndexOptions | undefined
   ): CreateIndexesOperation;
 
   static fromIndexSpecification(
@@ -641,17 +626,8 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     collectionName: string,
     indexSpec: IndexSpecification,
     allowUnknownIndexOptions: boolean,
-    indexOptions?: IndexOptions,
-    commandOptions?: CreateIndexOptions
-  ): CreateIndexesOperation;
-
-  static fromIndexSpecification(
-    parent: OperationParent,
-    collectionName: string,
-    indexSpec: IndexSpecification,
-    allowUnknownIndexOptions: boolean,
-    indexOptions?: CreateIndexesOptions | IndexOptions,
-    commandOptions?: CreateIndexOptions
+    indexOptions: CreateIndexesOptions | IndexOptions | undefined,
+    commandOptions: CreateIndexOptions | undefined
   ): CreateIndexesOperation {
     const key = constructIndexDescriptionMap(indexSpec);
     // If called with overload using `CreateIndexesOptions`, then indexOptions may contain combined index and command options

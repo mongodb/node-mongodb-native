@@ -159,7 +159,8 @@ describe('abstract operation', function () {
             db,
             'bar',
             [{ key: { a: 1 } }],
-            /*allowUnknownIndexOptions=*/ false
+            /*allowUnknownIndexOptions=*/ false,
+            undefined
           ),
         subclassType: CreateIndexesOperation,
         correctCommandName: 'createIndexes'

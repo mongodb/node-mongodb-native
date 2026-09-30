@@ -105,7 +105,8 @@ describe('class CreateIndexesOperation', () => {
       'b',
       input,
       /*allowUnknownIndexOptions=*/ false,
-      options
+      options,
+      undefined
     );
 
   const makeIndexesOperation = (

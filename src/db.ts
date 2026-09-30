@@ -459,7 +459,8 @@ export class Db {
         name,
         indexSpec,
         /*allowUnknownIndexOptions=*/ false,
-        options ?? {}
+        options ?? {},
+        undefined
       )
     );
     return indexes[0];

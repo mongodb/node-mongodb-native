@@ -671,7 +671,8 @@ export class Collection<TSchema extends Document = Document> {
             this.collectionName,
             indexSpec,
             /*allowUnknownIndexOptions=*/ false,
-            resolveOptions(this, indexOptions) // at this point indexOptions is the combined index and command options
+            resolveOptions(this, indexOptions), // at this point indexOptions is the combined index and command options
+            undefined
           )
         : CreateIndexesOperation.fromIndexSpecification(
             this,
