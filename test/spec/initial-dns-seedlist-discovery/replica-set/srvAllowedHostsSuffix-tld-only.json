@@ -1,0 +1,6 @@
+{
+  "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvAllowedHostsSuffix=.cc",
+  "seeds": [],
+  "hosts": [],
+  "error": true
+}

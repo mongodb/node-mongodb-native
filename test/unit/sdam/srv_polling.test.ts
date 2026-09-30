@@ -184,6 +184,101 @@ describe('Mongos SRV Polling', function () {
         expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
         expect(poller.failure).to.not.have.been.called;
       });
+
+      it('should report records with normalized host names', async () => {
+        const poller = new SrvPoller({ srvHost: SRV_HOST });
+
+        stubDns(null, [srvRecord('JALAD.Tanagra.COM.', 27017)]);
+        stubPoller(poller);
+
+        await poller._poll();
+
+        expect(poller.success).to.have.been.calledOnceWith([srvRecord('jalad.tanagra.com', 27017)]);
+      });
+
+      it('should succeed with records whose names contain underscores', async () => {
+        const poller = new SrvPoller({ srvHost: SRV_HOST });
+        const records = [srvRecord('jalad_1.tanagra.com'), srvRecord('the_beast.tanagra.com')];
+
+        stubDns(null, records);
+        stubPoller(poller);
+
+        await poller._poll();
+
+        expect(poller.success).to.have.been.calledOnce.and.calledWithMatch(records);
+        expect(poller.failure).to.not.have.been.called;
+      });
+
+      context('when srvAllowedHostsSuffix is set', () => {
+        it('should succeed with records that end with a suffix containing underscores', async () => {
+          const poller = new SrvPoller({
+            srvHost: SRV_HOST,
+            srvAllowedHostsSuffix: '.my_domain.net'
+          });
+          const records = [
+            srvRecord('jalad.us_east.my_domain.net'),
+            srvRecord('jalad.other_my_domain.net')
+          ];
+
+          stubDns(null, records);
+          stubPoller(poller);
+
+          await poller._poll();
+
+          expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
+          expect(poller.failure).to.not.have.been.called;
+        });
+
+        it('should only succeed with records that end with the suffix', async () => {
+          const poller = new SrvPoller({
+            srvHost: SRV_HOST,
+            srvAllowedHostsSuffix: '.tanagra.org'
+          });
+          const records = [srvRecord('jalad.us-east.tanagra.org'), srvRecord('jalad.tanagra.com')];
+
+          stubDns(null, records);
+          stubPoller(poller);
+
+          await poller._poll();
+
+          expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
+          expect(poller.failure).to.not.have.been.called;
+        });
+      });
+
+      context('when srvHostValidator is set', () => {
+        it('should use the validator verdict instead of the parent domain check', async () => {
+          const poller = new SrvPoller({
+            srvHost: SRV_HOST,
+            srvHostValidator: host => host.endsWith('.walls.com')
+          });
+          const records = [srvRecord('shaka.walls.com'), srvRecord('jalad.tanagra.com')];
+
+          stubDns(null, records);
+          stubPoller(poller);
+
+          await poller._poll();
+
+          expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
+          expect(poller.failure).to.not.have.been.called;
+        });
+
+        it('should fail without throwing if the validator returns a non-boolean', async () => {
+          const poller = new SrvPoller({
+            srvHost: SRV_HOST,
+            // @ts-expect-error: an async validator returns a Promise, which must not be treated as accepting
+            srvHostValidator: async () => true
+          });
+
+          stubDns(null, [srvRecord('jalad.tanagra.com')]);
+          stubPoller(poller);
+
+          await poller._poll();
+
+          expect(poller.success).to.not.have.been.called;
+          expect(poller.failure).to.have.been.calledOnce;
+        });
+      });
     });
   });
 

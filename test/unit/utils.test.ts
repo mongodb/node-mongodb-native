@@ -19,10 +19,12 @@ import {
   isUint8Array,
   LEGACY_HELLO_COMMAND,
   List,
+  MongoAPIError,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
   MongoInvalidArgumentError,
   MongoRuntimeError,
+  normalizeDnsName,
   runNodelessTests,
   shuffle
 } from '../mongodb';
@@ -1130,6 +1132,57 @@ describe('driver utils', function () {
             ).to.not.throw();
           });
         });
+
+        context('when the address and SRV host differ only in case', () => {
+          it('accepts address since host names are compared case-insensitively', () => {
+            expect(() =>
+              checkParentDomainMatch(
+                exampleHostNameWithoutDot[num].toUpperCase(),
+                exampleSrvName[num]
+              )
+            ).to.not.throw();
+            expect(() =>
+              checkParentDomainMatch(
+                exampleHostNameWithoutDot[num],
+                exampleSrvName[num].toUpperCase()
+              )
+            ).to.not.throw();
+          });
+        });
+      });
+    }
+  });
+
+  describe('normalizeDnsName()', () => {
+    it('removes a trailing dot', () => {
+      expect(normalizeDnsName('cluster.mongodb.com.')).to.equal('cluster.mongodb.com');
+    });
+
+    it('lowercases', () => {
+      expect(normalizeDnsName('CLUSTER.MongoDB.com')).to.equal('cluster.mongodb.com');
+    });
+
+    it('converts internationalized labels to A-label (Punycode) form', () => {
+      expect(normalizeDnsName('db.公司.cn')).to.equal('db.xn--55qx5d.cn');
+      expect(normalizeDnsName('db.XN--55QX5D.CN')).to.equal('db.xn--55qx5d.cn');
+    });
+
+    it('preserves underscores, which are valid in DNS names', () => {
+      expect(normalizeDnsName('test_1.my_host.example.com')).to.equal('test_1.my_host.example.com');
+    });
+
+    for (const name of [
+      '',
+      '.',
+      'bad host.example.com',
+      'bad/host.example.com',
+      'bad\\host.example.com',
+      'bad?host.example.com',
+      'bad#host.example.com',
+      'bad%68ost.example.com'
+    ]) {
+      it(`throws for ${JSON.stringify(name)}`, () => {
+        expect(() => normalizeDnsName(name)).to.throw(MongoAPIError, 'Invalid DNS host name');
       });
     }
   });

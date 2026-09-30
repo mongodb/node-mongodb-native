@@ -4,6 +4,7 @@ import { promises as fs } from 'fs';
 import * as http from 'http';
 import * as process from 'process';
 import { clearTimeout, setTimeout } from 'timers';
+import { domainToASCII } from 'url';
 
 import {
   ByteUtils,
@@ -29,7 +30,7 @@ import {
   MongoParseError,
   MongoRuntimeError
 } from './error';
-import type { MongoClient } from './mongo_client';
+import type { MongoClient, MongoOptions } from './mongo_client';
 import { type Abortable } from './mongo_types';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
@@ -1156,9 +1157,8 @@ export function parseUnsignedInteger(value: unknown): number | null {
  * @returns void
  */
 export function checkParentDomainMatch(address: string, srvHost: string): void {
-  // Remove trailing dot if exists on either the resolved address or the srv hostname
-  const normalizedAddress = address.endsWith('.') ? address.slice(0, address.length - 1) : address;
-  const normalizedSrvHost = srvHost.endsWith('.') ? srvHost.slice(0, srvHost.length - 1) : srvHost;
+  const normalizedAddress = normalizeDnsName(address);
+  const normalizedSrvHost = normalizeDnsName(srvHost);
 
   const allCharacterBeforeFirstDot = /^.*?\./;
   const srvIsLessThanThreeParts = normalizedSrvHost.split('.').length < 3;
@@ -1185,6 +1185,93 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
   if (!addressDomain.endsWith(srvHostDomain)) {
     throw new MongoAPIError('Server record does not share hostname with parent URI');
   }
+}
+
+/**
+ * Characters with special meaning to the input parsing of `domainToASCII`, which are rejected
+ * rather than normalized
+ */
+const DOMAIN_TO_ASCII_RESERVED_CHARACTERS = /[/\\?#%]/;
+
+/**
+ * Converts a DNS name to its lowercase A-label (Punycode) form.
+ *
+ * @returns the converted name, or `null` if the name cannot be converted
+ */
+export function dnsNameToASCII(name: string): string | null {
+  if (DOMAIN_TO_ASCII_RESERVED_CHARACTERS.test(name)) {
+    return null;
+  }
+  // The UTS #46 processing that domainToASCII applies includes lowercasing
+  const ascii = domainToASCII(name);
+  return ascii === '' ? null : ascii;
+}
+
+/**
+ * Normalizes a DNS host name so it can be compared against another normalized host name, as
+ * required by the Initial DNS Seedlist Discovery specification: a trailing `.` is removed, and the
+ * name is converted to its lowercase A-label (Punycode) form.
+ *
+ * @throws MongoAPIError if the name is not a valid DNS host name
+ */
+export function normalizeDnsName(name: string): string {
+  const withoutTrailingDot = name.endsWith('.') ? name.slice(0, -1) : name;
+  const normalized = dnsNameToASCII(withoutTrailingDot);
+  if (normalized == null) {
+    throw new MongoAPIError(`Invalid DNS host name "${name}"`);
+  }
+  return normalized;
+}
+
+/**
+ * Verifies a host name returned by an SRV lookup. Exactly one verification applies:
+ * - with `srvHostValidator`, the validator's return value is the complete verdict
+ * - with `srvAllowedHostsSuffix`, the host must end with the (already normalized) suffix
+ * - otherwise, the host must share the parent domain of `srvHost`, see {@link checkParentDomainMatch}
+ *
+ * @param host - A host name returned by an SRV lookup, already normalized with {@link normalizeDnsName}
+ * @param srvHost - The host from the `mongodb+srv` connection string
+ * @throws MongoAPIError if the host fails verification or the validator throws
+ * @throws MongoInvalidArgumentError if the validator returns a non-boolean value
+ */
+export function verifySrvHost(
+  host: string,
+  srvHost: string,
+  options: Pick<MongoOptions, 'srvAllowedHostsSuffix' | 'srvHostValidator'>
+): void {
+  const { srvAllowedHostsSuffix, srvHostValidator } = options;
+
+  if (srvHostValidator != null) {
+    let isValid: unknown;
+    try {
+      isValid = srvHostValidator(host);
+    } catch (error) {
+      throw new MongoAPIError(`srvHostValidator threw an error while validating "${host}"`, {
+        cause: error
+      });
+    }
+    // A Promise (e.g. from an async validator) is truthy, so accepting it would silently allow every host
+    if (typeof isValid !== 'boolean') {
+      throw new MongoInvalidArgumentError(
+        `srvHostValidator must return a boolean, received ${typeof isValid}`
+      );
+    }
+    if (!isValid) {
+      throw new MongoAPIError(`Server record "${host}" was rejected by srvHostValidator`);
+    }
+    return;
+  }
+
+  if (srvAllowedHostsSuffix != null) {
+    if (!host.endsWith(srvAllowedHostsSuffix)) {
+      throw new MongoAPIError(
+        `Server record "${host}" does not end with srvAllowedHostsSuffix "${srvAllowedHostsSuffix}"`
+      );
+    }
+    return;
+  }
+
+  checkParentDomainMatch(host, srvHost);
 }
 
 /**

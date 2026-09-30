@@ -24,18 +24,45 @@ import { resolveRuntimeAdapters } from './runtime_adapters';
 import { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import {
-  checkParentDomainMatch,
   DEFAULT_PK_FACTORY,
+  dnsNameToASCII,
   emitWarning,
   HostAddress,
   isRecord,
+  normalizeDnsName,
   parseInteger,
   setDifference,
-  squashError
+  squashError,
+  verifySrvHost
 } from './utils';
 import { type W, WriteConcern } from './write_concern';
 
 const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
+
+/** Options that only apply to SRV resolution, and so are invalid with a non-SRV connection string */
+const SRV_ONLY_OPTIONS = [
+  'srvMaxHosts',
+  'srvServiceName',
+  'srvAllowedHostsSuffix',
+  'srvHostValidator'
+] as const;
+
+/** Single labels that srvAllowedHostsSuffix may be, as they are reserved for private or special use */
+const RESERVED_SINGLE_LABEL_SUFFIXES = new Set([
+  // RFC 6761 special use names
+  'test',
+  'localhost',
+  'invalid',
+  'example',
+  // RFC 6762 multicast DNS
+  'local',
+  // Reserved by ICANN for private use
+  'internal',
+  // Not officially reserved by ICANN, but commonly used privately
+  'corp',
+  'home',
+  'mail'
+]);
 
 const LB_SINGLE_HOST_ERROR = 'loadBalanced option only supported with a single host in the URI';
 const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSet option';
@@ -94,11 +121,11 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
     throw new MongoAPIError('No addresses found at host');
   }
 
-  for (const { name } of addresses) {
-    checkParentDomainMatch(name, lookupAddress);
-  }
-
-  const hostAddresses = addresses.map(r => HostAddress.fromString(`${r.name}:${r.port ?? 27017}`));
+  const hostAddresses = addresses.map(({ name, port }) => {
+    const host = normalizeDnsName(name);
+    verifySrvHost(host, lookupAddress, options);
+    return HostAddress.fromString(`${host}:${port ?? 27017}`);
+  });
 
   validateLoadBalancedOptions(hostAddresses, options, true);
 
@@ -315,6 +342,12 @@ export function parseOptions(
     );
   }
 
+  if (urlOptions.has('srvHostValidator')) {
+    throw new MongoParseError(
+      'URI cannot contain `srvHostValidator`, it can only be passed to the client'
+    );
+  }
+
   const uriMechanismProperties = urlOptions.get('authMechanismProperties');
   if (uriMechanismProperties) {
     for (const property of uriMechanismProperties) {
@@ -477,6 +510,10 @@ export function parseOptions(
       throw new MongoParseError('Cannot use srvMaxHosts option with replicaSet');
     }
 
+    if (mongoOptions.srvAllowedHostsSuffix != null && mongoOptions.srvHostValidator != null) {
+      throw new MongoParseError('Cannot use srvAllowedHostsSuffix together with srvHostValidator');
+    }
+
     // SRV turns on TLS by default, but users can override and turn it off
     const noUserSpecifiedTLS = !objectOptions.has('tls') && !urlOptions.has('tls');
     const noUserSpecifiedSSL = !objectOptions.has('ssl') && !urlOptions.has('ssl');
@@ -484,15 +521,13 @@ export function parseOptions(
       mongoOptions.tls = true;
     }
   } else {
-    const userSpecifiedSrvOptions =
-      urlOptions.has('srvMaxHosts') ||
-      objectOptions.has('srvMaxHosts') ||
-      urlOptions.has('srvServiceName') ||
-      objectOptions.has('srvServiceName');
+    const userSpecifiedSrvOptions = SRV_ONLY_OPTIONS.filter(
+      option => urlOptions.has(option) || objectOptions.has(option)
+    );
 
-    if (userSpecifiedSrvOptions) {
+    if (userSpecifiedSrvOptions.length > 0) {
       throw new MongoParseError(
-        'Cannot use srvMaxHosts or srvServiceName with a non-srv connection string'
+        `Cannot use ${userSpecifiedSrvOptions.join(', ')} with a non-srv connection string`
       );
     }
   }
@@ -582,6 +617,50 @@ function validateLoadBalancedOptions(
     }
   }
   return;
+}
+
+/**
+ * Validates and normalizes an `srvAllowedHostsSuffix` value, following the steps in the Initial DNS
+ * Seedlist Discovery specification.
+ *
+ * @returns the suffix in lowercase A-label (Punycode) form, beginning with `.`
+ * @throws MongoParseError if the value is not a valid suffix
+ */
+function normalizeSrvAllowedHostsSuffix(value: string): string {
+  // 1. Strip leading and trailing dots
+  const stripped = value.replace(/^\.+|\.+$/g, '');
+  if (stripped === '') {
+    throw new MongoParseError('srvAllowedHostsSuffix must contain at least one domain label');
+  }
+
+  // 2 and 3. Convert to lowercase A-label form
+  const suffix = dnsNameToASCII(stripped);
+  const labels = suffix?.split('.') ?? [];
+  if (suffix == null || labels.includes('')) {
+    throw new MongoParseError(`srvAllowedHostsSuffix "${value}" is not a valid domain name`);
+  }
+
+  // Domain name length limits from RFC 2181 section 11
+  if (suffix.length > 255 || labels.some(label => label.length > 63)) {
+    throw new MongoParseError(
+      `srvAllowedHostsSuffix "${value}" exceeds the maximum length of a domain name or label`
+    );
+  }
+
+  // 4. Require at least two labels, unless the value is a reserved single label
+  if (!suffix.includes('.') && !RESERVED_SINGLE_LABEL_SUFFIXES.has(suffix)) {
+    throw new MongoParseError(
+      `srvAllowedHostsSuffix "${value}" must contain at least two domain labels, or be one of: ${[
+        ...RESERVED_SINGLE_LABEL_SUFFIXES
+      ].join(', ')}`
+    );
+  }
+
+  // 5. Rejecting public suffixes via the Public Suffix List is a SHOULD that is intentionally not
+  // implemented, matching the Java and C# drivers
+
+  // 6. Prepend a dot so the suffix only matches whole labels
+  return `.${suffix}`;
 }
 
 function setOption(
@@ -1108,6 +1187,22 @@ export const OPTIONS = {
     // TODO(NODE-6491): deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
+  },
+  srvAllowedHostsSuffix: {
+    transform({ values: [value] }): string {
+      if (typeof value !== 'string') {
+        throw new MongoParseError('srvAllowedHostsSuffix must be a string');
+      }
+      return normalizeSrvAllowedHostsSuffix(value);
+    }
+  },
+  srvHostValidator: {
+    transform({ values: [value] }): unknown {
+      if (typeof value !== 'function') {
+        throw new MongoParseError('srvHostValidator must be a function');
+      }
+      return value;
+    }
   },
   srvMaxHosts: {
     type: 'uint',

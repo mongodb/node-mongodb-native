@@ -152,6 +152,8 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** The name of the replica set to connect to */
   replicaSet?: string;
   srvHost?: string;
+  srvAllowedHostsSuffix?: string;
+  srvHostValidator?: (host: string) => boolean;
   srvPoller?: SrvPoller;
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
@@ -334,7 +336,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           heartbeatFrequencyMS: this.s.heartbeatFrequencyMS,
           srvHost: options.srvHost,
           srvMaxHosts: options.srvMaxHosts,
-          srvServiceName: options.srvServiceName
+          srvServiceName: options.srvServiceName,
+          srvAllowedHostsSuffix: options.srvAllowedHostsSuffix,
+          srvHostValidator: options.srvHostValidator
         });
 
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
