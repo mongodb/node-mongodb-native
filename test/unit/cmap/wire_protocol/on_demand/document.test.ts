@@ -99,6 +99,12 @@ describe('class OnDemandDocument', () => {
       expect(array.get(1, BSONType.int)).to.equal(1);
     });
 
+    it('does not cache elements accessed by number', () => {
+      array.get(1, BSONType.int);
+      expect(array).to.not.have.nested.property('cache.1');
+      expect(array).to.not.have.nested.property('indexFound.1');
+    });
+
     it('does not support access by number for objects', () => {
       expect(document.get(233, BSONType.int)).to.be.null;
       expect(document.get('233', BSONType.int)).to.equal(3);

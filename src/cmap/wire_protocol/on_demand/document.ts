@@ -124,19 +124,12 @@ export class OnDemandDocument {
     }
 
     if (typeof name === 'number') {
-      if (this.isArray) {
-        if (name < this.elements.length) {
-          const element = this.elements[name];
-          const cachedElement = { element, value: undefined };
-          this.cache[name] = cachedElement;
-          this.indexFound[name] = true;
-          return cachedElement;
-        } else {
-          return null;
-        }
-      } else {
-        return null;
+      // Array elements are addressed directly by index, so there is nothing to speed up by
+      // caching them.
+      if (this.isArray && name < this.elements.length) {
+        return { element: this.elements[name], value: undefined };
       }
+      return null;
     }
 
     for (let index = 0; index < this.elements.length; index++) {
