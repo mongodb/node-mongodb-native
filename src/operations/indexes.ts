@@ -299,16 +299,6 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
 /** @public */
 export interface IndexOptions extends Document {
   /**
-   * Optionally tells the server to build the index in the background and not block
-   * other tasks.
-   *
-   * @remarks This option is ignored by the server.
-   * @see https://www.mongodb.com/docs/manual/reference/command/createIndexes/
-   * @deprecated 4.2
-   */
-  background?: boolean;
-
-  /**
    * Optionally specifies the length in time, in seconds, for documents to remain in
    * a collection.
    */

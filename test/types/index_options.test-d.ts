@@ -33,7 +33,6 @@ expectNotAssignable<IndexDescription>({ key: {}, invalidOption: 2400 });
 // `IndexOptions` holds options for the index itself. It uses the names the index management
 // specification defines, which differ from the field names the `createIndexes` command expects for
 // three of them (`version`, `defaultLanguage`, `languageOverride`).
-expectAssignable<IndexOptions>({ background: true });
 expectAssignable<IndexOptions>({ expireAfterSeconds: 2400 });
 expectAssignable<IndexOptions>({ name: 'index_1' });
 expectAssignable<IndexOptions>({ sparse: true });
