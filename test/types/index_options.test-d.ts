@@ -53,9 +53,9 @@ expectAssignable<IndexOptions>({ partialFilterExpression: {} });
 expectAssignable<IndexOptions>({ collation: { locale: 'en' } });
 expectAssignable<IndexOptions>({ wildcardProjection: {} });
 expectAssignable<IndexOptions>({ hidden: true });
-expectAssignable<IndexOptions>({ clustered: true });
 
-// 2dsphere cell levels are supported by the server but are not in the specification.
+// 2dsphere cell levels are supported by the server but are not modelled by the driver; they are
+// accepted because `IndexOptions` is open, and passed through to the server for validation.
 expectAssignable<IndexOptions>({ finestIndexedLevel: 15 });
 expectAssignable<IndexOptions>({ coarsestIndexedLevel: 3 });
 

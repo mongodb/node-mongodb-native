@@ -374,16 +374,6 @@ export interface IndexOptions extends Document {
   '2dsphereIndexVersion'?: number;
 
   /**
-   * Optionally specifies the finest S2 cell level indexed by a 2dsphere index.
-   */
-  finestIndexedLevel?: number;
-
-  /**
-   * Optionally specifies the coarsest S2 cell level indexed by a 2dsphere index.
-   */
-  coarsestIndexedLevel?: number;
-
-  /**
    * Optionally specifies the precision of the stored geo hash in the 2d index, from 1 to 32.
    */
   bits?: number;
@@ -429,15 +419,6 @@ export interface IndexOptions extends Document {
    * This option is only supported by servers \>= 4.4.
    */
   hidden?: boolean;
-
-  /**
-   * Optionally specifies that this index is clustered.  This is not a valid option to provide to
-   * 'createIndexes', but can appear in the options returned for an index via 'listIndexes'.  To
-   * create a clustered index, create a new collection using the 'clusteredIndex' option.
-   *
-   * This options is only supported by servers \>= 6.0.
-   */
-  clustered?: boolean;
 }
 
 /** @public */
