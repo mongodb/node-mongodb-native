@@ -254,26 +254,12 @@ describe('Indexes', function () {
     );
 
     context('when an unknown index option is provided', function () {
-      context('and allowUnknownIndexOptions is unset (default)', function () {
+      context('and allowUnknownIndexOptions is false (the default when unset)', function () {
         it('silently drops the unknown option and creates the index', async () => {
           const [name] = await collection.createIndexes([
             // @ts-expect-error: intentionally providing an unknown option
             { key: { loc: '2dsphere' }, thisOptionDoesNotExist: true }
           ]);
-          expect(started[0].command.indexes[0]).to.not.have.property('thisOptionDoesNotExist');
-          const indexes = await collection.listIndexes().toArray();
-          expect(indexes.map(i => i.name)).to.include(name);
-        });
-      });
-
-      context('and allowUnknownIndexOptions is false', function () {
-        it('silently drops the unknown option and creates the index', async () => {
-          const [name] = await collection.createIndexes(
-            // @ts-expect-error: intentionally providing an unknown option
-            [{ key: { loc: '2dsphere' }, thisOptionDoesNotExist: true }],
-            {},
-            /*allowUnknownIndexOptions=*/ false
-          );
           expect(started[0].command.indexes[0]).to.not.have.property('thisOptionDoesNotExist');
           const indexes = await collection.listIndexes().toArray();
           expect(indexes.map(i => i.name)).to.include(name);
@@ -287,7 +273,7 @@ describe('Indexes', function () {
               // @ts-expect-error: intentionally providing an unknown option
               [{ key: { loc: '2dsphere' }, thisOptionDoesNotExist: true }],
               {},
-              /*allowUnknownIndexOptions=*/ true
+              true
             )
             .catch(error => error);
           expect(error).to.be.instanceOf(MongoServerError);

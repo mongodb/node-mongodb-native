@@ -458,7 +458,7 @@ export class Db {
         this,
         name,
         indexSpec,
-        /*allowUnknownIndexOptions=*/ false,
+        false,
         options ?? {},
         undefined
       )

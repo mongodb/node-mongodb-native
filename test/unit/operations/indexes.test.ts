@@ -104,7 +104,7 @@ describe('class CreateIndexesOperation', () => {
       { s: { namespace: ns('a.b') } },
       'b',
       input,
-      /*allowUnknownIndexOptions=*/ false,
+      false,
       options,
       undefined
     );
@@ -169,70 +169,74 @@ describe('class CreateIndexesOperation', () => {
     });
   });
 
-  describe('allowUnknownIndexOptions (createIndexes passthrough)', () => {
-    const indexDescription = () => ({
-      key: { a: 1 },
-      finestIndexedLevel: 15,
-      randomOptionThatWillNeverBeAdded: true
-    });
-
-    it('drops unknown options when the flag is unset (default behavior)', () => {
-      const output = makeIndexesOperation([indexDescription()]);
-      expect(output.indexes[0]).to.not.have.property('finestIndexedLevel');
-      expect(output.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
-    });
-
-    it('drops unknown options when the flag is set to false', () => {
-      const output = makeIndexesOperation([indexDescription()], {
-        allowUnknownIndexOptions: false
-      });
-      expect(output.indexes[0]).to.not.have.property('finestIndexedLevel');
-      expect(output.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
-    });
-
-    it('retains unknown options when the flag is set to true', () => {
-      const output = makeIndexesOperation([indexDescription()], {
-        allowUnknownIndexOptions: true
-      });
-      expect(output.indexes[0]).to.have.property('finestIndexedLevel', 15);
-      expect(output.indexes[0]).to.have.property('randomOptionThatWillNeverBeAdded', true);
-    });
-
-    it('rebuilds `key` as a Map even when unknown options are passed through', () => {
-      const output = makeIndexesOperation([{ key: { a: 1, b: -1 } }], {
-        allowUnknownIndexOptions: true
+  describe('CreateIndexesOperation.fromIndexDescriptionArray', () => {
+    describe('allowUnknownIndexOptions (createIndexes passthrough)', () => {
+      const indexDescription = () => ({
+        key: { a: 1 },
+        finestIndexedLevel: 15,
+        randomOptionThatWillNeverBeAdded: true
       });
 
-      // `key` must not survive the option filter: the operation rebuilds it as a Map so that
-      // index key ordering is preserved, and re-adds it after the filtered options.
-      expect(output.indexes[0].key).to.be.instanceOf(Map);
-      expect(output.indexes[0].key).to.deep.equal(
-        new Map([
-          ['a', 1],
-          ['b', -1]
-        ])
-      );
-    });
-
-    it('renames the text index language options the server expects in snake_case', () => {
-      const output = makeIndexesOperation(
-        [{ key: { a: 'text' }, defaultLanguage: 'spanish', languageOverride: 'lang' }],
-        { allowUnknownIndexOptions: true }
-      );
-      expect(output.indexes[0]).to.have.property('default_language', 'spanish');
-      expect(output.indexes[0]).to.have.property('language_override', 'lang');
-      expect(output.indexes[0]).to.not.have.property('defaultLanguage');
-      expect(output.indexes[0]).to.not.have.property('languageOverride');
-    });
-
-    it('still maps `version` to `v` when the flag is set to true', () => {
-      const output = makeIndexesOperation([{ key: { a: 1 }, version: 1 }], {
-        allowUnknownIndexOptions: true
+      it('drops unknown options when the allowUnknownIndexOptions is false (default behavior when unset)', () => {
+        const output = makeIndexesOperation([indexDescription()]);
+        expect(output.indexes[0]).to.not.have.property('finestIndexedLevel');
+        expect(output.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
       });
-      expect(output.indexes[0]).to.have.property('v', 1);
-      expect(output.indexes[0]).to.not.have.property('version');
-    });
 
+      it('drops unknown options when allowUnknownIndexOptions is set to false', () => {
+        const output = makeIndexesOperation([indexDescription()], {
+          allowUnknownIndexOptions: false
+        });
+        expect(output.indexes[0]).to.not.have.property('finestIndexedLevel');
+        expect(output.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
+      });
+
+      it('retains unknown options when allowUnknownIndexOptions is set to true', () => {
+        const output = makeIndexesOperation([indexDescription()], {
+          allowUnknownIndexOptions: true
+        });
+        expect(output.indexes[0]).to.have.property('finestIndexedLevel', 15);
+        expect(output.indexes[0]).to.have.property('randomOptionThatWillNeverBeAdded', true);
+      });
+
+      it('rebuilds `key` as a Map even when unknown options are passed through', () => {
+        const output = makeIndexesOperation([{ key: { a: 1, b: -1 } }], {
+          allowUnknownIndexOptions: true
+        });
+
+        // `key` must not survive the option filter: the operation rebuilds it as a Map so that
+        // index key ordering is preserved, and re-adds it after the filtered options.
+        expect(output.indexes[0].key).to.be.instanceOf(Map);
+        expect(output.indexes[0].key).to.deep.equal(
+          new Map([
+            ['a', 1],
+            ['b', -1]
+          ])
+        );
+      });
+
+      it('renames the text index language option names to ones the server expects', () => {
+        const output = makeIndexesOperation(
+          [{ key: { a: 'text' }, defaultLanguage: 'spanish', languageOverride: 'lang' }],
+          { allowUnknownIndexOptions: true }
+        );
+        expect(output.indexes[0]).to.have.property('default_language', 'spanish');
+        expect(output.indexes[0]).to.have.property('language_override', 'lang');
+        expect(output.indexes[0]).to.not.have.property('defaultLanguage');
+        expect(output.indexes[0]).to.not.have.property('languageOverride');
+      });
+
+      it('still maps `version` to `v` when allowUnknownIndexOptions is set to true', () => {
+        const output = makeIndexesOperation([{ key: { a: 1 }, version: 1 }], {
+          allowUnknownIndexOptions: true
+        });
+        expect(output.indexes[0]).to.have.property('v', 1);
+        expect(output.indexes[0]).to.not.have.property('version');
+      });
+    });
+  });
+
+  describe('CreateIndexesOperation.fromIndexSpecification', () => {
     it('does not enable passthrough for createIndex even when the flag is set to true', () => {
       const output = makeIndexOperation(
         { a: 1 },

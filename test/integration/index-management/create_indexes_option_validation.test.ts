@@ -140,47 +140,68 @@ describe('createIndex option validation', function () {
   });
 
   describe('when command options are given (three parameter form)', function () {
-    it('does not send driver options the user never supplied', async function () {
-      await collection.createIndex({ a: 1 }, {}, {});
+    describe('and the command options are an empty object', function () {
+      it('fails to create an index using an index option which the server does not recognize', async function () {
+        const error = await collection
+          .createIndex({ d: 1 }, { notARealOption: true }, {})
+          .catch(error => error);
 
-      expect(sentIndexes()).to.deep.equal([{ key: { a: 1 }, name: 'a_1' }]);
+        // the driver forwards the option; the server is what rejects it
+        expect(sentIndexes()[0]).to.have.property('notARealOption', true);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error.message).to.match(/not valid for an index specification/);
+      });
+
+      it(
+        'creates an index using an index option the driver does not know about',
+        // `prepareUnique` was introduced in server 6.0; on older servers it is not a valid index
+        // option and the server rejects the command, so this test cannot run there.
+        { requires: { mongodb: '>=6.0' } },
+        async function () {
+          // `prepareUnique` is supported by the server but is not in the driver's allowlist
+          await collection.createIndex({ e: 1 }, { prepareUnique: true }, {});
+
+          expect(sentIndexes()[0]).to.have.property('prepareUnique', true);
+          const indexes = await collection.listIndexes().toArray();
+          expect(indexes.find(index => index.name === 'e_1')).to.have.property(
+            'prepareUnique',
+            true
+          );
+        }
+      );
+
+      it('sends index options as normal', async function () {
+        await collection.createIndex({ f: 1 }, { unique: true, sparse: true, version: 2 }, {});
+
+        expect(sentIndexes()).to.deep.equal([
+          { unique: true, sparse: true, v: 2, name: 'f_1', key: { f: 1 } }
+        ]);
+      });
+
+      describe('and a command option is left in the index options', function () {
+        it('forwards a comment to the server, which rejects it', async function () {
+          const error = await collection
+            .createIndex({ l: 1 }, { unique: true, comment: 'a comment' }, {})
+            .catch(error => error);
+
+          expect(sentIndexes()[0]).to.have.property('comment', 'a comment');
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(error.message).to.match(/not valid for an index specification/);
+        });
+
+        it('forwards maxTimeMS to the server, which rejects it', async function () {
+          const error = await collection
+            .createIndex({ m: 1 }, { unique: true, maxTimeMS: 1000 }, {})
+            .catch(error => error);
+
+          expect(sentIndexes()[0]).to.have.property('maxTimeMS', 1000);
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(error.message).to.match(/not valid for an index specification/);
+        });
+      });
     });
 
-    it('sends an unknown option to the server', async function () {
-      const error = await collection
-        .createIndex({ d: 1 }, { notARealOption: true }, {})
-        .catch(error => error);
-
-      // the driver forwards the option; the server is what rejects it
-      expect(sentIndexes()[0]).to.have.property('notARealOption', true);
-      expect(error).to.be.instanceOf(MongoServerError);
-      expect(error.message).to.match(/not valid for an index specification/);
-    });
-
-    it(
-      'creates an index using a server option the driver does not know about',
-      // `prepareUnique` was introduced in server 6.0; on older servers it is not a valid index
-      // option and the server rejects the command, so this test cannot run there.
-      { requires: { mongodb: '>=6.0' } },
-      async function () {
-        // `prepareUnique` is supported by the server but is not in the driver's allowlist
-        await collection.createIndex({ e: 1 }, { prepareUnique: true }, {});
-
-        expect(sentIndexes()[0]).to.have.property('prepareUnique', true);
-        const indexes = await collection.listIndexes().toArray();
-        expect(indexes.find(index => index.name === 'e_1')).to.have.property('prepareUnique', true);
-      }
-    );
-
-    it('sends index options as normal', async function () {
-      await collection.createIndex({ f: 1 }, { unique: true, sparse: true, version: 2 }, {});
-
-      expect(sentIndexes()).to.deep.equal([
-        { unique: true, sparse: true, v: 2, name: 'f_1', key: { f: 1 } }
-      ]);
-    });
-
-    describe('and command options are passed in the third parameter', function () {
+    describe('and the command options have values', function () {
       it('keeps a comment out of the index description', async function () {
         await collection.createIndex({ g: 1 }, { unique: true }, { comment: 'a comment' });
 
@@ -229,28 +250,6 @@ describe('createIndex option validation', function () {
         ]);
         expect(sentCommand()).to.have.property('maxTimeMS', 1000);
         expect(sentCommand()).to.have.property('writeConcern');
-      });
-    });
-
-    describe('and a command option is left in the index options', function () {
-      it('forwards a comment to the server, which rejects it', async function () {
-        const error = await collection
-          .createIndex({ l: 1 }, { unique: true, comment: 'a comment' }, {})
-          .catch(error => error);
-
-        expect(sentIndexes()[0]).to.have.property('comment', 'a comment');
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(error.message).to.match(/not valid for an index specification/);
-      });
-
-      it('forwards maxTimeMS to the server, which rejects it', async function () {
-        const error = await collection
-          .createIndex({ m: 1 }, { unique: true, maxTimeMS: 1000 }, {})
-          .catch(error => error);
-
-        expect(sentIndexes()[0]).to.have.property('maxTimeMS', 1000);
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(error.message).to.match(/not valid for an index specification/);
       });
     });
   });
@@ -337,7 +336,7 @@ describe('createIndexes option validation', function () {
           // @ts-expect-error IndexDescription is a closed interface
           [{ key: { d: 1 }, name: 'd_1', notARealOption: true }],
           {},
-          /*allowUnknownIndexOptions=*/ true
+          true
         )
         .catch(error => error);
 
@@ -356,7 +355,7 @@ describe('createIndexes option validation', function () {
           // @ts-expect-error IndexDescription is a closed interface
           [{ key: { e: 1 }, name: 'e_1', prepareUnique: true }],
           {},
-          /*allowUnknownIndexOptions=*/ true
+          true
         );
 
         expect(sentIndexes()[0]).to.have.property('prepareUnique', true);

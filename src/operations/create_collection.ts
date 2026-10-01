@@ -207,7 +207,7 @@ export async function createCollections<TSchema extends Document>(
       db,
       name,
       { __safeContent__: 1 },
-      /*allowUnknownIndexOptions=*/ false,
+      false,
       { session: options.session },
       undefined
     );

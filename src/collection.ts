@@ -670,7 +670,7 @@ export class Collection<TSchema extends Document = Document> {
             this,
             this.collectionName,
             indexSpec,
-            /*allowUnknownIndexOptions=*/ false,
+            false,
             resolveOptions(this, indexOptions), // at this point indexOptions is the combined index and command options
             undefined
           )
@@ -678,7 +678,7 @@ export class Collection<TSchema extends Document = Document> {
             this,
             this.collectionName,
             indexSpec,
-            /*allowUnknownIndexOptions=*/ true,
+            true,
             indexOptions,
             resolveOptions(this, commandOptions)
           );
