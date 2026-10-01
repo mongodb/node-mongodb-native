@@ -633,7 +633,7 @@ function normalizeSrvAllowedHostsSuffix(value: string): string {
     throw new MongoParseError('srvAllowedHostsSuffix must contain at least one domain label');
   }
 
-  // 2 and 3. Convert to lowercase A-label form, using the WHATWG URL Standard's "domain to ASCII", the
+  // 2 and 3. Convert to lowercase A-label form, using the WHATWG URL Standard's domain parser, the
   // same conversion applied to the host names returned by the SRV lookup
   const suffix = dnsNameToASCII(stripped);
   if (suffix == null) {

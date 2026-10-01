@@ -191,9 +191,11 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    *
    * For example, with `mongodb+srv://cluster.mongodb.mydomain.net`, the default verification
    * rejects `host1.us-east-1.mydomain.net`, while `srvAllowedHostsSuffix: '.mydomain.net'` accepts
-   * it. A leading `.` is optional. The value must contain at least two labels, unless it is one of
-   * the names reserved for private or special use: `test`, `localhost`, `invalid`, `example`,
-   * `local`, `internal`, `corp`, `home`, or `mail`.
+   * it. A leading `.` is optional. Internationalized domain names may be given in Unicode or in
+   * A-label (`xn--`) form: the value is converted to lowercase A-label form, and a value that cannot
+   * be converted is an error. The value must contain at least two labels, unless it is one of the
+   * names reserved for private or special use: `test`, `localhost`, `invalid`, `example`, `local`,
+   * `internal`, `corp`, `home`, or `mail`.
    *
    * **WARNING: Modifying the default SRV domain name validation can create vulnerabilities.**
    * SRV host verification prevents a spoofed DNS response from directing the driver to arbitrary

@@ -1188,24 +1188,26 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
 }
 
 /**
- * Forbidden domain code points, per the WHATWG URL Standard, that `domainToASCII` does not itself
- * reject, so they are rejected here as the standard requires
+ * Forbidden domain code points, per the WHATWG URL Standard
  */
-const DOMAIN_TO_ASCII_RESERVED_CHARACTERS = /[/\\?#%]/;
+// eslint-disable-next-line no-control-regex
+const FORBIDDEN_DOMAIN_CODE_POINTS = /[\u0000- \u007F#%/:<>?@[\\\]^|]/;
 
 /**
  * Converts a DNS name to its lowercase A-label (Punycode) form, using the WHATWG URL Standard's
- * "domain to ASCII" algorithm.
+ * domain parser (with beStrict false).
  *
  * @returns the converted name, or `null` if the name cannot be converted
  */
 export function dnsNameToASCII(name: string): string | null {
-  if (DOMAIN_TO_ASCII_RESERVED_CHARACTERS.test(name)) {
+  if (FORBIDDEN_DOMAIN_CODE_POINTS.test(name)) {
     return null;
   }
-  // The UTS #46 processing that domainToASCII applies includes lowercasing
-  const ascii = domainToASCII(name);
-  return ascii === '' ? null : ascii;
+  // The standard returns an ASCII name lowercased, even if its `xn--` labels are not valid A-labels
+  // (https://github.com/whatwg/url/commit/a8d5ca3716c3). Node.js only does so from 24.20.0, which
+  // updated Ada to 4.0.0, so it is done here to behave the same on every Node.js version.
+  const ascii = /^\p{ASCII}*$/u.test(name) ? name.toLowerCase() : domainToASCII(name);
+  return ascii === '' || FORBIDDEN_DOMAIN_CODE_POINTS.test(ascii) ? null : ascii;
 }
 
 /**

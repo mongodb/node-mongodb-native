@@ -690,7 +690,7 @@ describe('Connection String', function () {
       }
 
       for (const [description, suffix] of [
-        ['invalid Punycode in an xn-- label', 'xn--a.example.com'],
+        ['a non-ASCII name with an invalid xn-- label', '公司.xn--a.cn'],
         ['a bidi rule violation', 'a\u05D0b.example.com'],
         ['a disallowed code point', 'a\u2028b.example.com'],
         ['a space', 'my domain.net'],
@@ -717,6 +717,20 @@ describe('Connection String', function () {
             .srvAllowedHostsSuffix
         ).to.equal('.db.xn--strae-oqa.example');
       });
+
+      // The WHATWG URL Standard returns an ASCII name lowercased without validating its xn-- labels
+      for (const [description, suffix] of [
+        ['invalid Punycode', 'XN--A.example.com'],
+        ['a label that decodes to only ASCII', 'xn--abc-.example.com'],
+        ['a label that cannot be decoded', 'xn--zzzzzz.example.com'],
+        ['a label that decodes to mapped code points', 'xn--8i7caa.example.com']
+      ]) {
+        it(`accepts an ASCII xn-- label that is not a valid A-label, lowercased: ${description}`, function () {
+          expect(
+            parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix }).srvAllowedHostsSuffix
+          ).to.equal(`.${suffix.toLowerCase()}`);
+        });
+      }
 
       it('throws when not a string', function () {
         expect(() =>

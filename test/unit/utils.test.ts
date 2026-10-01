@@ -1171,6 +1171,12 @@ describe('driver utils', function () {
       expect(normalizeDnsName('test_1.my_host.example.com')).to.equal('test_1.my_host.example.com');
     });
 
+    it('accepts ASCII xn-- labels that are not valid A-labels, lowercased, as the WHATWG URL Standard does', () => {
+      expect(normalizeDnsName('XN--A.Example.COM.')).to.equal('xn--a.example.com');
+      expect(normalizeDnsName('db1.xn--abc-.example.com')).to.equal('db1.xn--abc-.example.com');
+      expect(normalizeDnsName('xn--8i7caa.example.net')).to.equal('xn--8i7caa.example.net');
+    });
+
     for (const name of [
       '',
       '.',
@@ -1179,7 +1185,10 @@ describe('driver utils', function () {
       'bad\\host.example.com',
       'bad?host.example.com',
       'bad#host.example.com',
-      'bad%68ost.example.com'
+      'bad%68ost.example.com',
+      'bad:host.example.com',
+      'bad@host.example.com',
+      '公司.xn--a.cn'
     ]) {
       it(`throws for ${JSON.stringify(name)}`, () => {
         expect(() => normalizeDnsName(name)).to.throw(MongoAPIError, 'Invalid DNS host name');
