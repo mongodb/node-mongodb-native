@@ -147,12 +147,15 @@ describe('Handshake Prose Tests', function () {
   }
 
   context('Test 9: Valid container and FaaS provider', function () {
-    stubEnv([
-      ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
-      ['AWS_REGION', 'us-east-2'],
-      ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '1024'],
-      ['KUBERNETES_SERVICE_HOST', '1']
-    ], true);
+    stubEnv(
+      [
+        ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
+        ['AWS_REGION', 'us-east-2'],
+        ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '1024'],
+        ['KUBERNETES_SERVICE_HOST', '1']
+      ],
+      true
+    );
 
     it('runs a hello successfully', async function () {
       client = this.configuration.newClient({
