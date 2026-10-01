@@ -179,11 +179,10 @@ export async function makeClientMetadata(
     }
   }
 
-  // Env has an order of precedence for data truncation, and order matters.
+  // TODO(NODE-7851): Env has an order of precedence for data truncation, and order matters.
   // We append in the order of delete preference. 'name' is appended at the end of
-  // faasEnv, and is preference-agnostic with 'agent'. So we'll prefer keeping
-  // 'agent' over 'name', and 'name' over all FAAS props, and all FAAS props
-  // over 'container' (since FAAS props and 'container' are preference-agnostic as well)
+  // faasEnv, and is preference-agnostic with 'agent' for now, since ensuring 
+  // truncation order is to be tackled in NODE-7851.
   const containerMetadata = await getContainerMetadata();
   const faasEnv = getFAASEnv();
   const agentEnv = getAgentEnv();
@@ -289,17 +288,16 @@ export function getAgentEnv(): string {
 export const FAAS_ENV_VARIABLES = [
   'AWS_EXECUTION_ENV',
   'AWS_LAMBDA_RUNTIME_API',
-  'AWS_LAMBDA_FUNCTION_MEMORY_SIZE',
-  'AWS_REGION',
   'FUNCTIONS_WORKER_RUNTIME',
   'K_SERVICE',
   'FUNCTION_NAME',
+  'VERCEL',
+  'AWS_LAMBDA_FUNCTION_MEMORY_SIZE',
+  'AWS_REGION',
   'FUNCTION_MEMORY_MB',
   'FUNCTION_REGION',
   'FUNCTION_TIMEOUT_SEC',
-  'VERCEL',
-  'VERCEL_REGION',
-  'KUBERNETES_SERVICE_HOST'
+  'VERCEL_REGION'
 ] as const;
 
 /**
