@@ -119,6 +119,7 @@ export const {
   deserialize,
   DistinctOperation,
   DOCUMENT_DB_MSG,
+  DriverStringUtils,
   DocumentSequence,
   Double,
   DropCollectionOperation,

@@ -208,8 +208,8 @@ export async function makeClientMetadata(
 let dockerPromise: Promise<boolean> | undefined;
 
 /** @internal */
-export function resetDockerPromise() {
-  dockerPromise = undefined;
+export function resetDockerPromise(value?: Promise<boolean>) {
+  dockerPromise = value;
 }
 
 /** @internal */

@@ -17,7 +17,6 @@ import {
   type MongoClient,
   resetDockerPromise
 } from '../../mongodb';
-import * as utils from '../../../src/utils';
 import { sleep } from '../../tools/utils';
 
 type EnvironmentVariables = Array<[string, string]>;
@@ -40,18 +39,12 @@ function stubEnv(env: EnvironmentVariables, stubDockerEnv = false) {
       ...Object.fromEntries(env)
     };
 
-    if (stubDockerEnv) {
-      resetDockerPromise();
-      sinon.stub(utils, 'fileIsAccessible').resolves(false);
-    }
+    if (stubDockerEnv) resetDockerPromise(Promise.resolve(false));
   });
 
   after(function () {
     process.env = cachedEnv;
-    if (stubDockerEnv) {
-      sinon.restore();
-      resetDockerPromise();
-    }
+    if (stubDockerEnv) resetDockerPromise();
   });
 }
 
