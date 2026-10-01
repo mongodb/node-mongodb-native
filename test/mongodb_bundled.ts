@@ -143,6 +143,7 @@ export const {
   getAwsCredentialProvider,
   getFAASEnv,
   getAgentEnv,
+  resetDockerPromise,
   getGcpMetadata,
   getMongoDBClientEncryption,
   AGENT_ENV_VARIABLES,

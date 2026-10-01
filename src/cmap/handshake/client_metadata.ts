@@ -205,7 +205,13 @@ export async function makeClientMetadata(
   return metadataDocument.toObject() as ClientMetadata;
 }
 
-let dockerPromise: Promise<boolean>;
+let dockerPromise: Promise<boolean> | undefined;
+
+/** @internal */
+export function resetDockerPromise() {
+  dockerPromise = undefined;
+}
+
 /** @internal */
 async function getContainerMetadata(): Promise<Map<string, string>> {
   dockerPromise ??= fileIsAccessible('/.dockerenv');

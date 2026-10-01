@@ -14,8 +14,10 @@ import {
   Int32,
   isDriverInfoEqual,
   LEGACY_HELLO_COMMAND,
-  type MongoClient
+  type MongoClient,
+  resetDockerPromise
 } from '../../mongodb';
+import * as utils from '../../../src/utils';
 import { sleep } from '../../tools/utils';
 
 type EnvironmentVariables = Array<[string, string]>;
@@ -25,7 +27,7 @@ const handshakeEnvVars: string[] = [
   ...AGENT_ENV_VARIABLES.map(([key]) => key)
 ];
 
-function stubEnv(env: EnvironmentVariables) {
+function stubEnv(env: EnvironmentVariables, stubDockerEnv = false) {
   let cachedEnv: NodeJS.ProcessEnv;
   before(function () {
     cachedEnv = process.env;
@@ -37,10 +39,19 @@ function stubEnv(env: EnvironmentVariables) {
       ...cleanedEnv,
       ...Object.fromEntries(env)
     };
+
+    if (stubDockerEnv) {
+      resetDockerPromise();
+      sinon.stub(utils, 'fileIsAccessible').resolves(false);
+    }
   });
 
   after(function () {
     process.env = cachedEnv;
+    if (stubDockerEnv) {
+      sinon.restore();
+      resetDockerPromise();
+    }
   });
 }
 
@@ -148,7 +159,7 @@ describe('Handshake Prose Tests', function () {
       ['AWS_REGION', 'us-east-2'],
       ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '1024'],
       ['KUBERNETES_SERVICE_HOST', '1']
-    ]);
+    ], true);
 
     it('runs a hello successfully', async function () {
       client = this.configuration.newClient({
@@ -341,7 +352,7 @@ describe('Handshake Prose Tests', function () {
 
     for (const [i, { env, expectEnv }] of agentEnvs.entries()) {
       context(`Test 3: Test that agent metadata is properly captured #${i + 1}`, function () {
-        stubEnv(env);
+        stubEnv(env, true);
 
         it('runs a hello successfully', async function () {
           client = this.configuration.newClient({
