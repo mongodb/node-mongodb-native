@@ -283,7 +283,7 @@ describe('Handshake Prose Tests', function () {
       {
         env: [['AI_AGENT', ' Claude-Code_2-1-238_Agent ']],
         expectEnv: {
-          agent: 'claude_code_2-1-238_agent'
+          agent: 'claude-code_2-1-238_agent'
         }
       },
 
