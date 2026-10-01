@@ -6,6 +6,7 @@ import {
   ConnectionPool,
   MongoAPIError,
   type MongoClient,
+  MongoInvalidArgumentError,
   MongoParseError,
   resolveSRVRecord,
   Server,
@@ -538,6 +539,54 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
       expect(() =>
         this.configuration.newClient('mongodb://localhost:27017', { srvHostValidator: () => true })
       ).to.throw(MongoParseError, 'Cannot use srvHostValidator with a non-srv connection string');
+    });
+  });
+
+  describe('14. Throw when srvHostValidator returns a non-boolean value', function () {
+    /**
+     * During initial seedlist resolution, a validator that returns a value that is not a bool results in an error.
+     * Configure a validator that returns the string "true" and assert that the SRV mongodb+srv://blogs.mongodb.com
+     * resolving to cluster.mongodb.com throws an error.
+     */
+    afterEach(async function () {
+      sinon.restore();
+    });
+
+    it('throws', async function () {
+      stubSrvLookup('cluster.mongodb.com');
+      const err = await this.configuration
+        .newClient('mongodb+srv://blogs.mongodb.com', {
+          // @ts-expect-error: srvHostValidator must return a boolean
+          srvHostValidator: () => 'true'
+        })
+        .connect()
+        .catch(e => e);
+      expect(err).to.be.instanceOf(MongoInvalidArgumentError);
+      expect(err.message).to.equal('srvHostValidator must return a boolean, received string');
+    });
+  });
+
+  describe('15. Accept an underscore in srvAllowedHostsSuffix', function () {
+    /**
+     * Drivers MUST NOT apply hostname syntax validation to srvAllowedHostsSuffix beyond the listed steps, so a value
+     * containing an underscore must be accepted.
+     * Configure a MongoClient with srvAllowedHostsSuffix=.my_domain.net and assert that the SRV
+     * mongodb+srv://blogs.my_domain.net resolving to cluster.my_domain.net produces a seedlist containing
+     * cluster.my_domain.net.
+     */
+    let client: MongoClient;
+
+    afterEach(async function () {
+      sinon.restore();
+      await client?.close();
+    });
+
+    it('produces a seedlist containing the host', async function () {
+      stubSrvLookup('cluster.my_domain.net');
+      client = this.configuration.newClient(
+        'mongodb+srv://blogs.my_domain.net/?srvAllowedHostsSuffix=.my_domain.net'
+      );
+      expect(await resolveSeedlist(client)).to.deep.equal(['cluster.my_domain.net']);
     });
   });
 });

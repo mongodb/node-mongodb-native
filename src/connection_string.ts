@@ -633,18 +633,11 @@ function normalizeSrvAllowedHostsSuffix(value: string): string {
     throw new MongoParseError('srvAllowedHostsSuffix must contain at least one domain label');
   }
 
-  // 2 and 3. Convert to lowercase A-label form
+  // 2 and 3. Convert to lowercase A-label form, using the WHATWG URL Standard's "domain to ASCII", the
+  // same conversion applied to the host names returned by the SRV lookup
   const suffix = dnsNameToASCII(stripped);
-  const labels = suffix?.split('.') ?? [];
-  if (suffix == null || labels.includes('')) {
+  if (suffix == null) {
     throw new MongoParseError(`srvAllowedHostsSuffix "${value}" is not a valid domain name`);
-  }
-
-  // Domain name length limits from RFC 2181 section 11
-  if (suffix.length > 255 || labels.some(label => label.length > 63)) {
-    throw new MongoParseError(
-      `srvAllowedHostsSuffix "${value}" exceeds the maximum length of a domain name or label`
-    );
   }
 
   // 4. Require at least two labels, unless the value is a reserved single label

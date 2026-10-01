@@ -1188,13 +1188,14 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
 }
 
 /**
- * Characters with special meaning to the input parsing of `domainToASCII`, which are rejected
- * rather than normalized
+ * Forbidden domain code points, per the WHATWG URL Standard, that `domainToASCII` does not itself
+ * reject, so they are rejected here as the standard requires
  */
 const DOMAIN_TO_ASCII_RESERVED_CHARACTERS = /[/\\?#%]/;
 
 /**
- * Converts a DNS name to its lowercase A-label (Punycode) form.
+ * Converts a DNS name to its lowercase A-label (Punycode) form, using the WHATWG URL Standard's
+ * "domain to ASCII" algorithm.
  *
  * @returns the converted name, or `null` if the name cannot be converted
  */

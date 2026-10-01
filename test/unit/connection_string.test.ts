@@ -676,16 +676,34 @@ describe('Connection String', function () {
         });
       }
 
-      for (const suffix of [
-        'my..domain.net',
-        'my domain.net',
-        'my/domain.net',
-        'my\\domain.net',
-        'my?domain.net',
-        'my#domain.net',
-        'my%64omain.net'
+      // The specification permits only its listed normalization and validation steps
+      for (const [description, suffix] of [
+        ['an empty label', 'my..domain.net'],
+        ['a label longer than 63 characters', `${'a'.repeat(64)}.net`],
+        ['a name longer than 255 characters', `${'a'.repeat(63)}.`.repeat(4) + 'net']
       ]) {
-        it(`throws for the invalid domain name ${suffix}`, function () {
+        it(`applies no other host name syntax validation, accepting ${description}`, function () {
+          expect(
+            parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix }).srvAllowedHostsSuffix
+          ).to.equal(`.${suffix}`);
+        });
+      }
+
+      for (const [description, suffix] of [
+        ['invalid Punycode in an xn-- label', 'xn--a.example.com'],
+        ['a bidi rule violation', 'a\u05D0b.example.com'],
+        ['a disallowed code point', 'a\u2028b.example.com'],
+        ['a space', 'my domain.net'],
+        ['a slash', 'my/domain.net'],
+        ['a backslash', 'my\\domain.net'],
+        ['a question mark', 'my?domain.net'],
+        ['a number sign', 'my#domain.net'],
+        ['a percent sign', 'my%64omain.net'],
+        ['a colon', 'my:domain.net'],
+        ['an at sign', 'my@domain.net'],
+        ['non-ASCII characters combined with a slash', '公司/x.cn']
+      ]) {
+        it(`throws when it cannot be converted to A-label form: ${description}`, function () {
           expect(() => parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix })).to.throw(
             MongoParseError,
             'is not a valid domain name'
@@ -693,33 +711,12 @@ describe('Connection String', function () {
         });
       }
 
-      it('accepts labels of up to 63 characters and names of up to 255 characters', function () {
-        const longestLabel = 'a'.repeat(63);
+      it('converts valid xn-- labels', function () {
         expect(
-          parseOptions(SRV_URI, { srvAllowedHostsSuffix: `${longestLabel}.net` })
+          parseOptions(SRV_URI, { srvAllowedHostsSuffix: 'DB.XN--STRAE-OQA.example' })
             .srvAllowedHostsSuffix
-        ).to.equal(`.${longestLabel}.net`);
-
-        const longestName = [longestLabel, longestLabel, longestLabel, 'a'.repeat(59), 'net'].join(
-          '.'
-        );
-        expect(longestName).to.have.lengthOf(255);
-        expect(
-          parseOptions(SRV_URI, { srvAllowedHostsSuffix: longestName }).srvAllowedHostsSuffix
-        ).to.equal(`.${longestName}`);
+        ).to.equal('.db.xn--strae-oqa.example');
       });
-
-      for (const [description, suffix] of [
-        ['a label longer than 63 characters', `${'a'.repeat(64)}.net`],
-        ['a name longer than 255 characters', `${'a'.repeat(63)}.`.repeat(4) + 'net']
-      ]) {
-        it(`throws for ${description}`, function () {
-          expect(() => parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix })).to.throw(
-            MongoParseError,
-            'exceeds the maximum length of a domain name or label'
-          );
-        });
-      }
 
       it('throws when not a string', function () {
         expect(() =>

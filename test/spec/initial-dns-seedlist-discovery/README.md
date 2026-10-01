@@ -121,6 +121,25 @@ resolving to `db.cluster.localhost` produces a seedlist containing `db.cluster.l
 Assert that configuring a MongoClient with any `srvHostValidator` and the non-SRV URI `mongodb://localhost:27017` throws
 an error.
 
+### 14. Throw when `srvHostValidator` returns a non-boolean value
+
+Drivers whose language cannot express a non-boolean return value for `srvHostValidator` -- because the type is checked
+when the program is compiled -- MUST skip this test. During initial seedlist resolution, a validator that returns a
+value that is not a bool results in an error.
+
+Configure a validator that returns the string `"true"` and assert that the SRV `mongodb+srv://blogs.mongodb.com`
+resolving to `cluster.mongodb.com` throws an error.
+
+### 15. Accept an underscore in `srvAllowedHostsSuffix`
+
+Drivers MUST NOT apply hostname syntax validation to `srvAllowedHostsSuffix` beyond the steps listed in
+[srvAllowedHostsSuffix](../initial-dns-seedlist-discovery.md#srvallowedhostssuffix), so a value containing an underscore
+must be accepted.
+
+Configure a MongoClient with `srvAllowedHostsSuffix=.my_domain.net` and assert that the SRV
+`mongodb+srv://blogs.my_domain.net` resolving to `cluster.my_domain.net` produces a seedlist containing
+`cluster.my_domain.net`.
+
 ## Test Setup
 
 The tests in the `replica-set` directory MUST be executed against a three-node replica set on localhost ports 27017,
