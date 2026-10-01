@@ -1155,7 +1155,7 @@ export const DriverStringUtils = {
     if (!Number.isInteger(limit) || limit < 0) {
       throw new MongoRuntimeError('provided limit must be a positive integer');
     }
-    const buf = Buffer.from(str, encoding);
+    const buf = new TextEncoder().encode(str);
     if (buf.length <= limit) return str;
     const decoder = new StringDecoder(encoding);
     // incomplete multi-byte chars will not be returned through decoder.write

@@ -7,7 +7,6 @@ import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
-  AGENT_ENV_LIMIT_BYTES,
   AGENT_ENV_UNIDENTIFYING,
   AGENT_ENV_VARIABLES,
   DriverStringUtils,
