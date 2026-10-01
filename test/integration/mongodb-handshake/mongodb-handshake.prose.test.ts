@@ -281,7 +281,7 @@ describe('Handshake Prose Tests', function () {
       // 8. Generic agent, normalization. `AI_AGENT` is set to `Claude-Code_2-1-238_Agent` with one leading and one trailing
       // space. `client.env.agent` MUST equal `claude-code_2-1-238_agent`.
       {
-        env: [['AI_AGENT', ' claude_code_2-1-238_Agent ']],
+        env: [['AI_AGENT', ' Claude-Code_2-1-238_Agent ']],
         expectEnv: {
           agent: 'claude_code_2-1-238_agent'
         }
