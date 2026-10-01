@@ -146,7 +146,6 @@ export const {
   getGcpMetadata,
   getMongoDBClientEncryption,
   AGENT_ENV_VARIABLES,
-  AGENT_ENV_LIMIT,
   AGENT_ENV_UNIDENTIFYING,
   FAAS_ENV_VARIABLES,
   GetMoreOperation,

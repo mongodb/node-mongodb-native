@@ -103,6 +103,7 @@ export class LimitedSizeDocument {
   }
 }
 
+// Env var value length after truncating bytes
 const APP_NAME_TRUNCATION_LIMIT_BYTES = 128;
 
 type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
@@ -248,11 +249,9 @@ export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]
   ['AI_AGENT', null]
 ];
 
-/**
- * @internal
- * Env var value length after first 2 forms of normalization
- */
-export const AGENT_ENV_LIMIT_BYTES = 64;
+/// Env var value length after first 2 forms of normalization
+const AGENT_ENV_LIMIT_BYTES = 64;
+
 /**
  * @internal
  * Values used in AI_AGENT to indicate an agent is being used but are non-identifying

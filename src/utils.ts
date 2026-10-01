@@ -1147,17 +1147,17 @@ export function parseUnsignedInteger(value: unknown): number | null {
 /** @internal */
 export const DriverStringUtils = {
   /**
-   * Truncates a string to a specified byte length. Multi-byte characters which are bisected by the byte truncation
+   * Truncates a string to a specified byte length. Multi-byte characters which are split by the byte truncation
    * are considered, ensuring incomplete multi-byte characters are omitted from the result entirely.
    * @throws MongoRuntimeError on a malformed limit
    */
-  truncateStringBytes(str: string, limit: number, encoding: BufferEncoding = 'utf8'): string {
+  truncateStringBytes(str: string, limit: number): string {
     if (!Number.isInteger(limit) || limit < 0) {
-      throw new MongoRuntimeError('provided limit must be a positive integer');
+      throw new MongoRuntimeError('provided limit must be a non-negative integer');
     }
     const buf = new TextEncoder().encode(str);
     if (buf.length <= limit) return str;
-    const decoder = new StringDecoder(encoding);
+    const decoder = new StringDecoder('utf8');
     // incomplete multi-byte chars will not be returned through decoder.write
     return decoder.write(buf.subarray(0, limit));
   }
