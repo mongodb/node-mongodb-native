@@ -181,7 +181,7 @@ export async function makeClientMetadata(
 
   // TODO(NODE-7851): Env has an order of precedence for data truncation, and order matters.
   // We append in the order of delete preference. 'name' is appended at the end of
-  // faasEnv, and is preference-agnostic with 'agent' for now, since ensuring 
+  // faasEnv, and is preference-agnostic with 'agent' for now, since ensuring
   // truncation order is to be tackled in NODE-7851.
   const containerMetadata = await getContainerMetadata();
   const faasEnv = getFAASEnv();
