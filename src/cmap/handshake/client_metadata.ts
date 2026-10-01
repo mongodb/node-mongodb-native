@@ -248,7 +248,7 @@ export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]
   ['AI_AGENT', null]
 ];
 
-/// Env var value length after first 2 forms of normalization
+// Env var value length after first 2 forms of normalization
 const AGENT_ENV_LIMIT_BYTES = 64;
 
 /**
