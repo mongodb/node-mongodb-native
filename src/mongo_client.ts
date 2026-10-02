@@ -183,6 +183,48 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * Querying this DNS URI is expected to respond with SRV records
    */
   srvServiceName?: string;
+  /**
+   * A host name suffix that every host returned by the SRV lookup must end with. It replaces the
+   * default verification, which requires returned hosts to share the parent domain of the SRV host
+   * name (the SRV host name without its leftmost label). Only valid with a `mongodb+srv` connection
+   * string, and cannot be combined with `srvHostValidator`.
+   *
+   * For example, with `mongodb+srv://cluster.mongodb.mydomain.net`, the default verification
+   * rejects `host1.us-east-1.mydomain.net`, while `srvAllowedHostsSuffix: '.mydomain.net'` accepts
+   * it. A leading `.` is optional. Internationalized domain names may be given in Unicode or in
+   * A-label (`xn--`) form: the value is converted to lowercase A-label form, and a value that cannot
+   * be converted is an error. The value must contain at least two labels, unless it is one of the
+   * names reserved for private or special use: `test`, `localhost`, `invalid`, `example`, `local`,
+   * `internal`, `corp`, `home`, or `mail`.
+   *
+   * **WARNING: Modifying the default SRV domain name validation can create vulnerabilities.**
+   * SRV host verification prevents a spoofed DNS response from directing the driver to arbitrary
+   * hosts, and this option widens the set of hosts such a response can direct it to. Configure the
+   * narrowest suffix that covers your deployment: for a seed of
+   * `cluster.test.internal.example.com`, prefer `.internal.example.com` over `.example.com`.
+   */
+  srvAllowedHostsSuffix?: string;
+  /**
+   * A synchronous function that decides whether a host returned by the SRV lookup may be used. It
+   * receives the host name, normalized to lowercase A-label (Punycode) form without a trailing `.`,
+   * and must return `true` to accept the host or `false` to reject it. Its return value replaces the
+   * default verification entirely: the driver applies no other checks to the host. Only valid with a
+   * `mongodb+srv` connection string, cannot be combined with `srvAllowedHostsSuffix`, and cannot be
+   * set in the connection string.
+   *
+   * The function runs synchronously during SRV resolution and SRV polling, so it must not block.
+   * Returning anything other than a boolean, including the Promise returned by an `async` function,
+   * is an error.
+   *
+   * If the function throws or returns a non-boolean during the initial SRV lookup, `connect()`
+   * rejects; a thrown error is available as the `cause` of the resulting `MongoAPIError`. During SRV
+   * polling, the host is rejected instead and no error is raised.
+   *
+   * **WARNING: Modifying the default SRV domain name validation can create vulnerabilities.**
+   * SRV host verification prevents a spoofed DNS response from directing the driver to arbitrary
+   * hosts, and a validator that accepts too broadly removes that protection.
+   */
+  srvHostValidator?: (host: string) => boolean;
   /** The maximum number of connections in the connection pool. */
   maxPoolSize?: number;
   /** The minimum number of connections in the connection pool. */
@@ -1092,6 +1134,8 @@ export interface MongoOptions
   appName?: string;
   hosts: HostAddress[];
   srvHost?: string;
+  srvAllowedHostsSuffix?: string;
+  srvHostValidator?: (host: string) => boolean;
   credentials?: MongoCredentials;
   readPreference: ReadPreference;
   readConcern: ReadConcern;

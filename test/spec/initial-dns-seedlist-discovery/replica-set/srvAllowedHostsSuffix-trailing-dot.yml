@@ -1,0 +1,8 @@
+# A trailing dot in srvAllowedHostsSuffix must be stripped before comparison,
+# so ".build.10gen.cc." is equivalent to ".build.10gen.cc".
+uri: "mongodb+srv://test12.test.build.10gen.cc/?srvAllowedHostsSuffix=.build.10gen.cc."
+seeds:
+    - localhost.build.10gen.cc:27017
+options:
+    ssl: true
+ping: false

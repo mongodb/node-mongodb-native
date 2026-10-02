@@ -444,3 +444,112 @@ describe('Polling Srv Records for Mongos Discovery', () => {
     });
   });
 });
+
+// Unlike the cases above, these are not skipped on Node 18+ (NODE-5666): rather than a MongoClient with fake
+// timers, they use a real SrvPoller within a topology of mock mongoses, and drive each rescan by calling _poll.
+// Since the validator's verdict replaces the default verification, the mock mongoses' `localhost` addresses
+// stand in for the spec's localhost.test.build.10gen.cc records.
+describe('Polling Srv Records for Mongos Discovery with the srvHostValidator option', () => {
+  const SRV_HOST = 'test1.test.build.10gen.cc';
+  const HEARTBEAT_FREQUENCY_MS = 10000;
+  let mongoses: MockServer[];
+  let srvPoller: SrvPoller;
+  let topology: Topology;
+
+  beforeEach(async () => {
+    mongoses = await Promise.all(Array.from({ length: 3 }, () => mock.createServer()));
+    for (const mongos of mongoses) {
+      mongos.setMessageHandler(request => {
+        if (isHello(request.document)) {
+          request.reply({ ...mock.HELLO, msg: 'isdbgrid' });
+        }
+      });
+    }
+  });
+
+  afterEach(async () => {
+    sinon.restore();
+    srvPoller?.stop();
+    topology?.close();
+    await mock.cleanup();
+  });
+
+  /** The address of a mock mongos as it appears in the topology, using the `localhost` host name */
+  function mongosHost(mongos: MockServer) {
+    return `localhost:${mongos.port}`;
+  }
+
+  /** Connects a topology seeded with the first two mongoses, polled by an SrvPoller using `srvHostValidator` */
+  async function connectTopology(srvHostValidator: (host: string) => boolean) {
+    srvPoller = new SrvPoller({
+      srvHost: SRV_HOST,
+      srvHostValidator,
+      heartbeatFrequencyMS: HEARTBEAT_FREQUENCY_MS
+    } as SrvPollerOptions);
+    const seedlist = mongoses.slice(0, 2).map(mongos => HostAddress.fromString(mongosHost(mongos)));
+    topology = topologyWithPlaceholderClient(seedlist, { srvPoller, srvHost: SRV_HOST });
+    await topology.connect({});
+    expect(topology.description).to.have.property('type', TopologyType.Sharded);
+  }
+
+  /** Stubs DNS so every SRV rescan returns all three mongoses, in the un-normalized form DNS may use */
+  function stubRescanWithAllMongoses() {
+    sinon
+      .stub(dns.promises, 'resolve')
+      .resolves(mongoses.map(({ port }) => srvRecord('LOCALHOST.', port)));
+  }
+
+  function topologyHosts() {
+    return Array.from(topology.description.servers.keys()).sort();
+  }
+
+  function allMongosHosts() {
+    return mongoses.map(mongosHost).sort();
+  }
+
+  it('14. The validator is consulted when SRV records are rescanned', async () => {
+    const validatedHosts: string[] = [];
+    await connectTopology(host => {
+      validatedHosts.push(host);
+      return true;
+    });
+    stubRescanWithAllMongoses();
+
+    const willChange = once(topology, 'topologyDescriptionChanged');
+    await srvPoller._poll();
+    await willChange;
+
+    expect(validatedHosts).to.deep.equal(['localhost', 'localhost', 'localhost']);
+    expect(topologyHosts()).to.deep.equal(allMongosHosts());
+  });
+
+  for (const behavior of ['returns false', 'throws'] as const) {
+    it(`15. A validator that ${behavior} does not raise an error or stop polling`, async () => {
+      let acceptHosts = false;
+      await connectTopology(() => {
+        if (acceptHosts) return true;
+        if (behavior === 'throws') throw new Error('validator failure');
+        return false;
+      });
+      stubRescanWithAllMongoses();
+      const originalHosts = topologyHosts();
+
+      // Two rescans in which every host is rejected: neither raises, and the topology keeps its hosts
+      await srvPoller._poll();
+      await srvPoller._poll();
+      expect(topologyHosts()).to.deep.equal(originalHosts);
+
+      // No verified hosts means the next rescan is scheduled after heartbeatFrequencyMS
+      expect(srvPoller).to.have.property('haMode', true);
+      expect(srvPoller).to.have.property('intervalMS', HEARTBEAT_FREQUENCY_MS);
+      expect(srvPoller._timeout).to.exist;
+
+      acceptHosts = true;
+      const willChange = once(topology, 'topologyDescriptionChanged');
+      await srvPoller._poll();
+      await willChange;
+
+      expect(topologyHosts()).to.deep.equal(allMongosHosts());
+    });
+  }
+});

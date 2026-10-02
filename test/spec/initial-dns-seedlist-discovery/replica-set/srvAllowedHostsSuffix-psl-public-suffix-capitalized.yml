@@ -1,0 +1,7 @@
+# All rules in the Public Suffix List are lowercase, so a driver must normalize case
+# before comparing. "COM" is the ordinary rule "com", so it is a public suffix and must
+# be rejected.
+uri: "mongodb+srv://test1.test.build.10gen.cc/?srvAllowedHostsSuffix=COM"
+seeds: []
+hosts: []
+error: true

@@ -1,0 +1,5 @@
+# DNS record for test12.test.build.10gen.cc returns localhost.build.10gen.cc which would not match test.build.10gen.cc
+uri: "mongodb+srv://test12.test.build.10gen.cc/?srvAllowedHostsSuffix=test.build.10gen.cc"
+seeds: []
+hosts: []
+error: true

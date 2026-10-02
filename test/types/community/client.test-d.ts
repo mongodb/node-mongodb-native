@@ -1,4 +1,4 @@
-import { expectType } from 'tsd';
+import { expectError, expectType } from 'tsd';
 
 import {
   type GridFSBucket,
@@ -41,6 +41,21 @@ export async function testFunc(): Promise<MongoClient> {
 }
 
 expectType<Promise<MongoClient>>(MongoClient.connect(connectionString, options));
+
+// SRV host validation
+expectType<string | undefined>(options.srvAllowedHostsSuffix);
+expectType<((host: string) => boolean) | undefined>(options.srvHostValidator);
+new MongoClient('mongodb+srv://cluster.example.com', { srvAllowedHostsSuffix: '.example.com' });
+new MongoClient('mongodb+srv://cluster.example.com', {
+  srvHostValidator: host => {
+    expectType<string>(host);
+    return host.endsWith('.example.com');
+  }
+});
+// srvHostValidator is synchronous: an async function returns a Promise rather than a boolean
+expectError(
+  new MongoClient('mongodb+srv://cluster.example.com', { srvHostValidator: async () => true })
+);
 
 // TLS
 const userName = '';
