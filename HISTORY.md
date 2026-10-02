@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.7.1](https://github.com/mongodb/node-mongodb-native/compare/v7.7.0...v7.7.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **NODE-7659:** key unordered bulk insertedIds by originating operation index ([#4989](https://github.com/mongodb/node-mongodb-native/issues/4989)) ([df513cf](https://github.com/mongodb/node-mongodb-native/commit/df513cfa5e92a9ab40fe2606074298a15fecee88))
+
 ## [7.7.0](https://github.com/mongodb/node-mongodb-native/compare/v7.6.0...v7.7.0) (2026-09-18)
 
 
