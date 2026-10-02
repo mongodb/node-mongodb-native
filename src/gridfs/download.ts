@@ -319,7 +319,7 @@ function init(stream: GridFSBucketReadStream): void {
 
     if (!doc) {
       const identifier =
-        stream.s.filter._id != null ? String(stream.s.filter._id.$eq) : stream.s.filter.filename;
+        stream.s.filter._id != null ? stream.s.filter._id.$eq : stream.s.filter.filename;
       const errmsg = `FileNotFound: file ${identifier} was not found`;
       // TODO(NODE-3483)
       const err = new MongoRuntimeError(errmsg);
