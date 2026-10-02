@@ -1,0 +1,528 @@
+{
+  "description": "gridfs-queriesUseEq",
+  "schemaVersion": "1.1",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "gridfs-tests"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket0",
+        "database": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_files_collection",
+        "database": "database0",
+        "collectionName": "fs.files"
+      }
+    },
+    {
+      "collection": {
+        "id": "bucket0_chunks_collection",
+        "database": "database0",
+        "collectionName": "fs.chunks"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "gridfs-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "length": 2,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "filename": "file-1"
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000002"
+          },
+          "length": 0,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "filename": "file-2"
+        }
+      ]
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "gridfs-tests",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000011"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000001"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "ESI=",
+              "subType": "00"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "_yamlAnchors": {
+    "injectedId": {
+      "$gt": {
+        "$minKey": 1
+      }
+    },
+    "unchangedOutcome": [
+      {
+        "collectionName": "fs.files",
+        "databaseName": "gridfs-tests",
+        "documents": [
+          {
+            "_id": {
+              "$oid": "000000000000000000000001"
+            },
+            "length": 2,
+            "chunkSize": 4,
+            "uploadDate": {
+              "$date": "1970-01-01T00:00:00.000Z"
+            },
+            "filename": "file-1"
+          },
+          {
+            "_id": {
+              "$oid": "000000000000000000000002"
+            },
+            "length": 0,
+            "chunkSize": 4,
+            "uploadDate": {
+              "$date": "1970-01-01T00:00:00.000Z"
+            },
+            "filename": "file-2"
+          }
+        ]
+      },
+      {
+        "collectionName": "fs.chunks",
+        "databaseName": "gridfs-tests",
+        "documents": [
+          {
+            "_id": {
+              "$oid": "000000000000000000000011"
+            },
+            "files_id": {
+              "$oid": "000000000000000000000001"
+            },
+            "n": 0,
+            "data": {
+              "$binary": {
+                "base64": "ESI=",
+                "subType": "00"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "tests": [
+    {
+      "description": "download uses $eq to query the files and chunks collections",
+      "operations": [
+        {
+          "name": "download",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000001"
+            }
+          },
+          "expectResult": {
+            "$$matchesHexBytes": "1122"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.files",
+                  "filter": {
+                    "_id": {
+                      "$eq": {
+                        "$oid": "000000000000000000000001"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "fs.chunks",
+                  "filter": {
+                    "files_id": {
+                      "$eq": {
+                        "$oid": "000000000000000000000001"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "delete uses $eq to delete the files collection document and chunks",
+      "operations": [
+        {
+          "name": "delete",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000001"
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "fs.files",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$eq": {
+                            "$oid": "000000000000000000000001"
+                          }
+                        }
+                      },
+                      "limit": 1
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "fs.chunks",
+                  "deletes": [
+                    {
+                      "q": {
+                        "files_id": {
+                          "$eq": {
+                            "$oid": "000000000000000000000001"
+                          }
+                        }
+                      },
+                      "limit": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "fs.files",
+          "databaseName": "gridfs-tests",
+          "documents": [
+            {
+              "_id": {
+                "$oid": "000000000000000000000002"
+              },
+              "length": 0,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "file-2"
+            }
+          ]
+        },
+        {
+          "collectionName": "fs.chunks",
+          "databaseName": "gridfs-tests",
+          "documents": []
+        }
+      ]
+    },
+    {
+      "description": "rename uses $eq to update the files collection document",
+      "operations": [
+        {
+          "name": "rename",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000001"
+            },
+            "newFilename": "file-1-renamed"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "fs.files",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$eq": {
+                            "$oid": "000000000000000000000001"
+                          }
+                        }
+                      },
+                      "u": {
+                        "$set": {
+                          "filename": "file-1-renamed"
+                        }
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "fs.files",
+          "databaseName": "gridfs-tests",
+          "documents": [
+            {
+              "_id": {
+                "$oid": "000000000000000000000001"
+              },
+              "length": 2,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "file-1-renamed"
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000002"
+              },
+              "length": 0,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "file-2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "delete with a file id containing a query operator does not delete any files",
+      "operations": [
+        {
+          "name": "delete",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$gt": {
+                "$minKey": 1
+              }
+            }
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "fs.files",
+          "databaseName": "gridfs-tests",
+          "documents": [
+            {
+              "_id": {
+                "$oid": "000000000000000000000001"
+              },
+              "length": 2,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "file-1"
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000002"
+              },
+              "length": 0,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "file-2"
+            }
+          ]
+        },
+        {
+          "collectionName": "fs.chunks",
+          "databaseName": "gridfs-tests",
+          "documents": [
+            {
+              "_id": {
+                "$oid": "000000000000000000000011"
+              },
+              "files_id": {
+                "$oid": "000000000000000000000001"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "ESI=",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "download with a file id containing a query operator does not return any files",
+      "operations": [
+        {
+          "name": "download",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$gt": {
+                "$minKey": 1
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "rename with a file id containing a query operator does not rename any files",
+      "operations": [
+        {
+          "name": "rename",
+          "object": "bucket0",
+          "arguments": {
+            "id": {
+              "$gt": {
+                "$minKey": 1
+              }
+            },
+            "newFilename": "injected"
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "fs.files",
+          "databaseName": "gridfs-tests",
+          "documents": [
+            {
+              "_id": {
+                "$oid": "000000000000000000000001"
+              },
+              "length": 2,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "file-1"
+            },
+            {
+              "_id": {
+                "$oid": "000000000000000000000002"
+              },
+              "length": 0,
+              "chunkSize": 4,
+              "uploadDate": {
+                "$date": "1970-01-01T00:00:00.000Z"
+              },
+              "filename": "file-2"
+            }
+          ]
+        },
+        {
+          "collectionName": "fs.chunks",
+          "databaseName": "gridfs-tests",
+          "documents": [
+            {
+              "_id": {
+                "$oid": "000000000000000000000011"
+              },
+              "files_id": {
+                "$oid": "000000000000000000000001"
+              },
+              "n": 0,
+              "data": {
+                "$binary": {
+                  "base64": "ESI=",
+                  "subType": "00"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
