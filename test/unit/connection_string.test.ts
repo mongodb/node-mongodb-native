@@ -281,6 +281,18 @@ describe('Connection String', function () {
     }
   });
 
+  context('autoSelectFamily option', function () {
+    it('does not set a default when omitted', function () {
+      const options = parseOptions('mongodb://localhost');
+      expect(options).to.not.have.property('autoSelectFamily');
+    });
+
+    it('preserves an explicitly provided value', function () {
+      const options = parseOptions('mongodb://localhost?autoSelectFamily=false');
+      expect(options).to.have.property('autoSelectFamily', false);
+    });
+  });
+
   it('should parse compression options', function () {
     const options = parseOptions('mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4');
     expect(options).to.have.property('compressors');
