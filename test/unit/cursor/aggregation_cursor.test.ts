@@ -37,9 +37,9 @@ describe('class AggregationCursor', () => {
     it('clone pipline', () => {
       cursor.addStage({ $match: { yes: true } });
       const cloned = cursor.clone();
-      expect(cloned.pipline).to.not.equal(cursor.pipline);
-      expect(cloned.pipline.length).to.equal(1);
-      expect(cloned.pipline[0]).to.equal(cursor.pipline[0]);
+      expect(cloned.pipeline).to.not.equal(cursor.pipeline);
+      expect(cloned.pipeline.length).to.equal(1);
+      expect(cloned.pipeline[0]).to.equal(cursor.pipeline[0]);
     });
   });
 
