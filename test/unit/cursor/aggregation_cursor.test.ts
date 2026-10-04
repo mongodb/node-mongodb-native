@@ -33,6 +33,14 @@ describe('class AggregationCursor', () => {
       const cloned = cursor.clone();
       expect(cursor).to.not.equal(cloned);
     });
+
+    it('clone pipline', () => {
+      cursor.addStage({ $match: { yes: true } });
+      const cloned = cursor.clone();
+      expect(cloned.pipline).to.not.equal(cursor.pipline);
+      expect(cloned.pipline.length).to.equal(1);
+      expect(cloned.pipline[0]).to.equal(cursor.pipline[0]);
+    });
   });
 
   context('map()', () => {
