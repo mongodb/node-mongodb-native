@@ -1234,8 +1234,8 @@ export function normalizeDnsName(name: string): string {
  *
  * @param host - A host name returned by an SRV lookup, already normalized with {@link normalizeDnsName}
  * @param srvHost - The host from the `mongodb+srv` connection string
- * @throws MongoAPIError if the host fails verification or the validator throws
- * @throws MongoInvalidArgumentError if the validator returns a non-boolean value
+ * @throws MongoAPIError if the host fails verification, or the validator throws or returns a
+ * non-boolean value
  */
 export function verifySrvHost(
   host: string,
@@ -1255,9 +1255,7 @@ export function verifySrvHost(
     }
     // A Promise (e.g. from an async validator) is truthy, so accepting it would silently allow every host
     if (typeof isValid !== 'boolean') {
-      throw new MongoInvalidArgumentError(
-        `srvHostValidator must return a boolean, received ${typeof isValid}`
-      );
+      throw new MongoAPIError(`srvHostValidator must return a boolean, received ${typeof isValid}`);
     }
     if (!isValid) {
       throw new MongoAPIError(`Server record "${host}" was rejected by srvHostValidator`);

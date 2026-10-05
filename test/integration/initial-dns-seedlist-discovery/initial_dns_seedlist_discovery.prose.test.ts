@@ -6,7 +6,6 @@ import {
   ConnectionPool,
   MongoAPIError,
   type MongoClient,
-  MongoInvalidArgumentError,
   MongoParseError,
   resolveSRVRecord,
   Server,
@@ -561,7 +560,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         })
         .connect()
         .catch(e => e);
-      expect(err).to.be.instanceOf(MongoInvalidArgumentError);
+      expect(err).to.be.instanceOf(MongoAPIError).and.to.have.property('name', 'MongoAPIError');
       expect(err.message).to.equal('srvHostValidator must return a boolean, received string');
     });
   });

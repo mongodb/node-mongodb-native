@@ -217,8 +217,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * is an error.
    *
    * If the function throws or returns a non-boolean during the initial SRV lookup, `connect()`
-   * rejects; a thrown error is available as the `cause` of the resulting `MongoAPIError`. During SRV
-   * polling, the host is rejected instead and no error is raised.
+   * rejects with a `MongoAPIError`; an error thrown by the function is available as its `cause`.
+   * During SRV polling, the host is rejected instead and no error is raised.
    *
    * **WARNING: Modifying the default SRV domain name validation can create vulnerabilities.**
    * SRV host verification prevents a spoofed DNS response from directing the driver to arbitrary

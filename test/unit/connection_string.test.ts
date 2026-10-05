@@ -1057,13 +1057,15 @@ describe('Connection String', function () {
       });
 
       context('when srvHostValidator returns a non-boolean', function () {
-        it('throws a MongoInvalidArgumentError', async function () {
+        it('throws a MongoAPIError', async function () {
           stubSrvLookup('cluster.mongodb.com');
           const error = await resolveSeedlist('mongodb+srv://blogs.mongodb.com', {
             // @ts-expect-error: an async validator returns a Promise, which must not be treated as accepting
             srvHostValidator: async () => true
           }).catch(error => error);
-          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+          expect(error)
+            .to.be.instanceOf(MongoAPIError)
+            .and.to.have.property('name', 'MongoAPIError');
           expect(error.message).to.equal('srvHostValidator must return a boolean, received object');
         });
       });
