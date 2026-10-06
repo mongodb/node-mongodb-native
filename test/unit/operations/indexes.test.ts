@@ -247,4 +247,15 @@ describe('class CreateIndexesOperation', () => {
       expect(output.indexes[0]).to.not.have.property('allowUnknownIndexOptions');
     });
   });
+
+  describe('#buildCommand()', () => {
+    it('does not write `comment` to the command', () => {
+      const op = makeIndexOperation({ a: 1 }, { comment: 'a comment' });
+      expect(op.options).to.have.property('comment', 'a comment');
+
+      // `comment` is accepted by the option types, but createIndexes has never sent it. Asserted
+      // so that changing this is a deliberate decision.
+      expect(op.buildCommand({} as any)).to.not.have.property('comment');
+    });
+  });
 });

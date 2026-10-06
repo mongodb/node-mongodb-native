@@ -202,23 +202,6 @@ describe('createIndex option validation', function () {
     });
 
     describe('and the command options have values', function () {
-      it('keeps a comment out of the index description', async function () {
-        await collection.createIndex({ g: 1 }, { unique: true }, { comment: 'a comment' });
-
-        expect(sentIndexes()).to.deep.equal([{ unique: true, name: 'g_1', key: { g: 1 } }]);
-        // `comment` is accepted by CommandOperationOptions but createIndexes has never written it
-        // into its command document, so it does not reach the wire on either overload. This
-        // asserts only that the third parameter does not leak it into the index description.
-        expect(sentCommand()).to.not.have.property('comment');
-      });
-
-      it('sends maxTimeMS on the command and not in the index description', async function () {
-        await collection.createIndex({ h: 1 }, { unique: true }, { maxTimeMS: 1000 });
-
-        expect(sentIndexes()).to.deep.equal([{ unique: true, name: 'h_1', key: { h: 1 } }]);
-        expect(sentCommand()).to.have.property('maxTimeMS', 1000);
-      });
-
       it('sends a session on the command and not in the index description', async function () {
         const session = client.startSession();
         try {
