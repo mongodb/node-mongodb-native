@@ -15,6 +15,7 @@ import {
   MongoClient,
   Monitor,
   MonitorInterval,
+  OpCompressedRequest,
   RTTSampler,
   runNodelessTests,
   ServerDescription,
@@ -356,6 +357,86 @@ describe('monitoring', function () {
           });
         });
       }
+    });
+
+    describe('when compression has been negotiated', function () {
+      let compressSpy: sinon.SinonSpy;
+
+      beforeEach(() => {
+        compressSpy = sinon.spy(OpCompressedRequest.prototype, 'toBin');
+      });
+
+      afterEach(() => sinon.restore());
+
+      const topologyVersion = { processId: new ObjectId(), counter: new Long(0, 0) };
+
+      // The handshake is never compressed because the compressor is only agreed upon in its
+      // reply, so these tests only inspect the hello commands sent after the handshake.
+      const isPostHandshakeHello = doc => isHello(doc) && !('compression' in doc);
+
+      it('does not compress the streaming hello or the RTT hello', async function () {
+        let resolveAwaitableHello;
+        let resolveRttHello;
+        const awaitableHello = new Promise(resolve => (resolveAwaitableHello = resolve));
+        const rttHello = new Promise(resolve => (resolveRttHello = resolve));
+
+        mockServer.setMessageHandler(request => {
+          const doc = request.document;
+          if (!isPostHandshakeHello(doc)) {
+            request.reply({ ...mock.HELLO, helloOk: true, compression: ['zlib'], topologyVersion });
+          } else if ('maxAwaitTimeMS' in doc) {
+            // leave the awaitable hello pending, as a server would until a topology change
+            resolveAwaitableHello(doc);
+          } else {
+            request.reply({ ...mock.HELLO, helloOk: true });
+            resolveRttHello(doc);
+          }
+        });
+
+        const server = new MockServer(mockServer.address());
+        server.description.topologyVersion = topologyVersion;
+        monitor = new Monitor(
+          server as any,
+          {
+            compressors: ['zlib'],
+            serverMonitoringMode: 'stream',
+            heartbeatFrequencyMS: 100,
+            minHeartbeatFrequencyMS: 50
+          } as any
+        );
+        monitor.connect();
+
+        expect(await awaitableHello).to.have.property('hello', 1);
+        expect(await rttHello).to.have.property('hello', 1);
+        expect(monitor.connection?.description.compressor).to.equal('zlib');
+        expect(compressSpy).to.not.have.been.called;
+      });
+
+      it('does not compress the polling hello', async function () {
+        const pollingHello = new Promise(resolve => {
+          mockServer.setMessageHandler(request => {
+            const doc = request.document;
+            request.reply({ ...mock.HELLO, helloOk: true, compression: ['zlib'] });
+            if (isPostHandshakeHello(doc)) resolve(doc);
+          });
+        });
+
+        const server = new MockServer(mockServer.address());
+        monitor = new Monitor(
+          server as any,
+          {
+            compressors: ['zlib'],
+            serverMonitoringMode: 'poll',
+            heartbeatFrequencyMS: 100,
+            minHeartbeatFrequencyMS: 50
+          } as any
+        );
+        monitor.connect();
+
+        expect(await pollingHello).to.have.property('hello', 1);
+        expect(monitor.connection?.description.compressor).to.equal('zlib');
+        expect(compressSpy).to.not.have.been.called;
+      });
     });
   });
 

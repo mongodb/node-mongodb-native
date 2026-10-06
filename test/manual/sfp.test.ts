@@ -1,11 +1,13 @@
 import { expect } from 'chai';
 import * as process from 'process';
+import { setTimeout } from 'timers/promises';
 
 import {
   MongoClient,
   type MongoClient as MongoClientType,
   type MongoClientOptions,
-  ObjectId
+  ObjectId,
+  type ServerHeartbeatFailedEvent
 } from '../mongodb';
 
 /**
@@ -56,6 +58,31 @@ describe('Atlas Secure Frontend Processor (SFP)', function () {
     }
   }
 
+  /**
+   * Monitoring connections are never authenticated, and the SFP rejects compressed messages on
+   * unauthenticated connections. If the driver compresses a monitoring `hello`, the SFP closes the
+   * connection and the heartbeat fails, while the operations above still succeed.
+   *
+   * Must be called before `client.connect()`. Returns an assertion that waits until streaming
+   * heartbeats have succeeded (or one has failed), then checks that none failed.
+   */
+  function watchHeartbeats(client: MongoClientType) {
+    const failures: ServerHeartbeatFailedEvent[] = [];
+    let awaitedSuccesses = 0;
+    client.on('serverHeartbeatFailed', event => failures.push(event));
+    client.on('serverHeartbeatSucceeded', event => {
+      if (event.awaited) awaitedSuccesses += 1;
+    });
+
+    return async function assertHeartbeatsSucceed() {
+      while (failures.length === 0 && awaitedSuccesses < 2) {
+        await setTimeout(100);
+      }
+      expect(failures.map(({ connectionId, failure }) => `${connectionId}: ${failure}`)).to.be
+        .empty;
+    };
+  }
+
   async function assertCRUD(client: MongoClientType) {
     const collection = client.db('db').collection(collectionName);
     const _id = new ObjectId();
@@ -81,7 +108,11 @@ describe('Atlas Secure Frontend Processor (SFP)', function () {
   const variations: Array<{ name: string; options: MongoClientOptions }> = [
     { name: 'baseline', options: {} },
     // zlib is built into Node, so it needs no optional native addon (unlike zstd/snappy).
-    { name: 'with zlib compression', options: { compressors: ['zlib'] } },
+    // The minimum heartbeatFrequencyMS keeps the wait for streaming heartbeats short.
+    {
+      name: 'with zlib compression',
+      options: { compressors: ['zlib'], heartbeatFrequencyMS: 500 }
+    },
     { name: 'with Server API v1', options: { serverApi: { version: '1' } } }
   ];
 
@@ -94,11 +125,13 @@ describe('Atlas Secure Frontend Processor (SFP)', function () {
           authMechanism: 'SCRAM-SHA-256',
           ...options
         });
+        const assertHeartbeatsSucceed = watchHeartbeats(client);
         await client.connect();
 
         await assertPing(client);
         await assertConnectionStatus(client, { authenticated: true });
         await assertCRUD(client);
+        if (options.compressors) await assertHeartbeatsSucceed();
       });
     }
   });
@@ -111,11 +144,13 @@ describe('Atlas Secure Frontend Processor (SFP)', function () {
           authMechanism: 'MONGODB-X509',
           ...options
         });
+        const assertHeartbeatsSucceed = watchHeartbeats(client);
         await client.connect();
 
         await assertPing(client);
         await assertConnectionStatus(client, { authenticated: true });
         await assertCRUD(client);
+        if (options.compressors) await assertHeartbeatsSucceed();
       });
     }
   });

@@ -1,7 +1,7 @@
 import * as zlib from 'zlib';
 
 import { ByteUtils, readInt32LE } from '../../bson';
-import { LEGACY_HELLO_COMMAND } from '../../constants';
+import { LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMMAND_CAMEL_CASE } from '../../constants';
 import { getSnappy, getZstdLibrary, type SnappyLib, type ZStandard } from '../../deps';
 import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
 import {
@@ -29,7 +29,9 @@ export type Compressor = (typeof Compressor)[CompressorName];
 export type CompressorName = keyof typeof Compressor;
 
 export const uncompressibleCommands = new Set([
+  'hello',
   LEGACY_HELLO_COMMAND,
+  LEGACY_HELLO_COMMAND_CAMEL_CASE,
   'saslStart',
   'saslContinue',
   'getnonce',
