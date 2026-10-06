@@ -650,7 +650,7 @@ function normalizeSrvAllowedHostsSuffix(value: string): string {
   }
 
   // 5. Rejecting public suffixes via the Public Suffix List is a SHOULD that is intentionally not
-  // implemented, matching the Java and C# drivers
+  // implemented by the Node Driver. Skipping.
 
   // 6. Prepend a dot so the suffix only matches whole labels
   return `.${suffix}`;
