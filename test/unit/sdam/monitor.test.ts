@@ -34,7 +34,9 @@ class MockServer {
   topology: any;
   constructor(options) {
     this.pool = { generation: 1 };
-    this.description = new ServerDescription(`${options.host}:${options.port}`);
+    const isIPv6 = options.family?.toLowerCase() === 'ipv6';
+    const host = isIPv6 ? `[${options.host}]` : options.host;
+    this.description = new ServerDescription(`${host}:${options.port}`);
     this.description.type = ServerType.Unknown;
     this.topology = {
       s: { topologyId: 1 },

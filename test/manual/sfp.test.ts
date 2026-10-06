@@ -63,19 +63,27 @@ describe('Atlas Secure Frontend Processor (SFP)', function () {
    * unauthenticated connections. If the driver compresses a monitoring `hello`, the SFP closes the
    * connection and the heartbeat fails, while the operations above still succeed.
    *
-   * Must be called before `client.connect()`. Returns an assertion that waits until streaming
-   * heartbeats have succeeded (or one has failed), then checks that none failed.
+   * Must be called before `client.connect()`. Returns an assertion that waits until a streaming
+   * heartbeat has succeeded (or one has failed), then checks that none failed.
    */
   function watchHeartbeats(client: MongoClientType) {
     const failures: ServerHeartbeatFailedEvent[] = [];
-    let awaitedSuccesses = 0;
+    // The first success per server is the handshake, which is never compressed (and reports
+    // `awaited: true` when the server supports streaming), so only a second success per server
+    // proves that a streaming hello made it through the SFP.
+    const successesPerServer = new Map<string, number>();
     client.on('serverHeartbeatFailed', event => failures.push(event));
     client.on('serverHeartbeatSucceeded', event => {
-      if (event.awaited) awaitedSuccesses += 1;
+      successesPerServer.set(
+        event.connectionId,
+        (successesPerServer.get(event.connectionId) ?? 0) + 1
+      );
     });
+    const streamingHelloSucceeded = () =>
+      [...successesPerServer.values()].some(successes => successes >= 2);
 
     return async function assertHeartbeatsSucceed() {
-      while (failures.length === 0 && awaitedSuccesses < 2) {
+      while (failures.length === 0 && !streamingHelloSucceeded()) {
         await setTimeout(100);
       }
       expect(failures.map(({ connectionId, failure }) => `${connectionId}: ${failure}`)).to.be
