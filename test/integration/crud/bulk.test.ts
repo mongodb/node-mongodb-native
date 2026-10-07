@@ -338,6 +338,23 @@ describe('Bulk', function () {
               { 0: 0, 3: 3 }
             );
           });
+
+          it('contains the correct insertedIds when inserts are mixed with other operations', async function () {
+            // The inserts sit at operation indexes 0, 2 and 4, so the count of inserts seen
+            // differs from the originating operation index. The update and delete match nothing;
+            // they are only here to move the inserts off the positions a running count produces.
+            await assertFailsWithDuplicateFields(
+              [
+                { insertOne: { _id: 0, a: 1 } },
+                { updateOne: { filter: { nothing: 1 }, update: { $set: { b: 1 } } } },
+                { insertOne: { _id: 2, a: 1 } },
+                { deleteOne: { filter: { nothing: 1 } } },
+                { insertOne: { _id: 4, a: 2 } }
+              ],
+              false,
+              { 0: 0, 4: 4 }
+            );
+          });
         });
       });
     });
