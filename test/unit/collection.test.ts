@@ -1,7 +1,7 @@
 import { Long } from 'bson';
 import { expect } from 'chai';
 
-import { isHello, MongoClient } from '../mongodb';
+import { type Collection, type Document, isHello, MongoClient } from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {
@@ -155,6 +155,81 @@ describe('Collection', function () {
 
     it('should not set bypass document validation if not strictly true in unordered bulkWrite', async function () {
       await testBulkWrite({ expected: undefined, actual: false, ordered: false });
+    });
+  });
+
+  context('#createIndex', () => {
+    /**
+     * Runs `createIndex` against the mock server and returns the `createIndexes` command
+     * that went over the wire, so both the command root and the index descriptions can be
+     * asserted on.
+     */
+    async function captureCreateIndexes(
+      run: (collection: Collection) => Promise<unknown>
+    ): Promise<Document> {
+      const client = new MongoClient(`mongodb://${server.uri()}/test`);
+      let command: Document | undefined;
+
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.createIndexes) {
+          command = doc;
+          request.reply({ ok: 1, createdCollectionAutomatically: false });
+        } else if (isHello(doc)) {
+          request.reply(Object.assign({}, HELLO));
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      await client.connect();
+      try {
+        await run(client.db('test').collection('test_c'));
+      } finally {
+        await client.close();
+      }
+
+      expect(command, 'no createIndexes command was sent').to.exist;
+      return command as Document;
+    }
+
+    context('when command options are supplied', () => {
+      it('enables passthrough and passes index and command options separately', async () => {
+        const command = await captureCreateIndexes(collection =>
+          collection.createIndex(
+            { a: 1 },
+            { unique: true, finestIndexedLevel: 15, commitQuorum: 1 },
+            { commitQuorum: 2 }
+          )
+        );
+
+        // index options come only from the second argument, unknown ones included
+        expect(command.indexes[0]).to.include({
+          unique: true,
+          finestIndexedLevel: 15,
+          commitQuorum: 1
+        });
+        // command options come only from the third argument
+        expect(command).to.have.property('commitQuorum', 2);
+        expect(command).to.not.have.property('unique');
+      });
+    });
+
+    context('when command options are not supplied', () => {
+      it('disables passthrough and passes an index and command option composite', async () => {
+        const command = await captureCreateIndexes(collection =>
+          collection.createIndex(
+            { a: 1 },
+            // @ts-expect-error: the legacy options type is closed; the unknown option is dropped at runtime
+            { unique: true, notARealIndexOption: true, commitQuorum: 2 }
+          )
+        );
+
+        expect(command).to.have.property('commitQuorum', 2);
+        // the unknown option and the command option are kept out of the index description, and
+        // nothing `resolveOptions` injects (read preference, BSON options, ...) leaks into it
+        expect(command.indexes[0]).to.deep.equal({ unique: true, name: 'a_1', key: { a: 1 } });
+      });
     });
   });
 });

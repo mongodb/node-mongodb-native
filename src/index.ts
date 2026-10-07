@@ -530,11 +530,13 @@ export type {
 export type { IndexInformationOptions } from './operations/indexes';
 export type {
   CreateIndexesOptions,
+  CreateIndexOptions,
   DropIndexesOptions,
   IndexDescription,
   IndexDescriptionCompact,
   IndexDescriptionInfo,
   IndexDirection,
+  IndexOptions,
   IndexSpecification,
   ListIndexesOptions
 } from './operations/indexes';
