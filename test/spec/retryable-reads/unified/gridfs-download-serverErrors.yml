@@ -95,7 +95,8 @@ tests:
                 find: *files_collection_name
                 filter:
                   _id:
-                    $oid: '000000000000000000000001'
+                    $eq:
+                      $oid: '000000000000000000000001'
               databaseName: *database_name
           - *retryable_command_started_event
           - &find_chunks_command_started_event

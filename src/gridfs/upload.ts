@@ -214,7 +214,7 @@ export class GridFSBucketWriteStream extends Writable {
       `Upload timed out after ${this.timeoutContext?.timeoutMS}ms`
     );
 
-    await this.chunks.deleteMany({ files_id: this.id }, { timeoutMS: remainingTimeMS });
+    await this.chunks.deleteMany({ files_id: { $eq: this.id } }, { timeoutMS: remainingTimeMS });
   }
 }
 
