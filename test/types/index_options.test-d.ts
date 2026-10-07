@@ -1,9 +1,10 @@
-import { expectAssignable, expectDeprecated, expectNotAssignable, expectNotDeprecated } from 'tsd';
+import { expectAssignable, expectNotAssignable, expectNotDeprecated } from 'tsd';
 
 import type {
   CreateIndexesOptions,
   CreateIndexOptions,
   IndexDescription,
+  IndexDescriptionInfo,
   IndexOptions
 } from '../mongodb';
 
@@ -80,10 +81,14 @@ expectNotAssignable<CreateIndexOptions>({ unique: true });
 // still caught at compile time on the two parameter overload.
 expectNotAssignable<CreateIndexesOptions>({ anOptionTheDriverDoesNotKnowAbout: true });
 
-// Index options on the legacy interface are deprecated in favour of `IndexOptions`; `commitQuorum` is a
-// command option and is not.
-declare const legacyOptions: CreateIndexesOptions;
-expectDeprecated(legacyOptions.unique);
-expectDeprecated(legacyOptions.default_language);
-expectDeprecated(legacyOptions.collation);
-expectNotDeprecated(legacyOptions.commitQuorum);
+// `IndexDescription` picks its index options from `CreateIndexesOptions`, and `Pick` carries each
+// property's doc comment along with it. `createIndexes` takes index options from
+// `IndexDescription`, and `listIndexes` returns them on `IndexDescriptionInfo`, so a field-level
+// deprecation on `CreateIndexesOptions` would wrongly mark them deprecated in both places.
+declare const description: IndexDescription;
+expectNotDeprecated(description.unique);
+expectNotDeprecated(description.default_language);
+expectNotDeprecated(description.expireAfterSeconds);
+declare const listed: IndexDescriptionInfo;
+expectNotDeprecated(listed.unique);
+expectNotDeprecated(listed.default_language);
