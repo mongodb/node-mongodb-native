@@ -1,4 +1,4 @@
-import { once } from 'node:events';
+import { EventEmitter, once } from 'node:events';
 import * as net from 'node:net';
 
 import { Long, ObjectId } from 'bson';
@@ -10,11 +10,14 @@ import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
 import {
+  Connection,
+  HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,
   MongoClient,
   Monitor,
   MonitorInterval,
+  RTTPinger,
   RTTSampler,
   runNodelessTests,
   ServerDescription,
@@ -677,6 +680,82 @@ describe('monitoring', function () {
       const maybeError = await client.connect().catch(e => e);
       expect(maybeError).to.be.instanceOf(Error);
       expect(serverHeartbeatFailed).to.have.property('duration').that.is.lessThan(20); // way less than 80ms
+    });
+  });
+
+  describe('class RTTPinger', function () {
+    const heartbeatFrequencyMS = 50;
+    let rttPinger: RTTPinger;
+    let rttServer;
+
+    /**
+     * A minimal Monitor stand-in. RTTPinger only reads `cancellationToken`, `options` and
+     * `connectOptions` off of its monitor.
+     */
+    function fakeMonitor(hostAddress) {
+      const cancellationToken = new EventEmitter();
+      // The runner requires every EventEmitter to register an error listener synchronously.
+      cancellationToken.on('error', () => null);
+      return {
+        cancellationToken,
+        options: { heartbeatFrequencyMS },
+        connectOptions: { hostAddress, connectionType: Connection, metadata: {} }
+      } as any;
+    }
+
+    afterEach(async function () {
+      rttPinger?.close();
+      if (rttServer) await mock.cleanup();
+      rttServer = undefined;
+    });
+
+    context('when establishing the RTT connection fails', function () {
+      it('schedules another measurement rather than stopping permanently', async function () {
+        // Port 1 is reserved and will refuse the connection.
+        rttPinger = new RTTPinger(fakeMonitor(new HostAddress('127.0.0.1:1')));
+        const firstTimer = rttPinger.monitorId;
+
+        await setTimeoutPromise(heartbeatFrequencyMS * 6);
+
+        expect(
+          rttPinger.monitorId,
+          'RTTPinger did not reschedule after a failed connect - it is permanently stopped'
+        ).to.not.equal(firstTimer);
+      });
+    });
+
+    context('when the RTT command fails on an established connection', function () {
+      it('schedules another measurement rather than stopping permanently', async function () {
+        rttServer = await mock.createServer();
+        let helloCount = 0;
+        rttServer.setMessageHandler(request => {
+          if (isHello(request.document)) {
+            helloCount += 1;
+            // Allow the handshake through, then sever the socket on the first RTT ping.
+            if (helloCount > 1) return request.connection.destroy();
+            return request.reply(Object.assign({ helloOk: true }, mock.HELLO));
+          }
+          request.reply({ ok: 1 });
+        });
+
+        rttPinger = new RTTPinger(fakeMonitor(rttServer.hostAddress()));
+
+        // Wait for the handshake to complete so we sample the timer scheduled by the
+        // *successful* measurement, not the one set in the constructor.
+        for (let i = 0; i < 50 && rttPinger.connection == null; i++) {
+          await setTimeoutPromise(10);
+        }
+        expect(rttPinger.connection, 'RTTPinger never established a connection').to.exist;
+        const timerBeforeFailure = rttPinger.monitorId;
+
+        await setTimeoutPromise(heartbeatFrequencyMS * 8);
+
+        expect(helloCount, 'the RTT ping never reached the server').to.be.greaterThan(1);
+        expect(
+          rttPinger.monitorId,
+          'RTTPinger did not reschedule after a failed command - it is permanently stopped'
+        ).to.not.equal(timerBeforeFailure);
+      });
     });
   });
 
