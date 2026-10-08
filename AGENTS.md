@@ -45,6 +45,8 @@ VERSION='latest' TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
 source mo-expansion.sh
 ```
 
+If `VERSION` is omitted, `run-orchestration.sh` defaults to `latest-stable` (the newest stable release). Set `VERSION='latest'` explicitly to test against nightly.
+
 `VERSION='latest'` (the nightly server build) is downloaded from a private S3 bucket, so it requires AWS credentials for the `drivers-test-secrets-role` role (see "AWS Profile" in `test/readme.md` for one-time SSO setup). In Evergreen this role is assumed via `ec2.assume_role` in the "bootstrap mongo-orchestration" function. Without credentials, use `VERSION='latest-stable'` (or a specific version like `8.0`) instead.
 
 ```bash

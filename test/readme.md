@@ -124,6 +124,9 @@ Start a replica set with our [run-orchestration.sh](.evergreen/run-orchestration
 VERSION='latest' TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
 ```
 
+> [!NOTE]
+> If `VERSION` is omitted, `latest-stable` (the newest stable release) is used instead of the nightly build. This applies to every `run-orchestration.sh` example below that doesn't set `VERSION`. `VERSION='latest'` will target the nightly build.
+
 Load the new cluster's URI into the environment:
 
 ```sh
