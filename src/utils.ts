@@ -3,6 +3,7 @@ import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
 import * as process from 'process';
+import { StringDecoder } from 'string_decoder';
 import { clearTimeout, setTimeout } from 'timers';
 
 import {
@@ -1142,6 +1143,25 @@ export function parseUnsignedInteger(value: unknown): number | null {
 
   return parsedInt != null && parsedInt >= 0 ? parsedInt : null;
 }
+
+/** @internal */
+export const DriverStringUtils = {
+  /**
+   * Truncates a string to a specified byte length. Multi-byte characters which are split by the byte truncation
+   * are considered, ensuring incomplete multi-byte characters are omitted from the result entirely.
+   * @throws MongoRuntimeError on a malformed limit
+   */
+  truncateStringBytes(str: string, limit: number): string {
+    if (!Number.isInteger(limit) || limit < 0) {
+      throw new MongoRuntimeError('provided limit must be a non-negative integer');
+    }
+    const buf = new TextEncoder().encode(str);
+    if (buf.length <= limit) return str;
+    const decoder = new StringDecoder('utf8');
+    // incomplete multi-byte chars will not be returned through decoder.write
+    return decoder.write(buf.subarray(0, limit));
+  }
+};
 
 /**
  * This function throws a MongoAPIError in the event that either of the following is true:
