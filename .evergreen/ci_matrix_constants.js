@@ -19,7 +19,7 @@ const MACOS_OS = 'macos-14-arm64';
 const UBUNTU_OS = 'ubuntu1804-large';
 const UBUNTU_20_OS = 'ubuntu2004-small';
 const UBUNTU_22_OS = 'ubuntu2204-large';
-const DEBIAN_OS = 'debian11-small';
+const DEBIAN_OS = 'debian12-small';
 const GRAVITON_OS = 'amazon2023-arm64-latest-large-m8g';
 
 module.exports = {

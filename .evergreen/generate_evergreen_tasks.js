@@ -601,7 +601,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'ubuntu2004-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
-  run_on: UBUNTU_20_OS,
+  run_on: UBUNTU_22_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS
   },
@@ -763,7 +763,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'ubuntu20-test-all-oidc',
   display_name: 'MONGODB-OIDC Auth Tests',
-  run_on: UBUNTU_20_OS,
+  run_on: UBUNTU_22_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS
   },
