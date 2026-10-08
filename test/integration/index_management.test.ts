@@ -252,6 +252,35 @@ describe('Indexes', function () {
         });
       }
     );
+
+    context('when an unknown index option is provided', function () {
+      context('and allowUnknownIndexOptions is false (the default when unset)', function () {
+        it('silently drops the unknown option and creates the index', async () => {
+          const [name] = await collection.createIndexes([
+            // @ts-expect-error: intentionally providing an unknown option
+            { key: { loc: '2dsphere' }, thisOptionDoesNotExist: true }
+          ]);
+          expect(started[0].command.indexes[0]).to.not.have.property('thisOptionDoesNotExist');
+          const indexes = await collection.listIndexes().toArray();
+          expect(indexes.map(i => i.name)).to.include(name);
+        });
+      });
+
+      context('and allowUnknownIndexOptions is true', function () {
+        it('passes the option through and surfaces the server error', async () => {
+          const error = await collection
+            .createIndexes(
+              // @ts-expect-error: intentionally providing an unknown option
+              [{ key: { loc: '2dsphere' }, thisOptionDoesNotExist: true }],
+              {},
+              true
+            )
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(started[0].command.indexes[0]).to.have.property('thisOptionDoesNotExist', true);
+        });
+      });
+    });
   });
 
   describe('Collection.indexExists()', function () {
@@ -764,7 +793,6 @@ describe('Indexes', function () {
     it(
       'should run command with commitQuorum if specified on collection.createIndex',
       commitQuorumTest((db, collection) =>
-        // @ts-expect-error revaluate this?
         collection.createIndex('a', { writeConcern: { w: 'majority' }, commitQuorum: 0 })
       )
     );

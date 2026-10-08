@@ -95,7 +95,7 @@ export interface CreateCollectionOptions extends Omit<CommandOperationOptions, '
   clusteredIndex?: ClusteredCollectionOptions;
   /** The number of seconds after which a document in a timeseries or clustered collection expires. */
   expireAfterSeconds?: number;
-  /** @experimental */
+  /** Queryable Encryption field schema attached at collection creation. **/
   encryptedFields?: Document;
   /**
    * If set, enables pre-update and post-update document events to be included for any
@@ -207,7 +207,9 @@ export async function createCollections<TSchema extends Document>(
       db,
       name,
       { __safeContent__: 1 },
-      { session: options.session }
+      false,
+      { session: options.session },
+      undefined
     );
     await executeOperation(db.client, createIndexOp, timeoutContext);
   }
