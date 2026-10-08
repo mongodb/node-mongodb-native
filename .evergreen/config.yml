@@ -56,6 +56,9 @@ functions:
           # Strip any `npm install snappy` from the test runner so it cannot clobber v7.3.3.
           sed -i 's/npm install snappy//' .evergreen/run-tests.sh
   bootstrap mongo-orchestration:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${aws_test_secrets_role}
     - command: subprocess.exec
       params:
         binary: bash
