@@ -59,6 +59,7 @@ functions:
     - command: ec2.assume_role
       params:
         role_arn: ${DRIVERS_SECRETS_ARN}
+        duration_seconds: 3600
     - command: subprocess.exec
       params:
         binary: bash
