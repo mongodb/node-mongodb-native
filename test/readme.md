@@ -10,6 +10,8 @@ about the types of tests and how to run them.
   - [About the Tests](#about-the-tests)
     - [Spec Tests](#spec-tests)
   - [Running the Tests Locally](#running-the-tests-locally)
+    - [Prerequisites](#prerequisites)
+    - [Starting a Server and Running the Tests](#starting-a-server-and-running-the-tests)
     - [Testing With Authorization-Enabled](#testing-with-authorization-enabled)
     - [Testing Different MongoDB Topologies](#testing-different-mongodb-topologies)
     - [Running Individual Tests](#running-individual-tests)
@@ -91,6 +93,17 @@ The actual implementations of the spec tests can be unit tests or integration te
 > All scripts mentioned in the readme and in drivers-evergreen-tools expect to be run in bash.  These scripts will work fine in other shells so long as they're launched with the `bash` command.  The outputs of these scripts also expect the user to be running in a bash syntax-like shell; users using `fish` or shells with syntax for declaring environment variables that does not look like `export <name>=<value>` may find that they need to adapt the output of the tooling to work in their shell.
 
 The easiest way to get started running the tests locally is to start a replica set and run all of the integration tests.
+
+### Prerequisites
+
+- **AWS profile** — Integration tests run against the nightly MongoDB server build (`VERSION='latest'`) as a canary. That build is downloaded from a private S3 bucket, so you need the AWS profile described in [AWS Profile](#aws-profile) configured before starting a server. Log in at the start of each session:
+
+  ```sh
+  export AWS_PROFILE="drivers-test-secrets-role-857654397073"
+  aws sso login --sso-session drivers-test-secrets-session
+  ```
+
+### Starting a Server and Running the Tests
 
 Ensure the drivers tools submodule is cloned:
 
