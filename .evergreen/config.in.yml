@@ -95,7 +95,7 @@ functions:
   "bootstrap mongo-orchestration":
     - command: ec2.assume_role
       params:
-        role_arn: ${aws_test_secrets_role}
+        role_arn: ${DRIVERS_SECRETS_ARN}
     - command: subprocess.exec
       params:
         binary: bash
