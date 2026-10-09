@@ -2242,15 +2242,15 @@ tasks:
       - name: run-lint-checks
         variant: lint
         patch_optional: true
-  - name: aws-latest-auth-test-run-aws-ECS-auth-test
+  - name: aws-latest-stable-auth-test-run-aws-ECS-auth-test
     tags:
-      - latest
+      - latest-stable
     commands:
       - command: expansions.update
         type: setup
         params:
           updates:
-            - {key: VERSION, value: latest}
+            - {key: VERSION, value: latest-stable}
             - {key: NODE_LTS_VERSION, value: '24'}
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
@@ -4645,7 +4645,7 @@ buildvariants:
     expansions:
       NODE_LTS_VERSION: 24
     tasks:
-      - aws-latest-auth-test-run-aws-ECS-auth-test
+      - aws-latest-stable-auth-test-run-aws-ECS-auth-test
   - name: performance-tests
     display_name: Performance Test
     run_on: rhel90-dbx-perf-large
