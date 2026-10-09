@@ -344,6 +344,7 @@ for (const VERSION of TLS_VERSIONS) {
 }
 
 const AWS_AUTH_TASKS = [];
+const AWS_AUTH_TASKS_ALT_PLATFORM = [];
 
 for (const VERSION of AWS_AUTH_VERSIONS) {
   const name = ex => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
@@ -353,12 +354,15 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     { func: 'run aws auth test with aws EC2 credentials', onlySdk: true },
     { func: 'run aws auth test with aws credentials as environment variables' },
     { func: 'run aws auth test with aws credentials and session token as environment variables' },
-    { func: 'run aws ECS auth test' },
     { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset' },
     { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set' }
   ];
 
-  const awsTasks = awsFuncs.map(fn => ({
+  const altPlatformAwsFuncs = [
+    { func: 'run aws ECS auth test' },
+  ]
+
+  const createAwsTaskDefinition = fn => ({
     name: name(fn.func),
     tags: [VERSION],
     commands: [
@@ -374,10 +378,15 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
       { func: 'assume secrets manager role' },
       { func: fn.func }
     ]
-  }));
+  })
+
+  const awsTasks = awsFuncs.map(createAwsTaskDefinition);
+  const awsAltPlatformTasks = altPlatformAwsFuncs.map(createAwsTaskDefinition);
 
   TASKS.push(...awsTasks);
+  TASKS.push(...awsAltPlatformTasks);
   AWS_AUTH_TASKS.push(...awsTasks.map(t => t.name));
+  AWS_AUTH_TASKS_ALT_PLATFORM.push(...awsAltPlatformTasks.map(t => t.name));
 }
 
 const BUILD_VARIANTS = [];
@@ -599,13 +608,24 @@ BUILD_VARIANTS.push({
 
 // special case for MONGODB-AWS authentication
 BUILD_VARIANTS.push({
-  name: 'ubuntu2004-test-mongodb-aws',
+  name: 'ubuntu2204-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
   run_on: UBUNTU_22_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS
   },
   tasks: AWS_AUTH_TASKS
+});
+
+// Aws auth tasks which require a different platform (ubuntu 20)
+BUILD_VARIANTS.push({
+  name: 'ubuntu2004-test-mongodb-aws',
+  display_name: 'MONGODB-AWS Auth test',
+  run_on: UBUNTU_20_OS,
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS
+  },
+  tasks: AWS_AUTH_TASKS_ALT_PLATFORM
 });
 
 const customDependencyTests = [];

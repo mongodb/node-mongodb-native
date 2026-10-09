@@ -2200,27 +2200,6 @@ tasks:
       - name: run-lint-checks
         variant: lint
         patch_optional: true
-  - name: aws-latest-auth-test-run-aws-ECS-auth-test
-    tags:
-      - latest
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: NODE_LTS_VERSION, value: '24'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: assume secrets manager role
-      - func: run aws ECS auth test
-    depends_on:
-      - name: run-lint-checks
-        variant: lint
-        patch_optional: true
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
     tags:
       - latest
@@ -2259,6 +2238,27 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
+  - name: aws-latest-auth-test-run-aws-ECS-auth-test
+    tags:
+      - latest
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: latest}
+            - {key: NODE_LTS_VERSION, value: '24'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: assume secrets manager role
+      - func: run aws ECS auth test
     depends_on:
       - name: run-lint-checks
         variant: lint
@@ -4626,7 +4626,7 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - download-and-merge-coverage
-  - name: ubuntu2004-test-mongodb-aws
+  - name: ubuntu2204-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu2204-large
     expansions:
@@ -4637,9 +4637,15 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-      - aws-latest-auth-test-run-aws-ECS-auth-test
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
+  - name: ubuntu2004-test-mongodb-aws
+    display_name: MONGODB-AWS Auth test
+    run_on: ubuntu2004-small
+    expansions:
+      NODE_LTS_VERSION: 24
+    tasks:
+      - aws-latest-auth-test-run-aws-ECS-auth-test
   - name: performance-tests
     display_name: Performance Test
     run_on: rhel90-dbx-perf-large
