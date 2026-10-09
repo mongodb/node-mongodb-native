@@ -358,9 +358,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set' }
   ];
 
-  const altPlatformAwsFuncs = [
-    { func: 'run aws ECS auth test' },
-  ]
+  const altPlatformAwsFuncs = [{ func: 'run aws ECS auth test' }];
 
   const createAwsTaskDefinition = fn => ({
     name: name(fn.func),
@@ -378,7 +376,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
       { func: 'assume secrets manager role' },
       { func: fn.func }
     ]
-  })
+  });
 
   const awsTasks = awsFuncs.map(createAwsTaskDefinition);
   const awsAltPlatformTasks = altPlatformAwsFuncs.map(createAwsTaskDefinition);
