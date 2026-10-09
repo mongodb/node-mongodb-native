@@ -59,8 +59,9 @@ export class AggregationCursor<TSchema = any> extends ExplainableCursor<TSchema>
 
   clone(): AggregationCursor<TSchema> {
     const clonedOptions = mergeOptions({}, this.aggregateOptions);
+    const clonedPipeline = [...this.pipeline];
     delete clonedOptions.session;
-    return new AggregationCursor(this.client, this.namespace, this.pipeline, {
+    return new AggregationCursor(this.client, this.namespace, clonedPipeline, {
       ...clonedOptions
     });
   }
