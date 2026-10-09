@@ -4679,7 +4679,7 @@ buildvariants:
       - test-azurekms-fail-task
   - name: ubuntu20-test-all-oidc
     display_name: MONGODB-OIDC Auth Tests
-    run_on: ubuntu2204-large
+    run_on: ubuntu2004-small
     expansions:
       NODE_LTS_VERSION: 24
     batchtime: 20160
