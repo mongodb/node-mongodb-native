@@ -19,6 +19,8 @@ export interface GetMoreOptions extends OperationOptions {
   maxTimeMS?: number;
   /** TODO(NODE-4413): Address bug with maxAwaitTimeMS not being passed in from the cursor correctly */
   maxAwaitTimeMS?: number;
+  tailable?: boolean;
+  awaitData?: boolean;
 }
 
 /**
@@ -74,7 +76,11 @@ export class GetMoreOperation extends AbstractOperation<CursorResponse> {
       getMoreCmd.batchSize = Math.abs(this.options.batchSize);
     }
 
-    if (typeof this.options.maxAwaitTimeMS === 'number') {
+    if (
+      this.options.tailable &&
+      this.options.awaitData &&
+      typeof this.options.maxAwaitTimeMS === 'number'
+    ) {
       getMoreCmd.maxTimeMS = this.options.maxAwaitTimeMS;
     }
 
@@ -92,7 +98,8 @@ export class GetMoreOperation extends AbstractOperation<CursorResponse> {
       returnFieldSelector: null,
       documentsReturnedIn: 'nextBatch',
       timeoutContext,
-      ...this.options
+      ...this.options,
+      omitMaxTimeMS: true
     };
   }
 

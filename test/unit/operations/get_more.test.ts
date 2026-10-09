@@ -7,7 +7,8 @@ import {
   ns,
   ReadPreference,
   Server,
-  ServerDescription
+  ServerDescription,
+  TimeoutContext
 } from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
@@ -49,7 +50,9 @@ describe('GetMoreOperation', function () {
 
     it('should build getMore command with maxTimeMS if maxAwaitTimeMS specified', async () => {
       const options = {
-        maxAwaitTimeMS: 234
+        maxAwaitTimeMS: 234,
+        tailable: true,
+        awaitData: true
       };
       const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
       const { maxTimeMS } = getMoreOperation.buildCommand({
@@ -57,6 +60,48 @@ describe('GetMoreOperation', function () {
       } as any);
       expect(maxTimeMS).to.equal(234);
     });
+
+    for (const cursorOptions of [
+      {},
+      { tailable: true },
+      { awaitData: true },
+      { tailable: false, awaitData: true },
+      { tailable: true, awaitData: false }
+    ]) {
+      it(`omits maxAwaitTimeMS for a non-await cursor ${JSON.stringify(cursorOptions)}`, () => {
+        const operation = new GetMoreOperation(namespace, cursorId, server, {
+          ...cursorOptions,
+          maxAwaitTimeMS: 234
+        });
+        expect(operation.buildCommand({ description: {} } as any)).not.to.have.property(
+          'maxTimeMS'
+        );
+      });
+    }
+
+    for (const cursorOptions of [{}, { tailable: true }, { tailable: true, awaitData: true }]) {
+      it(`never derives getMore maxTimeMS from CSOT ${JSON.stringify(cursorOptions)}`, () => {
+        const timeoutContext = TimeoutContext.create({
+          timeoutMS: 10_000,
+          serverSelectionTimeoutMS: 10_000
+        });
+        const operation = new GetMoreOperation(namespace, cursorId, server, {
+          ...cursorOptions,
+          omitMaxTimeMS: false,
+          maxAwaitTimeMS: 234
+        });
+        const command = operation.buildCommand({ description: {} } as any);
+        const commandOptions = operation.buildOptions(timeoutContext);
+        expect(commandOptions.timeoutContext).to.equal(timeoutContext);
+        expect(commandOptions.omitMaxTimeMS).to.equal(true);
+        timeoutContext.addMaxTimeMSToCommand(command, commandOptions);
+        if (cursorOptions.tailable && cursorOptions.awaitData) {
+          expect(command.maxTimeMS).to.equal(234);
+        } else {
+          expect(command).not.to.have.property('maxTimeMS');
+        }
+      });
+    }
 
     context('error cases', () => {
       const server = new Server(
