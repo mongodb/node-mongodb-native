@@ -786,7 +786,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'ubuntu20-test-all-oidc',
   display_name: 'MONGODB-OIDC Auth Tests',
-  run_on: UBUNTU_22_OS,
+  run_on: UBUNTU_20_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS
   },
