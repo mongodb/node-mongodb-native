@@ -347,7 +347,6 @@ for (const VERSION of TLS_VERSIONS) {
 const AWS_AUTH_TASKS = [];
 const AWS_AUTH_TASKS_ALT_PLATFORM = [];
 
-
 const nameAwsAuthTest = (ex, version) => `aws-${version}-auth-test-${ex.split(' ').join('-')}`;
 const createAwsTaskDefinition = (fn, VERSION) => ({
   name: nameAwsAuthTest(fn.func, VERSION),
@@ -378,11 +377,14 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set' }
   ];
 
-  // Used for aws auth tests which cannot run on the default intended platform (debian 12 vs debian 11)
+  // Used for aws auth tests which cannot run on the default intended platform
+  // (debian 12 vs debian 11)
   const altPlatformAwsFuncs = [{ func: 'run aws ECS auth test' }];
 
-  const awsTasks = awsFuncs.map((fn) => createAwsTaskDefinition(fn, VERSION));
-  const awsAltPlatformTasks = altPlatformAwsFuncs.map((fn) => createAwsTaskDefinition(fn, SERVER_VERSION_LATEST_STABLE));
+  const awsTasks = awsFuncs.map(fn => createAwsTaskDefinition(fn, VERSION));
+  const awsAltPlatformTasks = altPlatformAwsFuncs.map(fn =>
+    createAwsTaskDefinition(fn, SERVER_VERSION_LATEST_STABLE)
+  );
 
   TASKS.push(...awsTasks);
   TASKS.push(...awsAltPlatformTasks);
