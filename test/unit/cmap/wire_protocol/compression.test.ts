@@ -10,7 +10,7 @@ const hasBuiltInZstd =
 
 describe('compression', function () {
   describe('.compress()', function () {
-    context('when the compression library is zstd', function () {
+    context('when the agreed compressor is zstd', function () {
       const buffer = Buffer.from('test', 'utf8');
 
       context('when a level is not provided', function () {
@@ -49,7 +49,7 @@ describe('compression', function () {
   });
 
   describe('.decompress()', function () {
-    context('when the compression library is zstd', function () {
+    context('when the agreed compressor is zstd', function () {
       const buffer = Buffer.from('test', 'utf8');
       const options = { agreedCompressor: 'zstd' as const, zlibCompressionLevel: 0 };
 
