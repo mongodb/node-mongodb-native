@@ -59,9 +59,7 @@ describe('Atlas Secure Frontend Processor (SFP)', function () {
   }
 
   /**
-   * Monitoring connections are never authenticated, and the SFP rejects compressed messages on
-   * unauthenticated connections. If the driver compresses a monitoring `hello`, the SFP closes the
-   * connection and the heartbeat fails, while the operations above still succeed.
+   * Monitoring connections are never authenticated and do not use compression.
    *
    * Must be called before `client.connect()`. Returns an assertion that waits until a streaming
    * heartbeat has succeeded (or one has failed), then checks that none failed.
