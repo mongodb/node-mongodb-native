@@ -4670,9 +4670,9 @@ buildvariants:
     tasks:
       - test_gcpkms_task_group
       - test-gcpkms-fail-task
-  - name: debian11-test-azure-kms
+  - name: ubuntu2204-test-azure-kms
     display_name: Azure KMS Test
-    run_on: debian12-small
+    run_on: ubuntu2204-small
     batchtime: 20160
     tasks:
       - test_azurekms_task_group
