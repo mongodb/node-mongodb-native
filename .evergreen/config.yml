@@ -4639,9 +4639,8 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-  - name: ubuntu2004-test-mongodb-aws
+  - name: ubuntu2404-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
-    run_on: ubuntu2004-small
     expansions:
       NODE_LTS_VERSION: 24
     tasks:

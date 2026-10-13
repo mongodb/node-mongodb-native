@@ -19,6 +19,7 @@ const {
   UBUNTU_20_OS,
   DEBIAN_OS,
   UBUNTU_22_OS,
+  UBUNTU_24_OS,
   GRAVITON_OS
 } = require('./ci_matrix_constants');
 
@@ -619,11 +620,11 @@ BUILD_VARIANTS.push({
   tasks: AWS_AUTH_TASKS
 });
 
-// Aws auth tasks which require a different platform (ubuntu 20)
+// Aws auth tasks which require a different platform (ubuntu 24)
 BUILD_VARIANTS.push({
-  name: 'ubuntu2004-test-mongodb-aws',
+  name: 'ubuntu2404-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
-  run_on: UBUNTU_20_OS,
+  run_on: UBUNTU_24_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS
   },
