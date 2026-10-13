@@ -4641,6 +4641,7 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
   - name: ubuntu2404-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
+    run_on: ubuntu2404-small
     expansions:
       NODE_LTS_VERSION: 24
     tasks:
