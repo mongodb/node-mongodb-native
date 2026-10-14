@@ -624,7 +624,7 @@ BUILD_VARIANTS.push({
 // Aws auth tasks which require a different platform (ubuntu 24)
 BUILD_VARIANTS.push({
   name: 'ubuntu2404-test-mongodb-aws',
-  display_name: 'MONGODB-AWS Auth test',
+  display_name: 'MONGODB-AWS Auth test (alternate platform)',
   run_on: UBUNTU_24_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS
