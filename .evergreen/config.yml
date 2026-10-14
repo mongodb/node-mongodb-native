@@ -4628,7 +4628,7 @@ buildvariants:
       - download-and-merge-coverage
   - name: ubuntu2204-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
-    run_on: ubuntu2204-large
+    run_on: ubuntu2204-small
     expansions:
       NODE_LTS_VERSION: 24
     tasks:

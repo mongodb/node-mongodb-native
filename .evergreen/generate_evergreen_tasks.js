@@ -19,7 +19,6 @@ const {
   UBUNTU_20_OS,
   DEBIAN_OS,
   UBUNTU_22_OS,
-  UBUNTU_22_OS_SM,
   UBUNTU_24_OS,
   GRAVITON_OS
 } = require('./ci_matrix_constants');
@@ -779,7 +778,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'ubuntu2204-test-azure-kms',
   display_name: 'Azure KMS Test',
-  run_on: UBUNTU_22_OS_SM,
+  run_on: UBUNTU_22_OS,
   batchtime: 20160,
   tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });
