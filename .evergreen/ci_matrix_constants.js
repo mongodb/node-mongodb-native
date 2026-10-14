@@ -1,4 +1,5 @@
-const MONGODB_VERSIONS = ['latest', 'rapid', '9.0', '8.0', '7.0', '6.0', '5.0', '4.4'];
+const SERVER_VERSION_LATEST = 'latest';
+const MONGODB_VERSIONS = [SERVER_VERSION_LATEST, 'rapid', '9.0', '8.0', '7.0', '6.0', '5.0', '4.4'];
 const versions = [
   { codeName: 'iron', versionNumber: '20.19.0' },
   { codeName: 'jod', versionNumber: 22 },
@@ -9,8 +10,7 @@ const LOWEST_LTS = NODE_VERSIONS[0];
 const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
 
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
-const AWS_AUTH_VERSIONS = ['latest'];
-const SERVER_VERSION_LATEST_STABLE = 'latest-stable';
+const AWS_AUTH_VERSIONS = [SERVER_VERSION_LATEST];
 const TLS_VERSIONS = MONGODB_VERSIONS.filter(value => value !== 'rapid');
 const LB_VERSIONS = MONGODB_VERSIONS.slice(0, MONGODB_VERSIONS.indexOf('5.0') + 1).toReversed();
 
@@ -34,7 +34,7 @@ module.exports = {
   LATEST_LTS,
   TOPOLOGIES,
   AWS_AUTH_VERSIONS,
-  SERVER_VERSION_LATEST_STABLE,
+  SERVER_VERSION_LATEST,
   TLS_VERSIONS,
   DEFAULT_OS,
   WINDOWS_OS,

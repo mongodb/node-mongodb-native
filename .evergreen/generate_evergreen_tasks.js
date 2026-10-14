@@ -11,7 +11,7 @@ const {
   LATEST_LTS,
   TOPOLOGIES,
   AWS_AUTH_VERSIONS,
-  SERVER_VERSION_LATEST_STABLE,
+  SERVER_VERSION_LATEST,
   TLS_VERSIONS,
   DEFAULT_OS,
   WINDOWS_OS,
@@ -388,7 +388,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
 // (debian 12 vs debian 11)
 const altPlatformAwsFuncs = [{ func: 'run aws ECS auth test' }];
 const awsAltPlatformTasks = altPlatformAwsFuncs.map(fn =>
-  createAwsTaskDefinition(fn, SERVER_VERSION_LATEST_STABLE)
+  createAwsTaskDefinition(fn, SERVER_VERSION_LATEST)
 );
 TASKS.push(...awsAltPlatformTasks);
 AWS_AUTH_TASKS_ALT_PLATFORM.push(...awsAltPlatformTasks.map(t => t.name));
@@ -785,6 +785,8 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
+
+
   name: 'ubuntu20-test-all-oidc',
   display_name: 'MONGODB-OIDC Auth Tests',
   run_on: UBUNTU_20_OS,
