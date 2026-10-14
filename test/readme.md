@@ -102,6 +102,7 @@ The easiest way to get started running the tests locally is to start a replica s
   export AWS_PROFILE="drivers-test-secrets-role-857654397073"
   aws sso login --sso-session drivers-test-secrets-session
   ```
+- If you don’t have access to the role (e.g. external contributors), use VERSION='latest-stable' instead to pick up a version without needing credentials.
 
 ### Starting a Server and Running the Tests
 
