@@ -385,7 +385,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
 }
 
 // Used for aws auth tests which cannot run on the default intended platform
-// (debian 12 vs debian 11)
+// (default is ubuntu 22.04, altPlatform runs on ubuntu24.04)
 const altPlatformAwsFuncs = [{ func: 'run aws ECS auth test' }];
 const awsAltPlatformTasks = altPlatformAwsFuncs.map(fn =>
   createAwsTaskDefinition(fn, SERVER_VERSION_LATEST)
