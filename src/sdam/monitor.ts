@@ -525,6 +525,19 @@ export class RTTPinger {
     }
 
     this.latestRtt = calculateDurationInMs(start);
+    this.scheduleNextMeasurement();
+  }
+
+  /**
+   * Schedules the next round trip time measurement. This must happen after every attempt,
+   * successful or not - otherwise a single interrupted connection permanently stops the pinger
+   * and `latestRtt` is served indefinitely as a stale measurement.
+   */
+  private scheduleNextMeasurement() {
+    if (this.closed) {
+      return;
+    }
+
     this.monitorId = setTimeout(
       () => this.measureRoundTripTime(),
       this.monitor.options.heartbeatFrequencyMS
@@ -546,6 +559,7 @@ export class RTTPinger {
         },
         () => {
           this.connection = undefined;
+          this.scheduleNextMeasurement();
         }
       );
       return;
@@ -559,7 +573,7 @@ export class RTTPinger {
       () => {
         this.connection?.destroy();
         this.connection = undefined;
-        return;
+        this.scheduleNextMeasurement();
       }
     );
   }
