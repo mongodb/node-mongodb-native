@@ -23,7 +23,7 @@ const skippedTests = {
   'error on aggregate if maxAwaitTimeMS is equal to timeoutMS': 'TODO(NODE-7360)',
   'apply remaining timeoutMS if less than maxAwaitTimeMS': 'TODO(NODE-7360)',
   'operation succeeds after one socket timeout - deleteOne on collection':
-    'NODE-6984 - experimental feature test impedence'
+    'NODE-6984 - impedes development for an experimental feature'
 };
 
 describe('CSOT spec tests', function () {
