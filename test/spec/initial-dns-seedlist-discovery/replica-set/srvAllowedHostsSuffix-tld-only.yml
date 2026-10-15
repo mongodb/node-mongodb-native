@@ -1,0 +1,6 @@
+# srvAllowedHostsSuffix SHOULD NOT be a public suffix. "cc" is an ordinary rule in the
+# Public Suffix List, and isn't two or more `.` separated labels so `.cc` MUST raise an error.
+uri: "mongodb+srv://test1.test.build.10gen.cc/?srvAllowedHostsSuffix=.cc"
+seeds: []
+hosts: []
+error: true

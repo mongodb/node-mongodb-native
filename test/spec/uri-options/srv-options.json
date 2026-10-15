@@ -111,6 +111,15 @@
         "loadBalanced": true,
         "srvMaxHosts": 0
       }
+    },
+    {
+      "description": "Non-SRV URI with srvAllowedHostsSuffix",
+      "uri": "mongodb://example.com/?srvAllowedHostsSuffix=.mongodb.net",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": null
     }
   ]
 }
