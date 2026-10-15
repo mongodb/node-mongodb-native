@@ -51,6 +51,7 @@ import {
   noop,
   once,
   processTimeMS,
+  promiseWithResolvers,
   squashError,
   uuidV4
 } from '../utils';
@@ -209,6 +210,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private clusterTime: Document | null = null;
   private error: Error | null = null;
   private dataEvents: AsyncGenerator<Uint8Array, void, void> | null = null;
+  /** Rejects a write that is waiting for the socket to drain */
+  private rejectPendingWrite: ((error: Error) => void) | null = null;
 
   private readonly socketTimeoutMS: number;
   private readonly monitorCommands: boolean;
@@ -363,6 +366,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.socket.destroy();
     this.error = error;
 
+    this.rejectPendingWrite?.(error);
     this.dataEvents?.throw(error).then(undefined, squashError);
     this.closed = true;
     this.emit(Connection.CLOSE);
@@ -718,6 +722,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
     }
 
+    // The connection may have closed while the command was serialized. A destroyed socket
+    // neither drains nor emits an error, so the write must not wait for it.
+    this.throwIfAborted();
+
     try {
       if (this.socket.write(buffer)) return;
     } catch (writeError) {
@@ -728,9 +736,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       throw networkError;
     }
 
+    // A socket that is destroyed before `drain` (for example, a write after the peer ended the
+    // connection) never drains, so `cleanup` rejects the pending write with the connection error.
     const drainEvent = once<void>(this.socket, 'drain', options);
+    const closed = promiseWithResolvers<never>();
+    this.rejectPendingWrite = closed.reject;
     const timeout = options?.timeoutContext?.timeoutForSocketWrite;
-    const drained = timeout ? Promise.race([drainEvent, timeout]) : drainEvent;
+    const drained = Promise.race(
+      timeout ? [drainEvent, closed.promise, timeout] : [drainEvent, closed.promise]
+    );
     try {
       return await drained;
     } catch (writeError) {
@@ -743,6 +757,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
       throw writeError;
     } finally {
+      this.rejectPendingWrite = null;
       timeout?.clear();
     }
   }
