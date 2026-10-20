@@ -5,7 +5,7 @@ import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const skippedSpecs = {
-  'retryability-legacy-timeouts': 'TODO(NODE-6984): timing-sensitive on loaded hosts'
+  'retryability-legacy-timeouts': 'Skipped in NODE-6984: timing-sensitive on loaded hosts.'
 };
 
 const skippedTests = {
