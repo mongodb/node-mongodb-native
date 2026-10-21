@@ -2,9 +2,11 @@ import {
   type BSONElement,
   type BSONSerializeOptions,
   BSONType,
+  deserialize,
   type DeserializeOptions,
   type Document,
   Long,
+  NumberUtils,
   parseToElementsToArray,
   parseUtf8ValidationOption,
   pluckBSONSerializeOptions,
@@ -308,20 +310,34 @@ export class CursorResponse extends MongoDBResponse {
       return null;
     }
 
-    const result = this.batch.get(this.iterated, BSONType.object, true) ?? null;
+    const offset = this.batch.getDocumentOffset(this.iterated);
     const encryptedResult = this.encryptedBatch?.get(this.iterated, BSONType.object, true) ?? null;
 
     this.iterated += 1;
 
     if (options?.raw) {
-      return result.toBytes();
-    } else {
-      const object = result.toObject(options);
-      if (encryptedResult) {
-        decorateDecryptionResult(object, encryptedResult.toObject(options), true);
-      }
-      return object;
+      return this.bson.subarray(offset, offset + NumberUtils.getInt32LE(this.bson, offset));
     }
+    const object = deserialize(this.bson, this.batchDeserializeOptions(options, offset));
+    if (encryptedResult) {
+      decorateDecryptionResult(object, encryptedResult.toObject(options), true);
+    }
+    return object;
+  }
+
+  private _batchOptionsSource: OnDemandDocumentDeserializeOptions | undefined;
+  private _batchOptions: DeserializeOptions | undefined;
+  /** One options object per cursor options, re-pointed at each document instead of spread per document */
+  private batchDeserializeOptions(
+    options: OnDemandDocumentDeserializeOptions,
+    offset: number
+  ): DeserializeOptions {
+    if (this._batchOptions == null || this._batchOptionsSource !== options) {
+      this._batchOptionsSource = options;
+      this._batchOptions = { ...options, index: 0, allowObjectSmallerThanBufferSize: true };
+    }
+    this._batchOptions.index = offset;
+    return this._batchOptions;
   }
 
   public clear() {
