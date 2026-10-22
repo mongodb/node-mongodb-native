@@ -13,7 +13,7 @@ module.exports = {
     'test/tools/runner/ee_checker.ts',
     'test/tools/runner/hooks/configuration.ts',
     'test/tools/runner/hooks/leak_checker.ts',
-    'test/tools/runner/hooks/compression_checker.ts'
+    ...(process.env.COMPRESSOR ? ['test/tools/runner/hooks/compression_checker.ts'] : [])
   ],
   extension: ['js', 'ts'],
   ui: 'test/tools/runner/metadata_ui.js',

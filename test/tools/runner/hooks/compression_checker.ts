@@ -9,8 +9,9 @@ import { OpCompressedRequest, OpMsgRequest, uncompressibleCommands } from '../..
  * See https://github.com/mongodb/specifications/blob/master/source/compression/OP_COMPRESSED.md#messages-not-allowed-to-be-compressed
  *
  * The check only has something to inspect when the suite runs with a compressor configured (the
- * `COMPRESSOR` environment variable, set by the compression tasks in CI). A regular server accepts
- * compressed `hello` commands, so without this check a violation goes unnoticed.
+ * `COMPRESSOR` environment variable, set by the compression tasks in CI), so `mocha_mongodb.js`
+ * only registers this hook when that variable is set. A regular server accepts compressed `hello`
+ * commands, so without this check a violation goes unnoticed.
  *
  * The wrapper is installed once for the whole run rather than per test, because monitors and RTT
  * pingers keep sending `hello` in the background between tests. For the same reason, a violation
@@ -63,7 +64,7 @@ const compressionCheckerAfterAll = function () {
   const error = takeViolationsError();
   if (error) throw error;
 
-  if (process.env.COMPRESSOR && compressedMessageCount === 0) {
+  if (compressedMessageCount === 0) {
     throw new Error(
       `COMPRESSOR=${process.env.COMPRESSOR} is set but no message was compressed during the run, ` +
         'so the uncompressible command check did not inspect anything'
