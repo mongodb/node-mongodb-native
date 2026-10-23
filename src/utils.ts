@@ -1188,7 +1188,9 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
 }
 
 /**
- * Forbidden domain code points, per the WHATWG URL Standard
+ * Forbidden domain code points, per the WHATWG URL Standard. `domainToASCII` parses its input as
+ * URL text (for example, `evil.com/x.example.com` becomes `evil.com`), so names containing these
+ * characters are rejected before conversion.
  */
 // eslint-disable-next-line no-control-regex
 const FORBIDDEN_DOMAIN_CODE_POINTS = /[\u0000- \u007F#%/:<>?@[\\\]^|]/;
@@ -1207,7 +1209,7 @@ export function dnsNameToASCII(name: string): string | null {
   // (https://github.com/whatwg/url/commit/a8d5ca3716c3). Node.js only does so from 24.20.0, which
   // updated Ada to 4.0.0, so it is done here to behave the same on every Node.js version.
   const ascii = /^\p{ASCII}*$/u.test(name) ? name.toLowerCase() : domainToASCII(name);
-  return ascii === '' || FORBIDDEN_DOMAIN_CODE_POINTS.test(ascii) ? null : ascii;
+  return ascii === '' ? null : ascii;
 }
 
 /**
