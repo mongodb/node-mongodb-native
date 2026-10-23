@@ -1,0 +1,7 @@
+# srvAllowedHostsSuffix MUST name at least one label. A value of "." is empty once the
+# leading and trailing "." are stripped, so it names no domain at all and MUST raise an
+# error rather than being treated as a suffix that every host matches.
+uri: "mongodb+srv://test1.test.build.10gen.cc/?srvAllowedHostsSuffix=."
+seeds: []
+hosts: []
+error: true
