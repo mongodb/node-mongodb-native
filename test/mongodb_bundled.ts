@@ -146,6 +146,7 @@ export const {
   getMongoDBClientEncryption,
   GetMoreOperation,
   getTopology,
+  getZstdLibrary,
   GridFSBucket,
   GSSAPI,
   GSSAPICanonicalizationValue,
