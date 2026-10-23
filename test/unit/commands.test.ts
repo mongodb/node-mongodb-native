@@ -13,17 +13,34 @@ import {
   OpCompressedRequest,
   OpMsgRequest,
   OpQueryRequest,
-  runNodelessTests,
-  uncompressibleCommands
+  runNodelessTests
 } from '../mongodb';
 
 describe('class OpCompressedRequest', () => {
   context('canCompress()', () => {
-    for (const command of uncompressibleCommands) {
-      it(`returns true when the command is ${command}`, () => {
-        const msg = new OpMsgRequest('db', { [command]: 1 }, {});
-        expect(OpCompressedRequest.canCompress(msg)).to.be.false;
-      });
+    // https://github.com/mongodb/specifications/blob/master/source/compression/OP_COMPRESSED.md#messages-not-allowed-to-be-compressed
+    const commandsNotAllowedToBeCompressed = [
+      'hello',
+      'ismaster',
+      'isMaster',
+      'saslStart',
+      'saslContinue',
+      'getnonce',
+      'authenticate',
+      'createUser',
+      'updateUser',
+      'copydbSaslStart',
+      'copydbgetnonce',
+      'copydb'
+    ];
+
+    for (const protocol of [OpMsgRequest, OpQueryRequest]) {
+      for (const command of commandsNotAllowedToBeCompressed) {
+        it(`returns false when the command is ${command} (${protocol.name})`, () => {
+          const msg = new protocol('db', { [command]: 1 }, {});
+          expect(OpCompressedRequest.canCompress(msg)).to.be.false;
+        });
+      }
     }
 
     it(`returns true for a compressable command`, () => {
