@@ -1,7 +1,7 @@
 import { once } from 'node:events';
 import * as net from 'node:net';
 
-import { Long, ObjectId } from 'bson';
+import { type Document, Long, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as process from 'process';
 import { satisfies } from 'semver';
@@ -15,6 +15,7 @@ import {
   MongoClient,
   Monitor,
   MonitorInterval,
+  OpCompressedRequest,
   RTTSampler,
   runNodelessTests,
   ServerDescription,
@@ -24,7 +25,7 @@ import {
   ServerType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
-import { topologyWithPlaceholderClient } from '../../tools/utils';
+import { sleep, topologyWithPlaceholderClient } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
 
 class MockServer {
@@ -33,7 +34,9 @@ class MockServer {
   topology: any;
   constructor(options) {
     this.pool = { generation: 1 };
-    this.description = new ServerDescription(`${options.host}:${options.port}`);
+    const isIPv6 = options.family?.toLowerCase() === 'ipv6';
+    const host = isIPv6 ? `[${options.host}]` : options.host;
+    this.description = new ServerDescription(`${host}:${options.port}`);
     this.description.type = ServerType.Unknown;
     this.topology = {
       s: { topologyId: 1 },
@@ -356,6 +359,131 @@ describe('monitoring', function () {
           });
         });
       }
+    });
+
+    describe('when compression has been negotiated', function () {
+      let compressSpy: sinon.SinonSpy;
+
+      beforeEach(() => {
+        compressSpy = sinon.spy(OpCompressedRequest.prototype, 'toBin');
+      });
+
+      afterEach(() => sinon.restore());
+
+      const topologyVersion = { processId: new ObjectId(), counter: new Long(0, 0) };
+
+      it('does not compress Monitor polling hellos', async function () {
+        const messages = [];
+
+        mockServer.setMessageHandler(request => {
+          const doc = request.document;
+          messages.push(doc);
+          if (isHello(doc)) {
+            // Reply that the hello was received and indicate that compression has been negotiated,
+            // which forces the monitor to use compression for subsequent messages.
+            request.reply({ ...mock.HELLO, helloOk: true, compression: ['zlib'] });
+          }
+        });
+
+        const server = new MockServer(mockServer.address());
+        monitor = new Monitor(
+          server as any,
+          {
+            compressors: ['zlib'],
+            serverMonitoringMode: 'poll',
+            heartbeatFrequencyMS: 100,
+            minHeartbeatFrequencyMS: 50
+          } as any
+        );
+        monitor.connect();
+
+        // Wait for the monitor to send a few hello messages.
+        while (messages.length < 3) {
+          await sleep(50);
+        }
+
+        // Ensure that the monitor's connection is using the expected compressor before checking the messages.
+        expect(monitor.connection?.description.compressor).to.equal('zlib');
+        // Ensure that none of the hello messages were compressed.
+        expect(compressSpy).to.not.have.been.called;
+        for (const message of messages) {
+          // Ensure that all captured messages are hello messages.
+          expect(isHello(message)).to.be.true;
+          // Ensure that the hello messages are polling and do not contain maxAwaitTimeMS.
+          expect('maxAwaitTimeMS' in message).to.be.false;
+        }
+      });
+
+      it('does not compress Monitor streaming or RTT hellos', async function () {
+        const connectionsToMessages = new Map<any, Document[]>();
+
+        mockServer.setMessageHandler(request => {
+          const doc = request.document;
+          const conn = request.connection;
+          const messageList = connectionsToMessages.get(conn) || [];
+          messageList.push(doc);
+          connectionsToMessages.set(conn, messageList);
+          if ('maxAwaitTimeMS' in doc) {
+            // The monitor's streaming (awaitable) hello. Deliberately no reply: a real server
+            // only replies when topology changes or maxAwaitTimeMS elapses.
+            return;
+          } else if (isHello(doc)) {
+            // Reply that the hello was received and indicate that compression has been negotiated,
+            // which forces the monitor to use compression for subsequent messages.
+            // Include the topologyVersion to simulate a streaming hello response.
+            request.reply({ ...mock.HELLO, helloOk: true, compression: ['zlib'], topologyVersion });
+          }
+        });
+
+        const server = new MockServer(mockServer.address());
+        server.description.topologyVersion = topologyVersion;
+        monitor = new Monitor(
+          server as any,
+          {
+            compressors: ['zlib'],
+            serverMonitoringMode: 'stream',
+            heartbeatFrequencyMS: 100,
+            minHeartbeatFrequencyMS: 50
+          } as any
+        );
+        monitor.connect();
+
+        // Sleep long enough to allow the monitor and RTT to send at least 2 hello messages.
+        while (true) {
+          await sleep(50);
+
+          // Check that there are two connections.
+          if (connectionsToMessages.size < 2) {
+            continue;
+          }
+
+          // Check if each connection had at least two messages.
+          if (Array.from(connectionsToMessages.values()).some(messages => messages.length < 2)) {
+            continue;
+          }
+
+          break;
+        }
+
+        // Ensure that the monitor's connection is using the expected compressor before checking the messages.
+        expect(monitor.connection?.description.compressor).to.equal('zlib');
+        // Ensure that none of the hello messages were compressed.
+        expect(compressSpy).to.not.have.been.called;
+        for (const messages of connectionsToMessages.values()) {
+          // Ensure that all captured messages are hello messages.
+          for (const message of messages) {
+            expect(isHello(message)).to.be.true;
+          }
+        }
+        // Ensure that there were 2 distinct connections used.
+        expect(connectionsToMessages.size).to.equal(2);
+        // Ensure that an awaitable hello was sent on one of the connections
+        expect(
+          Array.from(connectionsToMessages.values()).some(messages =>
+            messages.some(m => 'maxAwaitTimeMS' in m)
+          )
+        ).to.be.true;
+      });
     });
   });
 
