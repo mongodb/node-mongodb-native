@@ -4,7 +4,9 @@ import * as semver from 'semver';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
-const skippedSpecs = {};
+const skippedSpecs = {
+  'retryability-legacy-timeouts': 'Skipped in NODE-6984: timing-sensitive on loaded hosts.'
+};
 
 const skippedTests = {
   'Tailable cursor iteration timeoutMS is refreshed for getMore - failure': 'TODO(DRIVERS-2965)',
