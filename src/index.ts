@@ -593,7 +593,11 @@ export type {
   TagSet,
   TopologyVersion
 } from './sdam/server_description';
-export type { DeprioritizedServers, ServerSelector } from './sdam/server_selection';
+export type {
+  DeprioritizedServers,
+  ServerSelector,
+  ServerSelectorFunction
+} from './sdam/server_selection';
 export type { SrvPoller, SrvPollerEvents, SrvPollerOptions } from './sdam/srv_polling';
 export type {
   ConnectOptions,
