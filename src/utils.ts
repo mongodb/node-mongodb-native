@@ -1193,7 +1193,7 @@ export function checkParentDomainMatch(address: string, srvHost: string): void {
  * characters are rejected before conversion.
  */
 // eslint-disable-next-line no-control-regex
-const FORBIDDEN_DOMAIN_CODE_POINTS = /[\u0000- \u007F#%/:<>?@[\\\]^|]/;
+const FORBIDDEN_DOMAIN_CODE_POINTS = /[\u0000-\u0020\u007F#%/:<>?@[\\\]^|]/;
 
 /**
  * Converts a DNS name to its lowercase A-label (Punycode) form, using the WHATWG URL Standard's
@@ -1223,7 +1223,7 @@ export function normalizeDnsName(name: string): string {
   const withoutTrailingDot = name.endsWith('.') ? name.slice(0, -1) : name;
   const normalized = dnsNameToASCII(withoutTrailingDot);
   if (normalized == null) {
-    throw new MongoAPIError(`Invalid DNS host name "${name}"`);
+    throw new MongoAPIError('Invalid DNS host name');
   }
   return normalized;
 }
@@ -1251,7 +1251,7 @@ export function verifySrvHost(
     try {
       isValid = srvHostValidator(host);
     } catch (error) {
-      throw new MongoAPIError(`srvHostValidator threw an error while validating "${host}"`, {
+      throw new MongoAPIError('srvHostValidator threw an error', {
         cause: error
       });
     }
@@ -1260,16 +1260,14 @@ export function verifySrvHost(
       throw new MongoAPIError(`srvHostValidator must return a boolean, received ${typeof isValid}`);
     }
     if (!isValid) {
-      throw new MongoAPIError(`Server record "${host}" was rejected by srvHostValidator`);
+      throw new MongoAPIError('Server record was rejected by srvHostValidator');
     }
     return;
   }
 
   if (srvAllowedHostsSuffix != null) {
     if (!host.endsWith(srvAllowedHostsSuffix)) {
-      throw new MongoAPIError(
-        `Server record "${host}" does not end with srvAllowedHostsSuffix "${srvAllowedHostsSuffix}"`
-      );
+      throw new MongoAPIError('Server record does not end with srvAllowedHostsSuffix');
     }
     return;
   }

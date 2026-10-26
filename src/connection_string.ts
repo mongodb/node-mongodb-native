@@ -48,7 +48,7 @@ const SRV_ONLY_OPTIONS = [
 ] as const;
 
 /** Single labels that srvAllowedHostsSuffix may be, as they are reserved for private or special use */
-const RESERVED_SINGLE_LABEL_SUFFIXES = new Set([
+const VALID_SINGLE_LABEL_SUFFIXES = new Set([
   // RFC 6761 special use names
   'test',
   'localhost',
@@ -100,6 +100,9 @@ const resolveTxt = retryDNSTimeoutFor('TXT');
  *
  * @param uri - The connection string to parse
  * @param options - Optional user provided connection string options
+ * @throws MongoAPIError if the SRV lookup returns no hosts, or a returned host fails verification
+ * @throws MongoParseError if the TXT record is invalid, or conflicts with the provided options
+ * @throws Error the error from the DNS lookup, if it fails
  */
 export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddress[]> {
   if (typeof options.srvHost !== 'string') {
@@ -641,10 +644,10 @@ function normalizeSrvAllowedHostsSuffix(value: string): string {
   }
 
   // 4. Require at least two labels, unless the value is a reserved single label
-  if (!suffix.includes('.') && !RESERVED_SINGLE_LABEL_SUFFIXES.has(suffix)) {
+  if (!suffix.includes('.') && !VALID_SINGLE_LABEL_SUFFIXES.has(suffix)) {
     throw new MongoParseError(
       `srvAllowedHostsSuffix "${value}" must contain at least two domain labels, or be one of: ${[
-        ...RESERVED_SINGLE_LABEL_SUFFIXES
+        ...VALID_SINGLE_LABEL_SUFFIXES
       ].join(', ')}`
     );
   }

@@ -120,6 +120,7 @@ export const {
   DeprioritizedServers,
   deserialize,
   DistinctOperation,
+  dnsNameToASCII,
   DOCUMENT_DB_MSG,
   DocumentSequence,
   Double,

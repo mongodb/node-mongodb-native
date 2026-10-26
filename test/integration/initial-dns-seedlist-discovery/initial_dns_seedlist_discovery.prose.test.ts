@@ -385,9 +385,7 @@ describe('Initial DNS Seedlist Discovery (Prose Tests)', () => {
         .connect()
         .catch(e => e);
       expect(err).to.be.instanceOf(MongoAPIError);
-      expect(err.message).to.equal(
-        'Server record "cluster.mongodb.com" was rejected by srvHostValidator'
-      );
+      expect(err.message).to.equal('Server record was rejected by srvHostValidator');
     });
   });
 

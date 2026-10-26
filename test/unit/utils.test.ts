@@ -11,6 +11,7 @@ import {
   compareObjectId,
   decorateWithExplain,
   DEFAULT_ALLOWED_HOSTS,
+  dnsNameToASCII,
   Explain,
   hasAtomicOperators,
   HostAddress,
@@ -1153,44 +1154,61 @@ describe('driver utils', function () {
     }
   });
 
-  describe('normalizeDnsName()', () => {
-    it('removes a trailing dot', () => {
-      expect(normalizeDnsName('cluster.mongodb.com.')).to.equal('cluster.mongodb.com');
-    });
-
-    it('lowercases', () => {
-      expect(normalizeDnsName('CLUSTER.MongoDB.com')).to.equal('cluster.mongodb.com');
-    });
-
-    it('converts internationalized labels to A-label (Punycode) form', () => {
-      expect(normalizeDnsName('db.公司.cn')).to.equal('db.xn--55qx5d.cn');
-      expect(normalizeDnsName('db.XN--55QX5D.CN')).to.equal('db.xn--55qx5d.cn');
-    });
-
-    it('preserves underscores, which are valid in DNS names', () => {
-      expect(normalizeDnsName('test_1.my_host.example.com')).to.equal('test_1.my_host.example.com');
-    });
-
-    it('accepts ASCII xn-- labels that are not valid A-labels, lowercased, as the WHATWG URL Standard does', () => {
-      expect(normalizeDnsName('XN--A.Example.COM.')).to.equal('xn--a.example.com');
-      expect(normalizeDnsName('db1.xn--abc-.example.com')).to.equal('db1.xn--abc-.example.com');
-      expect(normalizeDnsName('xn--8i7caa.example.net')).to.equal('xn--8i7caa.example.net');
-    });
-
-    for (const name of [
-      '',
-      '.',
-      'bad host.example.com',
-      'bad/host.example.com',
-      'bad\\host.example.com',
-      'bad?host.example.com',
-      'bad#host.example.com',
-      'bad%68ost.example.com',
-      'bad:host.example.com',
-      'bad@host.example.com',
-      '公司.xn--a.cn'
+  describe('dnsNameToASCII()', () => {
+    for (const [description, name, expected] of [
+      ['lowercases ASCII', 'CLUSTER.MongoDB.com', 'cluster.mongodb.com'],
+      ['converts internationalized labels to A-label form', 'db.公司.cn', 'db.xn--55qx5d.cn'],
+      ['lowercases valid A-labels', 'db.XN--55QX5D.CN', 'db.xn--55qx5d.cn'],
+      ['preserves underscores', 'test_1.My_Host.example.com', 'test_1.my_host.example.com'],
+      ['preserves empty labels', 'my..domain.net', 'my..domain.net'],
+      // The WHATWG URL Standard returns an ASCII name lowercased without validating its xn-- labels
+      ['accepts invalid Punycode in an ASCII name', 'XN--A.Example.COM', 'xn--a.example.com'],
+      [
+        'accepts an xn-- label that decodes to only ASCII',
+        'db1.xn--abc-.example.com',
+        'db1.xn--abc-.example.com'
+      ],
+      [
+        'accepts an xn-- label that decodes to mapped code points',
+        'xn--8i7caa.example.net',
+        'xn--8i7caa.example.net'
+      ]
     ]) {
-      it(`throws for ${JSON.stringify(name)}`, () => {
+      it(description, () => {
+        expect(dnsNameToASCII(name)).to.equal(expected);
+      });
+    }
+
+    for (const [description, name] of [
+      ['an empty name', ''],
+      ['NUL', 'bad\u0000host.example.com'],
+      ['a tab', 'bad\thost.example.com'],
+      ['a line feed', 'bad\nhost.example.com'],
+      ['a carriage return', 'bad\rhost.example.com'],
+      ['DEL', 'bad\u007Fhost.example.com'],
+      ['a space', 'bad host.example.com'],
+      ['a slash', 'bad/host.example.com'],
+      ['a backslash', 'bad\\host.example.com'],
+      ['a question mark', 'bad?host.example.com'],
+      ['a number sign', 'bad#host.example.com'],
+      ['a percent sign', 'bad%68ost.example.com'],
+      ['a colon', 'bad:host.example.com'],
+      ['an at sign', 'bad@host.example.com'],
+      ['a non-ASCII name with an invalid xn-- label', '公司.xn--a.cn']
+    ]) {
+      it(`returns null for ${description}`, () => {
+        expect(dnsNameToASCII(name)).to.be.null;
+      });
+    }
+  });
+
+  describe('normalizeDnsName()', () => {
+    it('removes a trailing dot before converting to lowercase A-label form', () => {
+      expect(normalizeDnsName('Cluster.公司.cn.')).to.equal('cluster.xn--55qx5d.cn');
+    });
+
+    for (const name of ['', '.', 'bad host.example.com.']) {
+      it(`throws a MongoAPIError for ${JSON.stringify(name)}`, () => {
         expect(() => normalizeDnsName(name)).to.throw(MongoAPIError, 'Invalid DNS host name');
       });
     }

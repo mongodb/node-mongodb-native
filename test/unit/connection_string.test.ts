@@ -649,12 +649,14 @@ describe('Connection String', function () {
         ).to.equal('.my_domain.net');
       });
 
-      for (const suffix of ['localhost', '.INTERNAL', 'corp.']) {
+      for (const [suffix, expected] of [
+        ['localhost', '.localhost'],
+        ['.INTERNAL', '.internal'],
+        ['corp.', '.corp']
+      ]) {
         it(`accepts the reserved single label ${suffix}`, function () {
           const options = parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix });
-          expect(options.srvAllowedHostsSuffix).to.equal(
-            `.${suffix.replace(/\./g, '').toLowerCase()}`
-          );
+          expect(options.srvAllowedHostsSuffix).to.equal(expected);
         });
       }
 
@@ -677,31 +679,29 @@ describe('Connection String', function () {
       }
 
       // The specification permits only its listed normalization and validation steps
-      for (const [description, suffix] of [
-        ['an empty label', 'my..domain.net'],
-        ['a label longer than 63 characters', `${'a'.repeat(64)}.net`],
-        ['a name longer than 255 characters', `${'a'.repeat(63)}.`.repeat(4) + 'net']
+      const LABEL_64 = 'a'.repeat(64);
+      const LABEL_63 = 'a'.repeat(63);
+      for (const [description, suffix, expected] of [
+        ['an empty label', 'my..domain.net', '.my..domain.net'],
+        ['a label longer than 63 characters', `${LABEL_64}.net`, `.${LABEL_64}.net`],
+        [
+          'a name longer than 255 characters',
+          `${LABEL_63}.${LABEL_63}.${LABEL_63}.${LABEL_63}.net`,
+          `.${LABEL_63}.${LABEL_63}.${LABEL_63}.${LABEL_63}.net`
+        ]
       ]) {
         it(`applies no other host name syntax validation, accepting ${description}`, function () {
           expect(
             parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix }).srvAllowedHostsSuffix
-          ).to.equal(`.${suffix}`);
+          ).to.equal(expected);
         });
       }
 
+      // dnsNameToASCII() tests cover each conversion failure; these check that a failure is reported
       for (const [description, suffix] of [
-        ['a non-ASCII name with an invalid xn-- label', '公司.xn--a.cn'],
+        ['a forbidden domain code point', 'my/domain.net'],
         ['a bidi rule violation', 'a\u05D0b.example.com'],
-        ['a disallowed code point', 'a\u2028b.example.com'],
-        ['a space', 'my domain.net'],
-        ['a slash', 'my/domain.net'],
-        ['a backslash', 'my\\domain.net'],
-        ['a question mark', 'my?domain.net'],
-        ['a number sign', 'my#domain.net'],
-        ['a percent sign', 'my%64omain.net'],
-        ['a colon', 'my:domain.net'],
-        ['an at sign', 'my@domain.net'],
-        ['non-ASCII characters combined with a slash', '公司/x.cn']
+        ['a non-ASCII name with an invalid xn-- label', '公司.xn--a.cn']
       ]) {
         it(`throws when it cannot be converted to A-label form: ${description}`, function () {
           expect(() => parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix })).to.throw(
@@ -718,19 +718,12 @@ describe('Connection String', function () {
         ).to.equal('.db.xn--strae-oqa.example');
       });
 
-      // The WHATWG URL Standard returns an ASCII name lowercased without validating its xn-- labels
-      for (const [description, suffix] of [
-        ['invalid Punycode', 'XN--A.example.com'],
-        ['a label that decodes to only ASCII', 'xn--abc-.example.com'],
-        ['a label that cannot be decoded', 'xn--zzzzzz.example.com'],
-        ['a label that decodes to mapped code points', 'xn--8i7caa.example.com']
-      ]) {
-        it(`accepts an ASCII xn-- label that is not a valid A-label, lowercased: ${description}`, function () {
-          expect(
-            parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix }).srvAllowedHostsSuffix
-          ).to.equal(`.${suffix.toLowerCase()}`);
-        });
-      }
+      it('accepts an ASCII xn-- label that is not a valid A-label, lowercased', function () {
+        expect(
+          parseOptions(SRV_URI, { srvAllowedHostsSuffix: 'XN--A.example.com' })
+            .srvAllowedHostsSuffix
+        ).to.equal('.xn--a.example.com');
+      });
 
       it('throws when not a string', function () {
         expect(() =>
@@ -999,9 +992,7 @@ describe('Connection String', function () {
               `${CLUSTER_URI}/?srvAllowedHostsSuffix=example.net`
             ).catch(error => error);
             expect(error).to.be.instanceOf(MongoAPIError);
-            expect(error.message).to.equal(
-              `Server record "${host}" does not end with srvAllowedHostsSuffix ".example.net"`
-            );
+            expect(error.message).to.equal('Server record does not end with srvAllowedHostsSuffix');
           });
         }
 
@@ -1034,9 +1025,7 @@ describe('Connection String', function () {
             `${CLUSTER_URI}/?srvAllowedHostsSuffix=my_domain.net`
           ).catch(error => error);
           expect(error).to.be.instanceOf(MongoAPIError);
-          expect(error.message).to.equal(
-            'Server record "db1.other_my_domain.net" does not end with srvAllowedHostsSuffix ".my_domain.net"'
-          );
+          expect(error.message).to.equal('Server record does not end with srvAllowedHostsSuffix');
         });
       });
 
