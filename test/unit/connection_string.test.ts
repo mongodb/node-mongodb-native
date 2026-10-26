@@ -763,11 +763,54 @@ describe('Connection String', function () {
     describe('srvHostValidator', function () {
       const SRV_URI = 'mongodb+srv://cluster.mongodb.mydomain.net';
 
-      it('is set to the provided function', function () {
-        const srvHostValidator = () => true;
-        const options = parseOptions(SRV_URI, { srvHostValidator });
-        expect(options.srvHostValidator).to.equal(srvHostValidator);
+      it('is set to a wrapper that calls the provided function with the host', function () {
+        const hosts: string[] = [];
+        const options = parseOptions(SRV_URI, {
+          srvHostValidator: host => {
+            hosts.push(host);
+            return host === 'db1.mydomain.net';
+          }
+        });
+        expect(options.srvHostValidator('db1.mydomain.net')).to.equal(true);
+        expect(options.srvHostValidator('db2.mydomain.net')).to.equal(false);
+        expect(hosts).to.deep.equal(['db1.mydomain.net', 'db2.mydomain.net']);
       });
+
+      it('wraps an error thrown by the provided function in a MongoAPIError', function () {
+        const validatorError = new Error('validator failed');
+        const options = parseOptions(SRV_URI, {
+          srvHostValidator: () => {
+            throw validatorError;
+          }
+        });
+        const error = (() => {
+          try {
+            options.srvHostValidator('db1.mydomain.net');
+          } catch (error) {
+            return error;
+          }
+        })();
+        expect(error).to.be.instanceOf(MongoAPIError).and.to.have.property('name', 'MongoAPIError');
+        expect(error).to.have.property('message', 'srvHostValidator threw an error');
+        expect(error).to.have.property('cause', validatorError);
+      });
+
+      for (const [description, srvHostValidator, received] of [
+        ['a string', () => 'true', 'string'],
+        ['a Promise', async () => true, 'object'],
+        ['undefined', () => undefined, 'undefined']
+      ] as const) {
+        it(`throws a MongoAPIError when the provided function returns ${description}`, function () {
+          const options = parseOptions(SRV_URI, {
+            // @ts-expect-error: srvHostValidator must return a boolean
+            srvHostValidator
+          });
+          expect(() => options.srvHostValidator('db1.mydomain.net')).to.throw(
+            MongoAPIError,
+            `srvHostValidator must return a boolean, received ${received}`
+          );
+        });
+      }
 
       it('throws when set in the connection string', function () {
         expect(() => parseOptions(`${SRV_URI}/?srvHostValidator=anything`)).to.throw(

@@ -1059,11 +1059,6 @@ describe('driver utils', function () {
       'js-00.i-love-js.mongodb',
       'i-love-javascript-00.mongodb.io'
     ];
-    const exampleHostNamesWithDot = [
-      'js-00.i-love-js.',
-      'js-00.i-love-js.mongodb.',
-      'i-love-javascript-00.mongodb.io.'
-    ];
     const exampleHostNameThatDoNotMatchParent = [
       'js-00.i-love-js-a-little',
       'js-00.i-love-js-a-little.mongodb',
@@ -1094,21 +1089,7 @@ describe('driver utils', function () {
           });
         });
 
-        context('when addresses in SRV record end with a dot', () => {
-          it('accepts address since it is considered to still match the parent domain', () => {
-            expect(() =>
-              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvName[num])
-            ).to.not.throw();
-          });
-        });
-
         context('when SRV host ends with a dot', () => {
-          it('accepts address if it ends with a dot', () => {
-            expect(() =>
-              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvNameWithDot[num])
-            ).to.not.throw();
-          });
-
           it('accepts address if it does not end with a dot', () => {
             expect(() =>
               checkParentDomainMatch(exampleHostNameWithoutDot[num], exampleSrvNameWithDot[num])
@@ -1118,7 +1099,7 @@ describe('driver utils', function () {
           if (num < 2) {
             it('does not accept address if it does not contain an extra domain level', () => {
               expect(() =>
-                checkParentDomainMatch(exampleSrvNameWithDot[num], exampleSrvNameWithDot[num])
+                checkParentDomainMatch(exampleSrvName[num], exampleSrvNameWithDot[num])
               ).to.throw(
                 'Server record does not have at least one more domain level than parent URI'
               );
@@ -1129,19 +1110,13 @@ describe('driver utils', function () {
         context('when addresses in SRV record end without dots', () => {
           it('accepts address since it matches the parent domain', () => {
             expect(() =>
-              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvName[num])
+              checkParentDomainMatch(exampleHostNameWithoutDot[num], exampleSrvName[num])
             ).to.not.throw();
           });
         });
 
-        context('when the address and SRV host differ only in case', () => {
-          it('accepts address since host names are compared case-insensitively', () => {
-            expect(() =>
-              checkParentDomainMatch(
-                exampleHostNameWithoutDot[num].toUpperCase(),
-                exampleSrvName[num]
-              )
-            ).to.not.throw();
+        context('when the SRV host differs from the address only in case', () => {
+          it('accepts address since the SRV host is normalized', () => {
             expect(() =>
               checkParentDomainMatch(
                 exampleHostNameWithoutDot[num],

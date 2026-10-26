@@ -1152,12 +1152,11 @@ export function parseUnsignedInteger(value: unknown): number | null {
  * If a DNS server were to become compromised SRV records would still need to
  * advertise addresses that are under the same domain as the srvHost.
  *
- * @param address - The address to check against a domain
+ * @param address - The address to check against a domain, already normalized with {@link normalizeDnsName}
  * @param srvHost - The domain to check the provided address against
  * @returns void
  */
-export function checkParentDomainMatch(address: string, srvHost: string): void {
-  const normalizedAddress = normalizeDnsName(address);
+export function checkParentDomainMatch(normalizedAddress: string, srvHost: string): void {
   const normalizedSrvHost = normalizeDnsName(srvHost);
 
   const allCharacterBeforeFirstDot = /^.*?\./;
@@ -1237,7 +1236,8 @@ export function normalizeDnsName(name: string): string {
  * @param host - A host name returned by an SRV lookup, already normalized with {@link normalizeDnsName}
  * @param srvHost - The host from the `mongodb+srv` connection string
  * @throws MongoAPIError if the host fails verification, or the validator throws or returns a
- * non-boolean value
+ * non-boolean value (the `srvHostValidator` option transform wraps the validator to throw in those
+ * cases)
  */
 export function verifySrvHost(
   host: string,
@@ -1247,19 +1247,7 @@ export function verifySrvHost(
   const { srvAllowedHostsSuffix, srvHostValidator } = options;
 
   if (srvHostValidator != null) {
-    let isValid: unknown;
-    try {
-      isValid = srvHostValidator(host);
-    } catch (error) {
-      throw new MongoAPIError('srvHostValidator threw an error', {
-        cause: error
-      });
-    }
-    // A Promise (e.g. from an async validator) is truthy, so accepting it would silently allow every host
-    if (typeof isValid !== 'boolean') {
-      throw new MongoAPIError(`srvHostValidator must return a boolean, received ${typeof isValid}`);
-    }
-    if (!isValid) {
+    if (!srvHostValidator(host)) {
       throw new MongoAPIError('Server record was rejected by srvHostValidator');
     }
     return;

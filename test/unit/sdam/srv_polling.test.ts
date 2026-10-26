@@ -6,6 +6,7 @@ import { clearTimeout } from 'timers';
 
 import {
   MongoDriverError,
+  parseOptions,
   SrvPoller,
   SrvPollingEvent,
   TopologyDescription,
@@ -264,11 +265,12 @@ describe('Mongos SRV Polling', function () {
         });
 
         it('should fail without throwing if the validator returns a non-boolean', async () => {
-          const poller = new SrvPoller({
-            srvHost: SRV_HOST,
+          // The poller receives the validator as wrapped by the srvHostValidator option transform
+          const { srvHostValidator } = parseOptions(`mongodb+srv://${SRV_HOST}`, {
             // @ts-expect-error: an async validator returns a Promise, which must not be treated as accepting
             srvHostValidator: async () => true
           });
+          const poller = new SrvPoller({ srvHost: SRV_HOST, srvHostValidator });
 
           stubDns(null, [srvRecord('jalad.tanagra.com')]);
           stubPoller(poller);

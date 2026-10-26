@@ -1193,11 +1193,26 @@ export const OPTIONS = {
     }
   },
   srvHostValidator: {
-    transform({ values: [value] }): unknown {
+    transform({ values: [value] }): (host: string) => boolean {
       if (typeof value !== 'function') {
         throw new MongoParseError('srvHostValidator must be a function');
       }
-      return value;
+      // Wrap the validator so that every caller gets a boolean or a MongoAPIError
+      return (host: string): boolean => {
+        let isValid: unknown;
+        try {
+          isValid = value(host);
+        } catch (error) {
+          throw new MongoAPIError('srvHostValidator threw an error', { cause: error });
+        }
+        // A Promise (e.g. from an async validator) is truthy, so accepting it would silently allow every host
+        if (typeof isValid !== 'boolean') {
+          throw new MongoAPIError(
+            `srvHostValidator must return a boolean, received ${typeof isValid}`
+          );
+        }
+        return isValid;
+      };
     }
   },
   srvMaxHosts: {

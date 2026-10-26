@@ -220,6 +220,9 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * rejects with a `MongoAPIError`; an error thrown by the function is available as its `cause`.
    * During SRV polling, the host is rejected instead and no error is raised.
    *
+   * `client.options.srvHostValidator` is a wrapper around the provided function that applies these
+   * checks, not the provided function itself.
+   *
    * **WARNING: Modifying the default SRV domain name validation can create vulnerabilities.**
    * SRV host verification prevents a spoofed DNS response from directing the driver to arbitrary
    * hosts, and a validator that accepts too broadly removes that protection.
