@@ -183,13 +183,18 @@ export async function makeClientMetadata(
   // We append in the order of delete preference. 'name' is appended at the end of
   // faasEnv, and is preference-agnostic with 'agent' for now, since ensuring
   // truncation order is to be tackled in NODE-7851.
-  const containerMetadata = await getContainerMetadata();
-  const faasEnv = getFAASEnv();
-  const agentEnv = getAgentEnv();
 
+  // A placeholder document that contains all groups of data to be appended to the metadata document
+  // which are furnished from environment variables (agent, FAAS, container)
   const fullEnv = new Map<string, unknown>();
-  for (const [k, v] of faasEnv) fullEnv.set(k, v);
+  
+  // FAAS & Agent are set jointly & fitted after, since their order isn't significant
+  const faasEnv = getFAASEnv();
+  for (const [k, v] of faasEnv) fullEnv.set(k, v);  
+  const agentEnv = getAgentEnv();
   if (agentEnv.length > 0) fullEnv.set('agent', agentEnv);
+
+  // Fits to the metadata document preferentially setting by property order
   if (fullEnv.size > 0 && !metadataDocument.ifItFitsItSits('env', fullEnv)) {
     for (const key of fullEnv.keys()) {
       fullEnv.delete(key);
@@ -197,6 +202,9 @@ export async function makeClientMetadata(
       if (metadataDocument.ifItFitsItSits('env', fullEnv)) break;
     }
   }
+
+  // Finally, append container
+  const containerMetadata = await getContainerMetadata();
   if (containerMetadata.size > 0) {
     const newEnv = { ...Object.fromEntries(fullEnv), container: containerMetadata };
     metadataDocument.ifItFitsItSits('env', newEnv);
