@@ -152,6 +152,7 @@ export const {
   FAAS_ENV_VARIABLES,
   GetMoreOperation,
   getTopology,
+  getZstdLibrary,
   GridFSBucket,
   GSSAPI,
   GSSAPICanonicalizationValue,

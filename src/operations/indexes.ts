@@ -93,7 +93,11 @@ export interface IndexInformationOptions extends ListIndexesOptions {
   full?: boolean;
 }
 
-/** @public */
+/**
+ * @public
+ *
+ * Loosely aligns with `IndexModel` from the spec.
+ * */
 export interface IndexDescription
   extends Pick<
     CreateIndexesOptions,
@@ -160,6 +164,144 @@ export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'wri
   wildcardProjection?: Document;
   /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. */
   hidden?: boolean;
+  /** Collation */
+  collation?: CollationOptions;
+}
+
+// Maps to `IndexOptions` in
+// https://github.com/mongodb/specifications/blob/6f64d0ee3ae49edbdb30eb995f3e29549e8cfa6a/source/index-management/index-management.md#common-api-components
+/** @public */
+export interface IndexOptions extends Document {
+  /**
+   * Optionally specifies the length in time, in seconds, for documents to remain in
+   * a collection.
+   */
+  expireAfterSeconds?: number;
+
+  /**
+   * Optionally specify a specific name for the index outside of the default generated
+   * name. If none is provided then the name is generated in the format "[field]_[direction]".
+   *
+   * Note that if an index is created for the same key pattern with different collations,
+   * a name must be provided by the user to avoid ambiguity.
+   *
+   * @example For an index of name: 1, age: -1, the generated name would be "name_1_age_-1".
+   */
+  name?: string;
+
+  /**
+   * Optionally tells the index to only reference documents with the specified field in
+   * the index.
+   */
+  sparse?: boolean;
+
+  /**
+   * Optionally allows users to configure the storage engine on a per-index basis when creating
+   * an index.
+   */
+  storageEngine?: Document;
+
+  /**
+   * Optionally forces the index to be unique.
+   */
+  unique?: boolean;
+
+  /**
+   * Optionally specifies the index version number, either 0 or 1.
+   */
+  version?: number;
+
+  /**
+   * Optionally specifies the default language for text indexes.
+   * Is 'english' if none is provided.
+   */
+  defaultLanguage?: string;
+
+  /**
+   * Optionally Specifies the field in the document to override the language.
+   */
+  languageOverride?: string;
+
+  /**
+   * Optionally provides the text index version number.
+   */
+  textIndexVersion?: number;
+
+  /**
+   * Optionally specifies fields in the index and their corresponding weight values.
+   */
+  weights?: Document;
+
+  /**
+   * Optionally specifies the 2dsphere index version number.
+   */
+  '2dsphereIndexVersion'?: number;
+
+  /**
+   * Optionally specifies the precision of the stored geo hash in the 2d index, from 1 to 32.
+   */
+  bits?: number;
+
+  /**
+   * Optionally sets the maximum boundary for latitude and longitude in the 2d index.
+   */
+  max?: number;
+
+  /**
+   * Optionally sets the minimum boundary for latitude and longitude in the index in a
+   * 2d index.
+   */
+  min?: number;
+
+  /**
+   * Optionally specifies the number of units within which to group the location values
+   * in a geo haystack index.
+   */
+  bucketSize?: number;
+
+  /**
+   * Optionally specifies a filter for use in a partial index. Only documents that match the
+   * filter expression are included in the index.
+   */
+  partialFilterExpression?: Document;
+
+  /**
+   * Optionally specifies a collation to use for the index. If not specified, no collation is
+   * sent and the default collation of the collection server-side is used.
+   */
+  collation?: CollationOptions;
+
+  /**
+   * Optionally specifies the wildcard projection of a wildcard index.
+   */
+  wildcardProjection?: Document;
+
+  /**
+   * Optionally specifies that the index should exist on the target collection but should not be used by the query
+   * planner when executing operations.
+   *
+   * This option is only supported by servers \>= 4.4.
+   */
+  hidden?: boolean;
+}
+
+/** @public */
+export interface CreateIndexOptions extends Omit<CommandOperationOptions, 'collation' | 'explain'> {
+  /**
+   * Specifies how many data-bearing members of a replica set, including the primary, must
+   * complete the index builds successfully before the primary marks the indexes as ready.
+   *
+   * This option accepts the same values for the "w" field in a write concern plus "votingMembers",
+   * which indicates all voting data-bearing nodes.
+   *
+   * This option is only supported by servers \>= 4.4. Drivers MUST manually raise an error if this option
+   * is specified when creating an index on a pre 4.4 server. See the Q&A section for the rationale behind this.
+   *
+   * @remarks This option is sent only if the caller explicitly provides a value. The default is to not send a value.
+   *
+   * @sinceServerVersion 4.4
+   */
+  commitQuorum?: number | string;
 }
 
 function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
@@ -197,19 +339,36 @@ function constructIndexDescriptionMap(indexSpec: IndexSpecification): Map<string
 }
 
 /**
- * Receives an index description and returns a modified index description which has had invalid options removed
- * from the description and has mapped the `version` option to the `v` option.
+ * Index options whose public name on {@link IndexOptions} differs from the field name the
+ * `createIndexes` command expects.
+ */
+const INDEX_OPTION_RENAMES = new Map([
+  ['version', 'v'],
+  ['defaultLanguage', 'default_language'],
+  ['languageOverride', 'language_override']
+]);
+
+/**
+ * Receives an index description and returns a modified index description which has mapped the
+ * options in {@link INDEX_OPTION_RENAMES} to the field names the `createIndexes` command expects.
+ *
+ * When `allowUnknownIndexOptions` is `false` (the default), options that are not in the driver's
+ * `VALID_INDEX_OPTIONS` allowlist are removed from the description. When `true`, all options are
+ * retained and passed through to the server for validation.
  */
 function resolveIndexDescription(
-  description: IndexDescription
+  description: IndexDescription,
+  // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
+  allowUnknownIndexOptions: boolean
 ): Omit<ResolvedIndexDescription, 'key'> {
-  const validProvidedOptions = Object.entries(description).filter(([optionName]) =>
-    VALID_INDEX_OPTIONS.has(optionName)
+  const providedOptions = Object.entries(description).filter(
+    ([optionName]) =>
+      // Ensure `key` is removed, even when `allowUnknownIndexOptions` is true
+      optionName !== 'key' && (allowUnknownIndexOptions || VALID_INDEX_OPTIONS.has(optionName))
   );
 
   return Object.fromEntries(
-    // we support the `version` option, but the `createIndexes` command expects it to be the `v`
-    validProvidedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
+    providedOptions.map(([name, value]) => [INDEX_OPTION_RENAMES.get(name) ?? name, value])
   );
 }
 
@@ -251,11 +410,13 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions
+    // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
+    allowUnknownIndexOptions: boolean,
+    commandOptions: CreateIndexesOptions | CreateIndexOptions | undefined
   ) {
-    super(parent, options);
+    super(parent, commandOptions);
 
-    this.options = options ?? {};
+    this.options = { ...commandOptions };
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
     this.collectionName = collectionName;
@@ -264,7 +425,8 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
       const key =
         userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
       const name = userIndex.name ?? Array.from(key).flat().join('_');
-      const validIndexOptions = resolveIndexDescription(userIndex);
+
+      const validIndexOptions = resolveIndexDescription(userIndex, allowUnknownIndexOptions);
       return {
         ...validIndexOptions,
         name,
@@ -274,24 +436,58 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     this.ns = parent.s.namespace;
   }
 
+  /**
+   * Index options are carried by the individual {@link IndexDescription} entries of `indexes`,
+   * so the only options bag this factory takes is the command one.
+   */
   static fromIndexDescriptionArray(
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
-    options?: CreateIndexesOptions
+    // TODO(NODE-7868): Remove allowUnknownIndexOptions with a default behavior of true in a future major version release
+    allowUnknownIndexOptions: boolean,
+    commandOptions: CreateIndexesOptions | undefined
   ): CreateIndexesOperation {
-    return new CreateIndexesOperation(parent, collectionName, indexes, options);
+    return new CreateIndexesOperation(
+      parent,
+      collectionName,
+      indexes,
+      allowUnknownIndexOptions,
+      commandOptions
+    );
   }
 
   static fromIndexSpecification(
     parent: OperationParent,
     collectionName: string,
     indexSpec: IndexSpecification,
-    options: CreateIndexesOptions = {}
+    allowUnknownIndexOptions: boolean,
+    indexOptions: IndexOptions | undefined,
+    commandOptions: CreateIndexOptions | undefined
+  ): CreateIndexesOperation;
+
+  static fromIndexSpecification(
+    parent: OperationParent,
+    collectionName: string,
+    indexSpec: IndexSpecification,
+    allowUnknownIndexOptions: boolean,
+    indexOptions: CreateIndexesOptions | IndexOptions | undefined,
+    commandOptions: CreateIndexOptions | undefined
   ): CreateIndexesOperation {
     const key = constructIndexDescriptionMap(indexSpec);
-    const description: IndexDescription = { ...options, key };
-    return new CreateIndexesOperation(parent, collectionName, [description], options);
+    // If called with overload using `CreateIndexesOptions`, then indexOptions may contain combined index and command options
+    // These are filtered in CreateIndexesOperation using VALID_INDEX_OPTIONS.
+    // Otherwise, `IndexOptions` only contains index options (which is the ultimate goal anyway)
+    const description: IndexDescription = { ...indexOptions, key };
+    return new CreateIndexesOperation(
+      parent,
+      collectionName,
+      [description],
+      allowUnknownIndexOptions,
+      // TODO(NODE-7868): Remove the `?? indexOptions` fallback along with the two parameter path.
+      // Once `indexOptions` is index options only it must not reach the command root.
+      commandOptions ?? indexOptions
+    );
   }
 
   override get commandName() {

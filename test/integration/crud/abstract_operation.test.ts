@@ -155,7 +155,13 @@ describe('abstract operation', function () {
       },
       {
         subclassCreator: () =>
-          CreateIndexesOperation.fromIndexDescriptionArray(db, 'bar', [{ key: { a: 1 } }]),
+          CreateIndexesOperation.fromIndexDescriptionArray(
+            db,
+            'bar',
+            [{ key: { a: 1 } }],
+            false,
+            undefined
+          ),
         subclassType: CreateIndexesOperation,
         correctCommandName: 'createIndexes'
       },

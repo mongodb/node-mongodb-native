@@ -1,0 +1,181 @@
+description: "gridfs-queriesUseEq"
+
+schemaVersion: "1.1"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name gridfs-tests
+  - bucket:
+      id: &bucket0 bucket0
+      database: *database0
+  - collection:
+      id: &bucket0_files_collection bucket0_files_collection
+      database: *database0
+      collectionName: &bucket0_files_collectionName fs.files
+  - collection:
+      id: &bucket0_chunks_collection bucket0_chunks_collection
+      database: *database0
+      collectionName: &bucket0_chunks_collectionName fs.chunks
+
+initialData:
+  - collectionName: *bucket0_files_collectionName
+    databaseName: *database0Name
+    documents:
+      - &file1Document
+        _id: &file1Id { "$oid": "000000000000000000000001" }
+        length: 2
+        chunkSize: 4
+        uploadDate: &uploadDate { "$date": "1970-01-01T00:00:00.000Z" }
+        filename: "file-1"
+      - &file2Document
+        _id: { "$oid": "000000000000000000000002" }
+        length: 0
+        chunkSize: 4
+        uploadDate: *uploadDate
+        filename: "file-2"
+  - collectionName: *bucket0_chunks_collectionName
+    databaseName: *database0Name
+    documents:
+      - &chunk1Document
+        _id: { "$oid": "000000000000000000000011" }
+        files_id: *file1Id
+        n: 0
+        data: { "$binary": { "base64": "ESI=", "subType": "00" } } # hex: 1122
+
+_yamlAnchors:
+  injectedId: &injectedId { $gt: { "$minKey": 1 } }
+  unchangedOutcome: &unchangedOutcome
+    - collectionName: *bucket0_files_collectionName
+      databaseName: *database0Name
+      documents:
+        - *file1Document
+        - *file2Document
+    - collectionName: *bucket0_chunks_collectionName
+      databaseName: *database0Name
+      documents:
+        - *chunk1Document
+
+tests:
+  - description: "download uses $eq to query the files and chunks collections"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: *file1Id
+        expectResult: { $$matchesHexBytes: "1122" }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *bucket0_files_collectionName
+                filter: { _id: { $eq: *file1Id } }
+          - commandStartedEvent:
+              command:
+                find: *bucket0_chunks_collectionName
+                filter: { files_id: { $eq: *file1Id } }
+
+  - description: "delete uses $eq to delete the files collection document and chunks"
+    operations:
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: *file1Id
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *bucket0_files_collectionName
+                deletes:
+                  - q: { _id: { $eq: *file1Id } }
+                    limit: 1
+          - commandStartedEvent:
+              command:
+                delete: *bucket0_chunks_collectionName
+                deletes:
+                  - q: { files_id: { $eq: *file1Id } }
+                    limit: 0
+    outcome:
+      - collectionName: *bucket0_files_collectionName
+        databaseName: *database0Name
+        documents:
+          - *file2Document
+      - collectionName: *bucket0_chunks_collectionName
+        databaseName: *database0Name
+        documents: []
+
+  - description: "rename uses $eq to update the files collection document"
+    operations:
+      - name: rename
+        object: *bucket0
+        arguments:
+          id: *file1Id
+          newFilename: &newFilename "file-1-renamed"
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                update: *bucket0_files_collectionName
+                updates:
+                  - q: { _id: { $eq: *file1Id } }
+                    u: { $set: { filename: *newFilename } }
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
+    outcome:
+      - collectionName: *bucket0_files_collectionName
+        databaseName: *database0Name
+        documents:
+          - _id: *file1Id
+            length: 2
+            chunkSize: 4
+            uploadDate: *uploadDate
+            filename: *newFilename
+          - *file2Document
+
+  - description: "delete with a file id containing a query operator does not delete any files"
+    operations:
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: *injectedId
+        # Newer server versions will reject the query { $eq: { $gt: MinKey } } with a write error;
+        # otherwise, the delete will succeed with n: 0 and the driver will return a FileNotFound
+        # error.
+        expectError: { isError: true }
+    outcome: *unchangedOutcome
+
+  - description: "download with a file id containing a query operator does not return any files"
+    operations:
+      - name: download
+        object: *bucket0
+        arguments:
+          id: *injectedId
+        # Note: the data in the bucket is designed such that downloading with an injected ID always
+        # succeeds without $eq matching:
+        # - If fs.files.find({ _id: { $gt: MinKey } }) returns file-1,
+        #   fs.chunks.find({ _id: { $gt: MinKey } }) will return only chunks in file-1, and the
+        #   download will succeed. (If chunks from another file were also returned, the driver
+        #   would return an error.)
+        # - If fs.files.find({ _id: { $gt: MinKey } }) returns file-2, no find will be executed on
+        #   fs.chunks because file-2 is length 0, and the download will succeed.
+        # Thus, receiving an error here means that we successfully prevented injection.
+        expectError: { isClientError: true } # FileNotFound
+
+  - description: "rename with a file id containing a query operator does not rename any files"
+    operations:
+      - name: rename
+        object: *bucket0
+        arguments:
+          id: *injectedId
+          newFilename: "injected"
+        # The differing error behavior for deletes described above also applies to the update
+        # command.
+        expectError: { isError: true }
+    outcome: *unchangedOutcome

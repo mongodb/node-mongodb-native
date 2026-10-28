@@ -11,6 +11,7 @@ const {
   LATEST_LTS,
   TOPOLOGIES,
   AWS_AUTH_VERSIONS,
+  SERVER_VERSION_LATEST,
   TLS_VERSIONS,
   DEFAULT_OS,
   WINDOWS_OS,
@@ -18,6 +19,7 @@ const {
   UBUNTU_20_OS,
   DEBIAN_OS,
   UBUNTU_22_OS,
+  UBUNTU_24_OS,
   GRAVITON_OS
 } = require('./ci_matrix_constants');
 
@@ -344,41 +346,51 @@ for (const VERSION of TLS_VERSIONS) {
 }
 
 const AWS_AUTH_TASKS = [];
+const AWS_AUTH_TASKS_ALT_PLATFORM = [];
+
+const nameAwsAuthTest = (ex, version) => `aws-${version}-auth-test-${ex.split(' ').join('-')}`;
+const createAwsTaskDefinition = (fn, VERSION) => ({
+  name: nameAwsAuthTest(fn.func, VERSION),
+  tags: [VERSION],
+  commands: [
+    updateExpansions({
+      VERSION,
+      NODE_LTS_VERSION: LATEST_LTS,
+      AUTH: 'auth',
+      ORCHESTRATION_FILE: 'auth-aws.json',
+      TOPOLOGY: 'server'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
+    { func: 'assume secrets manager role' },
+    { func: fn.func }
+  ]
+});
 
 for (const VERSION of AWS_AUTH_VERSIONS) {
-  const name = ex => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
   const awsFuncs = [
     { func: 'run aws auth test with regular aws credentials' },
     { func: 'run aws auth test with assume role credentials' },
     { func: 'run aws auth test with aws EC2 credentials', onlySdk: true },
     { func: 'run aws auth test with aws credentials as environment variables' },
     { func: 'run aws auth test with aws credentials and session token as environment variables' },
-    { func: 'run aws ECS auth test' },
     { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset' },
     { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set' }
   ];
-
-  const awsTasks = awsFuncs.map(fn => ({
-    name: name(fn.func),
-    tags: [VERSION],
-    commands: [
-      updateExpansions({
-        VERSION,
-        NODE_LTS_VERSION: LATEST_LTS,
-        AUTH: 'auth',
-        ORCHESTRATION_FILE: 'auth-aws.json',
-        TOPOLOGY: 'server'
-      }),
-      { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'assume secrets manager role' },
-      { func: fn.func }
-    ]
-  }));
+  const awsTasks = awsFuncs.map(fn => createAwsTaskDefinition(fn, VERSION));
 
   TASKS.push(...awsTasks);
   AWS_AUTH_TASKS.push(...awsTasks.map(t => t.name));
 }
+
+// Used for aws auth tests which cannot run on the default intended platform
+// (default is ubuntu 22.04, altPlatform runs on ubuntu24.04)
+const altPlatformAwsFuncs = [{ func: 'run aws ECS auth test' }];
+const awsAltPlatformTasks = altPlatformAwsFuncs.map(fn =>
+  createAwsTaskDefinition(fn, SERVER_VERSION_LATEST)
+);
+TASKS.push(...awsAltPlatformTasks);
+AWS_AUTH_TASKS_ALT_PLATFORM.push(...awsAltPlatformTasks.map(t => t.name));
 
 const BUILD_VARIANTS = [];
 
@@ -599,13 +611,24 @@ BUILD_VARIANTS.push({
 
 // special case for MONGODB-AWS authentication
 BUILD_VARIANTS.push({
-  name: 'ubuntu2004-test-mongodb-aws',
+  name: 'ubuntu2204-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
-  run_on: UBUNTU_20_OS,
+  run_on: UBUNTU_22_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS
   },
   tasks: AWS_AUTH_TASKS
+});
+
+// Aws auth tasks which require a different platform (ubuntu 24)
+BUILD_VARIANTS.push({
+  name: 'ubuntu2404-test-mongodb-aws',
+  display_name: 'MONGODB-AWS Auth test (alternate platform)',
+  run_on: UBUNTU_24_OS,
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS
+  },
+  tasks: AWS_AUTH_TASKS_ALT_PLATFORM
 });
 
 const customDependencyTests = [];
@@ -753,9 +776,9 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
-  name: 'debian11-test-azure-kms',
+  name: 'ubuntu2204-test-azure-kms',
   display_name: 'Azure KMS Test',
-  run_on: DEBIAN_OS,
+  run_on: UBUNTU_22_OS,
   batchtime: 20160,
   tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });

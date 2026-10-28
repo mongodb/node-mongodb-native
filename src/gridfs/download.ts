@@ -83,7 +83,7 @@ export interface GridFSBucketReadStreamPrivate {
   expected: number;
 
   /**
-   * The filter used to search in the _files_ collection (i.e., `{ _id: <> }`)
+   * The filter used to search in the _files_ collection (i.e., `{ _id: { $eq: <> } }`)
    * This is not the same filter used when reading chunks from the chunks collection.
    */
   filter: Document;
@@ -318,9 +318,8 @@ function init(stream: GridFSBucketReadStream): void {
     if (stream.destroyed) return;
 
     if (!doc) {
-      const identifier = stream.s.filter._id
-        ? stream.s.filter._id.toString()
-        : stream.s.filter.filename;
+      const identifier =
+        stream.s.filter._id != null ? stream.s.filter._id.$eq : stream.s.filter.filename;
       const errmsg = `FileNotFound: file ${identifier} was not found`;
       // TODO(NODE-3483)
       const err = new MongoRuntimeError(errmsg);
@@ -349,7 +348,7 @@ function init(stream: GridFSBucketReadStream): void {
       return stream.destroy(error);
     }
 
-    const filter: Document = { files_id: doc._id };
+    const filter: Document = { files_id: { $eq: doc._id } };
 
     // Currently the skip function does not support the index,
     // it needs to retrieve all the documents first and then skip them. (CS-25811)

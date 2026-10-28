@@ -294,7 +294,7 @@ export class ClientEncryption {
   async rewrapManyDataKey(
     filter: Filter<DataKey>,
     options?: ClientEncryptionRewrapManyDataKeyProviderOptions
-  ): Promise<{ bulkWriteResult?: BulkWriteResult }> {
+  ): Promise<ClientEncryptionRewrapManyDataKeyResult> {
     let keyEncryptionKeyBson = undefined;
     if (options) {
       const keyEncryptionKey = Object.assign({ provider: options.provider }, options.masterKey);
@@ -927,7 +927,7 @@ export type TextQueryOptions = StringQueryOptions;
 
 /**
  * @public
- * @experimental
+ * Options interface for `rewrapManyDataKey`; selects the new KMS provider/masterKey for bulk key rotation.
  */
 export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
   provider: ClientEncryptionDataKeyProvider;
@@ -988,7 +988,6 @@ export interface ClientEncryptionOptions {
 
   /**
    * @experimental
-   *
    * The timeout setting to be used for all the operations on ClientEncryption.
    *
    * When provided, `timeoutMS` is used as the timeout for each operation executed on
@@ -1144,7 +1143,7 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
    */
   keyAltNames?: string[] | undefined;
 
-  /** @experimental */
+  /** Optional 96-byte custom key material used when creating a data key instead of libmongocrypt’s random material. **/
   keyMaterial?: Buffer | Binary;
 
   /** @internal */
@@ -1153,7 +1152,7 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
 
 /**
  * @public
- * @experimental
+ * Public result shape describing the `bulkWriteResult` produced by `rewrapManyDataKey`.
  */
 export interface ClientEncryptionRewrapManyDataKeyResult {
   /** The result of rewrapping data keys. If unset, no keys matched the filter. */

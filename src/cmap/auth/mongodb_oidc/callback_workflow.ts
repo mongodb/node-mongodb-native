@@ -154,24 +154,24 @@ export abstract class CallbackWorkflow implements Workflow {
    * to every 100ms.
    */
   protected withLock(callback: OIDCCallbackFunction): OIDCCallbackFunction {
-    let lock: Promise<any> = Promise.resolve();
+    let queue: Promise<void> = Promise.resolve();
     return async (params: OIDCCallbackParams): Promise<OIDCResponse> => {
-      // We do this to ensure that we would never return the result of the
-      // previous lock, only the current callback's value would get returned.
-      await lock;
-      lock = lock
-
-        .catch(() => null)
-
-        .then(async () => {
-          const difference = Date.now() - this.lastExecutionTime;
-          if (difference <= THROTTLE_MS) {
-            await setTimeout(THROTTLE_MS - difference, { signal: params.timeoutContext });
-          }
-          this.lastExecutionTime = Date.now();
-          return await callback(params);
-        });
-      return await lock;
+      const execution = queue.then(async () => {
+        const difference = Date.now() - this.lastExecutionTime;
+        if (difference <= THROTTLE_MS) {
+          await setTimeout(THROTTLE_MS - difference, { signal: params.timeoutContext });
+        }
+        this.lastExecutionTime = Date.now();
+        return await callback(params);
+      });
+      // The queue exists only to order callers, so it must carry neither a
+      // result nor an error: a caller waiting on it gets its own callback
+      // invocation, and a failed callback does not block the callers behind it.
+      queue = execution.then(
+        () => undefined,
+        () => undefined
+      );
+      return await execution;
     };
   }
 }

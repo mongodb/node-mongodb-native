@@ -39,9 +39,15 @@ Integration tests require a running MongoDB instance (unit tests do not). To sta
 ```bash
 git submodule update --init
 export DRIVERS_TOOLS=$(pwd)/drivers-evergreen-tools
+export AWS_PROFILE=drivers-test-secrets-role-857654397073
+aws sso login --sso-session drivers-test-secrets-session
 VERSION='latest' TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
 source mo-expansion.sh
 ```
+
+If `VERSION` is omitted, `run-orchestration.sh` defaults to `latest-stable` (the newest stable release). Set `VERSION='latest'` explicitly to test against nightly.
+
+`VERSION='latest'` (the nightly server build) is downloaded from a private S3 bucket, so it requires AWS credentials for the `drivers-test-secrets-role` role (see "AWS Profile" in `test/readme.md` for one-time SSO setup). In Evergreen this role is assumed via `ec2.assume_role` in the "bootstrap mongo-orchestration" function. Without credentials, use `VERSION='latest-stable'` (or a specific version like `8.0`) instead.
 
 ```bash
 npm run check:unit        # Unit tests (no database required)

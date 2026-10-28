@@ -149,7 +149,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       this.s._chunksCollection,
       this.s._filesCollection,
       this.s.options.readPreference,
-      { _id: id },
+      { _id: { $eq: id } },
       { timeoutMS: this.s.options.timeoutMS, ...options }
     );
   }
@@ -171,7 +171,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     }
 
     const { deletedCount } = await this.s._filesCollection.deleteOne(
-      { _id: id },
+      { _id: { $eq: id } },
       { timeoutMS: timeoutContext?.remainingTimeMS }
     );
 
@@ -179,7 +179,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     if (remainingTimeMS != null && remainingTimeMS <= 0)
       throw new MongoOperationTimeoutError(`Timed out after ${timeoutMS}ms`);
     // Delete orphaned chunks before returning FileNotFound
-    await this.s._chunksCollection.deleteMany({ files_id: id }, { timeoutMS: remainingTimeMS });
+    await this.s._chunksCollection.deleteMany(
+      { files_id: { $eq: id } },
+      { timeoutMS: remainingTimeMS }
+    );
 
     if (deletedCount === 0) {
       // TODO(NODE-3483): Replace with more appropriate error
@@ -230,7 +233,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param filename - new name for the file
    */
   async rename(id: ObjectId, filename: string, options?: { timeoutMS: number }): Promise<void> {
-    const filter = { _id: id };
+    const filter = { _id: { $eq: id } };
     const update = { $set: { filename } };
     const { matchedCount } = await this.s._filesCollection.updateOne(filter, update, options);
     if (matchedCount === 0) {

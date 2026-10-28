@@ -884,6 +884,37 @@ describe('Find', function () {
     test.equal('spam eggs and spam', items[0].s);
   });
 
+  it('should correctly sort by text score given as a [field, direction] pair', async function () {
+    const configuration = this.configuration;
+    const db = client.db(configuration.db);
+
+    const collection = db.collection('textSearchWithPairSort');
+    await collection.createIndex({ title: 'text' });
+
+    await collection.insertMany([
+      { title: 'The Godfather Part II' },
+      { title: 'Casablanca' },
+      { title: 'Harlem Nights' },
+      { title: 'The Godfather' },
+      { title: 'Godfather of Harlem' }
+    ]);
+
+    const items = await collection
+      .find(
+        { $text: { $search: 'godfather harlem' } },
+        { projection: { _id: false, title: true, score: { $meta: 'textScore' } } }
+      )
+      .sort(['score', { $meta: 'textScore' }])
+      .toArray();
+
+    expect(items.map(({ title }) => title)).to.deep.equal([
+      'Godfather of Harlem',
+      'The Godfather',
+      'Harlem Nights',
+      'The Godfather Part II'
+    ]);
+  });
+
   it('should not mutate user-provided options', async function () {
     const configuration = this.configuration;
     const db = client.db(configuration.db);
