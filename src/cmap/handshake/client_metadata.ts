@@ -247,6 +247,7 @@ export const AGENT_ENV_VARIABLES: ReadonlyArray<readonly [string, string | null]
   ['CLINE_ACTIVE', 'cline'],
   ['GEMINI_CLI', 'gemini_cli'],
   ['AUGMENT_AGENT', 'auggie_cli'],
+  ['OPENCODE', 'opencode_client'],
   ['OPENCODE_CLIENT', 'opencode_client'],
   ['TRAE_AI_SHELL_ID', 'trae_ai'],
   ['GOOSE_TERMINAL', 'goose'],

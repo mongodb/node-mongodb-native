@@ -719,6 +719,7 @@ describe('client metadata module', () => {
         { variable: 'CLINE_ACTIVE', value: 'true', expected: 'cline' },
         { variable: 'GEMINI_CLI', value: '1', expected: 'gemini_cli' },
         { variable: 'AUGMENT_AGENT', value: '1', expected: 'auggie_cli' },
+        { variable: 'OPENCODE', value: 'cli', expected: 'opencode_client' },
         { variable: 'OPENCODE_CLIENT', value: 'cli', expected: 'opencode_client' },
         { variable: 'TRAE_AI_SHELL_ID', value: 'some-id', expected: 'trae_ai' },
         { variable: 'GOOSE_TERMINAL', value: '1', expected: 'goose' },
