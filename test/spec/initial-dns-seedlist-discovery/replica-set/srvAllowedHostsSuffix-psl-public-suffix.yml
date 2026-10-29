@@ -1,0 +1,5 @@
+# "cc" is an ordinary rule in the Public Suffix List and is only one label and therefore MUST be rejected.
+uri: "mongodb+srv://test1.test.build.10gen.cc/?srvAllowedHostsSuffix=cc"
+seeds: []
+hosts: []
+error: true
