@@ -260,8 +260,8 @@ describe('Find Cursor', function () {
         {
           timeoutContext: new CursorTimeoutContext(
             TimeoutContext.create({
-              timeoutMS: 1000,
-              serverSelectionTimeoutMS: 1000
+              serverSelectionTimeoutMS: 1000,
+              waitQueueTimeoutMS: 0
             }),
             Symbol()
           )

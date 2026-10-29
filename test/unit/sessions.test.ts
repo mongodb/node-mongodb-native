@@ -283,43 +283,20 @@ describe('Sessions - unit', function () {
           await mock.cleanup();
         });
 
-        context('when client has defined timeoutMS', function () {
-          beforeEach(async () => {
+        // NODE-7958: timeoutMS is a no-op, so the session never has a timeoutMS
+        context('when defaultTimeoutMS is defined', function () {
+          it('leaves timeoutMS as undefined', function () {
             client = new MongoClient(`mongodb://${server.hostAddress()}`, { timeoutMS: 100 });
-          });
-
-          context('when defaultTimeoutMS is defined', function () {
-            it(`overrides client's timeoutMS value`, function () {
-              session = new ClientSession(client, serverSessionPool, { defaultTimeoutMS: 200 });
-              expect(session).to.have.property('timeoutMS', 200);
-            });
-          });
-
-          context('when defaultTimeoutMS is not defined', function () {
-            it(`inherits client's timeoutMS value`, function () {
-              session = new ClientSession(client, serverSessionPool, {});
-              expect(session).to.have.property('timeoutMS', 100);
-            });
+            session = new ClientSession(client, serverSessionPool, { defaultTimeoutMS: 200 });
+            expect(session.timeoutMS).to.be.undefined;
           });
         });
 
-        context('when client has not defined timeoutMS', function () {
-          beforeEach(async () => {
-            client = new MongoClient(`mongodb://${server.hostAddress()}`, {});
-          });
-
-          context('when defaultTimeoutMS is defined', function () {
-            it(`sets timeoutMS to defaultTimeoutMS`, function () {
-              session = new ClientSession(client, serverSessionPool, { defaultTimeoutMS: 200 });
-              expect(session).to.have.property('timeoutMS', 200);
-            });
-          });
-
-          context('when defaultTimeoutMS is not defined', function () {
-            it(`leaves timeoutMS as undefined`, function () {
-              session = new ClientSession(client, serverSessionPool, {});
-              expect(session.timeoutMS).to.be.undefined;
-            });
+        context('when defaultTimeoutMS is not defined', function () {
+          it('leaves timeoutMS as undefined', function () {
+            client = new MongoClient(`mongodb://${server.hostAddress()}`, { timeoutMS: 100 });
+            session = new ClientSession(client, serverSessionPool, {});
+            expect(session.timeoutMS).to.be.undefined;
           });
         });
       });

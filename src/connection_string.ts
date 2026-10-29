@@ -380,11 +380,13 @@ export function parseOptions(
         setOption(mongoOptions, key, descriptor, [DEFAULT_OPTIONS.get(key)]);
       }
     } else {
-      const { deprecated } = descriptor;
+      const { deprecated, ignored } = descriptor;
       if (deprecated) {
         const deprecatedMsg = typeof deprecated === 'string' ? `: ${deprecated}` : '';
         emitWarning(`${key} is a deprecated option${deprecatedMsg}`);
       }
+
+      if (ignored) continue;
 
       setOption(mongoOptions, key, descriptor, values);
     }
@@ -638,6 +640,8 @@ interface OptionDescriptor {
   default?: any;
 
   deprecated?: boolean | string;
+  /** The option is accepted but has no effect, so it is never stored on the resolved options. */
+  ignored?: boolean;
   /**
    * @param name - the original option name
    * @param options - the options so far for resolution
@@ -1105,7 +1109,6 @@ export const OPTIONS = {
     type: 'string'
   },
   socketTimeoutMS: {
-    // TODO(NODE-6491): deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
   },
@@ -1122,7 +1125,8 @@ export const OPTIONS = {
     type: 'boolean'
   },
   timeoutMS: {
-    type: 'uint'
+    deprecated: 'timeoutMS has no effect and will be removed in a future release',
+    ignored: true
   },
   tls: {
     type: 'boolean'
@@ -1176,7 +1180,6 @@ export const OPTIONS = {
     }
   },
   waitQueueTimeoutMS: {
-    // TODO(NODE-6491): deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
   },

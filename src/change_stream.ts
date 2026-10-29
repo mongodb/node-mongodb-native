@@ -20,7 +20,7 @@ import type { AggregateOptions } from './operations/aggregate';
 import type { OperationParent } from './operations/command';
 import { DeprioritizedServers } from './sdam/server_selection';
 import type { ServerSessionId } from './sessions';
-import { CSOTTimeoutContext, type TimeoutContext } from './timeout';
+import { type TimeoutContext } from './timeout';
 import { type AnyOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
 const CHANGE_DOMAIN_TYPES = {
@@ -647,18 +647,14 @@ export class ChangeStream<
 
     this.pipeline = pipeline;
     this.options = { ...options };
-    let serverSelectionTimeoutMS: number;
     delete this.options.writeConcern;
 
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;
-      serverSelectionTimeoutMS = parent.s.db.client.options.serverSelectionTimeoutMS;
     } else if (parent instanceof Db) {
       this.type = CHANGE_DOMAIN_TYPES.DATABASE;
-      serverSelectionTimeoutMS = parent.client.options.serverSelectionTimeoutMS;
     } else if (parent instanceof MongoClient) {
       this.type = CHANGE_DOMAIN_TYPES.CLUSTER;
-      serverSelectionTimeoutMS = parent.options.serverSelectionTimeoutMS;
     } else {
       throw new MongoChangeStreamError(
         'Parent provided to ChangeStream constructor must be an instance of Collection, Db, or MongoClient'
@@ -690,13 +686,6 @@ export class ChangeStream<
         this.cursorStream?.removeAllListeners('data');
       }
     });
-
-    if (this.options.timeoutMS != null) {
-      this.timeoutContext = new CSOTTimeoutContext({
-        timeoutMS: this.options.timeoutMS,
-        serverSelectionTimeoutMS
-      });
-    }
   }
 
   /** The cached resume token that is used to resume after the most recently returned change. */

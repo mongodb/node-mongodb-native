@@ -13,7 +13,7 @@ import {
 import type { FindOptions } from '../operations/find';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { CSOTTimeoutContext } from '../timeout';
+import { type CSOTTimeoutContext } from '../timeout';
 import type { Callback } from '../utils';
 import type { GridFSChunk } from './upload';
 
@@ -31,8 +31,8 @@ export interface GridFSBucketReadStreamOptions {
    */
   end?: number;
   /**
-   * @experimental
    * Specifies the time an operation will run until it throws a timeout error
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
 }
@@ -151,11 +151,7 @@ export class GridFSBucketReadStream extends Readable {
         end: 0,
         ...options
       },
-      readPreference,
-      timeoutContext:
-        options?.timeoutMS != null
-          ? new CSOTTimeoutContext({ timeoutMS: options.timeoutMS, serverSelectionTimeoutMS: 0 })
-          : undefined
+      readPreference
     };
   }
 

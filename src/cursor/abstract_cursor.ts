@@ -67,7 +67,6 @@ function removeActiveCursor(this: AbstractCursor) {
 
 /**
  * @public
- * @experimental
  * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
  * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
  * `cursor.next()`.
@@ -93,6 +92,7 @@ function removeActiveCursor(this: AbstractCursor) {
  * const cursor = collection.find({}, { timeoutMS: 1000, timeoutMode: 'cursorLifetime' });
  * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.
  * ```
+ * @deprecated `timeoutMode` has no effect and will be removed in a future release.
  */
 export const CursorTimeoutMode = Object.freeze({
   ITERATION: 'iteration',
@@ -101,7 +101,7 @@ export const CursorTimeoutMode = Object.freeze({
 
 /**
  * @public
- * @experimental
+ * @deprecated `timeoutMode` has no effect and will be removed in a future release.
  */
 export type CursorTimeoutMode = (typeof CursorTimeoutMode)[keyof typeof CursorTimeoutMode];
 
@@ -143,11 +143,13 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    */
   awaitData?: boolean;
   noCursorTimeout?: boolean;
-  /** Specifies the time an operation will run until it throws a timeout error. See {@link AbstractCursorOptions.timeoutMode} for more details on how this option applies to cursors. */
+  /**
+   * Specifies the time an operation will run until it throws a timeout error.
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
+   */
   timeoutMS?: number;
   /**
    * @public
-   * @experimental
    * Specifies how `timeoutMS` is applied to the cursor. Can be either `'cursorLifeTime'` or `'iteration'`
    * When set to `'iteration'`, the deadline specified by `timeoutMS` applies to each call of
    * `cursor.next()`.
@@ -173,6 +175,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    * const cursor = collection.find({}, { timeoutMS: 1000, timeoutMode: 'cursorLifetime' });
    * const docs = await cursor.toArray(); // This entire line will throw a timeout error if all batches are not fetched and returned within 1000ms.
    * ```
+   * @deprecated `timeoutMode` has no effect and will be removed in a future release.
    */
   timeoutMode?: CursorTimeoutMode;
 
@@ -273,49 +276,9 @@ export abstract class AbstractCursor<
           ? options.readPreference
           : ReadPreference.primary,
       ...pluckBSONSerializeOptions(options),
-      timeoutMS: options?.timeoutContext?.csotEnabled()
-        ? options.timeoutContext.timeoutMS
-        : options.timeoutMS,
       tailable: options.tailable,
       awaitData: options.awaitData
     };
-
-    if (this.cursorOptions.timeoutMS != null) {
-      if (options.timeoutMode == null) {
-        if (options.tailable) {
-          if (options.awaitData) {
-            if (
-              options.maxAwaitTimeMS != null &&
-              options.maxAwaitTimeMS >= this.cursorOptions.timeoutMS
-            )
-              throw new MongoInvalidArgumentError(
-                'Cannot specify maxAwaitTimeMS >= timeoutMS for a tailable awaitData cursor'
-              );
-          }
-
-          this.cursorOptions.timeoutMode = CursorTimeoutMode.ITERATION;
-        } else {
-          this.cursorOptions.timeoutMode = CursorTimeoutMode.LIFETIME;
-        }
-      } else {
-        if (options.tailable && options.timeoutMode === CursorTimeoutMode.LIFETIME) {
-          throw new MongoInvalidArgumentError(
-            "Cannot set tailable cursor's timeoutMode to LIFETIME"
-          );
-        }
-        this.cursorOptions.timeoutMode = options.timeoutMode;
-      }
-    } else {
-      if (options.timeoutMode != null)
-        throw new MongoInvalidArgumentError('Cannot set timeoutMode without setting timeoutMS');
-    }
-
-    // Set for initial command
-    this.cursorOptions.omitMaxTimeMS =
-      this.cursorOptions.timeoutMS != null &&
-      ((this.cursorOptions.timeoutMode === CursorTimeoutMode.ITERATION &&
-        !this.cursorOptions.tailable) ||
-        (this.cursorOptions.tailable && !this.cursorOptions.awaitData));
 
     const readConcern = ReadConcern.fromOptions(options);
     if (readConcern) {
@@ -635,9 +598,14 @@ export abstract class AbstractCursor<
 
   /**
    * Frees any client-side resources used by the cursor.
+   *
+   * @param _options - `timeoutMS` is deprecated and has no effect
    */
-  async close(options?: { timeoutMS?: number }): Promise<void> {
-    await this.cleanup(options?.timeoutMS);
+  async close(_options?: {
+    /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+    timeoutMS?: number;
+  }): Promise<void> {
+    await this.cleanup();
   }
 
   /**

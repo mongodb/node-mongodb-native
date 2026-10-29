@@ -9,8 +9,8 @@ import {
   MongoError,
   MongoOperationTimeoutError
 } from '../error';
-import { CSOTTimeoutContext } from '../timeout';
-import { type Callback, resolveTimeoutOptions, squashError } from '../utils';
+import { type CSOTTimeoutContext } from '../timeout';
+import { type Callback, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
 import type { GridFSFile } from './download';
@@ -33,8 +33,8 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   /** Object to store in the file document's `metadata` field */
   metadata?: Document;
   /**
-   * @experimental
    * Specifies the time an operation will run until it throws a timeout error
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
 }
@@ -132,13 +132,6 @@ export class GridFSBucketWriteStream extends Writable {
       errored: false,
       aborted: false
     };
-
-    if (options.timeoutMS != null)
-      this.timeoutContext = new CSOTTimeoutContext({
-        timeoutMS: options.timeoutMS,
-        serverSelectionTimeoutMS: resolveTimeoutOptions(this.bucket.s.db.client, {})
-          .serverSelectionTimeoutMS
-      });
   }
 
   /**
