@@ -187,12 +187,20 @@ export async function makeClientMetadata(
   // A placeholder document that contains all groups of data to be appended to the metadata document
   // which are furnished from environment variables (agent, FAAS, container)
   const fullEnv = new Map<string, unknown>();
-  
+
   // FAAS & Agent are set jointly & fitted after, since their order isn't significant
   const faasEnv = getFAASEnv();
-  for (const [k, v] of faasEnv) fullEnv.set(k, v);  
+  for (const [k, v] of faasEnv) {
+    // delay setting name, it needs to be done *after* agent
+    if (k !== 'name') {
+       fullEnv.set(k, v)
+    }
+  };
   const agentEnv = getAgentEnv();
   if (agentEnv.length > 0) fullEnv.set('agent', agentEnv);
+  if (faasEnv.has('name')) {
+    fullEnv.set('name', faasEnv.get('name'))
+  }
 
   // Fits to the metadata document preferentially setting by property order
   if (fullEnv.size > 0 && !metadataDocument.ifItFitsItSits('env', fullEnv)) {
