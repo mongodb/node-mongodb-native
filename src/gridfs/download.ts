@@ -2,7 +2,6 @@ import { Readable } from 'stream';
 
 import { ByteUtils, type Document, type ObjectId } from '../bson';
 import type { Collection } from '../collection';
-import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 import type { FindCursor } from '../cursor/find_cursor';
 import {
   MongoGridFSChunkError,
@@ -367,7 +366,6 @@ function init(stream: GridFSBucketReadStream): void {
 
     stream.s.cursor = stream.s.chunks
       .find(filter, {
-        timeoutMode: stream.s.options.timeoutMS != null ? CursorTimeoutMode.LIFETIME : undefined,
         timeoutMS: remainingTimeMS
       })
       .sort({ n: 1 });

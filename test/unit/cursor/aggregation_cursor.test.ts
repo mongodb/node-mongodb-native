@@ -28,6 +28,24 @@ describe('class AggregationCursor', () => {
     });
   });
 
+  // NODE-7958: timeoutMS and timeoutMode are no-ops
+  context('when timeoutMS and timeoutMode are provided', () => {
+    it('does not keep them on the cursor options or the aggregate options', () => {
+      const options = { timeoutMS: 100, timeoutMode: CursorTimeoutMode.ITERATION };
+      const aggregationCursor = new AggregationCursor(
+        client,
+        ns('db.coll'),
+        [{ $out: 'test' }],
+        options
+      );
+
+      expect(aggregationCursor).to.not.have.nested.property('cursorOptions.timeoutMS');
+      expect(aggregationCursor).to.not.have.nested.property('cursorOptions.timeoutMode');
+      expect(aggregationCursor).to.have.nested.property('aggregateOptions.timeoutMS', undefined);
+      expect(aggregationCursor).to.have.nested.property('aggregateOptions.timeoutMode', undefined);
+    });
+  });
+
   context('clone()', () => {
     it('returns a new cursor', () => {
       const cloned = cursor.clone();

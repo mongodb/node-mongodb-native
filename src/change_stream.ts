@@ -647,6 +647,9 @@ export class ChangeStream<
 
     this.pipeline = pipeline;
     this.options = { ...options };
+    // timeoutMS and timeoutMode are no-ops, so they must never reach the cursor options
+    this.options.timeoutMS = undefined;
+    this.options.timeoutMode = undefined;
     delete this.options.writeConcern;
 
     if (parent instanceof Collection) {

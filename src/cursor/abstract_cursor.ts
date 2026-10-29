@@ -212,6 +212,10 @@ export abstract class AbstractCursor<
     super();
     this.on('error', noop);
 
+    // timeoutMS and timeoutMode are no-ops, so they must never reach the operations built from these options
+    options.timeoutMS = undefined;
+    options.timeoutMode = undefined;
+
     if (!client.s.isMongoClient) {
       throw new MongoRuntimeError('Cursor must be constructed with MongoClient');
     }

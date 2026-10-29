@@ -2,7 +2,6 @@ import { Writable } from 'stream';
 
 import { ByteUtils, type Document, ObjectId } from '../bson';
 import type { Collection } from '../collection';
-import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 import {
   MongoAPIError,
   MONGODB_ERROR_CODES,
@@ -241,7 +240,6 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   try {
     indexes = await stream.chunks
       .listIndexes({
-        timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined,
         timeoutMS: remainingTimeMS
       })
       .toArray();
@@ -341,7 +339,6 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
     `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
   );
   const listIndexesOptions = {
-    timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined,
     timeoutMS: remainingTimeMS
   };
   try {
