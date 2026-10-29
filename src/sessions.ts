@@ -60,6 +60,7 @@ export interface ClientSessionOptions {
   defaultTransactionOptions?: TransactionOptions;
   /**
    * @public
+   * An overriding timeoutMS value to use for a client-side timeout.
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   defaultTimeoutMS?: number;
@@ -90,7 +91,10 @@ export interface EndSessionOptions {
   force?: boolean;
   forceClear?: boolean;
 
-  /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+  /**
+   * Specifies the time an operation will run until it throws a timeout error
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
+   */
   timeoutMS?: number;
 }
 
@@ -492,10 +496,8 @@ export class ClientSession
     });
     operation.maxAttempts = this.clientOptions.maxAdaptiveRetries + 1;
 
-    const timeoutContext = this.timeoutContext ?? null;
-
     try {
-      await executeOperation(this.client, operation, timeoutContext);
+      await executeOperation(this.client, operation);
       this.commitAttempted = undefined;
       return;
     } catch (firstCommitError) {
@@ -519,7 +521,7 @@ export class ClientSession
             bypassPinningCheck: true
           });
           op.maxAttempts = remainingAttempts;
-          await executeOperation(this.client, op, timeoutContext);
+          await executeOperation(this.client, op);
           return;
         } catch (retryCommitError) {
           // If the retry failed, we process that error instead of the original
@@ -587,8 +589,6 @@ export class ClientSession
       recoveryToken?: Document;
     } = { abortTransaction: 1 };
 
-    const timeoutContext = null;
-
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
     if (wc != null) {
       WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
@@ -605,7 +605,7 @@ export class ClientSession
     });
 
     try {
-      await executeOperation(this.client, operation, timeoutContext);
+      await executeOperation(this.client, operation);
       this.unpin();
       return;
     } catch (firstAbortError) {
@@ -618,7 +618,7 @@ export class ClientSession
 
       if (firstAbortError instanceof MongoError && isRetryableWriteError(firstAbortError)) {
         try {
-          await executeOperation(this.client, operation, timeoutContext);
+          await executeOperation(this.client, operation);
           return;
         } catch (secondAbortError) {
           if (secondAbortError.name === 'MongoRuntimeError') throw secondAbortError;
@@ -683,7 +683,10 @@ export class ClientSession
   async withTransaction<T = any>(
     fn: WithTransactionCallback<T>,
     options?: TransactionOptions & {
-      /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+      /**
+       * Configures a timeoutMS expiry for the entire withTransactionCallback.
+       * @deprecated `timeoutMS` has no effect and will be removed in a future release.
+       */
       timeoutMS?: number;
     }
   ): Promise<T> {

@@ -987,6 +987,7 @@ export interface ClientEncryptionOptions {
   keyExpirationMS?: number;
 
   /**
+   * The timeout setting to be used for all the operations on ClientEncryption.
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
