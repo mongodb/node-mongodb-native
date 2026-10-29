@@ -23,8 +23,8 @@ const {
   GRAVITON_OS
 } = require('./ci_matrix_constants');
 
-// Node v27 breaks tests
-// TODO: $TICKET
+// TODO(NODE-7962): revert to 'latest' after node v27 support is added to the driver as, currently the 
+// driver is not compatible
 const LATEST_NODE_VERSION = 26;
 
 const OPERATING_SYSTEMS = [
