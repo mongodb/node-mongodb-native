@@ -1187,10 +1187,21 @@ describe('MongoClient', function () {
       });
     }
 
-    context('when timeoutMS is in the connection string', function () {
-      it('does not throw and is not set on the options', function () {
-        const client = new MongoClient('mongodb://host/?timeoutMS=100');
-        expect(client.options).to.not.have.property('timeoutMS');
+    for (const value of ['100', '-5', 'abc', '']) {
+      context(`when timeoutMS is "${value}" in the connection string`, function () {
+        it('does not throw and is not set on the options', function () {
+          const client = new MongoClient(`mongodb://host/?timeoutMS=${value}`);
+          expect(client.options).to.not.have.property('timeoutMS');
+        });
+      });
+    }
+
+    context('when another option has an empty value in the connection string', function () {
+      it('still throws', function () {
+        expect(() => new MongoClient('mongodb://host/?socketTimeoutMS=')).to.throw(
+          MongoAPIError,
+          /cannot be specified with no value/
+        );
       });
     });
   });
