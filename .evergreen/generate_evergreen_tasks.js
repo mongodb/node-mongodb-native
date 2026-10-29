@@ -23,6 +23,10 @@ const {
   GRAVITON_OS
 } = require('./ci_matrix_constants');
 
+// TODO(NODE-7962): revert to 'latest' after node v27 support is added to the driver as, currently
+// the driver is not compatible
+const LATEST_NODE_VERSION = 26;
+
 const OPERATING_SYSTEMS = [
   {
     name: DEFAULT_OS,
@@ -436,7 +440,7 @@ for (const {
       display_name: `${osDisplayName} Node Latest`,
       run_on,
       expansions: {
-        NODE_LTS_VERSION: 'latest',
+        NODE_LTS_VERSION: LATEST_NODE_VERSION,
         CLIENT_ENCRYPTION: String(!!clientEncryption),
         TEST_CSFLE: String(!!clientEncryption)
       },
@@ -918,7 +922,7 @@ BUILD_VARIANTS.push({
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
+  variant => variant.expansions && variant.expansions.NODE_LTS_VERSION === LATEST_NODE_VERSION
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-socks5'].includes(name));
 }
