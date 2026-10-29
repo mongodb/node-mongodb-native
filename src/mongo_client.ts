@@ -1115,6 +1115,8 @@ export interface MongoOptions
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+  timeoutMS?: number;
   /** @internal */
   __skipPingOnConnect?: boolean;
 
