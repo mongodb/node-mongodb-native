@@ -120,7 +120,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500,
       serverMonitoringMode: options.serverMonitoringMode
     });
-    this.isRunningInFaasEnv = getFAASEnv() != null;
+    this.isRunningInFaasEnv = getFAASEnv().size > 0;
     this.mongoLogger = this.server.topology.client?.mongoLogger;
     this.rttSampler = new RTTSampler(10);
 
