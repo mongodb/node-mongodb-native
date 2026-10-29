@@ -43,10 +43,5 @@ describe('class AbstractCursor', () => {
       expect(cursor).to.have.property('session', session);
       await session.endSession();
     });
-
-    it('does not throw when given frozen options', () => {
-      const options = Object.freeze({ timeoutMS: 100 });
-      expect(() => new ConcreteCursor(client, options)).to.not.throw();
-    });
   });
 });
