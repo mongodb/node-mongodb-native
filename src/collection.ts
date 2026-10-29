@@ -1263,7 +1263,7 @@ export class Collection<TSchema extends Document = Document> {
           ? null
           : indexNameOrOptions;
 
-    return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, { ...options });
+    return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, options);
   }
 
   /**

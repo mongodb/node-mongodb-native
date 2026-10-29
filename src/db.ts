@@ -570,6 +570,6 @@ export class Db {
    * @param options - Configurations for running the command, bson options will apply to getMores
    */
   runCursorCommand(command: Document, options?: RunCursorCommandOptions): RunCommandCursor {
-    return new RunCommandCursor(this, command, { ...options });
+    return new RunCommandCursor(this, command, options);
   }
 }
