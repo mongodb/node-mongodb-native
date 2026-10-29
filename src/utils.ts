@@ -1188,8 +1188,7 @@ export function checkParentDomainMatch(normalizedAddress: string, srvHost: strin
 
 /**
  * Forbidden domain code points, per the WHATWG URL Standard. `domainToASCII` parses its input as
- * URL text (for example, `evil.com/x.example.com` becomes `evil.com`), so names containing these
- * characters are rejected before conversion.
+ * URL text, so names containing these characters are rejected before conversion.
  */
 // eslint-disable-next-line no-control-regex
 const FORBIDDEN_DOMAIN_CODE_POINTS = /[\u0000-\u0020\u007F#%/:<>?@[\\\]^|]/;

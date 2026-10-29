@@ -213,15 +213,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * set in the connection string.
    *
    * The function runs synchronously during SRV resolution and SRV polling, so it must not block.
-   * Returning anything other than a boolean, including the Promise returned by an `async` function,
-   * is an error.
    *
-   * If the function throws or returns a non-boolean during the initial SRV lookup, `connect()`
-   * rejects with a `MongoAPIError`; an error thrown by the function is available as its `cause`.
-   * During SRV polling, the host is rejected instead and no error is raised.
-   *
-   * `client.options.srvHostValidator` is a wrapper around the provided function that applies these
-   * checks, not the provided function itself.
+   * If the function throws during the initial SRV lookup, `connect()` rejects with a
+   * `MongoAPIError` whose `cause` is the thrown error. During SRV polling, the host is rejected
+   * instead and no error is raised.
    *
    * **WARNING: Modifying the default SRV domain name validation can create vulnerabilities.**
    * SRV host verification prevents a spoofed DNS response from directing the driver to arbitrary
