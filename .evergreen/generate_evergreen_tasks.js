@@ -677,7 +677,10 @@ for (const serverVersion of ['5.0', '8.0']) {
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'install mongodb-client-encryption from source' },
+      // The 6.x line is pinned to a released mongodb-client-encryption, whose prebuilt addon is published
+      // with the GitHub release. Building it from source needs the libmongocrypt prebuilds on S3, which
+      // are no longer available.
+      { func: 'install package', vars: { PACKAGE: 'mongodb-client-encryption@6.5.0' } },
       { func: 'assume secrets manager role' },
       { func: 'run custom csfle tests' }
     ]

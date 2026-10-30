@@ -1967,7 +1967,9 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: install mongodb-client-encryption from source
+      - func: install package
+        vars:
+          PACKAGE: mongodb-client-encryption@6.5.0
       - func: assume secrets manager role
       - func: run custom csfle tests
   - name: run-custom-csfle-tests-8.0
@@ -1985,7 +1987,9 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - func: install mongodb-client-encryption from source
+      - func: install package
+        vars:
+          PACKAGE: mongodb-client-encryption@6.5.0
       - func: assume secrets manager role
       - func: run custom csfle tests
   - name: test-latest-driver-mongodb-client-encryption-6.0.0
