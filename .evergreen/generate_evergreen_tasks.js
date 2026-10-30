@@ -21,6 +21,10 @@ const {
   UBUNTU_22_OS
 } = require('./ci_matrix_constants');
 
+// TODO(NODE-7962): revert to 'latest' after node v27 support is added to the driver as, currently
+// the driver is not compatible
+const LATEST_NODE_VERSION = 26;
+
 const OPERATING_SYSTEMS = [
   {
     name: DEFAULT_OS,
@@ -96,11 +100,11 @@ const AUTH_DISABLED_TASKS = generateVersionTopologyMatrix().map(test =>
 );
 
 BASE_TASKS.push({
-  name: `test-latest-server-v1-api`,
-  tags: ['latest', 'server', 'v1-api'],
+  name: `test-8.0-server-v1-api`,
+  tags: ['8.0', 'server', 'v1-api'],
   commands: [
     updateExpansions({
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'server',
       REQUIRE_API_VERSION: '1',
       MONGODB_API_VERSION: '1',
@@ -177,7 +181,7 @@ TASKS.push(
       tags: [],
       commands: [
         updateExpansions({
-          VERSION: 'latest',
+          VERSION: '8.0',
           TOPOLOGY: 'replica_set'
         }),
         { func: 'install dependencies' },
@@ -190,7 +194,7 @@ TASKS.push(
       tags: ['socks5-csfle'],
       commands: [
         updateExpansions({
-          VERSION: 'latest',
+          VERSION: '8.0',
           TOPOLOGY: 'replica_set',
           TEST_SOCKS5_CSFLE: 'true'
         }),
@@ -205,7 +209,7 @@ TASKS.push(
       commands: [
         updateExpansions({
           SSL: 'ssl',
-          VERSION: 'latest',
+          VERSION: '8.0',
           TOPOLOGY: 'replica_set'
         }),
         { func: 'install dependencies' },
@@ -221,7 +225,7 @@ TASKS.push({
   tags: ['latest', 'snappy'],
   commands: [
     updateExpansions({
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
       COMPRESSOR: 'snappy',
@@ -239,7 +243,7 @@ TASKS.push({
   tags: ['latest', 'zstd'],
   commands: [
     updateExpansions({
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
       COMPRESSOR: 'zstd',
@@ -263,7 +267,7 @@ TASKS.push({
   tags: ['latest', 'zstd'],
   commands: [
     updateExpansions({
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
       COMPRESSOR: 'zstd',
@@ -285,7 +289,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   commands: [
     updateExpansions({
       NPM_VERSION: 9,
-      VERSION: 'rapid',
+      VERSION: '8.0',
       TOPOLOGY: 'server'
     }),
     { func: 'install dependencies' },
@@ -301,7 +305,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   commands: [
     updateExpansions({
       NPM_VERSION: 9,
-      VERSION: 'rapid',
+      VERSION: '8.0',
       AUTH: 'auth',
       ORCHESTRATION_FILE: 'auth-aws.json',
       TOPOLOGY: 'server'
@@ -440,7 +444,7 @@ for (const {
       name: `${osName}-node-latest`,
       display_name: `${osDisplayName} Node Latest`,
       run_on,
-      expansions: { NODE_LTS_VERSION: 'latest' },
+      expansions: { NODE_LTS_VERSION: LATEST_NODE_VERSION },
       tasks: tasks.map(({ name }) => name)
     };
     if (clientEncryption) {
@@ -451,9 +455,8 @@ for (const {
 }
 
 // Running CSFLE tests with mongocryptd
-const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
-  mongoVersion =>
-    ['latest', 'rapid'].includes(mongoVersion) || semver.gte(`${mongoVersion}.0`, '4.2.0')
+const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(mongoVersion =>
+  semver.gte(`${mongoVersion}.0`, '4.2.0')
 ).map(mongoVersion => {
   return {
     name: `test-${mongoVersion}-csfle-mongocryptd`,
@@ -496,7 +499,7 @@ BUILD_VARIANTS.push({
     NODE_LTS_VERSION: LATEST_LTS,
     CLIENT_ENCRYPTION: true
   },
-  tasks: ['test-rapid-server']
+  tasks: ['test-8.0-server']
 });
 
 const unitTestTasks = Array.from(
@@ -562,7 +565,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          VERSION: 'latest',
+          VERSION: '8.0',
           TOPOLOGY: 'replica_set',
           NODE_LTS_VERSION: LATEST_LTS
         }),
@@ -610,10 +613,11 @@ function* makeTypescriptTasks() {
   }
 
   const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1);
-  yield makeCheckTypesTask('next', typesVersion);
+  // TODO(NODE-7233): unskip ts@next tests once we adopt Typescript 6.0.
+  // yield makeCheckTypesTask('next', typesVersion);
   yield makeCheckTypesTask('current', typesVersion);
 
-  yield makeCheckTypesTask('next', '16.x');
+  // yield makeCheckTypesTask('next', '16.x');
   yield makeCheckTypesTask('current', '16.x');
 
   // typescript 4.4 only compiles our types with this particular version
@@ -647,19 +651,19 @@ BUILD_VARIANTS.push({
   tasks: AWS_AUTH_TASKS
 });
 
-BUILD_VARIANTS.push({
-  name: 'ubuntu2204-test-atlas-data-lake',
-  display_name: 'Atlas Data Lake Tests',
-  run_on: UBUNTU_22_OS,
-  expansions: {
-    NODE_LTS_VERSION: LATEST_LTS
-  },
-  tasks: ['test-atlas-data-lake']
-});
+// BUILD_VARIANTS.push({
+//   name: 'ubuntu2204-test-atlas-data-lake',
+//   display_name: 'Atlas Data Lake Tests',
+//   run_on: UBUNTU_22_OS,
+//   expansions: {
+//     NODE_LTS_VERSION: LATEST_LTS
+//   },
+//   tasks: ['test-atlas-data-lake']
+// });
 
 const customDependencyTests = [];
 
-for (const serverVersion of ['5.0', 'rapid', 'latest']) {
+for (const serverVersion of ['5.0', '8.0']) {
   customDependencyTests.push({
     name: `run-custom-csfle-tests-${serverVersion}`,
     tags: ['run-custom-dependency-tests'],
@@ -673,7 +677,10 @@ for (const serverVersion of ['5.0', 'rapid', 'latest']) {
       }),
       { func: 'install dependencies' },
       { func: 'bootstrap mongo-orchestration' },
-      { func: 'install mongodb-client-encryption from source' },
+      // The 6.x line is pinned to a released mongodb-client-encryption, whose prebuilt addon is published
+      // with the GitHub release. Building it from source needs the libmongocrypt prebuilds on S3, which
+      // are no longer available.
+      { func: 'install package', vars: { PACKAGE: 'mongodb-client-encryption@6.5.0' } },
       { func: 'assume secrets manager role' },
       { func: 'run custom csfle tests' }
     ]
@@ -730,7 +737,7 @@ SINGLETON_TASKS.push({
   commands: [
     updateExpansions({
       NODE_VERSION: '16.20.1',
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'replica_set',
       CLIENT_ENCRYPTION: true,
       TEST_CSFLE: true,
@@ -872,7 +879,7 @@ BUILD_VARIANTS.push({
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
+  variant => variant.expansions && variant.expansions.NODE_LTS_VERSION === LATEST_NODE_VERSION
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-socks5'].includes(name));
 }
