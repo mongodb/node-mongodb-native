@@ -13,7 +13,6 @@ This file documents all experimental features in the MongoDB Node.js Driver.
 | --------------------------------------------------- | -------------------------------------------- | ------------- |
 | [Runtime Adapters](#runtime-adapters)               | Custom runtime module implementations        | v7.2.0        |
 | [AbortSignal Support](#abortsignal-support)         | Cancel operations using `AbortController`    | v6.13.0       |
-| [Timeout Management](#timeout-management)           | Control operation timeouts with `timeoutMS`  | v6.6.0        |
 | [Strict TypeScript Types](#strict-typescript-types) | Enhanced type safety for filters and updates | v5.0.0        |
 
 ---
@@ -79,73 +78,6 @@ await collection.find({}, { signal }).toArray();
 
 > [!NOTE]
 > The socket-teardown behavior described above is a driver implementation limitation. Making `AbortSignal` stable would require a project to cancel in-flight socket I/O without discarding the connection. Until that lands, the API is unsafe for high-frequency cancellation and will remain experimental.
-
----
-
-### Timeout Management
-
-Specifies the Client-side operations timeout (CSOT) in milliseconds after which an operation will throw an error. `timeoutMS` can be configured at the client, database, collection, session, transaction, and per-operation levels, with narrower scopes overriding broader ones.
-
-_See [Limit Server Execution Time](https://www.mongodb.com/docs/drivers/node/current/connect/connection-options/csot/) for the full inheritance/override rules, cursor-specific behavior, Client Encryption interactions, and code examples._
-
-> [!NOTE]
-> This feature will remain experimental while the common driver specification for Client-Side Operations Timeout isn't finalized.
-
-#### Cursor Timeout Modes
-
-This configures how the CSOT `timeoutMS` above is applied to cursors.
-
-**Type**: [`CursorTimeoutMode`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+path%3Aabstract_cursor.ts+CursorTimeoutMode&type=code)
-
-**Available on**:
-
-- [`AbstractCursorOptions.timeoutMode`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5EAbstractCursorOptions%24%2F&type=code)
-- [`RunCursorCommandOptions.timeoutMode`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5ERunCursorCommandOptions%24%2F&type=code)
-
-**Values**:
-
-- `'cursorLifetime'` — Timeout applies to the entire cursor lifetime (default for non-tailable cursors)
-- `'iteration'` — Timeout applies to each `cursor.next()` call (default for tailable cursors)
-
-**Example**:
-
-```typescript
-// timeoutMS applies to each next() call, not the whole cursor
-const cursor = collection.find(
-  {},
-  {
-    timeoutMS: 1_000,
-    timeoutMode: 'iteration'
-  }
-);
-
-for await (const doc of cursor) {
-  // each iteration gets its own 1s budget
-}
-```
-
-#### GridFS Streams
-
-Applies the CSOT `timeoutMS` above to GridFS upload and download streams as a per-stream lifetime.
-
-**Options**:
-
-- [`GridFSBucketReadStreamOptions.timeoutMS`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5EGridFSBucketReadStreamOptions%24%2F&type=code) — Limits the lifetime of a download stream; if any async operation is in progress when the timeout expires, the stream throws a timeout error.
-- [`GridFSBucketWriteStreamOptions.timeoutMS`](https://github.com/search?q=repo%3Amongodb%2Fnode-mongodb-native+symbol%3A%2F%5EGridFSBucketWriteStreamOptions%24%2F&type=code) — Limits the lifetime of an upload stream.
-
-**Example**:
-
-```typescript
-const bucket = new GridFSBucket(db);
-
-// Upload stream: fail if the whole upload takes longer than 30s
-const uploadStream = bucket.openUploadStream('report.pdf', { timeoutMS: 30_000 });
-await pipeline(fs.createReadStream('report.pdf'), uploadStream);
-
-// Download stream: fail if the whole download takes longer than 10s
-const downloadStream = bucket.openDownloadStream(uploadStream.id, { timeoutMS: 10_000 });
-await pipeline(downloadStream, fs.createWriteStream('out.pdf'));
-```
 
 ---
 
