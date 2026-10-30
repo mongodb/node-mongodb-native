@@ -23,8 +23,17 @@ describe('URI option spec tests', function () {
     // NOTE(NODE-3989): Skipped because we now only accept true/false for boolean options. The spec expects us to
     // warn on other accepted but deprecated values, but as of NODE-3989, we now throw on these
     // values
-    'Invalid loadBalanced value'
+    'Invalid loadBalanced value',
+
+    // NODE-7958: timeoutMS is a no-op, so it is accepted but never stored on the parsed options
+    'timeoutMS=0',
+    'Non-numeric timeoutMS causes a warning',
+    'Too low timeoutMS causes a warning'
   ];
+
+  // NODE-7958: the URI still contains timeoutMS, so these tests confirm it is accepted without
+  // throwing, but its expected value is dropped because it is never stored on the parsed options
+  const testsWithIgnoredTimeoutMS = ['Valid connection and timeout options are parsed correctly'];
 
   const testsThatDoNotThrowOnWarn = [
     // TODO(NODE-3923): compression option validation
@@ -54,8 +63,9 @@ describe('URI option spec tests', function () {
             return this.skip();
           }
 
+          const { timeoutMS: _timeoutMS, ...options } = test.options ?? {};
           executeUriValidationTest(
-            test,
+            testsWithIgnoredTimeoutMS.includes(test.description) ? { ...test, options } : test,
             testsThatDoNotThrowOnWarn.some(t => t === test.description)
           );
         });

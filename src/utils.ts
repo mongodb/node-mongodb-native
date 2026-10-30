@@ -512,12 +512,19 @@ export function resolveTimeoutOptions<T extends Partial<TimeoutContextOptions>>(
 ): T &
   Pick<
     MongoClient['s']['options'],
-    'timeoutMS' | 'serverSelectionTimeoutMS' | 'waitQueueTimeoutMS' | 'socketTimeoutMS'
-  > {
-  const { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS, timeoutMS } =
-    client.s.options;
-  return { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS, timeoutMS, ...options };
+    'serverSelectionTimeoutMS' | 'waitQueueTimeoutMS' | 'socketTimeoutMS'
+  > & { timeoutMS?: undefined } {
+  const { socketTimeoutMS, serverSelectionTimeoutMS, waitQueueTimeoutMS } = client.s.options;
+  // timeoutMS is a no-op, so it is never forwarded
+  return {
+    socketTimeoutMS,
+    serverSelectionTimeoutMS,
+    waitQueueTimeoutMS,
+    ...options,
+    timeoutMS: undefined
+  };
 }
+
 /**
  * Merge inherited properties from parent into options, prioritizing values from options,
  * then values from parent.
@@ -533,7 +540,6 @@ export function resolveOptions<T extends CommandOperationOptions>(
 ): T {
   const result: T = Object.assign({}, options, resolveBSONOptions(options, parent));
 
-  const timeoutMS = options?.timeoutMS ?? parent?.timeoutMS;
   // Users cannot pass a readConcern/writeConcern to operations in a transaction
   const session = options?.session;
 
@@ -543,33 +549,18 @@ export function resolveOptions<T extends CommandOperationOptions>(
       result.readConcern = readConcern;
     }
 
-    let writeConcern = WriteConcern.fromOptions(options) ?? parent?.writeConcern;
+    const writeConcern = WriteConcern.fromOptions(options) ?? parent?.writeConcern;
     if (writeConcern) {
-      if (timeoutMS != null) {
-        writeConcern = WriteConcern.fromOptions({
-          writeConcern: {
-            ...writeConcern,
-            wtimeout: undefined,
-            wtimeoutMS: undefined
-          }
-        });
-      }
       result.writeConcern = writeConcern;
     }
   }
 
-  result.timeoutMS = timeoutMS;
+  // timeoutMS is a no-op, so it is never propagated to the operation
+  result.timeoutMS = undefined;
 
   const readPreference = ReadPreference.fromOptions(options) ?? parent?.readPreference;
   if (readPreference) {
     result.readPreference = readPreference;
-  }
-
-  const isConvenientTransaction = session?.explicit && session?.timeoutContext != null;
-  if (isConvenientTransaction && options?.timeoutMS != null) {
-    throw new MongoInvalidArgumentError(
-      'An operation cannot be given a timeoutMS setting when inside a withTransaction call that has a timeoutMS setting'
-    );
   }
 
   return result;
