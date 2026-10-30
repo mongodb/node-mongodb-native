@@ -1176,25 +1176,32 @@ describe('MongoClient', function () {
   });
 
   context('timeoutMS', function () {
-    context('when timeoutMS is negative', function () {
-      it('throws MongoParseError', function () {
-        expect(() => new MongoClient('mongodb://host', { timeoutMS: -1 })).to.throw(
-          MongoParseError
+    // NODE-7958: timeoutMS is a no-op, it is accepted but never stored on the client
+    for (const timeoutMS of [-1, 0, 1]) {
+      context(`when timeoutMS is ${timeoutMS}`, function () {
+        it('does not throw and is not set on the options', function () {
+          const client = new MongoClient('mongodb://host', { timeoutMS });
+          expect(client.options).to.not.have.property('timeoutMS');
+          expect(client.timeoutMS).to.be.undefined;
+        });
+      });
+    }
+
+    for (const value of ['100', '-5', 'abc', '']) {
+      context(`when timeoutMS is "${value}" in the connection string`, function () {
+        it('does not throw and is not set on the options', function () {
+          const client = new MongoClient(`mongodb://host/?timeoutMS=${value}`);
+          expect(client.options).to.not.have.property('timeoutMS');
+        });
+      });
+    }
+
+    context('when another option has an empty value in the connection string', function () {
+      it('still throws', function () {
+        expect(() => new MongoClient('mongodb://host/?socketTimeoutMS=')).to.throw(
+          MongoAPIError,
+          /cannot be specified with no value/
         );
-      });
-    });
-
-    context('when timeoutMS is positive', function () {
-      it('sets the value on the MongoClient', function () {
-        const client = new MongoClient('mongodb://host', { timeoutMS: 1 });
-        expect(client.options.timeoutMS).to.equal(1);
-      });
-    });
-
-    context('when timeoutMS is zero', function () {
-      it('sets the value on the MongoClient', function () {
-        const client = new MongoClient('mongodb://host', { timeoutMS: 0 });
-        expect(client.options.timeoutMS).to.equal(0);
       });
     });
   });

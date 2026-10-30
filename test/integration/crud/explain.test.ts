@@ -300,7 +300,8 @@ describe('CRUD API explain option', function () {
     }
   });
 
-  describe('explain with timeoutMS', function () {
+  // NODE-7958: timeoutMS is a no-op
+  describe.skip('explain with timeoutMS', function () {
     let client: MongoClient;
     type ExplainStartedEvent = CommandStartedEvent & {
       command: { explain: Document & { maxTimeMS?: number }; maxTimeMS?: number };

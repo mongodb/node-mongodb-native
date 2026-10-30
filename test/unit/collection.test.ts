@@ -14,6 +14,15 @@ describe('Collection', function () {
     await cleanup();
   });
 
+  context('#listSearchIndexes', () => {
+    it('does not throw when given frozen options', () => {
+      const client = new MongoClient('mongodb://localhost:27017');
+      const options = Object.freeze({ timeoutMS: 100 });
+
+      expect(() => client.db().collection('test').listSearchIndexes(options)).to.not.throw();
+    });
+  });
+
   context('#aggregate', () => {
     // general test for aggregate function
     function testAggregate(config, done) {

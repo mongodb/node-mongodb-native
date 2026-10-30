@@ -18,12 +18,16 @@ import {
   isUint8Array,
   LEGACY_HELLO_COMMAND,
   List,
+  MongoClient,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
   MongoInvalidArgumentError,
   MongoRuntimeError,
   ObjectId,
-  shuffle
+  resolveOptions,
+  resolveTimeoutOptions,
+  shuffle,
+  TimeoutContext
 } from '../mongodb';
 import { sleep } from '../tools/utils';
 
@@ -1284,6 +1288,61 @@ describe('driver utils', function () {
 
         const result = await abortable(new Promise(() => null), { signal }).catch(e => e);
         expect(result).to.deep.equal(goodError);
+      });
+    });
+  });
+
+  // NODE-7958: timeoutMS and timeoutMode are no-ops
+  describe('timeoutMS no-op', function () {
+    describe('resolveOptions()', function () {
+      it('drops timeoutMS passed in the options', function () {
+        const result = resolveOptions(undefined, { timeoutMS: 100 });
+        expect(result.timeoutMS).to.be.undefined;
+      });
+
+      it('does not inherit timeoutMS from the parent', function () {
+        const result = resolveOptions({
+          s: { namespace: new MongoDBNamespace('db') },
+          timeoutMS: 100
+        });
+        expect(result.timeoutMS).to.be.undefined;
+      });
+
+      it('does not throw when timeoutMS is given inside an explicit session', function () {
+        const session = {
+          explicit: true,
+          timeoutContext: {},
+          inTransaction: () => true,
+          transaction: { options: {} }
+        };
+        expect(() => resolveOptions(undefined, { timeoutMS: 100, session } as any)).to.not.throw();
+      });
+
+      it('keeps wtimeoutMS on the write concern', function () {
+        const result = resolveOptions(undefined, {
+          timeoutMS: 100,
+          writeConcern: { w: 1, wtimeoutMS: 50 }
+        });
+        expect(result.writeConcern).to.have.property('wtimeoutMS', 50);
+      });
+    });
+
+    describe('resolveTimeoutOptions()', function () {
+      it('never forwards timeoutMS', function () {
+        const client = new MongoClient('mongodb://a/', { timeoutMS: 100 });
+        expect(resolveTimeoutOptions(client, {})).to.have.property('timeoutMS', undefined);
+        expect(resolveTimeoutOptions(client, { timeoutMS: 200 } as any)).to.have.property(
+          'timeoutMS',
+          undefined
+        );
+      });
+
+      it('creates a context that is not CSOT', function () {
+        const client = new MongoClient('mongodb://a/');
+        const context = TimeoutContext.create(
+          resolveTimeoutOptions(client, { timeoutMS: 200 } as any)
+        );
+        expect(context.csotEnabled()).to.be.false;
       });
     });
   });

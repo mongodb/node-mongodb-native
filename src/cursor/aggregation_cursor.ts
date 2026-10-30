@@ -1,11 +1,6 @@
 import type { Document } from '../bson';
 import { MongoAPIError } from '../error';
-import {
-  Explain,
-  type ExplainCommandOptions,
-  type ExplainVerbosityLike,
-  validateExplainTimeoutOptions
-} from '../explain';
+import { type ExplainCommandOptions, type ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import { type Abortable } from '../mongo_types';
 import { AggregateOperation, type AggregateOptions } from '../operations/aggregate';
@@ -77,16 +72,6 @@ export class AggregationCursor<TSchema = any> extends ExplainableCursor<TSchema>
       session,
       signal: this.signal
     };
-    if (options.explain) {
-      try {
-        validateExplainTimeoutOptions(options, Explain.fromOptions(options));
-      } catch {
-        throw new MongoAPIError(
-          'timeoutMS cannot be used with explain when explain is specified in aggregateOptions'
-        );
-      }
-    }
-
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, options);
 
     const response = await executeOperation(this.client, aggregateOperation, this.timeoutContext);
