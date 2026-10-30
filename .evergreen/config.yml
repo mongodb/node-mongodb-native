@@ -2908,7 +2908,7 @@ buildvariants:
     display_name: rhel8 Node Latest
     run_on: rhel80-large
     expansions:
-      NODE_LTS_VERSION: latest
+      NODE_LTS_VERSION: 26
       CLIENT_ENCRYPTION: true
     tasks:
       - test-8.0-server
