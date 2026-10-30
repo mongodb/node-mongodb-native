@@ -659,14 +659,6 @@ functions:
         args:
           - .evergreen/docker/alpine.sh
 tasks:
-  - name: test-atlas-data-lake
-    tags:
-      - datalake
-      - mongohouse
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongohoused
-      - func: run data lake tests
   - name: test-gcpkms-task
     commands:
       - command: expansions.update
