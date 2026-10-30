@@ -102,11 +102,6 @@ The MongoDB driver can now generate a cup of joe.
         - You may need to stash/rebase depending on where the tag was, see [etc/docs/README.md](etc/docs/README.md)
 1. Announce it!
     - Post an update about the newly released versions to `#nodejs` channel in Slack
-    - If releasing the driver, post to the community forums about the new release
-    - [Example 6.0.0 post](https://www.mongodb.com/community/forums/t/mongodb-nodejs-driver-6-0-0-released/241691)
-        - Copy what was in the release highlights section of your GitHub release post
-        - Topic: node-js
-        - Category: About the Community Product & Driver Announcements
 1. Mark the [fix version as released in JIRA](https://jira.mongodb.org/projects/NODE?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=unreleased).
 
 ### Authentication
