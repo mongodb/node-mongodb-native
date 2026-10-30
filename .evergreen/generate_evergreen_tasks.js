@@ -96,11 +96,11 @@ const AUTH_DISABLED_TASKS = generateVersionTopologyMatrix().map(test =>
 );
 
 BASE_TASKS.push({
-  name: `test-latest-server-v1-api`,
-  tags: ['latest', 'server', 'v1-api'],
+  name: `test-8.0-server-v1-api`,
+  tags: ['8.0', 'server', 'v1-api'],
   commands: [
     updateExpansions({
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'server',
       REQUIRE_API_VERSION: '1',
       MONGODB_API_VERSION: '1',
@@ -177,7 +177,7 @@ TASKS.push(
       tags: [],
       commands: [
         updateExpansions({
-          VERSION: 'latest',
+          VERSION: '8.0',
           TOPOLOGY: 'replica_set'
         }),
         { func: 'install dependencies' },
@@ -190,7 +190,7 @@ TASKS.push(
       tags: ['socks5-csfle'],
       commands: [
         updateExpansions({
-          VERSION: 'latest',
+          VERSION: '8.0',
           TOPOLOGY: 'replica_set',
           TEST_SOCKS5_CSFLE: 'true'
         }),
@@ -205,7 +205,7 @@ TASKS.push(
       commands: [
         updateExpansions({
           SSL: 'ssl',
-          VERSION: 'latest',
+          VERSION: '8.0',
           TOPOLOGY: 'replica_set'
         }),
         { func: 'install dependencies' },
@@ -221,7 +221,7 @@ TASKS.push({
   tags: ['latest', 'snappy'],
   commands: [
     updateExpansions({
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
       COMPRESSOR: 'snappy',
@@ -239,7 +239,7 @@ TASKS.push({
   tags: ['latest', 'zstd'],
   commands: [
     updateExpansions({
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
       COMPRESSOR: 'zstd',
@@ -263,7 +263,7 @@ TASKS.push({
   tags: ['latest', 'zstd'],
   commands: [
     updateExpansions({
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'replica_set',
       AUTH: 'auth',
       COMPRESSOR: 'zstd',
@@ -285,7 +285,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   commands: [
     updateExpansions({
       NPM_VERSION: 9,
-      VERSION: 'rapid',
+      VERSION: '8.0',
       TOPOLOGY: 'server'
     }),
     { func: 'install dependencies' },
@@ -301,7 +301,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   commands: [
     updateExpansions({
       NPM_VERSION: 9,
-      VERSION: 'rapid',
+      VERSION: '8.0',
       AUTH: 'auth',
       ORCHESTRATION_FILE: 'auth-aws.json',
       TOPOLOGY: 'server'
@@ -451,9 +451,8 @@ for (const {
 }
 
 // Running CSFLE tests with mongocryptd
-const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
-  mongoVersion =>
-    ['latest', 'rapid'].includes(mongoVersion) || semver.gte(`${mongoVersion}.0`, '4.2.0')
+const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(mongoVersion =>
+  semver.gte(`${mongoVersion}.0`, '4.2.0')
 ).map(mongoVersion => {
   return {
     name: `test-${mongoVersion}-csfle-mongocryptd`,
@@ -496,7 +495,7 @@ BUILD_VARIANTS.push({
     NODE_LTS_VERSION: LATEST_LTS,
     CLIENT_ENCRYPTION: true
   },
-  tasks: ['test-rapid-server']
+  tasks: ['test-8.0-server']
 });
 
 const unitTestTasks = Array.from(
@@ -562,7 +561,7 @@ SINGLETON_TASKS.push(
       tags: ['resource-management'],
       commands: [
         updateExpansions({
-          VERSION: 'latest',
+          VERSION: '8.0',
           TOPOLOGY: 'replica_set',
           NODE_LTS_VERSION: LATEST_LTS
         }),
@@ -660,7 +659,7 @@ BUILD_VARIANTS.push({
 
 const customDependencyTests = [];
 
-for (const serverVersion of ['5.0', 'rapid', 'latest']) {
+for (const serverVersion of ['5.0', '8.0']) {
   customDependencyTests.push({
     name: `run-custom-csfle-tests-${serverVersion}`,
     tags: ['run-custom-dependency-tests'],
@@ -731,7 +730,7 @@ SINGLETON_TASKS.push({
   commands: [
     updateExpansions({
       NODE_VERSION: '16.20.1',
-      VERSION: 'latest',
+      VERSION: '8.0',
       TOPOLOGY: 'replica_set',
       CLIENT_ENCRYPTION: true,
       TEST_CSFLE: true,

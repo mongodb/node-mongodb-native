@@ -758,7 +758,7 @@ tasks:
         params:
           updates:
             - { key: NPM_VERSION, value: "9" }
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: '8.0' }
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: noauth }
       - func: "install dependencies"
@@ -796,7 +796,7 @@ tasks:
         params:
           updates:
             - { key: NPM_VERSION, value: "9" }
-            - { key: VERSION, value: latest }
+            - { key: VERSION, value: '8.0' }
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: noauth }
       - func: "install dependencies"
