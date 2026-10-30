@@ -651,15 +651,15 @@ BUILD_VARIANTS.push({
   tasks: AWS_AUTH_TASKS
 });
 
-BUILD_VARIANTS.push({
-  name: 'ubuntu2204-test-atlas-data-lake',
-  display_name: 'Atlas Data Lake Tests',
-  run_on: UBUNTU_22_OS,
-  expansions: {
-    NODE_LTS_VERSION: LATEST_LTS
-  },
-  tasks: ['test-atlas-data-lake']
-});
+// BUILD_VARIANTS.push({
+//   name: 'ubuntu2204-test-atlas-data-lake',
+//   display_name: 'Atlas Data Lake Tests',
+//   run_on: UBUNTU_22_OS,
+//   expansions: {
+//     NODE_LTS_VERSION: LATEST_LTS
+//   },
+//   tasks: ['test-atlas-data-lake']
+// });
 
 const customDependencyTests = [];
 

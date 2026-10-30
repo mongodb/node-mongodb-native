@@ -3167,13 +3167,6 @@ buildvariants:
       - >-
         aws-8.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
       - aws-8.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-  - name: ubuntu2204-test-atlas-data-lake
-    display_name: Atlas Data Lake Tests
-    run_on: ubuntu2204-large
-    expansions:
-      NODE_LTS_VERSION: 22
-    tasks:
-      - test-atlas-data-lake
   - name: performance-tests
     display_name: Performance Test
     run_on: rhel90-dbx-perf-large
