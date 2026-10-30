@@ -827,6 +827,11 @@ describe('When executing an operation for the first time', () => {
   describe('when CSOT is enabled', function () {
     let client: MongoClient;
 
+    before(function () {
+      this.skipReason = 'NODE-7958: timeoutMS is a no-op';
+      this.skip();
+    });
+
     beforeEach(async function () {
       client = this.configuration.newClient({ timeoutMS: 500 });
     });

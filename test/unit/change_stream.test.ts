@@ -2,7 +2,13 @@ import { Long, Timestamp } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { ChangeStreamCursor, filterOutOptions, MongoClient, MongoDBNamespace } from '../mongodb';
+import {
+  ChangeStream,
+  ChangeStreamCursor,
+  filterOutOptions,
+  MongoClient,
+  MongoDBNamespace
+} from '../mongodb';
 
 describe('ChangeStreamCursor', function () {
   afterEach(function () {
@@ -260,5 +266,20 @@ describe('ChangeStreamCursor', function () {
         });
       });
     });
+  });
+});
+
+// NODE-7958: timeoutMS and timeoutMode are no-ops
+describe('ChangeStream', function () {
+  it('does not keep timeoutMS and timeoutMode on its options', function () {
+    const client = new MongoClient('mongodb://localhost:27017');
+    const changeStream = new ChangeStream(client, [], {
+      timeoutMS: 100,
+      timeoutMode: 'iteration'
+    } as any);
+
+    expect(changeStream.options).to.have.property('timeoutMS', undefined);
+    expect(changeStream.options).to.have.property('timeoutMode', undefined);
+    changeStream.close().catch(() => null);
   });
 });

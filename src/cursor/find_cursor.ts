@@ -1,12 +1,7 @@
 import { type Document } from '../bson';
 import { CursorResponse } from '../cmap/wire_protocol/responses';
-import { MongoAPIError, MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
-import {
-  Explain,
-  type ExplainCommandOptions,
-  type ExplainVerbosityLike,
-  validateExplainTimeoutOptions
-} from '../explain';
+import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
+import { type ExplainCommandOptions, type ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import { type Abortable } from '../mongo_types';
 import type { CollationOptions } from '../operations/command';
@@ -76,16 +71,6 @@ export class FindCursor<TSchema = any> extends ExplainableCursor<TSchema> {
       session,
       signal: this.signal
     };
-
-    if (options.explain) {
-      try {
-        validateExplainTimeoutOptions(options, Explain.fromOptions(options));
-      } catch {
-        throw new MongoAPIError(
-          'timeoutMS cannot be used with explain when explain is specified in findOptions'
-        );
-      }
-    }
 
     const findOperation = new FindOperation(this.namespace, this.cursorFilter, options);
 

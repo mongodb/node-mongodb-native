@@ -37,10 +37,8 @@ const metadata = { requires: { mongodb: '>=4.4' } };
 
 describe('CSOT driver tests', metadata, () => {
   before(function () {
-    if (semver.satisfies(this.configuration.version, '>=9.0')) {
-      this.skipReason = 'TODO(NODE-7418): CSOT tests fail on server >=9.0, tracked in NODE-7418';
-      this.skip();
-    }
+    this.skipReason = 'NODE-7958: timeoutMS is a no-op';
+    this.skip();
   });
 
   // NOTE: minPoolSize here is set to ensure that connections are available when testing timeout

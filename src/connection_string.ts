@@ -324,7 +324,7 @@ export function parseOptions(
       );
     }
 
-    if (!isReadPreferenceTags && values.includes('')) {
+    if (!isReadPreferenceTags && values.includes('') && !isIgnoredOption(key)) {
       throw new MongoAPIError(`URI option "${key}" cannot be specified with no value`);
     }
 
@@ -416,11 +416,13 @@ export function parseOptions(
         setOption(mongoOptions, key, descriptor, [DEFAULT_OPTIONS.get(key)]);
       }
     } else {
-      const { deprecated } = descriptor;
+      const { deprecated, ignored } = descriptor;
       if (deprecated) {
         const deprecatedMsg = typeof deprecated === 'string' ? `: ${deprecated}` : '';
         emitWarning(`${key} is a deprecated option${deprecatedMsg}`);
       }
+
+      if (ignored) continue;
 
       setOption(mongoOptions, key, descriptor, values);
     }
@@ -659,6 +661,13 @@ function normalizeSrvAllowedHostsSuffix(value: string): string {
   return `.${suffix}`;
 }
 
+/** Ignored options are never validated, since their values have no effect. */
+function isIgnoredOption(key: string): boolean {
+  return Object.entries(OPTIONS).some(
+    ([name, descriptor]) => descriptor.ignored && name.toLowerCase() === key.toLowerCase()
+  );
+}
+
 function setOption(
   mongoOptions: any,
   key: string,
@@ -713,6 +722,8 @@ interface OptionDescriptor {
   default?: any;
 
   deprecated?: boolean | string;
+  /** The option is accepted but has no effect, so it is never stored on the resolved options. */
+  ignored?: boolean;
   /**
    * @param name - the original option name
    * @param options - the options so far for resolution
@@ -1180,7 +1191,6 @@ export const OPTIONS = {
     type: 'string'
   },
   socketTimeoutMS: {
-    // TODO(NODE-6491): deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
   },
@@ -1228,7 +1238,8 @@ export const OPTIONS = {
     type: 'boolean'
   },
   timeoutMS: {
-    type: 'uint'
+    deprecated: 'timeoutMS has no effect and will be removed in a future release',
+    ignored: true
   },
   tls: {
     type: 'boolean'
@@ -1282,7 +1293,6 @@ export const OPTIONS = {
     }
   },
   waitQueueTimeoutMS: {
-    // TODO(NODE-6491): deprecated: 'Please use timeoutMS instead',
     default: 0,
     type: 'uint'
   },

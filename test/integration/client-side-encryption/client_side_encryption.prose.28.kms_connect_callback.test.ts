@@ -320,6 +320,9 @@ describe('28. KMS Connect Callback', function () {
 
   it('Case 5: callback receives timeout', metadata, async function () {
     // This case MUST only be run by drivers that have implemented CSOT.
+    this.skipReason = 'NODE-7958: timeoutMS is a no-op';
+    this.skip();
+
     let receivedTimeout: number | undefined;
 
     // Create a `ClientEncryption` object with `keyVaultNamespace` `keyvault.datakeys` and a

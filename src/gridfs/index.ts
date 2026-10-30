@@ -39,9 +39,9 @@ export interface GridFSBucketOptions extends WriteConcernOptions {
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
   /**
-   * @experimental
    * Specifies the lifetime duration of a gridFS stream. If any async operations are in progress
    * when this timeout expires, the stream will throw a timeout error.
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
 }
@@ -159,7 +159,13 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    *
    * @param id - The id of the file doc
    */
-  async delete(id: ObjectId, options?: { timeoutMS: number }): Promise<void> {
+  async delete(
+    id: ObjectId,
+    options?: {
+      /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+      timeoutMS?: number;
+    }
+  ): Promise<void> {
     const { timeoutMS } = resolveOptions(this.s.db, options);
     let timeoutContext: CSOTTimeoutContext | undefined = undefined;
 
@@ -232,7 +238,14 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param id - the id of the file to rename
    * @param filename - new name for the file
    */
-  async rename(id: ObjectId, filename: string, options?: { timeoutMS: number }): Promise<void> {
+  async rename(
+    id: ObjectId,
+    filename: string,
+    options?: {
+      /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+      timeoutMS?: number;
+    }
+  ): Promise<void> {
     const filter = { _id: { $eq: id } };
     const update = { $set: { filename } };
     const { matchedCount } = await this.s._filesCollection.updateOne(filter, update, options);
@@ -242,7 +255,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   }
 
   /** Removes this bucket's files collection, followed by its chunks collection. */
-  async drop(options?: { timeoutMS: number }): Promise<void> {
+  async drop(options?: {
+    /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+    timeoutMS?: number;
+  }): Promise<void> {
     const { timeoutMS } = resolveOptions(this.s.db, options);
     let timeoutContext: CSOTTimeoutContext | undefined = undefined;
 

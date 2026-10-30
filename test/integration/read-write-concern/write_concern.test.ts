@@ -315,7 +315,8 @@ describe('Write Concern', function () {
     });
   });
 
-  describe('NODE-6763: write concern is still added with timeoutMS is set', function () {
+  // NODE-7958: timeoutMS is a no-op
+  describe.skip('NODE-6763: write concern is still added with timeoutMS is set', function () {
     let client: MongoClient;
     let collection: Collection;
     const commands: CommandStartedEvent[] = [];
