@@ -3,6 +3,15 @@ import { expect } from 'chai';
 import { Db, type DbOptions, MongoClient, ReadPreference } from '../mongodb';
 
 describe('class Db', function () {
+  describe('runCursorCommand()', function () {
+    it('does not throw when given frozen options', function () {
+      const client = new MongoClient('mongodb://localhost:27017');
+      const options = Object.freeze({ timeoutMS: 100 });
+
+      expect(() => client.db().runCursorCommand({ a: 1 }, options)).to.not.throw();
+    });
+  });
+
   describe('secondaryOk', function () {
     const client = new MongoClient('mongodb://localhost:27017');
     const secondary_ok = 'secondaryOk';
