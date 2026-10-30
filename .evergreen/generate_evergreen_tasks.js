@@ -610,10 +610,11 @@ function* makeTypescriptTasks() {
   }
 
   const typesVersion = require('../package.json').devDependencies['@types/node'].slice(1);
-  yield makeCheckTypesTask('next', typesVersion);
+  // TODO(NODE-7233): unskip ts@next tests once we adopt Typescript 6.0.
+  // yield makeCheckTypesTask('next', typesVersion);
   yield makeCheckTypesTask('current', typesVersion);
 
-  yield makeCheckTypesTask('next', '16.x');
+  // yield makeCheckTypesTask('next', '16.x');
   yield makeCheckTypesTask('current', '16.x');
 
   // typescript 4.4 only compiles our types with this particular version
