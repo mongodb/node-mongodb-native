@@ -8,9 +8,7 @@ describe('class ListIndexesCursor', () => {
       const client = new MongoClient('mongodb://localhost:27017');
       const options = Object.freeze({ timeoutMS: 100 });
 
-      expect(
-        () => new ListIndexesCursor(client.db().collection('test'), options)
-      ).to.not.throw();
+      expect(() => new ListIndexesCursor(client.db().collection('test'), options)).to.not.throw();
     });
   });
 });
