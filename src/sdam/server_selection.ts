@@ -18,6 +18,26 @@ export type ServerSelector = (
   deprioritized: DeprioritizedServers
 ) => ServerDescription[];
 
+/**
+ * Narrows the servers eligible for an operation.
+ *
+ * PyMongo exposes the same hook as `MongoClient(server_selector=...)`.
+ * The Node driver calls this after read preference, tag, and max-staleness
+ * filtering and before `localThresholdMS`.
+ *
+ * @param servers - Servers that already satisfy the operation's selection rules.
+ * @returns The servers to consider. A one-element array targets that member.
+ * @public
+ */
+export type ServerSelectorFunction = (servers: ServerDescription[]) => ServerDescription[];
+
+/**
+ * Selectors in this set choose one already-known server (cursor getMore and
+ * killCursors). The user filter must not move those operations.
+ * @internal
+ */
+const selectorsIgnoringUserServerSelector = new WeakSet<ServerSelector>();
+
 /** @internal */
 export class DeprioritizedServers {
   private deprioritized: Set<string> = new Set();
@@ -69,7 +89,7 @@ export function writableServerSelector(): ServerSelector {
  * if it is in a state that it can have commands sent to it.
  */
 export function sameServerSelector(description?: ServerDescription): ServerSelector {
-  return function sameServerSelector(
+  const selector: ServerSelector = function sameServerSelector(
     _topologyDescription: TopologyDescription,
     servers: ServerDescription[],
     _deprioritized: DeprioritizedServers
@@ -81,6 +101,8 @@ export function sameServerSelector(description?: ServerDescription): ServerSelec
       return sd.address === description.address && sd.type !== ServerType.Unknown;
     });
   };
+  selectorsIgnoringUserServerSelector.add(selector);
+  return selector;
 }
 
 /**
@@ -251,6 +273,79 @@ function latencyWindowReducer(
 
   const high = low + topologyDescription.localThresholdMS;
   return servers.filter(server => server.roundTripTime <= high && server.roundTripTime >= low);
+}
+
+const TOPOLOGIES_IGNORING_USER_SERVER_SELECTOR = new Set<TopologyType>([
+  TopologyType.Single,
+  TopologyType.LoadBalanced,
+  TopologyType.Unknown
+]);
+
+/**
+ * Built-in selectors apply the latency window before returning. Copy the
+ * description with an unlimited window so a user filter can still see, and
+ * choose, a slower eligible member. The real window is applied to the filter's
+ * result.
+ */
+function withoutLatencyWindow(topologyDescription: TopologyDescription): TopologyDescription {
+  const widened = Object.create(Object.getPrototypeOf(topologyDescription));
+  return Object.assign(widened, topologyDescription, {
+    localThresholdMS: Number.POSITIVE_INFINITY
+  });
+}
+
+function isServerDescriptionList(value: unknown): value is ServerDescription[] {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.every(
+    server =>
+      server != null &&
+      typeof server.address === 'string' &&
+      typeof server.roundTripTime === 'number'
+  );
+}
+
+/**
+ * Applies a MongoClient `serverSelector` to an internal selector.
+ *
+ * The user function is skipped when no server is eligible, when the topology
+ * does not use server selection, and when the operation is pinned to a server.
+ * @internal
+ */
+export function applyUserServerSelector(
+  selector: ServerSelector,
+  userServerSelector: ServerSelectorFunction | undefined
+): ServerSelector {
+  if (userServerSelector == null || selectorsIgnoringUserServerSelector.has(selector)) {
+    return selector;
+  }
+
+  return function userServerSelectorWrapper(
+    topologyDescription: TopologyDescription,
+    servers: ServerDescription[],
+    deprioritized: DeprioritizedServers
+  ): ServerDescription[] {
+    if (TOPOLOGIES_IGNORING_USER_SERVER_SELECTOR.has(topologyDescription.type)) {
+      return selector(topologyDescription, servers, deprioritized);
+    }
+
+    const eligible = selector(withoutLatencyWindow(topologyDescription), servers, deprioritized);
+    if (eligible.length === 0) {
+      return [];
+    }
+
+    const selected = userServerSelector(eligible);
+    if (!isServerDescriptionList(selected)) {
+      throw new MongoInvalidArgumentError(
+        'serverSelector must return an array of server descriptions'
+      );
+    }
+    if (selected.length === 0) {
+      return [];
+    }
+    return latencyWindowReducer(topologyDescription, selected);
+  };
 }
 
 // filters

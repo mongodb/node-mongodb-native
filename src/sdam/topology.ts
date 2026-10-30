@@ -71,9 +71,11 @@ import type { ServerMonitoringMode } from './monitor';
 import { Server, type ServerEvents, type ServerOptions } from './server';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import {
+  applyUserServerSelector,
   DeprioritizedServers,
   readPreferenceServerSelector,
-  type ServerSelector
+  type ServerSelector,
+  type ServerSelectorFunction
 } from './server_selection';
 import {
   ServerSelectionFailedEvent,
@@ -162,6 +164,8 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   serverMonitoringMode: ServerMonitoringMode;
   /** MongoDB server API version */
   serverApi?: ServerApi;
+  /** @see MongoClientOptions.serverSelector */
+  serverSelector?: ServerSelectorFunction;
   __skipPingOnConnect?: boolean;
 }
 
@@ -559,6 +563,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     } else {
       serverSelector = selector;
     }
+
+    serverSelector = applyUserServerSelector(serverSelector, this.s.options.serverSelector);
 
     options = { serverSelectionTimeoutMS: this.s.serverSelectionTimeoutMS, ...options };
     if (

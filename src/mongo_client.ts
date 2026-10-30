@@ -49,7 +49,12 @@ import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import { type Runtime, type RuntimeAdapters } from './runtime_adapters';
 import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
-import { DeprioritizedServers, readPreferenceServerSelector } from './sdam/server_selection';
+import {
+  applyUserServerSelector,
+  DeprioritizedServers,
+  readPreferenceServerSelector,
+  type ServerSelectorFunction
+} from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, type TopologyEvents } from './sdam/topology';
 import { ClientSession, type ClientSessionOptions, ServerSessionPool } from './sessions';
@@ -259,6 +264,35 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   localThresholdMS?: number;
   /** Specifies how long (in milliseconds) to block for server selection before throwing an exception.  */
   serverSelectionTimeoutMS?: number;
+  /**
+   * Further filters the servers eligible for an operation.
+   *
+   * The driver calls this with the servers that already satisfy the operation's
+   * read preference, tags, and max staleness. Return the subset to consider.
+   * The driver then applies `localThresholdMS`. Return a one-element array to
+   * send those operations to one member of a replica set or sharded cluster.
+   *
+   * Writes only see writable servers, so this cannot redirect a write to a
+   * secondary. Use `directConnection` to talk to one host as a standalone.
+   *
+   * The function is not called when the topology is Single (`directConnection`)
+   * or LoadBalanced, when no server is eligible, or for operations pinned to a
+   * server, such as `getMore` and `killCursors`.
+   *
+   * This is not a connection-string option. Pass it to the `MongoClient` constructor.
+   * It matches PyMongo's `server_selector` keyword.
+   *
+   * @example
+   * ```ts
+   * new MongoClient(uri, {
+   *   serverSelector(servers) {
+   *     const member = servers.find(server => server.address === 'db-2.example.com:27017');
+   *     return member ? [member] : [];
+   *   }
+   * });
+   * ```
+   */
+  serverSelector?: ServerSelectorFunction;
   /** heartbeatFrequencyMS controls when the driver checks the state of the MongoDB deployment. Specify the interval (in milliseconds) between checks, counted from the end of the previous check until the beginning of the next one. */
   heartbeatFrequencyMS?: number;
   /** Sets the minimum heartbeat frequency. In the event that the driver has to frequently re-check a server's availability, it will wait at least this long since the previous check to avoid wasted effort. */
@@ -850,7 +884,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     ) {
       // If we would attempt to select a server and get nothing back we short circuit
       // to avoid the server selection timeout.
-      const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
+      const selector = applyUserServerSelector(
+        readPreferenceServerSelector(ReadPreference.primaryPreferred),
+        client.options.serverSelector
+      );
       const serverDescriptions = Array.from(topologyDescription.servers.values());
       const servers = selector(topologyDescription, serverDescriptions, new DeprioritizedServers());
       if (servers.length !== 0) {
@@ -1096,6 +1133,8 @@ export interface MongoOptions
   proxyUsername?: string;
   proxyPassword?: string;
   serverMonitoringMode: ServerMonitoringMode;
+  /** @see MongoClientOptions.serverSelector */
+  serverSelector?: ServerSelectorFunction;
   /** @internal */
   connectionType?: typeof Connection;
   /** @internal */

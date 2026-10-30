@@ -1187,6 +1187,14 @@ export const OPTIONS = {
     default: 30000,
     type: 'uint'
   },
+  serverSelector: {
+    transform({ values: [value] }) {
+      if (typeof value !== 'function') {
+        throw new MongoParseError('serverSelector must be a function');
+      }
+      return value;
+    }
+  },
   servername: {
     type: 'string'
   },
