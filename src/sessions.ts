@@ -28,7 +28,7 @@ import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { type AsyncDisposable, configureResourceManagement } from './resource_management';
 import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
-import { TimeoutContext } from './timeout';
+import { type TimeoutContext } from './timeout';
 import {
   isTransactionCommand,
   Transaction,
@@ -59,9 +59,8 @@ export interface ClientSessionOptions {
   defaultTransactionOptions?: TransactionOptions;
   /**
    * @public
-   * @experimental
    * An overriding timeoutMS value to use for a client-side timeout.
-   * If not provided the session uses the timeoutMS specified on the MongoClient.
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   defaultTimeoutMS?: number;
 
@@ -91,7 +90,10 @@ export interface EndSessionOptions {
   force?: boolean;
   forceClear?: boolean;
 
-  /** Specifies the time an operation will run until it throws a timeout error */
+  /**
+   * Specifies the time an operation will run until it throws a timeout error
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
+   */
   timeoutMS?: number;
 }
 
@@ -137,8 +139,8 @@ export class ClientSession
   /** @internal */
   public txnNumberIncrement: number;
   /**
-   * @experimental
    * Specifies the time an operation in a given `ClientSession` will run until it throws a timeout error
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
 
@@ -185,7 +187,6 @@ export class ClientSession
     this.sessionPool = sessionPool;
     this.hasEnded = false;
     this.clientOptions = clientOptions;
-    this.timeoutMS = options.defaultTimeoutMS ?? client.s.options?.timeoutMS;
 
     this.explicit = !!options.explicit;
     this._serverSession = this.explicit ? this.sessionPool.acquire() : null;
@@ -427,9 +428,12 @@ export class ClientSession
   /**
    * Commits the currently active transaction in this session.
    *
-   * @param options - Optional options, can be used to override `defaultTimeoutMS`.
+   * @param _options - `timeoutMS` is deprecated and has no effect.
    */
-  async commitTransaction(options?: { timeoutMS?: number }): Promise<void> {
+  async commitTransaction(_options?: {
+    /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+    timeoutMS?: number;
+  }): Promise<void> {
     if (this.transaction.state === TxnState.NO_TRANSACTION) {
       throw new MongoTransactionError('No transaction started');
     }
@@ -456,16 +460,9 @@ export class ClientSession
       maxTimeMS?: number;
     } = { commitTransaction: 1 };
 
-    const timeoutMS =
-      typeof options?.timeoutMS === 'number'
-        ? options.timeoutMS
-        : typeof this.timeoutMS === 'number'
-          ? this.timeoutMS
-          : null;
-
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
     if (wc != null) {
-      if (timeoutMS == null && this.timeoutContext == null) {
+      if (this.timeoutContext == null) {
         WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
       } else {
         const wcKeys = Object.keys(wc);
@@ -476,7 +473,7 @@ export class ClientSession
     }
 
     if (this.transaction.state === TxnState.TRANSACTION_COMMITTED || this.commitAttempted) {
-      if (timeoutMS == null && this.timeoutContext == null) {
+      if (this.timeoutContext == null) {
         WriteConcern.apply(command, { wtimeoutMS: 10000, ...wc, w: 'majority' });
       } else {
         WriteConcern.apply(command, { w: 'majority', ...wc, wtimeoutMS: undefined });
@@ -497,18 +494,8 @@ export class ClientSession
       bypassPinningCheck: true
     });
 
-    const timeoutContext =
-      this.timeoutContext ??
-      (typeof timeoutMS === 'number'
-        ? TimeoutContext.create({
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS,
-            timeoutMS
-          })
-        : null);
-
     try {
-      await executeOperation(this.client, operation, timeoutContext);
+      await executeOperation(this.client, operation);
       this.commitAttempted = undefined;
       return;
     } catch (firstCommitError) {
@@ -526,8 +513,7 @@ export class ClientSession
               session: this,
               readPreference: ReadPreference.primary,
               bypassPinningCheck: true
-            }),
-            timeoutContext
+            })
           );
           return;
         } catch (retryCommitError) {
@@ -561,9 +547,12 @@ export class ClientSession
   /**
    * Aborts the currently active transaction in this session.
    *
-   * @param options - Optional options, can be used to override `defaultTimeoutMS`.
+   * @param options - `timeoutMS` is deprecated and has no effect.
    */
-  async abortTransaction(options?: { timeoutMS?: number }): Promise<void>;
+  async abortTransaction(options?: {
+    /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
+    timeoutMS?: number;
+  }): Promise<void>;
   /** @internal */
   async abortTransaction(options?: { timeoutMS?: number; throwTimeout?: true }): Promise<void>;
   async abortTransaction(options?: { timeoutMS?: number; throwTimeout?: true }): Promise<void> {
@@ -596,26 +585,8 @@ export class ClientSession
       recoveryToken?: Document;
     } = { abortTransaction: 1 };
 
-    const timeoutMS =
-      typeof options?.timeoutMS === 'number'
-        ? options.timeoutMS
-        : this.timeoutContext?.csotEnabled()
-          ? this.timeoutContext.timeoutMS // refresh timeoutMS for abort operation
-          : typeof this.timeoutMS === 'number'
-            ? this.timeoutMS
-            : null;
-
-    const timeoutContext =
-      timeoutMS != null
-        ? TimeoutContext.create({
-            timeoutMS,
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS
-          })
-        : null;
-
     const wc = this.transaction.options.writeConcern ?? this.clientOptions?.writeConcern;
-    if (wc != null && timeoutMS == null) {
+    if (wc != null) {
       WriteConcern.apply(command, { wtimeoutMS: 10000, w: 'majority', ...wc });
     }
 
@@ -630,7 +601,7 @@ export class ClientSession
     });
 
     try {
-      await executeOperation(this.client, operation, timeoutContext);
+      await executeOperation(this.client, operation);
       this.unpin();
       return;
     } catch (firstAbortError) {
@@ -643,7 +614,7 @@ export class ClientSession
 
       if (firstAbortError instanceof MongoError && isRetryableWriteError(firstAbortError)) {
         try {
-          await executeOperation(this.client, operation, timeoutContext);
+          await executeOperation(this.client, operation);
           return;
         } catch (secondAbortError) {
           if (secondAbortError.name === 'MongoRuntimeError') throw secondAbortError;
@@ -710,25 +681,14 @@ export class ClientSession
     options?: TransactionOptions & {
       /**
        * Configures a timeoutMS expiry for the entire withTransactionCallback.
-       *
-       * @remarks
-       * - The remaining timeout will not be applied to callback operations that do not use the ClientSession.
-       * - Overriding timeoutMS for operations executed using the explicit session inside the provided callback will result in a client-side error.
+       * @deprecated `timeoutMS` has no effect and will be removed in a future release.
        */
       timeoutMS?: number;
     }
   ): Promise<T> {
     const MAX_TIMEOUT = 120000;
 
-    const timeoutMS = options?.timeoutMS ?? this.timeoutMS ?? null;
-    this.timeoutContext =
-      timeoutMS != null
-        ? TimeoutContext.create({
-            timeoutMS,
-            serverSelectionTimeoutMS: this.clientOptions.serverSelectionTimeoutMS,
-            socketTimeoutMS: this.clientOptions.socketTimeoutMS
-          })
-        : null;
+    // timeoutMS is a no-op, so a CSOT timeout context is never created
 
     const startTime = this.timeoutContext?.csotEnabled() ? this.timeoutContext.start : now();
 

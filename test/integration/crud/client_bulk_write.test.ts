@@ -90,6 +90,11 @@ describe('Client Bulk Write', function () {
   });
 
   describe('CSOT enabled', function () {
+    before(function () {
+      this.skipReason = 'NODE-7958: timeoutMS is a no-op';
+      this.skip();
+    });
+
     describe('when timeoutMS is set on the client', function () {
       beforeEach(async function () {
         client = this.configuration.newClient({}, { timeoutMS: 300 });

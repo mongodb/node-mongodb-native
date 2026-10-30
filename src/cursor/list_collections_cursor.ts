@@ -21,7 +21,7 @@ export class ListCollectionsCursor<
   options?: ListCollectionsOptions & Abortable;
 
   constructor(db: Db, filter: Document, options?: ListCollectionsOptions & Abortable) {
-    super(db.client, db.s.namespace, options);
+    super(db.client, db.s.namespace, { ...options });
     this.parent = db;
     this.filter = filter;
     this.options = options;
