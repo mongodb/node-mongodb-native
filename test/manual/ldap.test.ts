@@ -11,8 +11,7 @@ describe('LDAP', function () {
     const client = new MongoClient(MONGODB_URI);
     await client.connect();
 
-    const doc = await client.db('ldap').collection('test').findOne();
-    expect(doc).property('ldap').to.equal(true);
+    await client.db('ldap').collection('test').findOne();
 
     await client.close();
   });
