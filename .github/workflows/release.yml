@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
   id-token: write
 
-name: release-6.x
+name: release-latest
 
 jobs:
   release_please:
@@ -102,10 +102,4 @@ jobs:
       - run: npm publish --provenance --tag=latest
         if: ${{ needs.release_please.outputs.release_created }}
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          node ./.github/scripts/dispatch-and-wait.mjs npm-publish.yml \
-            tag=6.x \
-            version="$(node -p "require('./package.json').version")" \
-            ref="${{ github.sha }}"
-
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
