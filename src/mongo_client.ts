@@ -145,7 +145,6 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
   /**
-   * Specifies the time an operation will run until it throws a timeout error
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;

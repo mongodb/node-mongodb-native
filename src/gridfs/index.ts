@@ -39,8 +39,6 @@ export interface GridFSBucketOptions extends WriteConcernOptions {
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
   /**
-   * Specifies the lifetime duration of a gridFS stream. If any async operations are in progress
-   * when this timeout expires, the stream will throw a timeout error.
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;

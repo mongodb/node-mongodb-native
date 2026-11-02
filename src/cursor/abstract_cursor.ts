@@ -77,7 +77,6 @@ function removeActiveCursor(this: AbstractCursor) {
 
 /**
  * @public
- * Specifies how `timeoutMS` is applied to the cursor.
  * @deprecated `timeoutMode` has no effect and will be removed in a future release.
  */
 export const CursorTimeoutMode = Object.freeze({
@@ -135,12 +134,10 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   awaitData?: boolean;
   noCursorTimeout?: boolean;
   /**
-   * Specifies the time an operation will run until it throws a timeout error.
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
   /**
-   * Specifies how `timeoutMS` is applied to the cursor.
    * @deprecated `timeoutMode` has no effect and will be removed in a future release.
    */
   timeoutMode?: CursorTimeoutMode;

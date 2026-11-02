@@ -59,7 +59,6 @@ export interface ClientSessionOptions {
   defaultTransactionOptions?: TransactionOptions;
   /**
    * @public
-   * An overriding timeoutMS value to use for a client-side timeout.
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   defaultTimeoutMS?: number;
@@ -91,7 +90,6 @@ export interface EndSessionOptions {
   forceClear?: boolean;
 
   /**
-   * Specifies the time an operation will run until it throws a timeout error
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
@@ -139,7 +137,6 @@ export class ClientSession
   /** @internal */
   public txnNumberIncrement: number;
   /**
-   * Specifies the time an operation in a given `ClientSession` will run until it throws a timeout error
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
@@ -680,7 +677,6 @@ export class ClientSession
     fn: WithTransactionCallback<T>,
     options?: TransactionOptions & {
       /**
-       * Configures a timeoutMS expiry for the entire withTransactionCallback.
        * @deprecated `timeoutMS` has no effect and will be removed in a future release.
        */
       timeoutMS?: number;

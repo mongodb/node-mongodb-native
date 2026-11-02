@@ -20,12 +20,10 @@ export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
   /**
-   * Specifies the time an operation will run until it throws a timeout error.
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
   /**
-   * Specifies how `timeoutMS` is applied to the cursor.
    * @deprecated `timeoutMode` has no effect and will be removed in a future release.
    */
   timeoutMode?: CursorTimeoutMode;

@@ -93,7 +93,6 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
   /** Should retry failed writes */
   retryWrites?: boolean;
   /**
-   * Specifies the time an operation will run until it throws a timeout error
    * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
