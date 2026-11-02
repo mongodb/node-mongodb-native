@@ -36,6 +36,11 @@ import { type FailCommandFailPoint, type FailPoint, waitUntilPoolsFilled } from 
 const metadata = { requires: { mongodb: '>=4.4' } };
 
 describe('CSOT driver tests', metadata, () => {
+  before(function () {
+    this.skipReason = 'NODE-7958: timeoutMS is a no-op';
+    this.skip();
+  });
+
   // NOTE: minPoolSize here is set to ensure that connections are available when testing timeout
   // behaviour. This reduces flakiness in our tests since operations will not spend time
   // establishing connections, more closely mirroring long-running application behaviour

@@ -46,6 +46,11 @@ describe('CSOT spec prose tests', function () {
     await client?.close();
   });
 
+  before(function () {
+    this.skipReason = 'NODE-7958: timeoutMS is a no-op';
+    this.skip();
+  });
+
   describe('1. Multi-batch writes', { requires: { topology: 'single', mongodb: '>=4.4' } }, () => {
     /**
      * This test MUST only run against standalones on server versions 4.4 and higher.

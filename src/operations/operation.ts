@@ -39,8 +39,7 @@ export interface OperationOptions extends BSONSerializeOptions {
   omitMaxTimeMS?: boolean;
 
   /**
-   * @experimental
-   * Specifies the time an operation will run until it throws a timeout error
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
 }
@@ -63,7 +62,9 @@ export abstract class AbstractOperation<TResult = any> {
 
   options: OperationOptions & Abortable;
 
-  /** Specifies the time an operation will run until it throws a timeout error. */
+  /**
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
+   */
   timeoutMS?: number;
 
   private _session: ClientSession | undefined;

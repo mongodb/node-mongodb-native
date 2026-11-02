@@ -1,5 +1,4 @@
 import { type Document } from './bson';
-import { MongoAPIError } from './error';
 
 /** @public */
 export const ExplainVerbosity = Object.freeze({
@@ -87,13 +86,6 @@ export class Explain {
 
     const { verbosity, maxTimeMS } = explain;
     return new Explain(verbosity, maxTimeMS);
-  }
-}
-
-export function validateExplainTimeoutOptions(options: Document, explain?: Explain) {
-  const { maxTimeMS, timeoutMS } = options;
-  if (timeoutMS != null && (maxTimeMS != null || explain?.maxTimeMS != null)) {
-    throw new MongoAPIError('Cannot use maxTimeMS with timeoutMS for explain commands.');
   }
 }
 
