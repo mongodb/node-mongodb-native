@@ -1,5 +1,3 @@
-import { expect } from 'chai';
-
 import { MongoClient } from '../mongodb';
 
 describe('LDAP', function () {
