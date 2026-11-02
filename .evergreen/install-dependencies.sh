@@ -6,9 +6,10 @@ set -o errexit  # Exit the script with error if any of the commands fail
 ## 'latest'
 ## a full nodejs version, in the format v<major>.<minor>.patch
 export NODE_LTS_VERSION=${NODE_LTS_VERSION:-16}
-# npm version can be defined in the environment for cases where we need to install
-# a version lower than latest to support EOL Node versions. When not provided will
-# be handled by this script in drivers tools.
+# Use the npm bundled with the installed Node.js release instead of upgrading to
+# npm@latest. The bundled npm is version-matched to the Node release and avoids
+# pulling an npm@latest that no longer supports our (often pinned) Node version.
+export SKIP_NPM_UPGRADE=true
 source $DRIVERS_TOOLS/.evergreen/install-node.sh
 
 if [ "$NATIVE" = "true" ]; then
