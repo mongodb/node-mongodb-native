@@ -1,5 +1,5 @@
 // Server 9.0 and later (`latest` and `rapid`) are not supported by this version of the driver.
-const MONGODB_VERSIONS = ['8.0', '7.0', '6.0', '5.0', '4.4', '4.2'];
+const MONGODB_VERSIONS = ['8.0', '7.0', '6.0', '5.0', '4.4'];
 const versions = [
   { codeName: 'gallium', versionNumber: 16, npmVersion: 9 },
   { codeName: 'hydrogen', versionNumber: 18, npmVersion: 10 },
