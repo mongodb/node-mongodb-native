@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.22.0](https://github.com/mongodb/node-mongodb-native/compare/v6.21.0...v6.22.0) (2026-11-02)
+
+
+### Features
+
+* **NODE-7974:** make timeoutMS a no-op and deprecate it ([#5091](https://github.com/mongodb/node-mongodb-native/issues/5091)) ([389fb72](https://github.com/mongodb/node-mongodb-native/commit/389fb72694bf8407b41ee153a3a9f3554d7e0e0b))
+
 ## [6.21.0](https://github.com/mongodb/node-mongodb-native/compare/v6.20.0...v6.21.0) (2025-11-05)
 
 
