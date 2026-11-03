@@ -2,12 +2,7 @@ import { Writable } from 'stream';
 
 import { ByteUtils, type Document, ObjectId } from '../bson';
 import type { Collection } from '../collection';
-import {
-  MongoAPIError,
-  MONGODB_ERROR_CODES,
-  MongoError,
-  MongoOperationTimeoutError
-} from '../error';
+import { isNamespaceNotFoundError, MongoAPIError, MongoOperationTimeoutError } from '../error';
 import { type CSOTTimeoutContext } from '../timeout';
 import { type Callback, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
@@ -244,7 +239,7 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
       })
       .toArray();
   } catch (error) {
-    if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
+    if (isNamespaceNotFoundError(error)) {
       indexes = [];
     } else {
       throw error;
@@ -344,7 +339,7 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   try {
     indexes = await stream.files.listIndexes(listIndexesOptions).toArray();
   } catch (error) {
-    if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
+    if (isNamespaceNotFoundError(error)) {
       indexes = [];
     } else {
       throw error;

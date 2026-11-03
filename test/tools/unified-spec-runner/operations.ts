@@ -14,8 +14,8 @@ import {
   Db,
   type Document,
   GridFSBucket,
+  isNamespaceNotFoundError,
   type MongoClient,
-  MONGODB_ERROR_CODES,
   MongoError,
   ReadConcern,
   ReadPreference,
@@ -102,7 +102,7 @@ operations.set('assertIndexNotExists', async ({ operation, client }) => {
   try {
     indexes = await listIndexCursor.toArray();
   } catch (error) {
-    if (error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
+    if (isNamespaceNotFoundError(error)) {
       return;
     }
     // Error will always exist here, this makes the output show what caused an issue with assertIndexNotExists
