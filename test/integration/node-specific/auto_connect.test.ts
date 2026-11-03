@@ -409,7 +409,7 @@ describe('When executing an operation for the first time', () => {
     describe(`#dropIndexes()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
-        await c.dropIndexes().catch(() => null);
+        await c.dropIndexes();
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       });
     });
