@@ -30,11 +30,13 @@ Fixes are usually released in either the next patch version or in the next minor
 
 release-please automatically tags release commits with a tag in the format v<major>.<minor>.<patch>.  When backporting, first determine the target minor version and create a release branch for it by branching off of the release tag.  The release branch should follow the format `v<major>.<minor>.x`.  For example, to create a backport of bson's 6.5 release, create a release branch from the v6.5.0 tag with the name v6.5.x.  
 
-Then, backport the release action to the target release branch. This should be done as the first PR on the release branch. Use the following instructions to create it.
+A backport is split across several PRs, each opened against the `v<major>.<minor>.x` release branch.
 
-First, create a copy of our current release action (release.yml). Then, change any references to `main` to the target branch. Also, add the branch to the list of CodeQL target branches (codeql.yml). Double check that there isn't any release tooling on `main` that doesn't exist on the target branch. If there is, make sure this is backported too. After opening the PR, check the CI to make sure everything works as expected: add backports of CI fixes as needed.
+1. **Release tooling sync PR.** Sync the release workflows from `main` (`publish.yml`, `release.yml`, etc.) and change any references to `main` to the target branch. Also add the branch to the list of CodeQL target branches (`codeql.yml`). Backport any other release tooling from `main` that the target branch is missing.
+2. **CI fix PR(s).** Apply the CI fixes needed for CI to go green on the release branch (for example changes to `.evergreen/`, lint and test configs, dependency pins). Some of these can be taken from `main`. Open further PRs as needed until CI is green.
+3. **Backport PR(s).** The code changes being backported. You can replay a cherry picked commit from step 2 onto this PR branch so your code can be tested against a sane base.
 
-Once the release action PR is merged, release-please will work on this branch in the same way as it does on `main`. Any PRs that merge to the release branch trigger the release action and update the release PR that release-please manages. Proceed as normal from here.
+Once the release tooling PR is merged, release-please will work on this branch in the same way as it does on `main`. Any PRs that merge to the release branch trigger the release action and update the release PR that release-please manages. Proceed as normal from here.
 
 ## `release-please`
 
