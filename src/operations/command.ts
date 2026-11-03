@@ -2,12 +2,7 @@ import { type Connection } from '..';
 import type { BSONSerializeOptions, Document } from '../bson';
 import { MIN_SUPPORTED_RAW_DATA_WIRE_VERSION } from '../cmap/wire_protocol/constants';
 import { MongoInvalidArgumentError } from '../error';
-import {
-  decorateWithExplain,
-  Explain,
-  type ExplainOptions,
-  validateExplainTimeoutOptions
-} from '../explain';
+import { decorateWithExplain, Explain, type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
 import type { ServerCommandOptions } from '../sdam/server';
@@ -99,7 +94,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);
-      if (this.explain) validateExplainTimeoutOptions(this.options, this.explain);
     } else if (options?.explain != null) {
       throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
     }

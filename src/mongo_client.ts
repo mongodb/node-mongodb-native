@@ -143,8 +143,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
   /**
-   * @experimental
    * Specifies the time an operation will run until it throws a timeout error
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
   /** Enables or disables TLS/SSL for the connection. */
@@ -183,6 +183,46 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * Querying this DNS URI is expected to respond with SRV records
    */
   srvServiceName?: string;
+  /**
+   * A host name suffix that every host returned by the SRV lookup must end with. It replaces the
+   * default verification, which requires returned hosts to share the parent domain of the SRV host
+   * name (the SRV host name without its leftmost label). Only valid with a `mongodb+srv` connection
+   * string, and cannot be combined with `srvHostValidator`.
+   *
+   * For example, with `mongodb+srv://cluster.mongodb.mydomain.net`, the default verification
+   * rejects `host1.us-east-1.mydomain.net`, while `srvAllowedHostsSuffix: '.mydomain.net'` accepts
+   * it. A leading `.` is optional. Internationalized domain names may be given in Unicode or in
+   * A-label (`xn--`) form: the value is converted to lowercase A-label form, and a value that cannot
+   * be converted is an error. The value must contain at least two labels, unless it is one of the
+   * names reserved for private or special use: `test`, `localhost`, `invalid`, `example`, `local`,
+   * `internal`, `corp`, `home`, or `mail`.
+   *
+   * **WARNING: Modifying the default SRV domain name validation can create vulnerabilities.**
+   * SRV host verification prevents a spoofed DNS response from directing the driver to arbitrary
+   * hosts, and this option widens the set of hosts such a response can direct it to. Configure the
+   * narrowest suffix that covers your deployment: for a seed of
+   * `cluster.test.internal.example.com`, prefer `.internal.example.com` over `.example.com`.
+   */
+  srvAllowedHostsSuffix?: string;
+  /**
+   * A synchronous function that decides whether a host returned by the SRV lookup may be used. It
+   * receives the host name, normalized to lowercase A-label (Punycode) form without a trailing `.`,
+   * and must return `true` to accept the host or `false` to reject it. Its return value replaces the
+   * default verification entirely: the driver applies no other checks to the host. Only valid with a
+   * `mongodb+srv` connection string, cannot be combined with `srvAllowedHostsSuffix`, and cannot be
+   * set in the connection string.
+   *
+   * The function runs synchronously during SRV resolution and SRV polling, so it must not block.
+   *
+   * If the function throws during the initial SRV lookup, `connect()` rejects with a
+   * `MongoAPIError` whose `cause` is the thrown error. During SRV polling, the host is rejected
+   * instead and no error is raised.
+   *
+   * **WARNING: Modifying the default SRV domain name validation can create vulnerabilities.**
+   * SRV host verification prevents a spoofed DNS response from directing the driver to arbitrary
+   * hosts, and a validator that accepts too broadly removes that protection.
+   */
+  srvHostValidator?: (host: string) => boolean;
   /** The maximum number of connections in the connection pool. */
   maxPoolSize?: number;
   /** The minimum number of connections in the connection pool. */
@@ -562,8 +602,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
     return this.s.bsonOptions;
   }
 
+  /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
   get timeoutMS(): number | undefined {
-    return this.s.options.timeoutMS;
+    return undefined;
   }
 
   /**
@@ -874,12 +915,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * **Connection Pooling Impact:** Calling `connect` will populate the connection pool with one connection
    * to a server selected by the client's configured `readPreference` (defaults to primary).
    *
-   * @remarks
-   * **Timeout Behavior:** When using `timeoutMS`, the connection establishment time does not count against
-   * the timeout for subsequent operations. This means `connect` runs without a `timeoutMS` limit, while
-   * your database operations will still respect the configured timeout. If you need predictable operation
-   * timing with `timeoutMS`, call `connect` explicitly before performing operations.
-   *
    * @see https://www.mongodb.com/docs/manual/reference/connection-string/
    */
   static async connect(url: string, options?: MongoClientOptions): Promise<MongoClient> {
@@ -961,59 +996,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
    * watch() accepts two generic arguments for distinct use cases:
    * - The first is to provide the schema that may be defined for all the data within the current cluster
    * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
-   *
-   * @remarks
-   * When `timeoutMS` is configured for a change stream, it will have different behaviour depending
-   * on whether the change stream is in iterator mode or emitter mode. In both cases, a change
-   * stream will time out if it does not receive a change event within `timeoutMS` of the last change
-   * event.
-   *
-   * Note that if a change stream is consistently timing out when watching a collection, database or
-   * client that is being changed, then this may be due to the server timing out before it can finish
-   * processing the existing oplog. To address this, restart the change stream with a higher
-   * `timeoutMS`.
-   *
-   * If the change stream times out the initial aggregate operation to establish the change stream on
-   * the server, then the client will close the change stream. If the getMore calls to the server
-   * time out, then the change stream will be left open, but will throw a MongoOperationTimeoutError
-   * when in iterator mode and emit an error event that returns a MongoOperationTimeoutError in
-   * emitter mode.
-   *
-   * To determine whether or not the change stream is still open following a timeout, check the
-   * {@link ChangeStream.closed} getter.
-   *
-   * @example
-   * In iterator mode, if a next() call throws a timeout error, it will attempt to resume the change stream.
-   * The next call can just be retried after this succeeds.
-   * ```ts
-   * const changeStream = collection.watch([], { timeoutMS: 100 });
-   * try {
-   *     await changeStream.next();
-   * } catch (e) {
-   *     if (e instanceof MongoOperationTimeoutError && !changeStream.closed) {
-   *       await changeStream.next();
-   *     }
-   *     throw e;
-   * }
-   * ```
-   *
-   * @example
-   * In emitter mode, if the change stream goes `timeoutMS` without emitting a change event, it will
-   * emit an error event that returns a MongoOperationTimeoutError, but will not close the change
-   * stream unless the resume attempt fails. There is no need to re-establish change listeners as
-   * this will automatically continue emitting change events once the resume attempt completes.
-   *
-   * ```ts
-   * const changeStream = collection.watch([], { timeoutMS: 100 });
-   * changeStream.on('change', console.log);
-   * changeStream.on('error', e => {
-   *     if (e instanceof MongoOperationTimeoutError && !changeStream.closed) {
-   *         // do nothing
-   *     } else {
-   *         changeStream.close();
-   *     }
-   * });
-   * ```
    * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    * @typeParam TSchema - Type of the data being detected by the change stream
@@ -1092,6 +1074,8 @@ export interface MongoOptions
   appName?: string;
   hosts: HostAddress[];
   srvHost?: string;
+  srvAllowedHostsSuffix?: string;
+  srvHostValidator?: (host: string) => boolean;
   credentials?: MongoCredentials;
   readPreference: ReadPreference;
   readConcern: ReadConcern;
@@ -1173,6 +1157,7 @@ export interface MongoOptions
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
   timeoutMS?: number;
   /** @internal */
   __skipPingOnConnect?: boolean;

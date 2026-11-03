@@ -436,7 +436,8 @@ describe('class AbstractCursor', function () {
     );
   });
 
-  describe('externally provided timeout contexts', function () {
+  // NODE-7958: timeoutMS and timeoutMode are no-ops
+  describe.skip('externally provided timeout contexts', function () {
     let client: MongoClient;
     let collection: Collection;
     let context: CursorTimeoutContext;

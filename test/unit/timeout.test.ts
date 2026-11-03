@@ -78,15 +78,16 @@ describe('Timeout', function () {
 
 describe('TimeoutContext', function () {
   describe('TimeoutContext.create', function () {
+    // NODE-7958: timeoutMS is a no-op, so a CSOTTimeoutContext is never created
     context('when timeoutMS is a number', function () {
-      it('returns a CSOTTimeoutContext instance', function () {
+      it('returns a LegacyTimeoutContext instance', function () {
         const ctx = TimeoutContext.create({
           timeoutMS: 0,
           serverSelectionTimeoutMS: 0,
           waitQueueTimeoutMS: 0
         });
 
-        expect(ctx).to.be.instanceOf(CSOTTimeoutContext);
+        expect(ctx).to.be.instanceOf(LegacyTimeoutContext);
       });
     });
 

@@ -142,7 +142,7 @@ The MongoDB driver can optionally be enhanced by the following feature packages:
 
 Maintained by MongoDB:
 
-- Zstd network compression - [@mongodb-js/zstd](https://github.com/mongodb-js/zstd)
+- Zstd network compression - [@mongodb-js/zstd](https://github.com/mongodb-js/zstd) (only needed on Node.js versions earlier than 22.15.0, later versions have zstd built in)
 - MongoDB field level and queryable encryption - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 - GSSAPI / SSPI / Kerberos authentication - [kerberos](https://github.com/mongodb-js/kerberos)
 

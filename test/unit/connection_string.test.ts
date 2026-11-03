@@ -13,6 +13,7 @@ import {
   type Log,
   MongoAPIError,
   MongoClient,
+  type MongoClientOptions,
   MongoCredentials,
   MongoDriverError,
   MongoInvalidArgumentError,
@@ -616,6 +617,230 @@ describe('Connection String', function () {
       expect(options.dbName).to.equal('somedb');
       expect(options.srvHost).to.equal('test1.test.build.10gen.cc');
     });
+
+    describe('srvAllowedHostsSuffix', function () {
+      const SRV_URI = 'mongodb+srv://cluster.mongodb.mydomain.net';
+
+      context('when set in the connection string', function () {
+        it('strips leading and trailing dots, lowercases, and prepends a dot', function () {
+          const options = parseOptions(`${SRV_URI}/?srvAllowedHostsSuffix=.MyDomain.NET.`);
+          expect(options.srvAllowedHostsSuffix).to.equal('.mydomain.net');
+        });
+      });
+
+      context('when set in the options', function () {
+        it('strips leading and trailing dots, lowercases, and prepends a dot', function () {
+          const options = parseOptions(SRV_URI, { srvAllowedHostsSuffix: 'MyDomain.NET' });
+          expect(options.srvAllowedHostsSuffix).to.equal('.mydomain.net');
+        });
+      });
+
+      it('converts internationalized labels to A-label (Punycode) form', function () {
+        const options = parseOptions(SRV_URI, { srvAllowedHostsSuffix: '.公司.cn' });
+        expect(options.srvAllowedHostsSuffix).to.equal('.xn--55qx5d.cn');
+      });
+
+      it('accepts underscores', function () {
+        expect(
+          parseOptions(`${SRV_URI}/?srvAllowedHostsSuffix=my_domain.net`).srvAllowedHostsSuffix
+        ).to.equal('.my_domain.net');
+        expect(
+          parseOptions(SRV_URI, { srvAllowedHostsSuffix: '.My_Domain.NET' }).srvAllowedHostsSuffix
+        ).to.equal('.my_domain.net');
+      });
+
+      for (const [suffix, expected] of [
+        ['localhost', '.localhost'],
+        ['.INTERNAL', '.internal'],
+        ['corp.', '.corp']
+      ]) {
+        it(`accepts the reserved single label ${suffix}`, function () {
+          const options = parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix });
+          expect(options.srvAllowedHostsSuffix).to.equal(expected);
+        });
+      }
+
+      for (const suffix of ['net', '.com', 'cc']) {
+        it(`throws for the single label ${suffix}`, function () {
+          expect(() => parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix })).to.throw(
+            MongoParseError,
+            'must contain at least two domain labels'
+          );
+        });
+      }
+
+      for (const suffix of ['.', '..']) {
+        it(`throws for ${suffix}, which contains no domain labels`, function () {
+          expect(() => parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix })).to.throw(
+            MongoParseError,
+            'srvAllowedHostsSuffix must contain at least one domain label'
+          );
+        });
+      }
+
+      // The specification permits only its listed normalization and validation steps
+      const LABEL_64 = 'a'.repeat(64);
+      const LABEL_63 = 'a'.repeat(63);
+      for (const [description, suffix, expected] of [
+        ['an empty label', 'my..domain.net', '.my..domain.net'],
+        ['a label longer than 63 characters', `${LABEL_64}.net`, `.${LABEL_64}.net`],
+        [
+          'a name longer than 255 characters',
+          `${LABEL_63}.${LABEL_63}.${LABEL_63}.${LABEL_63}.net`,
+          `.${LABEL_63}.${LABEL_63}.${LABEL_63}.${LABEL_63}.net`
+        ]
+      ]) {
+        it(`applies no other host name syntax validation, accepting ${description}`, function () {
+          expect(
+            parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix }).srvAllowedHostsSuffix
+          ).to.equal(expected);
+        });
+      }
+
+      // dnsNameToASCII() tests cover each conversion failure; these check that a failure is reported
+      for (const [description, suffix] of [
+        ['a forbidden domain code point', 'my/domain.net'],
+        ['a bidi rule violation', 'a\u05D0b.example.com'],
+        ['a non-ASCII name with an invalid xn-- label', '公司.xn--a.cn']
+      ]) {
+        it(`throws when it cannot be converted to A-label form: ${description}`, function () {
+          expect(() => parseOptions(SRV_URI, { srvAllowedHostsSuffix: suffix })).to.throw(
+            MongoParseError,
+            'is not a valid domain name'
+          );
+        });
+      }
+
+      it('converts valid xn-- labels', function () {
+        expect(
+          parseOptions(SRV_URI, { srvAllowedHostsSuffix: 'DB.XN--STRAE-OQA.example' })
+            .srvAllowedHostsSuffix
+        ).to.equal('.db.xn--strae-oqa.example');
+      });
+
+      it('accepts an ASCII xn-- label that is not a valid A-label, lowercased', function () {
+        expect(
+          parseOptions(SRV_URI, { srvAllowedHostsSuffix: 'XN--A.example.com' })
+            .srvAllowedHostsSuffix
+        ).to.equal('.xn--a.example.com');
+      });
+
+      it('throws when not a string', function () {
+        expect(() =>
+          // @ts-expect-error: srvAllowedHostsSuffix must be a string
+          parseOptions(SRV_URI, { srvAllowedHostsSuffix: 42 })
+        ).to.throw(MongoParseError, 'srvAllowedHostsSuffix must be a string');
+      });
+
+      it('throws when combined with srvHostValidator', function () {
+        expect(() =>
+          parseOptions(SRV_URI, {
+            srvAllowedHostsSuffix: '.mydomain.net',
+            srvHostValidator: () => true
+          })
+        ).to.throw(
+          MongoParseError,
+          'Cannot use srvAllowedHostsSuffix together with srvHostValidator'
+        );
+      });
+
+      it('throws with a non-srv connection string', function () {
+        expect(() =>
+          parseOptions('mongodb://localhost/?srvAllowedHostsSuffix=.mydomain.net')
+        ).to.throw(
+          MongoParseError,
+          'Cannot use srvAllowedHostsSuffix with a non-srv connection string'
+        );
+        expect(() =>
+          parseOptions('mongodb://localhost', { srvAllowedHostsSuffix: '.mydomain.net' })
+        ).to.throw(
+          MongoParseError,
+          'Cannot use srvAllowedHostsSuffix with a non-srv connection string'
+        );
+      });
+    });
+
+    describe('srvHostValidator', function () {
+      const SRV_URI = 'mongodb+srv://cluster.mongodb.mydomain.net';
+
+      it('is set to a wrapper that calls the provided function with the host', function () {
+        const hosts: string[] = [];
+        const options = parseOptions(SRV_URI, {
+          srvHostValidator: host => {
+            hosts.push(host);
+            return host === 'db1.mydomain.net';
+          }
+        });
+        expect(options.srvHostValidator('db1.mydomain.net')).to.equal(true);
+        expect(options.srvHostValidator('db2.mydomain.net')).to.equal(false);
+        expect(hosts).to.deep.equal(['db1.mydomain.net', 'db2.mydomain.net']);
+      });
+
+      it('wraps an error thrown by the provided function in a MongoAPIError', function () {
+        const validatorError = new Error('validator failed');
+        const options = parseOptions(SRV_URI, {
+          srvHostValidator: () => {
+            throw validatorError;
+          }
+        });
+        const error = (() => {
+          try {
+            options.srvHostValidator('db1.mydomain.net');
+          } catch (error) {
+            return error;
+          }
+        })();
+        expect(error).to.be.instanceOf(MongoAPIError).and.to.have.property('name', 'MongoAPIError');
+        expect(error).to.have.property('message', 'srvHostValidator threw an error');
+        expect(error).to.have.property('cause', validatorError);
+      });
+
+      for (const [description, srvHostValidator, received] of [
+        ['a string', () => 'true', 'string'],
+        ['a Promise', async () => true, 'object'],
+        ['undefined', () => undefined, 'undefined']
+      ] as const) {
+        it(`throws a MongoAPIError when the provided function returns ${description}`, function () {
+          const options = parseOptions(SRV_URI, {
+            // @ts-expect-error: srvHostValidator must return a boolean
+            srvHostValidator
+          });
+          expect(() => options.srvHostValidator('db1.mydomain.net')).to.throw(
+            MongoAPIError,
+            `srvHostValidator must return a boolean, received ${received}`
+          );
+        });
+      }
+
+      it('throws when set in the connection string', function () {
+        expect(() => parseOptions(`${SRV_URI}/?srvHostValidator=anything`)).to.throw(
+          MongoParseError,
+          'URI cannot contain `srvHostValidator`, it can only be passed to the client'
+        );
+      });
+
+      it('throws when not a function', function () {
+        expect(() =>
+          // @ts-expect-error: srvHostValidator must be a function
+          parseOptions(SRV_URI, { srvHostValidator: 'notacallable' })
+        ).to.throw(MongoParseError, 'srvHostValidator must be a function');
+      });
+
+      it('throws with a non-srv connection string', function () {
+        expect(() =>
+          parseOptions('mongodb://localhost', { srvHostValidator: () => true })
+        ).to.throw(MongoParseError, 'Cannot use srvHostValidator with a non-srv connection string');
+      });
+    });
+
+    it('names every srv-only option provided with a non-srv connection string', function () {
+      expect(() =>
+        parseOptions('mongodb://localhost/?srvMaxHosts=2&srvAllowedHostsSuffix=.mydomain.net')
+      ).to.throw(
+        MongoParseError,
+        'Cannot use srvMaxHosts, srvAllowedHostsSuffix with a non-srv connection string'
+      );
+    });
   });
 
   describe('resolveSRVRecord()', () => {
@@ -742,6 +967,140 @@ describe('Connection String', function () {
       expect(options).to.have.nested.property('credentials.username', '');
       expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
       expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
+    });
+
+    context('when verifying the hosts returned by the SRV lookup', function () {
+      /** Stubs DNS so the SRV lookup returns `names` and the TXT lookup returns no records */
+      function stubSrvLookup(...names: string[]) {
+        const stub = sinon.stub(dns.promises, 'resolve');
+        stub
+          .withArgs(sinon.match.any, 'SRV')
+          .resolves(names.map(name => ({ name, port: 27017, weight: 0, priority: 0 })));
+        stub
+          .withArgs(sinon.match.any, 'TXT')
+          .rejects(Object.assign(new Error('no TXT records'), { code: 'ENODATA' }));
+      }
+
+      async function resolveSeedlist(uri: string, options?: MongoClientOptions) {
+        const hosts = await resolveSRVRecord(parseOptions(uri, options));
+        return hosts.map(host => host.toString());
+      }
+
+      it('compares against the SRV host from the connection string case-insensitively', async function () {
+        stubSrvLookup('localhost.test.build.10gen.cc');
+        expect(await resolveSeedlist('mongodb+srv://TEST1.TEST.BUILD.10GEN.CC')).to.deep.equal([
+          'localhost.test.build.10gen.cc:27017'
+        ]);
+      });
+
+      it('normalizes returned host names, and seeds with the normalized form', async function () {
+        stubSrvLookup('LOCALHOST.Test.Build.10gen.CC.');
+        expect(await resolveSeedlist('mongodb+srv://test1.test.build.10gen.cc')).to.deep.equal([
+          'localhost.test.build.10gen.cc:27017'
+        ]);
+      });
+
+      it('compares internationalized host names in A-label (Punycode) form', async function () {
+        stubSrvLookup('db.公司.cn');
+        expect(await resolveSeedlist('mongodb+srv://cluster.xn--55qx5d.cn')).to.deep.equal([
+          'db.xn--55qx5d.cn:27017'
+        ]);
+      });
+
+      it('accepts host names containing underscores', async function () {
+        stubSrvLookup('db_1.my_domain.net');
+        expect(await resolveSeedlist('mongodb+srv://cluster.my_domain.net')).to.deep.equal([
+          'db_1.my_domain.net:27017'
+        ]);
+      });
+
+      context('when srvAllowedHostsSuffix is set', function () {
+        const CLUSTER_URI = 'mongodb+srv://cluster.mongodb.dyn.example.net';
+        const REGIONAL_HOSTS = ['host1.na.example.net', 'host2.asia.example.net'];
+
+        it('accepts hosts in other subdomains of the suffix, which are rejected by default', async function () {
+          stubSrvLookup(...REGIONAL_HOSTS);
+          const error = await resolveSeedlist(CLUSTER_URI).catch(error => error);
+          expect(error).to.be.instanceOf(MongoAPIError);
+
+          expect(
+            await resolveSeedlist(`${CLUSTER_URI}/?srvAllowedHostsSuffix=example.net`)
+          ).to.deep.equal(REGIONAL_HOSTS.map(host => `${host}:27017`));
+        });
+
+        for (const host of ['host1.na.example.net.evil.com', 'host1.notexample.net']) {
+          it(`rejects ${host}, which does not end with the suffix as whole labels`, async function () {
+            stubSrvLookup(host);
+            const error = await resolveSeedlist(
+              `${CLUSTER_URI}/?srvAllowedHostsSuffix=example.net`
+            ).catch(error => error);
+            expect(error).to.be.instanceOf(MongoAPIError);
+            expect(error.message).to.equal('Server record does not end with srvAllowedHostsSuffix');
+          });
+        }
+
+        it('does not require the SRV host to end with the suffix', async function () {
+          stubSrvLookup('db1.hosts.example.net');
+          expect(
+            await resolveSeedlist(
+              'mongodb+srv://cluster.example.org/?srvAllowedHostsSuffix=.hosts.example.net'
+            )
+          ).to.deep.equal(['db1.hosts.example.net:27017']);
+        });
+
+        it('does not require an extra domain level for an SRV host with fewer than three parts', async function () {
+          stubSrvLookup('db.local');
+          expect(
+            await resolveSeedlist('mongodb+srv://mongo.local/?srvAllowedHostsSuffix=local')
+          ).to.deep.equal(['db.local:27017']);
+        });
+
+        it('accepts a suffix and host names containing underscores', async function () {
+          stubSrvLookup('db1.us_east.my_domain.net', 'db_2.my_domain.net');
+          expect(
+            await resolveSeedlist(`${CLUSTER_URI}/?srvAllowedHostsSuffix=my_domain.net`)
+          ).to.deep.equal(['db1.us_east.my_domain.net:27017', 'db_2.my_domain.net:27017']);
+        });
+
+        it('does not treat an underscore as a label boundary', async function () {
+          stubSrvLookup('db1.other_my_domain.net');
+          const error = await resolveSeedlist(
+            `${CLUSTER_URI}/?srvAllowedHostsSuffix=my_domain.net`
+          ).catch(error => error);
+          expect(error).to.be.instanceOf(MongoAPIError);
+          expect(error.message).to.equal('Server record does not end with srvAllowedHostsSuffix');
+        });
+      });
+
+      context('when srvHostValidator is set', function () {
+        it('passes host names containing underscores to the validator', async function () {
+          stubSrvLookup('DB_1.My_Domain.NET.');
+          const validatedHosts: string[] = [];
+          expect(
+            await resolveSeedlist('mongodb+srv://cluster.example.com', {
+              srvHostValidator: host => {
+                validatedHosts.push(host);
+                return true;
+              }
+            })
+          ).to.deep.equal(['db_1.my_domain.net:27017']);
+          expect(validatedHosts).to.deep.equal(['db_1.my_domain.net']);
+        });
+      });
+
+      context('when srvHostValidator returns a non-boolean', function () {
+        it('throws a MongoAPIError', async function () {
+          stubSrvLookup('cluster.mongodb.com');
+          const error = await resolveSeedlist('mongodb+srv://blogs.mongodb.com', {
+            // @ts-expect-error: an async validator returns a Promise, which must not be treated as accepting
+            srvHostValidator: async () => true
+          }).catch(error => error);
+          expect(error)
+            .to.be.instanceOf(MongoAPIError)
+            .and.to.have.property('name', 'MongoAPIError');
+          expect(error.message).to.equal('srvHostValidator must return a boolean, received object');
+        });
+      });
     });
   });
 

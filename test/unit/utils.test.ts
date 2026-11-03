@@ -11,6 +11,7 @@ import {
   compareObjectId,
   decorateWithExplain,
   DEFAULT_ALLOWED_HOSTS,
+  dnsNameToASCII,
   Explain,
   hasAtomicOperators,
   HostAddress,
@@ -19,12 +20,18 @@ import {
   isUint8Array,
   LEGACY_HELLO_COMMAND,
   List,
+  MongoAPIError,
+  MongoClient,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
   MongoInvalidArgumentError,
   MongoRuntimeError,
+  normalizeDnsName,
+  resolveOptions,
+  resolveTimeoutOptions,
   runNodelessTests,
-  shuffle
+  shuffle,
+  TimeoutContext
 } from '../mongodb';
 import { ensureTypeByName, sleep } from '../tools/utils';
 
@@ -1056,11 +1063,6 @@ describe('driver utils', function () {
       'js-00.i-love-js.mongodb',
       'i-love-javascript-00.mongodb.io'
     ];
-    const exampleHostNamesWithDot = [
-      'js-00.i-love-js.',
-      'js-00.i-love-js.mongodb.',
-      'i-love-javascript-00.mongodb.io.'
-    ];
     const exampleHostNameThatDoNotMatchParent = [
       'js-00.i-love-js-a-little',
       'js-00.i-love-js-a-little.mongodb',
@@ -1091,21 +1093,7 @@ describe('driver utils', function () {
           });
         });
 
-        context('when addresses in SRV record end with a dot', () => {
-          it('accepts address since it is considered to still match the parent domain', () => {
-            expect(() =>
-              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvName[num])
-            ).to.not.throw();
-          });
-        });
-
         context('when SRV host ends with a dot', () => {
-          it('accepts address if it ends with a dot', () => {
-            expect(() =>
-              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvNameWithDot[num])
-            ).to.not.throw();
-          });
-
           it('accepts address if it does not end with a dot', () => {
             expect(() =>
               checkParentDomainMatch(exampleHostNameWithoutDot[num], exampleSrvNameWithDot[num])
@@ -1115,7 +1103,7 @@ describe('driver utils', function () {
           if (num < 2) {
             it('does not accept address if it does not contain an extra domain level', () => {
               expect(() =>
-                checkParentDomainMatch(exampleSrvNameWithDot[num], exampleSrvNameWithDot[num])
+                checkParentDomainMatch(exampleSrvName[num], exampleSrvNameWithDot[num])
               ).to.throw(
                 'Server record does not have at least one more domain level than parent URI'
               );
@@ -1126,10 +1114,81 @@ describe('driver utils', function () {
         context('when addresses in SRV record end without dots', () => {
           it('accepts address since it matches the parent domain', () => {
             expect(() =>
-              checkParentDomainMatch(exampleHostNamesWithDot[num], exampleSrvName[num])
+              checkParentDomainMatch(exampleHostNameWithoutDot[num], exampleSrvName[num])
             ).to.not.throw();
           });
         });
+
+        context('when the SRV host differs from the address only in case', () => {
+          it('accepts address since the SRV host is normalized', () => {
+            expect(() =>
+              checkParentDomainMatch(
+                exampleHostNameWithoutDot[num],
+                exampleSrvName[num].toUpperCase()
+              )
+            ).to.not.throw();
+          });
+        });
+      });
+    }
+  });
+
+  describe('dnsNameToASCII()', () => {
+    for (const [description, name, expected] of [
+      ['lowercases ASCII', 'CLUSTER.MongoDB.com', 'cluster.mongodb.com'],
+      ['converts internationalized labels to A-label form', 'db.公司.cn', 'db.xn--55qx5d.cn'],
+      ['lowercases valid A-labels', 'db.XN--55QX5D.CN', 'db.xn--55qx5d.cn'],
+      ['preserves underscores', 'test_1.My_Host.example.com', 'test_1.my_host.example.com'],
+      ['preserves empty labels', 'my..domain.net', 'my..domain.net'],
+      // The WHATWG URL Standard returns an ASCII name lowercased without validating its xn-- labels
+      ['accepts invalid Punycode in an ASCII name', 'XN--A.Example.COM', 'xn--a.example.com'],
+      [
+        'accepts an xn-- label that decodes to only ASCII',
+        'db1.xn--abc-.example.com',
+        'db1.xn--abc-.example.com'
+      ],
+      [
+        'accepts an xn-- label that decodes to mapped code points',
+        'xn--8i7caa.example.net',
+        'xn--8i7caa.example.net'
+      ]
+    ]) {
+      it(description, () => {
+        expect(dnsNameToASCII(name)).to.equal(expected);
+      });
+    }
+
+    for (const [description, name] of [
+      ['an empty name', ''],
+      ['NUL', 'bad\u0000host.example.com'],
+      ['a tab', 'bad\thost.example.com'],
+      ['a line feed', 'bad\nhost.example.com'],
+      ['a carriage return', 'bad\rhost.example.com'],
+      ['DEL', 'bad\u007Fhost.example.com'],
+      ['a space', 'bad host.example.com'],
+      ['a slash', 'bad/host.example.com'],
+      ['a backslash', 'bad\\host.example.com'],
+      ['a question mark', 'bad?host.example.com'],
+      ['a number sign', 'bad#host.example.com'],
+      ['a percent sign', 'bad%68ost.example.com'],
+      ['a colon', 'bad:host.example.com'],
+      ['an at sign', 'bad@host.example.com'],
+      ['a non-ASCII name with an invalid xn-- label', '公司.xn--a.cn']
+    ]) {
+      it(`returns null for ${description}`, () => {
+        expect(dnsNameToASCII(name)).to.be.null;
+      });
+    }
+  });
+
+  describe('normalizeDnsName()', () => {
+    it('removes a trailing dot before converting to lowercase A-label form', () => {
+      expect(normalizeDnsName('Cluster.公司.cn.')).to.equal('cluster.xn--55qx5d.cn');
+    });
+
+    for (const name of ['', '.', 'bad host.example.com.']) {
+      it(`throws a MongoAPIError for ${JSON.stringify(name)}`, () => {
+        expect(() => normalizeDnsName(name)).to.throw(MongoAPIError, 'Invalid DNS host name');
       });
     }
   });
@@ -1322,6 +1381,61 @@ describe('driver utils', function () {
 
         const result = await abortable(new Promise(() => null), { signal }).catch(e => e);
         expect(result).to.deep.equal(goodError);
+      });
+    });
+  });
+
+  // NODE-7958: timeoutMS and timeoutMode are no-ops
+  describe('timeoutMS no-op', function () {
+    describe('resolveOptions()', function () {
+      it('drops timeoutMS passed in the options', function () {
+        const result = resolveOptions(undefined, { timeoutMS: 100 });
+        expect(result.timeoutMS).to.be.undefined;
+      });
+
+      it('does not inherit timeoutMS from the parent', function () {
+        const result = resolveOptions({
+          s: { namespace: new MongoDBNamespace('db') },
+          timeoutMS: 100
+        });
+        expect(result.timeoutMS).to.be.undefined;
+      });
+
+      it('does not throw when timeoutMS is given inside an explicit session', function () {
+        const session = {
+          explicit: true,
+          timeoutContext: {},
+          inTransaction: () => true,
+          transaction: { options: {} }
+        };
+        expect(() => resolveOptions(undefined, { timeoutMS: 100, session } as any)).to.not.throw();
+      });
+
+      it('keeps wtimeoutMS on the write concern', function () {
+        const result = resolveOptions(undefined, {
+          timeoutMS: 100,
+          writeConcern: { w: 1, wtimeoutMS: 50 }
+        });
+        expect(result.writeConcern).to.have.property('wtimeoutMS', 50);
+      });
+    });
+
+    describe('resolveTimeoutOptions()', function () {
+      it('never forwards timeoutMS', function () {
+        const client = new MongoClient('mongodb://a/', { timeoutMS: 100 });
+        expect(resolveTimeoutOptions(client, {})).to.have.property('timeoutMS', undefined);
+        expect(resolveTimeoutOptions(client, { timeoutMS: 200 } as any)).to.have.property(
+          'timeoutMS',
+          undefined
+        );
+      });
+
+      it('creates a context that is not CSOT', function () {
+        const client = new MongoClient('mongodb://a/');
+        const context = TimeoutContext.create(
+          resolveTimeoutOptions(client, { timeoutMS: 200 } as any)
+        );
+        expect(context.csotEnabled()).to.be.false;
       });
     });
   });

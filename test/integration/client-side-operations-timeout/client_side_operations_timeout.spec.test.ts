@@ -4,6 +4,10 @@ import * as semver from 'semver';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
+// NODE-7958: timeoutMS is a no-op, so every spec file that exercises it is skipped. These specs
+// only use the legacy timeouts, so they keep running.
+const nonCSOTSpecs = ['legacy-timeouts', 'retryability-legacy-timeouts'];
+
 const skippedSpecs = {
   'retryability-legacy-timeouts': 'Skipped in NODE-6984: timing-sensitive on loaded hosts.'
 };
@@ -30,6 +34,9 @@ describe('CSOT spec tests', function () {
   const specs = loadSpecTests('client-side-operations-timeout');
   for (const spec of specs) {
     for (const test of spec.tests) {
+      if (!nonCSOTSpecs.includes(spec.name)) {
+        test.skipReason = 'NODE-7958: timeoutMS is a no-op';
+      }
       if (skippedSpecs[spec.name] != null) {
         test.skipReason = skippedSpecs[spec.name];
       }
@@ -58,7 +65,8 @@ describe('CSOT spec tests', function () {
   });
 });
 
-describe('CSOT modified spec tests', function () {
+// NODE-7958: timeoutMS is a no-op
+describe.skip('CSOT modified spec tests', function () {
   const specs = loadSpecTests(
     join('..', 'integration', 'client-side-operations-timeout', 'unified-csot-node-specs')
   );

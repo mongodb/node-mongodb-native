@@ -1,0 +1,8 @@
+# Also tests trailing dot normalization: DNS returns targets with a trailing dot
+# (localhost.build.10gen.cc.) which must be stripped before suffix comparison.
+uri: "mongodb+srv://test12.test.build.10gen.cc/?srvAllowedHostsSuffix=.build.10gen.cc"
+seeds:
+    - localhost.build.10gen.cc:27017
+options:
+    ssl: true
+ping: false

@@ -366,6 +366,7 @@ export function executeUriValidationTest(
       case 'replicaSet':
       case 'srvServiceName':
       case 'srvMaxHosts':
+      case 'srvAllowedHostsSuffix':
       case 'tls':
         expect(options, `${errorMessage} ${optionKey}`)
           .to.have.property(optionKey)
