@@ -11,6 +11,7 @@ const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 const {
   LEGACY_HELLO_COMMAND,
+  MONGODB_ERROR_CODES,
   CMAP_EVENTS: SOURCE_CMAP_EVENTS,
   TOPOLOGY_EVENTS,
   HEARTBEAT_EVENTS
@@ -771,8 +772,7 @@ const kOperations = new Map([
           .then(results => results.map(({ name }) => name))
           .then(indexes => expect(indexes).to.not.include(indexName))
       ).catch(err => {
-        // The error message can differ slightly with the same error code.
-        if (!err.message.match(/ns not found|ns does not exist/)) {
+        if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
           throw err;
         }
       });
