@@ -1,13 +1,14 @@
 import { Long } from 'bson';
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
+import * as executeOperationModule from '../../src/operations/execute_operation';
 import {
   type Collection,
   type Document,
   isHello,
   MongoClient,
-  MongoServerError,
-  MongoWriteConcernError
+  MongoServerError
 } from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
@@ -250,69 +251,55 @@ describe('Collection', function () {
   });
 
   context('#dropIndexes', () => {
-    /** Runs `dropIndexes` against a mock server whose `dropIndexes` reply is `reply`. */
-    async function runDropIndexes(reply: Document): Promise<boolean> {
-      const client = new MongoClient(`mongodb://${server.uri()}/test`);
+    let executeOperationStub: sinon.SinonStub;
+    // An unconnected client: no network is touched because executeOperation is stubbed.
+    const collection = new MongoClient('mongodb://localhost:27017').db('test').collection('test_c');
 
-      server.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.dropIndexes) {
-          request.reply(reply);
-        } else if (isHello(doc)) {
-          request.reply(Object.assign({}, HELLO));
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
+    beforeEach(() => {
+      executeOperationStub = sinon.stub(executeOperationModule, 'executeOperation');
+    });
 
-      await client.connect();
-      try {
-        return await client.db('test').collection('test_c').dropIndexes();
-      } finally {
-        await client.close();
-      }
-    }
+    afterEach(() => {
+      sinon.restore();
+    });
 
-    context('when the server succeeds', () => {
+    context('when the operation succeeds', () => {
       it('resolves true', async () => {
-        expect(await runDropIndexes({ ok: 1 })).to.equal(true);
+        executeOperationStub.resolves({ ok: 1 });
+
+        expect(await collection.dropIndexes()).to.equal(true);
       });
     });
 
-    context('when the server responds with NamespaceNotFound', () => {
+    context('when the operation rejects with NamespaceNotFound', () => {
       it('resolves false', async () => {
-        const result = await runDropIndexes({
-          ok: 0,
-          code: 26,
-          codeName: 'NamespaceNotFound',
-          errmsg: 'ns not found'
-        });
-        expect(result).to.equal(false);
+        executeOperationStub.rejects(
+          new MongoServerError({ ok: 0, code: 26, codeName: 'NamespaceNotFound', errmsg: 'x' })
+        );
+
+        expect(await collection.dropIndexes()).to.equal(false);
       });
     });
 
-    context('when the server responds with any other error', () => {
-      it('rejects with the server error', async () => {
-        const error = await runDropIndexes({
-          ok: 0,
-          code: 91,
-          codeName: 'ShutdownInProgress',
-          errmsg: 'shutting down'
-        }).catch(error => error);
+    context('when the operation rejects with any other server error', () => {
+      it('rethrows that error', async () => {
+        const serverError = new MongoServerError({ ok: 0, code: 91, errmsg: 'x' });
+        executeOperationStub.rejects(serverError);
 
-        expect(error).to.be.instanceOf(MongoServerError);
-        expect(error).to.have.property('code', 91);
+        const error = await collection.dropIndexes().catch(error => error);
+
+        expect(error).to.equal(serverError);
       });
     });
 
-    context('when the server responds with a write concern error', () => {
-      it('rejects with a MongoWriteConcernError', async () => {
-        const error = await runDropIndexes({
-          ok: 1,
-          writeConcernError: { code: 64, codeName: 'WriteConcernFailed', errmsg: 'wc failed' }
-        }).catch(error => error);
+    context('when the operation rejects with a non-server error', () => {
+      it('rethrows that error', async () => {
+        const nonServerError = new Error('x');
+        executeOperationStub.rejects(nonServerError);
 
-        expect(error).to.be.instanceOf(MongoWriteConcernError);
+        const error = await collection.dropIndexes().catch(error => error);
+
+        expect(error).to.equal(nonServerError);
       });
     });
   });
