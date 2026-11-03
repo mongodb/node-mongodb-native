@@ -1,7 +1,14 @@
 import { Long } from 'bson';
 import { expect } from 'chai';
 
-import { type Collection, type Document, isHello, MongoClient } from '../mongodb';
+import {
+  type Collection,
+  type Document,
+  isHello,
+  MongoClient,
+  MongoServerError,
+  MongoWriteConcernError
+} from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {
@@ -238,6 +245,74 @@ describe('Collection', function () {
         // the unknown option and the command option are kept out of the index description, and
         // nothing `resolveOptions` injects (read preference, BSON options, ...) leaks into it
         expect(command.indexes[0]).to.deep.equal({ unique: true, name: 'a_1', key: { a: 1 } });
+      });
+    });
+  });
+
+  context('#dropIndexes', () => {
+    /** Runs `dropIndexes` against a mock server whose `dropIndexes` reply is `reply`. */
+    async function runDropIndexes(reply: Document): Promise<boolean> {
+      const client = new MongoClient(`mongodb://${server.uri()}/test`);
+
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.dropIndexes) {
+          request.reply(reply);
+        } else if (isHello(doc)) {
+          request.reply(Object.assign({}, HELLO));
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      await client.connect();
+      try {
+        return await client.db('test').collection('test_c').dropIndexes();
+      } finally {
+        await client.close();
+      }
+    }
+
+    context('when the server succeeds', () => {
+      it('resolves true', async () => {
+        expect(await runDropIndexes({ ok: 1 })).to.equal(true);
+      });
+    });
+
+    context('when the server responds with NamespaceNotFound', () => {
+      it('resolves false', async () => {
+        const result = await runDropIndexes({
+          ok: 0,
+          code: 26,
+          codeName: 'NamespaceNotFound',
+          errmsg: 'ns not found'
+        });
+        expect(result).to.equal(false);
+      });
+    });
+
+    context('when the server responds with any other error', () => {
+      it('rejects with the server error', async () => {
+        const error = await runDropIndexes({
+          ok: 0,
+          code: 91,
+          codeName: 'ShutdownInProgress',
+          errmsg: 'shutting down'
+        }).catch(error => error);
+
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error).to.have.property('code', 91);
+      });
+    });
+
+    context('when the server responds with a write concern error', () => {
+      it('rejects with a MongoWriteConcernError', async () => {
+        const error = await runDropIndexes({
+          ok: 1,
+          writeConcernError: { code: 64, codeName: 'WriteConcernFailed', errmsg: 'wc failed' }
+        }).catch(error => error);
+
+        expect(error).to.be.instanceOf(MongoWriteConcernError);
       });
     });
   });

@@ -16,7 +16,12 @@ import {
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
-import { MongoAPIError, MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
+import {
+  MongoAPIError,
+  MONGODB_ERROR_CODES,
+  MongoInvalidArgumentError,
+  MongoServerError
+} from './error';
 import { type ExplainCommandOptions, type ExplainVerbosityLike } from './explain';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
@@ -791,9 +796,9 @@ export class Collection<TSchema extends Document = Document> {
       );
       return true;
     } catch (error) {
-      // TODO(NODE-6517): Driver should only filter for namespace not found error. Other errors should be thrown.
-      if (error instanceof MongoOperationTimeoutError) throw error;
-      return false;
+      if (error instanceof MongoServerError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound)
+        return false;
+      throw error;
     }
   }
 
