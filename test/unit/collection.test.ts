@@ -2,14 +2,9 @@ import { Long } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as executeOperationModule from '../../src/operations/execute_operation';
-import {
-  type Collection,
-  type Document,
-  isHello,
-  MongoClient,
-  MongoServerError
-} from '../mongodb';
+import { type Collection, type Document, isHello, MongoClient, MongoServerError } from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {
