@@ -93,6 +93,8 @@ export * from '../src/operations/drop';
 export * from '../src/operations/end_sessions';
 export * from '../src/operations/estimated_document_count';
 export * from '../src/operations/execute_operation';
+// Exposes the whole module as one object, so tests can stub `executeOperation` on it
+export * as executeOperationModule from '../src/operations/execute_operation';
 export * from '../src/operations/find';
 export * from '../src/operations/find_and_modify';
 export * from '../src/operations/get_more';
