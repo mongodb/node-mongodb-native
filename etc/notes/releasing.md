@@ -32,9 +32,9 @@ release-please automatically tags release commits with a tag in the format v<maj
 
 A backport is split across several PRs, each opened against the `v<major>.<minor>.x` release branch.
 
-1. **Release tooling sync PR.** Copy the release workflows from `main` (`publish.yml`, `release.yml`, etc.). In `release.yml`, change any references to `main` to the target branch. Also add the branch to the list of CodeQL target branches (`codeql.yml`). Backport any other release tooling from `main` that the target branch is missing.
-2. **CI fix PR(s).** Apply the CI fixes needed for CI to go green on the release branch (for example changes to `.evergreen/`, lint and test configs, dependency pins). Some of these can be taken from `main`. Open further PRs as needed until CI is green.
-3. **Backport PR(s).** The code changes being backported. You can replay a cherry picked commit from step 2 onto this PR branch so your code can be tested against a sane base.
+1. **CI fix PR(s).** Apply the CI fixes needed for CI to go green on the release branch (for example changes to `.evergreen/`, lint and test configs, dependency pins). Some of these can be taken from `main`. Open further PRs as needed until CI is green.
+2. **Backport PR(s).** The code changes being backported. You can replay a cherry picked commit from step 1 onto this PR branch so your code can be tested against a sane base.
+3. **Release tooling sync PR.** Copy the release workflows from `main` (`publish.yml`, `release.yml`, etc.). In `release.yml`, change any references to `main` to the target branch. Also add the branch to the list of CodeQL target branches (`codeql.yml`). Backport any other release tooling from `main` that the target branch is missing.
 
 Once the release tooling PR is merged, release-please will work on this branch in the same way as it does on `main`. Any PRs that merge to the release branch trigger the release action and update the release PR that release-please manages. Proceed as normal from here.
 
