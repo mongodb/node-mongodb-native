@@ -88,6 +88,7 @@ export type ClientEncryptionSocketOptions = Pick<
 export type KMSConnectCallback = (options: {
   host: string;
   port: number;
+  /** @deprecated `timeoutMS` has no effect and will be removed in a future release. */
   timeoutMS?: number;
   signal: AbortSignal;
 }) => Promise<Duplex>;

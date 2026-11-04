@@ -1,4 +1,4 @@
-current = "7.7 Driver"
+current = "7.8 Driver"
 mongoDBManual = "https://www.mongodb.com/docs/drivers/node/"
 
 [[versions]]
@@ -9,8 +9,15 @@ usesMongoDBManual = true
 tag = "Next"
 
 [[versions]]
-version = "7.7 Driver"
+version = "7.8 Driver"
 status = "latest"
+api = "./7.8"
+usesMongoDBManual = true
+tag = "7.8"
+
+[[versions]]
+version = "7.7 Driver"
+status = "supported"
 api = "./7.7"
 usesMongoDBManual = true
 tag = "7.7"
@@ -63,6 +70,13 @@ status = "supported"
 api = "./7.0"
 usesMongoDBManual = true
 tag = "7.0"
+
+[[versions]]
+version = "6.22 Driver"
+status = "supported"
+api = "./6.22"
+usesMongoDBManual = true
+tag = "6.22"
 
 [[versions]]
 version = "6.21 Driver"

@@ -392,6 +392,11 @@ describe('Client Side Encryption Functional', function () {
   );
 
   describe('CSOT on ClientEncryption', { requires: { clientSideEncryption: true } }, function () {
+    before(function () {
+      this.skipReason = 'NODE-7958: timeoutMS is a no-op';
+      this.skip();
+    });
+
     const metadata: MongoDBMetadataUI = {
       requires: { clientSideEncryption: true, mongodb: '>=4.4' }
     };
@@ -662,7 +667,8 @@ describe('Range Explicit Encryption with JS native types', function () {
 });
 
 describe('CSOT', function () {
-  describe('Auto encryption', function () {
+  // NODE-7958: timeoutMS is a no-op
+  describe.skip('Auto encryption', function () {
     let setupClient;
     let keyVaultClient: MongoClient;
     let dataKey;
@@ -797,7 +803,8 @@ describe('CSOT', function () {
     );
   });
 
-  describe('State machine', function () {
+  // NODE-7958: timeoutMS is a no-op
+  describe.skip('State machine', function () {
     const stateMachine = new StateMachine({} as any);
 
     const timeoutContext = () => ({
@@ -1091,7 +1098,8 @@ describe('CSOT', function () {
     });
   });
 
-  describe('Explicit Encryption', function () {
+  // NODE-7958: timeoutMS is a no-op
+  describe.skip('Explicit Encryption', function () {
     describe('#createEncryptedCollection', function () {
       let client: MongoClient;
       let clientEncryption: ClientEncryption;

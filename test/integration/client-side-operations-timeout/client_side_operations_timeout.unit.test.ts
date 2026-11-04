@@ -28,6 +28,11 @@ import { createTimerSandbox } from '../../unit/timer_sandbox';
 describe('CSOT spec unit tests', function () {
   let client: MongoClient;
 
+  before(function () {
+    this.skipReason = 'NODE-7958: timeoutMS is a no-op';
+    this.skip();
+  });
+
   afterEach(async function () {
     sinon.restore();
     await client?.close();

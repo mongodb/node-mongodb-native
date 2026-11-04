@@ -2,15 +2,14 @@ import { Writable } from 'stream';
 
 import { ByteUtils, type Document, ObjectId } from '../bson';
 import type { Collection } from '../collection';
-import { CursorTimeoutMode } from '../cursor/abstract_cursor';
 import {
   MongoAPIError,
   MONGODB_ERROR_CODES,
   MongoError,
   MongoOperationTimeoutError
 } from '../error';
-import { CSOTTimeoutContext } from '../timeout';
-import { type Callback, resolveTimeoutOptions, squashError } from '../utils';
+import { type CSOTTimeoutContext } from '../timeout';
+import { type Callback, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
 import type { GridFSFile } from './download';
@@ -33,8 +32,8 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   /** Object to store in the file document's `metadata` field */
   metadata?: Document;
   /**
-   * @experimental
    * Specifies the time an operation will run until it throws a timeout error
+   * @deprecated `timeoutMS` has no effect and will be removed in a future release.
    */
   timeoutMS?: number;
 }
@@ -132,13 +131,6 @@ export class GridFSBucketWriteStream extends Writable {
       errored: false,
       aborted: false
     };
-
-    if (options.timeoutMS != null)
-      this.timeoutContext = new CSOTTimeoutContext({
-        timeoutMS: options.timeoutMS,
-        serverSelectionTimeoutMS: resolveTimeoutOptions(this.bucket.s.db.client, {})
-          .serverSelectionTimeoutMS
-      });
   }
 
   /**
@@ -248,7 +240,6 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   try {
     indexes = await stream.chunks
       .listIndexes({
-        timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined,
         timeoutMS: remainingTimeMS
       })
       .toArray();
@@ -348,7 +339,6 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
     `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
   );
   const listIndexesOptions = {
-    timeoutMode: remainingTimeMS != null ? CursorTimeoutMode.LIFETIME : undefined,
     timeoutMS: remainingTimeMS
   };
   try {

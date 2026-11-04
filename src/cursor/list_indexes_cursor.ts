@@ -10,7 +10,7 @@ export class ListIndexesCursor extends AbstractCursor {
   options?: ListIndexesOptions;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
-    super(collection.client, collection.s.namespace, options);
+    super(collection.client, collection.s.namespace, { ...options });
     this.parent = collection;
     this.options = options;
   }

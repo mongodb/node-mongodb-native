@@ -40,38 +40,16 @@ describe('ClientEncryption', function () {
         'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
         'base64'
       );
+      // NODE-7958: timeoutMS is a no-op, so it is never used by ClientEncryption
       context('when timeoutMS is provided in ClientEncryptionOptions and client', function () {
-        it('sets clientEncryption._timeoutMS to ClientEncryptionOptions.timeoutMS value', function () {
+        it('leaves clientEncryption._timeoutMS undefined', function () {
           const client = new MongoClient('mongodb://a/', { timeoutMS: 100 });
           const clientEncryption = new ClientEncryption(client, {
             keyVaultNamespace: 'keyvault.datakeys',
             kmsProviders: { local: { key: LOCAL_MASTERKEY } },
             timeoutMS: 500
           });
-          expect(clientEncryption._timeoutMS).to.equal(500);
-        });
-      });
-
-      context('when timeoutMS is only provided in ClientEncryptionOptions', function () {
-        it('sets clientEncryption._timeoutMS to ClientEncryptionOptions.timeoutMS value', function () {
-          const client = new MongoClient('mongodb://a/');
-          const clientEncryption = new ClientEncryption(client, {
-            keyVaultNamespace: 'keyvault.datakeys',
-            kmsProviders: { local: { key: LOCAL_MASTERKEY } },
-            timeoutMS: 500
-          });
-          expect(clientEncryption._timeoutMS).to.equal(500);
-        });
-      });
-
-      context('when timeoutMS is only provided in client', function () {
-        it('sets clientEncryption._timeoutMS to client.timeoutMS value', function () {
-          const client = new MongoClient('mongodb://a/', { timeoutMS: 100 });
-          const clientEncryption = new ClientEncryption(client, {
-            keyVaultNamespace: 'keyvault.datakeys',
-            kmsProviders: { local: { key: LOCAL_MASTERKEY } }
-          });
-          expect(clientEncryption._timeoutMS).to.equal(100);
+          expect(clientEncryption._timeoutMS).to.be.undefined;
         });
       });
     });

@@ -28,6 +28,24 @@ describe('class AggregationCursor', () => {
     });
   });
 
+  // NODE-7958: timeoutMS and timeoutMode are no-ops
+  context('when timeoutMS and timeoutMode are provided', () => {
+    it('does not keep them on the cursor options or the aggregate options', () => {
+      const options = { timeoutMS: 100, timeoutMode: CursorTimeoutMode.ITERATION };
+      const aggregationCursor = new AggregationCursor(
+        client,
+        ns('db.coll'),
+        [{ $out: 'test' }],
+        options
+      );
+
+      expect(aggregationCursor).to.not.have.nested.property('cursorOptions.timeoutMS');
+      expect(aggregationCursor).to.not.have.nested.property('cursorOptions.timeoutMode');
+      expect(aggregationCursor).to.have.nested.property('aggregateOptions.timeoutMS', undefined);
+      expect(aggregationCursor).to.have.nested.property('aggregateOptions.timeoutMode', undefined);
+    });
+  });
+
   context('clone()', () => {
     it('returns a new cursor', () => {
       const cloned = cursor.clone();
@@ -131,7 +149,8 @@ describe('class AggregationCursor', () => {
   });
 
   context('when addStage, bespoke stage methods, or array is used to construct pipeline', () => {
-    context('when CSOT is enabled', () => {
+    // NODE-7958: timeoutMS and timeoutMode are no-ops, so these guards can never trigger
+    context.skip('when CSOT is enabled', () => {
       let aggregationCursor: AggregationCursor;
       before(function () {
         aggregationCursor = client
@@ -196,7 +215,8 @@ describe('class AggregationCursor', () => {
   });
 
   describe('constructor()', () => {
-    context('when CSOT is enabled', () => {
+    // NODE-7958: timeoutMS and timeoutMode are no-ops, so these guards can never trigger
+    context.skip('when CSOT is enabled', () => {
       context('when timeoutMode=ITERATION and a $out stage is provided', function () {
         it('throws a MongoAPIError', function () {
           expect(
