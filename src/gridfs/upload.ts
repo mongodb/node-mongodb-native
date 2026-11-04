@@ -228,7 +228,8 @@ function createChunkDoc(filesId: ObjectId, n: number, data: Uint8Array): GridFSC
   };
 }
 
-async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> {
+/** @internal */
+export async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> {
   const index = { files_id: 1, n: 1 };
 
   let remainingTimeMS;
@@ -316,7 +317,8 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
   queueMicrotask(callback);
 }
 
-async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
+/** @internal */
+export async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   let remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
     `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
   );
