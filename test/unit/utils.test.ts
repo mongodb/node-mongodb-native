@@ -11,8 +11,8 @@ import {
   compareObjectId,
   decorateWithExplain,
   DEFAULT_ALLOWED_HOSTS,
-  DriverStringUtils,
   dnsNameToASCII,
+  DriverStringUtils,
   Explain,
   hasAtomicOperators,
   HostAddress,
@@ -1416,6 +1416,9 @@ describe('driver utils', function () {
 
     it('throws when the limit is NaN', function () {
       expect(() => truncateStringBytes('abc', NaN)).to.throw();
+    });
+  });
+
   // NODE-7958: timeoutMS and timeoutMode are no-ops
   describe('timeoutMS no-op', function () {
     describe('resolveOptions()', function () {

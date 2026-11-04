@@ -193,13 +193,13 @@ export async function makeClientMetadata(
   for (const [k, v] of faasEnv) {
     // delay setting name, it needs to be done *after* agent
     if (k !== 'name') {
-       fullEnv.set(k, v)
+      fullEnv.set(k, v);
     }
-  };
+  }
   const agentEnv = getAgentEnv();
   if (agentEnv.length > 0) fullEnv.set('agent', agentEnv);
   if (faasEnv.has('name')) {
-    fullEnv.set('name', faasEnv.get('name'))
+    fullEnv.set('name', faasEnv.get('name'));
   }
 
   // Fits to the metadata document preferentially setting by property order
