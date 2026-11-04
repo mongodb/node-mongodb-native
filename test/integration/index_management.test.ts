@@ -405,7 +405,7 @@ describe('Indexes', function () {
           },
           data: {
             failCommands: ['dropIndexes'],
-            errorCode: MONGODB_ERROR_CODES.HostUnreachable
+            errorCode: MONGODB_ERROR_CODES.ShutdownInProgress
           }
         });
     });
@@ -413,7 +413,7 @@ describe('Indexes', function () {
     it('should throw the server error', async function () {
       const error = await collection.dropIndexes().catch(error => error);
       expect(error).to.be.instanceOf(MongoServerError);
-      expect(error).to.have.property('code', MONGODB_ERROR_CODES.HostUnreachable);
+      expect(error).to.have.property('code', MONGODB_ERROR_CODES.ShutdownInProgress);
     });
   });
 
