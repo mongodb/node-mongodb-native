@@ -1,4 +1,4 @@
-import { type Connection, type MongoError } from '..';
+import { type Connection, type MongoError, MongoServerError } from '..';
 import type { Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
@@ -42,7 +42,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
   }
 
   override handleError(error: MongoError): boolean {
-    if (!isNamespaceNotFoundError(error)) throw error;
+    if (!(error instanceof MongoServerError && isNamespaceNotFoundError(error))) throw error;
 
     return false;
   }
