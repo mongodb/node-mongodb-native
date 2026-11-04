@@ -111,10 +111,14 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
 /**
  * From the specs:
  * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
- * 1. Omit fields from `env` except `env.name` & `env.agent`.
- * 2. Omit fields from `os` except `os.type`.
- * 3. Omit the `env` document entirely.
- * 4. Truncate `platform`. -- special we do not truncate this field
+ * 1. Omit fields from `env` except `env.name` and `env.agent`.
+ * 2. Omit `env.agent`. If `env` then has no remaining fields, omit `env` entirely.
+ * 3. Omit fields from `os` except `os.type`.
+ * 4. Omit the `env` document entirely.
+ * 5. Truncate `platform`. -- special we do not truncate this field
+ *
+ * `env.agent` is omitted before `env.name` because drivers have reported `env.name` since before
+ * `env.agent` existed.
  */
 export async function makeClientMetadata(
   driverInfoList: DriverInfo[],
@@ -179,16 +183,20 @@ export async function makeClientMetadata(
     }
   }
 
-  // TODO(NODE-7851): Env has an order of precedence for data truncation, and order matters.
-  // We append in the order of delete preference. 'name' is appended at the end of
-  // faasEnv, and is preference-agnostic with 'agent' for now, since ensuring
-  // truncation order is to be tackled in NODE-7851.
+  // Env has an order of precedence for data truncation, and order matters.
+  // We append in the order of delete preference. Per the spec, 'agent' is omitted before 'name'.
+
+  // TODO(NODE-7851): Truncation does not yet follow the spec's cumulative order in two ways:
+  // 1. `env.container` is appended last, so it is effectively deleted after `env.name`. If the
+  //    FaaS fields don't fit but `container` does, we send `env` with `container` and no `name`.
+  // 2. `os` is fitted before `env`, so it is truncated too early. The spec trims `env` down to
+  //    name & agent, then omits agent, then trims `os` down to `os.type`, and only then omits `env`.
 
   // A placeholder document that contains all groups of data to be appended to the metadata document
   // which are furnished from environment variables (agent, FAAS, container)
   const fullEnv = new Map<string, unknown>();
 
-  // FAAS & Agent are set jointly & fitted after, since their order isn't significant
+  // FAAS fields (other than name) are set first, then agent, then name last
   const faasEnv = getFAASEnv();
   for (const [k, v] of faasEnv) {
     // delay setting name, it needs to be done *after* agent
