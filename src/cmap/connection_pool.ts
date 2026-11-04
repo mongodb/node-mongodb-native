@@ -134,6 +134,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   private waitQueue: List<WaitQueueMember>;
   private metrics: ConnectionPoolMetrics;
   private processingWaitQueue: boolean;
+  /**
+   * Set when `clear()` (or another caller) enters `processWaitQueue` while a pass
+   * is already running. The in-progress pass finishes, then the queue is processed
+   * again so a pause is not dropped on the floor.
+   */
+  private pendingWaitQueueProcessing: boolean;
 
   /**
    * Emitted when the connection pool is created.
@@ -227,6 +233,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this.waitQueue = new List();
     this.metrics = new ConnectionPoolMetrics();
     this.processingWaitQueue = false;
+    this.pendingWaitQueueProcessing = false;
 
     this.mongoLogger = this.server.topology.client?.mongoLogger;
     this.component = 'connection';
@@ -700,7 +707,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // connection permits because that potentially delays the availability of
       // the connection to a checkout request
       this.createConnection((err, connection) => {
-        if (!err && connection) {
+        // A connection created for minPoolSize can finish after clear() + ready().
+        // Its generation is the one captured when connect started. Do not add a
+        // retired, idle, or already-closed socket to the available list.
+        if (!err && connection && !this.destroyConnectionIfPerished(connection)) {
           this.connections.push(connection);
           queueMicrotask(() => this.processWaitQueue());
         }
@@ -723,10 +733,25 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   private processWaitQueue() {
     if (this.processingWaitQueue) {
+      // clear() calls this method to fail waiters on a paused pool. A checkout
+      // listener can invoke clear() while the pass that checked out the connection
+      // is still on the stack. Remember the request and run it after this pass.
+      this.pendingWaitQueueProcessing = true;
       return;
     }
-    this.processingWaitQueue = true;
 
+    this.processingWaitQueue = true;
+    try {
+      do {
+        this.pendingWaitQueueProcessing = false;
+        this.processWaitQueuePass();
+      } while (this.pendingWaitQueueProcessing);
+    } finally {
+      this.processingWaitQueue = false;
+    }
+  }
+
+  private processWaitQueuePass() {
     while (this.waitQueueSize) {
       const waitQueueMember = this.waitQueue.first();
       if (!waitQueueMember) {
@@ -774,6 +799,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     const { maxPoolSize, maxConnecting } = this.options;
     while (
+      this.poolState === PoolState.ready &&
       this.waitQueueSize > 0 &&
       this.pendingConnectionCount < maxConnecting &&
       (maxPoolSize === 0 || this.totalConnectionCount < maxPoolSize)
@@ -784,35 +810,45 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       this.createConnection((err, connection) => {
         if (waitQueueMember.cancelled) {
-          if (!err && connection) {
+          if (!err && connection && !this.destroyConnectionIfPerished(connection)) {
             this.connections.push(connection);
           }
-        } else {
-          if (err) {
-            this.emitAndLog(
-              ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-              // TODO(NODE-5192): Remove this cast
-              new ConnectionCheckOutFailedEvent(
-                this,
-                'connectionError',
-                waitQueueMember.checkoutTime,
-                err as MongoError
-              )
-            );
-            waitQueueMember.reject(err);
-          } else if (connection) {
-            this.checkedOut.add(connection);
-            this.emitAndLog(
-              ConnectionPool.CONNECTION_CHECKED_OUT,
-              new ConnectionCheckedOutEvent(this, connection, waitQueueMember.checkoutTime)
-            );
-            waitQueueMember.resolve(connection);
-          }
+        } else if (err) {
+          this.emitAndLog(
+            ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+            // TODO(NODE-5192): Remove this cast
+            new ConnectionCheckOutFailedEvent(
+              this,
+              'connectionError',
+              waitQueueMember.checkoutTime,
+              err as MongoError
+            )
+          );
+          waitQueueMember.reject(err);
+        } else if (connection && this.connectionIsStale(connection)) {
+          // createConnection stamps the generation that was current when the
+          // handshake started. clear() can increment it, and ready() can reopen
+          // the pool, before this callback runs. Checking the socket out anyway
+          // hands the operation a connection the pool clear was supposed to retire.
+          // Example: checkout begins, the pool is cleared for a network error or
+          // a stepdown, monitoring marks the pool ready, then the in-flight hello
+          // completes. Destroy that socket and leave the waiter queued. The next
+          // pass opens a connection at the generation ready() is serving.
+          // Rejecting with PoolClearedError would fail the operation here, where
+          // a retry is not guaranteed.
+          this.destroyConnection(connection, 'stale');
+          this.waitQueue.unshift(waitQueueMember);
+        } else if (connection) {
+          this.checkedOut.add(connection);
+          this.emitAndLog(
+            ConnectionPool.CONNECTION_CHECKED_OUT,
+            new ConnectionCheckedOutEvent(this, connection, waitQueueMember.checkoutTime)
+          );
+          waitQueueMember.resolve(connection);
         }
         queueMicrotask(() => this.processWaitQueue());
       });
     }
-    this.processingWaitQueue = false;
   }
 }
 
