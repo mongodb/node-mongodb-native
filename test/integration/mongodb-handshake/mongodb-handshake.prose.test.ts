@@ -221,8 +221,7 @@ describe('Handshake Prose Tests', function () {
     });
   });
 
-  // Ref: https://github.com/aclark4life/specifications/blob/feaec8d0ca332a80f457f75c6ef1600267e61d64/source/mongodb-handshake/tests/README.md#test-3-test-that-agent-metadata-is-properly-captured
-  // TODO: Update link when fixed to main branch
+  // Ref: https://github.com/mongodb/specifications/blob/9ea18a92308ed437e16dd95e6ff9c496daa61ecd/source/mongodb-handshake/tests/README.md#test-3-test-that-agent-metadata-is-properly-captured
   context(`Test 3: Test that agent metadata is properly captured`, function () {
     const agentEnvs: Array<{
       expectEnv: object;

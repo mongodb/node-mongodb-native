@@ -568,6 +568,22 @@ describe('client metadata module', () => {
       });
     });
 
+    context('when env.name fits but env.agent does not', () => {
+      beforeEach('2. Omit `env.agent`.', () => {
+        sinon.stub(process, 'env').get(() => ({
+          AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
+          AI_AGENT: 'a'.repeat(64)
+        }));
+      });
+
+      it('omits env.agent before env.name', async () => {
+        // The padded driver.name leaves roughly 70 bytes: room for env.name (31 bytes as a BSON
+        // element) but not for env.name plus a 64-byte env.agent (107 bytes).
+        const metadata = await makeClientMetadata([{ name: 'a'.repeat(260) }], { runtime });
+        expect(metadata.env).to.deep.equal({ name: 'aws.lambda' });
+      });
+    });
+
     context('when os information is too large', () => {
       context('release too large', () => {
         beforeEach('2. Omit fields from `os` except `os.type`.', () => {
