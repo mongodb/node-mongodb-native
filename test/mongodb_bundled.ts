@@ -163,6 +163,7 @@ export const {
   isDriverInfoEqual,
   isEmptyCredentials,
   isHello,
+  isNamespaceNotFoundError,
   isRecord,
   isResumableError,
   isRetryableReadError,
