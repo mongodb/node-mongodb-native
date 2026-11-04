@@ -4,7 +4,14 @@ import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as executeOperationModule from '../../src/operations/execute_operation';
-import { type Collection, type Document, isHello, MongoClient, MongoServerError } from '../mongodb';
+import {
+  type Collection,
+  type Document,
+  isHello,
+  MongoClient,
+  MONGODB_ERROR_CODES,
+  MongoServerError
+} from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {
@@ -269,7 +276,12 @@ describe('Collection', function () {
     context('when the operation rejects with NamespaceNotFound', () => {
       it('resolves false', async () => {
         executeOperationStub.rejects(
-          new MongoServerError({ ok: 0, code: 26, codeName: 'NamespaceNotFound', errmsg: 'x' })
+          new MongoServerError({
+            ok: 0,
+            code: MONGODB_ERROR_CODES.NamespaceNotFound,
+            codeName: 'NamespaceNotFound',
+            errmsg: 'x'
+          })
         );
 
         expect(await collection.dropIndexes()).to.equal(false);
@@ -278,7 +290,11 @@ describe('Collection', function () {
 
     context('when the operation rejects with any other server error', () => {
       it('rethrows that error', async () => {
-        const serverError = new MongoServerError({ ok: 0, code: 91, errmsg: 'x' });
+        const serverError = new MongoServerError({
+          ok: 0,
+          code: MONGODB_ERROR_CODES.HostUnreachable,
+          errmsg: 'x'
+        });
         executeOperationStub.rejects(serverError);
 
         const error = await collection.dropIndexes().catch(error => error);

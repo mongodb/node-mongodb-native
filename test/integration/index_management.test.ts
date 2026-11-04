@@ -6,6 +6,7 @@ import {
   type CommandSucceededEvent,
   type Db,
   type MongoClient,
+  MONGODB_ERROR_CODES,
   MongoServerError
 } from '../mongodb';
 import { type FailCommandFailPoint } from '../tools/utils';
@@ -404,7 +405,7 @@ describe('Indexes', function () {
           },
           data: {
             failCommands: ['dropIndexes'],
-            errorCode: 91
+            errorCode: MONGODB_ERROR_CODES.HostUnreachable
           }
         });
     });
@@ -412,7 +413,7 @@ describe('Indexes', function () {
     it('should throw the server error', async function () {
       const error = await collection.dropIndexes().catch(error => error);
       expect(error).to.be.instanceOf(MongoServerError);
-      expect(error).to.have.property('code', 91);
+      expect(error).to.have.property('code', MONGODB_ERROR_CODES.HostUnreachable);
     });
   });
 
