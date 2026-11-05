@@ -612,7 +612,6 @@ export class Collection<TSchema extends Document = Document> {
    * Creates an index on the db and collection collection.
    *
    * @param indexSpec - The field name or index specification to create an index for
-   * @param indexOptions - Optional settings for the command
    *
    * @example
    * ```ts
@@ -635,10 +634,19 @@ export class Collection<TSchema extends Document = Document> {
    * // Equivalent to { j: 1, k: -1, l: 2d }
    * await collection.createIndex(['j', ['k', -1], { l: '2d' }])
    * ```
+   */
+  createIndex(indexSpec: IndexSpecification): Promise<string>;
+
+  /**
+   * Creates an index on the db and collection collection.
+   *
+   * @param indexSpec - The field name or index specification to create an index for
+   * @param options - Settings for the index and the `createIndexes` command combined
+   *
    * @deprecated Use the three parameter overload, which separates index options from
    *   command options. This overload will be removed in a future major release.
    */
-  createIndex(indexSpec: IndexSpecification, options?: CreateIndexesOptions): Promise<string>;
+  createIndex(indexSpec: IndexSpecification, options: CreateIndexesOptions): Promise<string>;
 
   /**
    * Creates an index on the db and collection collection.
