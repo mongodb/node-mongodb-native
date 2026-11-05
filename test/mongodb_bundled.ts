@@ -133,7 +133,6 @@ export const {
   EJSON,
   enumToString,
   EstimatedDocumentCountOperation,
-  executeOperationModule,
   Explain,
   ExplainVerbosity,
   fetchAzureKMSToken,

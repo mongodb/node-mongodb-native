@@ -1,14 +1,13 @@
 import { Long } from 'bson';
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import {
   type Collection,
   type Document,
-  executeOperationModule,
   isHello,
   MongoClient,
   MONGODB_ERROR_CODES,
+  MongoNetworkError,
   MongoServerError
 } from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
@@ -252,64 +251,77 @@ describe('Collection', function () {
   });
 
   context('#dropIndexes', () => {
-    let executeOperationStub: sinon.SinonStub;
-    // An unconnected client: no network is touched because executeOperation is stubbed.
-    const collection = new MongoClient('mongodb://localhost:27017').db('test').collection('test_c');
+    /**
+     * Runs `dropIndexes` against the mock server, letting `respond` answer the command.
+     * `executeOperation` cannot be stubbed under the bundled runtime, so the outcome is driven
+     * from the server reply instead.
+     */
+    async function dropIndexes(respond: (request) => void): Promise<boolean> {
+      const client = new MongoClient(`mongodb://${server.uri()}/test`);
 
-    beforeEach(() => {
-      executeOperationStub = sinon.stub(executeOperationModule, 'executeOperation');
-    });
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.dropIndexes) {
+          respond(request);
+        } else if (isHello(doc)) {
+          request.reply(Object.assign({}, HELLO));
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
 
-    afterEach(() => {
-      sinon.restore();
-    });
+      await client.connect();
+      try {
+        return await client.db('test').collection('test_c').dropIndexes();
+      } finally {
+        await client.close();
+      }
+    }
 
     context('when the operation succeeds', () => {
       it('resolves true', async () => {
-        executeOperationStub.resolves({ ok: 1 });
-
-        expect(await collection.dropIndexes()).to.equal(true);
+        expect(await dropIndexes(request => request.reply({ ok: 1 }))).to.equal(true);
       });
     });
 
     context('when the operation rejects with NamespaceNotFound', () => {
       it('resolves false', async () => {
-        executeOperationStub.rejects(
-          new MongoServerError({
+        const result = await dropIndexes(request =>
+          request.reply({
             ok: 0,
             code: MONGODB_ERROR_CODES.NamespaceNotFound,
             codeName: 'NamespaceNotFound',
-            errmsg: 'x'
+            errmsg: 'ns not found'
           })
         );
 
-        expect(await collection.dropIndexes()).to.equal(false);
+        expect(result).to.equal(false);
       });
     });
 
     context('when the operation rejects with any other server error', () => {
       it('rethrows that error', async () => {
-        const serverError = new MongoServerError({
-          ok: 0,
-          code: MONGODB_ERROR_CODES.HostUnreachable,
-          errmsg: 'x'
-        });
-        executeOperationStub.rejects(serverError);
+        const error = await dropIndexes(request =>
+          request.reply({
+            ok: 0,
+            code: MONGODB_ERROR_CODES.HostUnreachable,
+            codeName: 'HostUnreachable',
+            errmsg: 'x'
+          })
+        ).catch(error => error);
 
-        const error = await collection.dropIndexes().catch(error => error);
-
-        expect(error).to.equal(serverError);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error).to.have.property('codeName', 'HostUnreachable');
       });
     });
 
     context('when the operation rejects with a non-server error', () => {
       it('rethrows that error', async () => {
-        const nonServerError = new Error('x');
-        executeOperationStub.rejects(nonServerError);
+        const error = await dropIndexes(request => request.connection.destroy()).catch(
+          error => error
+        );
 
-        const error = await collection.dropIndexes().catch(error => error);
-
-        expect(error).to.equal(nonServerError);
+        expect(error).to.be.instanceOf(MongoNetworkError);
       });
     });
   });
