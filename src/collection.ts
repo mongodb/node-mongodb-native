@@ -646,7 +646,10 @@ export class Collection<TSchema extends Document = Document> {
    * @deprecated Use the three parameter overload, which separates index options from
    *   command options. This overload will be removed in a future major release.
    */
-  createIndex(indexSpec: IndexSpecification, options: CreateIndexesOptions): Promise<string>;
+  createIndex(
+    indexSpec: IndexSpecification,
+    options: CreateIndexesOptions | undefined
+  ): Promise<string>;
 
   /**
    * Creates an index on the db and collection collection.
