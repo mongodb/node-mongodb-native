@@ -1063,15 +1063,15 @@ describe('class MongoClient', function () {
         client = this.configuration.newClient();
       });
 
-      it('sets the default options', {
+      it('does not pass autoSelectFamily to the socket', {
         metadata: { requires: { topology: ['single'], tls: 'disabled' } },
         test: async function () {
           await client.connect();
-          expect(netSpy).to.have.been.calledWith(
-            sinon.match({
-              autoSelectFamily: true
-            })
-          );
+          expect(netSpy).to.have.been.called;
+          for (const call of netSpy.getCalls()) {
+            expect(call.args[0]).to.not.have.property('autoSelectFamily');
+            expect(call.args[0]).to.not.have.property('autoSelectFamilyAttemptTimeout');
+          }
         }
       });
     });

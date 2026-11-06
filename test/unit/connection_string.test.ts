@@ -282,6 +282,25 @@ describe('Connection String', function () {
     }
   });
 
+  context('autoSelectFamily option', function () {
+    it('is not set when omitted', function () {
+      const options = parseOptions('mongodb://localhost');
+      expect(options).to.not.have.property('autoSelectFamily');
+    });
+
+    for (const value of [true, false]) {
+      it(`preserves ${value} from the connection string`, function () {
+        const options = parseOptions(`mongodb://localhost?autoSelectFamily=${value}`);
+        expect(options).to.have.property('autoSelectFamily', value);
+      });
+
+      it(`preserves ${value} from the options object`, function () {
+        const options = parseOptions('mongodb://localhost', { autoSelectFamily: value });
+        expect(options).to.have.property('autoSelectFamily', value);
+      });
+    }
+  });
+
   it('should parse compression options', function () {
     const options = parseOptions('mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4');
     expect(options).to.have.property('compressors');
