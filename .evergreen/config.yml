@@ -195,6 +195,7 @@ functions:
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_BUNDLED: ${MONGODB_BUNDLED}
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh
@@ -4618,9 +4619,32 @@ buildvariants:
     display_name: lint
     run_on: rhel80-large
     tasks:
-      - .unit-tests
       - .lint-checks
       - .typescript-compilation
+  - name: unit-tests-rhel8
+    display_name: Unit Tests RHEL 8
+    run_on: rhel80-large
+    tasks:
+      - .unit-tests
+  - name: unit-tests-windows
+    display_name: Unit Tests Windows
+    run_on: windows-2022-latest-large
+    tasks:
+      - .unit-tests
+  - name: unit-tests-rhel8-bundled
+    display_name: Unit Tests RHEL 8 Bundled
+    run_on: rhel80-large
+    expansions:
+      MONGODB_BUNDLED: true
+    tasks:
+      - run-unit-tests-node-24
+  - name: unit-tests-windows-bundled
+    display_name: Unit Tests Windows Bundled
+    run_on: windows-2022-latest-large
+    expansions:
+      MONGODB_BUNDLED: true
+    tasks:
+      - run-unit-tests-node-24
   - name: generate-combined-coverage
     display_name: Generate Combined Coverage
     run_on: rhel80-large

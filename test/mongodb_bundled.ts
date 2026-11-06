@@ -178,6 +178,7 @@ export const {
   ListCollectionsCursor,
   ListCollectionsOperation,
   ListDatabasesOperation,
+  ListIndexesCursor,
   ListIndexesOperation,
   Long,
   makeClientMetadata,
@@ -247,6 +248,7 @@ export const {
   OpMsgResponse,
   OpQueryRequest,
   OpReply,
+  OrderedBulkOperation,
   parseOptions,
   parseSeverityFromString,
   performGSSAPICanonicalizeHostName,
@@ -266,6 +268,7 @@ export const {
   RenameOperation,
   ReplaceOneOperation,
   resolveCname,
+  resolveOptions,
   resolveRuntimeAdapters,
   resolveSRVRecord,
   resolveTimeoutOptions,
@@ -327,6 +330,7 @@ export const {
   TopologyType,
   Transaction,
   uncompressibleCommands,
+  UnorderedBulkOperation,
   UpdateManyOperation,
   UpdateOneOperation,
   UpdateOperation,
@@ -462,6 +466,7 @@ import type {
   MonitorInterval as _MonitorInterval,
   ObjectId as _ObjectId,
   OnDemandDocument as _OnDemandDocument,
+  OrderedBulkOperation as _OrderedBulkOperation,
   RTTSampler as _RTTSampler,
   Server as _Server,
   ServerApiVersion as _ServerApiVersion,
@@ -482,6 +487,7 @@ import type {
   TopologyOpeningEvent as _TopologyOpeningEvent,
   TopologyOptions as _TopologyOptions,
   TopologyType as _TopologyType,
+  UnorderedBulkOperation as _UnorderedBulkOperation,
   UUID as _UUID
 } from './tools/runner/bundle/types/index';
 
@@ -524,6 +530,7 @@ export type Monitor = _Monitor;
 export type MonitorInterval = _MonitorInterval;
 export type ObjectId = _ObjectId;
 export type OnDemandDocument = _OnDemandDocument;
+export type OrderedBulkOperation = _OrderedBulkOperation;
 export type RTTSampler = _RTTSampler;
 export type Server = _Server;
 export type ServerApiVersion = _ServerApiVersion;
@@ -544,6 +551,7 @@ export type TopologyDescriptionChangedEvent = _TopologyDescriptionChangedEvent;
 export type TopologyOpeningEvent = _TopologyOpeningEvent;
 export type TopologyOptions = _TopologyOptions;
 export type TopologyType = _TopologyType;
+export type UnorderedBulkOperation = _UnorderedBulkOperation;
 export type UUID = _UUID;
 
 // Export specific types from other files in the contextified module
