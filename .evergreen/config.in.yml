@@ -244,6 +244,7 @@ functions:
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_BUNDLED: ${MONGODB_BUNDLED}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh"

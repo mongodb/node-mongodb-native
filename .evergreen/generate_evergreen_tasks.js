@@ -603,8 +603,41 @@ BUILD_VARIANTS.push({
   name: 'lint',
   display_name: 'lint',
   run_on: DEFAULT_OS,
-  tasks: ['.unit-tests', '.lint-checks', '.typescript-compilation']
+  tasks: ['.lint-checks', '.typescript-compilation']
 });
+
+// Unit tests need no server. The `run-unit-tests-node-*` tasks set their own Node.js version, so a
+// variant only picks the operating system and whether `MONGODB_BUNDLED` is set. Unit tests run on
+// every supported Node.js version, and against the bundled driver on the latest LTS only.
+const latestLtsUnitTests = `run-unit-tests-node-${LATEST_LTS}`;
+BUILD_VARIANTS.push(
+  {
+    name: 'unit-tests-rhel8',
+    display_name: 'Unit Tests RHEL 8',
+    run_on: DEFAULT_OS,
+    tasks: ['.unit-tests']
+  },
+  {
+    name: 'unit-tests-windows',
+    display_name: 'Unit Tests Windows',
+    run_on: WINDOWS_OS,
+    tasks: ['.unit-tests']
+  },
+  {
+    name: 'unit-tests-rhel8-bundled',
+    display_name: 'Unit Tests RHEL 8 Bundled',
+    run_on: DEFAULT_OS,
+    expansions: { MONGODB_BUNDLED: true },
+    tasks: [latestLtsUnitTests]
+  },
+  {
+    name: 'unit-tests-windows-bundled',
+    display_name: 'Unit Tests Windows Bundled',
+    run_on: WINDOWS_OS,
+    expansions: { MONGODB_BUNDLED: true },
+    tasks: [latestLtsUnitTests]
+  }
+);
 
 BUILD_VARIANTS.push({
   name: 'generate-combined-coverage',
