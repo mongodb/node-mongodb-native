@@ -16,7 +16,7 @@ import {
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
-import { MongoAPIError, MongoInvalidArgumentError, MongoOperationTimeoutError } from './error';
+import { isNamespaceNotFoundError, MongoAPIError, MongoInvalidArgumentError } from './error';
 import { type ExplainCommandOptions, type ExplainVerbosityLike } from './explain';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
@@ -802,9 +802,8 @@ export class Collection<TSchema extends Document = Document> {
       );
       return true;
     } catch (error) {
-      // TODO(NODE-6517): Driver should only filter for namespace not found error. Other errors should be thrown.
-      if (error instanceof MongoOperationTimeoutError) throw error;
-      return false;
+      if (isNamespaceNotFoundError(error)) return false;
+      throw error;
     }
   }
 

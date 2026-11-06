@@ -2,7 +2,7 @@ import { type Connection, type MongoError } from '../..';
 import type { Document } from '../../bson';
 import { MongoDBResponse } from '../../cmap/wire_protocol/responses';
 import type { Collection } from '../../collection';
-import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
+import { isNamespaceNotFoundError, MongoServerError } from '../../error';
 import type { ServerCommandOptions } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { type TimeoutContext } from '../../timeout';
@@ -49,9 +49,7 @@ export class DropSearchIndexOperation extends AbstractOperation<void> {
   }
 
   override handleError(error: MongoError): void {
-    const isNamespaceNotFoundError =
-      error instanceof MongoServerError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound;
-    if (!isNamespaceNotFoundError) {
+    if (!(error instanceof MongoServerError && isNamespaceNotFoundError(error))) {
       throw error;
     }
   }
