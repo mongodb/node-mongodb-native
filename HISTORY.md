@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.9.0](https://github.com/mongodb/node-mongodb-native/compare/v7.8.0...v7.9.0) (2026-11-06)
+
+
+### Features
+
+* **NODE-7968:** un-deprecate single parameter overload of `createIndex` ([#5106](https://github.com/mongodb/node-mongodb-native/issues/5106)) ([18f21e5](https://github.com/mongodb/node-mongodb-native/commit/18f21e5b51426224fb01b7feac8882930eb17bc2))
+
 ## [7.8.0](https://github.com/mongodb/node-mongodb-native/compare/v7.7.0...v7.8.0) (2026-10-30)
 
 
