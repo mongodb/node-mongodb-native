@@ -16,7 +16,12 @@ import {
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
-import { isNamespaceNotFoundError, MongoAPIError, MongoInvalidArgumentError } from './error';
+import {
+  isNamespaceNotFoundError,
+  MongoAPIError,
+  MongoInvalidArgumentError,
+  MongoServerError
+} from './error';
 import { type ExplainCommandOptions, type ExplainVerbosityLike } from './explain';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
@@ -791,7 +796,7 @@ export class Collection<TSchema extends Document = Document> {
       );
       return true;
     } catch (error) {
-      if (isNamespaceNotFoundError(error)) return false;
+      if (error instanceof MongoServerError && isNamespaceNotFoundError(error)) return false;
       throw error;
     }
   }

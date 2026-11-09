@@ -1,9 +1,11 @@
 import { Long } from 'bson';
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 import {
   type Collection,
   type Document,
+  DropIndexOperation,
   isHello,
   MongoClient,
   MONGODB_ERROR_CODES,
@@ -20,6 +22,7 @@ describe('Collection', function () {
   });
 
   afterEach(async () => {
+    sinon.restore();
     await cleanup();
   });
 
@@ -324,5 +327,23 @@ describe('Collection', function () {
         expect(error).to.be.instanceOf(MongoNetworkError);
       });
     });
+
+    context(
+      'when the operation rejects with a non-server error that has code NamespaceNotFound',
+      () => {
+        it('rethrows that error', async () => {
+          const thrown = Object.assign(new Error('not a server error'), {
+            code: MONGODB_ERROR_CODES.NamespaceNotFound
+          });
+          sinon.stub(DropIndexOperation.prototype, 'buildCommandDocument').throws(thrown);
+
+          const error = await dropIndexes(request => request.reply({ ok: 1 })).catch(
+            error => error
+          );
+
+          expect(error).to.equal(thrown);
+        });
+      }
+    );
   });
 });
