@@ -306,7 +306,12 @@ describe('client metadata module', () => {
       it('truncates the application name with truncateStringBytes', async () => {
         const spy = sinon.spy(DriverStringUtils, 'truncateStringBytes');
         await makeClientMetadata([], { runtime, appName: 'myApplication' });
-        expect(spy.called).to.be.true;
+        expect(spy.calledWith('myApplication', 128)).to.be.true;
+      });
+
+      it('does not split a multi-byte character straddling byte 128', async () => {
+        const metadata = await makeClientMetadata([], { runtime, appName: '€'.repeat(300) });
+        expect(metadata.application?.name).to.equal('€'.repeat(42));
       });
     });
 
