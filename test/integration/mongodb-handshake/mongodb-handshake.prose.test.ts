@@ -23,7 +23,8 @@ type EnvironmentVariables = Array<[string, string]>;
 
 const handshakeEnvVars: string[] = [
   ...FAAS_ENV_VARIABLES,
-  ...AGENT_ENV_VARIABLES.map(([key]) => key)
+  ...AGENT_ENV_VARIABLES.map(([key]) => key),
+  'KUBERNETES_SERVICE_HOST'
 ];
 
 function stubEnv(env: EnvironmentVariables, stubDockerEnv = false) {
