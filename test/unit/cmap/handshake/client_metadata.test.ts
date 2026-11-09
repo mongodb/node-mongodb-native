@@ -312,6 +312,7 @@ describe('client metadata module', () => {
       it('does not split a multi-byte character straddling byte 128', async () => {
         const metadata = await makeClientMetadata([], { runtime, appName: '€'.repeat(300) });
         expect(metadata.application?.name).to.equal('€'.repeat(42));
+        expect(Buffer.byteLength(metadata.application?.name ?? '', 'utf8')).to.equal(126);
       });
     });
 
