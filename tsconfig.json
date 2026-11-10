@@ -10,6 +10,10 @@
     // and is preserved verbatim instead of being downleveled to `require()` (NODE-7603).
     "module": "node16",
     "moduleResolution": "node16",
+    // node16 defaults esModuleInterop on; keep it off to preserve this package's historical
+    // emit exactly (`import * as x` stays `const x = require(...)`, no __importStar wrappers —
+    // which sinon-based module stubbing in the test suite also relies on).
+    "esModuleInterop": false,
     "skipLibCheck": true,
     "lib": [
       "es2023"
@@ -20,8 +24,6 @@
     // Never emit error filled code
     "noEmitOnError": true,
     "outDir": "lib",
-    // TS 6 no longer infers rootDir from the input files; keep src/index.ts -> lib/index.js
-    "rootDir": "./src",
     // We want the sourcemaps in a separate file
     "inlineSourceMap": false,
     "sourceMap": true,
@@ -43,11 +45,7 @@
   },
   "ts-node": {
     "transpileOnly": true,
-    "compiler": "typescript-cached-transpile",
-    // ts-node also transpiles files outside src/ (test/, etc/)
-    "compilerOptions": {
-      "rootDir": "."
-    }
+    "compiler": "typescript-cached-transpile"
   },
   "include": [
     "src/**/*"
