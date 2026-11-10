@@ -1063,7 +1063,7 @@ describe('class MongoClient', function () {
         client = this.configuration.newClient();
       });
 
-      it('does not pass autoSelectFamily to the socket', {
+      it('does not pass autoSelectFamily to the socket by default', {
         metadata: { requires: { topology: ['single'], tls: 'disabled' } },
         test: async function () {
           await client.connect();

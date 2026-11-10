@@ -119,7 +119,7 @@ describe('AutoEncrypter', function () {
       });
 
       context('when mongocryptdURI is not specified', () => {
-        it('sets family options', function () {
+        it('does not set autoSelectFamily by default', function () {
           expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
           const options = autoEncrypter._mongocryptdClient?.s.options;
           if (net.getDefaultAutoSelectFamily) {
@@ -131,7 +131,7 @@ describe('AutoEncrypter', function () {
       });
 
       context('when mongocryptdURI is specified', () => {
-        it('does not set autoSelectFamily options', function () {
+        it('does not set autoSelectFamily options by default', function () {
           const autoEncrypter = new AutoEncrypter(client, {
             ...autoEncrypterOptions,
             extraOptions: { mongocryptdURI: MongocryptdManager.DEFAULT_MONGOCRYPTD_URI }

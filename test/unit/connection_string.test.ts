@@ -283,7 +283,7 @@ describe('Connection String', function () {
   });
 
   context('autoSelectFamily option', function () {
-    it('is not set when omitted', function () {
+    it('is not set by default', function () {
       const options = parseOptions('mongodb://localhost');
       expect(options).to.not.have.property('autoSelectFamily');
     });

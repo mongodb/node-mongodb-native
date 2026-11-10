@@ -230,7 +230,7 @@ describe('StateMachine', function () {
       const request = new MockRequest(Buffer.from('foobar'), -1);
       let connectOptions;
 
-      it('does not pass autoSelectFamily options to the socket', async function () {
+      it('does not pass autoSelectFamily options to the socket by default', async function () {
         sandbox.stub(tls, 'connect').callsFake((options, callback) => {
           connectOptions = options;
           this.fakeSocket = new MockSocket(callback);
