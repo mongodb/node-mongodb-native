@@ -30,6 +30,15 @@ describe('`import * as` emit with the repo tsconfig and installed TypeScript', f
     );
   });
 
+  it('emits lib/ code that throws on a default import when a consumer requires the driver', function () {
+    const js = transpile('src/connection_string.ts');
+    const __importStar = (mod: unknown) => mod;
+
+    expect(() => vm.runInNewContext(js, { exports: {}, require, __importStar })).to.throw(
+      /__importDefault is not defined/
+    );
+  });
+
   it('stops the driver from seeing exports a user adds to a built-in module after loading it', function () {
     const js = transpile('src/deps.ts', {});
     const zlib: Record<string, unknown> = { constants: {} };
