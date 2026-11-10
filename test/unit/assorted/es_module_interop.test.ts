@@ -60,5 +60,3 @@ describe('esModuleInterop forced on (TypeScript 6)', function () {
     expect(depsTs6.getZstdLibrary().kModuleError).to.be.instanceOf(Error);
   });
 });
-
-
