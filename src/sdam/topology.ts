@@ -170,7 +170,11 @@ export interface ConnectOptions {
   readPreference?: ReadPreference;
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated `SelectServerOptions` is not intended for public use and will be made internal in the
+ * next major release.
+ */
 export interface SelectServerOptions {
   readPreference?: ReadPreferenceLike;
   /** How long to block for server selection before throwing an error */
