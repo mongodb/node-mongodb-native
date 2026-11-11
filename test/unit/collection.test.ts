@@ -1,7 +1,17 @@
 import { Long } from 'bson';
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import { type Collection, type Document, isHello, MongoClient } from '../mongodb';
+import {
+  type Collection,
+  type Document,
+  DropIndexOperation,
+  isHello,
+  MongoClient,
+  MONGODB_ERROR_CODES,
+  MongoNetworkError,
+  MongoServerError
+} from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {
@@ -12,6 +22,7 @@ describe('Collection', function () {
   });
 
   afterEach(async () => {
+    sinon.restore();
     await cleanup();
   });
 
@@ -240,5 +251,99 @@ describe('Collection', function () {
         expect(command.indexes[0]).to.deep.equal({ unique: true, name: 'a_1', key: { a: 1 } });
       });
     });
+  });
+
+  context('#dropIndexes', () => {
+    /**
+     * Runs `dropIndexes` against the mock server, letting `respond` answer the command.
+     * `executeOperation` cannot be stubbed under the bundled runtime, so the outcome is driven
+     * from the server reply instead.
+     */
+    async function dropIndexes(respond: (request) => void): Promise<boolean> {
+      const client = new MongoClient(`mongodb://${server.uri()}/test`);
+
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.dropIndexes) {
+          respond(request);
+        } else if (isHello(doc)) {
+          request.reply(Object.assign({}, HELLO));
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      await client.connect();
+      try {
+        return await client.db('test').collection('test_c').dropIndexes();
+      } finally {
+        await client.close();
+      }
+    }
+
+    context('when the operation succeeds', () => {
+      it('resolves true', async () => {
+        expect(await dropIndexes(request => request.reply({ ok: 1 }))).to.equal(true);
+      });
+    });
+
+    context('when the operation rejects with NamespaceNotFound', () => {
+      it('resolves false', async () => {
+        const result = await dropIndexes(request =>
+          request.reply({
+            ok: 0,
+            code: MONGODB_ERROR_CODES.NamespaceNotFound,
+            codeName: 'NamespaceNotFound',
+            errmsg: 'ns not found'
+          })
+        );
+
+        expect(result).to.equal(false);
+      });
+    });
+
+    context('when the operation rejects with any other server error', () => {
+      it('rethrows that error', async () => {
+        const error = await dropIndexes(request =>
+          request.reply({
+            ok: 0,
+            code: MONGODB_ERROR_CODES.HostUnreachable,
+            codeName: 'HostUnreachable',
+            errmsg: 'x'
+          })
+        ).catch(error => error);
+
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error).to.have.property('codeName', 'HostUnreachable');
+      });
+    });
+
+    context('when the operation rejects with a non-server error', () => {
+      it('rethrows that error', async () => {
+        const error = await dropIndexes(request => request.connection.destroy()).catch(
+          error => error
+        );
+
+        expect(error).to.be.instanceOf(MongoNetworkError);
+      });
+    });
+
+    context(
+      'when the operation rejects with a non-server error that has code NamespaceNotFound',
+      () => {
+        it('rethrows that error', async () => {
+          const thrown = Object.assign(new Error('not a server error'), {
+            code: MONGODB_ERROR_CODES.NamespaceNotFound
+          });
+          sinon.stub(DropIndexOperation.prototype, 'buildCommandDocument').throws(thrown);
+
+          const error = await dropIndexes(request => request.reply({ ok: 1 })).catch(
+            error => error
+          );
+
+          expect(error).to.equal(thrown);
+        });
+      }
+    );
   });
 });

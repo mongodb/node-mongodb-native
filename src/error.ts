@@ -66,6 +66,16 @@ export const MONGODB_ERROR_CODES = Object.freeze({
   ReadConcernMajorityNotAvailableYet: 134
 } as const);
 
+/**
+ * @internal
+ * Matches on `code` alone, so any error type works. `Number()` because `code` is a BSON Int32 when `promoteValues` is false.
+ */
+export function isNamespaceNotFoundError(error: unknown): boolean {
+  return (
+    Number((error as { code?: unknown } | null)?.code) === MONGODB_ERROR_CODES.NamespaceNotFound
+  );
+}
+
 // From spec https://github.com/mongodb/specifications/blob/921232976f9913cf17415b5ef937ee772e45e6ae/source/change-streams/change-streams.md#resumable-error
 export const GET_MORE_RESUMABLE_CODES = new Set<number>([
   MONGODB_ERROR_CODES.HostUnreachable,

@@ -4,8 +4,8 @@ import * as process from 'process';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
 import {
+  isNamespaceNotFoundError,
   type MongoClient,
-  MONGODB_ERROR_CODES,
   MongoParseError,
   MongoServerError,
   ns,
@@ -222,7 +222,7 @@ async function runUnifiedTest(
           // https://jira.mongodb.org/browse/SERVER-60533
           // distinct throws namespace not found errors on servers 5.2.2 and under.
           // For now, we skip these errors to be addressed in NODE-4238.
-          if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+          if (!isNamespaceNotFoundError(err)) {
             throw err;
           }
           const serverVersion = ctx.configuration.version;
