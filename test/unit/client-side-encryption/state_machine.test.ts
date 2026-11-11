@@ -225,6 +225,28 @@ describe('StateMachine', function () {
       });
     });
 
+    context('when socket options are not provided', function () {
+      const stateMachine = new StateMachine({} as any);
+      const request = new MockRequest(Buffer.from('foobar'), -1);
+      let connectOptions;
+
+      it('does not pass autoSelectFamily options to the socket by default', async function () {
+        sandbox.stub(tls, 'connect').callsFake((options, callback) => {
+          connectOptions = options;
+          this.fakeSocket = new MockSocket(callback);
+          return this.fakeSocket;
+        });
+        const kmsRequestPromise = stateMachine.kmsRequest(request);
+
+        await setTimeoutAsync(0);
+        this.fakeSocket.emit('data', Buffer.alloc(0));
+
+        await kmsRequestPromise;
+        expect(connectOptions).to.not.have.property('autoSelectFamily');
+        expect(connectOptions).to.not.have.property('autoSelectFamilyAttemptTimeout');
+      });
+    });
+
     context('when a kmsConnectCallback is provided', function () {
       it('invokes the callback with host/port and uses the returned socket', async function () {
         let received;
