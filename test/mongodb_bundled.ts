@@ -26,6 +26,7 @@ export const {
   AuthProvider,
   AutoEncrypter,
   AutomatedCallbackWorkflow,
+  autoSelectSocketOptions,
   aws4Sign,
   AWSSDKCredentialProvider,
   azureCallback,
