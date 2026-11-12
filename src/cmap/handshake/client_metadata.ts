@@ -103,7 +103,7 @@ export class LimitedSizeDocument {
   }
 }
 
-// Env var value length after truncating bytes
+// Maximum size of application.name in bytes
 const APP_NAME_TRUNCATION_LIMIT_BYTES = 128;
 
 type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
