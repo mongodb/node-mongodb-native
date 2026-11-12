@@ -234,6 +234,15 @@ export class MongoCredentials {
         );
       }
 
+      if (
+        this.mechanismProperties.ENVIRONMENT &&
+        (this.mechanismProperties.OIDC_CALLBACK || this.mechanismProperties.OIDC_HUMAN_CALLBACK)
+      ) {
+        throw new MongoInvalidArgumentError(
+          `ENVIRONMENT may not be used together with OIDC_CALLBACK or OIDC_HUMAN_CALLBACK for mechanism '${this.mechanism}'.`
+        );
+      }
+
       if (this.mechanismProperties.ALLOWED_HOSTS) {
         const hosts = this.mechanismProperties.ALLOWED_HOSTS;
         if (!Array.isArray(hosts)) {
