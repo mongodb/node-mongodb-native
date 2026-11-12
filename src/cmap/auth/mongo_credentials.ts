@@ -188,6 +188,17 @@ export class MongoCredentials {
       throw new MongoMissingCredentialsError(`Username required for mechanism '${this.mechanism}'`);
     }
 
+    if (
+      this.mechanism === AuthMechanism.MONGODB_PLAIN &&
+      (this.username.includes('\x00') || this.password.includes('\x00'))
+    ) {
+      // RFC 4616 uses NUL as the separator between the PLAIN message fields,
+      // so neither the username nor the password may contain it.
+      throw new MongoInvalidArgumentError(
+        `Username and password cannot contain NUL characters for mechanism '${this.mechanism}'`
+      );
+    }
+
     if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
       if (
         this.username &&
