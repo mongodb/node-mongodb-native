@@ -158,7 +158,16 @@ export type AbstractCursorEvents = {
   [AbstractCursor.CLOSE](): void;
 };
 
-/** @public */
+/**
+ * Base class for all cursors.
+ *
+ * A cursor does not support overlapping calls to `hasNext()`, `next()` or `tryNext()`.
+ * Wait for each call to settle before making the next one on the same cursor. Calls that overlap
+ * can each send their own command to the server, which can result in duplicate commands, server
+ * cursors that are never closed, or session errors.
+ *
+ * @public
+ */
 export abstract class AbstractCursor<
     TSchema = any,
     CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
@@ -437,6 +446,12 @@ export abstract class AbstractCursor<
     return readable;
   }
 
+  /**
+   * Check if there is any document still available in the cursor.
+   *
+   * Do not call this method while a previous `hasNext()`, `next()` or `tryNext()` call on the same
+   * cursor is still pending. Overlapping calls are not supported.
+   */
   async hasNext(): Promise<boolean> {
     this.signal?.throwIfAborted();
 
@@ -463,7 +478,12 @@ export abstract class AbstractCursor<
     return false;
   }
 
-  /** Get the next available document from the cursor, returns null if no more documents are available. */
+  /**
+   * Get the next available document from the cursor, returns null if no more documents are available.
+   *
+   * Do not call this method while a previous `hasNext()`, `next()` or `tryNext()` call on the same
+   * cursor is still pending. Overlapping calls are not supported.
+   */
   async next(): Promise<TSchema | null> {
     this.signal?.throwIfAborted();
 
@@ -495,6 +515,9 @@ export abstract class AbstractCursor<
 
   /**
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
+   *
+   * Do not call this method while a previous `hasNext()`, `next()` or `tryNext()` call on the same
+   * cursor is still pending. Overlapping calls are not supported.
    */
   async tryNext(): Promise<TSchema | null> {
     this.signal?.throwIfAborted();
