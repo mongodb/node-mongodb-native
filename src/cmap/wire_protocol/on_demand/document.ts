@@ -337,6 +337,18 @@ export class OnDemandDocument {
   }
 
   /**
+   * Returns the offset of the embedded document at `index` of this BSON array, without
+   * parsing it into an `OnDemandDocument`: the deserializer walks it once instead of twice.
+   */
+  public getDocumentOffset(index: number): number {
+    const element = this.isArray ? this.elements[index] : undefined;
+    if (element == null || element[BSONElementOffset.type] !== BSONType.object) {
+      throw new BSONError(`BSON element "${index}" is missing`);
+    }
+    return element[BSONElementOffset.offset];
+  }
+
+  /**
    * Deserialize this object, DOES NOT cache result so avoid multiple invocations
    * @param options - BSON deserialization options
    */

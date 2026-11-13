@@ -97,6 +97,27 @@ describe('class CursorResponse', () => {
       expect(response.shift({ promoteValues: false })).to.deep.equal({ _id: new Int32(3) });
       expect(response.shift()).to.deep.equal(null);
     });
+
+    it('returns each document with the same options object', () => {
+      const options = { promoteValues: false, validation: { utf8: true } };
+      expect(response.shift(options)).to.deep.equal({ _id: new Int32(1) });
+      expect(response.shift(options)).to.deep.equal({ _id: new Int32(2) });
+      expect(response.shift(options)).to.deep.equal({ _id: new Int32(3) });
+    });
+
+    it('returns the bytes of each document when raw is set', () => {
+      const options = { raw: true, validation: { utf8: true } };
+      expect(response.shift(options)).to.deep.equal(serialize({ _id: 1 }));
+      expect(response.shift(options)).to.deep.equal(serialize({ _id: 2 }));
+    });
+
+    it('throws when a batch entry is not a document', () => {
+      const response = new CursorResponse(
+        serialize({ ok: 1, cursor: { id: 0n, nextBatch: [{ _id: 1 }, 2] } })
+      );
+      expect(response.shift()).to.deep.equal({ _id: 1 });
+      expect(() => response.shift()).to.throw(/"1" is missing/);
+    });
   });
 
   describe('clear()', () => {
