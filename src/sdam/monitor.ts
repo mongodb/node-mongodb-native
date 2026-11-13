@@ -525,6 +525,25 @@ export class RTTPinger {
     }
 
     this.latestRtt = calculateDurationInMs(start);
+    this.rescheduleSample();
+  }
+
+  /**
+   * Arm the next sample on the heartbeat interval.
+   *
+   * A failed connect or hello must use this and must not update `latestRtt`.
+   * Streaming heartbeats and client-side operation timeouts keep using the last
+   * successful sample. Recording the failed attempt would publish the time it
+   * took to fail, and returning without arming another timer freezes `latestRtt`
+   * until the monitor is reset. Example: the dedicated RTT socket is reset while
+   * the hello monitor keeps streaming. The next sample waits `heartbeatFrequencyMS`,
+   * opens a new socket, and only then replaces `latestRtt`.
+   */
+  private rescheduleSample(): void {
+    if (this.closed) {
+      return;
+    }
+
     this.monitorId = setTimeout(
       () => this.measureRoundTripTime(),
       this.monitor.options.heartbeatFrequencyMS
@@ -545,7 +564,9 @@ export class RTTPinger {
           this.measureAndReschedule(start, connection);
         },
         () => {
+          // connect() already destroys the socket it opened. Leave latestRtt alone.
           this.connection = undefined;
+          this.rescheduleSample();
         }
       );
       return;
@@ -559,7 +580,7 @@ export class RTTPinger {
       () => {
         this.connection?.destroy();
         this.connection = undefined;
-        return;
+        this.rescheduleSample();
       }
     );
   }
