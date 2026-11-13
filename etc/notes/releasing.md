@@ -79,7 +79,7 @@ The MongoDB driver can now generate a cup of joe.
     - Check CI for failures.
     - Check the performance metrics to make sure there are no regressions.
 1. Announce the upcoming release on Slack by running the **Node Driver pre-release announcements** workflow.
-    - Find it in the `#nodejs-team` channel, under the **Workflows** tab.
+    - Find it in the team slack channel, under the **Workflows** tab.
     - The workflow posts the announcement to every channel that should hear about an upcoming driver release, so you do not need to post to those channels yourself.
     - You may skip this step if you are releasing a package other than the driver.
 1. **If there are new or changed experimental features**, update `EXPERIMENTAL_FEATURES.md`
