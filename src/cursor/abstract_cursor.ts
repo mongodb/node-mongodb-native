@@ -161,10 +161,10 @@ export type AbstractCursorEvents = {
 /**
  * Base class for all cursors.
  *
- * A cursor does not support overlapping calls to `hasNext()`, `next()` or `tryNext()`.
- * Wait for each call to settle before making the next one on the same cursor. Calls that overlap
- * can each send their own command to the server, which can result in duplicate commands, server
- * cursors that are never closed, or session errors.
+ * A cursor does not support overlapping calls to any method that reads from the cursor, such as
+ * `hasNext()`, `next()` or `tryNext()`. Wait for each call to settle before making the next one on
+ * the same cursor. Calls that overlap can result in undefined behaviour, which could produce
+ * unpredictable or incorrect results.
  *
  * @public
  */
