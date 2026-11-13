@@ -1,0 +1,8 @@
+{
+  "uri": "mongodb+srv://build.10gen.cc/",
+  "seeds": [
+    "build.10gen.cc:27017"
+  ],
+  "ping": false,
+  "comment": "Should not throw when SRV hostname and resolved hostname are identical and SRV hostname has three dot-separated parts."
+}

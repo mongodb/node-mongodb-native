@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 
-import { HostAddress, MongoClient } from '../../mongodb';
+import { HostAddress, MongoClient, resolveSRVRecord } from '../../mongodb';
 
 function makeTest(test, topology) {
   let client;
@@ -17,25 +17,30 @@ function makeTest(test, topology) {
   });
 
   it(test.comment, async function () {
-    this.test.skipReason =
-      'TODO(NODE-3757): These tests require specific environment setups, also the error cases need better assertions';
-    return this.skip();
     if (topology === 'replica-set' && this.configuration.topologyType !== 'ReplicaSetWithPrimary') {
-      return this.skip();
+      this.skip();
     }
 
-    if (topology === 'sharded' && this.configuration.topologyType !== 'sharded') {
-      return this.skip();
+    if (topology === 'sharded' && this.configuration.topologyType !== 'Sharded') {
+      this.skip();
     }
 
-    if (topology === 'load-balanced' && this.configuration.topologyType !== 'load-balanced') {
-      return this.skip();
+    if (topology === 'load-balanced' && this.configuration.topologyType !== 'LoadBalanced') {
+      this.skip();
     }
 
     let thrownError;
+    let resolvedSeeds: string[] | undefined;
     try {
       client = new MongoClient(test.uri, { serverSelectionTimeoutMS: 2000, tls: false });
-      await client.connect();
+      if (test.ping === false) {
+        // The spec forbids running a "ping" for these tests, and the resolved hosts may not be
+        // reachable, so only resolve (and validate) the SRV record without connecting.
+        const resolved = await resolveSRVRecord(client.options);
+        resolvedSeeds = resolved.map(h => h.toString());
+      } else {
+        await client.connect();
+      }
     } catch (error) {
       thrownError = error;
     }
@@ -43,6 +48,14 @@ function makeTest(test, topology) {
     if (test.error) {
       expect(thrownError).to.exist;
       return; // Nothing more to test...
+    }
+
+    if (test.ping === false) {
+      expect(thrownError).to.not.exist;
+      if (Array.isArray(test.seeds)) {
+        expect(resolvedSeeds).to.have.members(test.seeds);
+      }
+      return; // Nothing more to test, there is no topology to inspect
     }
 
     const options = client.options;
@@ -79,7 +92,7 @@ function makeTest(test, topology) {
     // srvMaxHost limiting happens in the topology constructor
     if (options.srvHost && test.comment.includes('srvMaxHosts')) {
       const initialSeedlist = hosts.map(h => h.toString());
-      const selectedHosts = Array.from(topology.s.description.servers.keys());
+      const selectedHosts = Array.from<string>(client.topology.s.description.servers.keys());
 
       if (typeof test.numSeeds === 'number') {
         // numSeeds: the expected number of initial seeds discovered from the SRV record.
