@@ -84,14 +84,6 @@ functions:
           git fetch origin "${SOURCE_REV}:${SOURCE_REV}"
           git checkout "${SOURCE_REV}"
           npm i
-  "strip snappy install from test runner":
-    # TODO: NODE-7766 Remove this when snappy v7.4 is operational or there's a fix version which fixes require() breaks
-    - command: shell.exec
-      params:
-        working_dir: src
-        script: |
-          # Strip any `npm install snappy` from the test runner so it cannot clobber v7.3.3.
-          sed -i 's/npm install snappy//' .evergreen/run-tests.sh
   "bootstrap mongo-orchestration":
     - command: ec2.assume_role
       params:
@@ -244,6 +236,7 @@ functions:
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_BUNDLED: ${MONGODB_BUNDLED}
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh"
@@ -1086,7 +1079,6 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
-      - func: strip snappy install from test runner
       - func: log state
       - func: run tests
 
@@ -1115,7 +1107,6 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
-      - func: strip snappy install from test runner
       - func: log state
       - func: run tests
 
@@ -1144,7 +1135,6 @@ tasks:
       - func: install package
         vars:
           PACKAGE: https://github.com/mongodb/js-bson#HEAD
-      - func: strip snappy install from test runner
       - func: log state
       - func: run tests
 

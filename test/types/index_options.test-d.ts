@@ -1,6 +1,7 @@
-import { expectAssignable, expectNotAssignable, expectNotDeprecated } from 'tsd';
+import { expectAssignable, expectDeprecated, expectNotAssignable, expectNotDeprecated } from 'tsd';
 
 import type {
+  Collection,
   CreateIndexesOptions,
   CreateIndexOptions,
   IndexDescription,
@@ -92,3 +93,16 @@ expectNotDeprecated(description.expireAfterSeconds);
 declare const listed: IndexDescriptionInfo;
 expectNotDeprecated(listed.unique);
 expectNotDeprecated(listed.default_language);
+
+// Only the two parameter overload is deprecated.
+// Omitting the second argument should resolve to the single parameter overload
+declare const collection: Collection;
+expectNotDeprecated(collection.createIndex({ a: 1 }));
+expectDeprecated(collection.createIndex({ a: 1 }, {}));
+expectDeprecated(collection.createIndex({ a: 1 }, { unique: true }));
+expectNotDeprecated(collection.createIndex({ a: 1 }, undefined, undefined));
+expectNotDeprecated(collection.createIndex({ a: 1 }, { unique: true }, { commitQuorum: 2 }));
+// Confirm that `createIndex({ a: 1 }, undefined)` is treated as the deprecated two parameter overload.
+expectDeprecated(collection.createIndex({ a: 1 }, undefined));
+declare const maybeOptions: CreateIndexesOptions | undefined;
+expectDeprecated(collection.createIndex({ a: 1 }, maybeOptions));

@@ -6,6 +6,7 @@ import {
   type CommandSucceededEvent,
   type Db,
   type MongoClient,
+  MONGODB_ERROR_CODES,
   MongoServerError
 } from '../mongodb';
 import { type FailCommandFailPoint } from '../tools/utils';
@@ -381,7 +382,15 @@ describe('Indexes', function () {
     });
   });
 
-  context('when dropIndexes fails', function () {
+  context('when dropIndexes fails with NamespaceNotFound', function () {
+    it('should return false', async function () {
+      const missing = db.collection('test_drop_indexes_missing_ns');
+      const result = await missing.dropIndexes();
+      expect(result).to.equal(false);
+    });
+  });
+
+  context('when dropIndexes fails with any other error', function () {
     beforeEach(async function () {
       await collection.insertOne({ a: 1 });
       // Create an index on the collection
@@ -396,14 +405,15 @@ describe('Indexes', function () {
           },
           data: {
             failCommands: ['dropIndexes'],
-            errorCode: 91
+            errorCode: MONGODB_ERROR_CODES.ShutdownInProgress
           }
         });
     });
 
-    it('should return false', async function () {
-      const result = await collection.dropIndexes();
-      expect(result).to.equal(false);
+    it('should throw the server error', async function () {
+      const error = await collection.dropIndexes().catch(error => error);
+      expect(error).to.be.instanceOf(MongoServerError);
+      expect(error).to.have.property('code', MONGODB_ERROR_CODES.ShutdownInProgress);
     });
   });
 

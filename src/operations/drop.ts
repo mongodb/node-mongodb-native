@@ -3,7 +3,7 @@ import type { Document } from '../bson';
 import { MongoDBResponse } from '../cmap/wire_protocol/responses';
 import { CursorTimeoutContext } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
-import { MONGODB_ERROR_CODES } from '../error';
+import { isNamespaceNotFoundError } from '../error';
 import type { ClientSession } from '../sessions';
 import { TimeoutContext } from '../timeout';
 import { CommandOperation, type CommandOperationOptions } from './command';
@@ -42,8 +42,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
   }
 
   override handleError(error: MongoError): boolean {
-    if (!(error instanceof MongoServerError)) throw error;
-    if (Number(error.code) !== MONGODB_ERROR_CODES.NamespaceNotFound) throw error;
+    if (!(error instanceof MongoServerError && isNamespaceNotFoundError(error))) throw error;
 
     return false;
   }

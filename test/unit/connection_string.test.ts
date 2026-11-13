@@ -282,6 +282,25 @@ describe('Connection String', function () {
     }
   });
 
+  context('autoSelectFamily option', function () {
+    it('is not set by default', function () {
+      const options = parseOptions('mongodb://localhost');
+      expect(options).to.not.have.property('autoSelectFamily');
+    });
+
+    for (const value of [true, false]) {
+      it(`preserves ${value} from the connection string`, function () {
+        const options = parseOptions(`mongodb://localhost?autoSelectFamily=${value}`);
+        expect(options).to.have.property('autoSelectFamily', value);
+      });
+
+      it(`preserves ${value} from the options object`, function () {
+        const options = parseOptions('mongodb://localhost', { autoSelectFamily: value });
+        expect(options).to.have.property('autoSelectFamily', value);
+      });
+    }
+  });
+
   it('should parse compression options', function () {
     const options = parseOptions('mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4');
     expect(options).to.have.property('compressors');
@@ -375,6 +394,49 @@ describe('Connection String', function () {
         });
       });
     });
+
+    for (const callbackName of ['OIDC_CALLBACK', 'OIDC_HUMAN_CALLBACK'] as const) {
+      context(`when ENVIRONMENT and ${callbackName} are both specified`, function () {
+        const callback = async () => ({ accessToken: 'token' });
+        const expectedMessage = /ENVIRONMENT may not be used together/;
+
+        context('when both are in the options', function () {
+          it('raises an error', function () {
+            expect(() => {
+              parseOptions('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+                authMechanismProperties: { ENVIRONMENT: 'test', [callbackName]: callback }
+              });
+            }).to.throw(MongoInvalidArgumentError, expectedMessage);
+          });
+        });
+
+        context('when ENVIRONMENT is in the URI and the callback is in the options', function () {
+          it('raises an error', function () {
+            expect(() => {
+              parseOptions(
+                'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:test',
+                { authMechanismProperties: { [callbackName]: callback } }
+              );
+            }).to.throw(MongoInvalidArgumentError, expectedMessage);
+          });
+
+          it('raises an error from the MongoClient constructor', function () {
+            expect(
+              () =>
+                new MongoClient(
+                  'mongodb://evil.example.com/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:azure,TOKEN_RESOURCE:foo',
+                  {
+                    authMechanismProperties: {
+                      [callbackName]: callback,
+                      ALLOWED_HOSTS: ['localhost']
+                    }
+                  }
+                )
+            ).to.throw(MongoInvalidArgumentError, expectedMessage);
+          });
+        });
+      });
+    }
   });
 
   it('should parse `authMechanismProperties`', function () {
