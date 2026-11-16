@@ -78,6 +78,70 @@ functions:
       params:
         script: |
           bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
+  start dsc:
+    - command: shell.exec
+      type: setup
+      params:
+        working_dir: src/drivers-evergreen-tools
+        script: |
+          set -o errexit
+          git fetch https://github.com/mdb-ad/drivers-evergreen-tools.git dsc
+          git checkout FETCH_HEAD
+    - command: ec2.assume_role
+      params:
+        role_arn: arn:aws:iam::664315256653:role/disagg-storage-tf-project-ro
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: src
+        binary: bash
+        include_expansions_in_env:
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+        args:
+          - ${DRIVERS_TOOLS}/.evergreen/disagg/setup.sh
+    - command: expansions.update
+      params:
+        file: src/dsc-expansion.yml
+  fetch dsc crypt_shared:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${DRIVERS_SECRETS_ARN}
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: src
+        binary: bash
+        include_expansions_in_env:
+          - AWS_ACCESS_KEY_ID
+          - AWS_SECRET_ACCESS_KEY
+          - AWS_SESSION_TOKEN
+        args:
+          - ${DRIVERS_TOOLS}/.evergreen/disagg/download-crypt.sh
+    - command: expansions.update
+      params:
+        file: src/crypt-shared-expansion.yml
+  stop dsc:
+    - command: shell.exec
+      params:
+        working_dir: src
+        shell: bash
+        script: |
+          if [[ "${DSC|}" == "on" ]]; then
+            bash ${DRIVERS_TOOLS}/.evergreen/disagg/teardown.sh
+          fi
+    - command: s3.put
+      params:
+        aws_key: ${aws_key}
+        aws_secret: ${aws_secret}
+        local_file: src/sls-logs.txt.gz
+        optional: true
+        remote_file: mongo-node-driver/${revision}/${version_id}/${build_id}/logs/${task_id}-${execution}-sls-logs.txt.gz
+        bucket: mciuploads
+        permissions: public-read
+        content_type: application/x-gzip
+        display_name: sls-logs.txt.gz
   bootstrap mongohoused:
     - command: ec2.assume_role
       params:
@@ -2576,6 +2640,27 @@ tasks:
       - name: run-lint-checks
         variant: lint
         patch_optional: true
+  - name: test-dsc-replica_set
+    tags:
+      - dsc
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: DSC, value: 'on'}
+            - {key: AUTH, value: noauth}
+            - {key: SSL, value: nossl}
+            - {key: CLIENT_ENCRYPTION, value: 'true'}
+            - {key: TEST_CSFLE, value: 'true'}
+      - func: install dependencies
+      - func: start dsc
+      - func: fetch dsc crypt_shared
+      - func: run tests
+    depends_on:
+      - name: run-lint-checks
+        variant: lint
+        patch_optional: true
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -4139,6 +4224,7 @@ post:
   - func: reset aws instance profile
   - func: upload test results
   - func: stop mongo-orchestration
+  - func: stop dsc
   - func: upload coverage report
   - func: cleanup
 ignore:
@@ -4744,6 +4830,14 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - test_atlas_task_group_search_indexes
+  - name: ubuntu2404-test-dsc
+    display_name: Disaggregated Storage (DSC) Tests
+    run_on: ubuntu2404-large
+    expansions:
+      NODE_LTS_VERSION: 24
+    batchtime: 1440
+    tasks:
+      - .dsc
   - name: resource management tests
     display_name: resource management tests
     run_on: rhel80-large

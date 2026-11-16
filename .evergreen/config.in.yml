@@ -120,6 +120,74 @@ functions:
         script: |
           bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
 
+  # Disaggregated storage (DSC) deployment: a three-member replica set backed by SLS, run in containers.
+  # See drivers-evergreen-tools/.evergreen/disagg/README.md and "Disaggregated storage (DSC)" in test/readme.md.
+  "start dsc":
+    # TODO(NODE-7697): remove this step once mongodb-labs/drivers-evergreen-tools#918 is merged and the
+    # drivers-evergreen-tools submodule is bumped past it.
+    - command: shell.exec
+      type: setup
+      params:
+        working_dir: src/drivers-evergreen-tools
+        script: |
+          set -o errexit
+          git fetch https://github.com/mdb-ad/drivers-evergreen-tools.git dsc
+          git checkout FETCH_HEAD
+    # The SLS images are in a private ECR registry that requires this role.
+    - command: ec2.assume_role
+      params:
+        role_arn: arn:aws:iam::664315256653:role/disagg-storage-tf-project-ro
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: src
+        binary: bash
+        include_expansions_in_env: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN]
+        args:
+          - ${DRIVERS_TOOLS}/.evergreen/disagg/setup.sh
+    # setup.sh writes MONGODB_URI for the deployment
+    - command: expansions.update
+      params:
+        file: src/dsc-expansion.yml
+
+  # mongo-orchestration does not run in DSC tasks, so fetch crypt_shared (CRYPT_SHARED_LIB_PATH) directly.
+  "fetch dsc crypt_shared":
+    # Downloads of the "latest" crypt_shared require AWS credentials (DRIVERS-3628).
+    - <<: *assume_secrets_manager_role
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: src
+        binary: bash
+        include_expansions_in_env: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN]
+        args:
+          - ${DRIVERS_TOOLS}/.evergreen/disagg/download-crypt.sh
+    - command: expansions.update
+      params:
+        file: src/crypt-shared-expansion.yml
+
+  # Runs in `post` for every task, so it only acts in DSC tasks (DSC=on).
+  "stop dsc":
+    - command: shell.exec
+      params:
+        working_dir: src
+        shell: bash
+        script: |
+          if [[ "${DSC|}" == "on" ]]; then
+            bash ${DRIVERS_TOOLS}/.evergreen/disagg/teardown.sh
+          fi
+    - command: s3.put
+      params:
+        aws_key: ${aws_key}
+        aws_secret: ${aws_secret}
+        local_file: src/sls-logs.txt.gz
+        optional: true
+        remote_file: mongo-node-driver/${revision}/${version_id}/${build_id}/logs/${task_id}-${execution}-sls-logs.txt.gz
+        bucket: mciuploads
+        permissions: public-read
+        content_type: application/x-gzip
+        display_name: "sls-logs.txt.gz"
+
   "bootstrap mongohoused":
     - <<: *assume_secrets_manager_role
     - command: shell.exec
@@ -1408,6 +1476,7 @@ post:
   - func: "reset aws instance profile"
   - func: "upload test results"
   - func: "stop mongo-orchestration"
+  - func: "stop dsc"
   - func: "upload coverage report"
   - func: "cleanup"
 

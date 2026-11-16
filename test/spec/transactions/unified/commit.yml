@@ -1,6 +1,6 @@
 description: commit
 
-schemaVersion: '1.3'
+schemaVersion: '1.30'
 
 runOnRequirements:
   -
@@ -313,6 +313,9 @@ tests:
           - { _id: 1 }
   -
     description: 'write concern error on commit'
+    # Disaggregated storage deployments accept the unsatisfiable w: 10 without returning a writeConcernError. (SERVER-120912)
+    runOnRequirements:
+      - dsc: forbid
     operations:
       -
         object: *session0

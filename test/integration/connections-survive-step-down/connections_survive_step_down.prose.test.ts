@@ -43,8 +43,9 @@ describe('Connections Survive Primary Step Down - prose', function () {
     client.on('connectionPoolCleared', poolClearEvent => poolClearedEvents.push(poolClearEvent));
   });
 
-  context('getMore Iteration', { requires: { topology: ['replicaset'] } }, () => {
+  context('getMore Iteration', { requires: { topology: ['replicaset'], dsc: 'disabled' } }, () => {
     // This test requires a replica set.
+    // It uses replSetStepDown, which fails on DSC test deployments (they have no electable secondary).
 
     let cursor: FindCursor;
     afterEach(() => cursor.close());

@@ -1,10 +1,11 @@
 {
   "description": "rediscover-quickly-after-step-down",
-  "schemaVersion": "1.4",
+  "schemaVersion": "1.30",
   "runOnRequirements": [
     {
       "minServerVersion": "4.4",
       "serverless": "forbid",
+      "dsc": "forbid",
       "topologies": [
         "replicaset"
       ]

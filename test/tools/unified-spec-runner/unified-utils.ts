@@ -15,6 +15,7 @@ import {
   type MongoClient,
   ReturnDocument
 } from '../../mongodb';
+import { isDSC } from '../runner/filters/dsc_filter';
 import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
 import { MalformedOperationError } from './operations';
@@ -143,6 +144,22 @@ export async function topologySatisfies(
           skipReason = `requires libmongocrypt>=${minLibmongocryptVersion} but ${config.clientSideEncryption.libmongocrypt} is being used.`;
         }
       }
+    }
+  }
+
+  if (r.dsc != null && r.dsc !== 'allow') {
+    if (r.dsc === 'require') {
+      ok &&= isDSC();
+      if (!ok && skipReason == null) {
+        skipReason = `requires disaggregated storage (DSC) but DSC is not set for this environment`;
+      }
+    } else if (r.dsc === 'forbid') {
+      ok &&= !isDSC();
+      if (!ok && skipReason == null) {
+        skipReason = `forbids disaggregated storage (DSC) but DSC is set for this environment`;
+      }
+    } else {
+      throw new AssertionError(`Unexpected value for dsc: ${r.dsc}`);
     }
   }
 

@@ -9,6 +9,7 @@ set -o errexit # Exit the script with error if any of the commands fail
 #       MARCH                   Machine Architecture. Defaults to lowercase uname -m
 #       SKIP_DEPS               Skip installing dependencies
 #       TEST_CSFLE              Set to enforce running csfle tests
+#       DSC                     Set to "on" when MONGODB_URI is a disaggregated storage (DSC) deployment
 
 AUTH=${AUTH:-noauth}
 MONGODB_URI=${MONGODB_URI:-}
@@ -70,4 +71,5 @@ export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
 export TEST_CSFLE=${TEST_CSFLE}
 export COMPRESSOR=${COMPRESSOR}
+export DSC=${DSC}
 npm run check:integration-coverage

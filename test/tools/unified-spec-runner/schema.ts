@@ -118,6 +118,7 @@ export interface RunOnRequirement {
     | {
         minLibmongocryptVersion?: string;
       };
+  dsc?: 'require' | 'forbid' | 'allow';
 }
 export type ObservableCommandEventId =
   | 'commandStartedEvent'

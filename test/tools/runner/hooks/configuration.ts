@@ -24,6 +24,7 @@ import { flakyTests } from '../flaky';
 import { CryptSharedFilter } from '../filters/crypt_shared_filter';
 import { LibmongocryptVersionFilter } from '../filters/libmongocrypt_version_filter';
 import { TLSFilter } from '../filters/tls_filter';
+import { DSCFilter } from '../filters/dsc_filter';
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -58,6 +59,7 @@ async function initializeFilters(client): Promise<Record<string, any>> {
       new AuthFilter(),
       new ClientSideEncryptionFilter(),
       new CryptSharedFilter(),
+      new DSCFilter(),
       new GenericPredicateFilter(),
       new IDMSMockServerFilter(),
       new LibmongocryptVersionFilter(),
