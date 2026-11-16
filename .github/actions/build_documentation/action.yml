@@ -11,7 +11,7 @@ runs:
         echo "$(pwd)/hugo" >> $GITHUB_PATH
 
     - name: Install Node and dependencies
-      uses: mongodb-labs/drivers-github-tools/node/setup@v2
+      uses: mongodb-labs/drivers-github-tools/node/setup@99b1cbd729bc83bf7fc74e1b2a97fffad3d65d7b # v3.1.1
 
     - name: Build Docs
       run: npm run build:docs -- --yes
