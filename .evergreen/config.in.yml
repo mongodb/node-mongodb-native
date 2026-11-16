@@ -142,7 +142,8 @@ functions:
       params:
         working_dir: src
         binary: bash
-        include_expansions_in_env: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, DSC_SLS_TAG]
+        include_expansions_in_env:
+          [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, DSC_SLS_TAG]
         args:
           - ${DRIVERS_TOOLS}/.evergreen/disagg/setup.sh
     # setup.sh writes MONGODB_URI for the deployment
