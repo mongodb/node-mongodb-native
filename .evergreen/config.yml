@@ -99,6 +99,7 @@ functions:
           - AWS_ACCESS_KEY_ID
           - AWS_SECRET_ACCESS_KEY
           - AWS_SESSION_TOKEN
+          - DSC_SLS_TAG
         args:
           - ${DRIVERS_TOOLS}/.evergreen/disagg/setup.sh
     - command: expansions.update
@@ -137,7 +138,7 @@ functions:
         aws_secret: ${aws_secret}
         local_file: src/sls-logs.txt.gz
         optional: true
-        remote_file: mongo-node-driver/${revision}/${version_id}/${build_id}/logs/${task_id}-${execution}-sls-logs.txt.gz
+        remote_file: mongo-node-driver/dsc-logs/${version_id}/${task_id}-${execution}-sls-logs.txt.gz
         bucket: mciuploads
         permissions: public-read
         content_type: application/x-gzip
@@ -2649,6 +2650,7 @@ tasks:
         params:
           updates:
             - {key: DSC, value: 'on'}
+            - {key: DSC_SLS_TAG, value: linux-x86-64-f987ae59a6f61e0b4e3edc73663992e15c4e9261}
             - {key: AUTH, value: noauth}
             - {key: SSL, value: nossl}
             - {key: CLIENT_ENCRYPTION, value: 'true'}

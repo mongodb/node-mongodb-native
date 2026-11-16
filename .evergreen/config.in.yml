@@ -142,7 +142,7 @@ functions:
       params:
         working_dir: src
         binary: bash
-        include_expansions_in_env: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN]
+        include_expansions_in_env: [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, DSC_SLS_TAG]
         args:
           - ${DRIVERS_TOOLS}/.evergreen/disagg/setup.sh
     # setup.sh writes MONGODB_URI for the deployment
@@ -182,7 +182,9 @@ functions:
         aws_secret: ${aws_secret}
         local_file: src/sls-logs.txt.gz
         optional: true
-        remote_file: mongo-node-driver/${revision}/${version_id}/${build_id}/logs/${task_id}-${execution}-sls-logs.txt.gz
+        # Not under mongo-node-driver/${revision}/${version_id}/: "download and merge coverage" downloads
+        # everything under that prefix and treats every file as a coverage report.
+        remote_file: mongo-node-driver/dsc-logs/${version_id}/${task_id}-${execution}-sls-logs.txt.gz
         bucket: mciuploads
         permissions: public-read
         content_type: application/x-gzip

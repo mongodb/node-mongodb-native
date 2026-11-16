@@ -879,6 +879,9 @@ SINGLETON_TASKS.push({
   commands: [
     updateExpansions({
       DSC: 'on',
+      // Without a pinned tag, setup.sh picks the newest SLS image, and recent images fail to start
+      // (StartLog "store_id mismatch"). Same tag as the C driver's DSC tasks (mongo-c-driver#2552).
+      DSC_SLS_TAG: 'linux-x86-64-f987ae59a6f61e0b4e3edc73663992e15c4e9261',
       AUTH: 'noauth',
       SSL: 'nossl',
       CLIENT_ENCRYPTION: true,
