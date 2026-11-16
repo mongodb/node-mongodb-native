@@ -123,7 +123,7 @@ functions:
   # Disaggregated storage (DSC) deployment: a three-member replica set backed by SLS, run in containers.
   # See drivers-evergreen-tools/.evergreen/disagg/README.md and "Disaggregated storage (DSC)" in test/readme.md.
   "start dsc":
-    # TODO(NODE-7697): remove this step once mongodb-labs/drivers-evergreen-tools#918 is merged and the
+    # TODO: remove this step once mongodb-labs/drivers-evergreen-tools#918 (DRIVERS-3190) is merged and the
     # drivers-evergreen-tools submodule is bumped past it.
     - command: shell.exec
       type: setup
