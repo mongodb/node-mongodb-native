@@ -11,6 +11,7 @@ import {
   MongoClient,
   type MongoClientOptions,
   type MongoDBOIDC,
+  MongoInvalidArgumentError,
   type OIDCCallbackFunction,
   type OIDCCallbackParams,
   type OIDCResponse
@@ -211,11 +212,12 @@ describe('OIDC Auth Spec Tests', function () {
         // Create an OIDC configured client with an OIDC callback and auth mechanism property ENVIRONMENT:test.
         // Assert it returns a client configuration error.
         it('fails validation', async function () {
-          try {
-            client = getClient({}, callbackSpy);
-          } catch (error) {
-            expect(error).to.exist;
-          }
+          expect(() => {
+            client = getClient(
+              { authMechanismProperties: { OIDC_CALLBACK: callbackSpy, ENVIRONMENT: 'test' } },
+              callbackSpy
+            );
+          }).to.throw(MongoInvalidArgumentError, /ENVIRONMENT may not be used together/);
         });
       });
     });

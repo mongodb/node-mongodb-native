@@ -8,7 +8,9 @@ import * as importsFromErrorSrc from '../../src/error';
 import * as importsFromEntryPoint from '../../src/index';
 import {
   DeprioritizedServers,
+  Int32,
   isHello,
+  isNamespaceNotFoundError,
   isResumableError,
   isRetryableReadError,
   isStateChangeError,
@@ -714,6 +716,50 @@ describe('MongoErrors', () => {
           code: topLevelCode
         };
         expect(new MongoWriteConcernError(res).code).to.equal(topLevelCode);
+      });
+    });
+  });
+
+  describe('isNamespaceNotFoundError()', function () {
+    context('when error.code is the number 26', function () {
+      it('returns true', function () {
+        expect(isNamespaceNotFoundError({ code: MONGODB_ERROR_CODES.NamespaceNotFound })).to.equal(
+          true
+        );
+      });
+    });
+
+    context('when error.code is a BSON Int32 of 26', function () {
+      it('returns true', function () {
+        const code = new Int32(MONGODB_ERROR_CODES.NamespaceNotFound);
+
+        expect(isNamespaceNotFoundError({ code })).to.equal(true);
+      });
+    });
+
+    context('when error.code is any other number', function () {
+      it('returns false', function () {
+        expect(isNamespaceNotFoundError({ code: MONGODB_ERROR_CODES.HostUnreachable })).to.equal(
+          false
+        );
+      });
+    });
+
+    context('when error has no code', function () {
+      it('returns false', function () {
+        expect(isNamespaceNotFoundError({})).to.equal(false);
+      });
+    });
+
+    context('when error is null', function () {
+      it('returns false', function () {
+        expect(isNamespaceNotFoundError(null)).to.equal(false);
+      });
+    });
+
+    context('when error is undefined', function () {
+      it('returns false', function () {
+        expect(isNamespaceNotFoundError(undefined)).to.equal(false);
       });
     });
   });

@@ -3,8 +3,8 @@ import { Writable } from 'stream';
 import { ByteUtils, type Document, ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import {
+  isNamespaceNotFoundError,
   MongoAPIError,
-  MONGODB_ERROR_CODES,
   MongoError,
   MongoOperationTimeoutError
 } from '../error';
@@ -228,7 +228,8 @@ function createChunkDoc(filesId: ObjectId, n: number, data: Uint8Array): GridFSC
   };
 }
 
-async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> {
+/** @internal */
+export async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> {
   const index = { files_id: 1, n: 1 };
 
   let remainingTimeMS;
@@ -244,7 +245,7 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
       })
       .toArray();
   } catch (error) {
-    if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
+    if (error instanceof MongoError && isNamespaceNotFoundError(error)) {
       indexes = [];
     } else {
       throw error;
@@ -316,7 +317,8 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
   queueMicrotask(callback);
 }
 
-async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
+/** @internal */
+export async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   let remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(
     `Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`
   );
@@ -344,7 +346,7 @@ async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
   try {
     indexes = await stream.files.listIndexes(listIndexesOptions).toArray();
   } catch (error) {
-    if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
+    if (error instanceof MongoError && isNamespaceNotFoundError(error)) {
       indexes = [];
     } else {
       throw error;

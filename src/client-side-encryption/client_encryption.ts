@@ -1153,14 +1153,15 @@ export interface RangeOptions {
 }
 
 /**
- * Get the socket options from the client.
+ * Get the address family selection socket options from the client.
+ * Options the client did not set are left out, so that Node's process-level defaults apply.
  * @param baseOptions - The mongo client options.
  * @returns ClientEncryptionSocketOptions
  */
 export function autoSelectSocketOptions(
   baseOptions: MongoClientOptions
 ): ClientEncryptionSocketOptions {
-  const options: ClientEncryptionSocketOptions = { autoSelectFamily: true };
+  const options: ClientEncryptionSocketOptions = {};
   if ('autoSelectFamily' in baseOptions) {
     options.autoSelectFamily = baseOptions.autoSelectFamily;
   }

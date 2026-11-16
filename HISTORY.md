@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.9.0](https://github.com/mongodb/node-mongodb-native/compare/v7.8.0...v7.9.0) (2026-11-12)
+
+
+### Features
+
+* **NODE-7743:** deprecate SelectServerOptions ([#5108](https://github.com/mongodb/node-mongodb-native/issues/5108)) ([b22b432](https://github.com/mongodb/node-mongodb-native/commit/b22b43225768d0e84f0e8ed1e89af4dbbd711f01))
+* **NODE-7968:** un-deprecate single parameter overload of `createIndex` ([#5106](https://github.com/mongodb/node-mongodb-native/issues/5106)) ([18f21e5](https://github.com/mongodb/node-mongodb-native/commit/18f21e5b51426224fb01b7feac8882930eb17bc2))
+
+
+### Bug Fixes
+
+* **NODE-6517:** drop indexes swallowing errors ([#5100](https://github.com/mongodb/node-mongodb-native/issues/5100)) ([035bffb](https://github.com/mongodb/node-mongodb-native/commit/035bffb01b7f0bc1990a292ab53cdfd909d6d2a2))
+* **NODE-7848:** honor Node's process-level autoSelectFamily default ([#5107](https://github.com/mongodb/node-mongodb-native/issues/5107)) ([7d64ea2](https://github.com/mongodb/node-mongodb-native/commit/7d64ea2c6452e67ed9ec8736fe68eeed4124d41d))
+
 ## [7.8.0](https://github.com/mongodb/node-mongodb-native/compare/v7.7.0...v7.8.0) (2026-10-30)
 
 
