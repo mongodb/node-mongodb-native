@@ -522,6 +522,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
         return true;
       }
     };
+    Object.defineProperty(this.s, 'url', { enumerable: false });
     this.checkForNonGenuineHosts();
   }
 
@@ -1161,6 +1162,8 @@ export interface MongoOptions
   timeoutMS?: number;
   /** @internal */
   __skipPingOnConnect?: boolean;
+  /** @internal */
+  toJSON?: () => unknown;
 
   /** @internal */
   runtime: Promise<Runtime>;

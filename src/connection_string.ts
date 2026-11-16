@@ -220,13 +220,13 @@ function getIntFromOptions(name: string, value: unknown): number {
   if (parsedInt != null) {
     return parsedInt;
   }
-  throw new MongoParseError(`Expected ${name} to be stringified int value, got: ${value}`);
+  throw new MongoParseError(`Expected ${name} to be stringified int value`);
 }
 
 function getUIntFromOptions(name: string, value: unknown): number {
   const parsedValue = getIntFromOptions(name, value);
   if (parsedValue < 0) {
-    throw new MongoParseError(`${name} can only be a positive int value, got: ${value}`);
+    throw new MongoParseError(`${name} can only be a positive int value, got: ${parsedValue}`);
   }
   return parsedValue;
 }
@@ -283,7 +283,16 @@ export function parseOptions(
     throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
   }
 
-  const url = new ConnectionString(uri);
+  let url: ConnectionString;
+  try {
+    url = new ConnectionString(uri);
+  } catch (error) {
+    // TODO(NODE-8016): remove this guard once mongodb-connection-string-url no longer includes the username in this error
+    if (error.message?.startsWith('Username contains unescaped characters')) {
+      throw new MongoParseError('Username contains unescaped characters');
+    }
+    throw error;
+  }
   const { hosts, isSRV } = url;
 
   const mongoOptions = Object.create(null);
@@ -313,19 +322,33 @@ export function parseOptions(
     urlOptions.set('auth', [auth]);
   }
 
+  const supportedKeys = new Set(Object.keys(OPTIONS).map(s => s.toLowerCase()));
+
+  // An unknown key may contain text intended as a credential, so only its position is reported
+  const unsupportedPositions = Array.from(url.searchParams.keys()).flatMap((key, index) =>
+    supportedKeys.has(key.toLowerCase()) ? [] : [index + 1]
+  );
+  if (unsupportedPositions.length !== 0) {
+    throw new MongoParseError(
+      `connection string contains unsupported options, at position: ${unsupportedPositions.join(', ')}`
+    );
+  }
+
   for (const key of url.searchParams.keys()) {
     const values = url.searchParams.getAll(key);
+    // The name comes from the driver's own list, never from the connection string
+    const name = Object.keys(OPTIONS).find(option => option.toLowerCase() === key.toLowerCase());
 
     const isReadPreferenceTags = /readPreferenceTags/i.test(key);
 
     if (!isReadPreferenceTags && values.length > 1) {
       throw new MongoInvalidArgumentError(
-        `URI option "${key}" cannot appear more than once in the connection string`
+        `URI option "${name}" cannot appear more than once in the connection string`
       );
     }
 
     if (!isReadPreferenceTags && values.includes('') && !isIgnoredOption(key)) {
-      throw new MongoAPIError(`URI option "${key}" cannot be specified with no value`);
+      throw new MongoAPIError(`URI option "${name}" cannot be specified with no value`);
     }
 
     if (!urlOptions.has(key)) {
@@ -336,6 +359,13 @@ export function parseOptions(
   const objectOptions = new CaseInsensitiveMap<unknown>(
     Object.entries(options).filter(([, v]) => v != null)
   );
+
+  // Checked here, where the value is known to come from the connection string, instead of deeper in
+  // the transformer, where the source is obviated (could be provided from config in new MongoClient vs. URI)
+  const [uriReadPreference] = urlOptions.get('readPreference') ?? [];
+  if (typeof uriReadPreference === 'string' && !ReadPreference.isValid(uriReadPreference)) {
+    throw new MongoInvalidArgumentError('readPreference is not a valid read preference mode');
+  }
 
   // Validate options that can only be provided by one of uri or object
 
@@ -395,10 +425,7 @@ export function parseOptions(
 
   checkTLSOptions(allProvidedOptions);
 
-  const unsupportedOptions = setDifference(
-    allProvidedKeys,
-    Array.from(Object.keys(OPTIONS)).map(s => s.toLowerCase())
-  );
+  const unsupportedOptions = setDifference(allProvidedKeys, supportedKeys);
   if (unsupportedOptions.size !== 0) {
     const optionWord = unsupportedOptions.size > 1 ? 'options' : 'option';
     const isOrAre = unsupportedOptions.size > 1 ? 'are' : 'is';
@@ -589,7 +616,36 @@ export function parseOptions(
   // as an unhandled rejection; consumers awaiting `runtime` still observe the rejection.
   mongoOptions.runtime.then(undefined, squashError);
 
+  // Enumerable, so that a copy of the options made with a spread is redacted as well
+  mongoOptions[INSPECT_CUSTOM] = inspectRedactedOptions;
+  mongoOptions.toJSON = redactOptions;
+
   return mongoOptions;
+}
+
+const INSPECT_CUSTOM = Symbol.for('nodejs.util.inspect.custom');
+
+/**
+ * Returns a copy of the options it is called on, with choice-options redacted.
+ * `nodejs.util.inspect.custom` is removed from the copy, so that inspecting it does not cause a cyclic call.
+ */
+function redactOptions(this: Record<PropertyKey, any>): Record<PropertyKey, any> {
+  const redacted = { ...this };
+  delete redacted[INSPECT_CUSTOM];
+  for (const key of ['proxyUsername', 'proxyPassword', 'passphrase']) {
+    if (redacted[key] != null) redacted[key] = '<redacted>';
+  }
+  return redacted;
+}
+
+/** Called by `util.inspect` and `console.log` */
+function inspectRedactedOptions(
+  this: Record<PropertyKey, any>,
+  _depth: number,
+  options: unknown,
+  inspect: (value: unknown, options: unknown) => string
+): string {
+  return inspect(redactOptions.call(this), options);
 }
 
 /**
@@ -642,13 +698,13 @@ function normalizeSrvAllowedHostsSuffix(value: string): string {
   // same conversion applied to the host names returned by the SRV lookup
   const suffix = dnsNameToASCII(stripped);
   if (suffix == null) {
-    throw new MongoParseError(`srvAllowedHostsSuffix "${value}" is not a valid domain name`);
+    throw new MongoParseError('srvAllowedHostsSuffix is not a valid domain name');
   }
 
   // 4. Require at least two labels, unless the value is a reserved single label
   if (!suffix.includes('.') && !VALID_SINGLE_LABEL_SUFFIXES.has(suffix)) {
     throw new MongoParseError(
-      `srvAllowedHostsSuffix "${value}" must contain at least two domain labels, or be one of: ${[
+      `srvAllowedHostsSuffix must contain at least two domain labels, or be one of: ${[
         ...VALID_SINGLE_LABEL_SUFFIXES
       ].join(', ')}`
     );
@@ -758,9 +814,15 @@ export const OPTIONS = {
     target: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
       const mechanisms = Object.values(AuthMechanism);
-      const [mechanism] = mechanisms.filter(m => m.match(RegExp(String.raw`\b${value}\b`, 'i')));
+      let mechanism: AuthMechanism | undefined;
+      try {
+        // new RegExp() can reject with the input on v8
+        [mechanism] = mechanisms.filter(m => m.match(RegExp(String.raw`\b${value}\b`, 'i')));
+      } catch {
+        // swallow the error
+      }
       if (!mechanism) {
-        throw new MongoParseError(`authMechanism one of ${mechanisms}, got ${value}`);
+        throw new MongoParseError(`authMechanism must be one of ${mechanisms}`);
       }
       let source = options.credentials?.source;
       if (
@@ -876,7 +938,7 @@ export const OPTIONS = {
             compressionList.add(String(c));
           } else {
             throw new MongoInvalidArgumentError(
-              `${c} is not a valid compression mechanism. Must be one of: ${Object.keys(
+              `compressors contains a value that is not a valid compression mechanism. Must be one of: ${Object.keys(
                 Compressor
               )}.`
             );
@@ -1040,9 +1102,7 @@ export const OPTIONS = {
       if (isRecord(value, ['createPk'] as const) && typeof value.createPk === 'function') {
         return value as PkFactory;
       }
-      throw new MongoParseError(
-        `Option pkFactory must be an object with a createPk function, got ${value}`
-      );
+      throw new MongoParseError('Option pkFactory must be an object with a createPk function');
     }
   },
   promoteBuffers: {
@@ -1078,7 +1138,7 @@ export const OPTIONS = {
       if (value instanceof ReadConcern || isRecord(value, ['level'] as const)) {
         return ReadConcern.fromOptions({ ...options.readConcern, ...value });
       }
-      throw new MongoParseError(`ReadConcern must be an object, got ${JSON.stringify(value)}`);
+      throw new MongoParseError('ReadConcern must be an object');
     }
   },
   readConcernLevel: {
@@ -1314,7 +1374,7 @@ export const OPTIONS = {
         });
       }
 
-      throw new MongoParseError(`Invalid WriteConcern cannot parse: ${JSON.stringify(value)}`);
+      throw new MongoParseError('Invalid WriteConcern cannot parse');
     }
   },
   wtimeout: {

@@ -884,8 +884,9 @@ export class HostAddress {
     try {
       url = new URL(urlString);
     } catch (urlError) {
-      const runtimeError = new MongoRuntimeError(`Unable to parse ${escapedHost} with URL`);
-      runtimeError.cause = urlError;
+      delete (urlError as { input?: string }).input;
+      const runtimeError = new MongoRuntimeError('Unable to parse host with URL');
+      runtimeError.cause = urlError as Error;
       throw runtimeError;
     }
 

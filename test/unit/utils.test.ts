@@ -915,6 +915,21 @@ describe('driver utils', function () {
         expect(ha).to.have.property('host', 'iLoveJavascript.sock'.toLowerCase());
         expect(ha).to.have.property('port', 27017);
       });
+
+      it('should not include the host in the error message when it cannot be parsed', () => {
+        const host = 'example.com:NOT_A_PORT';
+        const error = (() => {
+          try {
+            new HostAddress(host);
+          } catch (e) {
+            return e;
+          }
+        })();
+        expect(error).to.be.instanceOf(MongoRuntimeError);
+        expect(error.message).to.not.include(host);
+        expect(error.cause.message).to.not.include(host);
+        expect(JSON.stringify(error)).to.not.include(host);
+      });
     });
   });
 
