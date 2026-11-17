@@ -4,7 +4,11 @@ import * as sinon from 'sinon';
 
 import { MongoClient } from '../../mongodb';
 
-const metadata: MongoDBMetadataUI = { requires: { topology: '!single', tls: 'disabled' } };
+// The SRV records of test1.test.build.10gen.cc point at a replica set on localhost:27017 and 27018,
+// which DSC tasks do not have.
+const metadata: MongoDBMetadataUI = {
+  requires: { topology: '!single', tls: 'disabled', dsc: 'disabled' }
+};
 
 // This serves as a placeholder for _whatever_ node.js may throw. We only rely upon `.code`
 class DNSTimeoutError extends Error {

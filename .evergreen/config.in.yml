@@ -123,16 +123,6 @@ functions:
   # Disaggregated storage (DSC) deployment: a three-member replica set backed by SLS, run in containers.
   # See drivers-evergreen-tools/.evergreen/disagg/README.md and "Disaggregated storage (DSC)" in test/readme.md.
   "start dsc":
-    # TODO: remove this step once mongodb-labs/drivers-evergreen-tools#918 (DRIVERS-3190) is merged and the
-    # drivers-evergreen-tools submodule is bumped past it.
-    - command: shell.exec
-      type: setup
-      params:
-        working_dir: src/drivers-evergreen-tools
-        script: |
-          set -o errexit
-          git fetch https://github.com/mdb-ad/drivers-evergreen-tools.git dsc
-          git checkout FETCH_HEAD
     # The SLS images are in a private ECR registry that requires this role.
     - command: ec2.assume_role
       params:

@@ -156,8 +156,10 @@ describe('Sessions Prose Tests', () => {
     it(
       '18. Implicit session is ignored if connection does not support sessions',
       {
+        // Spawns mongocryptd from PATH, and DSC tasks do not download server binaries.
         requires: {
-          clientSideEncryption: true
+          clientSideEncryption: true,
+          dsc: 'disabled'
         }
       },
       async function () {
@@ -194,8 +196,10 @@ describe('Sessions Prose Tests', () => {
     it(
       '19. Explicit session raises an error if connection does not support sessions',
       {
+        // Spawns mongocryptd from PATH, and DSC tasks do not download server binaries.
         requires: {
-          clientSideEncryption: true
+          clientSideEncryption: true,
+          dsc: 'disabled'
         }
       },
       async function () {

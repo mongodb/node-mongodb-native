@@ -322,7 +322,7 @@ describe('class MongoClient', function () {
     it('throws ENOTFOUND error when connecting to non-existent host with no auth and loadBalanced=true', async function () {
       const configuration = this.configuration;
       const client = configuration.newClient(
-        'mongodb://iLoveJavaScript:27017/test?loadBalanced=true',
+        'mongodb://iLoveJavaScript.invalid:27017/test?loadBalanced=true',
         { serverSelectionTimeoutMS: 100 }
       );
 

@@ -79,14 +79,6 @@ functions:
         script: |
           bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
   start dsc:
-    - command: shell.exec
-      type: setup
-      params:
-        working_dir: src/drivers-evergreen-tools
-        script: |
-          set -o errexit
-          git fetch https://github.com/mdb-ad/drivers-evergreen-tools.git dsc
-          git checkout FETCH_HEAD
     - command: ec2.assume_role
       params:
         role_arn: arn:aws:iam::664315256653:role/disagg-storage-tf-project-ro
