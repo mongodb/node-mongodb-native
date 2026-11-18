@@ -84,7 +84,7 @@ functions:
           git fetch origin "${SOURCE_REV}:${SOURCE_REV}"
           git checkout "${SOURCE_REV}"
           npm i
-  "bootstrap mongo-orchestration":
+  "run mongodb":
     - command: ec2.assume_role
       params:
         role_arn: ${DRIVERS_SECRETS_ARN}
@@ -107,18 +107,19 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           MONGODB_BINARIES: ${MONGODB_BINARIES}
         args:
-          - src/.evergreen/run-orchestration.sh
+          - ${DRIVERS_TOOLS}/.evergreen/run-mongodb.sh
+          - start
 
-    # run-orchestration generates expansion file with the MONGODB_URI for the cluster
+    # run-mongodb.sh generates expansion file with the MONGODB_URI for the cluster
     - command: expansions.update
       params:
         file: mo-expansion.yml
 
-  "stop mongo-orchestration":
+  "stop mongodb":
     - command: shell.exec
       params:
         script: |
-          bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
+          bash ${DRIVERS_TOOLS}/.evergreen/run-mongodb.sh stop
 
   "bootstrap mongohoused":
     - <<: *assume_secrets_manager_role
@@ -814,7 +815,7 @@ tasks:
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: noauth }
       - func: "install dependencies"
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - command: subprocess.exec
         type: test
         params:
@@ -856,7 +857,7 @@ tasks:
             - { key: TOPOLOGY, value: server }
             - { key: AUTH, value: noauth }
       - func: "install dependencies"
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - command: subprocess.exec
         type: test
         params:
@@ -1072,7 +1073,7 @@ tasks:
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -1100,7 +1101,7 @@ tasks:
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -1128,7 +1129,7 @@ tasks:
             - { key: CLIENT_ENCRYPTION, value: "false" }
             - { key: NODE_LTS_VERSION, value: "20.19.0" }
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -1407,7 +1408,7 @@ pre:
 post:
   - func: "reset aws instance profile"
   - func: "upload test results"
-  - func: "stop mongo-orchestration"
+  - func: "stop mongodb"
   - func: "upload coverage report"
   - func: "cleanup"
 

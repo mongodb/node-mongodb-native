@@ -14,7 +14,7 @@ This is the official MongoDB Node.js driver (`mongodb` npm package). It provides
 - **[mongodb-js/mongodb-client-encryption](https://github.com/mongodb-js/mongodb-client-encryption)** — Native bindings to `libmongocrypt` for CSFLE/Queryable Encryption (`mongodb-client-encryption` npm package). Owned by this team.
 - **[mongodb-js/zstd](https://github.com/mongodb-js/zstd)** and **[mongodb-js/saslprep](https://github.com/mongodb-js/saslprep)** — Compression and SCRAM SASLprep helpers, also team-owned.
 
-**Do not hand-edit**: `lib/` (build output), `mongodb.d.ts` (generated), `HISTORY.md` (release-please managed), `test/spec/` (vendored from specifications repo).
+**Do not hand-edit**: `lib/` (build output), `mongodb.d.ts` (generated), `HISTORY.md` (release-please managed), `test/spec/` (vendored from specifications repo), `.evergreen/config.yml` (generated, see below).
 
 ## Common Commands
 
@@ -41,13 +41,15 @@ git submodule update --init
 export DRIVERS_TOOLS=$(pwd)/drivers-evergreen-tools
 export AWS_PROFILE=drivers-test-secrets-role-857654397073
 aws sso login --sso-session drivers-test-secrets-session
-VERSION='latest' TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
+MONGODB_VERSION='latest' TOPOLOGY='replica_set' bash $DRIVERS_TOOLS/.evergreen/run-mongodb.sh start
 source mo-expansion.sh
 ```
 
-If `VERSION` is omitted, `run-orchestration.sh` defaults to `latest-stable` (the newest stable release). Set `VERSION='latest'` explicitly to test against nightly.
+Stop it with `bash $DRIVERS_TOOLS/.evergreen/run-mongodb.sh stop`. The script starts servers with [mongodb-runner](https://github.com/mongodb-js/devtools-shared/tree/main/packages/mongodb-runner). Do not use drivers-evergreen-tools' `run-orchestration.sh` / `stop-orchestration.sh`: they use the deprecated mongo-orchestration ([DRIVERS-3335](https://jira.mongodb.org/browse/DRIVERS-3335)).
 
-`VERSION='latest'` (the nightly server build) is downloaded from a private S3 bucket, so it requires AWS credentials for the `drivers-test-secrets-role` role (see "AWS Profile" in `test/readme.md` for one-time SSO setup). In Evergreen this role is assumed via `ec2.assume_role` in the "bootstrap mongo-orchestration" function. Without credentials, use `VERSION='latest-stable'` (or a specific version like `8.0`) instead.
+Note the variable is `MONGODB_VERSION`, not `VERSION` (a plain `VERSION` is silently ignored). If it is omitted, `run-mongodb.sh` defaults to `latest-stable` (the newest stable release). Set `MONGODB_VERSION='latest'` explicitly to test against nightly.
+
+`MONGODB_VERSION='latest'` (the nightly server build) is downloaded from a private S3 bucket, so it requires AWS credentials for the `drivers-test-secrets-role` role (see "AWS Profile" in `test/readme.md` for one-time SSO setup). In Evergreen this role is assumed via `ec2.assume_role` in the "run mongodb" function (which maps the task's `VERSION` to `MONGODB_VERSION`). Without credentials, use `MONGODB_VERSION='latest-stable'` (or a specific version like `8.0`) instead.
 
 ```bash
 npm run check:unit        # Unit tests (no database required)
@@ -68,6 +70,12 @@ describe(
   function () {}
 );
 ```
+
+### Evergreen CI config
+
+`.evergreen/config.yml` is generated: edit `.evergreen/config.in.yml` (functions, hand-written tasks) and/or `.evergreen/generate_evergreen_tasks.js` (task/variant matrix, `ci_matrix_constants.js`), then run `npm run build:evergreen` and commit all of them. The generator re-serializes the YAML, so comments only survive in `config.in.yml`.
+
+Test servers are started by the `run mongodb` function (drivers-evergreen-tools' `run-mongodb.sh start`, which writes the cluster's `MONGODB_URI` to `mo-expansion.yml`) and stopped by `stop mongodb` in `post:`.
 
 ## Architecture
 

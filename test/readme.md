@@ -96,13 +96,13 @@ The easiest way to get started running the tests locally is to start a replica s
 
 ### Prerequisites
 
-- **AWS profile** — Integration tests run against the nightly MongoDB server build (`VERSION='latest'`) as a canary. That build is downloaded from a private S3 bucket, so you need the AWS profile described in [AWS Profile](#aws-profile) configured before starting a server. Log in at the start of each session:
+- **AWS profile** — Integration tests run against the nightly MongoDB server build (`MONGODB_VERSION='latest'` locally) as a canary. That build is downloaded from a private S3 bucket, so you need the AWS profile described in [AWS Profile](#aws-profile) configured before starting a server. Log in at the start of each session:
 
   ```sh
   export AWS_PROFILE="drivers-test-secrets-role-857654397073"
   aws sso login --sso-session drivers-test-secrets-session
   ```
-- If you don’t have access to the role (e.g. external contributors), use VERSION='latest-stable' instead to pick up a version without needing credentials.
+- If you don’t have access to the role (e.g. external contributors), use MONGODB_VERSION='latest-stable' instead to pick up a version without needing credentials.
 
 ### Starting a Server and Running the Tests
 
@@ -119,14 +119,14 @@ Set the `DRIVERS_TOOLS` environment variable:
 export DRIVERS_TOOLS=<path to driver>/drivers-evergreen-tools
 ```
 
-Start a replica set with our [run-orchestration.sh](.evergreen/run-orchestration.sh) script with the environment set for the cluster:
+Start a replica set with the drivers-evergreen-tools [run-mongodb.sh](../drivers-evergreen-tools/.evergreen/run-mongodb.sh) script with the environment set for the cluster. It starts the servers with [mongodb-runner](https://github.com/mongodb-js/devtools-shared/tree/main/packages/mongodb-runner):
 
 ```sh
-VERSION='latest' TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
+MONGODB_VERSION='latest' TOPOLOGY='replica_set' bash $DRIVERS_TOOLS/.evergreen/run-mongodb.sh start
 ```
 
 > [!NOTE]
-> If `VERSION` is omitted, `latest-stable` (the newest stable release) is used instead of the nightly build. This applies to every `run-orchestration.sh` example below that doesn't set `VERSION`. `VERSION='latest'` will target the nightly build.
+> The variable is `MONGODB_VERSION`, not `VERSION`: a plain `VERSION` is silently ignored. If `MONGODB_VERSION` is omitted, `latest-stable` (the newest stable release) is used instead of the nightly build. This applies to every `run-mongodb.sh` example below that doesn't set `MONGODB_VERSION`. `MONGODB_VERSION='latest'` will target the nightly build.
 
 Load the new cluster's URI into the environment:
 
@@ -143,7 +143,7 @@ npm run check:test
 > [!NOTE]
 > The command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
-[../drivers-evergreen-tools/.evergreen/run-orchestration.sh](../drivers-evergreen-tools/.evergreen/run-orchestration.sh) has a number of settings that can enabled using env vars. Take a look at that script/repo for more information.
+[../drivers-evergreen-tools/.evergreen/run-mongodb.sh](../drivers-evergreen-tools/.evergreen/run-mongodb.sh) has a number of settings that can enabled using env vars. Take a look at that script/repo for more information.
 
 The output will show how many tests passed, failed, and are pending. Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test results. See [Mocha's documentation][mocha-skip] for more information.
 
@@ -151,10 +151,10 @@ In the following subsections, we'll dig into the details of running the tests.
 
 ### Testing With Authorization-Enabled
 
-By default, the integration tests run with auth-enabled and the mongo orchestration script will run with auth enabled when the `AUTH` variable is set to `auth`. Tests can be run locally without auth by setting the environment variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
+By default, the integration tests run with auth-enabled and the `run-mongodb.sh` script will run with auth enabled when the `AUTH` variable is set to `auth`. Tests can be run locally without auth by setting the environment variable `AUTH` to the value of `noauth`.  This must be a two-step process of starting a server without auth-enabled and then running the tests without auth-enabled.
 
 ```shell
-AUTH='noauth' TOPOLOGY='server' bash .evergreen/run-orchestration.sh
+AUTH='noauth' TOPOLOGY='server' bash $DRIVERS_TOOLS/.evergreen/run-mongodb.sh start
 AUTH='noauth' npm run check:test
 ```
 
@@ -165,21 +165,23 @@ As we mentioned earlier, the tests check the topology of the MongoDB server bein
 In the steps above, we started a standalone server:
 
 ```sh
-TOPOLOGY='server' bash .evergreen/run-orchestration.sh
+TOPOLOGY='server' bash $DRIVERS_TOOLS/.evergreen/run-mongodb.sh start
 ```
 
-You can use the same [run-orchestration.sh](.evergreen/run-orchestration.sh) script to start a replica set or sharded cluster by passing the appropriate option:
+You can use the same [run-mongodb.sh](../drivers-evergreen-tools/.evergreen/run-mongodb.sh) script to start a replica set or sharded cluster by passing the appropriate option:
 ```sh
-TOPOLOGY='replica_set' bash .evergreen/run-orchestration.sh
+TOPOLOGY='replica_set' bash $DRIVERS_TOOLS/.evergreen/run-mongodb.sh start
 ```
 or
 ```sh
-TOPOLOGY='sharded_cluster' bash .evergreen/run-orchestration.sh
+TOPOLOGY='sharded_cluster' bash $DRIVERS_TOOLS/.evergreen/run-mongodb.sh start
 ```
 If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated `maxproc` steps.)
 
-The [run-orchestration.sh](.evergreen/run-orchestration.sh) script automatically stores the files associated with the MongoDB server in the `data` directory, which is stored at the top-level of this repository.
-You can delete this directory if you want to ensure you're running a clean configuration. If you delete the directory, the associated database server will be stopped, and you will need to run [run-orchestration.sh](.evergreen/run-orchestration.sh) again.
+Each `run-mongodb.sh start` stops any cluster it started before and starts from a clean configuration. To stop the cluster without starting a new one, run:
+```sh
+bash $DRIVERS_TOOLS/.evergreen/run-mongodb.sh stop
+```
 
 You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment. For example, for a standalone server, you might use:
 
@@ -723,7 +725,7 @@ Once you have the AWS Profile configured locally (see section "AWS Profile" for 
 
 ```sh
 export AWS_CREDENTIAL_TYPE="session-creds" # session-creds || env-creds
-export VERSION="latest"
+export MONGODB_VERSION="latest"
 export NODE_LTS_VERSION="24"
 export AUTH="auth"
 export ORCHESTRATION_FILE="auth-aws.json"
@@ -737,8 +739,8 @@ aws sso login --sso-session drivers-test-secrets-session
 # Install dependencies
 bash ${NODE_DRIVER}/.evergreen/install-dependencies.sh
 
-# Orchestration
-bash ${NODE_DRIVER}/.evergreen/run-orchestration.sh
+# Start the server
+bash ${DRIVERS_TOOLS}/.evergreen/run-mongodb.sh start
 
 bash ${NODE_DRIVER}/.evergreen/run-mongodb-aws-test.sh
 ```
