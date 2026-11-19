@@ -1,0 +1,130 @@
+description: write-concern-errors-client-side-encryption
+
+schemaVersion: "1.8"
+
+runOnRequirements:
+  - csfle: true
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - clientEncryption:
+      id: &clientEncryption0 clientEncryption0
+      clientEncryptionOpts:
+        keyVaultClient: *client0
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          local: { key: { $$placeholder: 1 } }
+
+initialData:
+  - databaseName: keyvault
+    collectionName: datakeys
+    documents:
+      - _id: { $binary: { base64: bG9jYWxrZXlsb2NhbGtleQ==, subType: "04" } }
+        keyAltNames: ["local_key"]
+        keyMaterial:
+          {
+            $binary:
+              {
+                base64: ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==,
+                subType: "00",
+              },
+          }
+        creationDate: { $date: { $numberLong: "1641024000000" } }
+        updateDate: { $date: { $numberLong: "1641024000000" } }
+        status: 1
+        masterKey:
+          provider: local
+
+tests:
+  - description: rewrapManyDataKey reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ update ]
+              writeConcernError: &write_concern_error
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: rewrapManyDataKey
+        object: *clientEncryption0
+        arguments:
+          filter: {}
+          opts:
+            provider: local
+        expectError:
+          isError: true
+
+  - description: createDataKey reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              writeConcernError: *write_concern_error
+      - name: createDataKey
+        object: *clientEncryption0
+        arguments:
+          kmsProvider: local
+        expectError: &expect_write_concern_error
+          errorCode: 79
+
+  - description: deleteKey reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              writeConcernError: *write_concern_error
+      - name: deleteKey
+        object: *clientEncryption0
+        arguments:
+          id: &local_key_id { $binary: { base64: bG9jYWxrZXlsb2NhbGtleQ==, subType: "04" } }
+        expectError: *expect_write_concern_error
+
+  - description: addKeyAltName reports a writeConcernError
+    operations:
+      - &failPoint_findAndModify
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ findAndModify ]
+              writeConcernError: *write_concern_error
+      - name: addKeyAltName
+        object: *clientEncryption0
+        arguments:
+          id: *local_key_id
+          keyAltName: new_key_alt_name
+        expectError: *expect_write_concern_error
+
+  - description: removeKeyAltName reports a writeConcernError
+    operations:
+      - *failPoint_findAndModify
+      - name: removeKeyAltName
+        object: *clientEncryption0
+        arguments:
+          id: *local_key_id
+          keyAltName: local_key
+        expectError: *expect_write_concern_error

@@ -1,0 +1,60 @@
+description: write-concern-errors-findAndModify
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: write-concern-errors-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: coll
+
+tests:
+  - description: findOneAndUpdate reports a writeConcernError
+    operations:
+      - &failPoint_findAndModify
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ findAndModify ]
+              writeConcernError:
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+          update: { $set: { x: 111 } }
+        expectError: &expect_write_concern_error
+          errorCode: 79
+
+  - description: findOneAndReplace reports a writeConcernError
+    operations:
+      - *failPoint_findAndModify
+      - name: findOneAndReplace
+        object: *collection0
+        arguments:
+          filter: { _id: 2 }
+          replacement: { x: 222 }
+        expectError: *expect_write_concern_error
+
+  - description: findOneAndDelete reports a writeConcernError
+    operations:
+      - *failPoint_findAndModify
+      - name: findOneAndDelete
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+        expectError: *expect_write_concern_error

@@ -1,0 +1,49 @@
+description: write-concern-errors-mapReduce
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name write-concern-errors-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+# Create the database used for mapReduce to avoid a NamespaceNotFound error.
+initialData:
+  - collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests:
+  - description: mapReduce with an output collection reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ mapReduce ]
+              writeConcernError:
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: mapReduce
+        object: *collection0
+        arguments:
+          map: { $code: "function inc() { return emit(0, this.x + 1) }" }
+          reduce: { $code: "function sum(key, values) { return values.reduce((acc, x) => acc + x); }" }
+          out: { replace: "mapreduce_out" }
+        expectError:
+          errorCode: 79

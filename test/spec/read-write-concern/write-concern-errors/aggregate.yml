@@ -1,0 +1,67 @@
+description: write-concern-errors-aggregate
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name write-concern-errors-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+# Create the database used for aggregate to avoid a NamespaceNotFound error.
+initialData:
+  - collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  - description: aggregate with $out reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ aggregate ]
+              writeConcernError: &write_concern_error
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline:
+            - $match: { _id: { $gt: 1 } }
+            - $out: "aggregate_out"
+        expectError: &expect_write_concern_error
+          errorCode: 79
+
+  - description: aggregate with $merge reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ aggregate ]
+              writeConcernError: *write_concern_error
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline:
+            - $match: { _id: { $gt: 1 } }
+            - $merge: { into: "aggregate_merge" }
+        expectError: *expect_write_concern_error
