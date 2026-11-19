@@ -1024,12 +1024,14 @@ export class ServerSession {
    * @param sessionTimeoutMinutes - The server's "logicalSessionTimeoutMinutes"
    */
   hasTimedOut(sessionTimeoutMinutes: number): boolean {
-    // Take the difference of the lastUse timestamp and now, which will result in a value in
-    // milliseconds, and then convert milliseconds to minutes to compare to `sessionTimeoutMinutes`
-    const idleTimeMinutes = Math.round(
-      ((calculateDurationInMs(this.lastUse) % 86400000) % 3600000) / 60000
-    );
-
+    // logicalSessionTimeoutMinutes is how long the server keeps an idle session.
+    // A driver must not send an lsid the server may already have expired.
+    // Idle time is the elapsed minutes since lastUse. Reducing that duration
+    // modulo an hour (or a day) treats a session idle for 60 minutes as idle
+    // for 0, so it is reused during part of every hour after it should have
+    // been dropped. The `- 1` is the spec's one-minute margin: a session within
+    // one minute of expiry is not returned to the pool.
+    const idleTimeMinutes = calculateDurationInMs(this.lastUse) / 60000;
     return idleTimeMinutes > sessionTimeoutMinutes - 1;
   }
 }
