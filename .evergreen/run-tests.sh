@@ -55,7 +55,8 @@ if [ "$COMPRESSOR" != "" ]; then
   if [[ "$MONGODB_URI" == *"?"* ]]; then
     export MONGODB_URI="${MONGODB_URI}&compressors=${COMPRESSOR}"
   else
-    export MONGODB_URI="${MONGODB_URI}/?compressors=${COMPRESSOR}"
+    # mongodb-runner URIs end in "/"; strip it so we don't produce "//?", which parses as dbName "/"
+    export MONGODB_URI="${MONGODB_URI%/}/?compressors=${COMPRESSOR}"
   fi
 fi
 
