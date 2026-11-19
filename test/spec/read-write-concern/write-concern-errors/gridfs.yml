@@ -1,0 +1,145 @@
+description: write-concern-errors-gridfs
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name write-concern-errors-tests
+  - bucket:
+      id: &bucket0 bucket0
+      database: *database0
+
+initialData:
+  - databaseName: *database_name
+    collectionName: fs.files
+    documents:
+      - _id: &file_id { $oid: "000000000000000000000001" }
+        length: 0
+        chunkSize: 4
+        uploadDate: { $date: "1970-01-01T00:00:00.000Z" }
+        filename: filename
+  - databaseName: *database_name
+    collectionName: fs.chunks
+    documents: []
+
+tests:
+  - description: upload reports a writeConcernError from a chunk insert
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              writeConcernError: &write_concern_error
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: upload
+        object: *bucket0
+        arguments:
+          filename: filename
+          source: { $$hexBytes: "1122334455" }
+        expectError: &expect_write_concern_error
+          errorCode: 79
+
+  - description: upload reports a writeConcernError from the files document insert
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { skip: 1 }
+            data:
+              failCommands: [ insert ]
+              writeConcernError: *write_concern_error
+      - name: upload
+        object: *bucket0
+        arguments:
+          filename: filename
+          source: { $$hexBytes: "1122334455" }
+        expectError: *expect_write_concern_error
+
+  - description: delete reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              writeConcernError: *write_concern_error
+      - name: delete
+        object: *bucket0
+        arguments:
+          id: *file_id
+        expectError: *expect_write_concern_error
+
+  - description: deleteByName reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              writeConcernError: *write_concern_error
+      - name: deleteByName
+        object: *bucket0
+        arguments:
+          filename: filename
+        expectError: *expect_write_concern_error
+
+  - description: file rename reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ update ]
+              writeConcernError: *write_concern_error
+      - name: rename
+        object: *bucket0
+        arguments:
+          id: *file_id
+          newFilename: newfilename
+        expectError: *expect_write_concern_error
+
+  - description: renameByName reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ update ]
+              writeConcernError: *write_concern_error
+      - name: renameByName
+        object: *bucket0
+        arguments:
+          filename: filename
+          newFilename: newfilename
+        expectError: *expect_write_concern_error

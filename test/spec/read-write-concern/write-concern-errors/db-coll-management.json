@@ -1,0 +1,201 @@
+{
+  "description": "write-concern-errors-db-coll-management",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "write-concern-errors-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "write-concern-errors-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "createCollection reports a writeConcernError",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "coll_create"
+          }
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "create"
+                ],
+                "writeConcernError": {
+                  "code": 79,
+                  "codeName": "UnknownReplWriteConcern",
+                  "errmsg": "Triggered by failpoint"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "coll_create"
+          },
+          "expectError": {
+            "errorCode": 79
+          }
+        }
+      ]
+    },
+    {
+      "description": "dropCollection reports a writeConcernError",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "drop"
+                ],
+                "writeConcernError": {
+                  "code": 79,
+                  "codeName": "UnknownReplWriteConcern",
+                  "errmsg": "Triggered by failpoint"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "coll"
+          },
+          "expectError": {
+            "errorCode": 79
+          }
+        }
+      ]
+    },
+    {
+      "description": "rename reports a writeConcernError",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "coll_renamed"
+          }
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "renameCollection"
+                ],
+                "writeConcernError": {
+                  "code": 79,
+                  "codeName": "UnknownReplWriteConcern",
+                  "errmsg": "Triggered by failpoint"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "rename",
+          "object": "collection0",
+          "arguments": {
+            "to": "coll_renamed"
+          },
+          "expectError": {
+            "errorCode": 79
+          }
+        }
+      ]
+    },
+    {
+      "description": "dropDatabase reports a writeConcernError",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "dropDatabase"
+                ],
+                "writeConcernError": {
+                  "code": 79,
+                  "codeName": "UnknownReplWriteConcern",
+                  "errmsg": "Triggered by failpoint"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "dropDatabase",
+          "object": "client0",
+          "arguments": {
+            "database": "write-concern-errors-dropdb"
+          },
+          "expectError": {
+            "errorCode": 79
+          }
+        }
+      ]
+    }
+  ]
+}

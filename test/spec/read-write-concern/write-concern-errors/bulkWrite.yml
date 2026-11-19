@@ -1,0 +1,41 @@
+description: write-concern-errors-bulkWrite
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: write-concern-errors-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: coll
+
+tests:
+  - description: bulkWrite reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              writeConcernError:
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: bulkWrite
+        object: *collection0
+        arguments:
+          requests:
+            - insertOne:
+                document: { x: 33 }
+        expectError:
+          isError: true

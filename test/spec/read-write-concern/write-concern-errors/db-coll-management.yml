@@ -1,0 +1,107 @@
+description: write-concern-errors-db-coll-management
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name write-concern-errors-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name coll
+
+# Create the collection to be renamed to avoid a NamespaceNotFound error.
+initialData:
+  - collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  - description: createCollection reports a writeConcernError
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: &created_collection coll_create
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ create ]
+              writeConcernError: &write_concern_error
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *created_collection
+        expectError: &expect_write_concern_error
+          errorCode: 79
+
+  - description: dropCollection reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ drop ]
+              writeConcernError: *write_concern_error
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection_name
+        expectError: *expect_write_concern_error
+
+  - description: rename reports a writeConcernError
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: &renamed_collection coll_renamed
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ renameCollection ]
+              writeConcernError: *write_concern_error
+      - name: rename
+        object: *collection0
+        arguments:
+          to: *renamed_collection
+        expectError: *expect_write_concern_error
+
+  - description: dropDatabase reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ dropDatabase ]
+              writeConcernError: *write_concern_error
+      - name: dropDatabase
+        object: *client0
+        arguments:
+          database: write-concern-errors-dropdb
+        expectError: *expect_write_concern_error
