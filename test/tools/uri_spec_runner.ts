@@ -1,4 +1,7 @@
 import { expect } from 'chai';
+import * as process from 'process';
+import * as sinon from 'sinon';
+import { inspect } from 'util';
 
 import {
   MongoAPIError,
@@ -47,6 +50,31 @@ function isAuthTest(test: AuthTest | UriTest): test is AuthTest {
 
 function isUriTest(test: AuthTest | UriTest): test is UriTest {
   return 'options' in test;
+}
+
+const SENTINELS = [
+  'SENTINELpassword1234',
+  '%53%45%4E%54%49%4E%45%4C%70%61%73%73%77%6F%72%64%31%32%33%34'
+].map(sentinel => sentinel.toLowerCase());
+
+export function executeCredentialDisclosureTest(test: { uri: string }): void {
+  const reported: string[] = [];
+  const emitWarning = sinon.stub(process, 'emitWarning');
+  try {
+    new MongoClient(test.uri);
+  } catch (error) {
+    // inspect() is what the runtime prints when the error is never caught
+    reported.push(error.message, inspect(error), JSON.stringify(error));
+  } finally {
+    reported.push(...emitWarning.args.map(([warning]) => String(warning)));
+    emitWarning.restore();
+  }
+
+  for (const text of reported) {
+    for (const sentinel of SENTINELS) {
+      expect(text.toLowerCase()).to.not.include(sentinel);
+    }
+  }
 }
 
 export function executeUriValidationTest(

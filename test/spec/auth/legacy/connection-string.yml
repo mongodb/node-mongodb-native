@@ -198,6 +198,12 @@ tests:
 - description: should throw an exception if no username (PLAIN)
   uri: mongodb://localhost/?authMechanism=PLAIN
   valid: false
+- description: should throw an exception if username contains a NUL character (PLAIN)
+  uri: mongodb://user%00name:password@localhost/?authMechanism=PLAIN
+  valid: false
+- description: should throw an exception if password contains a NUL character (PLAIN)
+  uri: mongodb://user:pass%00word@localhost/?authMechanism=PLAIN
+  valid: false
 - description: should recognize the mechanism (SCRAM-SHA-1)
   uri: mongodb://user:password@localhost/?authMechanism=SCRAM-SHA-1
   valid: true
