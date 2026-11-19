@@ -574,11 +574,16 @@ describe('MongoClient.close() Integration', () => {
           expect(client.s.sessionPool.sessions).to.have.length.greaterThan(0);
         });
 
-        it('does not execute endSessions', { requires: { tls: 'disabled' } }, async function () {
-          await client.close();
+        // Spawns mongocryptd from PATH, and DSC tasks do not download server binaries.
+        it(
+          'does not execute endSessions',
+          { requires: { tls: 'disabled', dsc: 'disabled' } },
+          async function () {
+            await client.close();
 
-          expect(commands).to.deep.equal([]);
-        });
+            expect(commands).to.deep.equal([]);
+          }
+        );
       });
     });
   });

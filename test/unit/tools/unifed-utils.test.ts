@@ -1,6 +1,11 @@
-import { expect } from 'chai';
+import { AssertionError, expect } from 'chai';
+import * as process from 'process';
 
-import { mergeKMSProviders } from '../../tools/unified-spec-runner/unified-utils';
+import { type RunOnRequirement } from '../../tools/unified-spec-runner/schema';
+import {
+  mergeKMSProviders,
+  topologySatisfies
+} from '../../tools/unified-spec-runner/unified-utils';
 
 describe('parseOptions', function () {
   context('aws providers', function () {
@@ -335,6 +340,60 @@ describe('parseOptions', function () {
       expect(parsedProviders.kmip).deep.equal({
         endpoint: 'endpoint'
       });
+    });
+  });
+});
+
+describe('topologySatisfies', function () {
+  context('dsc runOnRequirement', function () {
+    let originalDSC: string | undefined;
+    let ctx: { configuration: Record<string, never>; currentTest: { skipReason?: string } };
+
+    beforeEach(function () {
+      originalDSC = process.env.DSC;
+      ctx = { configuration: {}, currentTest: {} };
+    });
+
+    afterEach(function () {
+      if (originalDSC == null) delete process.env.DSC;
+      else process.env.DSC = originalDSC;
+    });
+
+    // The requirement only has `dsc`, so topologySatisfies never needs the server (utilClient).
+    const satisfies = (dsc: RunOnRequirement['dsc']) =>
+      topologySatisfies(ctx as any, { dsc }, undefined as any);
+
+    for (const [env, isDSC] of [
+      ['on', true],
+      [undefined, false],
+      ['off', false]
+    ] as const) {
+      context(`when DSC=${env}`, function () {
+        beforeEach(function () {
+          if (env == null) delete process.env.DSC;
+          else process.env.DSC = env;
+        });
+
+        it(`${isDSC ? 'satisfies' : 'does not satisfy'} 'require'`, async function () {
+          expect(await satisfies('require')).to.equal(isDSC);
+          if (!isDSC) expect(ctx.currentTest.skipReason).to.match(/requires disaggregated storage/);
+        });
+
+        it(`${isDSC ? 'does not satisfy' : 'satisfies'} 'forbid'`, async function () {
+          expect(await satisfies('forbid')).to.equal(!isDSC);
+          if (isDSC) expect(ctx.currentTest.skipReason).to.match(/forbids disaggregated storage/);
+        });
+
+        it(`satisfies 'allow'`, async function () {
+          expect(await satisfies('allow')).to.be.true;
+        });
+      });
+    }
+
+    it('throws on an unexpected value', async function () {
+      const error = await satisfies('sometimes' as any).catch(error => error);
+      expect(error).to.be.instanceOf(AssertionError);
+      expect(error.message).to.match(/Unexpected value for dsc: sometimes/);
     });
   });
 });

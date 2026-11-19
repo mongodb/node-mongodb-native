@@ -24,6 +24,12 @@ declare global {
       libmongocrypt?: string;
 
       tls?: 'enabled' | 'disabled';
+
+      /**
+       * 'enabled' runs the test only against a disaggregated storage deployment (DSC),
+       * 'disabled' never runs it against one. Set by `DSC=on`; see test/readme.md.
+       */
+      dsc?: 'enabled' | 'disabled';
     };
 
     sessions?: {

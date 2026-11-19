@@ -46,6 +46,7 @@ about the types of tests and how to run them.
     - [AWS Authentication tests](#aws-authentication-tests)
       - [Running AWS tests](#running-aws-tests)
     - [Container Tests](#container-tests)
+    - [Disaggregated Storage (DSC)](#disaggregated-storage-dsc)
     - [Node-less Runtime Testing](#node-less-runtime-testing)
       - [Design](#design)
       - [Running tests in Node-less Runtime](#running-tests-in-node-less-runtime)
@@ -750,6 +751,27 @@ our existing integration test suite and run Evergreen patches against a single i
 
 _Note that in cases where the tests need to run longer than one hour to ensure that tokens expire
 that the mocha timeout must be increased in order for the test not to timeout._
+
+### Disaggregated Storage (DSC)
+
+A disaggregated storage cluster (DSC) is a replica set whose storage is provided by a separate storage service (SLS)
+instead of a local disk. The `ubuntu2404-test-dsc` variant runs the integration suite against a three-member DSC
+replica set started by [`drivers-evergreen-tools/.evergreen/disagg`](https://github.com/mongodb-labs/drivers-evergreen-tools/tree/master/.evergreen/disagg)
+(the `start dsc` and `stop dsc` functions in `.evergreen/config.in.yml`). The SLS images are in a private ECR registry,
+so the deployment needs an x86_64 Linux host with Docker and AWS credentials for the role in that README; running it
+locally is not supported. The SLS image is pinned with `DSC_SLS_TAG` in `.evergreen/generate_evergreen_tasks.js`,
+because the newest images do not always start; to try a different image, change that tag. The SLS container logs are
+attached to each task as `sls-logs.txt.gz`.
+
+The server does not report whether it uses disaggregated storage, so the test environment sets `DSC=on`. Tests that
+cannot pass against a DSC are skipped with:
+
+- the `dsc` [runOnRequirement](https://github.com/mongodb/specifications/blob/master/source/unified-test-format/unified-test-format.md#runonrequirement)
+  (`require`, `forbid` or `allow`) in unified spec tests
+- `requires: { dsc: 'disabled' }` metadata in other tests (or `'enabled'` for tests that only run against a DSC)
+
+For example, DSC test deployments have no electable secondary, so tests that step down the primary with
+`replSetStepDown` are skipped.
 
 ### Node-less Runtime Testing
 

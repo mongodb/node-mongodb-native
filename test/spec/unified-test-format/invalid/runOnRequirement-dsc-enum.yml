@@ -1,0 +1,10 @@
+description: "runOnRequirement-dsc-enum"
+
+schemaVersion: "1.30"
+
+runOnRequirements:
+  - dsc: "foo"
+
+tests:
+  - description: "foo"
+    operations: []

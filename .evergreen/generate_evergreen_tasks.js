@@ -871,6 +871,42 @@ BUILD_VARIANTS.push({
   tasks: ['test_atlas_task_group_search_indexes']
 });
 
+// Disaggregated storage (DSC): the full integration suite against a three-member replica set backed by SLS.
+// DSC has no auth, TLS, standalone, or sharded deployments. See "Disaggregated storage (DSC)" in test/readme.md.
+SINGLETON_TASKS.push({
+  name: 'test-dsc-replica_set',
+  tags: ['dsc'],
+  commands: [
+    updateExpansions({
+      DSC: 'on',
+      // Without a pinned tag, setup.sh picks the newest SLS image, and recent images fail to start
+      // (StartLog "store_id mismatch"). Same tag as the C driver's DSC tasks (mongo-c-driver#2552).
+      DSC_SLS_TAG: 'linux-x86-64-f987ae59a6f61e0b4e3edc73663992e15c4e9261',
+      AUTH: 'noauth',
+      SSL: 'nossl',
+      CLIENT_ENCRYPTION: true,
+      TEST_CSFLE: true
+    }),
+    { func: 'install dependencies' },
+    { func: 'start dsc' },
+    { func: 'fetch dsc crypt_shared' },
+    { func: 'run tests' }
+  ]
+});
+
+BUILD_VARIANTS.push({
+  name: 'ubuntu2404-test-dsc',
+  display_name: 'Disaggregated Storage (DSC) Tests',
+  // The SLS containers need an x86_64 Linux host with Docker.
+  run_on: 'ubuntu2404-large',
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS
+  },
+  // Not yet stable: at most once a day on mainline.
+  batchtime: 1440,
+  tasks: ['.dsc']
+});
+
 BUILD_VARIANTS.push({
   name: 'resource management tests',
   display_name: 'resource management tests',

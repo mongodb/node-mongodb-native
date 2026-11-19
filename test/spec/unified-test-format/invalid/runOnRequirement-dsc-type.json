@@ -1,0 +1,15 @@
+{
+  "description": "runOnRequirement-dsc-type",
+  "schemaVersion": "1.30",
+  "runOnRequirements": [
+    {
+      "dsc": 1234
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

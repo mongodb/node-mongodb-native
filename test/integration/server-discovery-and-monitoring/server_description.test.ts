@@ -3,8 +3,11 @@ import { expect } from 'chai';
 import { MongoClient } from '../../mongodb';
 import { configureMongocryptdSpawnHooks } from '../../tools/utils';
 
+// These tests spawn mongocryptd from PATH, and DSC tasks do not download server binaries.
+const mongocryptdMetadata: MongoDBMetadataUI = { requires: { mongodb: '>=4.4', dsc: 'disabled' } };
+
 describe('class ServerDescription', function () {
-  describe('when connecting to mongocryptd', { requires: { mongodb: '>=4.4' } }, function () {
+  describe('when connecting to mongocryptd', mongocryptdMetadata, function () {
     let client: MongoClient;
 
     const { port: mongocryptdTestPort } = configureMongocryptdSpawnHooks();

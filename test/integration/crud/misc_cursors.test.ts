@@ -129,7 +129,9 @@ describe('Cursor', function () {
   });
 
   it('should correctly execute cursor count with secondary readPreference', {
-    metadata: { requires: { topology: 'replicaset' } },
+    // The lookup below only maps 127.0.0.1 to localhost; the DSC replica set members have other
+    // hostnames (shard1-node1-mongod), so the selected server is not found.
+    metadata: { requires: { topology: 'replicaset', dsc: 'disabled' } },
     async test() {
       const bag = [];
       client.on('commandStarted', filterForCommands(['count'], bag));

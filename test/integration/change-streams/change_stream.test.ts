@@ -2292,7 +2292,8 @@ describe('ChangeStream resumability', function () {
       context('when the error is not a server error', function () {
         it(
           'should resume on ServerSelectionError',
-          { requires: { topology: ['replicaset'] } },
+          // DSC test deployments have no electable secondary, so replSetStepDown fails
+          { requires: { topology: ['replicaset'], dsc: 'disabled' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -2621,7 +2622,8 @@ describe('ChangeStream resumability', function () {
       context('when the error is not a server error', function () {
         it(
           'should resume on ServerSelectionError',
-          { requires: { topology: ['replicaset'] } },
+          // DSC test deployments have no electable secondary, so replSetStepDown fails
+          { requires: { topology: ['replicaset'], dsc: 'disabled' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -2782,7 +2784,8 @@ describe('ChangeStream resumability', function () {
       context('when the error is not a server error', function () {
         it(
           'should resume on ServerSelectionError',
-          { requires: { topology: ['replicaset'] } },
+          // DSC test deployments have no electable secondary, so replSetStepDown fails
+          { requires: { topology: ['replicaset'], dsc: 'disabled' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -2996,7 +2999,8 @@ describe('ChangeStream resumability', function () {
     context('when the error is not a server error', function () {
       it(
         'should resume on ServerSelectionError',
-        { requires: { topology: ['replicaset'] } },
+        // DSC test deployments have no electable secondary, so replSetStepDown fails
+        { requires: { topology: ['replicaset'], dsc: 'disabled' } },
         async function () {
           changeStream = collection.watch([]);
 
