@@ -765,12 +765,9 @@ function addPerformanceTasks() {
         AUTH: 'noauth',
         MONGODB_CLIENT_OPTIONS: JSON.stringify(MONGODB_CLIENT_OPTIONS)
       }),
-      ...[
-        'install dependencies',
-        'run mongodb',
-        'run spec driver benchmarks',
-        'perf send'
-      ].map(func => ({ func }))
+      ...['install dependencies', 'run mongodb', 'run spec driver benchmarks', 'perf send'].map(
+        func => ({ func })
+      )
     ]
   });
 
