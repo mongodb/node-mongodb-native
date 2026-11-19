@@ -458,6 +458,8 @@ export class DocumentSequence {
     buffer[0] = 1;
     // Third part is the field name at offset 5 with trailing null byte.
     encodeUTF8Into(buffer, `${this.field}\0`, 5);
+    // Section length for a sequence with no documents yet; push() keeps it up to date.
+    NumberUtils.setInt32LE(buffer, 1, 4 + this.field.length + 1);
     this.chunks.push(buffer);
     this.header = buffer;
     if (documents) {
@@ -492,11 +494,12 @@ export class DocumentSequence {
   }
 
   /**
-   * Get the fully serialized bytes for the document sequence section.
-   * @returns The section bytes.
+   * Get the serialized bytes for the document sequence section: the section header
+   * followed by each document's buffer. Not concatenated, to avoid copying the payload.
+   * @returns The section chunks.
    */
-  toBin(): Uint8Array {
-    return ByteUtils.concat(this.chunks);
+  toBin(): Uint8Array[] {
+    return this.chunks;
   }
 }
 
@@ -603,7 +606,7 @@ export class OpMsgRequest {
    * Add the sections to the OP_MSG request's buffers and returns the length.
    */
   makeSections(buffers: Uint8Array[], document: Document): number {
-    const sequencesBuffer = this.extractDocumentSequences(document);
+    const sequenceChunks = this.extractDocumentSequences(document);
     const payloadTypeBuffer = ByteUtils.allocateUnsafe(1);
     payloadTypeBuffer[0] = 0;
 
@@ -611,23 +614,26 @@ export class OpMsgRequest {
     // First section, type 0
     buffers.push(payloadTypeBuffer);
     buffers.push(documentBuffer);
-    // Subsequent sections, type 1
-    buffers.push(sequencesBuffer);
-
-    return payloadTypeBuffer.length + documentBuffer.length + sequencesBuffer.length;
+    let length = payloadTypeBuffer.length + documentBuffer.length;
+    // Subsequent sections, type 1, pushed chunk by chunk so the payload is copied
+    // only once, when the message is written to the socket.
+    for (const chunk of sequenceChunks) {
+      buffers.push(chunk);
+      length += chunk.length;
+    }
+    return length;
   }
 
   /**
-   * Extracts the document sequences from the command document and returns
-   * a buffer to be added as multiple sections after the initial type 0
-   * section in the message.
+   * Extracts the document sequences from the command document and returns their
+   * chunks, to be added as multiple sections after the initial type 0 section.
    */
-  extractDocumentSequences(document: Document): Uint8Array {
+  extractDocumentSequences(document: Document): Uint8Array[] {
     // Pull out any field in the command document that's value is a document sequence.
-    const chunks = [];
+    const chunks: Uint8Array[] = [];
     for (const [key, value] of Object.entries(document)) {
       if (value instanceof DocumentSequence) {
-        chunks.push(value.toBin());
+        for (const chunk of value.toBin()) chunks.push(chunk);
         // Why are we removing the field from the command? This is because it needs to be
         // removed in the OP_MSG request first section, and DocumentSequence is not a
         // BSON type and is specific to the MongoDB wire protocol so there's nothing
@@ -638,12 +644,7 @@ export class OpMsgRequest {
         delete document[key];
       }
     }
-    if (chunks.length > 0) {
-      return ByteUtils.concat(chunks);
-    }
-    // If we have no document sequences we return an empty buffer for nothing to add
-    // to the payload.
-    return ByteUtils.allocate(0);
+    return chunks;
   }
 
   serializeBson(document: Document): Uint8Array {
