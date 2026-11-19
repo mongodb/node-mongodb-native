@@ -23,6 +23,9 @@ updates:
         versions: [">=11.0.0"]
       # we ignore TS as a part of quarterly dependency updates.
       - dependency-name: "typescript"
+      # prettier is pinned to an exact version. Newer releases (3.9.10 was checked)
+      # reformat existing code, so it is updated in a separate PR.
+      - dependency-name: "prettier"
       # NODE-3773: sinon 19+ breaks the srv polling unit tests
       - dependency-name: "sinon"
         versions: [">=19.0.0"]
