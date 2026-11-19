@@ -1,4 +1,5 @@
-import { Socket } from 'node:net';
+import { once } from 'node:events';
+import { type AddressInfo, createConnection, createServer, type Server, Socket } from 'node:net';
 import { Writable } from 'node:stream';
 
 import { expect } from 'chai';
@@ -14,6 +15,7 @@ import {
   MongoClientAuthProviders,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
+  MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
   ns,
@@ -300,6 +302,68 @@ describe('new Connection()', function () {
           });
         });
       });
+    });
+  });
+
+  describe('when the socket closes while a command is being written', function () {
+    let server: Server;
+    let opened: Connection | undefined;
+
+    beforeEach(async function () {
+      // a server that closes every connection it accepts
+      server = createServer(serverSocket => serverSocket.end());
+      server.listen(0, '127.0.0.1');
+      await once(server, 'listening');
+    });
+
+    afterEach(async function () {
+      opened?.destroy();
+      opened = undefined;
+      server.close();
+      await once(server, 'close');
+    });
+
+    // listeners attached in the same tick as the connect observe every socket event
+    function connect(): { socket: Socket; connection: Connection } {
+      const socket = createConnection((server.address() as AddressInfo).port, '127.0.0.1');
+      opened = new Connection(socket, {});
+      return { socket, connection: opened };
+    }
+
+    async function settleWithin(command: Promise<unknown>, ms: number): Promise<unknown> {
+      return await Promise.race([
+        command.then(
+          () => 'resolved',
+          error => error
+        ),
+        setTimeout(ms, 'pending')
+      ]);
+    }
+
+    it('rejects a command written after the socket finished but before its close was observed', async function () {
+      const { socket, connection } = connect();
+      const { promise: outcome, resolve } = promiseWithResolvers<unknown>();
+      let closedAtFinish: boolean | undefined;
+      socket.once('finish', () => {
+        // the socket has ended and is about to be destroyed; the connection still looks open
+        closedAtFinish = connection.closed;
+        settleWithin(connection.command(ns('admin.$cmd'), { ping: 1 }, {}), 2000).then(resolve);
+      });
+
+      expect(await outcome).to.be.instanceOf(MongoNetworkError);
+      expect(closedAtFinish).to.be.false;
+      expect(connection.closed).to.be.true;
+    });
+
+    it('rejects a command when the connection is destroyed before the command is written', async function () {
+      const { socket, connection } = connect();
+      await once(socket, 'connect');
+      const command = connection.command(ns('admin.$cmd'), { ping: 1 }, {});
+      connection.destroy();
+
+      const outcome = await settleWithin(command, 2000);
+
+      expect(outcome).to.be.instanceOf(MongoNetworkError);
     });
   });
 
