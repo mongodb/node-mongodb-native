@@ -3,6 +3,7 @@
 const {
   ConnectionPool,
   MongoError,
+  PoolClearedError,
   WaitQueueTimeoutError,
   isHello,
   ns,
@@ -147,6 +148,88 @@ describe('Connection Pool', function () {
     await setImmediate();
 
     expect(pool).property('waitQueueSize').to.equal(0);
+  });
+
+  it('does not check out a connection created before clear once the pool is ready again', async function () {
+    let releaseFirstHello;
+    const firstHello = new Promise(resolve => {
+      releaseFirstHello = resolve;
+    });
+    let helloCount = 0;
+    mockMongod.setMessageHandler(request => {
+      if (!isHello(request.document)) {
+        return;
+      }
+      helloCount += 1;
+      if (helloCount === 1) {
+        // Hold the handshake that createConnection already stamped with generation 0.
+        firstHello.then(() => request.reply(mock.HELLO));
+        return;
+      }
+      request.reply(mock.HELLO);
+    });
+
+    pool = new ConnectionPool(stubServer, {
+      maxPoolSize: 1,
+      hostAddress: mockMongod.hostAddress()
+    });
+    pool.ready();
+
+    const checkout = pool.checkOut({ timeoutContext });
+    const started = Date.now();
+    while (helloCount < 1 && Date.now() - started < 2000) {
+      await setImmediate();
+    }
+    expect(helloCount).to.equal(1);
+
+    pool.clear();
+    pool.ready();
+    expect(pool.generation).to.equal(1);
+
+    releaseFirstHello();
+    const connection = await checkout;
+    expect(connection.generation).to.equal(pool.generation);
+    pool.checkIn(connection);
+  });
+
+  it('rejects a queued checkout when clear runs while a connection is being created', async function () {
+    let releaseHello;
+    const hello = new Promise(resolve => {
+      releaseHello = resolve;
+    });
+    mockMongod.setMessageHandler(request => {
+      if (isHello(request.document)) {
+        hello.then(() => request.reply(mock.HELLO));
+      }
+    });
+
+    // PoolClearedError reads server.description. The shared stub has no description.
+    const server = {
+      ...stubServer,
+      description: {}
+    };
+    pool = new ConnectionPool(server, {
+      maxPoolSize: 2,
+      maxConnecting: 1,
+      hostAddress: mockMongod.hostAddress()
+    });
+    let cleared = false;
+    pool.on('connectionCreated', () => {
+      if (!cleared) {
+        cleared = true;
+        pool.clear();
+      }
+    });
+    pool.ready();
+
+    const first = pool.checkOut({ timeoutContext });
+    const second = pool.checkOut({ timeoutContext });
+    const secondError = await second.catch(error => error);
+    expect(secondError).to.be.instanceOf(PoolClearedError);
+
+    releaseHello();
+    const firstError = await first.catch(error => error);
+    expect(firstError).to.be.instanceOf(PoolClearedError);
   });
 
   describe('minPoolSize population', function () {
