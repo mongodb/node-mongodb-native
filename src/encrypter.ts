@@ -10,9 +10,20 @@ export interface EncrypterOptions {
   maxPoolSize?: number;
 }
 
+type MongoClientListener = (...args: any[]) => void;
+
 /** @internal */
 export class Encrypter {
   private internalClient: MongoClient | null;
+  /**
+   * Forwards `newListener` and `removeListener` from the application client onto
+   * the internal key-vault client. Held so `close()` can detach both hooks.
+   */
+  private listenerForwarders?: {
+    client: MongoClient;
+    newListener: (eventName: string | symbol, listener: MongoClientListener) => void;
+    removeListener: (eventName: string | symbol, listener: MongoClientListener) => void;
+  };
   bypassAutoEncryption: boolean;
   needsConnecting: boolean;
   autoEncrypter: AutoEncrypter;
@@ -69,18 +80,34 @@ export class Encrypter {
 
       clonedOptions.minPoolSize = 0;
 
-      internalClient = new MongoClient(uri, clonedOptions);
-      this.internalClient = internalClient;
+      const createdClient = new MongoClient(uri, clonedOptions);
+      internalClient = createdClient;
+      this.internalClient = createdClient;
 
       for (const eventName of MONGO_CLIENT_EVENTS) {
         for (const listener of client.listeners(eventName)) {
-          internalClient.on(eventName, listener);
+          createdClient.on(eventName, listener as MongoClientListener);
         }
       }
 
-      client.on('newListener', (eventName, listener) => {
-        internalClient?.on(eventName, listener);
-      });
+      // `newListener` covers every event name, including ones outside
+      // MONGO_CLIENT_EVENTS, because that is what the previous hook did.
+      // `removeListener` has to cover the same set. Otherwise
+      // `client.removeListener('commandStarted', onStarted)` leaves `onStarted`
+      // attached to the key-vault client: it keeps running for key-vault traffic
+      // and the application function stays reachable from a client it no longer
+      // observes.
+      // Registering `removeListener` emits `newListener` and copies that function
+      // onto the internal client. That copy is removed in `removeListenerForwarders`.
+      const newListener = (eventName: string | symbol, listener: MongoClientListener) => {
+        createdClient.on(eventName, listener);
+      };
+      const removeListener = (eventName: string | symbol, listener: MongoClientListener) => {
+        createdClient.removeListener(eventName, listener);
+      };
+      client.on('newListener', newListener);
+      client.on('removeListener', removeListener);
+      this.listenerForwarders = { client, newListener, removeListener };
 
       this.needsConnecting = true;
     }
@@ -95,7 +122,31 @@ export class Encrypter {
     }
   }
 
+  /**
+   * Stop mirroring listener changes onto the internal client.
+   *
+   * The `removeListener` hook is itself forwarded by `newListener`, so the
+   * internal client holds that function too. Removing it from the application
+   * client does not run the hook (the hook is the listener being removed),
+   * so drop it from the internal client directly.
+   */
+  private removeListenerForwarders(): void {
+    const forwarders = this.listenerForwarders;
+    if (forwarders == null) {
+      return;
+    }
+    this.listenerForwarders = undefined;
+
+    this.internalClient?.removeListener('removeListener', forwarders.removeListener);
+    forwarders.client.removeListener('newListener', forwarders.newListener);
+    forwarders.client.removeListener('removeListener', forwarders.removeListener);
+  }
+
   async close(client: MongoClient): Promise<void> {
+    // Detach even when the crypt client fails to close. Otherwise the application
+    // client keeps forwarding events at an internal client that is going away.
+    this.removeListenerForwarders();
+
     let error;
     try {
       await this.autoEncrypter.close();
