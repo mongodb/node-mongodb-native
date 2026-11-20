@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.9.1](https://github.com/mongodb/node-mongodb-native/compare/v7.9.0...v7.9.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **NODE-7799:** keep credential values out of errors and option output ([74ac2bb](https://github.com/mongodb/node-mongodb-native/commit/74ac2bb852dac4ac44b935ef9f23ebc79f3b0438))
+* **NODE-7828:** reject NUL characters in PLAIN credentials ([9796332](https://github.com/mongodb/node-mongodb-native/commit/9796332f04f328bb9405b39842f0eb6c20bb5fbf))
+
 ## [7.9.0](https://github.com/mongodb/node-mongodb-native/compare/v7.8.0...v7.9.0) (2026-11-12)
 
 

@@ -188,6 +188,17 @@ export class MongoCredentials {
       throw new MongoMissingCredentialsError(`Username required for mechanism '${this.mechanism}'`);
     }
 
+    if (
+      this.mechanism === AuthMechanism.MONGODB_PLAIN &&
+      (this.username.includes('\x00') || this.password.includes('\x00'))
+    ) {
+      // RFC 4616 uses NUL as the separator between the PLAIN message fields,
+      // so neither the username nor the password may contain it.
+      throw new MongoInvalidArgumentError(
+        `Username and password cannot contain NUL characters for mechanism '${this.mechanism}'`
+      );
+    }
+
     if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
       if (
         this.username &&
@@ -195,13 +206,13 @@ export class MongoCredentials {
         this.mechanismProperties.ENVIRONMENT !== 'azure'
       ) {
         throw new MongoInvalidArgumentError(
-          `username and ENVIRONMENT '${this.mechanismProperties.ENVIRONMENT}' may not be used together for mechanism '${this.mechanism}'.`
+          `username and a non-azure ENVIRONMENT may not be used together for mechanism '${this.mechanism}'.`
         );
       }
 
       if (this.username && this.password) {
         throw new MongoInvalidArgumentError(
-          `No password is allowed in ENVIRONMENT '${this.mechanismProperties.ENVIRONMENT}' for '${this.mechanism}'.`
+          `No password is allowed with a username for '${this.mechanism}'.`
         );
       }
 
@@ -260,7 +271,7 @@ export class MongoCredentials {
       if (this.source != null && this.source !== '$external') {
         // TODO(NODE-3485): Replace this with a MongoAuthValidationError
         throw new MongoAPIError(
-          `Invalid source '${this.source}' for mechanism '${this.mechanism}' specified.`
+          `Invalid source for mechanism '${this.mechanism}' specified, it must be '$external'.`
         );
       }
     }
@@ -281,8 +292,34 @@ export class MongoCredentials {
 
     const canonicalization = this.mechanismProperties.CANONICALIZE_HOST_NAME ?? false;
     if (!Object.values(GSSAPICanonicalizationValue).includes(canonicalization)) {
-      throw new MongoAPIError(`Invalid CANONICALIZE_HOST_NAME value: ${canonicalization}`);
+      throw new MongoAPIError('Invalid CANONICALIZE_HOST_NAME value');
     }
+  }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](
+    _depth: number,
+    options: unknown,
+    inspect: (value: unknown, options: unknown) => string
+  ): string {
+    return inspect(this.toJSON(), options);
+  }
+
+  /** @internal */
+  toJSON(): Record<string, unknown> {
+    const redacted: Record<string, unknown> = {
+      ...(this as MongoCredentials),
+      username: '<redacted>',
+      password: '<redacted>'
+    };
+    // The token is kept on the credentials even when the mechanism in use never reads it
+    if (this.mechanismProperties.AWS_SESSION_TOKEN != null) {
+      redacted.mechanismProperties = {
+        ...this.mechanismProperties,
+        AWS_SESSION_TOKEN: '<redacted>'
+      };
+    }
+    return redacted;
   }
 
   static merge(

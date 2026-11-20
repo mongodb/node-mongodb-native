@@ -31,11 +31,11 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref }}
       - name: Install Node and dependencies
-        uses: mongodb-labs/drivers-github-tools/node/setup@v3
+        uses: mongodb-labs/drivers-github-tools/node/setup@99b1cbd729bc83bf7fc74e1b2a97fffad3d65d7b # v3.1.1
       - run: npm version "$VERSION" --git-tag-version=false --allow-same-version
         env:
           VERSION: ${{ inputs.version }}
