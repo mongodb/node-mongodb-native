@@ -109,17 +109,17 @@ const APP_NAME_TRUNCATION_LIMIT_BYTES = 128;
 type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
 
 /**
- * From the specs:
- * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
+ * From the spec:
+ * Implementers SHOULD cumulatively update fields in the following order until the document is under the size limit:
+
  * 1. Omit fields from `env` except `env.name` and `env.agent`.
  * 2. Omit `env.agent`. If `env` then has no remaining fields, omit `env` entirely.
  * 3. Omit fields from `os` except `os.type`.
  * 4. Omit the `env` document entirely.
- * 5. Truncate `platform`. -- special we do not truncate this field
- *
- * `env.agent` is omitted before `env.name` because drivers have reported `env.name` since before
- * `env.agent` existed.
- */
+ * 5. Truncate `platform`.
+
+ * `env.agent` is omitted before `env.name` because drivers have reported `env.name` since before `env.agent` existed.
+*/
 export async function makeClientMetadata(
   driverInfoList: DriverInfo[],
   { appName = '', runtime }: MakeClientMetadataOptions
@@ -127,10 +127,20 @@ export async function makeClientMetadata(
   const { os } = await runtime;
   const metadataDocument = new LimitedSizeDocument(512);
 
+  // Existing maps are set, maps are constructed from non-maps, empty is omitted
+  const fit = (key: string, value: Record<string, any> | string): boolean => {
+    if (!(value instanceof Map)) return metadataDocument.ifItFitsItSits(key, value);
+    return value.size === 0 || metadataDocument.ifItFitsItSits(key, new Map(value));
+  };
+
+  const osInfo = new Map<string, unknown>().set('type', os.type());
+  const envInfo = new Map<string, unknown>();
+
   // Add app name first, it must be sent
   if (appName.length > 0) {
     const name = DriverStringUtils.truncateStringBytes(appName, APP_NAME_TRUNCATION_LIMIT_BYTES);
-    metadataDocument.ifItFitsItSits('application', { name });
+    // 1. set application.name
+    fit('application', { name });
   }
 
   const driverInfo = {
@@ -148,11 +158,16 @@ export async function makeClientMetadata(
     }
   }
 
-  if (!metadataDocument.ifItFitsItSits('driver', driverInfo)) {
+  // 2. Set driver
+  if (!fit('driver', driverInfo)) {
     throw new MongoInvalidArgumentError(
       'Unable to include driverInfo name and version, metadata cannot exceed 512 bytes'
     );
   }
+
+  // 3. Set os.type
+  // os.type is never omitted, so it is added before platform (the spec truncates platform last)
+  fit('os', osInfo);
 
   let runtimeInfo = getRuntimeInfo();
   // This is where we handle additional driver info added after client construction.
@@ -162,68 +177,41 @@ export async function makeClientMetadata(
     }
   }
 
-  if (!metadataDocument.ifItFitsItSits('platform', runtimeInfo)) {
+  // 4. Set platform (first truncatable)
+  if (!fit('platform', runtimeInfo)) {
     throw new MongoInvalidArgumentError(
       'Unable to include driverInfo platform, metadata cannot exceed 512 bytes'
     );
   }
 
-  // Note: order matters, os.type is last so it will be removed last if we're at maxSize
-  const osInfo = new Map()
-    .set('name', os.platform())
-    .set('architecture', os.arch())
-    .set('version', os.release())
-    .set('type', os.type());
-
-  if (!metadataDocument.ifItFitsItSits('os', osInfo)) {
-    for (const key of osInfo.keys()) {
-      osInfo.delete(key);
-      if (osInfo.size === 0) break;
-      if (metadataDocument.ifItFitsItSits('os', osInfo)) break;
-    }
-  }
-
-  // Env has an order of precedence for data truncation, and order matters.
-  // We append in the order of delete preference. Per the spec, 'agent' is omitted before 'name'.
-
-  // TODO(NODE-7851): Truncation does not yet follow the spec's cumulative order in two ways:
-  // 1. `env.container` is appended last, so it is effectively deleted after `env.name`. If the
-  //    FaaS fields don't fit but `container` does, we send `env` with `container` and no `name`.
-  // 2. `os` is fitted before `env`, so it is truncated too early. The spec trims `env` down to
-  //    name & agent, then omits agent, then trims `os` down to `os.type`, and only then omits `env`.
-
-  // A placeholder document that contains all groups of data to be appended to the metadata document
-  // which are furnished from environment variables (agent, FAAS, container)
-  const fullEnv = new Map<string, unknown>();
-
-  // FAAS fields (other than name) are set first, then agent, then name last
+  // Add the remaining os and env fields in the reverse of the spec's omission order, so the fields
+  // the spec omits first are added last. Stop at the first group that does not fit to keep the
+  // truncation cumulative, and only gather a group's values once the earlier groups have fit.
+  // Append order (os.type is added before platform): os.type, platform, env.name, ...os, env.agent, ...env
   const faasEnv = getFAASEnv();
-  for (const [k, v] of faasEnv) {
-    // delay setting name, it needs to be done *after* agent
-    if (k !== 'name') {
-      fullEnv.set(k, v);
-    }
-  }
-  const agentEnv = getAgentEnv();
-  if (agentEnv.length > 0) fullEnv.set('agent', agentEnv);
-  if (faasEnv.has('name')) {
-    fullEnv.set('name', faasEnv.get('name'));
-  }
+  if (faasEnv.has('name')) envInfo.set('name', faasEnv.get('name'));
 
-  // Fits to the metadata document preferentially setting by property order
-  if (fullEnv.size > 0 && !metadataDocument.ifItFitsItSits('env', fullEnv)) {
-    for (const key of fullEnv.keys()) {
-      fullEnv.delete(key);
-      if (fullEnv.size === 0) break;
-      if (metadataDocument.ifItFitsItSits('env', fullEnv)) break;
-    }
-  }
+  // 6. Set env.name
+  if (fit('env', envInfo)) {
+    osInfo.set('name', os.platform()).set('architecture', os.arch()).set('version', os.release());
 
-  // Finally, append container
-  const containerMetadata = await getContainerMetadata();
-  if (containerMetadata.size > 0) {
-    const newEnv = { ...Object.fromEntries(fullEnv), container: containerMetadata };
-    metadataDocument.ifItFitsItSits('env', newEnv);
+    // 7. Set os
+    if (fit('os', osInfo)) {
+      const agentEnv = getAgentEnv();
+      if (agentEnv.length > 0) envInfo.set('agent', agentEnv);
+
+      // 8. Set agent
+      if (fit('env', envInfo)) {
+        for (const [k, v] of faasEnv) {
+          if (k !== 'name') envInfo.set(k, v);
+        }
+        const containerMetadata = await getContainerMetadata();
+        if (containerMetadata.size > 0) envInfo.set('container', containerMetadata);
+
+        // 9. Set rest of env
+        fit('env', envInfo);
+      }
+    }
   }
 
   return metadataDocument.toObject() as ClientMetadata;

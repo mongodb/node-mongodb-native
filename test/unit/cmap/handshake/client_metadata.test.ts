@@ -592,7 +592,7 @@ describe('client metadata module', () => {
 
     context('when os information is too large', () => {
       context('release too large', () => {
-        beforeEach('2. Omit fields from `os` except `os.type`.', () => {
+        beforeEach('3. Omit fields from `os` except `os.type`.', () => {
           sinon.stub(process, 'env').get(() => ({
             AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
             AWS_REGION: 'abc'
@@ -603,7 +603,8 @@ describe('client metadata module', () => {
         it('only includes os.type', async () => {
           const metadata = await makeClientMetadata([], { runtime });
           expect(metadata).to.have.property('env');
-          expect(metadata).to.have.nested.property('env.region', 'abc');
+          expect(metadata).not.to.have.nested.property('env.region', 'abc');
+          expect(metadata).to.have.nested.property('env.name', 'aws.lambda');
           expect(metadata.os).to.have.all.keys('type');
         });
       });
@@ -625,7 +626,7 @@ describe('client metadata module', () => {
     });
 
     context('when there is no space for any env field', () => {
-      beforeEach('3. Omit the `env` document entirely.', () => {
+      beforeEach('4. Omit the `env` document entirely.', () => {
         sinon.stub(process, 'env').get(() => ({
           KUBERNETES_SERVICE_HOST: 'non_empty_string',
           AWS_EXECUTION_ENV: 'iLoveJavaScript',
@@ -639,6 +640,98 @@ describe('client metadata module', () => {
       it('omits the env document', async () => {
         const metadata = await makeClientMetadata([{ name: 'a'.repeat(350) }], { runtime });
         expect(metadata).to.not.have.property('env');
+      });
+    });
+
+    describe('truncation order', () => {
+      const fullOs = {
+        type: 'Linux',
+        name: 'linux',
+        architecture: 'arm64',
+        version: '6.17.0-41-generic'
+      };
+
+      const stubEnv = (env: NodeJS.ProcessEnv) => {
+        sinon.stub(process, 'env').get(() => env);
+      };
+
+      const stubOs = (release = fullOs.version) => {
+        sinon.stub(os, 'type').returns(fullOs.type);
+        sinon.stub(os, 'platform').returns(fullOs.name);
+        sinon.stub(os, 'arch').returns(fullOs.architecture);
+        sinon.stub(os, 'release').returns(release);
+      };
+
+      context('when the rest of env overfills the metadata document', () => {
+        it('omits the rest of env and keeps env.name, env.agent', async () => {
+          stubOs();
+          stubEnv({
+            AWS_EXECUTION_ENV: 'AWS_Lambda_java8',
+            AWS_REGION: 'a'.repeat(512),
+            CLAUDECODE: '1'
+          });
+
+          const metadata = await makeClientMetadata([], { runtime });
+
+          expect(metadata.env).to.deep.equal({ name: 'aws.lambda', agent: 'claude_code' });
+          expect(metadata.os).to.deep.equal(fullOs);
+          expect(metadata).to.have.property('platform');
+        });
+      });
+
+      context('when env.agent overfills the metadata document', () => {
+        it('omits env.agent and the rest of env and keeps env.name', async () => {
+          stubOs();
+          stubEnv({ AWS_EXECUTION_ENV: 'AWS_Lambda_java8', AWS_REGION: 'abc', CLAUDECODE: '1' });
+
+          const metadata = await makeClientMetadata([{ platform: 'a'.repeat(273) }], { runtime });
+
+          expect(metadata.env).to.deep.equal({ name: 'aws.lambda' });
+          expect(metadata.os).to.deep.equal(fullOs);
+          expect(metadata).to.have.property('platform');
+        });
+      });
+
+      context('when os fields overfill the metadata document', () => {
+        it('omits os fields but keeps os.type', async () => {
+          stubOs('a'.repeat(512));
+          stubEnv({ AWS_EXECUTION_ENV: 'AWS_Lambda_java8', AWS_REGION: 'abc', CLAUDECODE: '1' });
+
+          const metadata = await makeClientMetadata([], { runtime });
+
+          expect(metadata.os).to.deep.equal({ type: 'Linux' });
+          expect(metadata.env).to.deep.equal({ name: 'aws.lambda' });
+          expect(metadata).to.have.property('platform');
+        });
+      });
+
+      context('when env.name overfills the metadata document', () => {
+        it('omits env entirely', async () => {
+          stubOs();
+          stubEnv({ AWS_EXECUTION_ENV: 'AWS_Lambda_java8', AWS_REGION: 'abc', CLAUDECODE: '1' });
+
+          // The platform padding leaves room for os.type, but not for env.name. It was measured
+          // with Node v24.22.0 and driver version 7.9.1, and shifts if either changes the length
+          // of the platform string or the driver version.
+          const metadata = await makeClientMetadata([{ platform: 'a'.repeat(367) }], { runtime });
+
+          expect(metadata).to.not.have.property('env');
+          expect(metadata.os).to.deep.equal({ type: 'Linux' });
+          expect(metadata).to.have.property('platform');
+        });
+      });
+
+      context('when platform overfills the metadata document', () => {
+        it('throws instead of truncating platform', async () => {
+          stubOs();
+          stubEnv({ AWS_EXECUTION_ENV: 'AWS_Lambda_java8', AWS_REGION: 'abc', CLAUDECODE: '1' });
+
+          const error = await makeClientMetadata([{ platform: 'a'.repeat(512) }], {
+            runtime
+          }).catch(error => error);
+
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+        });
       });
     });
   });
