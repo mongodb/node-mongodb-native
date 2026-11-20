@@ -127,7 +127,7 @@ export async function makeClientMetadata(
   const { os } = await runtime;
   const metadataDocument = new LimitedSizeDocument(512);
 
-  // The document keeps a reference to whatever it accepts, so a Map group is copied. An empty group is skipped.
+  // Existing maps are set, maps are constructed from non-maps, empty is omitted
   const fit = (key: string, value: Record<string, any> | string): boolean => {
     if (!(value instanceof Map)) return metadataDocument.ifItFitsItSits(key, value);
     return value.size === 0 || metadataDocument.ifItFitsItSits(key, new Map(value));
@@ -189,10 +189,7 @@ export async function makeClientMetadata(
   let fits = fit('env', envInfo);
 
   if (fits) {
-    osInfo
-      .set('name', os.platform())
-      .set('architecture', os.arch())
-      .set('version', os.release());
+    osInfo.set('name', os.platform()).set('architecture', os.arch()).set('version', os.release());
     fits = fit('os', osInfo);
   }
 
