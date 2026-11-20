@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
+import { once } from 'events';
 import * as process from 'process';
 import * as sinon from 'sinon';
 import { inspect } from 'util';
@@ -15,7 +16,6 @@ import {
   MongoClient,
   type MongoClientOptions,
   MongoCredentials,
-  MongoDriverError,
   MongoInvalidArgumentError,
   type MongoOptions,
   MongoParseError,
@@ -642,7 +642,7 @@ describe('Connection String', function () {
       }
       expect(thrownError).to.be.instanceOf(MongoInvalidArgumentError);
       expect(thrownError.message).to.equal(
-        'bunnies is not a valid compression mechanism. Must be one of: none,snappy,zlib,zstd.'
+        'compressors contains a value that is not a valid compression mechanism. Must be one of: none,snappy,zlib,zstd.'
       );
     });
 
@@ -661,15 +661,180 @@ describe('Connection String', function () {
     it('should validate authMechanism', function () {
       expect(() => parseOptions('mongodb://localhost/?authMechanism=DOGS')).to.throw(
         MongoParseError,
-        'authMechanism one of MONGODB-AWS,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509,MONGODB-OIDC, got DOGS'
+        'authMechanism must be one of MONGODB-AWS,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509,MONGODB-OIDC'
       );
     });
 
     it('should validate readPreference', function () {
       expect(() => parseOptions('mongodb://localhost/?readPreference=llamasPreferred')).to.throw(
-        MongoDriverError, // not parse Error b/c thrown from ReadPreference construction
-        'Invalid read preference mode "llamasPreferred"'
+        MongoInvalidArgumentError,
+        'readPreference is not a valid read preference mode'
       );
+    });
+
+    context('when reporting a problem with the connection string', function () {
+      it('reports an unsupported URI option by its position', function () {
+        expect(() => parseOptions('mongodb://localhost/?tls=true&notAnOption=1'))
+          .to.throw(MongoParseError)
+          .with.property(
+            'message',
+            'connection string contains unsupported options, at position: 2'
+          );
+      });
+
+      it('names a repeated URI option using the spelling of the driver', function () {
+        expect(() => parseOptions('mongodb://localhost/?MAXPOOLSIZE=1&MAXPOOLSIZE=2'))
+          .to.throw(MongoInvalidArgumentError)
+          .with.property('message')
+          .that.includes('"maxPoolSize"')
+          .and.does.not.include('MAXPOOLSIZE');
+      });
+
+      it('names a URI option with no value using the spelling of the driver', function () {
+        expect(() => parseOptions('mongodb://localhost/?MAXPOOLSIZE='))
+          .to.throw(MongoAPIError)
+          .with.property('message')
+          .that.includes('"maxPoolSize"')
+          .and.does.not.include('MAXPOOLSIZE');
+      });
+
+      it('does not include a value that is not an integer', function () {
+        expect(() => parseOptions('mongodb://localhost/?maxPoolSize=abc'))
+          .to.throw(MongoParseError)
+          .with.property('message')
+          .that.does.not.include('abc');
+      });
+
+      it('formats a negative integer from the parsed number, not the supplied spelling', function () {
+        expect(() => parseOptions('mongodb://localhost/?maxPoolSize=-05'))
+          .to.throw(MongoParseError)
+          .with.property('message')
+          .that.includes('-5')
+          .and.does.not.include('-05');
+      });
+
+      it('does not include an invalid srvAllowedHostsSuffix', function () {
+        expect(() =>
+          parseOptions('mongodb+srv://cluster.mongodb.mydomain.net', {
+            srvAllowedHostsSuffix: 'my/domain.net'
+          })
+        )
+          .to.throw(MongoParseError)
+          .with.property('message')
+          .that.does.not.include('my/domain.net');
+      });
+
+      it('does not include a single label srvAllowedHostsSuffix', function () {
+        expect(() =>
+          parseOptions('mongodb+srv://cluster.mongodb.mydomain.net', {
+            srvAllowedHostsSuffix: 'cc'
+          })
+        )
+          .to.throw(MongoParseError)
+          .with.property('message')
+          .that.does.not.include('"cc"');
+      });
+
+      it('does not include an invalid writeConcern', function () {
+        expect(() => parseOptions('mongodb://localhost/?writeConcern=value'))
+          .to.throw(MongoParseError)
+          .with.property('message')
+          .that.does.not.include('value');
+      });
+
+      it('does not include an invalid readConcern', function () {
+        expect(() => parseOptions('mongodb://localhost/?readConcern=value'))
+          .to.throw(MongoParseError)
+          .with.property('message')
+          .that.does.not.include('value');
+      });
+
+      it('does not include an invalid pkFactory', function () {
+        expect(() => parseOptions('mongodb://localhost/?pkFactory=value'))
+          .to.throw(MongoParseError)
+          .with.property('message')
+          .that.does.not.include('value');
+      });
+
+      it('does not include an authMechanism that is not a valid pattern', function () {
+        expect(() => parseOptions('mongodb://localhost/?authMechanism=value('))
+          .to.throw(MongoParseError)
+          .with.property('message')
+          .that.does.not.include('value');
+      });
+    });
+
+    it('replaces the sensitive options with a marker when the options are inspected', function () {
+      const options = parseOptions(
+        'mongodb://localhost/?proxyHost=localhost&proxyUsername=alice&proxyPassword=hunter2&tlsCertificateKeyFilePassword=opensesame'
+      );
+
+      const representation = inspect(options);
+
+      expect(representation).to.not.include('alice');
+      expect(representation).to.not.include('hunter2');
+      expect(representation).to.not.include('opensesame');
+      expect(representation).to.include("proxyPassword: '<redacted>'");
+    });
+
+    it('replaces the sensitive options with a marker when the options are serialized', function () {
+      const options = parseOptions(
+        'mongodb://localhost/?proxyHost=localhost&proxyUsername=alice&proxyPassword=hunter2&tlsCertificateKeyFilePassword=opensesame'
+      );
+
+      const representation = JSON.stringify(options);
+
+      expect(representation).to.not.include('alice');
+      expect(representation).to.not.include('hunter2');
+      expect(representation).to.not.include('opensesame');
+      expect(representation).to.include('"proxyPassword":"<redacted>"');
+    });
+
+    it('replaces the sensitive options with a marker when the client is inspected, or its pool options are serialized, after connect() starts', async function () {
+      // Port 1 is unreachable on purpose: the test only needs the servers, pools and monitors to
+      // exist, which happens synchronously right after the 'serverOpening' event
+      const client = new MongoClient(
+        'mongodb://127.0.0.1:1/?proxyHost=127.0.0.1&proxyPort=2&proxyUsername=alice&proxyPassword=hunter2&tlsCertificateKeyFilePassword=opensesame&serverSelectionTimeoutMS=100'
+      );
+      const serverOpening = once(client, 'serverOpening');
+      const connecting = client.connect().catch(error => error);
+
+      try {
+        await serverOpening;
+        // sanity check: the copies that were not redacted live under these servers
+        expect(client.topology?.s.servers.size).to.equal(1);
+
+        const representation = inspect(client, { depth: Infinity });
+
+        // boolean assertions keep the failure output short (the full representation is very large)
+        expect(representation.includes('alice'), 'proxyUsername is in inspect(client)').to.equal(
+          false
+        );
+        expect(representation.includes('hunter2'), 'proxyPassword is in inspect(client)').to.equal(
+          false
+        );
+        expect(
+          representation.includes('opensesame'),
+          'tlsCertificateKeyFilePassword is in inspect(client)'
+        ).to.equal(false);
+
+        const [server] = Array.from(client.topology?.s.servers.values() ?? []);
+        const serialized = JSON.stringify(server.pool.options);
+
+        expect(serialized.includes('alice'), 'proxyUsername is in the pool options').to.equal(
+          false
+        );
+        expect(serialized.includes('hunter2'), 'proxyPassword is in the pool options').to.equal(
+          false
+        );
+        expect(
+          serialized.includes('opensesame'),
+          'tlsCertificateKeyFilePassword is in the pool options'
+        ).to.equal(false);
+      } finally {
+        await client.close();
+        await connecting;
+      }
     });
   });
 

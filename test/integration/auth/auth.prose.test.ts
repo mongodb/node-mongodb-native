@@ -2,7 +2,13 @@ import { expect } from 'chai';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { Connection, LEGACY_HELLO_COMMAND, type MongoClient, ScramSHA256 } from '../../mongodb';
+import {
+  Connection,
+  LEGACY_HELLO_COMMAND,
+  MongoClient,
+  MongoInvalidArgumentError,
+  ScramSHA256
+} from '../../mongodb';
 import { type TestConfiguration } from '../../tools/runner/config';
 
 function makeConnectionString(config, username, password) {
@@ -562,6 +568,34 @@ describe('Authentication Spec Prose Tests', function () {
             }
           );
         });
+      });
+    });
+  });
+
+  describe('1. Driver rejects a PLAIN authentication credential with NUL character', function () {
+    // Drivers MUST assert that the error message contains the string "cannot contain NUL characters".
+    const expectedMessage = 'cannot contain NUL characters';
+
+    // For each test case, drivers MUST assert that a **driver-side** error is raised for the specified authentication fields.
+    // 2. When a `MongoClient` is constructed with the options from step 1.
+    const constructClient = (auth: { username: string; password: string }) => () =>
+      new MongoClient('mongodb://localhost', { auth, authMechanism: 'PLAIN' });
+
+    describe('Case 1: NUL character in username', function () {
+      it('raises a driver-side error', function () {
+        expect(constructClient({ username: 'user\0name', password: 'password' }))
+          .to.throw(MongoInvalidArgumentError)
+          .with.property('message')
+          .that.includes(expectedMessage);
+      });
+    });
+
+    describe('Case 2: NUL character in password', function () {
+      it('raises a driver-side error', function () {
+        expect(constructClient({ username: 'username', password: 'pass\0word' }))
+          .to.throw(MongoInvalidArgumentError)
+          .with.property('message')
+          .that.includes(expectedMessage);
       });
     });
   });

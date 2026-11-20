@@ -13,14 +13,6 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
-    ignore:
-      # Interim rule: suppress patch-level pin PRs (e.g. v4 -> 4.37.3) for as long as
-      # we reference the floating v4 tag, which GitHub recommends so that CodeQL CLI
-      # updates and server-side flag changes are picked up automatically.
-      # REMOVE THIS RULE when NODE-7721 pins our actions to commit SHAs: dependabot
-      # must then be free to advance the pinned SHA within the v4 line.
-      - dependency-name: "github/codeql-action"
-        versions: ["4.x"]
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
