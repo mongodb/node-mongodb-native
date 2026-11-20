@@ -109,17 +109,17 @@ const APP_NAME_TRUNCATION_LIMIT_BYTES = 128;
 type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'runtime'>;
 
 /**
- * From the specs:
- * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
+ * From the spec:
+ * Implementers SHOULD cumulatively update fields in the following order until the document is under the size limit:
+
  * 1. Omit fields from `env` except `env.name` and `env.agent`.
  * 2. Omit `env.agent`. If `env` then has no remaining fields, omit `env` entirely.
  * 3. Omit fields from `os` except `os.type`.
  * 4. Omit the `env` document entirely.
- * 5. Truncate `platform`. -- special we do not truncate this field
- *
- * `env.agent` is omitted before `env.name` because drivers have reported `env.name` since before
- * `env.agent` existed.
- */
+ * 5. Truncate `platform`.
+
+ * `env.agent` is omitted before `env.name` because drivers have reported `env.name` since before `env.agent` existed.
+*/
 export async function makeClientMetadata(
   driverInfoList: DriverInfo[],
   { appName = '', runtime }: MakeClientMetadataOptions
@@ -139,6 +139,7 @@ export async function makeClientMetadata(
   // Add app name first, it must be sent
   if (appName.length > 0) {
     const name = DriverStringUtils.truncateStringBytes(appName, APP_NAME_TRUNCATION_LIMIT_BYTES);
+    // 1. set application.name
     fit('application', { name });
   }
 
@@ -157,12 +158,14 @@ export async function makeClientMetadata(
     }
   }
 
+  // 2. Set driver
   if (!fit('driver', driverInfo)) {
     throw new MongoInvalidArgumentError(
       'Unable to include driverInfo name and version, metadata cannot exceed 512 bytes'
     );
   }
 
+  // 3. Set os.type
   // os.type is never omitted, so it is added before platform (the spec truncates platform last)
   fit('os', osInfo);
 
@@ -174,6 +177,7 @@ export async function makeClientMetadata(
     }
   }
 
+  // 4. Set platform (first truncatable)
   if (!fit('platform', runtimeInfo)) {
     throw new MongoInvalidArgumentError(
       'Unable to include driverInfo platform, metadata cannot exceed 512 bytes'
@@ -185,27 +189,30 @@ export async function makeClientMetadata(
   // truncation cumulative, and only gather a group's values once the earlier groups have fit.
   // Append order (os.type is added before platform): os.type, platform, env.name, ...os, env.agent, ...env
   const faasEnv = getFAASEnv();
+  // 5. Set env.name
   if (faasEnv.has('name')) envInfo.set('name', faasEnv.get('name'));
-  let fits = fit('env', envInfo);
 
-  if (fits) {
+  // 6. Set env (rest of FAAS env)
+  if (fit('env', envInfo)) {
     osInfo.set('name', os.platform()).set('architecture', os.arch()).set('version', os.release());
-    fits = fit('os', osInfo);
-  }
 
-  if (fits) {
-    const agentEnv = getAgentEnv();
-    if (agentEnv.length > 0) envInfo.set('agent', agentEnv);
-    fits = fit('env', envInfo);
-  }
+    // 7. Set os
+    if (fit('os', osInfo)) {
+      const agentEnv = getAgentEnv();
+      if (agentEnv.length > 0) envInfo.set('agent', agentEnv);
 
-  if (fits) {
-    for (const [k, v] of faasEnv) {
-      if (k !== 'name') envInfo.set(k, v);
+      // 8. Set agent
+      if (fit('env', envInfo)) {
+        for (const [k, v] of faasEnv) {
+          if (k !== 'name') envInfo.set(k, v);
+        }
+        const containerMetadata = await getContainerMetadata();
+        if (containerMetadata.size > 0) envInfo.set('container', containerMetadata);
+
+        // 9. Set env.container
+        fit('env', envInfo);
+      }
     }
-    const containerMetadata = await getContainerMetadata();
-    if (containerMetadata.size > 0) envInfo.set('container', containerMetadata);
-    fit('env', envInfo);
   }
 
   return metadataDocument.toObject() as ClientMetadata;
