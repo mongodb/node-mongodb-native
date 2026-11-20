@@ -592,7 +592,7 @@ describe('client metadata module', () => {
 
     context('when os information is too large', () => {
       context('release too large', () => {
-        beforeEach('2. Omit fields from `os` except `os.type`.', () => {
+        beforeEach('3. Omit fields from `os` except `os.type`.', () => {
           sinon.stub(process, 'env').get(() => ({
             AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
             AWS_REGION: 'abc'
@@ -603,7 +603,8 @@ describe('client metadata module', () => {
         it('only includes os.type', async () => {
           const metadata = await makeClientMetadata([], { runtime });
           expect(metadata).to.have.property('env');
-          expect(metadata).to.have.nested.property('env.region', 'abc');
+          expect(metadata).not.to.have.nested.property('env.region', 'abc');
+          expect(metadata).to.have.nested.property('env.name', 'aws.lambda');
           expect(metadata.os).to.have.all.keys('type');
         });
       });
@@ -625,7 +626,7 @@ describe('client metadata module', () => {
     });
 
     context('when there is no space for any env field', () => {
-      beforeEach('3. Omit the `env` document entirely.', () => {
+      beforeEach('4. Omit the `env` document entirely.', () => {
         sinon.stub(process, 'env').get(() => ({
           KUBERNETES_SERVICE_HOST: 'non_empty_string',
           AWS_EXECUTION_ENV: 'iLoveJavaScript',
