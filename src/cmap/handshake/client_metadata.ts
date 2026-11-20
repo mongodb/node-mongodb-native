@@ -189,10 +189,9 @@ export async function makeClientMetadata(
   // truncation cumulative, and only gather a group's values once the earlier groups have fit.
   // Append order (os.type is added before platform): os.type, platform, env.name, ...os, env.agent, ...env
   const faasEnv = getFAASEnv();
-  // 5. Set env.name
   if (faasEnv.has('name')) envInfo.set('name', faasEnv.get('name'));
 
-  // 6. Set env (rest of FAAS env)
+  // 6. Set env.name
   if (fit('env', envInfo)) {
     osInfo.set('name', os.platform()).set('architecture', os.arch()).set('version', os.release());
 
@@ -209,7 +208,7 @@ export async function makeClientMetadata(
         const containerMetadata = await getContainerMetadata();
         if (containerMetadata.size > 0) envInfo.set('container', containerMetadata);
 
-        // 9. Set env.container
+        // 9. Set rest of env
         fit('env', envInfo);
       }
     }
