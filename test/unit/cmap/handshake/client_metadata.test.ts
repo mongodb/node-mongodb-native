@@ -1,4 +1,4 @@
-import { Int32, ObjectId } from 'bson';
+import { BSON, Int32, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as os from 'os';
 import * as process from 'process';
@@ -197,13 +197,10 @@ describe('client metadata module', () => {
     });
 
     context('when driverInfo.platform is provided', () => {
-      it('throws an error if driverInfo.platform is too large', async () => {
-        const error = await makeClientMetadata([{ platform: 'a'.repeat(512) }], { runtime }).catch(
-          e => e
-        );
-        expect(error)
-          .to.be.instanceOf(MongoInvalidArgumentError)
-          .to.match(/platform/);
+      it('truncates the platform field if driverInfo.platform is too large', async () => {
+        const metadata = await makeClientMetadata([{ platform: 'a'.repeat(512) }], { runtime });
+        expect(metadata.platform).to.have.length.lessThan(512);
+        expect(BSON.serialize(metadata).byteLength).to.equal(512);
       });
 
       it('appends driverInfo.platform to the platform field', async () => {
@@ -690,6 +687,16 @@ describe('client metadata module', () => {
           expect(metadata.os).to.deep.equal(fullOs);
           expect(metadata).to.have.property('platform');
         });
+
+        it('omits env entirely when no env properties remain', async () => {
+          stubOs();
+          stubEnv({ CLAUDECODE: '1' });
+
+          const metadata = await makeClientMetadata([{ platform: 'a'.repeat(367) }], { runtime });
+
+          expect(metadata).to.not.have.property('env');
+          expect(metadata).to.have.property('platform');
+        });
       });
 
       context('when os fields overfill the metadata document', () => {
@@ -710,9 +717,6 @@ describe('client metadata module', () => {
           stubOs();
           stubEnv({ AWS_EXECUTION_ENV: 'AWS_Lambda_java8', AWS_REGION: 'abc', CLAUDECODE: '1' });
 
-          // The platform padding leaves room for os.type, but not for env.name. It was measured
-          // with Node v24.22.0 and driver version 7.9.1, and shifts if either changes the length
-          // of the platform string or the driver version.
           const metadata = await makeClientMetadata([{ platform: 'a'.repeat(367) }], { runtime });
 
           expect(metadata).to.not.have.property('env');
@@ -722,15 +726,17 @@ describe('client metadata module', () => {
       });
 
       context('when platform overfills the metadata document', () => {
-        it('throws instead of truncating platform', async () => {
+        it('truncates platform to fit and omits env', async () => {
           stubOs();
           stubEnv({ AWS_EXECUTION_ENV: 'AWS_Lambda_java8', AWS_REGION: 'abc', CLAUDECODE: '1' });
 
-          const error = await makeClientMetadata([{ platform: 'a'.repeat(512) }], {
-            runtime
-          }).catch(error => error);
+          const metadata = await makeClientMetadata([{ platform: 'a'.repeat(512) }], { runtime });
 
-          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+          expect(metadata).to.not.have.property('env');
+          expect(metadata.os).to.deep.equal({ type: 'Linux' });
+          expect(metadata.platform).to.have.length.lessThan(512);
+          expect(metadata.platform).to.include('aaa');
+          expect(BSON.serialize(metadata).byteLength).to.equal(512);
         });
       });
     });

@@ -93,6 +93,12 @@ export class LimitedSizeDocument {
     return true;
   }
 
+  /** The most bytes a string value can occupy under a new key while still fitting in the document */
+  public remainingStringBytes(key: string): number {
+    const emptyElementSize = BSON.serialize(new Map().set(key, '')).byteLength - 5;
+    return Math.max(0, this.maxSize - this.documentSize - emptyElementSize);
+  }
+
   toObject(): Document {
     return BSON.deserialize(BSON.serialize(this.document), {
       promoteLongs: false,
@@ -177,17 +183,13 @@ export async function makeClientMetadata(
     }
   }
 
-  // 4. Set platform (first truncatable)
+  // 4. Set platform
   if (!fit('platform', runtimeInfo)) {
-    throw new MongoInvalidArgumentError(
-      'Unable to include driverInfo platform, metadata cannot exceed 512 bytes'
-    );
+    const limit = metadataDocument.remainingStringBytes('platform');
+    // Truncated to the space remaining if it does not fit (the spec truncates platform last)
+    fit('platform', DriverStringUtils.truncateStringBytes(runtimeInfo, limit));
   }
 
-  // Add the remaining os and env fields in the reverse of the spec's omission order, so the fields
-  // the spec omits first are added last. Stop at the first group that does not fit to keep the
-  // truncation cumulative, and only gather a group's values once the earlier groups have fit.
-  // Append order (os.type is added before platform): os.type, platform, env.name, ...os, env.agent, ...env
   const faasEnv = getFAASEnv();
   if (faasEnv.has('name')) envInfo.set('name', faasEnv.get('name'));
 
