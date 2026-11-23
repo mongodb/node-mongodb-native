@@ -1,5 +1,8 @@
 import { loadSpecTests } from '../spec';
-import { executeUriValidationTest } from '../tools/uri_spec_runner';
+import {
+  executeCredentialDisclosureTest,
+  executeUriValidationTest
+} from '../tools/uri_spec_runner';
 
 const skipTests = [
   // TODO(NODE-3914): Fix; note that wtimeoutms will be deprecated via DRIVERS-555 (NODE-3078)
@@ -7,6 +10,8 @@ const skipTests = [
   // Note this will always be skipped as the URI class cannot properly parse these.
   'Colon in a key value pair'
 ];
+
+const CREDENTIAL_DISCLOSURE_SUITE = 'credential-disclosure';
 
 describe('Connection String spec tests', function () {
   const suites = loadSpecTests('connection-string');
@@ -19,7 +24,11 @@ describe('Connection String spec tests', function () {
             return this.skip();
           }
 
-          executeUriValidationTest(test);
+          if (suite.name === CREDENTIAL_DISCLOSURE_SUITE) {
+            executeCredentialDisclosureTest(test);
+          } else {
+            executeUriValidationTest(test);
+          }
         });
       }
     });
