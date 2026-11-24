@@ -810,39 +810,66 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> implements
       writable: false
     });
 
-    this.topology?.closeCheckedOutConnections();
+    // A failure in one cleanup step must not stop the remaining steps from running,
+    // otherwise the server monitors and connection pools are left open (NODE-7995).
+    // The first error is rethrown once every step has been attempted.
+    const errors: unknown[] = [];
+
+    try {
+      this.topology?.closeCheckedOutConnections();
+    } catch (error) {
+      errors.push(error);
+    }
 
     const activeCursorCloses = Array.from(this.s.activeCursors, cursor => cursor.close());
     this.s.activeCursors.clear();
 
-    await Promise.all(activeCursorCloses);
+    for (const result of await Promise.allSettled(activeCursorCloses)) {
+      if (result.status === 'rejected') errors.push(result.reason);
+    }
 
     const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
     this.s.activeSessions.clear();
 
-    await Promise.all(activeSessionEnds);
-
-    if (this.topology == null) {
-      return;
+    for (const result of await Promise.allSettled(activeSessionEnds)) {
+      if (result.status === 'rejected') errors.push(result.reason);
     }
 
-    const supportsSessions =
-      this.topology.description.type === TopologyType.LoadBalanced ||
-      this.topology.description.logicalSessionTimeoutMinutes != null;
+    if (this.topology != null) {
+      const supportsSessions =
+        this.topology.description.type === TopologyType.LoadBalanced ||
+        this.topology.description.logicalSessionTimeoutMinutes != null;
 
-    if (supportsSessions) {
-      await endSessions(this, this.topology);
+      if (supportsSessions) {
+        try {
+          await endSessions(this, this.topology);
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+
+      // clear out references to old topology
+      const topology = this.topology;
+      this.topology = undefined;
+
+      try {
+        topology.close();
+      } catch (error) {
+        errors.push(error);
+      }
+
+      const { encrypter } = this.options;
+      if (encrypter) {
+        try {
+          await encrypter.close(this);
+        } catch (error) {
+          errors.push(error);
+        }
+      }
     }
 
-    // clear out references to old topology
-    const topology = this.topology;
-    this.topology = undefined;
-
-    topology.close();
-
-    const { encrypter } = this.options;
-    if (encrypter) {
-      await encrypter.close(this);
+    if (errors.length !== 0) {
+      throw errors[0];
     }
 
     async function endSessions(
