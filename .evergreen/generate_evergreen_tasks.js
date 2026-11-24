@@ -103,7 +103,7 @@ function makeTask({
     commands: [
       updateExpansions(baseExpansions),
       { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
+      { func: 'run mongodb' },
       { func: 'run tests' }
     ]
   };
@@ -140,7 +140,7 @@ BASE_TASKS.push({
       CLIENT_ENCRYPTION: 'true'
     }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run mongodb' },
     { func: 'run tests' }
   ]
 });
@@ -188,7 +188,7 @@ TASKS.push(
           TEST_CSFLE: 'false'
         }),
         { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
+        { func: 'run mongodb' },
         { func: 'start-load-balancer' },
         { func: 'run-lb-tests' },
         { func: 'stop-load-balancer' }
@@ -224,7 +224,7 @@ TASKS.push(
           TOPOLOGY: 'replica_set'
         }),
         { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
+        { func: 'run mongodb' },
         { func: 'run socks5 tests' }
       ]
     },
@@ -238,7 +238,7 @@ TASKS.push(
           TEST_SOCKS5_CSFLE: 'true'
         }),
         { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
+        { func: 'run mongodb' },
         { func: 'run socks5 tests' }
       ]
     },
@@ -252,7 +252,7 @@ TASKS.push(
           TOPOLOGY: 'replica_set'
         }),
         { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
+        { func: 'run mongodb' },
         { func: 'run socks5 tests' }
       ]
     }
@@ -272,7 +272,7 @@ TASKS.push({
       TEST_CSFLE: 'false'
     }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run mongodb' },
     { func: 'run-compression-tests' }
   ]
 });
@@ -290,7 +290,7 @@ TASKS.push({
       TEST_CSFLE: 'false'
     }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run mongodb' },
     { func: 'run-compression-tests' }
   ]
 });
@@ -307,7 +307,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
       TOPOLOGY: 'server'
     }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run mongodb' },
     { func: 'run lambda handler example tests' }
   ]
 });
@@ -325,7 +325,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
       TOPOLOGY: 'server'
     }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run mongodb' },
     { func: 'assume secrets manager role' },
     { func: 'run lambda handler example tests with aws auth' }
   ]
@@ -343,7 +343,7 @@ for (const VERSION of TLS_VERSIONS) {
         AUTH: 'auth'
       }),
       { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
+      { func: 'run mongodb' },
       { func: 'run tls tests' }
     ]
   });
@@ -365,7 +365,7 @@ const createAwsTaskDefinition = (fn, VERSION) => ({
       TOPOLOGY: 'server'
     }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run mongodb' },
     { func: 'assume secrets manager role' },
     { func: fn.func }
   ]
@@ -466,7 +466,7 @@ const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
         NODE_LTS_VERSION: LATEST_LTS
       }),
       { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
+      { func: 'run mongodb' },
       { func: 'run tests' }
     ]
   };
@@ -553,7 +553,7 @@ SINGLETON_TASKS.push(
           NODE_LTS_VERSION: LATEST_LTS
         }),
         { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
+        { func: 'run mongodb' },
         { func: 'check resource management feature integration' }
       ]
     },
@@ -682,7 +682,7 @@ for (const serverVersion of ['5.0', 'rapid', 'latest']) {
         CLIENT_ENCRYPTION: true
       }),
       { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
+      { func: 'run mongodb' },
       { func: 'install mongodb-client-encryption from source' },
       { func: 'assume secrets manager role' },
       { func: 'run custom csfle tests' }
@@ -701,7 +701,7 @@ customDependencyTests.push({
       CLIENT_ENCRYPTION: true
     }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run mongodb' },
     {
       func: 'install package',
       vars: {
@@ -746,7 +746,7 @@ SINGLETON_TASKS.push({
       MONGODB_BINARIES: '${PROJECT_DIRECTORY}/mongodb/bin'
     }),
     { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
+    { func: 'run mongodb' },
     { func: 'assume secrets manager role' },
     { func: 'build and test alpine FLE' }
   ]
@@ -765,12 +765,9 @@ function addPerformanceTasks() {
         AUTH: 'noauth',
         MONGODB_CLIENT_OPTIONS: JSON.stringify(MONGODB_CLIENT_OPTIONS)
       }),
-      ...[
-        'install dependencies',
-        'bootstrap mongo-orchestration',
-        'run spec driver benchmarks',
-        'perf send'
-      ].map(func => ({ func }))
+      ...['install dependencies', 'run mongodb', 'run spec driver benchmarks', 'perf send'].map(
+        func => ({ func })
+      )
     ]
   });
 

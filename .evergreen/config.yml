@@ -48,7 +48,7 @@ functions:
           git fetch origin "${SOURCE_REV}:${SOURCE_REV}"
           git checkout "${SOURCE_REV}"
           npm i
-  bootstrap mongo-orchestration:
+  run mongodb:
     - command: ec2.assume_role
       params:
         role_arn: ${DRIVERS_SECRETS_ARN}
@@ -69,15 +69,16 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           MONGODB_BINARIES: ${MONGODB_BINARIES}
         args:
-          - src/.evergreen/run-orchestration.sh
+          - ${DRIVERS_TOOLS}/.evergreen/run-mongodb.sh
+          - start
     - command: expansions.update
       params:
         file: mo-expansion.yml
-  stop mongo-orchestration:
+  stop mongodb:
     - command: shell.exec
       params:
         script: |
-          bash ${DRIVERS_TOOLS}/.evergreen/stop-orchestration.sh
+          bash ${DRIVERS_TOOLS}/.evergreen/run-mongodb.sh stop
   bootstrap mongohoused:
     - command: ec2.assume_role
       params:
@@ -729,7 +730,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - command: subprocess.exec
         type: test
         params:
@@ -777,7 +778,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: noauth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - command: subprocess.exec
         type: test
         params:
@@ -1027,7 +1028,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -1056,7 +1057,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -1085,7 +1086,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: switch source
         vars:
           SOURCE_REV: refs/tags/v7.0.0
@@ -1112,7 +1113,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1132,7 +1133,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1152,7 +1153,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1172,7 +1173,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1192,7 +1193,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1212,7 +1213,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1232,7 +1233,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1252,7 +1253,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1272,7 +1273,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1292,7 +1293,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1312,7 +1313,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1332,7 +1333,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1352,7 +1353,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1372,7 +1373,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1392,7 +1393,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1412,7 +1413,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1432,7 +1433,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1452,7 +1453,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1472,7 +1473,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1492,7 +1493,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1512,7 +1513,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1532,7 +1533,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1552,7 +1553,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1572,7 +1573,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1596,7 +1597,7 @@ tasks:
             - {key: TEST_CSFLE, value: 'true'}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -1652,7 +1653,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
@@ -1677,7 +1678,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
@@ -1702,7 +1703,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
@@ -1727,7 +1728,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
@@ -1752,7 +1753,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
@@ -1777,7 +1778,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
@@ -1802,7 +1803,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
@@ -1851,7 +1852,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run socks5 tests
     depends_on:
       - name: run-lint-checks
@@ -1870,7 +1871,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: TEST_SOCKS5_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run socks5 tests
     depends_on:
       - name: run-lint-checks
@@ -1889,7 +1890,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run socks5 tests
     depends_on:
       - name: run-lint-checks
@@ -1911,7 +1912,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run-compression-tests
     depends_on:
       - name: run-lint-checks
@@ -1933,7 +1934,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'false'}
             - {key: TEST_CSFLE, value: 'false'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run-compression-tests
     depends_on:
       - name: run-lint-checks
@@ -1954,7 +1955,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tls tests
     depends_on:
       - name: run-lint-checks
@@ -1975,7 +1976,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tls tests
     depends_on:
       - name: run-lint-checks
@@ -1996,7 +1997,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tls tests
     depends_on:
       - name: run-lint-checks
@@ -2017,7 +2018,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tls tests
     depends_on:
       - name: run-lint-checks
@@ -2038,7 +2039,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tls tests
     depends_on:
       - name: run-lint-checks
@@ -2059,7 +2060,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tls tests
     depends_on:
       - name: run-lint-checks
@@ -2080,7 +2081,7 @@ tasks:
             - {key: TOPOLOGY, value: server}
             - {key: AUTH, value: auth}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tls tests
     depends_on:
       - name: run-lint-checks
@@ -2100,7 +2101,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run aws auth test with regular aws credentials
     depends_on:
@@ -2121,7 +2122,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run aws auth test with assume role credentials
     depends_on:
@@ -2142,7 +2143,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run aws auth test with aws EC2 credentials
     depends_on:
@@ -2163,7 +2164,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run aws auth test with aws credentials as environment variables
     depends_on:
@@ -2184,7 +2185,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run aws auth test with aws credentials and session token as environment variables
     depends_on:
@@ -2205,7 +2206,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
     depends_on:
@@ -2226,7 +2227,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
     depends_on:
@@ -2247,7 +2248,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run aws ECS auth test
     depends_on:
@@ -2271,7 +2272,7 @@ tasks:
             - {key: AUTH, value: noauth}
             - {key: MONGODB_CLIENT_OPTIONS, value: '{}'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run spec driver benchmarks
       - func: perf send
     depends_on:
@@ -2295,7 +2296,7 @@ tasks:
             - {key: AUTH, value: noauth}
             - {key: MONGODB_CLIENT_OPTIONS, value: '{"monitorCommands":true}'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run spec driver benchmarks
       - func: perf send
     depends_on:
@@ -2319,7 +2320,7 @@ tasks:
             - {key: AUTH, value: noauth}
             - {key: MONGODB_CLIENT_OPTIONS, value: '{"mongodbLogPath":"stderr","mongodbLogComponentSeverities":{"default":"trace"}}'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run spec driver benchmarks
       - func: perf send
     depends_on:
@@ -2395,7 +2396,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: check resource management feature integration
     depends_on:
       - name: run-lint-checks
@@ -2478,7 +2479,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
@@ -2500,7 +2501,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
@@ -2522,7 +2523,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: install mongodb-client-encryption from source
       - func: assume secrets manager role
       - func: run custom csfle tests
@@ -2544,7 +2545,7 @@ tasks:
             - {key: TOPOLOGY, value: replica_set}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: install package
         vars:
           PACKAGE: mongodb-client-encryption@7.0.0
@@ -2569,7 +2570,7 @@ tasks:
             - {key: TEST_CSFLE, value: 'true'}
             - {key: MONGODB_BINARIES, value: '${PROJECT_DIRECTORY}/mongodb/bin'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: build and test alpine FLE
     depends_on:
@@ -2592,7 +2593,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2614,7 +2615,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2636,7 +2637,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2658,7 +2659,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2680,7 +2681,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2702,7 +2703,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2724,7 +2725,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2746,7 +2747,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2768,7 +2769,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2790,7 +2791,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2812,7 +2813,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2834,7 +2835,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2856,7 +2857,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2878,7 +2879,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2900,7 +2901,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2922,7 +2923,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2944,7 +2945,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2966,7 +2967,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -2988,7 +2989,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3010,7 +3011,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3032,7 +3033,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3054,7 +3055,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3076,7 +3077,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3098,7 +3099,7 @@ tasks:
             - {key: SSL, value: nossl}
             - {key: NODE_LTS_VERSION, value: 20.19.0}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3117,7 +3118,7 @@ tasks:
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run lambda handler example tests
     depends_on:
       - name: run-lint-checks
@@ -3138,7 +3139,7 @@ tasks:
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: assume secrets manager role
       - func: run lambda handler example tests with aws auth
     depends_on:
@@ -3159,7 +3160,7 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3179,7 +3180,7 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3199,7 +3200,7 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3219,7 +3220,7 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3239,7 +3240,7 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3259,7 +3260,7 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3279,7 +3280,7 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3299,7 +3300,7 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: NODE_LTS_VERSION, value: '24'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3323,7 +3324,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3347,7 +3348,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3371,7 +3372,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3395,7 +3396,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3419,7 +3420,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3443,7 +3444,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3467,7 +3468,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3491,7 +3492,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3515,7 +3516,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3539,7 +3540,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3563,7 +3564,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3587,7 +3588,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3611,7 +3612,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3635,7 +3636,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3659,7 +3660,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3683,7 +3684,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3707,7 +3708,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3731,7 +3732,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3755,7 +3756,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3779,7 +3780,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3803,7 +3804,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3827,7 +3828,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3851,7 +3852,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -3875,7 +3876,7 @@ tasks:
             - {key: CLIENT_ENCRYPTION, value: 'true'}
             - {key: TEST_CSFLE, value: 'true'}
       - func: install dependencies
-      - func: bootstrap mongo-orchestration
+      - func: run mongodb
       - func: run tests
     depends_on:
       - name: run-lint-checks
@@ -4138,7 +4139,7 @@ pre:
 post:
   - func: reset aws instance profile
   - func: upload test results
-  - func: stop mongo-orchestration
+  - func: stop mongodb
   - func: upload coverage report
   - func: cleanup
 ignore:
