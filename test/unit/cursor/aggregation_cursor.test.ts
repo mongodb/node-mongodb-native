@@ -51,6 +51,34 @@ describe('class AggregationCursor', () => {
       const cloned = cursor.clone();
       expect(cursor).to.not.equal(cloned);
     });
+
+    it('copies the pipeline into a new array', () => {
+      cursor.addStage({ $match: { yes: true } });
+      const cloned = cursor.clone();
+      expect(cloned.pipeline).to.not.equal(cursor.pipeline);
+      expect(cloned.pipeline.length).to.equal(1);
+      expect(cloned.pipeline[0]).to.equal(cursor.pipeline[0]);
+    });
+
+    it('does not modify the original pipeline when addStage() is called on the clone', () => {
+      cursor.addStage({ $match: { yes: true } });
+      const cloned = cursor.clone();
+
+      cloned.addStage({ $count: 'count' });
+
+      expect(cursor.pipeline).to.deep.equal([{ $match: { yes: true } }]);
+      expect(cloned.pipeline).to.deep.equal([{ $match: { yes: true } }, { $count: 'count' }]);
+    });
+
+    it('does not modify the cloned pipeline when addStage() is called on the original', () => {
+      cursor.addStage({ $match: { yes: true } });
+      const cloned = cursor.clone();
+
+      cursor.addStage({ $count: 'count' });
+
+      expect(cloned.pipeline).to.deep.equal([{ $match: { yes: true } }]);
+      expect(cursor.pipeline).to.deep.equal([{ $match: { yes: true } }, { $count: 'count' }]);
+    });
   });
 
   context('map()', () => {
