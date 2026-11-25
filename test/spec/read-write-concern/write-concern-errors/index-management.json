@@ -1,0 +1,161 @@
+{
+  "description": "write-concern-errors-index-management",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "write-concern-errors-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "createIndex reports a writeConcernError",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "createIndexes"
+                ],
+                "writeConcernError": {
+                  "code": 79,
+                  "codeName": "UnknownReplWriteConcern",
+                  "errmsg": "Triggered by failpoint"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "createIndex",
+          "object": "collection0",
+          "arguments": {
+            "keys": {
+              "x": 1
+            }
+          },
+          "expectError": {
+            "errorCode": 79
+          }
+        }
+      ]
+    },
+    {
+      "description": "dropIndex reports a writeConcernError",
+      "operations": [
+        {
+          "name": "createIndex",
+          "object": "collection0",
+          "arguments": {
+            "keys": {
+              "x": 1
+            },
+            "name": "x_1"
+          }
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "dropIndexes"
+                ],
+                "writeConcernError": {
+                  "code": 79,
+                  "codeName": "UnknownReplWriteConcern",
+                  "errmsg": "Triggered by failpoint"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "dropIndex",
+          "object": "collection0",
+          "arguments": {
+            "name": "x_1"
+          },
+          "expectError": {
+            "errorCode": 79
+          }
+        }
+      ]
+    },
+    {
+      "description": "dropIndexes reports a writeConcernError",
+      "operations": [
+        {
+          "name": "createIndex",
+          "object": "collection0",
+          "arguments": {
+            "keys": {
+              "x": 1
+            },
+            "name": "x_1"
+          }
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "dropIndexes"
+                ],
+                "writeConcernError": {
+                  "code": 79,
+                  "codeName": "UnknownReplWriteConcern",
+                  "errmsg": "Triggered by failpoint"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "dropIndexes",
+          "object": "collection0",
+          "expectError": {
+            "errorCode": 79
+          }
+        }
+      ]
+    }
+  ]
+}

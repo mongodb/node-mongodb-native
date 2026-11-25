@@ -1,0 +1,120 @@
+description: write-concern-errors-crud
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: write-concern-errors-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: coll
+
+tests:
+  - description: insertOne reports a writeConcernError
+    operations:
+      - &failPoint_insert
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              writeConcernError: &write_concern_error
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { x: 33 }
+        expectError: &expect_write_concern_error
+          errorCode: 79
+
+  - description: insertMany reports a writeConcernError
+    operations:
+      - *failPoint_insert
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - { x: 44 }
+            - { x: 55 }
+        expectError:
+          isError: true
+
+  - description: updateOne reports a writeConcernError
+    operations:
+      - &failPoint_update
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ update ]
+              writeConcernError: *write_concern_error
+      - name: updateOne
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+          update: { $set: { x: 111 } }
+        expectError: *expect_write_concern_error
+
+  - description: updateMany reports a writeConcernError
+    operations:
+      - *failPoint_update
+      - name: updateMany
+        object: *collection0
+        arguments:
+          filter: {}
+          update: { $inc: { x: 1 } }
+        expectError: *expect_write_concern_error
+
+  - description: replaceOne reports a writeConcernError
+    operations:
+      - *failPoint_update
+      - name: replaceOne
+        object: *collection0
+        arguments:
+          filter: { _id: 2 }
+          replacement: { x: 222 }
+        expectError: *expect_write_concern_error
+
+  - description: deleteOne reports a writeConcernError
+    operations:
+      - &failPoint_delete
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              writeConcernError: *write_concern_error
+      - name: deleteOne
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+        expectError: *expect_write_concern_error
+
+  - description: deleteMany reports a writeConcernError
+    operations:
+      - *failPoint_delete
+      - name: deleteMany
+        object: *collection0
+        arguments:
+          filter: {}
+        expectError: *expect_write_concern_error

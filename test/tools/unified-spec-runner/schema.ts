@@ -416,6 +416,7 @@ export interface ExpectedError {
   errorLabelsOmit?: string[];
   expectResult?: unknown;
   errorResponse?: Document;
+  writeConcernErrors?: Document[];
 }
 
 export interface ExpectedLogMessage {

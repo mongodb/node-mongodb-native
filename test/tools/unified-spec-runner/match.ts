@@ -862,4 +862,16 @@ export function expectErrorCheck(
       resultCheck(error, expected.errorResponse, entities);
     }
   }
+
+  if (expected.writeConcernErrors != null) {
+    expect(error, expectMessage).to.be.instanceOf(MongoClientBulkWriteError);
+    const actualWriteConcernErrors = (error as MongoClientBulkWriteError).writeConcernErrors;
+    expect(
+      actualWriteConcernErrors,
+      `Expected ${expected.writeConcernErrors.length} write concern errors, got ${actualWriteConcernErrors.length} -- ${expectMessage}`
+    ).to.have.lengthOf(expected.writeConcernErrors.length);
+    for (const [index, expectedWriteConcernError] of expected.writeConcernErrors.entries()) {
+      resultCheck(actualWriteConcernErrors[index], expectedWriteConcernError, entities);
+    }
+  }
 }

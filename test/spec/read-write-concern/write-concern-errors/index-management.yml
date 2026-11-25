@@ -1,0 +1,75 @@
+description: write-concern-errors-index-management
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: write-concern-errors-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: coll
+
+tests:
+  - description: createIndex reports a writeConcernError
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ createIndexes ]
+              writeConcernError: &write_concern_error
+                code: 79
+                codeName: UnknownReplWriteConcern
+                errmsg: "Triggered by failpoint"
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys: { x: 1 }
+        expectError: &expect_write_concern_error
+          errorCode: 79
+
+  - description: dropIndex reports a writeConcernError
+    operations:
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys: { x: 1 }
+          name: x_1
+      - &failPoint_dropIndexes
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ dropIndexes ]
+              writeConcernError: *write_concern_error
+      - name: dropIndex
+        object: *collection0
+        arguments:
+          name: x_1
+        expectError: *expect_write_concern_error
+
+  - description: dropIndexes reports a writeConcernError
+    operations:
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys: { x: 1 }
+          name: x_1
+      - *failPoint_dropIndexes
+      - name: dropIndexes
+        object: *collection0
+        expectError: *expect_write_concern_error

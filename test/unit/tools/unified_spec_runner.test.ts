@@ -2,8 +2,9 @@ import { BSON } from 'bson';
 import { AssertionError, expect } from 'chai';
 import * as sinon from 'sinon';
 
+import { MongoClientBulkWriteError, MongoServerError } from '../../mongodb';
 import { EntitiesMap } from '../../tools/unified-spec-runner/entities';
-import { compareLogs, resultCheck } from '../../tools/unified-spec-runner/match';
+import { compareLogs, expectErrorCheck, resultCheck } from '../../tools/unified-spec-runner/match';
 import { type ExpectedLogMessage } from '../../tools/unified-spec-runner/schema';
 
 describe('Unified Spec Runner', function () {
@@ -138,6 +139,53 @@ describe('Unified Spec Runner', function () {
               /to be an object/
             );
           });
+        });
+      });
+    });
+
+    describe('expectErrorCheck', function () {
+      const entitiesMap = new EntitiesMap();
+
+      function bulkWriteErrorWith(writeConcernErrors: any[]): MongoClientBulkWriteError {
+        const error = new MongoClientBulkWriteError({ message: 'bulk write failed' });
+        error.writeConcernErrors = writeConcernErrors;
+        return error;
+      }
+
+      context('writeConcernErrors', function () {
+        it('passes when the write concern errors match', function () {
+          const error = bulkWriteErrorWith([{ code: 79, message: 'Triggered by failpoint' }]);
+          expect(() =>
+            expectErrorCheck(error, { writeConcernErrors: [{ code: 79 }] }, entitiesMap)
+          ).to.not.throw();
+        });
+
+        it('fails when the error has no write concern errors', function () {
+          const error = bulkWriteErrorWith([]);
+          expect(() =>
+            expectErrorCheck(error, { writeConcernErrors: [{ code: 79 }] }, entitiesMap)
+          ).to.throw(AssertionError, /Expected 1 write concern errors, got 0/);
+        });
+
+        it('fails when the error has additional write concern errors', function () {
+          const error = bulkWriteErrorWith([{ code: 79 }, { code: 79 }]);
+          expect(() =>
+            expectErrorCheck(error, { writeConcernErrors: [{ code: 79 }] }, entitiesMap)
+          ).to.throw(AssertionError, /Expected 1 write concern errors, got 2/);
+        });
+
+        it('fails when the write concern error has a different code', function () {
+          const error = bulkWriteErrorWith([{ code: 64, message: 'Triggered by failpoint' }]);
+          expect(() =>
+            expectErrorCheck(error, { writeConcernErrors: [{ code: 79 }] }, entitiesMap)
+          ).to.throw(AssertionError);
+        });
+
+        it('fails when the error is not a MongoClientBulkWriteError', function () {
+          const error = new MongoServerError({ message: 'server error', code: 79 });
+          expect(() =>
+            expectErrorCheck(error, { writeConcernErrors: [{ code: 79 }] }, entitiesMap)
+          ).to.throw(AssertionError);
         });
       });
     });
