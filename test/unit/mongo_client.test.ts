@@ -7,6 +7,7 @@ import { Writable } from 'stream';
 import { inspect } from 'util';
 
 import {
+  isHello,
   MongoAPIError,
   MongoClient,
   type MongoClientOptions,
@@ -23,6 +24,7 @@ import {
   SeverityLevel,
   WriteConcern
 } from '../mongodb';
+import * as mock from '../tools/mongodb-mock/index';
 import { ensureTypeByName } from '../tools/utils';
 
 describe('MongoClient', function () {
@@ -1203,6 +1205,98 @@ describe('MongoClient', function () {
           /cannot be specified with no value/
         );
       });
+    });
+  });
+
+  describe('close() when a cleanup step fails (NODE-7995)', function () {
+    let mockServer;
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      mockServer = await mock.createServer();
+      mockServer.setMessageHandler(request => {
+        if (isHello(request.document)) {
+          request.reply({ ...mock.HELLO, maxWireVersion: 21 });
+        } else {
+          request.reply({ ok: 1 });
+        }
+      });
+      client = new MongoClient(`mongodb://${mockServer.hostAddress()}/`, {
+        directConnection: true
+      });
+      await client.connect();
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await client.close().catch(() => null);
+      await mock.cleanup();
+    });
+
+    function monitorsOf(client: MongoClient) {
+      const topology = client.topology;
+      expect(topology).to.exist;
+      const monitors = Array.from(topology.s.servers.values(), server => server.monitor);
+      expect(monitors).to.have.length.greaterThan(0);
+      return { topology, monitors };
+    }
+
+    function expectClosed({ topology, monitors }: ReturnType<typeof monitorsOf>) {
+      expect(topology.isConnected()).to.be.false;
+      expect(topology.s.state).to.equal('closed');
+      for (const monitor of monitors) {
+        expect(monitor.s.state).to.equal('closed');
+      }
+    }
+
+    it('closes the topology and server monitors when a cursor close rejects, then rethrows', async function () {
+      const resources = monitorsOf(client);
+      const error = new Error('cursor close failed');
+      const otherCursorClose = sinon.stub().resolves();
+      client.s.activeCursors.add({ close: () => Promise.reject(error) } as any);
+      client.s.activeCursors.add({ close: otherCursorClose } as any);
+
+      const thrown = await client.close().catch(error => error);
+
+      expect(thrown).to.equal(error);
+      expect(otherCursorClose).to.have.been.calledOnce;
+      expectClosed(resources);
+      expect(client.topology).to.be.undefined;
+    });
+
+    it('closes the topology and server monitors when a session end rejects, then rethrows', async function () {
+      const resources = monitorsOf(client);
+      const error = new Error('endSession failed');
+      client.s.activeSessions.add({ endSession: () => Promise.reject(error) } as any);
+
+      const thrown = await client.close().catch(error => error);
+
+      expect(thrown).to.equal(error);
+      expectClosed(resources);
+    });
+
+    it('closes the topology and server monitors when closing checked out connections throws, then rethrows', async function () {
+      const resources = monitorsOf(client);
+      const error = new Error('closeCheckedOutConnections failed');
+      sinon.stub(resources.topology, 'closeCheckedOutConnections').throws(error);
+
+      const thrown = await client.close().catch(error => error);
+
+      expect(thrown).to.equal(error);
+      expectClosed(resources);
+    });
+
+    it('rethrows the first error when several cleanup steps fail', async function () {
+      const resources = monitorsOf(client);
+      const first = new Error('first');
+      const second = new Error('second');
+      client.s.activeCursors.add({ close: () => Promise.reject(first) } as any);
+      client.s.activeSessions.add({ endSession: () => Promise.reject(second) } as any);
+
+      const thrown = await client.close().catch(error => error);
+
+      expect(thrown).to.equal(first);
+      expectClosed(resources);
     });
   });
 
