@@ -190,6 +190,8 @@ _mongodb._tcp.test21.test.build.10gen.cc.   86400  IN SRV  27017  localhost.test
 _customname._tcp.test22.test.build.10gen.cc 86400  IN SRV  27017  localhost.test.build.10gen.cc.
 _mongodb._tcp.test23.test.build.10gen.cc.   86400  IN SRV  8000   localhost.test.build.10gen.cc.
 _mongodb._tcp.test24.test.build.10gen.cc.   86400  IN SRV  8000   localhost.test.build.10gen.cc.
+_mongodb._tcp.build.10gen.cc.               86400  IN SRV  27017  build.10gen.cc.
+_mongodb._tcp.test.build.10gen.cc.          86400  IN SRV  27017  test.build.10gen.cc.
 
 Record                                    TTL    Class   Text
 test5.test.build.10gen.cc.                86400  IN TXT  "replicaSet=repl0&authSource=thisDB"
@@ -211,6 +213,9 @@ Notes:
 - The missing `test.` sub-domain in the SRV record target for `test12` is deliberate.
 - `test22` is used to test a custom service name (`customname`).
 - `test23` and `test24` point to port 8000 (HAProxy) and are used for load-balanced tests.
+- The `build.10gen.cc` and `test.build.10gen.cc` SRV records resolve to hostnames identical to the SRV hostname and are
+    used to verify that no error is thrown when the resolver and resolved hostnames are identical and the SRV hostname
+    has three or more `.` separated parts.
 
 In our tests we have used `localhost.test.build.10gen.cc` as the domain, and then configured
 `localhost.test.build.10gen.cc` to resolve to 127.0.0.1.
