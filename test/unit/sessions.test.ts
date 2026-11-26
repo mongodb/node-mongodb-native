@@ -513,6 +513,20 @@ describe('Sessions - unit', function () {
       pool.release(session);
     });
 
+    it('does not reuse a session idle for one hour when the timeout is 30 minutes', function () {
+      const oldSession = new ServerSession();
+      // 60 minutes modulo one hour is 0. That used to compare as 0 > 29 and reuse the lsid.
+      oldSession.lastUse = processTimeMS() - 60 * 60 * 1000;
+      expect(oldSession.hasTimedOut(30)).to.equal(true);
+
+      const pool = new ServerSessionPool(client);
+      pool.sessions.push(oldSession);
+
+      const session = pool.acquire();
+      expect(session).to.not.eql(oldSession);
+      pool.release(session);
+    });
+
     describe('release()', () => {
       const makeOldSession = () => {
         const oldSession = new ServerSession();
@@ -529,9 +543,9 @@ describe('Sessions - unit', function () {
         pool.release(new ServerSession());
 
         expect(pool.sessions).to.have.lengthOf(3);
-        const anyTimedOutSessions = pool.sessions
-          .toArray()
-          .some(s => s.hasTimedOut(30 * 60 * 1000));
+        // 10 is logicalSessionTimeoutMinutes from the mock hello. The check used to pass
+        // 30 * 60 * 1000, which is a minute count no session in this test can exceed.
+        const anyTimedOutSessions = pool.sessions.toArray().some(s => s.hasTimedOut(10));
         expect(anyTimedOutSessions, 'Unexpected timed out sessions found in pool after release').to
           .be.false;
       });
@@ -545,9 +559,7 @@ describe('Sessions - unit', function () {
         pool.release(new ServerSession());
 
         expect(pool.sessions).to.have.lengthOf(3);
-        const anyTimedOutSessions = pool.sessions
-          .toArray()
-          .some(s => s.hasTimedOut(30 * 60 * 1000));
+        const anyTimedOutSessions = pool.sessions.toArray().some(s => s.hasTimedOut(10));
         expect(anyTimedOutSessions, 'Unexpected timed out sessions found in pool after release').to
           .be.false;
       });
@@ -562,9 +574,7 @@ describe('Sessions - unit', function () {
         pool.release(new ServerSession());
 
         expect(pool.sessions).to.have.lengthOf(3);
-        const anyTimedOutSessions = pool.sessions
-          .toArray()
-          .some(s => s.hasTimedOut(30 * 60 * 1000));
+        const anyTimedOutSessions = pool.sessions.toArray().some(s => s.hasTimedOut(10));
         expect(anyTimedOutSessions, 'Unexpected timed out sessions found in pool after release').to
           .be.false;
       });
@@ -582,9 +592,7 @@ describe('Sessions - unit', function () {
         pool.release(new ServerSession());
 
         expect(pool.sessions).to.have.lengthOf(3);
-        const anyTimedOutSessions = pool.sessions
-          .toArray()
-          .some(s => s.hasTimedOut(30 * 60 * 1000));
+        const anyTimedOutSessions = pool.sessions.toArray().some(s => s.hasTimedOut(10));
         expect(anyTimedOutSessions, 'Unexpected timed out sessions found in pool after release').to
           .be.false;
       });
