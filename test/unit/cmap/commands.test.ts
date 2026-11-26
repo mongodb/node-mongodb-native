@@ -3,7 +3,15 @@ import { expect } from 'chai';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { readInt32LE } from '../../../src/bson';
-import { DocumentSequence, OpMsgRequest, OpReply } from '../../mongodb';
+import {
+  Compressor,
+  decompress,
+  DocumentSequence,
+  makeDocumentSequence,
+  OpCompressedRequest,
+  OpMsgRequest,
+  OpReply
+} from '../../mongodb';
 
 // Helper to decode UTF-8 string from Uint8Array
 function utf8Slice(buffer: Uint8Array, start: number, end: number): string {
@@ -15,8 +23,7 @@ describe('commands', function () {
     describe('#toBin', function () {
       /**
        * Note that #toBin returns an array of buffers, in this case we are interested in
-       * the buffer at index 3 of the array, which is a single buffer of all the
-       * document sequence sections.
+       * the buffers from index 3 of the array, which hold all the document sequence sections.
        */
       context('when the command has document sequences', function () {
         context('when there is one document sequence', function () {
@@ -26,6 +33,7 @@ describe('commands', function () {
           };
           const msg = new OpMsgRequest('admin', command, {});
           const buffers = msg.toBin();
+          const sequences = Buffer.concat(buffers.slice(3));
 
           it('keeps the first section as type 0', function () {
             // The type byte for the first section is at index 1.
@@ -43,17 +51,17 @@ describe('commands', function () {
 
           it('sets the document sequence section type to 1', function () {
             // First byte is a one byte type.
-            expect(buffers[3][0]).to.equal(1);
+            expect(sequences[0]).to.equal(1);
           });
 
           it('sets the length of the document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(readInt32LE(buffers[3], 1)).to.equal(25);
+            expect(readInt32LE(sequences, 1)).to.equal(25);
           });
 
           it('sets the name of the first field to be replaced', function () {
             // Bytes starting at index 5 is the field name.
-            expect(utf8Slice(buffers[3], 5, 10)).to.equal('field');
+            expect(utf8Slice(sequences, 5, 10)).to.equal('field');
           });
         });
 
@@ -65,6 +73,7 @@ describe('commands', function () {
           };
           const msg = new OpMsgRequest('admin', command, {});
           const buffers = msg.toBin();
+          const sequences = Buffer.concat(buffers.slice(3));
 
           it('keeps the first section as type 0', function () {
             // The type byte for the first section is at index 1.
@@ -83,34 +92,133 @@ describe('commands', function () {
 
           it('sets the document sequence sections first type to 1', function () {
             // First byte is a one byte type.
-            expect(buffers[3][0]).to.equal(1);
+            expect(sequences[0]).to.equal(1);
           });
 
           it('sets the length of the first document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(readInt32LE(buffers[3], 1)).to.equal(28);
+            expect(readInt32LE(sequences, 1)).to.equal(28);
           });
 
           it('sets the name of the first field to be replaced', function () {
             // Bytes starting at index 5 is the field name.
-            expect(utf8Slice(buffers[3], 5, 13)).to.equal('fieldOne');
+            expect(utf8Slice(sequences, 5, 13)).to.equal('fieldOne');
           });
 
           it('sets the document sequence sections second type to 1', function () {
             // First byte is a one byte type.
-            expect(buffers[3][29]).to.equal(1);
+            expect(sequences[29]).to.equal(1);
           });
 
           it('sets the length of the second document sequence', function () {
             // Bytes starting at index 1 is a 4 byte length.
-            expect(readInt32LE(buffers[3], 30)).to.equal(28);
+            expect(readInt32LE(sequences, 30)).to.equal(28);
           });
 
           it('sets the name of the second field to be replaced', function () {
             // Bytes starting at index 33 is the field name.
-            expect(utf8Slice(buffers[3], 34, 42)).to.equal('fieldTwo');
+            expect(utf8Slice(sequences, 34, 42)).to.equal('fieldTwo');
           });
         });
+      });
+
+      context('wire format', function () {
+        /** Encodes an OP_MSG as specified, one section after the other. */
+        function encodeOpMsg(
+          requestId: number,
+          body: BSON.Document,
+          sequences: Array<[string, BSON.Document[]]>
+        ): Buffer {
+          const sections = [Buffer.from([0]), Buffer.from(BSON.serialize(body))];
+          for (const [field, documents] of sequences) {
+            const name = Buffer.from(`${field}\0`, 'utf8');
+            const docs = documents.map(doc => Buffer.from(BSON.serialize(doc)));
+            const size = Buffer.alloc(4);
+            size.writeInt32LE(4 + name.length + docs.reduce((total, doc) => total + doc.length, 0));
+            sections.push(Buffer.from([1]), size, name, ...docs);
+          }
+          const header = Buffer.alloc(20);
+          const message = Buffer.concat([header, ...sections]);
+          message.writeInt32LE(message.length, 0);
+          message.writeInt32LE(requestId, 4);
+          message.writeInt32LE(2013, 12);
+          return message;
+        }
+
+        const documents = (count: number) =>
+          Array.from({ length: count }, (_, i) => ({ _id: i, name: `doc ${i}`, tags: ['a', 'b'] }));
+
+        const cases: Array<{
+          name: string;
+          command: () => BSON.Document;
+          body: BSON.Document;
+          sequences: Array<[string, BSON.Document[]]>;
+        }> = [
+          {
+            name: 'a command without document sequences',
+            command: () => ({ find: 'coll', filter: { a: 1 } }),
+            body: { find: 'coll', filter: { a: 1 }, $db: 'db' },
+            sequences: []
+          },
+          {
+            name: 'a command with one document sequence',
+            command: () => ({
+              insert: 'coll',
+              documents: makeDocumentSequence(
+                'documents',
+                documents(3),
+                documents(3).map(doc => BSON.serialize(doc))
+              )
+            }),
+            body: { insert: 'coll', $db: 'db' },
+            sequences: [['documents', documents(3)]]
+          },
+          {
+            name: 'a command with multiple document sequences',
+            command: () => ({
+              bulkWrite: 1,
+              ops: new DocumentSequence('ops', documents(2)),
+              nsInfo: new DocumentSequence('nsInfo', [{ ns: 'db.coll' }])
+            }),
+            body: { bulkWrite: 1, $db: 'db' },
+            sequences: [
+              ['ops', documents(2)],
+              ['nsInfo', [{ ns: 'db.coll' }]]
+            ]
+          },
+          {
+            name: 'a command with an empty document sequence',
+            command: () => ({ insert: 'coll', documents: new DocumentSequence('documents') }),
+            body: { insert: 'coll', $db: 'db' },
+            sequences: [['documents', []]]
+          }
+        ];
+
+        for (const { name, command, body, sequences } of cases) {
+          it(`encodes ${name}`, function () {
+            const msg = new OpMsgRequest('db', command(), { requestId: 7 });
+            expect(Buffer.concat(msg.toBin())).to.deep.equal(encodeOpMsg(7, body, sequences));
+          });
+
+          for (const compressor of ['zlib', 'snappy'] as const) {
+            it(`encodes ${name} compressed with ${compressor}`, async function () {
+              const msg = new OpMsgRequest('db', command(), { requestId: 7 });
+              const [header, details, compressed] = await new OpCompressedRequest(msg, {
+                agreedCompressor: compressor,
+                zlibCompressionLevel: 6
+              }).toBin();
+              const expected = encodeOpMsg(7, body, sequences);
+
+              expect(readInt32LE(header, 0)).to.equal(16 + 9 + compressed.length);
+              expect(readInt32LE(header, 12)).to.equal(2012);
+              expect(readInt32LE(details, 0)).to.equal(2013);
+              expect(readInt32LE(details, 4)).to.equal(expected.length - 16);
+              expect(
+                Buffer.from(await decompress(Compressor[compressor], compressed))
+              ).to.deep.equal(expected.subarray(16));
+            });
+          }
+        }
       });
     });
   });
